@@ -1,0 +1,23 @@
+{
+  "name": "italiaapp-backend",
+  "version": "0.0.1",
+  "description": "Backend dell'applicazione di Cittadinanza Digitale",
+  "main": "index.js",
+  "engines": {
+    "node": "7.9.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teamdigitale/ItaliaApp-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/teamdigitale/ItaliaApp-backend/issues"
+  },
+  "homepage": "https://github.com/teamdigitale/ItaliaApp-backend#readme"
+}
