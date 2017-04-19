@@ -5,6 +5,7 @@
 [libs]
 
 [options]
-all=true
+emoji=true
 
 [version]
+^0.44.0
