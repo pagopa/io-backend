@@ -23,7 +23,10 @@
   "homepage": "https://github.com/teamdigitale/ItaliaApp-backend#readme",
   "dependencies": {
     "express": "^4.15.2",
-    "flow-remove-types": "^1.2.0"
+    "flow-remove-types": "^1.2.0",
+    "morgan": "^1.8.1",
+    "passport": "^0.3.2",
+    "passport-http-bearer": "^1.0.1"
   },
   "devDependencies": {
     "flow-bin": "^0.44.2"
