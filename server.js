@@ -48,6 +48,12 @@ type User = {
   familyname?: string,
   fiscalnumber?: string,
   spidcode?: string,
+  gender?: string,
+  mobilephone?: string,
+  email?: string,
+  address?: string,
+  expirationdate?: string,
+  digitaladdress?: string,
 };
 
 app.get('/app/token/new', function(req: express$Request, res: express$Response) {
@@ -61,7 +67,11 @@ app.get('/app/token/new', function(req: express$Request, res: express$Response) 
     'spid-idp': req.headers['shib-identity-provider'],
   };
 
-  ['name', 'familyname', 'fiscalnumber', 'spidcode'].forEach((field) => {
+  [
+    'name', 'familyname', 'fiscalnumber', 'spidcode', 'gender',
+    'mobilephone', 'email', 'address', 'expirationdate',
+    'digitaladdress'
+  ].forEach((field) => {
     user[field] = req.headers['spid-attribute-' + field];
   });
 
@@ -70,7 +80,11 @@ app.get('/app/token/new', function(req: express$Request, res: express$Response) 
   res.redirect('/app/token/get/' + token);
 });
 
-app.get('/api/headers',
+app.get('/app/token/get/*', function(req: express$Request, res: express$Response) {
+  res.send('OK');
+});
+
+app.get('/api/v1/user',
   passport.authenticate('bearer', { session: false }),
   function(req: express$Request, res: express$Response) {
     const reqWithUser = ((req: Object): {user: Object});
