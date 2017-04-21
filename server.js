@@ -43,7 +43,7 @@ app.get('/', function(req: express$Request, res: express$Response) {
 type User = {
   created_at: number,
   token: string,
-  'spid-idp': string,
+  spid_idp: string,
   name?: string,
   familyname?: string,
   fiscalnumber?: string,
@@ -54,6 +54,10 @@ type User = {
   address?: string,
   expirationdate?: string,
   digitaladdress?: string,
+  countyofbirth?: string,
+  dateofbirth?: string,
+  idcard?: string,
+  placeofbirth?: string,
 };
 
 app.get('/app/token/new', function(req: express$Request, res: express$Response) {
@@ -61,16 +65,17 @@ app.get('/app/token/new', function(req: express$Request, res: express$Response) 
   // vedi http://stackoverflow.com/questions/9407892/how-to-generate-random-sha1-hash-to-use-as-id-in-node-js/14869745#14869745
   const token = crypto.randomBytes(20).toString('base64');
 
-  var user: User = {
-    'created_at': (new Date).getTime(),
-    'token': token,
-    'spid-idp': req.headers['shib-identity-provider'],
+  const user: User = {
+    created_at: (new Date).getTime(),
+    token: token,
+    spid_idp: req.headers['shib-identity-provider'],
   };
 
   [
     'name', 'familyname', 'fiscalnumber', 'spidcode', 'gender',
     'mobilephone', 'email', 'address', 'expirationdate',
-    'digitaladdress'
+    'digitaladdress', 'countyofbirth', 'dateofbirth', 'idcard',
+    'placeofbirth'
   ].forEach((field) => {
     user[field] = req.headers['spid-attribute-' + field];
   });
