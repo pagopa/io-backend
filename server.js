@@ -80,7 +80,12 @@ app.get('/app/token/new', function(req: express$Request, res: express$Response) 
   res.redirect('/app/token/get/' + token);
 });
 
+app.get('/app/debug/headers', function(req: express$Request, res: express$Response) {
+  res.json(req.headers);
+});
+
 app.get('/app/token/get/*', function(req: express$Request, res: express$Response) {
+  // TODO display nice OK page
   res.send('OK');
 });
 
