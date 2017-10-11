@@ -1,0 +1,225 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Backend API
+  description: Mobile and web backend API gateway.
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+paths:
+  '/demos/{demo_id}':
+    x-swagger-router-controller: Demos
+    parameters:
+      - name: demo_id
+        in: path
+        type: string
+        required: true
+        description: 'The id of the demo.'
+    get:
+      operationId: getDemo
+      summary: Get steps for application demo
+      description: |-
+        Returns the steps used by the client to demonstrate the application's features.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/Steps'
+        '404':
+          description: No steps found.
+  '/providers':
+    x-swagger-router-controller: Providers
+    get:
+      operationId: getProviders
+      summary: Get the list of available service providers
+      description: |-
+        Returns the list of available service providers.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Provider'
+        '404':
+          description: No steps found.
+  '/users/{fiscal_code}/messages':
+    x-swagger-router-controller: Messages
+    parameters:
+      - $ref: '#/parameters/PaginationRequest'
+      - name: fiscal_code
+        in: path
+        type: string
+        required: true
+        description: 'The fiscal code of the user, all upper case.'
+        maxLength: 16
+        minLength: 16
+        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+    get:
+      operationId: getMessagesByUser
+      summary: Get messages by user
+      description: |-
+        Returns the messages for the user identified by the provided fiscal code.
+        Messages will be returned in inverse acceptance order (from last to first).
+        The "next" field, when present, contains an URL pointing to the next page of results.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Message'
+              - $ref: '#/definitions/PaginationResponse'
+        '404':
+          description: No message found.
+  '/users/{fiscal_code}/preferences':
+    x-swagger-router-controller: Preferences
+    get:
+      operationId: getUserPreferences
+      summary: Get User's Preferences
+      description: Returns the preferences for the user identified by the provided fiscal code.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/Preferences'
+          examples: {}
+        '404':
+          description: No user found for the provided fiscal code.
+    parameters:
+      - name: fiscal_code
+        in: path
+        type: string
+        required: true
+        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+        maxLength: 16
+        minLength: 16
+        description: 'User''s fiscal code, all upper case.'
+definitions:
+  Steps:
+    title: Steps
+    type: object
+    properties:
+      content:
+        type: string
+    required:
+      - content
+  Provider:
+    title: Provider
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      logo:
+        type: string
+        format: byte
+      entityID:
+        type: string
+        pattern: 'http[s]?://(-\.)?([^\s/?\.#-]+\.?)+(/[^\s]*)?$'
+      profileUrl:
+        type: string
+        pattern: 'http[s]?://(-\.)?([^\s/?\.#-]+\.?)+(/[^\s]*)?$'
+    required:
+      - id
+      - name
+      - logo
+      - entityID
+      - profileUrl
+  Message:
+    title: Message
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        type: string
+        description: User's fiscal code.
+        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+      content:
+        $ref: '#/definitions/MessageContent'
+    required:
+      - id
+      - fiscal_code
+      - content
+  MessageContent:
+    title: MessageContent
+    type: object
+    properties:
+      body_short:
+        type: string
+        description: |-
+          An abstract of the message, in plain text. The content of this field will be delivered to channels that support a limited amount of characters (e.g. SMS, mobile notifications, etc...).
+          The caller should assume that only the content in "body_short" may be delivered so the value of this field MUST contain *all* the required information.
+        minLength: 3
+        maxLength: 100
+      body_long:
+        type: string
+        description: 'A long version of the message, in plain text. The content of this field will be delivered to channels that don''t have any limit in terms of content size (e.g. email, etc...). The long version of the message is optional and should be provided only in cases when a longer message (compared to the short version provided in body_short) gives more information to the user. This field should not be a duplicate of body_short.'
+        minLength: 100
+        maxLength: 100000
+    required:
+      - body_short
+  Preferences:
+    title: Preferences
+    description: Describes the user's preferences.
+    type: object
+    properties:
+      fiscal_code:
+        type: string
+        description: 'The user''s fiscal code, all upper case.'
+        minLength: 16
+        maxLength: 16
+        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+      email:
+        type: string
+        description: |
+          The user's preferred email address.
+      preferred_languages:
+        type: array
+        description: 'Indicates the User''s preferred written or spoken language. Generally used for selecting a localized User interface. Valid values are concatenation of the ISO 639-1 two letter language code, an underscore, and the ISO 3166-1 2 letter country code; e.g., ''en_US'' specifies the language English and country US.'
+        x-extensible-enum:
+          - it_IT
+          - en_GB
+          - es_ES
+          - de_DE
+          - fr_FR
+        items:
+          type: string
+    required:
+      - fiscal_code
+  PaginationResponse:
+    type: object
+    title: pagination
+    description: Pagination response parameters.
+    properties:
+      page_size:
+        type: integer
+        minimum: 1
+        description: Number of items returned for each page.
+      next:
+        type: string
+        description: 'Contains an URL to GET the next #<page_size> results in the retrieved collection of items.'
+        format: uri
+responses: {}
+parameters:
+  PaginationRequest:
+    name: cursor
+    in: query
+    type: string
+    minimum: 1
+    description: An opaque identifier that points to the next item in the collection.
+consumes:
+  - application/json
+produces:
+  - application/json
