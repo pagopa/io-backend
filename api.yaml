@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
   version: 1.0.0
-  title: Backend API
-  description: Mobile and web backend API gateway.
+  title: Proxy API
+  description: Mobile and web proxy API gateway.
 host: localhost
 basePath: /api/v1
 schemes:
@@ -17,10 +17,10 @@ paths:
         required: true
         description: 'The id of the demo.'
     get:
-      operationId: getDemo
-      summary: Get steps for application demo
+      operationId: getDemoById
+      summary: Get steps for an application demo
       description: |-
-        Returns the steps used by the client to demonstrate the application's features.
+        Returns the steps used by the client to demonstrate some application's features.
       responses:
         '200':
           description: Found.
@@ -48,18 +48,30 @@ paths:
                       $ref: '#/definitions/Provider'
         '404':
           description: No steps found.
-  '/users/{fiscal_code}/messages':
-    x-swagger-router-controller: Messages
+  '/providers/{provider_id}':
+    x-swagger-router-controller: Providers
     parameters:
-      - $ref: '#/parameters/PaginationRequest'
-      - name: fiscal_code
+      - name: provider_id
         in: path
         type: string
         required: true
-        description: 'The fiscal code of the user, all upper case.'
-        maxLength: 16
-        minLength: 16
-        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+        description: 'The id of the service provider.'
+    get:
+      operationId: getProviderById
+      summary: Get data about a service provider
+      description: |-
+        Returns the data needed to render a link to a SPID service provider.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/Provider'
+        '404':
+          description: No provider found.
+  '/users/messages':
+    x-swagger-router-controller: Messages
+    parameters:
+      - $ref: '#/parameters/PaginationRequest'
     get:
       operationId: getMessagesByUser
       summary: Get messages by user
@@ -81,7 +93,7 @@ paths:
               - $ref: '#/definitions/PaginationResponse'
         '404':
           description: No message found.
-  '/users/{fiscal_code}/preferences':
+  '/users/preferences':
     x-swagger-router-controller: Preferences
     get:
       operationId: getUserPreferences
@@ -95,15 +107,6 @@ paths:
           examples: {}
         '404':
           description: No user found for the provided fiscal code.
-    parameters:
-      - name: fiscal_code
-        in: path
-        type: string
-        required: true
-        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
-        maxLength: 16
-        minLength: 16
-        description: 'User''s fiscal code, all upper case.'
 definitions:
   Steps:
     title: Steps
@@ -136,6 +139,13 @@ definitions:
       - logo
       - entityID
       - profileUrl
+  FiscalCode:
+    title: Fiscal code
+    type: string
+    description: 'The user''s fiscal code, all upper case.'
+    minLength: 16
+    maxLength: 16
+    pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
   Message:
     title: Message
     type: object
@@ -143,9 +153,7 @@ definitions:
       id:
         type: string
       fiscal_code:
-        type: string
-        description: User's fiscal code.
-        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+        $ref: '#/definitions/FiscalCode'
       content:
         $ref: '#/definitions/MessageContent'
     required:
@@ -176,11 +184,7 @@ definitions:
     type: object
     properties:
       fiscal_code:
-        type: string
-        description: 'The user''s fiscal code, all upper case.'
-        minLength: 16
-        maxLength: 16
-        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+        $ref: '#/definitions/FiscalCode'
       email:
         type: string
         description: |
