@@ -1,0 +1,18 @@
+version: "2.2"
+
+services:
+  backend:
+    command: ["yarn", "hot-reload"]
+    container_name: italia-backend
+    environment:
+      - NODE_ENV=development
+    expose:
+      - "8080"
+    image: node:8.5.0-alpine
+    init: true
+    ports:
+      - "80:8080"
+    restart: always
+    volumes:
+      - "./app:/usr/src/app"
+    working_dir: "/usr/src/app"

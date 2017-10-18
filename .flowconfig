@@ -1,11 +1,14 @@
 [ignore]
+<PROJECT_ROOT>/coverage/.*
+<PROJECT_ROOT>/dist/.*
+<PROJECT_ROOT>/node_modules/.*
 
 [include]
 
 [libs]
+flow-typed
 
 [options]
-emoji=true
+suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
 
 [version]
-^0.44.0

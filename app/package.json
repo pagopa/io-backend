@@ -1,0 +1,61 @@
+{
+  "name": "italia-backend",
+  "version": "0.0.1",
+  "description": "Italia app and web backend",
+  "main": "index.js",
+  "engines": {
+    "node": "8.5.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "hot-reload": "nodemon ./node_modules/flow-remove-types/flow-node src/server.js",
+    "lint": "eslint 'src/**/*.js'",
+    "prettify": "prettier --write 'src/**/*.js'",
+    "pretest": "yarn lint",
+    "test": "jest --coverage",
+    "start": "./node_modules/flow-remove-types/flow-node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teamdigitale/italia-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/teamdigitale/italia-backend/issues"
+  },
+  "homepage": "https://github.com/teamdigitale/italia-backend#readme",
+  "dependencies": {
+    "eslint": "^4.8.0",
+    "eslint-plugin-flowtype": "^2.39.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-prettier": "^2.3.1",
+    "express": "^4.15.2",
+    "flow-remove-types": "^1.2.0",
+    "morgan": "^1.8.1",
+    "passport": "^0.3.2",
+    "passport-http-bearer": "^1.0.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "flow-bin": "^0.56.0",
+    "jest": "^21.2.1",
+    "nodemon": "^1.11.0",
+    "prettier": "^1.7.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "transform": {
+      "^.+.js$": "<rootDir>/node_modules/babel-jest"
+    },
+    "testMatch": [
+      "**/__tests__/*.js"
+    ],
+    "mapCoverage": true
+  }
+}
