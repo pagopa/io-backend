@@ -1,0 +1,36 @@
+{
+  "root": true,
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "node": true,
+    "jest": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:flowtype/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings"
+  ],
+  "plugins": [
+    "flowtype",
+    "prettier"
+  ],
+  "rules": {
+    "strict": 0,
+    "prettier/prettier": "error"
+  },
+  "settings": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": false
+    }
+  },
+  "globals": {
+  }
+}
