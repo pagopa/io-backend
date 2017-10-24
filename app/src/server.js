@@ -11,7 +11,6 @@
  */
 
 const express = require("express");
-const crypto = require("crypto");
 const passport = require("passport");
 const Strategy = require("passport-http-bearer");
 const morgan = require("morgan");
@@ -22,12 +21,12 @@ const port = process.env.PORT || 8080;
 let tokens = {};
 
 passport.use(
-  new Strategy(function(token, cb) {
+  new Strategy(function(token, done) {
     const user = tokens[token];
     if (user) {
-      return cb(null, user);
+      return done(null, user);
     } else {
-      return cb(null, false);
+      return done(null, false);
     }
   })
 );
@@ -36,9 +35,16 @@ const app = express();
 
 app.use(morgan("dev"));
 app.use(express.static("public"));
+app.use(passport.initialize());
 
 app.get("/", function(req: express$Request, res: express$Response) {
   res.send("Nothing to see here");
+});
+
+app.get("/idp_list", function(req: express$Request, res: express$Response) {
+  res.send(
+    '<a href="https://italia-backend/saml/Login?target=/app/token/new&entityID=spid-testenv-identityserver">Login</a>'
+  );
 });
 
 type User = {
@@ -65,10 +71,8 @@ app.get("/app/token/new", function(
   req: express$Request,
   res: express$Response
 ) {
-  // Genera un buon token univoco
-  // vedi
-  // http://stackoverflow.com/questions/9407892/how-to-generate-random-sha1-hash-to-use-as-id-in-node-js/14869745#14869745
-  const token = crypto.randomBytes(20).toString("base64");
+  // Use the shibboleth session id as token.
+  const token = req.headers["shib-session-id"];
 
   const user: User = {
     created_at: new Date().getTime(),

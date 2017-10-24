@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SPConfig xmlns="urn:mace:shibboleth:2.0:native:sp:config" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+          xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+          clockSkew="180">
+    <RequestMapper type="XML">
+        <RequestMap applicationId="default" authType="shibboleth">
+            <Host name="italia-backend" requireSession="true">
+                <Path name="/app"/>
+            </Host>
+        </RequestMap>
+    </RequestMapper>
+    <ApplicationDefaults
+            entityID="https://italia-backend"
+            REMOTE_USER="eppn persistent-id targeted-id"
+            signing="true"
+            encryption="false"
+    >
+        <Sessions lifetime="28800" timeout="3600" relayState="ss:mem" checkAddress="true" handlerSSL="true"
+                  cookieProps="https" handlerURL="/saml">
+            <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="/SAML2/POST"
+                                         index="0" isDefault="true"/>
+            <SessionInitiator type="SAML2" Location="/Login" isDefault="true" forceAuthn="true"
+                              outgoingBinding="urn:oasis:names:tc:SAML:profiles:SSO:request-init" isPassive="false"
+                              signing="true"
+                              authnContextClassRef="https://www.spid.gov.it/SpidL1"
+                              authnContextComparison="minimum"
+                              NameIDFormat="urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+                              signingAlg="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+            >
+                <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+                                    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="spid.agid.gov.it"
+                                    Version="2.0" IssueInstant="2017-01-01T00:00:00Z" AssertionConsumerServiceIndex="0"
+                                    AttributeConsumingServiceIndex="1">
+                    <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity"
+                                 NameQualifier="italia-backend">https://italia-backend
+                    </saml:Issuer>
+                </samlp:AuthnRequest>
+            </SessionInitiator>
+
+            <LogoutInitiator type="Chaining" Location="/Logout">
+                <LogoutInitiator type="SAML2"
+                                 outgoingBindings="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                 signing="true"/>
+                <LogoutInitiator type="Local" signing="true"/>
+            </LogoutInitiator>
+            <md:SingleLogoutService Location="/SLO/SOAP" Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"/>
+            <md:SingleLogoutService Location="/SLO/POST" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+            <md:SingleLogoutService Location="/SLO/REDIRECT"
+                                    Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+            <Handler type="MetadataGenerator" Location="/Metadata" signing="false"
+                     signingAlg="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+                     digestAlg="http://www.w3.org/2001/04/xmlenc#sha256" template="spidMetadata.xml"/>
+            <Handler type="Status" Location="/Status" acl="127.0.0.1 ::1"/>
+            <Handler type="Session" Location="/Session" showAttributeValues="true"/>
+        </Sessions>
+        <Errors supportContact="test@example.com" helpLocation="/about.html" styleSheet="/shibboleth-sp/main.css"/>
+
+        <!-- SPID IDP Metadata -->
+        <MetadataProvider type="XML" validate="true" file="spid-idp-metadata/spid-idp-testenv.xml"
+                          id="https://spid-testenv-identityserver:9443/samlsso"/>
+        <AttributeExtractor type="XML" validate="true" reloadChanges="false" path="attribute-map.xml"/>
+        <CredentialResolver type="File" key="certs/spid-signature.key" certificate="certs/spid-signature.cer"
+                            use="signing"/>
+    </ApplicationDefaults>
+    <SecurityPolicyProvider type="XML" validate="true" path="security-policy.xml"/>
+    <ProtocolProvider type="XML" validate="true" reloadChanges="false" path="protocols.xml"/>
+</SPConfig>

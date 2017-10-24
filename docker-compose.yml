@@ -8,11 +8,50 @@ services:
       - NODE_ENV=development
     expose:
       - "8080"
-    image: node:8.5.0-alpine
-    init: true
-    ports:
-      - "80:8080"
+    image: node:8.6.0-alpine
     restart: always
     volumes:
       - "./app:/usr/src/app"
     working_dir: "/usr/src/app"
+
+  shibboleth:
+    container_name: shibboleth
+    image: virtualstaticvoid/shibboleth-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - "./logs/shibboleth:/var/log"
+      - "./docker/shibboleth/shibboleth-nginx-default.conf:/etc/nginx/conf.d/default.conf"
+      - "./docker/shibboleth/shibboleth2.xml:/etc/shibboleth/shibboleth2.xml"
+      - "./docker/shibboleth/shibboleth-spid/attribute-map.xml:/etc/shibboleth/attribute-map.xml"
+      - "./docker/shibboleth/shibboleth-spid/protocols.xml:/etc/shibboleth/protocols.xml"
+      - "./docker/shibboleth/shibboleth-spid/security-policy.xml:/etc/shibboleth/security-policy.xml"
+      - "./docker/shibboleth/shibboleth-spid/spid-idp-metadata:/etc/shibboleth/spid-idp-metadata"
+      - "./docker/shibboleth/shibboleth-spid/spidMetadata.xml:/etc/shibboleth/spidMetadata.xml"
+      - "./docker/keys/test-cert.key:/etc/shibboleth/certs/spid-signature.key:ro"
+      - "./docker/keys/test-cert.crt:/etc/shibboleth/certs/spid-signature.cer:ro"
+
+  spid-testenv-identityserver:
+    container_name: spid-testenv-identityserver
+    image: italia/spid-testenv-identityserver:docker-compose
+    ports:
+      - "9443:9443"
+    restart: always
+    volumes:
+      - "./logs/idp:/spid-testenvironment/is/identity-server/repository/logs"
+
+  spid-testenv-backoffice:
+    container_name: spid-testenv-backoffice
+    depends_on:
+      - spid-testenv-identityserver
+    environment:
+      - NODE_ENV=development
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    image: italia/spid-testenv-backoffice:latest
+    ports:
+      - "8080:8080"
+    restart: always
+    volumes:
+      - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js"
