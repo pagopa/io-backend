@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User profile</title>
+</head>
+<body>
+
+<h1>User profile</h1>
+
+<div id="name"></div>
+<div id="familyname"></div>
+
+<script>
+
+  var url_string = window.location.href;
+  var url = new URL(url_string);
+  var token = url.searchParams.get("token") || localStorage.getItem("token");
+
+  if (token) {
+    localStorage.setItem("token", token);
+
+    fetch('./api/v1/user', {
+      credentials: 'include',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      },
+    })
+      .then(
+        function(response) {
+          if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' +
+              response.status);
+            return;
+          }
+
+          // Examine the text in the response
+          response.json().then(function(data) {
+            console.log(data);
+
+            document.getElementById("name").append(data.name);
+            document.getElementById("familyname").append(data.familyname);
+          });
+        }
+      )
+      .catch(function(err) {
+        console.log('Fetch Error :-S', err);
+      });
+  } else {
+    window.location = 'idp_list.html';
+  }
+
+</script>
+
+</body>
+</html>

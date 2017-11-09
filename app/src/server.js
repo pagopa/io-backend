@@ -32,20 +32,9 @@ passport.use(
 );
 
 const app = express();
-
 app.use(morgan("dev"));
 app.use(express.static("public"));
 app.use(passport.initialize());
-
-app.get("/", function(req: express$Request, res: express$Response) {
-  res.send("Nothing to see here");
-});
-
-app.get("/idp_list", function(req: express$Request, res: express$Response) {
-  res.send(
-    '<a href="https://italia-backend/saml/Login?target=/app/token/new&entityID=spid-testenv-identityserver">Login</a>'
-  );
-});
 
 type User = {
   created_at: number,
@@ -67,10 +56,7 @@ type User = {
   placeofbirth?: string
 };
 
-app.get("/app/token/new", function(
-  req: express$Request,
-  res: express$Response
-) {
+app.get("/sso", function(req: express$Request, res: express$Response) {
   // Use the shibboleth session id as token.
   const token = req.headers["shib-session-id"];
 
@@ -101,22 +87,7 @@ app.get("/app/token/new", function(
 
   tokens[token] = user;
 
-  res.redirect("/app/token/get/" + token);
-});
-
-app.get("/app/debug/headers", function(
-  req: express$Request,
-  res: express$Response
-) {
-  res.json(req.headers);
-});
-
-app.get("/app/token/get/*", function(
-  req: express$Request,
-  res: express$Response
-) {
-  // TODO display nice OK page
-  res.send("OK");
+  res.redirect("/profile.html?token=" + token);
 });
 
 app.get(
