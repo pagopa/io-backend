@@ -4,6 +4,8 @@
 
 # Digital citizenship web and mobile backend
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/italia-backend?utm_source=github.com&utm_medium=referral&utm_content=teamdigitale/italia-backend&utm_campaign=badger)
+
 ## How to run the application
 
 ### Dependencies
