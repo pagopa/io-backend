@@ -32,7 +32,7 @@ localhost    italia-backend
 7. run `scripts/import-spid-data.sh` to configure the local IDP 
 8. point your browser to [https://italia-backend](https://italia-backend)
 
-If you are using Docker with a Docker Machine replace `localhost with the IP of the Docker Machine
+If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
 
 ### Container description
