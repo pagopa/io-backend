@@ -20,7 +20,7 @@
   if (token) {
     localStorage.setItem("token", token);
 
-    fetch('./api/v1/user', {
+    fetch('./api/v1/users/preferences', {
       credentials: 'include',
       headers: {
         'Authorization': 'Bearer ' + token
