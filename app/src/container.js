@@ -2,9 +2,9 @@
 
 "use strict";
 
-import AuthenticationController from "./Controller/authenticationController";
-import DummySessionStorage from "./Service/dummySessionStorage";
-import PreferencesController from "./Controller/preferencesController";
+import AuthenticationController from "./controllers/authenticationController";
+import DummySessionStorage from "./services/dummySessionStorage";
+import PreferencesController from "./controllers/preferencesController";
 
 const awilix = require("awilix");
 

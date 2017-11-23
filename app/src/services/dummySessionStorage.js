@@ -2,8 +2,8 @@
 
 "use strict";
 
-import type { User } from "../user";
-import type { SessionStorageInterface } from "./SessionStorageInterface";
+import type { User } from "../types/user";
+import type { SessionStorageInterface } from "./sessionStorageInterface";
 
 export default class DummySessionStorage implements SessionStorageInterface {
   // Dummy, in memory storage

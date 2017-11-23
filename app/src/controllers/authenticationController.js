@@ -2,8 +2,8 @@
 
 "use strict";
 
-import type { User } from "../user";
-import type { SessionStorageInterface } from "../Service/SessionStorageInterface";
+import type { User } from "../types/user";
+import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 
 /**
  *

@@ -7,7 +7,7 @@
  */
 
 import container from "./container";
-import type { SessionStorageInterface } from "./Service/SessionStorageInterface";
+import type { SessionStorageInterface } from "./services/sessionStorageInterface";
 
 const express = require("express");
 const morgan = require("morgan");
