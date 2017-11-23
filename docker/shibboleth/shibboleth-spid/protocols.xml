@@ -1,0 +1,24 @@
+<Protocols xmlns="urn:mace:shibboleth:2.0:native:sp:protocols">
+  
+  <!-- SAML 2.0 -->
+  <Protocol id="SAML2">
+    <Service id="SSO">
+      <Initiator id="SAML2" />
+      <Binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" path="/SAML2/POST" />
+    </Service>
+    <Service id="Logout">
+      <Initiator id="SAML2" />
+      <Binding id="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" path="/SLO/SOAP" />
+      <Binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" path="/SLO/Redirect" />
+      <Binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" path="/SLO/POST" />
+    </Service>
+  </Protocol>
+
+  <!-- Local Logout -->
+  <Protocol id="Local">
+    <Service id="Logout">
+      <Initiator id="Local" />
+    </Service>
+  </Protocol>
+  
+</Protocols>

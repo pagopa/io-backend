@@ -1,0 +1,41 @@
+<Attributes xmlns="urn:mace:shibboleth:2.0:attribute-map" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!-- Fourth, the SAML 2.0 NameID Format: -->
+  <Attribute name="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" id="persistent-id">
+    <AttributeDecoder xsi:type="NameIDAttributeDecoder" formatter="$NameQualifier!$SPNameQualifier!$Name"
+                      defaultQualifiers="true"/>
+  </Attribute>
+
+  <!-- SPID Attributes -->
+  <!-- Primary -->
+  <Attribute name="spidCode" id="spid-attribute-spidCode"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="name" id="spid-attribute-name" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="familyName" id="spid-attribute-familyName"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="placeOfBirth" id="spid-attribute-placeOfBirth"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="countyOfBirth" id="spid-attribute-countyOfBirth"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="dateOfBirth" id="spid-attribute-dateOfBirth"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="gender" id="spid-attribute-gender" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="companyName" id="spid-attribute-companyName"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="registeredOffice" id="spid-attribute-registeredOffice"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="fiscalNumber" id="spid-attribute-fiscalNumber"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="ivaCode" id="spid-attribute-ivaCode" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <!-- Secondary -->
+  <Attribute name="idCard" id="spid-attribute-idCard" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="mobilePhone" id="spid-attribute-mobilePhone"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="email" id="spid-attribute-email" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="address" id="spid-attribute-address" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="expirationDate" id="spid-attribute-expirationDate"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+  <Attribute name="digitalAddress" id="spid-attribute-digitalAddress"
+             nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+
+</Attributes>

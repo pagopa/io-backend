@@ -1,5 +1,9 @@
 .vscode
 .idea
-node_modules
+/app/node_modules
 /app/env
 /app/coverage
+/logs/**/*.log
+/logs/**/*.log.*
+/logs/**/*.out
+/spid-batch-import/node_modules

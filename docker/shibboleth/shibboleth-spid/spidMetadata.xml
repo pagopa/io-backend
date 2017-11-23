@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<md:EntityDescriptor
+  xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  entityID="https://italia-backend"
+  ID="e10073cb-bf21-471c-bab6-9473f35d41df">
+
+  <md:SPSSODescriptor
+    protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
+    AuthnRequestsSigned="true"
+    WantAssertionsSigned="true">
+
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDhTCCAmygAwIBAgIBADANBgkqhkiG9w0BAQ0FADBcMQswCQYDVQQGEwJpdDEP
+            MA0GA1UECAwGTWlsYW5vMRAwDgYDVQQKDAdXZWxsbmV0MSowKAYDVQQDDCFodHRw
+            czovL3NwaWQtdGVzdC5hZ2lkLndlbGxuZXQuaXQwHhcNMTcxMDIzMTEyMjIxWhcN
+            MTgxMDIzMTEyMjIxWjBcMQswCQYDVQQGEwJpdDEPMA0GA1UECAwGTWlsYW5vMRAw
+            DgYDVQQKDAdXZWxsbmV0MSowKAYDVQQDDCFodHRwczovL3NwaWQtdGVzdC5hZ2lk
+            LndlbGxuZXQuaXQwggEjMA0GCSqGSIb3DQEBAQUAA4IBEAAwggELAoIBAgC2jLvx
+            HJgnx4YvoOvgy+8VogqKkY3URTV5a4eKZyrLjQMhxfpADT9NPfkKyvo5Vuimyb0G
+            lC6rl1ySadbfm9OP4qGdFTY5LQtgL+PM76QLdjpX7bY2w0kK39JDolFmYjJ4nKWn
+            kVbg7os8himE/hAlqqthWPybaU1Y3zMgrxGKn5ciOcQxv9vIVG4vZ5JEyt2CG2PR
+            8W2ZnCDGy7zT7CL5mlObFtRHpMU+8kQhr7DeS7MxQ7jRzedGIbVvihn1jI18i8Xb
+            u1f8bwqaoGJ0WTCxFdV6Lup2HInCAEalYixiDHadOdkXfL7Yi7FKf+40uPnOJTyP
+            ScvuaTrcI9f7nY3pTQIDAQABo1AwTjAdBgNVHQ4EFgQUeXr1IJNLRNy7kO19dTl/
+            YDoNT9UwHwYDVR0jBBgwFoAUeXr1IJNLRNy7kO19dTl/YDoNT9UwDAYDVR0TBAUw
+            AwEB/zANBgkqhkiG9w0BAQ0FAAOCAQIAl7OEh9w2WbCv5O3RrQ/MZTcEext8Dx1n
+            D+CzmrW1gbKkgHuVELMIyf397f6zKk5qxRjlhO16IcOf4nxIdpR3tZ9+4wbdJ4nh
+            W9jX85gGpAY+8jqC82PBdiTvpy/7MyDrbVH+AU65DeeN1OoFlHDpYaT5BRBHGk8C
+            i/jpmth6HAxI+RQNGtSLiby0+NkORhvITvC6rQZKUsPlQoEdCZvh0NDJ2gjTUptk
+            V3YIk/m8fLAZCN3QzFdPVituqWaddz5lyUhtmCH8Fk5d4Bj5Yi9Cx0m0BI8WFG5F
+            gD/6oOu1Hi5bpckHUrTz+ydWvD37XGFxmkRJLC/CpP7eXgs2HWurbOM=</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+
+    <md:KeyDescriptor use="encryption">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDhTCCAmygAwIBAgIBADANBgkqhkiG9w0BAQ0FADBcMQswCQYDVQQGEwJpdDEP
+            MA0GA1UECAwGTWlsYW5vMRAwDgYDVQQKDAdXZWxsbmV0MSowKAYDVQQDDCFodHRw
+            czovL3NwaWQtdGVzdC5hZ2lkLndlbGxuZXQuaXQwHhcNMTcxMDIzMTEyMjIxWhcN
+            MTgxMDIzMTEyMjIxWjBcMQswCQYDVQQGEwJpdDEPMA0GA1UECAwGTWlsYW5vMRAw
+            DgYDVQQKDAdXZWxsbmV0MSowKAYDVQQDDCFodHRwczovL3NwaWQtdGVzdC5hZ2lk
+            LndlbGxuZXQuaXQwggEjMA0GCSqGSIb3DQEBAQUAA4IBEAAwggELAoIBAgC2jLvx
+            HJgnx4YvoOvgy+8VogqKkY3URTV5a4eKZyrLjQMhxfpADT9NPfkKyvo5Vuimyb0G
+            lC6rl1ySadbfm9OP4qGdFTY5LQtgL+PM76QLdjpX7bY2w0kK39JDolFmYjJ4nKWn
+            kVbg7os8himE/hAlqqthWPybaU1Y3zMgrxGKn5ciOcQxv9vIVG4vZ5JEyt2CG2PR
+            8W2ZnCDGy7zT7CL5mlObFtRHpMU+8kQhr7DeS7MxQ7jRzedGIbVvihn1jI18i8Xb
+            u1f8bwqaoGJ0WTCxFdV6Lup2HInCAEalYixiDHadOdkXfL7Yi7FKf+40uPnOJTyP
+            ScvuaTrcI9f7nY3pTQIDAQABo1AwTjAdBgNVHQ4EFgQUeXr1IJNLRNy7kO19dTl/
+            YDoNT9UwHwYDVR0jBBgwFoAUeXr1IJNLRNy7kO19dTl/YDoNT9UwDAYDVR0TBAUw
+            AwEB/zANBgkqhkiG9w0BAQ0FAAOCAQIAl7OEh9w2WbCv5O3RrQ/MZTcEext8Dx1n
+            D+CzmrW1gbKkgHuVELMIyf397f6zKk5qxRjlhO16IcOf4nxIdpR3tZ9+4wbdJ4nh
+            W9jX85gGpAY+8jqC82PBdiTvpy/7MyDrbVH+AU65DeeN1OoFlHDpYaT5BRBHGk8C
+            i/jpmth6HAxI+RQNGtSLiby0+NkORhvITvC6rQZKUsPlQoEdCZvh0NDJ2gjTUptk
+            V3YIk/m8fLAZCN3QzFdPVituqWaddz5lyUhtmCH8Fk5d4Bj5Yi9Cx0m0BI8WFG5F
+            gD/6oOu1Hi5bpckHUrTz+ydWvD37XGFxmkRJLC/CpP7eXgs2HWurbOM=</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+
+    <md:SingleLogoutService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="/Logout" />
+
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+
+    <md:AssertionConsumerService
+      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      Location="/SAML2/POST"
+      index="0"
+      isDefault="true" />
+
+    <md:AttributeConsumingService index="1">
+      <md:ServiceName xml:lang="it">Test</md:ServiceName>
+      <md:ServiceDescription xml:lang="it">Test</md:ServiceDescription>
+      <md:RequestedAttribute Name="spidCode" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="name" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="gender" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="placeOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="ivaCode" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="companyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="address" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="expirationDate" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="fiscalNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="familyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="dateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="countyOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="idCard" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="registeredOffice" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+      <md:RequestedAttribute Name="digitalAddress" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
+    </md:AttributeConsumingService>
+
+  </md:SPSSODescriptor>
+
+</md:EntityDescriptor>
