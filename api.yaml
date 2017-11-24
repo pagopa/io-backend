@@ -94,7 +94,7 @@ paths:
         '404':
           description: No message found.
   '/users/preferences':
-    x-swagger-router-controller: Preferences
+    x-swagger-router-controller: PreferencesController
     get:
       operationId: getUserPreferences
       summary: Get User's Preferences

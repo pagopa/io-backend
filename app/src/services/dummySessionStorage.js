@@ -10,7 +10,7 @@ export default class DummySessionStorage implements SessionStorageInterface {
   tokens: Object;
 
   /**
-   *
+   * Class constructor.
    */
   constructor() {
     this.tokens = {};

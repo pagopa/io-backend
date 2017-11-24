@@ -6,8 +6,12 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
+require("dotenv").load();
+
 import container from "./container";
 import type { SessionStorageInterface } from "./services/sessionStorageInterface";
+import PreferencesController from "./controllers/preferencesController";
+import AuthenticationController from "./controllers/authenticationController";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -36,7 +40,10 @@ app.use(express.static("public"));
 app.use(passport.initialize());
 
 app.get("/sso", function(req: express$Request, res: express$Response) {
-  const controller = container.resolve("authenticationController");
+  const controller = (container.resolve(
+    "authenticationController"
+  ): AuthenticationController);
+
   controller.sso(req, res);
 });
 
@@ -44,8 +51,11 @@ app.get(
   "/api/v1/users/preferences",
   passport.authenticate("bearer", { session: false }),
   function(req: express$Request, res: express$Response) {
-    const controller = container.resolve("preferencesController");
-    controller.preferences(req, res);
+    const controller = (container.resolve(
+      "preferencesController"
+    ): PreferencesController);
+
+    controller.getUserPreferences(req, res);
   }
 );
 

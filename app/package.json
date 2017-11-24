@@ -10,7 +10,6 @@
     "flow": "flow",
     "hot-reload": "nodemon ./node_modules/.bin/babel-node src/server.js",
     "lint": "eslint 'src/**/*.js'",
-    "prettify": "prettier --write 'src/**/*.js'",
     "pretest": "yarn lint",
     "test": "jest --coverage",
     "start": "./node_modules/.bin/babel-node src/server.js"
@@ -28,12 +27,10 @@
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
     "awilix": "^2.11.1",
-    "eslint": "^4.8.0",
-    "eslint-plugin-flowtype": "^2.39.1",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-prettier": "^2.3.1",
+    "dotenv": "^4.0.0",
     "express": "^4.16.0",
     "morgan": "^1.8.1",
+    "ms-rest": "^2.2.7",
     "passport": "^0.3.2",
     "passport-http-bearer": "^1.0.1"
   },
@@ -43,6 +40,10 @@
     "babel-preset-es2015-node5": "*",
     "babel-preset-stage-3": "*",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "eslint": "^4.8.0",
+    "eslint-plugin-flowtype": "^2.39.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-prettier": "^2.3.1",
     "flow-bin": "^0.56.0",
     "jest": "^21.2.1",
     "nodemon": "^1.11.0",

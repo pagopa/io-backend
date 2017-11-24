@@ -12,6 +12,7 @@ export default class AuthenticationController {
   sessionStorage: SessionStorageInterface;
 
   /**
+   * Class constructor.
    *
    * @param sessionStorage
    */
@@ -31,13 +32,13 @@ export default class AuthenticationController {
     const user: User = {
       created_at: new Date().getTime(),
       token: token,
-      spid_idp: req.headers["shib-identity-provider"]
+      spid_idp: req.headers["shib-identity-provider"],
+      fiscalnumber: req.headers["spid-attribute-fiscalnumber"]
     };
 
     [
       "name",
       "familyname",
-      "fiscalnumber",
       "spidcode",
       "gender",
       "mobilephone",

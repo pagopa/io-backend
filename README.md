@@ -33,8 +33,9 @@ localhost    italia-backend
 ```
 
 6. wait a couple of minutes to let the IDP start (or monitor the process in `logs/idp/wso2carbon.log`)
-7. run `scripts/import-spid-data.sh` to configure the local IDP 
-8. point your browser to [https://italia-backend](https://italia-backend)
+7. run `scripts/import-spid-data.sh` to configure the local IDP
+8. copy `app/.env.example` to `app/.env` and fill the variables with your values
+9. point your browser to [https://italia-backend](https://italia-backend)
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
@@ -78,3 +79,9 @@ A Linux/macOS environment is required at the moment.
 * run Jest tests directly or with `scripts/test.sh` 
 
 In general follow the [Node Best Practices](https://devcenter.heroku.com/articles/node-best-practices).
+
+### Generate the API client
+
+* download the latest API specs from [https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/public_api_v1.yaml]
+* install the [AutoRest](https://github.com/Azure/autorest) tool
+* run the command `autorest --input-file=public_api_v1.yaml --nodejs --output-folder=app/src/api`
