@@ -10,7 +10,7 @@ require("dotenv").load();
 
 import container from "./container";
 import type { SessionStorageInterface } from "./services/sessionStorageInterface";
-import PreferencesController from "./controllers/preferencesController";
+import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
 
 const express = require("express");
@@ -48,14 +48,14 @@ app.get("/sso", function(req: express$Request, res: express$Response) {
 });
 
 app.get(
-  "/api/v1/users/preferences",
+  "/api/v1/profile",
   passport.authenticate("bearer", { session: false }),
   function(req: express$Request, res: express$Response) {
     const controller = (container.resolve(
-      "preferencesController"
-    ): PreferencesController);
+      "profileController"
+    ): ProfileController);
 
-    controller.getUserPreferences(req, res);
+    controller.getUserProfile(req, res);
   }
 );
 

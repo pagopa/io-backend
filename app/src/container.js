@@ -4,8 +4,8 @@
 
 import AuthenticationController from "./controllers/authenticationController";
 import DummySessionStorage from "./services/dummySessionStorage";
-import PreferencesController from "./controllers/preferencesController";
 import ApiClient from "./services/apiClient";
+import ProfileController from "./controllers/profileController";
 
 const awilix = require("awilix");
 
@@ -26,7 +26,7 @@ container.registerClass({
 });
 
 container.registerClass({
-  preferencesController: [PreferencesController]
+  profileController: [ProfileController]
 });
 
 export default container;

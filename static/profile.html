@@ -8,6 +8,7 @@
 
 <h1>User profile</h1>
 
+<div id="name"></div>
 <div id="fiscal_code"></div>
 <div id="email"></div>
 
@@ -20,7 +21,7 @@
   if (token) {
     localStorage.setItem("token", token);
 
-    fetch('./api/v1/users/preferences', {
+    fetch('./api/v1/profile', {
       credentials: 'include',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -38,6 +39,7 @@
           response.json().then(function(data) {
             console.log(data);
 
+            document.getElementById("name").append(data.name + ' ' + data.familyname);
             document.getElementById("fiscal_code").append(data.fiscal_code);
             document.getElementById("email").append(data.email);
           });

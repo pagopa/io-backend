@@ -93,17 +93,17 @@ paths:
               - $ref: '#/definitions/PaginationResponse'
         '404':
           description: No message found.
-  '/users/preferences':
-    x-swagger-router-controller: PreferencesController
+  '/profile':
+    x-swagger-router-controller: ProfileController
     get:
-      operationId: getUserPreferences
-      summary: Get User's Preferences
-      description: Returns the preferences for the user identified by the provided fiscal code.
+      operationId: getUserProfile
+      summary: Get User's Profile
+      description: Returns the profile for the user identified by the provided fiscal code.
       responses:
         '200':
           description: Found.
           schema:
-            $ref: '#/definitions/Preferences'
+            $ref: '#/definitions/Profile'
           examples:
             application/json:
               fiscal_code: "TMMEXQ60A10Y526X"
@@ -111,7 +111,7 @@ paths:
         '404':
           description: No user found for the provided fiscal code.
         '500':
-          description: There was an error in retrieving the user preferences.
+          description: There was an error in retrieving the user profile.
 definitions:
   Steps:
     title: Steps
@@ -183,9 +183,9 @@ definitions:
         maxLength: 100000
     required:
       - body_short
-  Preferences:
-    title: Preferences
-    description: Describes the user's preferences.
+  Profile:
+    title: Profile
+    description: Describes the user's profile.
     type: object
     properties:
       fiscal_code:
