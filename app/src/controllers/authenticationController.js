@@ -33,29 +33,28 @@ export default class AuthenticationController {
       created_at: new Date().getTime(),
       token: token,
       spid_idp: req.headers["shib-identity-provider"],
-      fiscalnumber: req.headers["spid-attribute-fiscalnumber"]
+      address: req.headers["spid-attribute-address"],
+      countyofbirth: req.headers["spid-attribute-countyofbirth"],
+      dateofbirth: req.headers["spid-attribute-dateofbirth"],
+      digitaladdress: req.headers["spid-attribute-digitaladdress"],
+      email: req.headers["spid-attribute-email"],
+      expirationdate: req.headers["spid-attribute-expirationdate"],
+      familyname: req.headers["spid-attribute-familyname"],
+      fiscalnumber: req.headers["spid-attribute-fiscalnumber"],
+      gender: req.headers["spid-attribute-gender"],
+      idcard: req.headers["spid-attribute-idcard"],
+      mobilephone: req.headers["spid-attribute-mobilephone"],
+      name: req.headers["spid-attribute-name"],
+      placeofbirth: req.headers["spid-attribute-placeofbirth"],
+      spidcode: req.headers["spid-attribute-spidcode"]
     };
-
-    [
-      "name",
-      "familyname",
-      "spidcode",
-      "gender",
-      "mobilephone",
-      "email",
-      "address",
-      "expirationdate",
-      "digitaladdress",
-      "countyofbirth",
-      "dateofbirth",
-      "idcard",
-      "placeofbirth"
-    ].forEach(field => {
-      user[field] = req.headers["spid-attribute-" + field];
-    });
 
     this.sessionStorage.set(token, user);
 
-    res.redirect("/profile.html?token=" + token);
+    const url =
+      process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
+    const urlWithToken = url.replace("{token}", token);
+
+    res.redirect(urlWithToken);
   }
 }

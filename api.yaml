@@ -104,9 +104,14 @@ paths:
           description: Found.
           schema:
             $ref: '#/definitions/Preferences'
-          examples: {}
+          examples:
+            application/json:
+              fiscal_code: "TMMEXQ60A10Y526X"
+              email: "email@example.com"
         '404':
           description: No user found for the provided fiscal code.
+        '500':
+          description: There was an error in retrieving the user preferences.
 definitions:
   Steps:
     title: Steps
