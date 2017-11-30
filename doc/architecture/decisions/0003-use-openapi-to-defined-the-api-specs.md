@@ -12,8 +12,10 @@ We need to define the API specifications of the services we're going to implemen
 
 ## Decision
 
-We use the [OpenAPI 2.0](https://swagger.io/specification/) specification (aka Swagger spec) as standard for our REST API definitions.
+We use the [OpenAPI 2.0](https://swagger.io/specification/) specification (aka Swagger spec) as standard for our REST
+API definitions.
 
 ## Consequences
 
-We have to provide the API definition in YAML format (instead of JSON) for the OpenAPI API definition files due to its improved readability.
+We have to provide the API definition in YAML format (instead of JSON) for the OpenAPI API definition files due to its
+improved readability.

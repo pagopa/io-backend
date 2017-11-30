@@ -7,3 +7,4 @@
 /logs/**/*.log.*
 /logs/**/*.out
 /spid-batch-import/node_modules
+/app/.env
