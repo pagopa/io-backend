@@ -6,6 +6,7 @@ import AuthenticationController from "./controllers/authenticationController";
 import DummySessionStorage from "./services/dummySessionStorage";
 import ApiClient from "./services/apiClient";
 import ProfileController from "./controllers/profileController";
+import MessagesController from "./controllers/messagesController";
 
 const awilix = require("awilix");
 
@@ -27,6 +28,10 @@ container.registerClass({
 
 container.registerClass({
   profileController: [ProfileController]
+});
+
+container.registerClass({
+  messagesController: [MessagesController]
 });
 
 export default container;

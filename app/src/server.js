@@ -2,6 +2,8 @@
 
 "use strict";
 
+import MessagesController from "./controllers/messagesController";
+
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
@@ -56,6 +58,18 @@ app.get(
     ): ProfileController);
 
     controller.getUserProfile(req, res);
+  }
+);
+
+app.get(
+  "/api/v1/messages",
+  passport.authenticate("bearer", { session: false }),
+  function(req: express$Request, res: express$Response) {
+    const controller = (container.resolve(
+      "messagesController"
+    ): MessagesController);
+
+    controller.getUserMessages(req, res);
   }
 );
 

@@ -68,13 +68,13 @@ paths:
             $ref: '#/definitions/Provider'
         '404':
           description: No provider found.
-  '/users/messages':
-    x-swagger-router-controller: Messages
+  '/messages':
+    x-swagger-router-controller: MessagesController
     parameters:
       - $ref: '#/parameters/PaginationRequest'
     get:
-      operationId: getMessagesByUser
-      summary: Get messages by user
+      operationId: getUserMessages
+      summary: Get User's Messages
       description: |-
         Returns the messages for the user identified by the provided fiscal code.
         Messages will be returned in inverse acceptance order (from last to first).
@@ -92,7 +92,9 @@ paths:
                       $ref: '#/definitions/Message'
               - $ref: '#/definitions/PaginationResponse'
         '404':
-          description: No message found.
+          description: No messages found.
+        '500':
+          description: There was an error in retrieving the user profile.
   '/profile':
     x-swagger-router-controller: ProfileController
     get:
