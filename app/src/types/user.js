@@ -6,7 +6,7 @@ export type User = {
   +created_at: number,
   +token: string,
   +spid_idp: string,
-  +fiscalnumber: string,
+  +fiscal_code: string,
   +name?: string,
   +familyname?: string,
   +spidcode?: string,

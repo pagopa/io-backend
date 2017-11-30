@@ -34,12 +34,12 @@ export default class PreferencesController {
     const reqWithUser = ((req: Object): { user: User });
 
     this.apiClient
-      .getClient(reqWithUser.user.fiscalnumber)
+      .getClient(reqWithUser.user.fiscal_code)
       .getProfile()
       .then(
         function(profile: GetProfileOKResponse) {
           const preferences: Preferences = {
-            fiscal_code: reqWithUser.user.fiscalnumber,
+            fiscal_code: reqWithUser.user.fiscal_code,
             email: (profile.email: string)
           };
           res.json(preferences);
@@ -47,6 +47,7 @@ export default class PreferencesController {
         function(err: APIError) {
           if (err.statusCode === 404) {
             res.status(400).json({ message: err.message });
+            return;
           }
 
           res.status(500).json({

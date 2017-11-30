@@ -40,7 +40,7 @@ export default class AuthenticationController {
       email: req.headers["spid-attribute-email"],
       expirationdate: req.headers["spid-attribute-expirationdate"],
       familyname: req.headers["spid-attribute-familyname"],
-      fiscalnumber: req.headers["spid-attribute-fiscalnumber"],
+      fiscal_code: req.headers["spid-attribute-fiscalnumber"],
       gender: req.headers["spid-attribute-gender"],
       idcard: req.headers["spid-attribute-idcard"],
       mobilephone: req.headers["spid-attribute-mobilephone"],
