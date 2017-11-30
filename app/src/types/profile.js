@@ -6,5 +6,5 @@ export type Profile = {
   +name: string,
   +familyname: string,
   +fiscal_code: string,
-  +email: string
+  +email?: string
 };
