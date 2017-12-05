@@ -5,7 +5,7 @@
 import type { User } from "../types/user";
 import type { ApiClientInterface } from "../services/apiClientInterface";
 import type { APIError } from "../types/error";
-import { GetMessagesByUserOKResponse } from "../api/models";
+import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
 
 /**
  *
@@ -41,12 +41,41 @@ export default class MessagesController {
         },
         function(err: APIError) {
           if (err.statusCode === 404) {
-            res.status(400).json({ message: err.message });
+            res.status(404).json({ message: err.message });
             return;
           }
 
           res.status(500).json({
-            message: "There was an error in retrieving the user messages."
+            message: "There was an error in retrieving the messages."
+          });
+        }
+      );
+  }
+
+  /**
+   * Returns the message identified by the message id.
+   *
+   * @param req
+   * @param res
+   */
+  getUserMessage(req: express$Request, res: express$Response) {
+    const reqWithUser = ((req: Object): { user: User });
+
+    this.apiClient
+      .getClient(reqWithUser.user.fiscal_code)
+      .getMessage(req.params.id)
+      .then(
+        function(messages: MessageResponse) {
+          res.json(messages);
+        },
+        function(err: APIError) {
+          if (err.statusCode === 404) {
+            res.status(404).json({ message: err.message });
+            return;
+          }
+
+          res.status(500).json({
+            message: "There was an error in retrieving the message."
           });
         }
       );

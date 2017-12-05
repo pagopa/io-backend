@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User profile</title>
+  <title>Messages</title>
 
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -14,26 +14,30 @@
 <body>
 
 <div class="container">
-  <h1>User profile</h1>
+  <h1>Messages</h1>
 
   <a href="index.html">Home</a>
 
   <br/><br/>
 
-  <div id="name"></div>
-  <div id="fiscal_code"></div>
-  <div id="email"></div>
+  <table class="table table-bordered" id="messages">
+    <thead>
+    <tr>
+      <th scope="col">Message ID</th>
+      <th scope="col">Subject</th>
+      <th scope="col">Body</th>
+    </tr>
+    </thead>
+  </table>
 </div>
 
 <script>
-  const url_string = window.location.href;
-  const url = new URL(url_string);
-  const token = url.searchParams.get("token") || localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
   if (token) {
     localStorage.setItem("token", token);
 
-    fetch('./api/v1/profile', {
+    fetch('./api/v1/messages', {
       credentials: 'include',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -49,9 +53,10 @@
 
           // Examine the text in the response
           response.json().then(function(data) {
-            $("#name").append(data.name + ' ' + data.familyname);
-            $("#fiscal_code").append(data.fiscal_code);
-            $("#email").append(data.email);
+            console.log(data);
+            for (let i = 0; i < data.pageSize; i++) {
+              $('#messages').append('<tr><td><a href="message.html?id=' + data.items[i].id + '">' + data.items[i].id + '</a><td>-</td><td>-</td></td></tr>');
+            }
           });
         }
       )

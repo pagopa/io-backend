@@ -73,6 +73,18 @@ app.get(
   }
 );
 
+app.get(
+  "/api/v1/messages/:id",
+  passport.authenticate("bearer", { session: false }),
+  function(req: express$Request, res: express$Response) {
+    const controller = (container.resolve(
+      "messagesController"
+    ): MessagesController);
+
+    controller.getUserMessage(req, res);
+  }
+);
+
 const server = app.listen(port, function() {
   // eslint-disable-next-line no-console
   console.log("Listening on port %d", server.address().port);

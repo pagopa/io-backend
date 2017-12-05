@@ -48,7 +48,7 @@ export default class ProfileController {
         },
         function(err: APIError) {
           if (err.statusCode === 404) {
-            res.status(400).json({ message: err.message });
+            res.status(404).json({ message: err.message });
             return;
           }
 
