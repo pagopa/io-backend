@@ -6,6 +6,7 @@ import type { User } from "../types/user";
 import type { ApiClientInterface } from "../services/apiClientInterface";
 import type { APIError } from "../types/error";
 import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
+import type { Message } from "../types/message";
 
 /**
  *
@@ -36,8 +37,19 @@ export default class MessagesController {
       .getClient(reqWithUser.user.fiscal_code)
       .getMessagesByUser()
       .then(
-        function(messages: GetMessagesByUserOKResponse) {
-          res.json(messages);
+        function(apiMessages: GetMessagesByUserOKResponse) {
+          let appMessages = [];
+          for (let i = 0; i < apiMessages.pageSize; i++) {
+            const apiMessage = apiMessages.items[i];
+            const appMessage: Message = {
+              id: apiMessage.id,
+              subject: "Lorem ipsum", //apiMessage.content.subject,
+              markdown: "Lorem ipsum" //apiMessage.content.markdown
+            };
+            appMessages.push(appMessage);
+          }
+
+          res.json({ items: appMessages, pageSize: apiMessages.pageSize });
         },
         function(err: APIError) {
           if (err.statusCode === 404) {
@@ -65,8 +77,14 @@ export default class MessagesController {
       .getClient(reqWithUser.user.fiscal_code)
       .getMessage(req.params.id)
       .then(
-        function(messages: MessageResponse) {
-          res.json(messages);
+        function(apiMessage: MessageResponse) {
+          const appMessage: Message = {
+            id: apiMessage.id,
+            subject: "Lorem ipsum", //apiMessage.content.subject,
+            markdown: "Lorem ipsum" //apiMessage.content.markdown
+          };
+
+          res.json(appMessage);
         },
         function(err: APIError) {
           if (err.statusCode === 404) {

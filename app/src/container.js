@@ -3,10 +3,10 @@
 "use strict";
 
 import AuthenticationController from "./controllers/authenticationController";
-import DummySessionStorage from "./services/dummySessionStorage";
 import ApiClient from "./services/apiClient";
 import ProfileController from "./controllers/profileController";
 import MessagesController from "./controllers/messagesController";
+import RedisSessionStorage from "./services/redisSessionStorage";
 
 const awilix = require("awilix");
 
@@ -15,7 +15,7 @@ const container = awilix.createContainer({
 });
 
 container.registerClass({
-  sessionStorage: [DummySessionStorage, { lifetime: awilix.Lifetime.SINGLETON }]
+  sessionStorage: [RedisSessionStorage, { lifetime: awilix.Lifetime.SINGLETON }]
 });
 
 container.registerClass({

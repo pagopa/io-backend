@@ -47,7 +47,8 @@
     "flow-bin": "^0.56.0",
     "jest": "^21.2.1",
     "nodemon": "^1.11.0",
-    "prettier": "^1.7.4"
+    "prettier": "^1.7.4",
+    "redis": "^2.8.0"
   },
   "jest": {
     "testEnvironment": "node",

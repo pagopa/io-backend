@@ -34,6 +34,14 @@ services:
       - "./docker/keys/test-cert.key:/etc/shibboleth/certs/spid-signature.key:ro"
       - "./docker/keys/test-cert.crt:/etc/shibboleth/certs/spid-signature.cer:ro"
 
+  redis:
+    container_name: redis
+    image: wodby/redis
+    environment:
+      REDIS_TIMEOUT: 300
+      REDIS_TCP_KEEPALIVE: 60
+      REDIS_MAXMEMORY: 182m
+
   spid-testenv-identityserver:
     container_name: spid-testenv-identityserver
     image: italia/spid-testenv-identityserver:docker-compose

@@ -20,17 +20,24 @@
 
   <br/><br/>
 
+  <div><strong>Subject:</strong></div>
   <div id="subject"></div>
+  <br/>
+  <div><strong>Markdown:</strong></div>
   <div id="markdown"></div>
 </div>
 
 <script>
   const token = localStorage.getItem("token");
 
+  const url_string = window.location.href;
+  const url = new URL(url_string);
+  const id = url.searchParams.get("id");
+
   if (token) {
     localStorage.setItem("token", token);
 
-    fetch('./api/v1/messages/01BZPTBKYKN7WFKWJ2JR6XGW01', {
+    fetch('./api/v1/messages/' + id, {
       credentials: 'include',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -47,8 +54,8 @@
           // Examine the text in the response
           response.json().then(function(data) {
             console.log(data);
-            $('#subject').append(data.message.content.subject);
-            $('#markdown').append(data.message.content.markdown);
+            $('#subject').append(data.subject);
+            $('#markdown').append(data.markdown);
           });
         }
       )

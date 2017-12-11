@@ -2,14 +2,13 @@
 
 "use strict";
 
-import MessagesController from "./controllers/messagesController";
-
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
 
 require("dotenv").load();
 
+import MessagesController from "./controllers/messagesController";
 import container from "./container";
 import type { SessionStorageInterface } from "./services/sessionStorageInterface";
 import ProfileController from "./controllers/profileController";
@@ -27,12 +26,14 @@ passport.use(
     const sessionStorage = (container.resolve(
       "sessionStorage"
     ): SessionStorageInterface);
-    const user = sessionStorage.get(token);
-    if (user) {
-      return done(null, user);
-    } else {
-      return done(null, false);
-    }
+    sessionStorage.get(token).then(
+      function(user) {
+        return done(null, user);
+      },
+      function() {
+        return done(null, false);
+      }
+    );
   })
 );
 

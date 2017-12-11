@@ -25,7 +25,7 @@
     <tr>
       <th scope="col">Message ID</th>
       <th scope="col">Subject</th>
-      <th scope="col">Body</th>
+      <th scope="col">Markdown</th>
     </tr>
     </thead>
   </table>
@@ -55,7 +55,7 @@
           response.json().then(function(data) {
             console.log(data);
             for (let i = 0; i < data.pageSize; i++) {
-              $('#messages').append('<tr><td><a href="message.html?id=' + data.items[i].id + '">' + data.items[i].id + '</a><td>-</td><td>-</td></td></tr>');
+              $('#messages').append('<tr><td><a href="message.html?id=' + data.items[i].id + '">' + data.items[i].id + '</a><td>' + data.items[i].subject + '</td><td>' + data.items[i].markdown + '</td></td></tr>');
             }
           });
         }

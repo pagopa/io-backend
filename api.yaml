@@ -87,10 +87,10 @@ paths:
       operationId: getUserMessage
       summary: Get Message
       description: |-
-        The previously created message with the provided message ID is returned.
+        Returns the message with the provided message ID.
       responses:
         '200':
-          description: Message found.
+          description: Found.
           schema:
             $ref: "#/definitions/Message"
           examples:
@@ -141,33 +141,28 @@ definitions:
     properties:
       id:
         type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
       content:
         $ref: '#/definitions/MessageContent'
     required:
       - id
-      - fiscal_code
       - content
   MessageContent:
     title: MessageContent
     type: object
     properties:
       subject:
-        $ref: "#/MessageSubject"
+        $ref: "#/definitions/MessageSubject"
       markdown:
-        $ref: "#/MessageBodyMarkdown"
+        $ref: "#/definitions/MessageBodyMarkdown"
     required:
+    - subject
     - markdown
   MessageSubject:
     type: string
     description: |-
-      The (optional) subject of the message - note that only some notification
-      channels support the display of a subject. When a subject is not provided,
-      one gets generated from the client attributes.
+      The subject of the message.
     minLength: 10
     maxLength: 120
-    example: Welcome new user !
   MessageBodyMarkdown:
     type: string
     description: |-
@@ -176,12 +171,6 @@ definitions:
       limit in terms of content size (e.g. email, etc...).
     minLength: 80
     maxLength: 10000
-    example: |-
-      # This is a markdown header
-
-      to show how easily markdown can be converted to **HTML**
-
-      Remember: this has to be a long text.
   PaginationResponse:
     type: object
     title: pagination

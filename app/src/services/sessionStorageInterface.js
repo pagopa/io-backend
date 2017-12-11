@@ -17,5 +17,5 @@ export interface SessionStorageInterface {
    * @param token
    * @returns {*}
    */
-  get(token: string): User;
+  get(token: string): Promise<User>;
 }
