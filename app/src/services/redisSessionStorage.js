@@ -2,19 +2,24 @@
 
 "use strict";
 
+/**
+ * This service uses the Redis client to store and retrieve session information.
+ */
+
 import type { User } from "../types/user";
 import type { SessionStorageInterface } from "./sessionStorageInterface";
+import type { RedisClient } from "redis";
 
 const redis = require("redis");
 
 export default class RedisSessionStorage implements SessionStorageInterface {
-  client: Object;
+  client: RedisClient;
 
   /**
    * Class constructor.
    */
-  constructor() {
-    this.client = redis.createClient(process.env.REDIS_URL);
+  constructor(redisUrl: string) {
+    this.client = redis.createClient(redisUrl);
   }
 
   /**
@@ -31,12 +36,12 @@ export default class RedisSessionStorage implements SessionStorageInterface {
     const client = this.client;
 
     return new Promise(function(resolve, reject) {
-      client.hget("hash", token, function(err, reply) {
-        if (reply !== null) {
-          const user = JSON.parse(reply);
+      client.hget("hash", token, function(err, value) {
+        if (!err && value !== undefined) {
+          const user = JSON.parse(value);
           resolve((user: User));
         } else {
-          reject();
+          reject(err);
         }
       });
     });

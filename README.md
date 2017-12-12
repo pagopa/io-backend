@@ -37,7 +37,7 @@ A Linux/macOS environment is required at the moment.
 
 ### Installation steps
 
-1. clone the project in a folder called italia-backend
+1. clone the project in a folder called `italia-backend`
 2. go to the project's folder
 3. run `scripts/yarn.sh` to install backend dependencies
 4. run `docker-compose up -d` to start the containers

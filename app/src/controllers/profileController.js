@@ -2,24 +2,26 @@
 
 "use strict";
 
+/**
+ * This controller handles reading the user profile from the
+ * app by forwarding the call to the API system.
+ */
+
 import type { User } from "../types/user";
-import type { ApiClientInterface } from "../services/apiClientInterface";
 import { GetProfileOKResponse } from "../api/models/index";
 import type { APIError } from "../types/error";
 import type { Profile } from "../types/profile";
+import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 
-/**
- *
- */
 export default class ProfileController {
-  apiClient: ApiClientInterface;
+  apiClient: ApiClientFactoryInterface;
 
   /**
    * Class constructor.
    *
    * @param apiClient
    */
-  constructor(apiClient: ApiClientInterface) {
+  constructor(apiClient: ApiClientFactoryInterface) {
     this.apiClient = apiClient;
   }
 

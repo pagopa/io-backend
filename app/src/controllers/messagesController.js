@@ -2,24 +2,26 @@
 
 "use strict";
 
+/**
+ * This controller handles reading messages from the app by
+ * forwarding the call to the API system.
+ */
+
 import type { User } from "../types/user";
-import type { ApiClientInterface } from "../services/apiClientInterface";
 import type { APIError } from "../types/error";
 import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
-import type { Message } from "../types/message";
+import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
+import { toAppMessage } from "../types/message";
 
-/**
- *
- */
 export default class MessagesController {
-  apiClient: ApiClientInterface;
+  apiClient: ApiClientFactoryInterface;
 
   /**
    * Class constructor.
    *
    * @param apiClient
    */
-  constructor(apiClient: ApiClientInterface) {
+  constructor(apiClient: ApiClientFactoryInterface) {
     this.apiClient = apiClient;
   }
 
@@ -38,16 +40,9 @@ export default class MessagesController {
       .getMessagesByUser()
       .then(
         function(apiMessages: GetMessagesByUserOKResponse) {
-          let appMessages = [];
-          for (let i = 0; i < apiMessages.pageSize; i++) {
-            const apiMessage = apiMessages.items[i];
-            const appMessage: Message = {
-              id: apiMessage.id,
-              subject: "Lorem ipsum", //apiMessage.content.subject,
-              markdown: "Lorem ipsum" //apiMessage.content.markdown
-            };
-            appMessages.push(appMessage);
-          }
+          const appMessages = apiMessages.items.map(apiMessage => {
+            return toAppMessage(apiMessage);
+          });
 
           res.json({ items: appMessages, pageSize: apiMessages.pageSize });
         },
@@ -78,11 +73,7 @@ export default class MessagesController {
       .getMessage(req.params.id)
       .then(
         function(apiMessage: MessageResponse) {
-          const appMessage: Message = {
-            id: apiMessage.id,
-            subject: "Lorem ipsum", //apiMessage.content.subject,
-            markdown: "Lorem ipsum" //apiMessage.content.markdown
-          };
+          const appMessage = toAppMessage(apiMessage);
 
           res.json(appMessage);
         },
