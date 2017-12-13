@@ -7,6 +7,8 @@
  * the application.
  */
 
+require("dotenv").load();
+
 import AuthenticationController from "./controllers/authenticationController";
 import ProfileController from "./controllers/profileController";
 import MessagesController from "./controllers/messagesController";
