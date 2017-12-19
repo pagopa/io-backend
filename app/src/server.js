@@ -26,6 +26,7 @@ passport.use(
     const sessionStorage = (container.resolve(
       "sessionStorage"
     ): SessionStorageInterface);
+
     sessionStorage.get(token).then(
       function(user) {
         return done(null, user);
@@ -38,7 +39,7 @@ passport.use(
 );
 
 const app = express();
-app.use(morgan("dev"));
+app.use(morgan(process.env.NODE_ENV));
 app.use(express.static("public"));
 app.use(passport.initialize());
 

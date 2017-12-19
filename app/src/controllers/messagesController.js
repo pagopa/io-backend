@@ -2,17 +2,16 @@
 
 "use strict";
 
-/**
- * This controller handles reading messages from the app by
- * forwarding the call to the API system.
- */
-
-import type { User } from "../types/user";
 import type { APIError } from "../types/error";
 import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppMessage } from "../types/message";
+import { extractUserFromRequest } from "../types/user";
 
+/**
+ * This controller handles reading messages from the app by
+ * forwarding the call to the API system.
+ */
 export default class MessagesController {
   apiClient: ApiClientFactoryInterface;
 
@@ -33,10 +32,17 @@ export default class MessagesController {
    * @param res
    */
   getUserMessages(req: express$Request, res: express$Response) {
-    const reqWithUser = ((req: Object): { user: User });
+    const user = extractUserFromRequest(req);
+
+    if (user.fiscal_code === undefined) {
+      res.status(500).json({
+        message: "There was an error in retrieving the user profile."
+      });
+      return;
+    }
 
     this.apiClient
-      .getClient(reqWithUser.user.fiscal_code)
+      .getClient(user.fiscal_code)
       .getMessagesByUser()
       .then(
         function(apiMessages: GetMessagesByUserOKResponse) {
@@ -66,10 +72,17 @@ export default class MessagesController {
    * @param res
    */
   getUserMessage(req: express$Request, res: express$Response) {
-    const reqWithUser = ((req: Object): { user: User });
+    const user = extractUserFromRequest(req);
+
+    if (user.fiscal_code === undefined) {
+      res.status(500).json({
+        message: "There was an error in retrieving the user profile."
+      });
+      return;
+    }
 
     this.apiClient
-      .getClient(reqWithUser.user.fiscal_code)
+      .getClient(user.fiscal_code)
       .getMessage(req.params.id)
       .then(
         function(apiMessage: MessageResponse) {

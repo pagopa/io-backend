@@ -1642,6 +1642,10 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
+fp-ts@^0.6.4:
+  version "0.6.6"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-0.6.6.tgz#5b5c0c4c3c6ce58da60621eaaa15a650458d09ec"
+
 fresh@0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
@@ -2039,6 +2043,12 @@ invariant@^2.2.0, invariant@^2.2.2:
 invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
+
+io-ts@^0.9.2:
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-0.9.2.tgz#d9155469cffdcb07ccc215789f5573ff91293a62"
+  dependencies:
+    fp-ts "^0.6.4"
 
 ipaddr.js@1.5.2:
   version "1.5.2"

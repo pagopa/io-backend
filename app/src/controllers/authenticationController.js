@@ -2,15 +2,14 @@
 
 "use strict";
 
+import type { User } from "../types/user";
+import type { SessionStorageInterface } from "../services/sessionStorageInterface";
+
 /**
  * This controller handles the call from the IDP after
  * a successful authentication. In the request headers there are all the
  * attributes sent from the IDP.
  */
-
-import type { User } from "../types/user";
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
-
 export default class AuthenticationController {
   sessionStorage: SessionStorageInterface;
 

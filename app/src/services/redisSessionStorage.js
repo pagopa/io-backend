@@ -2,16 +2,16 @@
 
 "use strict";
 
-/**
- * This service uses the Redis client to store and retrieve session information.
- */
-
 import type { User } from "../types/user";
+import { extractUserFromJson } from "../types/user";
 import type { SessionStorageInterface } from "./sessionStorageInterface";
 import type { RedisClient } from "redis";
 
 const redis = require("redis");
 
+/**
+ * This service uses the Redis client to store and retrieve session information.
+ */
 export default class RedisSessionStorage implements SessionStorageInterface {
   client: RedisClient;
 
@@ -26,6 +26,8 @@ export default class RedisSessionStorage implements SessionStorageInterface {
    * {@inheritDoc}
    */
   set(token: string, user: User): void {
+    // Sets field in the hash stored at token to user.
+    // @see https://redis.io/commands/hset
     this.client.hset("hash", token, JSON.stringify(user));
   }
 
@@ -36,10 +38,12 @@ export default class RedisSessionStorage implements SessionStorageInterface {
     const client = this.client;
 
     return new Promise(function(resolve, reject) {
+      // Returns the value associated with field in the hash stored at token.
+      // @see https://redis.io/commands/hget
       client.hget("hash", token, function(err, value) {
         if (!err && value !== undefined) {
-          const user = JSON.parse(value);
-          resolve((user: User));
+          const user = extractUserFromJson(value);
+          resolve(user);
         } else {
           reject(err);
         }

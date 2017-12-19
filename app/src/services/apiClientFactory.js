@@ -2,16 +2,15 @@
 
 "use strict";
 
+import DigitalCitizenshipAPI from "../api/digitalCitizenshipAPI";
+import type { ApiClientFactoryInterface } from "./apiClientFactoryInterface";
+
 /**
  * This service builds api clients by wrapping the DigitalCitizenshipAPI client
  * built by the AutoRest tool.
  *
  * @see ../api/digitalCitizenshipAPI
  */
-
-import DigitalCitizenshipAPI from "../api/digitalCitizenshipAPI";
-import type { ApiClientFactoryInterface } from "./apiClientFactoryInterface";
-
 export default class ApiClientFactory implements ApiClientFactoryInterface {
   /**
    * {@inheritDoc}
