@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<md:EntityDescriptor ID="_d2301c246999a2b66348086deeaa3befc1bde2341" entityID="https://login.id.tim.it/affwebservices/public/saml2sso" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#_d2301c246999a2b66348086deeaa3befc1bde2341"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>Sp8iQjepBl9lGxSAVvh/+8OmKXHgbOPN6pCt1IWjAFw=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>q54fJqtZsZwzyi4t5tQpPGTBQVvT6+BZLXQbKLHUah1tE+VJ2VUrNT+V60ODuGzQgTqdKiomRnX15Ss9R3N7gu2+SCP6UYzYQjykr9Obcl94fqABef4db1LwX6ktdkvI88EwM1bLVSl06k3ueB3+3NtTj1Aa/0ESSROuwkAGcKpqYjN8PDgLxjAbaFGqz45lch5C3AgyDAWgucGCEYcVzQFMJBzdcccRqGUrBVbvNdDuGc8CCPev314bKkNQCUn9jCp+EcLh4q7LsuXvhHhm1W+QN9l4ZThCWyuxe5mgnVMtYxShpL0WXwfBpoc0KkPw5DpobCXGLjq1yF7IgPG8jw==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIE7jCCA9agAwIBAgIJAIfOQuFIcYGRMA0GCSqGSIb3DQEBCwUAMIGqMQswCQYDVQQGEwJJVDELMAkGA1UECBMCUk0xEDAOBgNVBAcTB1BvbWV6aWExLjAsBgNVBAoTJVRlbGVjb20gSXRhbGlhIFRydXN0IFRlY2hub2xvZ2llcyBzcmwxKDAmBgNVBAsTH1NlcnZpemkgcGVyIGwnaWRlbnRpdGEgZGlnaXRhbGUxIjAgBgNVBAMTGVRJIFRydXN0IFRlY2hub2xvZ2llcyBzcmwwHhcNMTYwMTE4MTAxODA2WhcNMTgwMTE3MTAxODA2WjCBqjELMAkGA1UEBhMCSVQxCzAJBgNVBAgTAlJNMRAwDgYDVQQHEwdQb21lemlhMS4wLAYDVQQKEyVUZWxlY29tIEl0YWxpYSBUcnVzdCBUZWNobm9sb2dpZXMgc3JsMSgwJgYDVQQLEx9TZXJ2aXppIHBlciBsJ2lkZW50aXRhIGRpZ2l0YWxlMSIwIAYDVQQDExlUSSBUcnVzdCBUZWNobm9sb2dpZXMgc3JsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0mvyKfdJp0YgK7KAdD+sVcVpHcZoBBBFcz0cg8PPdT+2nH0ES09uxHWghcHNg0nJGWPJKaUJ0PWdokKwQ+ahI7RiHI9zufN4G7LlM40ko7heI5Xjv4wCMeJNYM2GY+1l9fS+595882GopALi8MGhTxH3QFvPTDtxj7D0fsKw0DNFk18jcRoLwfc/X0fzyUMBDk6QaZzi5MTjKP5ouHn/CATkW7MRZZOy6CGb6Fic0HyOhB46eFnB2QlRnCzQe1cwzpnfzB/BbtouWe/CFlHtbACbZwXGRKfFJnr3Zj5eYi5aRZDteIXMAj/UmNTP0X0PcI66b5ialTeDXFjgEO1hhwIDAQABo4IBEzCCAQ8wHQYDVR0OBBYEFIqo1nunRisDzjvLkTZx2/VVmXPjMIHfBgNVHSMEgdcwgdSAFIqo1nunRisDzjvLkTZx2/VVmXPjoYGwpIGtMIGqMQswCQYDVQQGEwJJVDELMAkGA1UECBMCUk0xEDAOBgNVBAcTB1BvbWV6aWExLjAsBgNVBAoTJVRlbGVjb20gSXRhbGlhIFRydXN0IFRlY2hub2xvZ2llcyBzcmwxKDAmBgNVBAsTH1NlcnZpemkgcGVyIGwnaWRlbnRpdGEgZGlnaXRhbGUxIjAgBgNVBAMTGVRJIFRydXN0IFRlY2hub2xvZ2llcyBzcmyCCQCHzkLhSHGBkTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBkgBFZDg34+ER3HaFSmg5I7BUkjyPinMqy1G2k5O2Jlry/e6X8u8QhieKXhMtGq3+XzYHY/QEFmnqOvEdlCeET9PPVb0Mr0mG5vU7lb2MfB+2+Wqg+1Hf8c3ABfDItuJoL95OsbEO4a+3a6EMfaAdSaeTb2+rsfr6R12cSxQcx16430iMhGj4T9GpFp8XH/JSE5XJvIddpNxuzf+/LlbcsMJ5lljitlOYUi7MxLpiqtgl56UD1YkGcezoi2Glb3m3l3a2V4pShh6qROfyd87jLCjqsuBJtlgToSQgMTb4lFv9RBbFD3rjL8gCx55W6kxP1YeclFVPzk/7Xaca29uTJ</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature>
+	<md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+		<md:KeyDescriptor use="signing">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509IssuerSerial>
+                        <ds:X509IssuerName>CN=TI Trust Technologies srl,OU=Servizi per l'identita digitale,O=Telecom Italia Trust Technologies srl,L=Pomezia,ST=RM,C=IT</ds:X509IssuerName>
+                        <ds:X509SerialNumber>9785832575673139601</ds:X509SerialNumber>
+                    </ds:X509IssuerSerial>
+                    <ds:X509Certificate>MIIE7jCCA9agAwIBAgIJAIfOQuFIcYGRMA0GCSqGSIb3DQEBCwUAMIGqMQswCQYDVQQGEwJJVDELMAkGA1UECBMCUk0xEDAOBgNVBAcTB1BvbWV6aWExLjAsBgNVBAoTJVRlbGVjb20gSXRhbGlhIFRydXN0IFRlY2hub2xvZ2llcyBzcmwxKDAmBgNVBAsTH1NlcnZpemkgcGVyIGwnaWRlbnRpdGEgZGlnaXRhbGUxIjAgBgNVBAMTGVRJIFRydXN0IFRlY2hub2xvZ2llcyBzcmwwHhcNMTYwMTE4MTAxODA2WhcNMTgwMTE3MTAxODA2WjCBqjELMAkGA1UEBhMCSVQxCzAJBgNVBAgTAlJNMRAwDgYDVQQHEwdQb21lemlhMS4wLAYDVQQKEyVUZWxlY29tIEl0YWxpYSBUcnVzdCBUZWNobm9sb2dpZXMgc3JsMSgwJgYDVQQLEx9TZXJ2aXppIHBlciBsJ2lkZW50aXRhIGRpZ2l0YWxlMSIwIAYDVQQDExlUSSBUcnVzdCBUZWNobm9sb2dpZXMgc3JsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0mvyKfdJp0YgK7KAdD+sVcVpHcZoBBBFcz0cg8PPdT+2nH0ES09uxHWghcHNg0nJGWPJKaUJ0PWdokKwQ+ahI7RiHI9zufN4G7LlM40ko7heI5Xjv4wCMeJNYM2GY+1l9fS+595882GopALi8MGhTxH3QFvPTDtxj7D0fsKw0DNFk18jcRoLwfc/X0fzyUMBDk6QaZzi5MTjKP5ouHn/CATkW7MRZZOy6CGb6Fic0HyOhB46eFnB2QlRnCzQe1cwzpnfzB/BbtouWe/CFlHtbACbZwXGRKfFJnr3Zj5eYi5aRZDteIXMAj/UmNTP0X0PcI66b5ialTeDXFjgEO1hhwIDAQABo4IBEzCCAQ8wHQYDVR0OBBYEFIqo1nunRisDzjvLkTZx2/VVmXPjMIHfBgNVHSMEgdcwgdSAFIqo1nunRisDzjvLkTZx2/VVmXPjoYGwpIGtMIGqMQswCQYDVQQGEwJJVDELMAkGA1UECBMCUk0xEDAOBgNVBAcTB1BvbWV6aWExLjAsBgNVBAoTJVRlbGVjb20gSXRhbGlhIFRydXN0IFRlY2hub2xvZ2llcyBzcmwxKDAmBgNVBAsTH1NlcnZpemkgcGVyIGwnaWRlbnRpdGEgZGlnaXRhbGUxIjAgBgNVBAMTGVRJIFRydXN0IFRlY2hub2xvZ2llcyBzcmyCCQCHzkLhSHGBkTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBkgBFZDg34+ER3HaFSmg5I7BUkjyPinMqy1G2k5O2Jlry/e6X8u8QhieKXhMtGq3+XzYHY/QEFmnqOvEdlCeET9PPVb0Mr0mG5vU7lb2MfB+2+Wqg+1Hf8c3ABfDItuJoL95OsbEO4a+3a6EMfaAdSaeTb2+rsfr6R12cSxQcx16430iMhGj4T9GpFp8XH/JSE5XJvIddpNxuzf+/LlbcsMJ5lljitlOYUi7MxLpiqtgl56UD1YkGcezoi2Glb3m3l3a2V4pShh6qROfyd87jLCjqsuBJtlgToSQgMTb4lFv9RBbFD3rjL8gCx55W6kxP1YeclFVPzk/7Xaca29uTJ</ds:X509Certificate>
+                    <ds:X509SubjectName>CN=TI Trust Technologies srl,OU=Servizi per l'identita digitale,O=Telecom Italia Trust Technologies srl,L=Pomezia,ST=RM,C=IT</ds:X509SubjectName>
+                </ds:X509Data>
+            </ds:KeyInfo>
+		</md:KeyDescriptor>
+		<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://login.id.tim.it/affwebservices/public/saml2slo"/>
+		<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://login.id.tim.it/affwebservices/public/saml2slo"/>
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+		<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://login.id.tim.it/affwebservices/public/saml2sso"/>
+		<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://login.id.tim.it/affwebservices/public/saml2sso"/>
+		<ns2:Attribute Name="spidCode" NameFormat="xsi:string" xmlns:ns2="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns3:Attribute Name="name" NameFormat="xsi:string" xmlns:ns3="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns4:Attribute Name="familyName" NameFormat="xsi:string" xmlns:ns4="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns5:Attribute Name="placeOfBirth" NameFormat="xsi:string" xmlns:ns5="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns6:Attribute Name="countyOfBirth" NameFormat="xsi:string" xmlns:ns6="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns7:Attribute Name="dateOfBirth" NameFormat="xsi:string" xmlns:ns7="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns8:Attribute Name="gender" NameFormat="xsi:string" xmlns:ns8="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns9:Attribute Name="companyName" NameFormat="xsi:string" xmlns:ns9="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns10:Attribute Name="registeredOffice" NameFormat="xsi:string" xmlns:ns10="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns11:Attribute Name="fiscalNumber" NameFormat="xsi:string" xmlns:ns11="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns12:Attribute Name="ivaCode" NameFormat="xsi:string" xmlns:ns12="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns13:Attribute Name="idCard" NameFormat="xsi:string" xmlns:ns13="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns14:Attribute Name="mobilePhone" NameFormat="xsi:string" xmlns:ns14="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns15:Attribute Name="email" NameFormat="xsi:string" xmlns:ns15="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns16:Attribute Name="address" NameFormat="xsi:string" xmlns:ns16="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns17:Attribute Name="digitalAddress" NameFormat="xsi:string" xmlns:ns17="urn:oasis:names:tc:SAML:2.0:assertion"/>
+		<ns18:Attribute Name="expirationDate" NameFormat="xsi:string" xmlns:ns18="urn:oasis:names:tc:SAML:2.0:assertion"/>
+	</md:IDPSSODescriptor>
+	<md:Organization>
+		<md:OrganizationName xml:lang="en">TI Trust Technologies srl</md:OrganizationName>
+		<md:OrganizationDisplayName xml:lang="en">Trust Technologies srl</md:OrganizationDisplayName>
+		<md:OrganizationURL xml:lang="en">https://www.trusttechnologies.it</md:OrganizationURL>
+	</md:Organization>
+</md:EntityDescriptor>

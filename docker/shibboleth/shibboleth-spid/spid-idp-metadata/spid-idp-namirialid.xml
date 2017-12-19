@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xsi="http://www.w3.org/2001/XMLSchemainstance" ID="_pfx8cdfef6c-7dff-4e1c-a9eb-2c51cac9d137" entityID="https://idp.namirialtsp.com/idp"><ds:Signature>
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+<ds:Reference URI="#_pfx8cdfef6c-7dff-4e1c-a9eb-2c51cac9d137">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>RTS2eAj2zeQ1LC/gZlKshJyd/HWUHxnXy5N3AOdrnlY=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+jNuzriPwfKK+WCAXXblctOXM/P4nOvqBKK0xWmr770ygVxuEiZj0Is9nWf7Sh8hFA4j215LaHHA2
+hPiOvNEcy2DTGm2SMFCAZpzkHnGuYuC1Z2iNv1DZRtWATrK33UKi7EaJy7noIRzoidtBqNWgd/FH
+ZMmLgdKRsz7Q6nT+HFuADVTwFLRLNhk3gCZCDmWMkp62kikW2Jy4I6PN3WOriFN7WZLSw/HktIEs
+6aj1c+g5OKPezzSH0n13cEV0s2i7OM8uj4g3GVlkUKNnnPFEmXTOpHrRYOIwif1mWx3LdjYDp6Vs
+yOiU9kiG0wMKPOLbrn0i8a45UMqLmyaVQ5qF1g==
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>
+3y5D7LzWu3rrBwOE0ez+uHqcXt8rROpOXed7Ki+aJkv2p6eh5R7W0c8f6sf6cRnBPIvyPA5Mus/N
+uPsRTGxP3av4057ufymnmuyos/xkn1jM7HeZIvPvCzE8k2cvYiQen9XxEUtlVIGH8AbKLBwXmBnB
+A64yCAxC/NHPixq183QUSPCcNoQHJcRQ3pmqejLPtlnvcSa2xjZ2kDYVLt7bw847YuMg3NKLWOd8
+6Bl2er5JM1u3CFuXt85Go4NDTiPKj1+OLb+wZaYIHp1cNA4I2F7BeT/26t7pJI2sj6K7lvvp+1Y4
+8CI2h7gDxAX9hdDzwJff+lI/0qZO+noBKth0fQ==
+</ds:Modulus>
+<ds:Exponent>AQAB</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIELTCCAxWgAwIBAgIJAM0qjWgXN4QGMA0GCSqGSIb3DQEBCwUAMIGsMQswCQYDVQQGEwJJVDEL
+MAkGA1UECAwCQW4xEzARBgNVBAcMClNlbmlnYWxsaWExFTATBgNVBAoMDE5hbWlyaWFsIFNwYTEc
+MBoGA1UECwwTU2VjdXJpdHkgRGVwYXJ0bWVudDEcMBoGA1UEAwwTaWRwLm5hbWlyaWFsdHNwLmNv
+bTEoMCYGCSqGSIb3DQEJARYZc2Vydml6aW9zcGlkQG5hbWlyaWFsLmNvbTAeFw0xNzA2MTkxNjU2
+NTdaFw0zNzA2MTQxNjU2NTdaMIGsMQswCQYDVQQGEwJJVDELMAkGA1UECAwCQW4xEzARBgNVBAcM
+ClNlbmlnYWxsaWExFTATBgNVBAoMDE5hbWlyaWFsIFNwYTEcMBoGA1UECwwTU2VjdXJpdHkgRGVw
+YXJ0bWVudDEcMBoGA1UEAwwTaWRwLm5hbWlyaWFsdHNwLmNvbTEoMCYGCSqGSIb3DQEJARYZc2Vy
+dml6aW9zcGlkQG5hbWlyaWFsLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAN8u
+Q+y81rt66wcDhNHs/rh6nF7fK0TqTl3neyovmiZL9qenoeUe1tHPH+rH+nEZwTyL8jwOTLrPzbj7
+EUxsT92r+NOe7n8pp5rsqLP8ZJ9YzOx3mSLz7wsxPJNnL2IkHp/V8RFLZVSBh/AGyiwcF5gZwQOu
+MggMQvzRz4satfN0FEjwnDaEByXEUN6Zqnoyz7ZZ73EmtsY2dpA2FS7e28POO2LjINzSi1jnfOgZ
+dnq+STNbtwhbl7fORqODQ04jyo9fji2/sGWmCB6dXDQOCNhewXk/9ure6SSNrI+iu5b76ftWOPAi
+Noe4A8QF/YXQ88CX3/pSP9KmTvp6ASrYdH0CAwEAAaNQME4wHQYDVR0OBBYEFDqgWZdNk87kS58F
+Ik/h+oT1EMIGMB8GA1UdIwQYMBaAFDqgWZdNk87kS58FIk/h+oT1EMIGMAwGA1UdEwQFMAMBAf8w
+DQYJKoZIhvcNAQELBQADggEBAHvbJy4TG4jsYKF5q6sbZnV27GVHYTddgkNFiXYDZe1oPs5WbwQw
+xNioTJd//r2ml3t/PVvZZPfjqxTCwo/ywCm3Q/H5hxsjWB6obefp6uYxEj6m7LF7nw2Y/FKs7+85
+z04eQQ5+z2d/6200H6r6Kl/R4Qr6FvjnvnA2j4LMxClsc5AmWEyYF+bH42iTe3LJXLSbYvGCQmPt
+1huzHGXSW19gLDoG+9ssXcwOXosH3dCTHKDTLC+zHkZCViF6+ZNgMoycXJm2Jj02tEAnWQ2JT1qa
+wDCWGxyZ95CNTQPNOJr5dGCUL86S6KhrJIj9dIfZJs9ugTjyAzEXMoYlehVCPNk=
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature>
+	<md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+		<md:KeyDescriptor use="signing">
+			<ds:KeyInfo>
+				<ds:X509Data>
+					<ds:X509SubjectName>CN=*.namirialtsp.com,OU=Security Departement,O=Namirial Spa,L=Senigallia,ST=Ancona,C=IT</ds:X509SubjectName>
+					<ds:X509Certificate>MIIDNzCCAh+gAwIBAgIUNGvDUjTpLSPlP4sEfO0+JARITnEwDQYJKoZIhvcNAQEL
+BQAwHjEcMBoGA1UEAwwTaWRwLm5hbWlyaWFsdHNwLmNvbTAeFw0xNzAzMDgwOTE3
+NTZaFw0zNzAzMDgwOTE3NTZaMB4xHDAaBgNVBAMME2lkcC5uYW1pcmlhbHRzcC5j
+b20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDrcJvYRh49nNijgzwL
+1OOwgzeMDUWcMSwoWdtMpx3kDhZwMFQ3ITDmNvlz21I0QKaP0BDg/UAjfCbDtLqU
+y6wHtI6NWVJoqIziw+dLfg7S5Sr2nOzJ/sKhzadWH1kDsetIenOLU2ex+7Vf/+4P
+7nIrS0c+xghi9/zN8dH6+09wWYnloGmcW3qWRFMKJjR3ctBmsmqCKWNIIq2QfeFs
+zSSeG0xaNlLKBrj6TyPDxDqPAskq038W1fCuh7aejCk7XTTOxuuIwDGJiYsc8rfX
+SG9/auskAfCziGEm304/ojy5MRcNjekz4KgWxT9anMCipv0I2T7tCAivc1z9QCsE
+Pk5pAgMBAAGjbTBrMB0GA1UdDgQWBBQi8+cnv0Nw0lbuICzxlSHsvBw5SzBKBgNV
+HREEQzBBghNpZHAubmFtaXJpYWx0c3AuY29thipodHRwczovL2lkcC5uYW1pcmlh
+bHRzcC5jb20vaWRwL3NoaWJib2xldGgwDQYJKoZIhvcNAQELBQADggEBAEp953KM
+WY7wJbJqnPTmDkXaZJVoubcjW86IY494RgVBeZ4XzAGOifa3ScDK6a0OWfIlRTba
+KKu9lEVw9zs54vLp9oQI4JulomSaL805Glml4bYqtcLoh5qTnKaWp5qvzBgcQ7i2
+GcDC9F+qrsJYreCA7rbHXzF0hu5yIfz0BrrCRWvuWiop92WeKvtucI4oBGfoHhYO
+ZsLuoTT3hZiEFJT60xS5Y2SNdz+Eia9Dgt0cvAzoOVk93Cxg+XBdyyEEiZn/zvhj
+us29KyFrzh3XYznh+4jq3ymt7Os4JKmY0aJm7yNxw+LyPjkdaB0icfo3+hD7PiuU
+jC3Y67LUWQ8YgOc=</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</md:KeyDescriptor>
+		<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.namirialtsp.com/idp/profile/SAML2/POST/SLO"/>
+		<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.namirialtsp.com/idp/profile/SAML2/Redirect/SLO"/>
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+		<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.namirialtsp.com/idp/profile/SAML2/POST/SSO"/>
+		<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.namirialtsp.com/idp/profile/SAML2/Redirect/SSO"/>
+		<saml:Attribute FriendlyName="Domicilio fisico" Name="address"/>
+		<saml:Attribute FriendlyName="Ragione o denominazione sociale" Name="companyName"/>
+		<saml:Attribute FriendlyName="Provincia di nascita" Name="countyOfBirth"/>
+		<saml:Attribute FriendlyName="Data di nascita" Name="dateOfBirth"/>
+		<saml:Attribute FriendlyName="Domicilio digitale" Name="digitalAddress"/>
+		<saml:Attribute FriendlyName="Indirizzo di posta elettronica" Name="email"/>
+		<saml:Attribute FriendlyName="Data di scadenza identita" Name="expirationDate"/>
+		<saml:Attribute FriendlyName="Cognome" Name="familyName"/>
+		<saml:Attribute FriendlyName="Codice fiscale" Name="fiscalNumber"/>
+		<saml:Attribute FriendlyName="Sesso" Name="gender"/>
+		<saml:Attribute FriendlyName="Documento d'identita" Name="idCard"/>
+		<saml:Attribute FriendlyName="Partita IVA" Name="ivaCode"/>
+		<saml:Attribute FriendlyName="Numero di telefono mobile" Name="mobilePhone"/>
+		<saml:Attribute FriendlyName="Nome" Name="name"/>
+		<saml:Attribute FriendlyName="Luogo di nascita" Name="placeOfBirth"/>
+		<saml:Attribute FriendlyName="Sede legale" Name="registeredOffice"/>
+		<saml:Attribute FriendlyName="Codice identificativo SPID" Name="spidCode"/>
+	</md:IDPSSODescriptor>
+    <md:Organization>
+       <md:OrganizationName xml:lang="it">Namirial</md:OrganizationName>
+       <md:OrganizationDisplayName xml:lang="it">Namirial S.p.a. Trust Service Provider</md:OrganizationDisplayName>
+       <md:OrganizationURL xml:lang="it">https://www.namirialtsp.com</md:OrganizationURL>
+    </md:Organization>
+</md:EntityDescriptor>
