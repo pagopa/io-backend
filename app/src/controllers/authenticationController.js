@@ -21,32 +21,25 @@ export default class AuthenticationController {
   }
 
   /**
+   * The Assertion consumer service.
    *
    * @param req
    * @param res
    */
-  sso(req: express$Request, res: express$Response) {
-    // Use the shibboleth session id as token.
-    const token = req.headers["shib-session-id"];
+  acs(req: express$Request, res: express$Response) {
+    const reqWithUser = ((req: Object): { user: Object });
+
+    // Use the SAML sessionIndex as token.
+    const token = reqWithUser.user.sessionIndex;
 
     const user: User = {
       created_at: new Date().getTime(),
       token: token,
-      spid_idp: req.headers["shib-identity-provider"],
-      address: req.headers["spid-attribute-address"],
-      countyofbirth: req.headers["spid-attribute-countyofbirth"],
-      dateofbirth: req.headers["spid-attribute-dateofbirth"],
-      digitaladdress: req.headers["spid-attribute-digitaladdress"],
-      email: req.headers["spid-attribute-email"],
-      expirationdate: req.headers["spid-attribute-expirationdate"],
-      familyname: req.headers["spid-attribute-familyname"],
-      fiscal_code: req.headers["spid-attribute-fiscalnumber"],
-      gender: req.headers["spid-attribute-gender"],
-      idcard: req.headers["spid-attribute-idcard"],
-      mobilephone: req.headers["spid-attribute-mobilephone"],
-      name: req.headers["spid-attribute-name"],
-      placeofbirth: req.headers["spid-attribute-placeofbirth"],
-      spidcode: req.headers["spid-attribute-spidcode"]
+      sessionIndex: token, // The sessionIndex is needed for logout.
+      spid_idp: reqWithUser.user.issuer._, // The used idp is needed for logout.
+      fiscal_code: reqWithUser.user.fiscalNumber,
+      name: reqWithUser.user.name,
+      familyname: reqWithUser.user.familyName
     };
 
     this.sessionStorage.set(token, user);
