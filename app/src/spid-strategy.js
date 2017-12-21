@@ -70,34 +70,26 @@ SpidStrategy.prototype.authenticate = function(req, options) {
     }
   }
 
-  const spidOptions = {
-    path: this.spidOptions.path,
-    issuer: this.spidOptions.issuer,
-    privateCert: this.spidOptions.privateCert,
-    attributeConsumingServiceIndex: this.spidOptions.attributeConsumingServiceIndex,
-    identifierFormat: this.spidOptions.identifierFormat,
-    authnContext: this.spidOptions.authnContext
-  };
+  const spidOptions = this.spidOptions.sp;
 
   const entityID = req.query.entityID;
-
   if (entityID !== undefined) {
-    const idp = this.spidOptions.idps[entityID];
+    const idp = this.spidOptions.idp[entityID];
     spidOptions.entryPoint = idp.entryPoint;
     spidOptions.cert = idp.cert;
   }
 
-  this._saml = new saml(spidOptions);
+  const samlClient = new saml(spidOptions);
 
   if (req.body && req.body.SAMLResponse) {
-    this._saml.validatePostResponse(req.body, validateCallback);
+    samlClient.validatePostResponse(req.body, validateCallback);
   } else if (req.body && req.body.SAMLRequest) {
-    this._saml.validatePostRequest(req.body, validateCallback);
+    samlClient.validatePostRequest(req.body, validateCallback);
   } else {
     const requestHandler = {
       "login-request": function() {
         if (self._authnRequestBinding === "HTTP-POST") {
-          this._saml.getAuthorizeForm(req, function(err, data) {
+          samlClient.getAuthorizeForm(req, function(err, data) {
             if (err) {
               self.error(err);
             } else {
@@ -107,11 +99,11 @@ SpidStrategy.prototype.authenticate = function(req, options) {
           });
         } else {
           // Defaults to HTTP-Redirect
-          this._saml.getAuthorizeUrl(req, redirectIfSuccess);
+          samlClient.getAuthorizeUrl(req, redirectIfSuccess);
         }
       }.bind(self),
       "logout-request": function() {
-        this._saml.getLogoutUrl(req, redirectIfSuccess);
+        samlClient.getLogoutUrl(req, redirectIfSuccess);
       }.bind(self)
     }[options.samlFallback];
 

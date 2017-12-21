@@ -40,13 +40,15 @@ passport.use(
 passport.use(
   new SpidStrategy(
     {
-      path: "/acs",
-      issuer: "http://italia-backend",
-      privateCert: fs.readFileSync("./certs/key.pem", "utf-8"),
-      attributeConsumingServiceIndex: 1,
-      identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-      authnContext: "https://www.spid.gov.it/SpidL1",
-      idps: {
+      sp: {
+        path: "/acs",
+        issuer: "http://italia-backend",
+        privateCert: fs.readFileSync("./certs/key.pem", "utf-8"),
+        attributeConsumingServiceIndex: 1,
+        identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+        authnContext: "https://www.spid.gov.it/SpidL1"
+      },
+      idp: {
         test: {
           entryPoint: "https://spid-testenv-identityserver:9443/samlsso",
           cert:
