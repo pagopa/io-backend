@@ -16,15 +16,15 @@ function SpidStrategy(options, verify) {
 
   passport.Strategy.call(this);
 
+  this.spidOptions = options;
   this._verify = verify;
-  this._saml = new saml(options);
   this._passReqToCallback = !!options.passReqToCallback;
   this._authnRequestBinding = options.authnRequestBinding || "HTTP-Redirect";
 }
 
 util.inherits(SpidStrategy, passport.Strategy);
 
-SpidStrategy.prototype.authenticate = function(req, options) { console.log(options);
+SpidStrategy.prototype.authenticate = function(req, options) {
   const self = this;
 
   options.samlFallback = options.samlFallback || "login-request";
@@ -70,6 +70,25 @@ SpidStrategy.prototype.authenticate = function(req, options) { console.log(optio
     }
   }
 
+  const spidOptions = {
+    path: this.spidOptions.path,
+    issuer: this.spidOptions.issuer,
+    privateCert: this.spidOptions.privateCert,
+    attributeConsumingServiceIndex: this.spidOptions.attributeConsumingServiceIndex,
+    identifierFormat: this.spidOptions.identifierFormat,
+    authnContext: this.spidOptions.authnContext
+  };
+
+  const entityID = req.query.entityID;
+
+  if (entityID !== undefined) {
+    const idp = this.spidOptions.idps[entityID];
+    spidOptions.entryPoint = idp.entryPoint;
+    spidOptions.cert = idp.cert;
+  }
+
+  this._saml = new saml(spidOptions);
+
   if (req.body && req.body.SAMLResponse) {
     this._saml.validatePostResponse(req.body, validateCallback);
   } else if (req.body && req.body.SAMLRequest) {
@@ -102,16 +121,6 @@ SpidStrategy.prototype.authenticate = function(req, options) { console.log(optio
 
     requestHandler();
   }
-};
-
-SpidStrategy.prototype.logout = function(req, callback) {
-  this._saml.getLogoutUrl(req, callback);
-};
-
-SpidStrategy.prototype.generateServiceProviderMetadata = function(
-  decryptionCert
-) {
-  return this._saml.generateServiceProviderMetadata(decryptionCert);
 };
 
 module.exports = SpidStrategy;
