@@ -7,9 +7,9 @@ services:
     environment:
       - NODE_ENV=development
     expose:
-      - "80"
+      - "443"
     ports:
-      - "80:80"
+      - "443:443"
     image: node:8.6.0-alpine
     restart: always
     volumes:
