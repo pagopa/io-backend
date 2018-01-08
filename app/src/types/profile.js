@@ -34,6 +34,6 @@ export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
     name: user.name,
     familyname: user.familyname,
     fiscal_code: user.fiscal_code,
-    email: (from.email: string)
+    email: from.email
   };
 }

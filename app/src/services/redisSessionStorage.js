@@ -42,11 +42,20 @@ export default class RedisSessionStorage implements SessionStorageInterface {
       // @see https://redis.io/commands/hget
       client.hget("hash", token, function(err, value) {
         if (!err && value !== undefined) {
-          const user = extractUserFromJson(value);
-          resolve(user);
-        } else {
-          reject(err);
+          const maybeUser = extractUserFromJson(value);
+
+          maybeUser.fold(
+            () => {
+              reject(
+                "There was an error extracting the user profile from the cache."
+              );
+            },
+            (user: User) => {
+              resolve(user);
+            }
+          );
         }
+        reject(err);
       });
     });
   }

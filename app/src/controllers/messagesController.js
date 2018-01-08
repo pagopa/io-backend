@@ -6,6 +6,7 @@ import type { APIError } from "../types/error";
 import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppMessage } from "../types/message";
+import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 
 /**
@@ -32,37 +33,38 @@ export default class MessagesController {
    * @param res
    */
   getUserMessages(req: express$Request, res: express$Response) {
-    const user = extractUserFromRequest(req);
+    const maybeUser = extractUserFromRequest(req);
 
-    if (user.fiscal_code === undefined) {
-      res.status(500).json({
-        message: "There was an error in retrieving the user profile."
-      });
-      return;
-    }
+    maybeUser.fold(
+      () => {
+        res.status(500).json({
+          message:
+            "There was an error extracting the user profile from the request."
+        });
+      },
+      (user: User) => {
+        this.apiClient
+          .getClient(user.fiscal_code)
+          .getMessagesByUser()
+          .then(
+            function(apiMessages: GetMessagesByUserOKResponse) {
+              const appMessages = apiMessages.items.map(toAppMessage);
 
-    this.apiClient
-      .getClient(user.fiscal_code)
-      .getMessagesByUser()
-      .then(
-        function(apiMessages: GetMessagesByUserOKResponse) {
-          const appMessages = apiMessages.items.map(apiMessage => {
-            return toAppMessage(apiMessage);
-          });
+              res.json({ items: appMessages, pageSize: apiMessages.pageSize });
+            },
+            function(err: APIError) {
+              if (err.statusCode === 404) {
+                res.status(404).json({ message: err.message });
+                return;
+              }
 
-          res.json({ items: appMessages, pageSize: apiMessages.pageSize });
-        },
-        function(err: APIError) {
-          if (err.statusCode === 404) {
-            res.status(404).json({ message: err.message });
-            return;
-          }
-
-          res.status(500).json({
-            message: "There was an error in retrieving the messages."
-          });
-        }
-      );
+              res.status(500).json({
+                message: "There was an error in retrieving the messages."
+              });
+            }
+          );
+      }
+    );
   }
 
   /**
@@ -72,34 +74,37 @@ export default class MessagesController {
    * @param res
    */
   getUserMessage(req: express$Request, res: express$Response) {
-    const user = extractUserFromRequest(req);
+    const maybeUser = extractUserFromRequest(req);
 
-    if (user.fiscal_code === undefined) {
-      res.status(500).json({
-        message: "There was an error in retrieving the user profile."
-      });
-      return;
-    }
+    maybeUser.fold(
+      () => {
+        res.status(500).json({
+          message:
+            "There was an error extracting the user profile from the request."
+        });
+      },
+      (user: User) => {
+        this.apiClient
+          .getClient(user.fiscal_code)
+          .getMessage(req.params.id)
+          .then(
+            function(apiMessage: MessageResponse) {
+              const appMessage = toAppMessage(apiMessage);
 
-    this.apiClient
-      .getClient(user.fiscal_code)
-      .getMessage(req.params.id)
-      .then(
-        function(apiMessage: MessageResponse) {
-          const appMessage = toAppMessage(apiMessage);
+              res.json(appMessage);
+            },
+            function(err: APIError) {
+              if (err.statusCode === 404) {
+                res.status(404).json({ message: err.message });
+                return;
+              }
 
-          res.json(appMessage);
-        },
-        function(err: APIError) {
-          if (err.statusCode === 404) {
-            res.status(404).json({ message: err.message });
-            return;
-          }
-
-          res.status(500).json({
-            message: "There was an error in retrieving the message."
-          });
-        }
-      );
+              res.status(500).json({
+                message: "There was an error in retrieving the message."
+              });
+            }
+          );
+      }
+    );
   }
 }

@@ -1646,6 +1646,10 @@ fp-ts@^0.6.4:
   version "0.6.6"
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-0.6.6.tgz#5b5c0c4c3c6ce58da60621eaaa15a650458d09ec"
 
+fp-ts@^0.6.7:
+  version "0.6.7"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-0.6.7.tgz#15a56c60fc10cb2daf1d4c6f3cfd5ccdaef526e2"
+
 fresh@0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"

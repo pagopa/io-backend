@@ -7,6 +7,8 @@
  * the application.
  */
 
+// Without this the environment variables loaded by dotenv aren't available in
+// this file.
 require("dotenv").load();
 
 import AuthenticationController from "./controllers/authenticationController";

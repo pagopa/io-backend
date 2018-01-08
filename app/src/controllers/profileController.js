@@ -2,13 +2,12 @@
 
 "use strict";
 
+import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import { GetProfileOKResponse } from "../api/models/index";
 import type { APIError } from "../types/error";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppProfile } from "../types/profile";
-
-const undefined = require("io-ts").undefined;
 
 /**
  * This controller handles reading the user profile from the
@@ -34,34 +33,37 @@ export default class ProfileController {
    * @param res
    */
   getUserProfile(req: express$Request, res: express$Response) {
-    const user = extractUserFromRequest(req);
+    const maybeUser = extractUserFromRequest(req);
 
-    if (user.fiscal_code === undefined) {
-      res.status(500).json({
-        message: "There was an error in retrieving the user profile."
-      });
-      return;
-    }
+    maybeUser.fold(
+      () => {
+        res.status(500).json({
+          message:
+            "There was an error extracting the user profile from the request."
+        });
+      },
+      (user: User) => {
+        this.apiClient
+          .getClient(user.fiscal_code)
+          .getProfile()
+          .then(
+            function(apiProfile: GetProfileOKResponse) {
+              const appProfile = toAppProfile(apiProfile, user);
 
-    this.apiClient
-      .getClient(user.fiscal_code)
-      .getProfile()
-      .then(
-        function(apiProfile: GetProfileOKResponse) {
-          const appProfile = toAppProfile(apiProfile, user);
+              res.json(appProfile);
+            },
+            function(err: APIError) {
+              if (err.statusCode === 404) {
+                res.status(404).json({ message: err.message });
+                return;
+              }
 
-          res.json(appProfile);
-        },
-        function(err: APIError) {
-          if (err.statusCode === 404) {
-            res.status(404).json({ message: err.message });
-            return;
-          }
-
-          res.status(500).json({
-            message: "There was an error in retrieving the user profile."
-          });
-        }
-      );
+              res.status(500).json({
+                message: "There was an error in retrieving the user profile."
+              });
+            }
+          );
+      }
+    );
   }
 }

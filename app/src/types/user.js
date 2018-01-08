@@ -3,6 +3,8 @@
 "use strict";
 
 import * as t from "io-ts";
+import type { Option } from "fp-ts/lib/Option";
+import { none, some } from "fp-ts/lib/Option";
 
 const UserModel = t.intersection([
   t.type({
@@ -42,13 +44,17 @@ export type User = t.TypeOf<typeof UserModel>;
  * @param from
  * @returns {User}
  */
-export function extractUserFromRequest(from: express$Request): User {
+export function extractUserFromRequest(from: express$Request): Option<User> {
   const reqWithUser = ((from: Object): { user: User });
 
-  // eslint-disable-next-line no-unused-vars
-  return t.validate(reqWithUser.user, UserModel).fold(_ => {
-    return createEmptyUser();
-  }, t.identity);
+  return t.validate(reqWithUser.user, UserModel).fold(
+    () => {
+      return none;
+    },
+    (user: User) => {
+      return some(user);
+    }
+  );
 }
 
 /**
@@ -57,25 +63,13 @@ export function extractUserFromRequest(from: express$Request): User {
  * @param from
  * @returns {User}
  */
-export function extractUserFromJson(from: string): User {
-  // eslint-disable-next-line no-unused-vars
-  return t.validate(JSON.parse(from), UserModel).fold(_ => {
-    return createEmptyUser();
-  }, t.identity);
-}
-
-/**
- * Creates a new immutable empty User object.
- *
- * @returns {User}
- */
-function createEmptyUser(): User {
-  return {
-    created_at: new Date().getTime(),
-    token: "",
-    spid_idp: "",
-    fiscal_code: "",
-    name: "",
-    familyname: ""
-  };
+export function extractUserFromJson(from: string): Option<User> {
+  return t.validate(JSON.parse(from), UserModel).fold(
+    () => {
+      return none;
+    },
+    (user: User) => {
+      return some(user);
+    }
+  );
 }
