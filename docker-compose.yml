@@ -10,7 +10,7 @@ services:
       - "443"
     ports:
       - "443:443"
-    image: node:8.6.0-alpine
+    image: node:8.9.4-alpine
     restart: always
     volumes:
       - "./app:/usr/src/app"

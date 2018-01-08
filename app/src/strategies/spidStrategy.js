@@ -9,7 +9,7 @@ const spidStrategy = new SpidStrategy(
   {
     sp: {
       path: "/acs",
-      issuer: "http://italia-backend",
+      issuer: "https://italia-backend",
       privateCert: fs.readFileSync("./certs/key.pem", "utf-8"),
       attributeConsumingServiceIndex: 1,
       identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
