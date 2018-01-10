@@ -21,25 +21,22 @@ const container = awilix.createContainer({
 
 export const SESSION_STORAGE = "sessionStorage";
 container.registerClass({
-  SESSION_STORAGE: [
-    DummySessionStorage,
-    { lifetime: awilix.Lifetime.SINGLETON }
-  ]
+  sessionStorage: [DummySessionStorage, { lifetime: awilix.Lifetime.SINGLETON }]
 });
 
 export const API_CLIENT = "apiClient";
 container.registerClass({
-  API_CLIENT: [ApiClient]
+  apiClient: [ApiClient]
 });
 
 export const AUTHENTICATION_CONTROLLER = "authenticationController";
 container.registerClass({
-  AUTHENTICATION_CONTROLLER: [AuthenticationController]
+  authenticationController: [AuthenticationController]
 });
 
 export const PROFILE_CONTROLLER = "profileController";
 container.registerClass({
-  PROFILE_CONTROLLER: [ProfileController]
+  profileController: [ProfileController]
 });
 
 export default container;

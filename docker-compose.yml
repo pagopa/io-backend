@@ -5,7 +5,7 @@ services:
     command: ["yarn", "hot-reload"]
     container_name: italia-backend
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=dev
     expose:
       - "443"
     ports:

@@ -64,9 +64,19 @@ app.use(passport.initialize());
 
 app.get("/login", spidAuth);
 
-app.post("/assertionConsumerService", spidAuth, acsController.acs);
+app.post("/assertionConsumerService", spidAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  acsController.acs(req, res);
+});
 
-app.get("/api/v1/profile", tokenAuth, profileController.getUserProfile);
+app.get("/api/v1/profile", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  profileController.getUserProfile(req, res);
+});
 
 // Setup and start the HTTPS server.
 
