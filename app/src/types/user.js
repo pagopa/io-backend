@@ -3,8 +3,6 @@
 "use strict";
 
 import * as t from "io-ts";
-import type { Option } from "fp-ts/lib/Option";
-import { none, some } from "fp-ts/lib/Option";
 
 const UserModel = t.intersection([
   t.type({
@@ -44,17 +42,12 @@ export type User = t.TypeOf<typeof UserModel>;
  * @param from
  * @returns {User}
  */
-export function extractUserFromRequest(from: express$Request): Option<User> {
+export function extractUserFromRequest(
+  from: express$Request
+): Either<ValidationError[], User> {
   const reqWithUser = ((from: Object): { user: User });
 
-  return t.validate(reqWithUser.user, UserModel).fold(
-    () => {
-      return none;
-    },
-    (user: User) => {
-      return some(user);
-    }
-  );
+  return t.validate(reqWithUser.user, UserModel);
 }
 
 /**
@@ -63,13 +56,8 @@ export function extractUserFromRequest(from: express$Request): Option<User> {
  * @param from
  * @returns {User}
  */
-export function extractUserFromJson(from: string): Option<User> {
-  return t.validate(JSON.parse(from), UserModel).fold(
-    () => {
-      return none;
-    },
-    (user: User) => {
-      return some(user);
-    }
-  );
+export function extractUserFromJson(
+  from: string
+): Either<ValidationError[], User> {
+  return t.validate(JSON.parse(from), UserModel);
 }

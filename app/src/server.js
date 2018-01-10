@@ -13,6 +13,7 @@ import container from "./container";
 import type { SessionStorageInterface } from "./services/sessionStorageInterface";
 import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
+import type { User } from "./types/user";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -27,14 +28,16 @@ passport.use(
       "sessionStorage"
     ): SessionStorageInterface);
 
-    sessionStorage.get(token).then(
-      function(user) {
-        return done(null, user);
-      },
-      function() {
-        return done(null, false);
-      }
-    );
+    sessionStorage.get(token).then(function(maybeUser: Either<String, User>) {
+      maybeUser.fold(
+        error => {
+          return done(null, false, { message: error });
+        },
+        user => {
+          return done(null, user);
+        }
+      );
+    });
   })
 );
 

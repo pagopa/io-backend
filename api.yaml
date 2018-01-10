@@ -14,7 +14,7 @@ paths:
       - $ref: "#/parameters/PaginationRequest"
     get:
       operationId: getUserMessages
-      summary: Get User"s Messages
+      summary: Get user's messages
       description: |-
         Returns the messages for the user identified by the provided fiscal code.
         Messages will be returned in inverse acceptance order (from last to first).
@@ -65,7 +65,7 @@ paths:
         description: The ID of the message.
     get:
       operationId: getUserMessage
-      summary: Get Message
+      summary: Get message
       description: |-
         Returns the message with the provided message ID.
       responses:
@@ -92,7 +92,7 @@ paths:
     x-swagger-router-controller: ProfileController
     get:
       operationId: getUserProfile
-      summary: Get User"s Profile
+      summary: Get user's profile
       description: Returns the profile for the user identified by the provided fiscal code.
       responses:
         "200":
@@ -109,17 +109,17 @@ paths:
           description: There was an error in retrieving the user profile.
 definitions:
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#MessageContent"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#FiscalCode"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#EmailAddress"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#IsInboxEnabled"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PaginationResponse"
   Message:
     title: Message
     type: object

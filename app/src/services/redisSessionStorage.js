@@ -6,6 +6,7 @@ import type { User } from "../types/user";
 import { extractUserFromJson } from "../types/user";
 import type { SessionStorageInterface } from "./sessionStorageInterface";
 import type { RedisClient } from "redis";
+import { left } from "fp-ts/lib/Either";
 
 const redis = require("redis");
 
@@ -34,28 +35,33 @@ export default class RedisSessionStorage implements SessionStorageInterface {
   /**
    * {@inheritDoc}
    */
-  get(token: string): Promise<User> {
+  get(token: string): Promise<Either<String, User>> {
     const client = this.client;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       // Returns the value associated with field in the hash stored at token.
       // @see https://redis.io/commands/hget
       client.hget("hash", token, function(err, value) {
-        if (!err && value !== undefined) {
-          const maybeUser = extractUserFromJson(value);
+        if (err) {
+          resolve(left(err));
+        } else {
+          if (value === undefined) {
+            resolve(
+              left(
+                "There was an error extracting the user profile from the session."
+              )
+            );
+          } else {
+            const maybeUser = extractUserFromJson(value);
 
-          maybeUser.fold(
-            () => {
-              reject(
-                "There was an error extracting the user profile from the cache."
-              );
-            },
-            (user: User) => {
-              resolve(user);
-            }
-          );
+            // TODO: better error message.
+            maybeUser.mapLeft(() => {
+              return "Errors in validating the user profile";
+            });
+
+            resolve(maybeUser);
+          }
         }
-        reject(err);
       });
     });
   }

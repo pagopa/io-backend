@@ -35,11 +35,15 @@ export default class ProfileController {
   getUserProfile(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
+    // TODO: better error message.
+    maybeUser.mapLeft(() => {
+      return "Errors in validating the user profile";
+    });
+
     maybeUser.fold(
-      () => {
+      (error: String) => {
         res.status(500).json({
-          message:
-            "There was an error extracting the user profile from the request."
+          message: error
         });
       },
       (user: User) => {
