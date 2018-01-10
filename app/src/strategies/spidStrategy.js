@@ -2,13 +2,18 @@
 
 "use strict";
 
+/**
+ * Builds and configure a Passport strategy to authenticate the proxy to the
+ * different SPID IDPs.
+ */
+
 const fs = require("fs");
 const SpidStrategy = require("spid-passport");
 
 const spidStrategy = new SpidStrategy(
   {
     sp: {
-      path: "/acs",
+      path: "/assertionConsumerService",
       issuer: "https://italia-backend",
       privateCert: fs.readFileSync("./certs/key.pem", "utf-8"),
       attributeConsumingServiceIndex: 1,

@@ -35,7 +35,7 @@
     "passport": "^0.4.0",
     "passport-strategy": "^1.0.0",
     "passport-http-bearer": "^1.0.1",
-    "spid-passport": "git://github.com/lussoluca/spid-passport.git#master"
+    "spid-passport": "git://github.com/lussoluca/spid-passport.git#16f3475"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
