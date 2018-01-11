@@ -53,9 +53,9 @@ container.registerClass({
 });
 
 // Register the messages controller as a service.
-export const MESSAGE_CONTROLLER = "messagesController";
+export const MESSAGES_CONTROLLER = "messagesController";
 container.registerClass({
-  [MESSAGE_CONTROLLER]: [MessagesController]
+  [MESSAGES_CONTROLLER]: [MessagesController]
 });
 
 export default container;

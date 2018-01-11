@@ -8,6 +8,7 @@
 
 import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import container, { SESSION_STORAGE } from "../container";
+import type { User } from "../types/user";
 
 const Strategy = require("passport-http-bearer");
 
@@ -16,12 +17,12 @@ const tokenStrategy = new Strategy(function(token, done) {
     SESSION_STORAGE
   ): SessionStorageInterface);
 
-  const user = sessionStorage.get(token);
-  if (user) {
-    return done(null, user);
-  } else {
-    return done(null, false);
-  }
+  sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
+    maybeUser.fold(
+      message => done(null, false, { message }),
+      user => done(null, user)
+    );
+  });
 });
 
 export default tokenStrategy;
