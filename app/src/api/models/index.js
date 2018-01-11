@@ -20,6 +20,7 @@ exports.MessageResponse = require('./messageResponse');
 exports.PaginationResponse = require('./paginationResponse');
 exports.LimitedProfile = require('./limitedProfile');
 exports.ExtendedProfile = require('./extendedProfile');
+exports.Service = require('./service');
 exports.GetMessagesByUserOKResponse = require('./getMessagesByUserOKResponse');
 exports.GetProfileOKResponse = require('./getProfileOKResponse');
 exports.UpsertProfileOKResponse = require('./upsertProfileOKResponse');

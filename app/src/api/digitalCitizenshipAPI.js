@@ -614,6 +614,8 @@ function _getProfile(options, callback) {
  *
  * @param {array} [options.body.preferredLanguages]
  *
+ * @param {boolean} [options.body.isInboxEnabled]
+ *
  * @param {number} [options.body.version]
  *
  * @param {object} [options.customHeaders] Headers that will be added to the
@@ -889,7 +891,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
 
     this.baseUri = baseUri;
     if (!this.baseUri) {
-      this.baseUri = 'https://localhost/api/v1';
+      this.baseUri = '/api/v1';
     }
     this.fiscalCode = fiscalCode;
 
@@ -1291,6 +1293,8 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @param {array} [options.body.preferredLanguages]
    *
+   * @param {boolean} [options.body.isInboxEnabled]
+   *
    * @param {number} [options.body.version]
    *
    * @param {object} [options.customHeaders] Headers that will be added to the
@@ -1329,6 +1333,8 @@ class DigitalCitizenshipAPI extends ServiceClient {
    * @param {string} [options.body.email]
    *
    * @param {array} [options.body.preferredLanguages]
+   *
+   * @param {boolean} [options.body.isInboxEnabled]
    *
    * @param {number} [options.body.version]
    *

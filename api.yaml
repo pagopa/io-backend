@@ -107,6 +107,35 @@ paths:
           description: No user found for the provided fiscal code.
         "500":
           description: There was an error in retrieving the user profile.
+    post:
+      operationId: upsertProfile
+      summary: Set User's profile
+      description: Create or update the profile for the user identified by the provided fiscal code.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ExtendedProfile"
+          x-examples:
+            application/json:
+              email: foobar@example.com
+      responses:
+        '200':
+          description: Profile updated.
+          schema:
+            allOf:
+            - $ref: "#/definitions/LimitedProfile"
+            - $ref: "#/definitions/ExtendedProfile"
+          examples:
+            application/json:
+              email: foobar@example.com
+              version: 0
+        "404":
+          description: No user found for the provided fiscal code.
+        '400':
+          description: Invalid payload.
+        '500':
+          description: Profile cannot be updated.
 definitions:
   MessageContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#MessageContent"
@@ -114,6 +143,10 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#FiscalCode"
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#EmailAddress"
+  ExtendedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#ExtendedProfile"
+  LimitedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#LimitedProfile"
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PreferredLanguages"
   IsInboxEnabled:
@@ -136,6 +169,10 @@ definitions:
     description: Describes the user's profile.
     type: object
     properties:
+      name:
+        type: string
+      family_name:
+        type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
       email:
@@ -144,8 +181,11 @@ definitions:
         $ref: '#/definitions/PreferredLanguages'
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
+      version:
+        type: integer
     required:
       - fiscal_code
+      - version
 responses: {}
 parameters:
   PaginationRequest:

@@ -61,7 +61,7 @@ app.use(morgan(process.env.NODE_ENV));
 // Parse the incoming request body. This is needed by Passport spid strategy.
 app.use(bodyParser.json());
 // Parse an urlencoded body.
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 // Define the folder that contains the public assets.
 app.use(express.static("public"));
 // Initializes Passport for incoming requests.
@@ -83,6 +83,13 @@ app.get("/api/v1/profile", tokenAuth, function(
   res: express$Response
 ) {
   profileController.getUserProfile(req, res);
+});
+
+app.post("/api/v1/profile", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  profileController.upsertProfile(req, res);
 });
 
 app.get("/api/v1/messages", tokenAuth, function(

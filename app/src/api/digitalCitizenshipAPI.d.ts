@@ -321,6 +321,8 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @param {array} [options.body.preferredLanguages]
    *
+   * @param {boolean} [options.body.isInboxEnabled]
+   *
    * @param {number} [options.body.version]
    *
    * @param {object} [options.customHeaders] Headers that will be added to the
@@ -347,6 +349,8 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    * @param {string} [options.body.email]
    *
    * @param {array} [options.body.preferredLanguages]
+   *
+   * @param {boolean} [options.body.isInboxEnabled]
    *
    * @param {number} [options.body.version]
    *

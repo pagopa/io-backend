@@ -14,7 +14,7 @@ const UserModel = t.type({
   spid_idp: t.string,
   fiscal_code: t.string,
   name: t.string,
-  familyname: t.string
+  family_name: t.string
 });
 
 export type User = t.TypeOf<typeof UserModel>;
@@ -32,8 +32,11 @@ export function extractUserFromRequest(
 
   const validation = t.validate(reqWithUser.user, UserModel);
 
-  // TODO: Better error messages.
-  winston.log("info", PathReporter.report(validation));
+  // TODO: better error message.
+  const message = PathReporter.report(validation);
+
+  validation.mapLeft(() => message);
+  winston.log("info", message);
 
   return validation;
 }
@@ -49,8 +52,11 @@ export function extractUserFromJson(
 ): Either<ValidationError[], User> {
   const validation = t.validate(JSON.parse(from), UserModel);
 
-  // TODO: Better error messages.
-  winston.log("info", PathReporter.report(validation));
+  // TODO: better error message.
+  const message = PathReporter.report(validation);
+
+  validation.mapLeft(() => message);
+  winston.log("info", message);
 
   return validation;
 }

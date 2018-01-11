@@ -41,7 +41,7 @@ export default class AuthenticationController {
       spid_idp: reqWithUser.user.issuer._, // The used idp is needed for logout.
       fiscal_code: reqWithUser.user.fiscalNumber,
       name: reqWithUser.user.name,
-      familyname: reqWithUser.user.familyName
+      family_name: reqWithUser.user.familyName
     };
 
     this.sessionStorage.set(token, user);
