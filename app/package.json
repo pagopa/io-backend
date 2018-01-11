@@ -4,7 +4,7 @@
   "description": "Italia app and web backend",
   "main": "index.js",
   "engines": {
-    "node": "8.6.0"
+    "node": "8.9.4"
   },
   "scripts": {
     "flow": "flow",
@@ -27,12 +27,15 @@
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
     "awilix": "^2.11.1",
+    "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
     "express": "^4.16.0",
     "morgan": "^1.8.1",
     "ms-rest": "^2.2.7",
-    "passport": "^0.3.2",
-    "passport-http-bearer": "^1.0.1"
+    "passport": "^0.4.0",
+    "passport-strategy": "^1.0.0",
+    "passport-http-bearer": "^1.0.1",
+    "spid-passport": "git://github.com/lussoluca/spid-passport.git#16f3475"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
