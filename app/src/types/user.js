@@ -3,36 +3,19 @@
 "use strict";
 
 import * as t from "io-ts";
+import { PathReporter } from "io-ts/lib/PathReporter";
 
-const UserModel = t.intersection([
-  t.type({
-    created_at: t.number,
-    token: t.string,
-    spid_idp: t.string,
-    fiscal_code: t.string,
-    name: t.string,
-    familyname: t.string
-  }),
-  t.partial({
-    created_at: t.number,
-    token: t.string,
-    spid_idp: t.string,
-    fiscal_code: t.string,
-    name: t.string,
-    familyname: t.string,
-    spidcode: t.string,
-    gender: t.string,
-    mobilephone: t.string,
-    email: t.string,
-    address: t.string,
-    expirationdate: t.string,
-    digitaladdress: t.string,
-    countyofbirth: t.string,
-    dateofbirth: t.string,
-    idcard: t.string,
-    placeofbirth: t.string
-  })
-]);
+const winston = require("winston");
+
+const UserModel = t.type({
+  created_at: t.number,
+  token: t.string,
+  session_index: t.string,
+  spid_idp: t.string,
+  fiscal_code: t.string,
+  name: t.string,
+  familyname: t.string
+});
 
 export type User = t.TypeOf<typeof UserModel>;
 
@@ -47,7 +30,12 @@ export function extractUserFromRequest(
 ): Either<ValidationError[], User> {
   const reqWithUser = ((from: Object): { user: User });
 
-  return t.validate(reqWithUser.user, UserModel);
+  const validation = t.validate(reqWithUser.user, UserModel);
+
+  // TODO: Better error messages.
+  winston.log("info", PathReporter.report(validation));
+
+  return validation;
 }
 
 /**
@@ -59,5 +47,10 @@ export function extractUserFromRequest(
 export function extractUserFromJson(
   from: string
 ): Either<ValidationError[], User> {
-  return t.validate(JSON.parse(from), UserModel);
+  const validation = t.validate(JSON.parse(from), UserModel);
+
+  // TODO: Better error messages.
+  winston.log("info", PathReporter.report(validation));
+
+  return validation;
 }

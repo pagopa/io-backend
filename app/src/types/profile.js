@@ -26,7 +26,9 @@ export type Profile = t.TypeOf<typeof ProfileModel>;
  * Converts an API profile to a Proxy profile.
  *
  * @param from
+ *   Profile retrieved from the Digital Citizenship API.
  * @param user
+ *   User data extracted from SPID.
  * @returns {Profile}
  */
 export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {

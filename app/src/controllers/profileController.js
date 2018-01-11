@@ -51,12 +51,12 @@ export default class ProfileController {
           .getClient(user.fiscal_code)
           .getProfile()
           .then(
-            function(apiProfile: GetProfileOKResponse) {
+            (apiProfile: GetProfileOKResponse) => {
               const appProfile = toAppProfile(apiProfile, user);
 
               res.json(appProfile);
             },
-            function(err: APIError) {
+            (err: APIError) => {
               if (err.statusCode === 404) {
                 res.status(404).json({ message: err.message });
                 return;

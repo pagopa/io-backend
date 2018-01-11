@@ -19,6 +19,7 @@ import MessagesController from "./controllers/messagesController";
 
 require("dotenv").load();
 
+const winston = require("winston");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const express = require("express");
@@ -101,9 +102,11 @@ app.get("/api/v1/messages/:id", tokenAuth, function(
 // Setup and start the HTTPS server.
 
 const certKeyPath = process.env.CERT_KEY_PATH || "./certs/key.pem";
-const certPath = process.env.CERT_PATH || "./certs/cert.pem";
-
+winston.log("info", "Reading HTTPS private key file from %s", certKeyPath);
 const key = fs.readFileSync(certKeyPath, "utf-8");
+
+const certPath = process.env.CERT_PATH || "./certs/cert.pem";
+winston.log("info", "Reading HTTPS certificate file from %s", certPath);
 const cert = fs.readFileSync(certPath, "utf-8");
 
 const options = {
@@ -112,6 +115,5 @@ const options = {
 };
 
 const server = https.createServer(options, app).listen(port, function() {
-  // eslint-disable-next-line no-console
-  console.log("Listening on port %d", server.address().port);
+  winston.log("info", "Listening on port %d", server.address().port);
 });

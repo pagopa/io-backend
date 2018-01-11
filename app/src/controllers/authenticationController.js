@@ -37,7 +37,7 @@ export default class AuthenticationController {
     const user: User = {
       created_at: new Date().getTime(),
       token: token,
-      sessionIndex: token, // The sessionIndex is needed for logout.
+      session_index: token, // The sessionIndex is needed for logout.
       spid_idp: reqWithUser.user.issuer._, // The used idp is needed for logout.
       fiscal_code: reqWithUser.user.fiscalNumber,
       name: reqWithUser.user.name,
