@@ -28,14 +28,10 @@ passport.use(
       "sessionStorage"
     ): SessionStorageInterface);
 
-    sessionStorage.get(token).then(function(maybeUser: Either<String, User>) {
+    sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
       maybeUser.fold(
-        error => {
-          return done(null, false, { message: error });
-        },
-        user => {
-          return done(null, user);
-        }
+        message => done(null, false, { message }),
+        user => done(null, user)
       );
     });
   })
