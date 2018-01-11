@@ -8,10 +8,12 @@
 
 require("dotenv").load();
 
+import MessagesController from "./controllers/messagesController";
 import container from "./container";
 import type { SessionStorageInterface } from "./services/sessionStorageInterface";
 import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
+import type { User } from "./types/user";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -25,17 +27,18 @@ passport.use(
     const sessionStorage = (container.resolve(
       "sessionStorage"
     ): SessionStorageInterface);
-    const user = sessionStorage.get(token);
-    if (user) {
-      return done(null, user);
-    } else {
-      return done(null, false);
-    }
+
+    sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
+      maybeUser.fold(
+        message => done(null, false, { message }),
+        user => done(null, user)
+      );
+    });
   })
 );
 
 const app = express();
-app.use(morgan("dev"));
+app.use(morgan(process.env.NODE_ENV));
 app.use(express.static("public"));
 app.use(passport.initialize());
 
@@ -56,6 +59,30 @@ app.get(
     ): ProfileController);
 
     controller.getUserProfile(req, res);
+  }
+);
+
+app.get(
+  "/api/v1/messages",
+  passport.authenticate("bearer", { session: false }),
+  function(req: express$Request, res: express$Response) {
+    const controller = (container.resolve(
+      "messagesController"
+    ): MessagesController);
+
+    controller.getUserMessages(req, res);
+  }
+);
+
+app.get(
+  "/api/v1/messages/:id",
+  passport.authenticate("bearer", { session: false }),
+  function(req: express$Request, res: express$Response) {
+    const controller = (container.resolve(
+      "messagesController"
+    ): MessagesController);
+
+    controller.getUserMessage(req, res);
   }
 );
 
