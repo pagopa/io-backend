@@ -5,7 +5,7 @@
 import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
 import type { User } from "./user";
 import * as t from "io-ts";
-import { PathReporter } from "io-ts/lib/PathReporter";
+import { ReadableReporter } from "../utils/validation_reporters";
 
 const winston = require("winston");
 
@@ -88,9 +88,7 @@ export function extractUpsertProfileFromRequest(
 ): Either<ValidationError[], UpsertProfile> {
   const validation = t.validate(from.body, UpsertProfileModel);
 
-  // TODO: better error message.
-  const message = PathReporter.report(validation);
-
+  const message = ReadableReporter.report(validation);
   validation.mapLeft(() => message);
   winston.log("info", message);
 

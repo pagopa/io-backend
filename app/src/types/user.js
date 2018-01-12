@@ -3,7 +3,7 @@
 "use strict";
 
 import * as t from "io-ts";
-import { PathReporter } from "io-ts/lib/PathReporter";
+import { ReadableReporter } from "../utils/validation_reporters";
 
 const winston = require("winston");
 
@@ -32,9 +32,7 @@ export function extractUserFromRequest(
 
   const validation = t.validate(reqWithUser.user, UserModel);
 
-  // TODO: better error message.
-  const message = PathReporter.report(validation);
-
+  const message = ReadableReporter.report(validation);
   validation.mapLeft(() => message);
   winston.log("info", message);
 
@@ -52,9 +50,7 @@ export function extractUserFromJson(
 ): Either<ValidationError[], User> {
   const validation = t.validate(JSON.parse(from), UserModel);
 
-  // TODO: better error message.
-  const message = PathReporter.report(validation);
-
+  const message = ReadableReporter.report(validation);
   validation.mapLeft(() => message);
   winston.log("info", message);
 
