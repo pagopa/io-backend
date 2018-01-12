@@ -6,8 +6,7 @@ import type { APIError } from "../types/error";
 import {
   GetMessagesByUserOKResponse,
   MessageResponse,
-  ProblemJson,
-  UpsertProfileOKResponse
+  ProblemJson
 } from "../api/models";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppMessage } from "../types/message";
@@ -16,11 +15,9 @@ import { extractUserFromRequest } from "../types/user";
 import {
   GetMessagesByUserOKResponseModel,
   MessageResponseModel,
-  ProblemJsonModel,
-  UpsertProfileOKResponseModel
+  ProblemJsonModel
 } from "../types/api";
 import * as t from "io-ts/lib/index";
-import { toAppProfile } from "../types/profile";
 
 /**
  * This controller handles reading messages from the app by
