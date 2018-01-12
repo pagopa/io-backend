@@ -6,7 +6,8 @@ import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
   GetProfileOKResponse,
-  UpsertProfileOKResponse
+  UpsertProfileOKResponse,
+  ProblemJson
 } from "../api/models/index";
 import type { APIError } from "../types/error";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
@@ -54,19 +55,22 @@ export default class ProfileController {
           .getClient(user.fiscal_code)
           .getProfile()
           .then(
-            (apiProfile: GetProfileOKResponse) => {
+            (apiProfile: GetProfileOKResponse | ProblemJson) => {
+              // TODO: find a better way to identify the type of the response.
+              if (apiProfile.hasOwnProperty("status")) {
+                res.status(apiProfile.status).json({
+                  message: apiProfile.detail
+                });
+                return;
+              }
+
               const appProfile = toAppProfile(apiProfile, user);
 
               res.json(appProfile);
             },
             (err: APIError) => {
-              if (err.statusCode === 404) {
-                res.status(404).json({ message: err.message });
-                return;
-              }
-
-              res.status(500).json({
-                message: "There was an error in retrieving the user profile."
+              res.status(err.statusCode).json({
+                message: err.message
               });
             }
           );
@@ -103,7 +107,15 @@ export default class ProfileController {
               .getClient(user.fiscal_code)
               .upsertProfile({ body: toExtendedProfile(upsertProfile) })
               .then(
-                (apiProfile: UpsertProfileOKResponse) => {
+                (apiProfile: UpsertProfileOKResponse | ProblemJson) => {
+                  // TODO: find a better way to identify the type of the response.
+                  if (apiProfile.hasOwnProperty("status")) {
+                    res.status(apiProfile.status).json({
+                      message: apiProfile.detail
+                    });
+                    return;
+                  }
+
                   const appProfile = toAppProfile(apiProfile, user);
 
                   res.json(appProfile);

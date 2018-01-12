@@ -60,11 +60,11 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<MessageResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error|ServiceError} - The error object.
    */
-  getMessageWithHttpOperationResponse(id: string, options?: { customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<models.MessageResponse>>;
+  getMessageWithHttpOperationResponse(id: string, options?: { customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<any>>;
 
   /**
    * @summary Get Message
@@ -85,7 +85,7 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned.
    *
-   *                      @resolve {MessageResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error|ServiceError} - The error object.
    *
@@ -93,16 +93,15 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    *                      {Error|ServiceError}  err        - The Error object if an error occurred, null otherwise.
    *
-   *                      {MessageResponse} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link MessageResponse} for more information.
+   *                      {Object} [result]   - The deserialized result object if an error did not occur.
    *
    *                      {WebResource} [request]  - The HTTP Request object if an error did not occur.
    *
    *                      {http.IncomingMessage} [response] - The HTTP Response stream if an error did not occur.
    */
-  getMessage(id: string, options?: { customHeaders? : { [headerName: string]: string; } }): Promise<models.MessageResponse>;
-  getMessage(id: string, callback: ServiceCallback<models.MessageResponse>): void;
-  getMessage(id: string, options: { customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<models.MessageResponse>): void;
+  getMessage(id: string, options?: { customHeaders? : { [headerName: string]: string; } }): Promise<any>;
+  getMessage(id: string, callback: ServiceCallback<any>): void;
+  getMessage(id: string, options: { customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<any>): void;
 
 
   /**
@@ -120,11 +119,11 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<GetMessagesByUserOKResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error|ServiceError} - The error object.
    */
-  getMessagesByUserWithHttpOperationResponse(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<models.GetMessagesByUserOKResponse>>;
+  getMessagesByUserWithHttpOperationResponse(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<any>>;
 
   /**
    * @summary Get messages by user
@@ -146,7 +145,7 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned.
    *
-   *                      @resolve {GetMessagesByUserOKResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error|ServiceError} - The error object.
    *
@@ -154,17 +153,15 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    *                      {Error|ServiceError}  err        - The Error object if an error occurred, null otherwise.
    *
-   *                      {GetMessagesByUserOKResponse} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link GetMessagesByUserOKResponse} for more
-   *                      information.
+   *                      {Object} [result]   - The deserialized result object if an error did not occur.
    *
    *                      {WebResource} [request]  - The HTTP Request object if an error did not occur.
    *
    *                      {http.IncomingMessage} [response] - The HTTP Response stream if an error did not occur.
    */
-  getMessagesByUser(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<models.GetMessagesByUserOKResponse>;
-  getMessagesByUser(callback: ServiceCallback<models.GetMessagesByUserOKResponse>): void;
-  getMessagesByUser(options: { customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<models.GetMessagesByUserOKResponse>): void;
+  getMessagesByUser(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<any>;
+  getMessagesByUser(callback: ServiceCallback<any>): void;
+  getMessagesByUser(options: { customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<any>): void;
 
 
   /**
@@ -264,11 +261,11 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<GetProfileOKResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error|ServiceError} - The error object.
    */
-  getProfileWithHttpOperationResponse(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<models.GetProfileOKResponse>>;
+  getProfileWithHttpOperationResponse(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<any>>;
 
   /**
    * @summary Get User's Preferences
@@ -287,7 +284,7 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned.
    *
-   *                      @resolve {GetProfileOKResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error|ServiceError} - The error object.
    *
@@ -295,16 +292,15 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    *                      {Error|ServiceError}  err        - The Error object if an error occurred, null otherwise.
    *
-   *                      {GetProfileOKResponse} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link GetProfileOKResponse} for more information.
+   *                      {Object} [result]   - The deserialized result object if an error did not occur.
    *
    *                      {WebResource} [request]  - The HTTP Request object if an error did not occur.
    *
    *                      {http.IncomingMessage} [response] - The HTTP Response stream if an error did not occur.
    */
-  getProfile(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<models.GetProfileOKResponse>;
-  getProfile(callback: ServiceCallback<models.GetProfileOKResponse>): void;
-  getProfile(options: { customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<models.GetProfileOKResponse>): void;
+  getProfile(options?: { customHeaders? : { [headerName: string]: string; } }): Promise<any>;
+  getProfile(callback: ServiceCallback<any>): void;
+  getProfile(options: { customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<any>): void;
 
 
   /**
@@ -330,11 +326,11 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<UpsertProfileOKResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error|ServiceError} - The error object.
    */
-  upsertProfileWithHttpOperationResponse(options?: { body? : models.ExtendedProfile, customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<models.UpsertProfileOKResponse>>;
+  upsertProfileWithHttpOperationResponse(options?: { body? : models.ExtendedProfile, customHeaders? : { [headerName: string]: string; } }): Promise<HttpOperationResponse<any>>;
 
   /**
    * @summary Set User's Preferences
@@ -364,7 +360,7 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned.
    *
-   *                      @resolve {UpsertProfileOKResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error|ServiceError} - The error object.
    *
@@ -372,17 +368,15 @@ declare class DigitalCitizenshipAPI extends ServiceClient {
    *
    *                      {Error|ServiceError}  err        - The Error object if an error occurred, null otherwise.
    *
-   *                      {UpsertProfileOKResponse} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link UpsertProfileOKResponse} for more
-   *                      information.
+   *                      {Object} [result]   - The deserialized result object if an error did not occur.
    *
    *                      {WebResource} [request]  - The HTTP Request object if an error did not occur.
    *
    *                      {http.IncomingMessage} [response] - The HTTP Response stream if an error did not occur.
    */
-  upsertProfile(options?: { body? : models.ExtendedProfile, customHeaders? : { [headerName: string]: string; } }): Promise<models.UpsertProfileOKResponse>;
-  upsertProfile(callback: ServiceCallback<models.UpsertProfileOKResponse>): void;
-  upsertProfile(options: { body? : models.ExtendedProfile, customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<models.UpsertProfileOKResponse>): void;
+  upsertProfile(options?: { body? : models.ExtendedProfile, customHeaders? : { [headerName: string]: string; } }): Promise<any>;
+  upsertProfile(callback: ServiceCallback<any>): void;
+  upsertProfile(options: { body? : models.ExtendedProfile, customHeaders? : { [headerName: string]: string; } }, callback: ServiceCallback<any>): void;
 
 
   /**

@@ -3,7 +3,11 @@
 "use strict";
 
 import type { APIError } from "../types/error";
-import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
+import {
+  GetMessagesByUserOKResponse,
+  MessageResponse,
+  ProblemJson
+} from "../api/models";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppMessage } from "../types/message";
 import type { User } from "../types/user";
@@ -47,19 +51,22 @@ export default class MessagesController {
           .getClient(user.fiscal_code)
           .getMessagesByUser()
           .then(
-            function(apiMessages: GetMessagesByUserOKResponse) {
+            function(apiMessages: GetMessagesByUserOKResponse | ProblemJson) {
+              // TODO: find a better way to identify the type of the response.
+              if (apiMessages.hasOwnProperty("status")) {
+                res.status(apiMessages.status).json({
+                  message: apiMessages.detail
+                });
+                return;
+              }
+
               const appMessages = apiMessages.items.map(toAppMessage);
 
               res.json({ items: appMessages, pageSize: apiMessages.pageSize });
             },
             function(err: APIError) {
-              if (err.statusCode === 404) {
-                res.status(404).json({ message: err.message });
-                return;
-              }
-
-              res.status(500).json({
-                message: "There was an error in retrieving the messages."
+              res.status(err.statusCode).json({
+                message: err.message
               });
             }
           );
@@ -87,19 +94,22 @@ export default class MessagesController {
           .getClient(user.fiscal_code)
           .getMessage(req.params.id)
           .then(
-            function(apiMessage: MessageResponse) {
+            function(apiMessage: MessageResponse | ProblemJson) {
+              // TODO: find a better way to identify the type of the response.
+              if (apiMessage.hasOwnProperty("status")) {
+                res.status(apiMessage.status).json({
+                  message: apiMessage.detail
+                });
+                return;
+              }
+
               const appMessage = toAppMessage(apiMessage);
 
               res.json(appMessage);
             },
             function(err: APIError) {
-              if (err.statusCode === 404) {
-                res.status(404).json({ message: err.message });
-                return;
-              }
-
-              res.status(500).json({
-                message: "There was an error in retrieving the message."
+              res.status(err.statusCode).json({
+                message: err.message
               });
             }
           );
