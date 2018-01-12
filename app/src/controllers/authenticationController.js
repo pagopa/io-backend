@@ -2,8 +2,9 @@
 
 "use strict";
 
-import type { User } from "../types/user";
+import type { SpidUser } from "../types/user";
 import type { SessionStorageInterface } from "../services/sessionStorageInterface";
+import { extractUserFromSpid, toUser } from "../types/user";
 
 /**
  * This controller handles the call from the IDP after
@@ -29,27 +30,25 @@ export default class AuthenticationController {
    * @param res
    */
   acs(req: express$Request, res: express$Response) {
-    const reqWithUser = ((req: Object): { user: Object });
+    const maybeUser = extractUserFromSpid(req);
 
-    // Use the SAML sessionIndex as token.
-    const token = reqWithUser.user.sessionIndex;
+    maybeUser.fold(
+      (error: String) => {
+        res.status(500).json({
+          message: error
+        });
+      },
+      (spidUser: SpidUser) => {
+        const user = toUser(spidUser);
 
-    const user: User = {
-      created_at: new Date().getTime(),
-      token: token,
-      session_index: token, // The sessionIndex is needed for logout.
-      spid_idp: reqWithUser.user.issuer._, // The used idp is needed for logout.
-      fiscal_code: reqWithUser.user.fiscalNumber,
-      name: reqWithUser.user.name,
-      family_name: reqWithUser.user.familyName
-    };
+        this.sessionStorage.set(user.token, user);
 
-    this.sessionStorage.set(token, user);
+        const url =
+          process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
+        const urlWithToken = url.replace("{token}", user.token);
 
-    const url =
-      process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
-    const urlWithToken = url.replace("{token}", token);
-
-    res.redirect(urlWithToken);
+        res.redirect(urlWithToken);
+      }
+    );
   }
 }

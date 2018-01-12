@@ -9,6 +9,11 @@ import {
   UpsertProfileOKResponse,
   ProblemJson
 } from "../api/models/index";
+import {
+  GetProfileOKResponseModel,
+  UpsertProfileOKResponseModel,
+  ProblemJsonModel
+} from "../types/api";
 import type { APIError } from "../types/error";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import type { UpsertProfile } from "../types/profile";
@@ -17,6 +22,7 @@ import {
   toAppProfile,
   toExtendedProfile
 } from "../types/profile";
+import * as t from "io-ts";
 
 /**
  * This controller handles reading the user profile from the
@@ -47,6 +53,7 @@ export default class ProfileController {
     maybeUser.fold(
       (error: String) => {
         res.status(500).json({
+          // Unable to extract the user from the request.
           message: error
         });
       },
@@ -55,21 +62,35 @@ export default class ProfileController {
           .getClient(user.fiscal_code)
           .getProfile()
           .then(
-            (apiProfile: GetProfileOKResponse | ProblemJson) => {
-              // TODO: find a better way to identify the type of the response.
-              if (apiProfile.hasOwnProperty("status")) {
-                res.status(apiProfile.status).json({
-                  message: apiProfile.detail
-                });
-                return;
-              }
-
-              const appProfile = toAppProfile(apiProfile, user);
-
-              res.json(appProfile);
+            (maybeApiProfile: GetProfileOKResponse | ProblemJson) => {
+              // Look if the response is a GetProfileOKResponse.
+              t.validate(maybeApiProfile, GetProfileOKResponseModel).fold(
+                () => {
+                  // Look if the response is a ProblemJson.
+                  t.validate(maybeApiProfile, ProblemJsonModel).fold(
+                    () => {
+                      res.status(500).json({
+                        // If we reach this something very bad as happened.
+                        message: "Unhandled error."
+                      });
+                    },
+                    error => {
+                      res.status(error.status).json({
+                        // Forward the error received from the API.
+                        message: error.detail
+                      });
+                    }
+                  );
+                },
+                apiProfile => {
+                  // All correct, return the response to the client.
+                  res.json(toAppProfile(apiProfile, user));
+                }
+              );
             },
             (err: APIError) => {
               res.status(err.statusCode).json({
+                // Here usually we have connection or transmission errors.
                 message: err.message
               });
             }
@@ -91,6 +112,7 @@ export default class ProfileController {
     maybeUser.fold(
       (error: String) => {
         res.status(500).json({
+          // Unable to extract the user from the request.
           message: error
         });
       },
@@ -107,21 +129,37 @@ export default class ProfileController {
               .getClient(user.fiscal_code)
               .upsertProfile({ body: toExtendedProfile(upsertProfile) })
               .then(
-                (apiProfile: UpsertProfileOKResponse | ProblemJson) => {
-                  // TODO: find a better way to identify the type of the response.
-                  if (apiProfile.hasOwnProperty("status")) {
-                    res.status(apiProfile.status).json({
-                      message: apiProfile.detail
-                    });
-                    return;
-                  }
-
-                  const appProfile = toAppProfile(apiProfile, user);
-
-                  res.json(appProfile);
+                (maybeApiProfile: UpsertProfileOKResponse | ProblemJson) => {
+                  // Look if the response is a UpsertProfileOKResponse.
+                  t
+                    .validate(maybeApiProfile, UpsertProfileOKResponseModel)
+                    .fold(
+                      () => {
+                        // Look if the response is a ProblemJson.
+                        t.validate(maybeApiProfile, ProblemJsonModel).fold(
+                          () => {
+                            res.status(500).json({
+                              // If we reach this something very bad as happened.
+                              message: "Unhandled error."
+                            });
+                          },
+                          error => {
+                            res.status(error.status).json({
+                              // Forward the error received from the API.
+                              message: error.detail
+                            });
+                          }
+                        );
+                      },
+                      apiProfile => {
+                        // All correct, return the response to the client.
+                        res.json(toAppProfile(apiProfile, user));
+                      }
+                    );
                 },
                 (err: APIError) => {
                   res.status(err.statusCode).json({
+                    // Here usually we have connection or transmission errors.
                     message: err.message
                   });
                 }

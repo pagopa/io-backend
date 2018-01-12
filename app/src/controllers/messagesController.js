@@ -6,12 +6,21 @@ import type { APIError } from "../types/error";
 import {
   GetMessagesByUserOKResponse,
   MessageResponse,
-  ProblemJson
+  ProblemJson,
+  UpsertProfileOKResponse
 } from "../api/models";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppMessage } from "../types/message";
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
+import {
+  GetMessagesByUserOKResponseModel,
+  MessageResponseModel,
+  ProblemJsonModel,
+  UpsertProfileOKResponseModel
+} from "../types/api";
+import * as t from "io-ts/lib/index";
+import { toAppProfile } from "../types/profile";
 
 /**
  * This controller handles reading messages from the app by
@@ -51,18 +60,37 @@ export default class MessagesController {
           .getClient(user.fiscal_code)
           .getMessagesByUser()
           .then(
-            function(apiMessages: GetMessagesByUserOKResponse | ProblemJson) {
-              // TODO: find a better way to identify the type of the response.
-              if (apiMessages.hasOwnProperty("status")) {
-                res.status(apiMessages.status).json({
-                  message: apiMessages.detail
-                });
-                return;
-              }
-
-              const appMessages = apiMessages.items.map(toAppMessage);
-
-              res.json({ items: appMessages, pageSize: apiMessages.pageSize });
+            (maybeApiMessages: GetMessagesByUserOKResponse | ProblemJson) => {
+              // Look if the response is a GetMessagesByUserOKResponse.
+              t
+                .validate(maybeApiMessages, GetMessagesByUserOKResponseModel)
+                .fold(
+                  () => {
+                    // Look if the response is a ProblemJson.
+                    t.validate(maybeApiMessages, ProblemJsonModel).fold(
+                      () => {
+                        res.status(500).json({
+                          // If we reach this something very bad as happened.
+                          message: "Unhandled error."
+                        });
+                      },
+                      error => {
+                        res.status(error.status).json({
+                          // Forward the error received from the API.
+                          message: error.detail
+                        });
+                      }
+                    );
+                  },
+                  apiMessages => {
+                    // All correct, return the response to the client.
+                    const appMessages = apiMessages.items.map(toAppMessage);
+                    res.json({
+                      items: appMessages,
+                      pageSize: apiMessages.pageSize
+                    });
+                  }
+                );
             },
             function(err: APIError) {
               res.status(err.statusCode).json({
@@ -94,18 +122,31 @@ export default class MessagesController {
           .getClient(user.fiscal_code)
           .getMessage(req.params.id)
           .then(
-            function(apiMessage: MessageResponse | ProblemJson) {
-              // TODO: find a better way to identify the type of the response.
-              if (apiMessage.hasOwnProperty("status")) {
-                res.status(apiMessage.status).json({
-                  message: apiMessage.detail
-                });
-                return;
-              }
-
-              const appMessage = toAppMessage(apiMessage);
-
-              res.json(appMessage);
+            (maybeApiMessage: MessageResponse | ProblemJson) => {
+              // Look if the response is a GetProfileOKResponse.
+              t.validate(maybeApiMessage, MessageResponseModel).fold(
+                () => {
+                  // Look if the response is a ProblemJson.
+                  t.validate(maybeApiMessage, ProblemJsonModel).fold(
+                    () => {
+                      res.status(500).json({
+                        // If we reach this something very bad as happened.
+                        message: "Unhandled error."
+                      });
+                    },
+                    error => {
+                      res.status(error.status).json({
+                        // Forward the error received from the API.
+                        message: error.detail
+                      });
+                    }
+                  );
+                },
+                apiMessage => {
+                  // All correct, return the response to the client.
+                  res.json(toAppMessage(apiMessage));
+                }
+              );
             },
             function(err: APIError) {
               res.status(err.statusCode).json({

@@ -78,14 +78,14 @@ export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
 }
 
 /**
- * Convert the body of an upsert request to a UpsertProfile object.
+ * Extracts a user profile from the body of a request.
  *
  * @param from
- * @returns {Either<ValidationError[], any>}
+ * @returns {Either<String, UpsertProfile>}
  */
 export function extractUpsertProfileFromRequest(
   from: express$Request
-): Either<ValidationError[], UpsertProfile> {
+): Either<String, UpsertProfile> {
   const validation = t.validate(from.body, UpsertProfileModel);
 
   const message = ReadableReporter.report(validation);
