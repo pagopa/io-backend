@@ -23,21 +23,15 @@ import {
   toExtendedProfile
 } from "../types/profile";
 import * as t from "io-ts";
+import ControllerBase from "./ControllerBase";
 
 /**
  * This controller handles reading the user profile from the
  * app by forwarding the call to the API system.
  */
-export default class ProfileController {
-  apiClient: ApiClientFactoryInterface;
-
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
+export default class ProfileController extends ControllerBase {
   constructor(apiClient: ApiClientFactoryInterface) {
-    this.apiClient = apiClient;
+    super(apiClient);
   }
 
   /**
@@ -65,23 +59,8 @@ export default class ProfileController {
             (maybeApiProfile: GetProfileOKResponse | ProblemJson) => {
               // Look if the response is a GetProfileOKResponse.
               t.validate(maybeApiProfile, GetProfileOKResponseModel).fold(
-                () => {
-                  // Look if the response is a ProblemJson.
-                  t.validate(maybeApiProfile, ProblemJsonModel).fold(
-                    () => {
-                      res.status(500).json({
-                        // If we reach this something very bad as happened.
-                        message: "Unhandled error."
-                      });
-                    },
-                    error => {
-                      res.status(error.status).json({
-                        // Forward the error received from the API.
-                        message: error.detail
-                      });
-                    }
-                  );
-                },
+                // Look if object is a ProblemJson.
+                () => this.validateProblemJson(maybeApiProfile, res),
                 apiProfile => {
                   // All correct, return the response to the client.
                   res.json(toAppProfile(apiProfile, user));

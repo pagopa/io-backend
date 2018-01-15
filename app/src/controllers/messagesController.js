@@ -8,31 +8,24 @@ import {
   MessageResponse,
   ProblemJson
 } from "../api/models";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 import { toAppMessage } from "../types/message";
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
   GetMessagesByUserOKResponseModel,
-  MessageResponseModel,
-  ProblemJsonModel
+  MessageResponseModel
 } from "../types/api";
 import * as t from "io-ts/lib/index";
+import ControllerBase from "./ControllerBase";
+import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class MessagesController {
-  apiClient: ApiClientFactoryInterface;
-
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
+export default class MessagesController extends ControllerBase {
   constructor(apiClient: ApiClientFactoryInterface) {
-    this.apiClient = apiClient;
+    super(apiClient);
   }
 
   /**
@@ -62,23 +55,8 @@ export default class MessagesController {
               t
                 .validate(maybeApiMessages, GetMessagesByUserOKResponseModel)
                 .fold(
-                  () => {
-                    // Look if the response is a ProblemJson.
-                    t.validate(maybeApiMessages, ProblemJsonModel).fold(
-                      () => {
-                        res.status(500).json({
-                          // If we reach this something very bad as happened.
-                          message: "Unhandled error."
-                        });
-                      },
-                      error => {
-                        res.status(error.status).json({
-                          // Forward the error received from the API.
-                          message: error.detail
-                        });
-                      }
-                    );
-                  },
+                  // Look if object is a ProblemJson.
+                  () => this.validateProblemJson(maybeApiMessages, res),
                   apiMessages => {
                     // All correct, return the response to the client.
                     const appMessages = apiMessages.items.map(toAppMessage);
@@ -122,23 +100,8 @@ export default class MessagesController {
             (maybeApiMessage: MessageResponse | ProblemJson) => {
               // Look if the response is a GetProfileOKResponse.
               t.validate(maybeApiMessage, MessageResponseModel).fold(
-                () => {
-                  // Look if the response is a ProblemJson.
-                  t.validate(maybeApiMessage, ProblemJsonModel).fold(
-                    () => {
-                      res.status(500).json({
-                        // If we reach this something very bad as happened.
-                        message: "Unhandled error."
-                      });
-                    },
-                    error => {
-                      res.status(error.status).json({
-                        // Forward the error received from the API.
-                        message: error.detail
-                      });
-                    }
-                  );
-                },
+                // Look if object is a ProblemJson.
+                () => this.validateProblemJson(maybeApiMessage, res),
                 apiMessage => {
                   // All correct, return the response to the client.
                   res.json(toAppMessage(apiMessage));
