@@ -18,10 +18,7 @@ const ProfileModel = t.intersection([
   }),
   t.partial({
     email: t.string,
-    family_name: t.string,
-    fiscal_code: t.string,
     is_inbox_enabled: t.boolean,
-    name: t.string,
     preferred_languages: t.readonlyArray(t.string)
   })
 ]);
