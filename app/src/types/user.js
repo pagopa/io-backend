@@ -63,10 +63,9 @@ export function extractUserFromRequest(
   const validation = t.validate(reqWithUser.user, UserModel);
 
   const message = ReadableReporter.report(validation);
-  validation.mapLeft(() => message);
   winston.log("info", message);
 
-  return validation;
+  return validation.mapLeft(() => message);
 }
 
 /**
@@ -83,10 +82,9 @@ export function extractUserFromSpid(
   const validation = t.validate(reqWithUser.user, SpidUserModel);
 
   const message = ReadableReporter.report(validation);
-  validation.mapLeft(() => message);
   winston.log("info", message);
 
-  return validation;
+  return validation.mapLeft(() => message);
 }
 
 /**
@@ -99,8 +97,7 @@ export function extractUserFromJson(from: string): Either<String, User> {
   const validation = t.validate(JSON.parse(from), UserModel);
 
   const message = ReadableReporter.report(validation);
-  validation.mapLeft(() => message);
   winston.log("info", message);
 
-  return validation;
+  return validation.mapLeft(() => message);
 }

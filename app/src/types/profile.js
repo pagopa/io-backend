@@ -11,32 +11,29 @@ const winston = require("winston");
 
 const ProfileModel = t.intersection([
   t.type({
-    name: t.string,
     family_name: t.string,
     fiscal_code: t.string,
-    is_inbox_enabled: t.boolean,
+    name: t.string,
     version: t.number
   }),
   t.partial({
-    name: t.string,
+    email: t.string,
     family_name: t.string,
     fiscal_code: t.string,
-    email: t.string,
     is_inbox_enabled: t.boolean,
-    version: t.number
+    name: t.string,
+    preferred_languages: t.readonlyArray(t.string)
   })
 ]);
 
 const UpsertProfileModel = t.intersection([
   t.type({
-    email: t.string,
-    is_inbox_enabled: t.boolean,
     version: t.number
   }),
   t.partial({
     email: t.string,
     is_inbox_enabled: t.boolean,
-    version: t.number
+    preferred_languages: t.readonlyArray(t.string)
   })
 ]);
 
@@ -53,11 +50,13 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
  * @returns {Profile}
  */
 export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
+  // $FlowFixMe
   return {
     name: user.name,
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
     email: from.email,
+    preferred_languages: from.preferredLanguages,
     is_inbox_enabled: from.isInboxEnabled,
     version: from.version
   };
@@ -71,7 +70,11 @@ export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
  */
 export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
   return {
+    // $FlowFixMe
     email: from.email,
+    // $FlowFixMe
+    preferred_languages: from.preferred_languages,
+    // $FlowFixMe
     isInboxEnabled: from.is_inbox_enabled,
     version: from.version
   };
@@ -89,8 +92,7 @@ export function extractUpsertProfileFromRequest(
   const validation = t.validate(from.body, UpsertProfileModel);
 
   const message = ReadableReporter.report(validation);
-  validation.mapLeft(() => message);
   winston.log("info", message);
 
-  return validation;
+  return validation.mapLeft(() => message);
 }

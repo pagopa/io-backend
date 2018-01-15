@@ -11,8 +11,6 @@ const MessageModel = t.intersection([
     markdown: t.string
   }),
   t.partial({
-    id: t.string,
-    markdown: t.string,
     subject: t.string
   })
 ]);
@@ -26,6 +24,7 @@ export type Message = t.TypeOf<typeof MessageModel>;
  * @returns {Message}
  */
 export function toAppMessage(from: MessageResponse): Message {
+  // $FlowFixMe
   return {
     id: from.id,
     subject: "Lorem ipsum", //from.content.subject,
