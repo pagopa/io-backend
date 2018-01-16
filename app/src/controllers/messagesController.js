@@ -3,7 +3,10 @@
 "use strict";
 
 import type { APIError } from "../types/error";
-import { toAppMessage } from "../types/message";
+import {
+  createdMessageToAppMessage,
+  messageResponseToAppMessage
+} from "../types/message";
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
@@ -60,7 +63,9 @@ export default class MessagesController extends ControllerBase {
                 () => validateProblemJson(maybeApiMessages, res),
                 // All correct, return the response to the client.
                 apiMessages => {
-                  const appMessages = apiMessages.items.map(toAppMessage);
+                  const appMessages = apiMessages.items.map(
+                    createdMessageToAppMessage
+                  );
                   res.json({
                     items: appMessages,
                     pageSize: apiMessages.pageSize
@@ -105,7 +110,7 @@ export default class MessagesController extends ControllerBase {
                 () => validateProblemJson(maybeApiMessage, res),
                 // All correct, return the response to the client.
                 apiMessage => {
-                  res.json(toAppMessage(apiMessage));
+                  res.json(messageResponseToAppMessage(apiMessage));
                 }
               );
             },
@@ -118,45 +123,4 @@ export default class MessagesController extends ControllerBase {
       }
     );
   }
-
-  // getService(serviceId: string, res: express$Response): Service {
-  //   this.adminApiClient
-  //     .getClient()
-  //     .getService(serviceId)
-  //     .then(
-  //       // (maybeService: Service | ProblemJson) => {
-  //       //   // Look if the response is a Service.
-  //       //   t.validate(maybeService, Service).fold(
-  //       //     // Look if object is a ProblemJson.
-  //       //     () => this.validateProblemJson(maybeService, res),
-  //       //     service => {
-  //       //       return service;
-  //       //     }
-  //       //   );
-  //       // },
-  //       maybeService => {
-  //         this.x < Service > (maybeService, res);
-  //       },
-  //       function(err: APIError) {
-  //         res.status(err.statusCode).json({
-  //           message: err.message
-  //         });
-  //       }
-  //     );
-  // }
-  //
-  // x<A>(object: A, res: express$Response): A {
-  //   const UserType = (reify: Type<User>);
-  //
-  //   // Look if the response is a Service.
-  //   t.validate(object, A).fold(
-  //     // Look if object is a ProblemJson.
-  //     () => this.validateProblemJson(object, res),
-  //     y => {
-  //       return y;
-  //     }
-  //   );
-  //
-  //   return object;
-  // }
 }
