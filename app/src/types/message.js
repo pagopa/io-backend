@@ -31,7 +31,7 @@ export function messageResponseToAppMessage(from: MessageResponse): Message {
   } else {
     return {
       id: from.message.id,
-      sender_service_id: from.message.senderServiceId,
+      sender_service_id: from.message.senderServiceId
     };
   }
 }
