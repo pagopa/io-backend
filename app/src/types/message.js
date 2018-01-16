@@ -3,17 +3,13 @@
 "use strict";
 
 import { MessageResponse } from "../api/models";
-import * as t from "io-ts";
+import t from "flow-runtime";
 
-const MessageModel = t.intersection([
-  t.type({
-    id: t.string,
-    markdown: t.string
-  }),
-  t.partial({
-    subject: t.string
-  })
-]);
+const MessageModel = t.object(
+  t.property("id", t.string()),
+  t.property("markdown", t.string()),
+  t.property("subject", t.string(), true)
+);
 
 export type Message = t.TypeOf<typeof MessageModel>;
 
@@ -24,7 +20,6 @@ export type Message = t.TypeOf<typeof MessageModel>;
  * @returns {Message}
  */
 export function toAppMessage(from: MessageResponse): Message {
-  // $FlowFixMe
   return {
     id: from.id,
     subject: "Lorem ipsum", //from.content.subject,

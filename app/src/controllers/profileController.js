@@ -5,14 +5,9 @@
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
-  GetProfileOKResponse,
-  UpsertProfileOKResponse,
-  ProblemJson
-} from "../api/models/index";
-import {
-  GetProfileOKResponseModel,
-  UpsertProfileOKResponseModel,
-  ProblemJsonModel
+  validateGetProfileOKResponseModel,
+  validateProblemJson,
+  validateUpsertProfileOKResponseModel
 } from "../types/api";
 import type { APIError } from "../types/error";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
@@ -22,7 +17,6 @@ import {
   toAppProfile,
   toExtendedProfile
 } from "../types/profile";
-import * as t from "io-ts";
 import ControllerBase from "./ControllerBase";
 
 /**
@@ -56,13 +50,13 @@ export default class ProfileController extends ControllerBase {
           .getClient(user.fiscal_code)
           .getProfile()
           .then(
-            (maybeApiProfile: GetProfileOKResponse | ProblemJson) => {
+            maybeApiProfile => {
               // Look if the response is a GetProfileOKResponse.
-              t.validate(maybeApiProfile, GetProfileOKResponseModel).fold(
+              validateGetProfileOKResponseModel(maybeApiProfile).fold(
                 // Look if object is a ProblemJson.
-                () => this.validateProblemJson(maybeApiProfile, res),
+                () => validateProblemJson(maybeApiProfile, res),
+                // All correct, return the response to the client.
                 apiProfile => {
-                  // All correct, return the response to the client.
                   res.json(toAppProfile(apiProfile, user));
                 }
               );
@@ -108,33 +102,16 @@ export default class ProfileController extends ControllerBase {
               .getClient(user.fiscal_code)
               .upsertProfile({ body: toExtendedProfile(upsertProfile) })
               .then(
-                (maybeApiProfile: UpsertProfileOKResponse | ProblemJson) => {
+                maybeApiProfile => {
                   // Look if the response is a UpsertProfileOKResponse.
-                  t
-                    .validate(maybeApiProfile, UpsertProfileOKResponseModel)
-                    .fold(
-                      () => {
-                        // Look if the response is a ProblemJson.
-                        t.validate(maybeApiProfile, ProblemJsonModel).fold(
-                          () => {
-                            res.status(500).json({
-                              // If we reach this something very bad as happened.
-                              message: "Unhandled error."
-                            });
-                          },
-                          error => {
-                            res.status(error.status).json({
-                              // Forward the error received from the API.
-                              message: error.detail
-                            });
-                          }
-                        );
-                      },
-                      apiProfile => {
-                        // All correct, return the response to the client.
-                        res.json(toAppProfile(apiProfile, user));
-                      }
-                    );
+                  validateUpsertProfileOKResponseModel().fold(
+                    // Look if the response is a ProblemJson.
+                    () => validateProblemJson(maybeApiProfile, res),
+                    // All correct, return the response to the client.
+                    apiProfile => {
+                      res.json(toAppProfile(apiProfile, user));
+                    }
+                  );
                 },
                 (err: APIError) => {
                   res.status(err.statusCode).json({

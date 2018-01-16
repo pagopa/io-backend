@@ -3,22 +3,16 @@
 "use strict";
 
 import type { APIError } from "../types/error";
-import {
-  GetMessagesByUserOKResponse,
-  MessageResponse,
-  ProblemJson
-} from "../api/models";
 import { toAppMessage } from "../types/message";
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
-  GetMessagesByUserOKResponseModel,
-  MessageResponseModel
+  validateGetMessagesByUserOKResponseModel,
+  validateMessageResponseModel,
+  validateProblemJson
 } from "../types/api";
-import * as t from "io-ts/lib/index";
 import ControllerBase from "./ControllerBase";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
-import { Service } from "../api/admin/models";
 import type { AdminApiClientFactoryInterface } from "../services/adminApiClientFactoryInterface";
 
 /**
@@ -59,22 +53,20 @@ export default class MessagesController extends ControllerBase {
           .getClient(user.fiscal_code)
           .getMessagesByUser()
           .then(
-            (maybeApiMessages: GetMessagesByUserOKResponse | ProblemJson) => {
+            maybeApiMessages => {
               // Look if the response is a GetMessagesByUserOKResponse.
-              t
-                .validate(maybeApiMessages, GetMessagesByUserOKResponseModel)
-                .fold(
-                  // Look if object is a ProblemJson.
-                  () => this.validateProblemJson(maybeApiMessages, res),
-                  apiMessages => {
-                    // All correct, return the response to the client.
-                    const appMessages = apiMessages.items.map(toAppMessage);
-                    res.json({
-                      items: appMessages,
-                      pageSize: apiMessages.pageSize
-                    });
-                  }
-                );
+              validateGetMessagesByUserOKResponseModel(maybeApiMessages).fold(
+                // Look if object is a ProblemJson.
+                () => validateProblemJson(maybeApiMessages, res),
+                // All correct, return the response to the client.
+                apiMessages => {
+                  const appMessages = apiMessages.items.map(toAppMessage);
+                  res.json({
+                    items: appMessages,
+                    pageSize: apiMessages.pageSize
+                  });
+                }
+              );
             },
             function(err: APIError) {
               res.status(err.statusCode).json({
@@ -106,13 +98,13 @@ export default class MessagesController extends ControllerBase {
           .getClient(user.fiscal_code)
           .getMessage(req.params.id)
           .then(
-            (maybeApiMessage: MessageResponse | ProblemJson) => {
+            maybeApiMessage => {
               // Look if the response is a GetProfileOKResponse.
-              t.validate(maybeApiMessage, MessageResponseModel).fold(
+              validateMessageResponseModel(maybeApiMessage).fold(
                 // Look if object is a ProblemJson.
-                () => this.validateProblemJson(maybeApiMessage, res),
+                () => validateProblemJson(maybeApiMessage, res),
+                // All correct, return the response to the client.
                 apiMessage => {
-                  // All correct, return the response to the client.
                   res.json(toAppMessage(apiMessage));
                 }
               );
