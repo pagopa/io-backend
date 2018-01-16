@@ -32,7 +32,7 @@ export type SpidUser = t.TypeOf<typeof SpidUserModel>;
  * Converts a SPID response to an User.
  *
  * @param from
- * @returns {{created_at: number, token: *, session_index: *, spid_idp: Array|number, fiscal_code: *, name: *, family_name: *}}
+ * @returns User
  */
 export function toUser(from: SpidUser): User {
   // Use the SAML sessionIndex as token.
