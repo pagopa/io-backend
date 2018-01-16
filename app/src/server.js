@@ -19,6 +19,7 @@ import MessagesController from "./controllers/messagesController";
 
 require("dotenv").load();
 
+const winston = require("winston");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const express = require("express");
@@ -60,7 +61,7 @@ app.use(morgan(process.env.NODE_ENV));
 // Parse the incoming request body. This is needed by Passport spid strategy.
 app.use(bodyParser.json());
 // Parse an urlencoded body.
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 // Define the folder that contains the public assets.
 app.use(express.static("public"));
 // Initializes Passport for incoming requests.
@@ -84,6 +85,13 @@ app.get("/api/v1/profile", tokenAuth, function(
   profileController.getUserProfile(req, res);
 });
 
+app.post("/api/v1/profile", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  profileController.upsertProfile(req, res);
+});
+
 app.get("/api/v1/messages", tokenAuth, function(
   req: express$Request,
   res: express$Response
@@ -100,10 +108,12 @@ app.get("/api/v1/messages/:id", tokenAuth, function(
 
 // Setup and start the HTTPS server.
 
-const certKeyPath = process.env.CERT_KEY_PATH || "./certs/key.pem";
-const certPath = process.env.CERT_PATH || "./certs/cert.pem";
-
+const certKeyPath = process.env.HTTPS_CERT_KEY_PATH || "./certs/key.pem";
+winston.log("info", "Reading HTTPS private key file from %s", certKeyPath);
 const key = fs.readFileSync(certKeyPath, "utf-8");
+
+const certPath = process.env.HTTPS_CERT_PATH || "./certs/cert.pem";
+winston.log("info", "Reading HTTPS certificate file from %s", certPath);
 const cert = fs.readFileSync(certPath, "utf-8");
 
 const options = {
@@ -112,6 +122,5 @@ const options = {
 };
 
 const server = https.createServer(options, app).listen(port, function() {
-  // eslint-disable-next-line no-console
-  console.log("Listening on port %d", server.address().port);
+  winston.log("info", "Listening on port %d", server.address().port);
 });

@@ -14,6 +14,7 @@ class GetProfileOKResponse {
    * Create a GetProfileOKResponse.
    * @member {array} [preferredLanguages]
    * @member {string} [email]
+   * @member {boolean} [isInboxEnabled]
    * @member {number} [version]
    */
   constructor() {
@@ -52,6 +53,13 @@ class GetProfileOKResponse {
             serializedName: 'email',
             type: {
               name: 'String'
+            }
+          },
+          isInboxEnabled: {
+            required: false,
+            serializedName: 'is_inbox_enabled',
+            type: {
+              name: 'Boolean'
             }
           },
           version: {

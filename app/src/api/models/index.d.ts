@@ -181,12 +181,42 @@ export interface LimitedProfile {
  *
  * @member {string} [email]
  * @member {array} [preferredLanguages]
+ * @member {boolean} [isInboxEnabled]
  * @member {number} [version]
  */
 export interface ExtendedProfile {
   email?: string;
   preferredLanguages?: string[];
+  isInboxEnabled?: boolean;
   version?: number;
+}
+
+/**
+ * @class
+ * Initializes a new instance of the Service class.
+ * @constructor
+ * @summary Service
+ *
+ * A Service tied to an user's subscription.
+ *
+ * @member {string} serviceId
+ * @member {string} serviceName
+ * @member {string} organizationName
+ * @member {string} departmentName
+ * @member {array} authorizedCidrs
+ * @member {array} authorizedRecipients
+ * @member {number} [version]
+ * @member {string} [id]
+ */
+export interface Service {
+  serviceId: string;
+  serviceName: string;
+  organizationName: string;
+  departmentName: string;
+  authorizedCidrs: string[];
+  authorizedRecipients: string[];
+  version?: number;
+  id?: string;
 }
 
 /**
@@ -205,11 +235,13 @@ export interface GetMessagesByUserOKResponse extends PaginationResponse {
  * @constructor
  * @member {array} [preferredLanguages]
  * @member {string} [email]
+ * @member {boolean} [isInboxEnabled]
  * @member {number} [version]
  */
 export interface GetProfileOKResponse {
   preferredLanguages?: string[];
   email?: string;
+  isInboxEnabled?: boolean;
   version?: number;
 }
 
@@ -219,10 +251,12 @@ export interface GetProfileOKResponse {
  * @constructor
  * @member {array} [preferredLanguages]
  * @member {string} [email]
+ * @member {boolean} [isInboxEnabled]
  * @member {number} [version]
  */
 export interface UpsertProfileOKResponse {
   preferredLanguages?: string[];
   email?: string;
+  isInboxEnabled?: boolean;
   version?: number;
 }

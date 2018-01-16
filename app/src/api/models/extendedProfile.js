@@ -18,6 +18,7 @@ class ExtendedProfile {
    * Create a ExtendedProfile.
    * @member {string} [email]
    * @member {array} [preferredLanguages]
+   * @member {boolean} [isInboxEnabled]
    * @member {number} [version]
    */
   constructor() {
@@ -56,6 +57,13 @@ class ExtendedProfile {
                     name: 'String'
                   }
               }
+            }
+          },
+          isInboxEnabled: {
+            required: false,
+            serializedName: 'is_inbox_enabled',
+            type: {
+              name: 'Boolean'
             }
           },
           version: {

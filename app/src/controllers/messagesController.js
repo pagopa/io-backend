@@ -3,26 +3,29 @@
 "use strict";
 
 import type { APIError } from "../types/error";
-import { GetMessagesByUserOKResponse, MessageResponse } from "../api/models";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
+import {
+  GetMessagesByUserOKResponse,
+  MessageResponse,
+  ProblemJson
+} from "../api/models";
 import { toAppMessage } from "../types/message";
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
+import {
+  GetMessagesByUserOKResponseModel,
+  MessageResponseModel
+} from "../types/api";
+import * as t from "io-ts/lib/index";
+import ControllerBase from "./ControllerBase";
+import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class MessagesController {
-  apiClient: ApiClientFactoryInterface;
-
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
+export default class MessagesController extends ControllerBase {
   constructor(apiClient: ApiClientFactoryInterface) {
-    this.apiClient = apiClient;
+    super(apiClient);
   }
 
   /**
@@ -47,19 +50,26 @@ export default class MessagesController {
           .getClient(user.fiscal_code)
           .getMessagesByUser()
           .then(
-            function(apiMessages: GetMessagesByUserOKResponse) {
-              const appMessages = apiMessages.items.map(toAppMessage);
-
-              res.json({ items: appMessages, pageSize: apiMessages.pageSize });
+            (maybeApiMessages: GetMessagesByUserOKResponse | ProblemJson) => {
+              // Look if the response is a GetMessagesByUserOKResponse.
+              t
+                .validate(maybeApiMessages, GetMessagesByUserOKResponseModel)
+                .fold(
+                  // Look if object is a ProblemJson.
+                  () => this.validateProblemJson(maybeApiMessages, res),
+                  apiMessages => {
+                    // All correct, return the response to the client.
+                    const appMessages = apiMessages.items.map(toAppMessage);
+                    res.json({
+                      items: appMessages,
+                      pageSize: apiMessages.pageSize
+                    });
+                  }
+                );
             },
             function(err: APIError) {
-              if (err.statusCode === 404) {
-                res.status(404).json({ message: err.message });
-                return;
-              }
-
-              res.status(500).json({
-                message: "There was an error in retrieving the messages."
+              res.status(err.statusCode).json({
+                message: err.message
               });
             }
           );
@@ -76,11 +86,6 @@ export default class MessagesController {
   getUserMessage(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
-    // TODO: better error message.
-    maybeUser.mapLeft(() => {
-      return "Errors in validating the user profile";
-    });
-
     maybeUser.fold(
       (error: String) => {
         res.status(500).json({
@@ -92,19 +97,20 @@ export default class MessagesController {
           .getClient(user.fiscal_code)
           .getMessage(req.params.id)
           .then(
-            function(apiMessage: MessageResponse) {
-              const appMessage = toAppMessage(apiMessage);
-
-              res.json(appMessage);
+            (maybeApiMessage: MessageResponse | ProblemJson) => {
+              // Look if the response is a GetProfileOKResponse.
+              t.validate(maybeApiMessage, MessageResponseModel).fold(
+                // Look if object is a ProblemJson.
+                () => this.validateProblemJson(maybeApiMessage, res),
+                apiMessage => {
+                  // All correct, return the response to the client.
+                  res.json(toAppMessage(apiMessage));
+                }
+              );
             },
             function(err: APIError) {
-              if (err.statusCode === 404) {
-                res.status(404).json({ message: err.message });
-                return;
-              }
-
-              res.status(500).json({
-                message: "There was an error in retrieving the message."
+              res.status(err.statusCode).json({
+                message: err.message
               });
             }
           );

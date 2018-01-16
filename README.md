@@ -39,19 +39,20 @@ A Linux/macOS environment is required at the moment.
 
 1. clone the project in a folder called `italia-backend`
 2. go to the project's folder
-3. run `scripts/yarn.sh` to install backend dependencies
-4. run `docker-compose up -d` to start the containers
-5. edit your `/etc/hosts` file by adding:
+3. run `scripts/build-tools.sh` to build the `tools` Docker image
+4. run `scripts/yarn.sh` to install backend dependencies
+5. run `docker-compose up -d` to start the containers
+6. edit your `/etc/hosts` file by adding:
 
 ```
 localhost    spid-testenv-identityserver
 localhost    italia-backend
 ```
 
-6. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
-7. run `scripts/import-spid-data.sh` to configure the local IDP
-8. copy `app/.env.example` to `app/.env` and fill the variables with your values
-9. point your browser to [https://italia-backend](https://italia-backend)
+7. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
+8. run `scripts/import-spid-data.sh` to configure the local IDP
+9. copy `app/.env.example` to `app/.env` and fill the variables with your values
+10. point your browser to [https://italia-backend](https://italia-backend)
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).

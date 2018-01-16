@@ -54,7 +54,8 @@
     "jest": "^21.2.1",
     "nodemon": "^1.11.0",
     "prettier": "^1.7.4",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "winston": "^2.4.0"
   },
   "jest": {
     "testEnvironment": "node",
