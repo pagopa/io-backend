@@ -18,14 +18,23 @@ import {
 import * as t from "io-ts/lib/index";
 import ControllerBase from "./ControllerBase";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
+import { Service } from "../api/admin/models";
+import type { AdminApiClientFactoryInterface } from "../services/adminApiClientFactoryInterface";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
 export default class MessagesController extends ControllerBase {
-  constructor(apiClient: ApiClientFactoryInterface) {
+  adminApiClient: AdminApiClientFactoryInterface;
+
+  constructor(
+    apiClient: ApiClientFactoryInterface,
+    adminApiClient: AdminApiClientFactoryInterface
+  ) {
     super(apiClient);
+
+    this.adminApiClient = adminApiClient;
   }
 
   /**
@@ -117,4 +126,45 @@ export default class MessagesController extends ControllerBase {
       }
     );
   }
+
+  // getService(serviceId: string, res: express$Response): Service {
+  //   this.adminApiClient
+  //     .getClient()
+  //     .getService(serviceId)
+  //     .then(
+  //       // (maybeService: Service | ProblemJson) => {
+  //       //   // Look if the response is a Service.
+  //       //   t.validate(maybeService, Service).fold(
+  //       //     // Look if object is a ProblemJson.
+  //       //     () => this.validateProblemJson(maybeService, res),
+  //       //     service => {
+  //       //       return service;
+  //       //     }
+  //       //   );
+  //       // },
+  //       maybeService => {
+  //         this.x < Service > (maybeService, res);
+  //       },
+  //       function(err: APIError) {
+  //         res.status(err.statusCode).json({
+  //           message: err.message
+  //         });
+  //       }
+  //     );
+  // }
+  //
+  // x<A>(object: A, res: express$Response): A {
+  //   const UserType = (reify: Type<User>);
+  //
+  //   // Look if the response is a Service.
+  //   t.validate(object, A).fold(
+  //     // Look if object is a ProblemJson.
+  //     () => this.validateProblemJson(object, res),
+  //     y => {
+  //       return y;
+  //     }
+  //   );
+  //
+  //   return object;
+  // }
 }
