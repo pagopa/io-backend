@@ -3,7 +3,7 @@
 NODE_VER ?= 8.6.0-alpine
 TAG ?= 1.0.0
 
-REPO = italia/api-proxy
+REPO = teamdigitale/italia-backend
 
 .PHONY: build
 
