@@ -69,7 +69,7 @@ export function validateProblemJson(value: any, res: express$Response) {
  *
  * @param value
  * @param type
- * @returns {any}
+ * @returns {Either<String, any>}
  */
 export function validateResponse(value: any, type: any): Either<String, any> {
   const validation = t.validate(type, value);
