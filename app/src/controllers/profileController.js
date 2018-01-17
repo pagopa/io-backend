@@ -104,7 +104,7 @@ export default class ProfileController extends ControllerBase {
               .then(
                 maybeApiProfile => {
                   // Look if the response is a UpsertProfileOKResponse.
-                  validateUpsertProfileOKResponseModel().fold(
+                  validateUpsertProfileOKResponseModel(maybeApiProfile).fold(
                     // Look if the response is a ProblemJson.
                     () => validateProblemJson(maybeApiProfile, res),
                     // All correct, return the response to the client.

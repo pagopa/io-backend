@@ -18,15 +18,15 @@ import { left, right } from "fp-ts/lib/Either";
 const GetProfileOKResponseModel = t.object(
   t.property("preferredLanguages", t.array(t.string()), true),
   t.property("email", t.string(), true),
-  t.property("isInboxEnabled", t.boolean(), true),
-  t.property("version", t.number(), true)
+  t.property("isInboxEnabled", t.boolean()),
+  t.property("version", t.number())
 );
 
 const UpsertProfileOKResponseModel = t.object(
   t.property("preferredLanguages", t.array(t.string()), true),
   t.property("email", t.string(), true),
-  t.property("isInboxEnabled", t.boolean(), true),
-  t.property("version", t.number(), true)
+  t.property("isInboxEnabled", t.boolean()),
+  t.property("version", t.number())
 );
 
 const ProblemJsonModel = t.object(
@@ -44,7 +44,7 @@ const GetMessagesByUserOKResponseModel = t.object(
 );
 
 const MessageResponseModel = t.object(
-  t.property("message", t.any(), true),
+  t.property("message", t.string()),
   t.property("notification", t.any(), true)
 );
 
@@ -55,20 +55,19 @@ const MessageResponseModel = t.object(
  * @param res
  */
 export function validateProblemJson(value: any, res: express$Response) {
-  t.validate(ProblemJsonModel, value).fold(
-    () => {
-      res.status(500).json({
-        // If we reach this point something very bad has happened.
-        message: "Unrecoverable error."
-      });
-    },
-    error => {
-      res.status(error.status).json({
-        // Forward the error received from the API.
-        message: error.detail
-      });
-    }
-  );
+  const validation = t.validate(ProblemJsonModel, value);
+
+  if (validation.hasErrors()) {
+    res.status(500).json({
+      // If we reach this point something very bad has happened.
+      message: "Unrecoverable error."
+    });
+  } else {
+    res.status(value.status).json({
+      // Forward the error received from the API.
+      message: value.detail
+    });
+  }
 }
 
 export function validateGetProfileOKResponseModel(
