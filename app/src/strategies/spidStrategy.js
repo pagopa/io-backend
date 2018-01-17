@@ -17,9 +17,10 @@ winston.log("info", "Reading SAML certificate file from %s", keyPath);
 const spidStrategy = new SpidStrategy(
   {
     sp: {
-      path: "/assertionConsumerService",
+      callbackUrl: "https://italia-backend/assertionConsumerService",
       issuer: "https://italia-backend",
       privateCert: fs.readFileSync(keyPath, "utf-8"),
+      decryptionPvk: fs.readFileSync(keyPath, "utf-8"),
       attributeConsumingServiceIndex: 1,
       identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
       authnContext: "https://www.spid.gov.it/SpidL1"

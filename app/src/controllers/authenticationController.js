@@ -5,6 +5,8 @@
 import type { SpidUser } from "../types/user";
 import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import { extractUserFromSpid, toUser } from "../types/user";
+import spidStrategy from "../strategies/spidStrategy";
+const fs = require("fs");
 
 /**
  * This controller handles the call from the IDP after
@@ -50,5 +52,24 @@ export default class AuthenticationController {
         res.redirect(urlWithToken);
       }
     );
+  }
+
+  /**
+   * The metadata for this Service Provider.
+   *
+   * @param req
+   * @param res
+   */
+  metadata(req: express$Request, res: express$Response) {
+    const certPath = process.env.HTTPS_CERT_PATH || "./certs/cert.pem";
+    // winston.log("info", "Reading HTTPS certificate file from %s", certPath);
+    const metadata = spidStrategy.generateServiceProviderMetadata(
+      fs.readFileSync(certPath, "utf-8")
+    );
+
+    res
+      .status(200)
+      .set("Content-Type", "application/xml")
+      .send(metadata);
   }
 }
