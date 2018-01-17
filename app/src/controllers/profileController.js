@@ -5,9 +5,10 @@
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
-  validateGetProfileOKResponseModel,
+  GetProfileOKResponseModel,
+  UpsertProfileOKResponseModel,
   validateProblemJson,
-  validateUpsertProfileOKResponseModel
+  validateResponse
 } from "../types/api";
 import type { APIError } from "../types/error";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
@@ -52,7 +53,7 @@ export default class ProfileController extends ControllerBase {
           .then(
             maybeApiProfile => {
               // Look if the response is a GetProfileOKResponse.
-              validateGetProfileOKResponseModel(maybeApiProfile).fold(
+              validateResponse(maybeApiProfile, GetProfileOKResponseModel).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiProfile, res),
                 // All correct, return the response to the client.
@@ -104,7 +105,10 @@ export default class ProfileController extends ControllerBase {
               .then(
                 maybeApiProfile => {
                   // Look if the response is a UpsertProfileOKResponse.
-                  validateUpsertProfileOKResponseModel(maybeApiProfile).fold(
+                  validateResponse(
+                    maybeApiProfile,
+                    UpsertProfileOKResponseModel
+                  ).fold(
                     // Look if the response is a ProblemJson.
                     () => validateProblemJson(maybeApiProfile, res),
                     // All correct, return the response to the client.

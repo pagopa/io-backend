@@ -10,9 +10,10 @@ import {
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
-  validateGetMessagesByUserOKResponseModel,
-  validateMessageResponseModel,
-  validateProblemJson
+  GetMessagesByUserOKResponseModel,
+  MessageResponseModel,
+  validateProblemJson,
+  validateResponse
 } from "../types/api";
 import ControllerBase from "./ControllerBase";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
@@ -58,7 +59,10 @@ export default class MessagesController extends ControllerBase {
           .then(
             maybeApiMessages => {
               // Look if the response is a GetMessagesByUserOKResponse.
-              validateGetMessagesByUserOKResponseModel(maybeApiMessages).fold(
+              validateResponse(
+                maybeApiMessages,
+                GetMessagesByUserOKResponseModel
+              ).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessages, res),
                 // All correct, return the response to the client.
@@ -105,7 +109,7 @@ export default class MessagesController extends ControllerBase {
           .then(
             maybeApiMessage => {
               // Look if the response is a GetProfileOKResponse.
-              validateMessageResponseModel(maybeApiMessage).fold(
+              validateResponse(maybeApiMessage, MessageResponseModel).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessage, res),
                 // All correct, return the response to the client.
