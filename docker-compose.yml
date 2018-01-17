@@ -5,34 +5,25 @@ services:
     command: ["yarn", "hot-reload"]
     container_name: italia-backend
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=dev
     expose:
-      - "8080"
-    image: node:8.6.0-alpine
+      - "443"
+    ports:
+      - "443:443"
+    image: node:8.9.4-alpine
     restart: always
     volumes:
       - "./app:/usr/src/app"
+      - "./keys:/usr/src/app/certs"
     working_dir: "/usr/src/app"
 
-  shibboleth:
-    container_name: shibboleth
-    image: virtualstaticvoid/shibboleth-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    restart: always
-    volumes:
-      - "./static:/var/www"
-      - "./logs/shibboleth:/var/log"
-      - "./docker/shibboleth/shibboleth-nginx-default.conf:/etc/nginx/conf.d/default.conf"
-      - "./docker/shibboleth/shibboleth2.xml:/etc/shibboleth/shibboleth2.xml"
-      - "./docker/shibboleth/shibboleth-spid/attribute-map.xml:/etc/shibboleth/attribute-map.xml"
-      - "./docker/shibboleth/shibboleth-spid/protocols.xml:/etc/shibboleth/protocols.xml"
-      - "./docker/shibboleth/shibboleth-spid/security-policy.xml:/etc/shibboleth/security-policy.xml"
-      - "./docker/shibboleth/shibboleth-spid/spid-idp-metadata:/etc/shibboleth/spid-idp-metadata"
-      - "./docker/shibboleth/shibboleth-spid/spidMetadata.xml:/etc/shibboleth/spidMetadata.xml"
-      - "./docker/keys/test-cert.key:/etc/shibboleth/certs/spid-signature.key:ro"
-      - "./docker/keys/test-cert.crt:/etc/shibboleth/certs/spid-signature.cer:ro"
+  redis:
+    container_name: redis
+    image: wodby/redis
+    environment:
+      REDIS_TIMEOUT: 300
+      REDIS_TCP_KEEPALIVE: 60
+      REDIS_MAXMEMORY: 182m
 
   spid-testenv-identityserver:
     container_name: spid-testenv-identityserver

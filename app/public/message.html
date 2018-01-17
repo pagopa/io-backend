@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Messages</title>
+
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>Message</h1>
+
+  <a href="index.html">Home</a> > <a href="messages.html">Messages</a>
+
+  <br/><br/>
+
+  <div><strong>Subject:</strong></div>
+  <div id="subject"></div>
+  <br/>
+  <div><strong>Markdown:</strong></div>
+  <div id="markdown"></div>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+
+  const url_string = window.location.href;
+  const url = new URL(url_string);
+  const id = url.searchParams.get("id");
+
+  if (token) {
+    localStorage.setItem("token", token);
+
+    fetch('./api/v1/messages/' + id, {
+      credentials: 'include',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      },
+    })
+      .then(
+        function(response) {
+          if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' +
+              response.status);
+            return;
+          }
+
+          // Examine the text in the response
+          response.json().then(function(data) {
+            console.log(data);
+            $('#subject').append(data.subject);
+            $('#markdown').append(data.markdown);
+          });
+        }
+      )
+      .catch(function(err) {
+        console.log('Fetch Error :-S', err);
+      });
+  } else {
+    window.location = 'idp_list.html';
+  }
+
+</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

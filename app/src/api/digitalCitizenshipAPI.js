@@ -36,7 +36,6 @@ const models = require('./models');
  *                      {Error}  err        - The Error object if an error occurred, null otherwise.
  *
  *                      {object} [result]   - The deserialized result object if an error did not occur.
- *                      See {@link MessageResponse} for more information.
  *
  *                      {object} [request]  - The HTTP Request object if an error did not occur.
  *
@@ -147,6 +146,23 @@ function _getMessage(id, options, callback) {
         return callback(deserializationError);
       }
     }
+    // Deserialize Response
+    if (statusCode === 404) {
+      let parsedResponse = null;
+      try {
+        parsedResponse = JSON.parse(responseBody);
+        result = JSON.parse(responseBody);
+        if (parsedResponse !== null && parsedResponse !== undefined) {
+          let resultMapper = new client.models['ProblemJson']().mapper();
+          result = client.deserialize(resultMapper, parsedResponse, 'result');
+        }
+      } catch (error) {
+        let deserializationError1 = new Error(`Error ${error} occurred in deserializing the responseBody - ${responseBody}`);
+        deserializationError1.request = msRest.stripRequest(httpRequest);
+        deserializationError1.response = msRest.stripResponse(response);
+        return callback(deserializationError1);
+      }
+    }
 
     return callback(null, result, httpRequest, response);
   });
@@ -172,8 +188,6 @@ function _getMessage(id, options, callback) {
  *                      {Error}  err        - The Error object if an error occurred, null otherwise.
  *
  *                      {object} [result]   - The deserialized result object if an error did not occur.
- *                      See {@link GetMessagesByUserOKResponse} for more
- *                      information.
  *
  *                      {object} [request]  - The HTTP Request object if an error did not occur.
  *
@@ -288,6 +302,23 @@ function _getMessagesByUser(options, callback) {
         deserializationError.request = msRest.stripRequest(httpRequest);
         deserializationError.response = msRest.stripResponse(response);
         return callback(deserializationError);
+      }
+    }
+    // Deserialize Response
+    if (statusCode === 404) {
+      let parsedResponse = null;
+      try {
+        parsedResponse = JSON.parse(responseBody);
+        result = JSON.parse(responseBody);
+        if (parsedResponse !== null && parsedResponse !== undefined) {
+          let resultMapper = new client.models['ProblemJson']().mapper();
+          result = client.deserialize(resultMapper, parsedResponse, 'result');
+        }
+      } catch (error) {
+        let deserializationError1 = new Error(`Error ${error} occurred in deserializing the responseBody - ${responseBody}`);
+        deserializationError1.request = msRest.stripRequest(httpRequest);
+        deserializationError1.response = msRest.stripResponse(response);
+        return callback(deserializationError1);
       }
     }
 
@@ -488,7 +519,6 @@ function _submitMessageforUser(options, callback) {
  *                      {Error}  err        - The Error object if an error occurred, null otherwise.
  *
  *                      {object} [result]   - The deserialized result object if an error did not occur.
- *                      See {@link GetProfileOKResponse} for more information.
  *
  *                      {object} [request]  - The HTTP Request object if an error did not occur.
  *
@@ -595,6 +625,23 @@ function _getProfile(options, callback) {
         return callback(deserializationError);
       }
     }
+    // Deserialize Response
+    if (statusCode === 404) {
+      let parsedResponse = null;
+      try {
+        parsedResponse = JSON.parse(responseBody);
+        result = JSON.parse(responseBody);
+        if (parsedResponse !== null && parsedResponse !== undefined) {
+          let resultMapper = new client.models['ProblemJson']().mapper();
+          result = client.deserialize(resultMapper, parsedResponse, 'result');
+        }
+      } catch (error) {
+        let deserializationError1 = new Error(`Error ${error} occurred in deserializing the responseBody - ${responseBody}`);
+        deserializationError1.request = msRest.stripRequest(httpRequest);
+        deserializationError1.response = msRest.stripResponse(response);
+        return callback(deserializationError1);
+      }
+    }
 
     return callback(null, result, httpRequest, response);
   });
@@ -614,6 +661,8 @@ function _getProfile(options, callback) {
  *
  * @param {array} [options.body.preferredLanguages]
  *
+ * @param {boolean} [options.body.isInboxEnabled]
+ *
  * @param {number} [options.body.version]
  *
  * @param {object} [options.customHeaders] Headers that will be added to the
@@ -626,8 +675,6 @@ function _getProfile(options, callback) {
  *                      {Error}  err        - The Error object if an error occurred, null otherwise.
  *
  *                      {object} [result]   - The deserialized result object if an error did not occur.
- *                      See {@link UpsertProfileOKResponse} for more
- *                      information.
  *
  *                      {object} [request]  - The HTTP Request object if an error did not occur.
  *
@@ -747,6 +794,40 @@ function _upsertProfile(options, callback) {
         deserializationError.request = msRest.stripRequest(httpRequest);
         deserializationError.response = msRest.stripResponse(response);
         return callback(deserializationError);
+      }
+    }
+    // Deserialize Response
+    if (statusCode === 400) {
+      let parsedResponse = null;
+      try {
+        parsedResponse = JSON.parse(responseBody);
+        result = JSON.parse(responseBody);
+        if (parsedResponse !== null && parsedResponse !== undefined) {
+          let resultMapper = new client.models['ProblemJson']().mapper();
+          result = client.deserialize(resultMapper, parsedResponse, 'result');
+        }
+      } catch (error) {
+        let deserializationError1 = new Error(`Error ${error} occurred in deserializing the responseBody - ${responseBody}`);
+        deserializationError1.request = msRest.stripRequest(httpRequest);
+        deserializationError1.response = msRest.stripResponse(response);
+        return callback(deserializationError1);
+      }
+    }
+    // Deserialize Response
+    if (statusCode === 500) {
+      let parsedResponse = null;
+      try {
+        parsedResponse = JSON.parse(responseBody);
+        result = JSON.parse(responseBody);
+        if (parsedResponse !== null && parsedResponse !== undefined) {
+          let resultMapper = new client.models['ProblemJson']().mapper();
+          result = client.deserialize(resultMapper, parsedResponse, 'result');
+        }
+      } catch (error) {
+        let deserializationError2 = new Error(`Error ${error} occurred in deserializing the responseBody - ${responseBody}`);
+        deserializationError2.request = msRest.stripRequest(httpRequest);
+        deserializationError2.response = msRest.stripResponse(response);
+        return callback(deserializationError2);
       }
     }
 
@@ -889,7 +970,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
 
     this.baseUri = baseUri;
     if (!this.baseUri) {
-      this.baseUri = 'https://localhost/api/v1';
+      this.baseUri = '/api/v1';
     }
     this.fiscalCode = fiscalCode;
 
@@ -922,7 +1003,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<MessageResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error} - The error object.
    */
@@ -959,7 +1040,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned
    *
-   *                      @resolve {MessageResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error} - The error object.
    *
@@ -968,7 +1049,6 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *                      {Error}  err        - The Error object if an error occurred, null otherwise.
    *
    *                      {object} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link MessageResponse} for more information.
    *
    *                      {object} [request]  - The HTTP Request object if an error did not occur.
    *
@@ -1009,7 +1089,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<GetMessagesByUserOKResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error} - The error object.
    */
@@ -1047,7 +1127,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned
    *
-   *                      @resolve {GetMessagesByUserOKResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error} - The error object.
    *
@@ -1056,8 +1136,6 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *                      {Error}  err        - The Error object if an error occurred, null otherwise.
    *
    *                      {object} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link GetMessagesByUserOKResponse} for more
-   *                      information.
    *
    *                      {object} [request]  - The HTTP Request object if an error did not occur.
    *
@@ -1207,7 +1285,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<GetProfileOKResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error} - The error object.
    */
@@ -1242,7 +1320,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned
    *
-   *                      @resolve {GetProfileOKResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error} - The error object.
    *
@@ -1251,7 +1329,6 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *                      {Error}  err        - The Error object if an error occurred, null otherwise.
    *
    *                      {object} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link GetProfileOKResponse} for more information.
    *
    *                      {object} [request]  - The HTTP Request object if an error did not occur.
    *
@@ -1291,6 +1368,8 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @param {array} [options.body.preferredLanguages]
    *
+   * @param {boolean} [options.body.isInboxEnabled]
+   *
    * @param {number} [options.body.version]
    *
    * @param {object} [options.customHeaders] Headers that will be added to the
@@ -1298,7 +1377,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @returns {Promise} A promise is returned
    *
-   * @resolve {HttpOperationResponse<UpsertProfileOKResponse>} - The deserialized result object.
+   * @resolve {HttpOperationResponse<Object>} - The deserialized result object.
    *
    * @reject {Error} - The error object.
    */
@@ -1330,6 +1409,8 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * @param {array} [options.body.preferredLanguages]
    *
+   * @param {boolean} [options.body.isInboxEnabled]
+   *
    * @param {number} [options.body.version]
    *
    * @param {object} [options.customHeaders] Headers that will be added to the
@@ -1342,7 +1423,7 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *
    * {Promise} A promise is returned
    *
-   *                      @resolve {UpsertProfileOKResponse} - The deserialized result object.
+   *                      @resolve {Object} - The deserialized result object.
    *
    *                      @reject {Error} - The error object.
    *
@@ -1351,8 +1432,6 @@ class DigitalCitizenshipAPI extends ServiceClient {
    *                      {Error}  err        - The Error object if an error occurred, null otherwise.
    *
    *                      {object} [result]   - The deserialized result object if an error did not occur.
-   *                      See {@link UpsertProfileOKResponse} for more
-   *                      information.
    *
    *                      {object} [request]  - The HTTP Request object if an error did not occur.
    *

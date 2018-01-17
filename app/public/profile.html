@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User profile</title>
+
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>User profile</h1>
+
+  <a href="index.html">Home</a>
+
+  <br/><br/>
+
+  <div id="name"></div>
+  <div id="fiscal_code"></div>
+  <div id="email"></div>
+  <div id="version"></div>
+  <div id="is_inbox_enabled"></div>
+
+  <h2>Edit</h2>
+
+  <form id="edit">
+    <label for="edit_email">Email:</label>
+    <input type="text" id="edit_email" value=""/><br/>
+    <label for="edit_inbox_enabled">Inbox enabled:</label>
+    <input type="checkbox" id="edit_inbox_enabled" checked/><br/>
+    <input type="hidden" id="edit_version" value=""/><br/>
+    <input type="submit" name="Save">
+  </form>
+</div>
+
+<script>
+  const url_string = window.location.href;
+  const url = new URL(url_string);
+  const token = url.searchParams.get("token") || localStorage.getItem("token");
+
+  if (token) {
+    localStorage.setItem("token", token);
+
+    fetch('./api/v1/profile', {
+      credentials: 'include',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      },
+    })
+      .then(
+        function(response) {
+          if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' +
+              response.status);
+            return;
+          }
+
+          // Examine the text in the response
+          response.json().then(function(data) {
+            $("#name").append(data.name + ' ' + data.family_name);
+            $("#fiscal_code").append(data.fiscal_code);
+            $("#email").append(data.email);
+            $("#version").append(data.version);
+
+            $("#edit_email").val(data.email);
+            $("#edit_version").val(data.version);
+
+            if (data.is_inbox_enabled) {
+              $("#is_inbox_enabled").append("Inbox enabled");
+              $("#edit_inbox_enabled").attr('checked', true);
+            } else {
+              $("#is_inbox_enabled").append("Inbox non enabled");
+              $("#edit_inbox_enabled").attr('checked', false);
+            }
+          });
+        }
+      )
+      .catch(function(err) {
+        console.log('Fetch Error :-S', err);
+      });
+  } else {
+    window.location = 'idp_list.html';
+  }
+
+  $("#edit").submit(function() {
+    const data = {
+      email: $("#edit_email").val(),
+      is_inbox_enabled: $("#edit_inbox_enabled").is(':checked'),
+      version: parseInt($("#edit_version").val())
+    };
+
+    console.log(data);
+
+    $.ajax({
+      url: "./api/v1/profile",
+      type: 'post',
+      data: JSON.stringify(data),
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      dataType: 'json',
+      success: function(data) {
+        console.info(data);
+      }
+    });
+  });
+
+</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

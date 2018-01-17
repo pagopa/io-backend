@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   version: 1.0.0
   title: Proxy API
@@ -8,79 +8,19 @@ basePath: /api/v1
 schemes:
   - https
 paths:
-  '/demos/{demo_id}':
-    x-swagger-router-controller: Demos
+  "/messages":
+    x-swagger-router-controller: MessagesController
     parameters:
-      - name: demo_id
-        in: path
-        type: string
-        required: true
-        description: 'The id of the demo.'
+      - $ref: "#/parameters/PaginationRequest"
     get:
-      operationId: getDemoById
-      summary: Get steps for an application demo
-      description: |-
-        Returns the steps used by the client to demonstrate some application's features.
-      responses:
-        '200':
-          description: Found.
-          schema:
-            $ref: '#/definitions/Steps'
-        '404':
-          description: No steps found.
-  '/providers':
-    x-swagger-router-controller: Providers
-    get:
-      operationId: getProviders
-      summary: Get the list of available service providers
-      description: |-
-        Returns the list of available service providers.
-      responses:
-        '200':
-          description: Found.
-          schema:
-            allOf:
-              - type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Provider'
-        '404':
-          description: No steps found.
-  '/providers/{provider_id}':
-    x-swagger-router-controller: Providers
-    parameters:
-      - name: provider_id
-        in: path
-        type: string
-        required: true
-        description: 'The id of the service provider.'
-    get:
-      operationId: getProviderById
-      summary: Get data about a service provider
-      description: |-
-        Returns the data needed to render a link to a SPID service provider.
-      responses:
-        '200':
-          description: Found.
-          schema:
-            $ref: '#/definitions/Provider'
-        '404':
-          description: No provider found.
-  '/users/messages':
-    x-swagger-router-controller: Messages
-    parameters:
-      - $ref: '#/parameters/PaginationRequest'
-    get:
-      operationId: getMessagesByUser
-      summary: Get messages by user
+      operationId: getUserMessages
+      summary: Get user's messages
       description: |-
         Returns the messages for the user identified by the provided fiscal code.
         Messages will be returned in inverse acceptance order (from last to first).
         The "next" field, when present, contains an URL pointing to the next page of results.
       responses:
-        '200':
+        "200":
           description: Found.
           schema:
             allOf:
@@ -89,137 +29,163 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/definitions/Message'
-              - $ref: '#/definitions/PaginationResponse'
-        '404':
+                      $ref: "#/definitions/Message"
+              - $ref: "#/definitions/PaginationResponse"
+          examples:
+            application/json:
+              items:
+              - id: 01BX9NSMKVXXS5PSP2FATZMYYY
+                content:
+                  subject: amet sunt dolor nulla esseesseanim
+                  markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+              - id: 01BX9NSMKVXXS5PSP2FATZM123
+                content:
+                  subject: idUt quis tempor esseesseanim
+                  markdown: Nullam dapibus metus sed elementum efficitur. Curabitur facilisis sagittis risus nec sodales.
+                    Vestibulum in eros sapien. Donec ac odio sit amet dui semper ornare eget nec odio. Pellentesque habitant
+                    morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent nibh ex, mattis sit amet
+                    felis id, sodales euismod velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              page_size: 2
+              next: https://example.com/next
+        "404":
           description: No message found.
-  '/profile':
+        "500":
+          description: There was an error in retrieving the messages.
+  "/messages/{id}":
+    x-swagger-router-controller: MessagesController
+    parameters:
+      - name: id
+        in: path
+        type: string
+        required: true
+        description: The ID of the message.
+    get:
+      operationId: getUserMessage
+      summary: Get message
+      description: |-
+        Returns the message with the provided message ID.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/Message"
+          examples:
+            application/json:
+              message:
+                id: 01BX9NSMKAAAS5PSP2FATZM6BQ
+                content:
+                  subject: message subject, aliquip sint nulla in estinut
+                  markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+        "404":
+          description: No message found for the provided ID.
+        "500":
+          description: There was an error in retrieving the message.
+  "/profile":
     x-swagger-router-controller: ProfileController
     get:
       operationId: getUserProfile
-      summary: Get User's Profile
+      summary: Get user's profile
       description: Returns the profile for the user identified by the provided fiscal code.
       responses:
-        '200':
+        "200":
           description: Found.
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: "#/definitions/Profile"
           examples:
             application/json:
               fiscal_code: "TMMEXQ60A10Y526X"
               email: "email@example.com"
-        '404':
+        "404":
           description: No user found for the provided fiscal code.
-        '500':
+        "500":
           description: There was an error in retrieving the user profile.
+    post:
+      operationId: upsertProfile
+      summary: Set User's profile
+      description: Create or update the profile for the user identified by the provided fiscal code.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ExtendedProfile"
+          x-examples:
+            application/json:
+              email: foobar@example.com
+      responses:
+        '200':
+          description: Profile updated.
+          schema:
+            allOf:
+            - $ref: "#/definitions/LimitedProfile"
+            - $ref: "#/definitions/ExtendedProfile"
+          examples:
+            application/json:
+              email: foobar@example.com
+              version: 0
+        "404":
+          description: No user found for the provided fiscal code.
+        '400':
+          description: Invalid payload.
+        '500':
+          description: Profile cannot be updated.
 definitions:
-  Steps:
-    title: Steps
-    type: object
-    properties:
-      content:
-        type: string
-    required:
-      - content
-  Provider:
-    title: Provider
-    type: object
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      logo:
-        type: string
-        format: byte
-      entityID:
-        type: string
-        pattern: 'http[s]?://(-\.)?([^\s/?\.#-]+\.?)+(/[^\s]*)?$'
-      profileUrl:
-        type: string
-        pattern: 'http[s]?://(-\.)?([^\s/?\.#-]+\.?)+(/[^\s]*)?$'
-    required:
-      - id
-      - name
-      - logo
-      - entityID
-      - profileUrl
+  MessageContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#MessageContent"
   FiscalCode:
-    title: Fiscal code
-    type: string
-    description: 'The user''s fiscal code, all upper case.'
-    minLength: 16
-    maxLength: 16
-    pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#FiscalCode"
+  EmailAddress:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#EmailAddress"
+  ExtendedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#ExtendedProfile"
+  LimitedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#LimitedProfile"
+  PreferredLanguages:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PreferredLanguages"
+  IsInboxEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#IsInboxEnabled"
+  PaginationResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PaginationResponse"
   Message:
     title: Message
     type: object
     properties:
       id:
         type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
       content:
         $ref: '#/definitions/MessageContent'
     required:
       - id
-      - fiscal_code
       - content
-  MessageContent:
-    title: MessageContent
-    type: object
-    properties:
-      body_short:
-        type: string
-        description: |-
-          An abstract of the message, in plain text. The content of this field will be delivered to channels that support a limited amount of characters (e.g. SMS, mobile notifications, etc...).
-          The caller should assume that only the content in "body_short" may be delivered so the value of this field MUST contain *all* the required information.
-        minLength: 3
-        maxLength: 100
-      body_long:
-        type: string
-        description: 'A long version of the message, in plain text. The content of this field will be delivered to channels that don''t have any limit in terms of content size (e.g. email, etc...). The long version of the message is optional and should be provided only in cases when a longer message (compared to the short version provided in body_short) gives more information to the user. This field should not be a duplicate of body_short.'
-        minLength: 100
-        maxLength: 100000
-    required:
-      - body_short
   Profile:
     title: Profile
     description: Describes the user's profile.
     type: object
     properties:
+      name:
+        type: string
+      family_name:
+        type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
       email:
-        type: string
-        description: |
-          The user's preferred email address.
+        $ref: '#/definitions/EmailAddress'
       preferred_languages:
-        type: array
-        description: 'Indicates the User''s preferred written or spoken language. Generally used for selecting a localized User interface. Valid values are concatenation of the ISO 639-1 two letter language code, an underscore, and the ISO 3166-1 2 letter country code; e.g., ''en_US'' specifies the language English and country US.'
-        x-extensible-enum:
-          - it_IT
-          - en_GB
-          - es_ES
-          - de_DE
-          - fr_FR
-        items:
-          type: string
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: "#/definitions/IsInboxEnabled"
+      version:
+        type: integer
     required:
       - fiscal_code
-  PaginationResponse:
-    type: object
-    title: pagination
-    description: Pagination response parameters.
-    properties:
-      page_size:
-        type: integer
-        minimum: 1
-        description: Number of items returned for each page.
-      next:
-        type: string
-        description: 'Contains an URL to GET the next #<page_size> results in the retrieved collection of items.'
-        format: uri
+      - version
 responses: {}
 parameters:
   PaginationRequest:

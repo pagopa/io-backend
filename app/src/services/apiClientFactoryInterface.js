@@ -4,8 +4,9 @@
 
 import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 
-export interface ApiClientInterface {
+export interface ApiClientFactoryInterface {
   /**
+   * Retrieves a configured instance of the API client.
    *
    * @param fiscalCode
    */
