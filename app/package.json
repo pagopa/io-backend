@@ -35,7 +35,9 @@
     "passport": "^0.4.0",
     "passport-strategy": "^1.0.0",
     "passport-http-bearer": "^1.0.1",
-    "spid-passport": "git://github.com/lussoluca/spid-passport.git#16f3475"
+    "redis": "^2.8.0",
+    "spid-passport": "git://github.com/lussoluca/spid-passport.git#16f3475",
+    "winston": "^2.4.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -53,9 +55,7 @@
     "fp-ts": "^0.6.7",
     "jest": "^21.2.1",
     "nodemon": "^1.11.0",
-    "prettier": "^1.7.4",
-    "redis": "^2.8.0",
-    "winston": "^2.4.0"
+    "prettier": "^1.7.4"
   },
   "jest": {
     "testEnvironment": "node",
