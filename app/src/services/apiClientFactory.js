@@ -6,7 +6,7 @@ import DigitalCitizenshipAPI from "../api/digitalCitizenshipAPI";
 import type { ApiClientFactoryInterface } from "./apiClientFactoryInterface";
 
 /**
- * This service builds api clients by wrapping the DigitalCitizenshipAPI client
+ * This service builds API client by wrapping the DigitalCitizenshipAPI client
  * built by the AutoRest tool.
  *
  * @see ../api/digitalCitizenshipAPI

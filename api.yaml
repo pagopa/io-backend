@@ -161,6 +161,8 @@ definitions:
         type: string
       content:
         $ref: '#/definitions/MessageContent'
+      sender_service_id:
+        type: string
     required:
       - id
       - content
