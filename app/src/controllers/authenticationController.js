@@ -3,26 +3,9 @@
 "use strict";
 
 import type { SpidUser } from "../types/user";
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import { extractUserFromSpid, toUser } from "../types/user";
+import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import spidStrategy from "../strategies/spidStrategy";
-
-const fs = require("fs");
-const winston = require("winston");
-
-// Retrieves the metadata for this Service Provide from the spidStrategy.
-function getMetadataHandler(certPath: string, spidStrategy: spidStrategy) {
-  return (req: express$Request, res: express$Response) => {
-    const metadata = spidStrategy.generateServiceProviderMetadata(
-      fs.readFileSync(certPath, "utf-8")
-    );
-
-    res
-      .status(200)
-      .set("Content-Type", "application/xml")
-      .send(metadata);
-  };
-}
 
 /**
  * This controller handles the call from the IDP after
@@ -75,11 +58,20 @@ export default class AuthenticationController {
    *
    * @param req
    * @param res
+   * @param samlCertFile
+   * @param spidStrategy
    */
-  metadata(req: express$Request, res: express$Response) {
-    const certPath = process.env.SAML_CERT_PATH || "./certs/cert.pem";
-    winston.log("info", "Reading SAML certificate file from %s", certPath);
+  metadata(
+    req: express$Request,
+    res: express$Response,
+    samlCertFile: string,
+    spidStrategy: spidStrategy
+  ) {
+    const metadata = spidStrategy.generateServiceProviderMetadata(samlCertFile);
 
-    getMetadataHandler(certPath, spidStrategy)(req, res);
+    res
+      .status(200)
+      .set("Content-Type", "application/xml")
+      .send(metadata);
   }
 }
