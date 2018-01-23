@@ -3,8 +3,11 @@ FROM node:8.9.4-alpine as builder
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
 
-COPY /app/package.json /usr/src/app/package.json
 WORKDIR /usr/src/app
+
+COPY /app/package.json /usr/src/app/package.json
+COPY /app/yarn.lock /usr/src/app/yarn.lock
+
 RUN yarn install
 
 FROM node:8.9.4-alpine
