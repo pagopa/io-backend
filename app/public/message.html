@@ -25,6 +25,9 @@
   <br/>
   <div><strong>Markdown:</strong></div>
   <div id="markdown"></div>
+  <br/>
+  <div><strong>Sender ID:</strong></div>
+  <div id="sender_service_id"></div>
 </div>
 
 <script>
@@ -56,6 +59,7 @@
             console.log(data);
             $('#subject').append(data.subject);
             $('#markdown').append(data.markdown);
+            $('#sender_service_id').append(data.sender_service_id);
           });
         }
       )
