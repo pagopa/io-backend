@@ -78,9 +78,7 @@ app.post("/assertionConsumerService", spidAuth, function(
   acsController.acs(req, res);
 });
 
-app.get("/metadata", function(req: express$Request, res: express$Response) {
-  acsController.metadata(req, res);
-});
+app.get("/metadata", acsController.metadata);
 
 app.get("/api/v1/profile", tokenAuth, function(
   req: express$Request,
