@@ -23,6 +23,9 @@
   <div id="name"></div>
   <div id="fiscal_code"></div>
   <div id="email"></div>
+  <div id="is_email_set"></div>
+  <div id="preferred_email"></div>
+  <div id="is_preferred_email_set"></div>
   <div id="version"></div>
   <div id="is_inbox_enabled"></div>
 
@@ -62,9 +65,12 @@
 
           // Examine the text in the response
           response.json().then(function(data) {
-            $("#name").append(data.name + ' ' + data.family_name);
-            $("#fiscal_code").append(data.fiscal_code);
-            $("#email").append(data.email);
+            $("#name").append('Name: ' + data.name + ' ' + data.family_name);
+            $("#fiscal_code").append('CF: '+ data.fiscal_code);
+            $("#email").append('Email: '+ data.email);
+            $("#is_email_set").append('Is "email" set? '+ data.is_email_set);
+            $("#preferred_email").append('Preferred Email: '+ data.preferred_email);
+            $("#is_preferred_email_set").append('Is "preferred_email" set? '+ data.is_preferred_email_set);
             $("#version").append(data.version);
 
             $("#edit_email").val(data.email);

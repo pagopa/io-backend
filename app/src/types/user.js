@@ -3,7 +3,7 @@
 "use strict";
 
 import * as t from "io-ts";
-import { ReadableReporter } from "../utils/validation_reporters";
+import {ReadableReporter} from "../utils/validation_reporters";
 
 const winston = require("winston");
 
@@ -14,7 +14,8 @@ const UserModel = t.type({
   spid_idp: t.string,
   fiscal_code: t.string,
   name: t.string,
-  family_name: t.string
+  family_name: t.string,
+  preferred_email: t.string
 });
 
 const SpidUserModel = t.type({
@@ -22,7 +23,8 @@ const SpidUserModel = t.type({
   name: t.string,
   familyName: t.string,
   sessionIndex: t.string,
-  issuer: t.any
+  issuer: t.any,
+  email: t.string
 });
 
 export type User = t.TypeOf<typeof UserModel>;
@@ -45,7 +47,8 @@ export function toUser(from: SpidUser): User {
     spid_idp: from.issuer._, // The used idp is needed for logout.
     fiscal_code: from.fiscalNumber,
     name: from.name,
-    family_name: from.familyName
+    family_name: from.familyName,
+    preferred_email: from.email,
   };
 }
 
@@ -74,7 +77,7 @@ export function extractUserFromRequest(
  * @param from
  * @returns {Either<String, SpidUser>}
  */
-export function extractUserFromSpid(
+  export function extractUserFromSpid(
   from: express$Request
 ): Either<String, SpidUser> {
   const reqWithUser = ((from: Object): { user: User });

@@ -19,6 +19,8 @@ const ProfileModel = t.intersection([
   t.partial({
     email: t.string,
     is_email_set: t.boolean,
+    preferred_email:t.string,
+    is_preferred_email_set: t.boolean,
     is_inbox_enabled: t.boolean,
     preferred_languages: t.readonlyArray(t.string)
   })
@@ -55,6 +57,8 @@ export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
     fiscal_code: user.fiscal_code,
     email: from.email,
     is_email_set: !!(from.email),
+    preferred_email: user.preferred_email,
+    is_preferred_email_set: !!(user.preferred_email),
     preferred_languages: from.preferredLanguages,
     is_inbox_enabled: from.isInboxEnabled,
     version: from.version
