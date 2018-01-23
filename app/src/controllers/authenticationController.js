@@ -6,7 +6,9 @@ import type { SpidUser } from "../types/user";
 import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import { extractUserFromSpid, toUser } from "../types/user";
 import spidStrategy from "../strategies/spidStrategy";
+
 const fs = require("fs");
+const winston = require("winston");
 
 /**
  * This controller handles the call from the IDP after
@@ -61,8 +63,9 @@ export default class AuthenticationController {
    * @param res
    */
   metadata(req: express$Request, res: express$Response) {
-    const certPath = process.env.HTTPS_CERT_PATH || "./certs/cert.pem";
-    // winston.log("info", "Reading HTTPS certificate file from %s", certPath);
+    const certPath = process.env.SAML_CERT_PATH || "./certs/cert.pem";
+    winston.log("info", "Reading SAML certificate file from %s", certPath);
+
     const metadata = spidStrategy.generateServiceProviderMetadata(
       fs.readFileSync(certPath, "utf-8")
     );

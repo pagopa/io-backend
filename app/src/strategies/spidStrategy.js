@@ -4,7 +4,7 @@
 
 /**
  * Builds and configure a Passport strategy to authenticate the proxy to the
- * different SPID IDPs.
+ * different SPID IDPs..
  */
 
 const fs = require("fs");
@@ -12,7 +12,7 @@ const SpidStrategy = require("spid-passport");
 const winston = require("winston");
 
 const keyPath = process.env.SAML_KEY_PATH || "./certs/key.pem";
-winston.log("info", "Reading SAML certificate file from %s", keyPath);
+winston.log("info", "Reading SAML private key file from %s", keyPath);
 
 const spidStrategy = new SpidStrategy(
   {
@@ -23,7 +23,16 @@ const spidStrategy = new SpidStrategy(
       decryptionPvk: fs.readFileSync(keyPath, "utf-8"),
       attributeConsumingServiceIndex: 1,
       identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-      authnContext: "https://www.spid.gov.it/SpidL1"
+      authnContext: "https://www.spid.gov.it/SpidL1",
+      attributes: {
+        name: "Required attributes",
+        attributes: ["fiscalNumber", "name", "familyName", "email"]
+      },
+      organization: {
+        name: "Digital citizenship proxy",
+        displayName: "Digital citizenship proxy",
+        URL: "https://github.com/teamdigitale/italia-backend"
+      }
     },
     idp: {
       testid: {
