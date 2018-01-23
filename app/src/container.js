@@ -17,6 +17,7 @@ import ProfileController from "./controllers/profileController";
 import MessagesController from "./controllers/messagesController";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import ApiClientFactory from "./services/apiClientFactory";
+import AdminApiClientFactory from "./services/adminApiClientFactory";
 
 const awilix = require("awilix");
 
@@ -38,6 +39,12 @@ container.registerClass({
 export const API_CLIENT = "apiClient";
 container.registerClass({
   [API_CLIENT]: [ApiClientFactory]
+});
+
+// Register a factory service to create admin API client.
+export const ADMIN_API_CLIENT = "adminApiClient";
+container.registerClass({
+  [ADMIN_API_CLIENT]: [AdminApiClientFactory]
 });
 
 // Register the authentication controller as a service.
