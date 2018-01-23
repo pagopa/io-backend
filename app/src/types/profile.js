@@ -2,10 +2,10 @@
 
 "use strict";
 
-import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
-import type { User } from "./user";
+import {ExtendedProfile, GetProfileOKResponse} from "../api/models";
+import type {User} from "./user";
 import * as t from "io-ts";
-import { ReadableReporter } from "../utils/validation_reporters";
+import {ReadableReporter} from "../utils/validation_reporters";
 
 const winston = require("winston");
 
@@ -18,6 +18,7 @@ const ProfileModel = t.intersection([
   }),
   t.partial({
     email: t.string,
+    is_email_set: t.boolean,
     is_inbox_enabled: t.boolean,
     preferred_languages: t.readonlyArray(t.string)
   })
@@ -53,6 +54,7 @@ export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
     email: from.email,
+    is_email_set: !!(from.email),
     preferred_languages: from.preferredLanguages,
     is_inbox_enabled: from.isInboxEnabled,
     version: from.version
