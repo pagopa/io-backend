@@ -22,11 +22,5 @@ export type Service = t.TypeOf<typeof ServiceModel>;
  * @returns {Service}
  */
 export function ServicePublicToAppService(from: ServicePublic): Service {
-  return {
-    serviceId: from.serviceId,
-    serviceName: from.serviceName,
-    organizationName: from.organizationName,
-    departmentName: from.departmentName,
-    version: from.version
-  };
+  return from;
 }
