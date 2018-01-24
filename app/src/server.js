@@ -8,11 +8,7 @@
 
 import tokenStrategy from "./strategies/tokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
-import container, {
-  AUTHENTICATION_CONTROLLER,
-  MESSAGES_CONTROLLER,
-  PROFILE_CONTROLLER
-} from "./container";
+import container, {AUTHENTICATION_CONTROLLER, MESSAGES_CONTROLLER, PROFILE_CONTROLLER} from "./container";
 import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -70,6 +66,13 @@ app.use(passport.initialize());
 // Setup routing.
 
 app.get("/login", spidAuth);
+
+app.get("/logout", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  acsController.slo(req, res);
+});
 
 app.post("/assertionConsumerService", spidAuth, function(
   req: express$Request,

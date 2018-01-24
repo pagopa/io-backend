@@ -2,11 +2,11 @@
 
 "use strict";
 
-import type { User } from "../types/user";
-import { extractUserFromJson } from "../types/user";
-import type { SessionStorageInterface } from "./sessionStorageInterface";
-import type { RedisClient } from "redis";
-import { left } from "fp-ts/lib/Either";
+import type {User} from "../types/user";
+import {extractUserFromJson} from "../types/user";
+import type {SessionStorageInterface} from "./sessionStorageInterface";
+import type {RedisClient} from "redis";
+import {left} from "fp-ts/lib/Either";
 
 const redis = require("redis");
 
@@ -64,5 +64,14 @@ export default class RedisSessionStorage implements SessionStorageInterface {
         }
       });
     });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  del(token: string): void {
+    // Removes the specified keys. A key is ignored if it does not exist.
+    // @see https://redis.io/commands/hdel
+    this.client.hdel("hash", token);
   }
 }

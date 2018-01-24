@@ -2,9 +2,10 @@
 
 "use strict";
 
-import type { SpidUser } from "../types/user";
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
-import { extractUserFromSpid, toUser } from "../types/user";
+import type {SpidUser, User} from "../types/user";
+import {extractUserFromRequest, extractUserFromSpid, toUser} from "../types/user";
+import type {SessionStorageInterface} from "../services/sessionStorageInterface";
+import spidStrategy from "../strategies/spidStrategy";
 
 /**
  * This controller handles the call from the IDP after
@@ -48,6 +49,47 @@ export default class AuthenticationController {
         const urlWithToken = url.replace("{token}", user.token);
 
         res.redirect(urlWithToken);
+      }
+    );
+  }
+
+  /**
+   * Single Logout Overview.
+   *
+   * @param req
+   * @param res
+   */
+  slo(req: express$Request, res: express$Response) {
+    const maybeUser = extractUserFromRequest(req);
+
+    maybeUser.fold(
+      (error: String) => {
+        res.status(500).json({
+          message: error
+        });
+      },
+      (user: User) => {
+        //delete Redis token
+        this.sessionStorage.del(user.token);
+
+        //logout from SPID
+        //req.query = {};
+        //req.query.entityID = user.spid_idp; //TODO: capire se riconosce l'idp o bisogna impostarlo (provare con idp non di test)
+
+        spidStrategy.logout(req, function(err, request) {
+          if (!err) {
+            console.log(request);
+
+            res.status(200).json({
+              logoutUrl: request
+            });
+          } else {
+            res.status(500).json({
+              message: err.toString()
+            });
+          }
+
+        });
       }
     );
   }

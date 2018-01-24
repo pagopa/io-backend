@@ -2,7 +2,7 @@
 
 "use strict";
 
-import type { User } from "../types/user";
+import type {User} from "../types/user";
 
 export interface SessionStorageInterface {
   /**
@@ -20,4 +20,11 @@ export interface SessionStorageInterface {
    * @returns {*}
    */
   get(token: string): Promise<User>;
+
+  /**
+   * Removes a value from the cache.
+   *
+   * @param token
+   */
+  del(token: string): void;
 }

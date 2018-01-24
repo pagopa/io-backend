@@ -36,6 +36,15 @@
     <input type="hidden" id="edit_version" value=""/><br/>
     <input type="submit" name="Save">
   </form>
+
+  <br/><br/>
+
+  <div>
+    <form id="logout">
+      <input type="submit" name="Logout" value="Logout" class="text-danger">
+    </form>
+  </div>
+
 </div>
 
 <script>
@@ -109,6 +118,31 @@
         console.info(data);
       }
     });
+  });
+
+
+  $("#logout").submit(function() {
+
+    $.ajax({
+      async: true,
+      crossDomain: true,
+      url: "./logout",
+      type: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+      },
+      success: function(data) {
+        alert(data);
+      },
+      error: function(data) {
+        alert(JSON.stringify(data));
+      }
+    });
+
+
+    //remove toke from localStorage
+    localStorage.removeItem("token");
+
   });
 
 </script>
