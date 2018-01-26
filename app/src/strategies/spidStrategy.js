@@ -9,14 +9,14 @@
 
 const SpidStrategy = require("spid-passport");
 
-const spidStrategy = (samlKeyFile: string) => {
+const spidStrategy = (samlKey: string) => {
   return new SpidStrategy(
     {
       sp: {
         callbackUrl: "https://italia-backend/assertionConsumerService",
         issuer: "https://italia-backend",
-        privateCert: samlKeyFile,
-        decryptionPvk: samlKeyFile,
+        privateCert: samlKey,
+        decryptionPvk: samlKey,
         attributeConsumingServiceIndex: 1,
         identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
         authnContext: "https://www.spid.gov.it/SpidL1",

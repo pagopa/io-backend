@@ -18,15 +18,80 @@ import MessagesController from "./controllers/messagesController";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import ApiClientFactory from "./services/apiClientFactory";
 import AdminApiClientFactory from "./services/adminApiClientFactory";
+import spidStrategy from "./strategies/spidStrategy";
+import tokenStrategy from "./strategies/tokenStrategy";
 
 const awilix = require("awilix");
+const fs = require("fs");
+const winston = require("winston");
 
 const container = awilix.createContainer({
   resolutionMode: awilix.ResolutionMode.CLASSIC
 });
 
+// Private key used in SAML authentication to a SPID IDP.
+const samlKey = () => {
+  return readFile(
+    process.env.SAML_KEY_PATH || "./certs/key.pem",
+    "SAML private key"
+  );
+};
+export const SAML_KEY = "samlKey";
+container.register({
+  [SAML_KEY]: awilix.asFunction(samlKey).singleton()
+});
+
+// Public certificate used in SAML authentication to a SPID IDP.
+const samlCert = () => {
+  return readFile(
+    process.env.SAML_CERT_PATH || "./certs/cert.pem",
+    "SAML certificate"
+  );
+};
+export const SAML_CERT = "samlCert";
+container.register({
+  [SAML_CERT]: awilix.asFunction(samlCert).singleton()
+});
+
+// Private key used by the proxy HTTPS server.
+const httpsKey = () => {
+  return readFile(
+    process.env.HTTPS_KEY_PATH || "./certs/key.pem",
+    "HTTPS private key"
+  );
+};
+export const HTTPS_KEY = "httpsKey";
+container.register({
+  [HTTPS_KEY]: awilix.asFunction(httpsKey).singleton()
+});
+
+// Public certificate used by the proxy HTTPS server.
+const httpsCert = () => {
+  return readFile(
+    process.env.HTTPS_CERT_PATH || "./certs/cert.pem",
+    "HTTPS certificate"
+  );
+};
+export const HTTPS_CERT = "httpsCert";
+container.register({
+  [HTTPS_CERT]: awilix.asFunction(httpsCert).singleton()
+});
+
+// Url to the Redis server.
 container.register({
   redisUrl: awilix.asValue(process.env.REDIS_URL)
+});
+
+// Register the spidStrategy.
+export const SPID_STRATEGY = "spidStrategy";
+container.register({
+  [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
+});
+
+// Register the tokenStrategy.
+export const TOKEN_STRATEGY = "tokenStrategy";
+container.register({
+  [TOKEN_STRATEGY]: awilix.asFunction(tokenStrategy).singleton()
 });
 
 // Register a session storage service backed by Redis.
@@ -66,3 +131,8 @@ container.registerClass({
 });
 
 export default container;
+
+function readFile(path: string, type: string): string {
+  winston.log("info", "Reading %s file from %s", type, path);
+  return fs.readFileSync(path, "utf-8");
+}

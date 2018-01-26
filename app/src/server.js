@@ -6,12 +6,14 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
-import tokenStrategy from "./strategies/tokenStrategy";
-import spidStrategy from "./strategies/spidStrategy";
 import container, {
   AUTHENTICATION_CONTROLLER,
+  HTTPS_CERT,
+  HTTPS_KEY,
   MESSAGES_CONTROLLER,
-  PROFILE_CONTROLLER
+  PROFILE_CONTROLLER,
+  SPID_STRATEGY,
+  TOKEN_STRATEGY
 } from "./container";
 import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
@@ -21,7 +23,6 @@ require("dotenv").load();
 
 const winston = require("winston");
 const bodyParser = require("body-parser");
-const fs = require("fs");
 const express = require("express");
 const https = require("https");
 const morgan = require("morgan");
@@ -29,30 +30,12 @@ const passport = require("passport");
 
 const port = process.env.PORT || 443;
 
-// Read security files.
-
-const samlKeyPath = process.env.SAML_KEY_PATH || "./certs/key.pem";
-winston.log("info", "Reading SAML private key file from %s", samlKeyPath);
-const samlKeyFile = fs.readFileSync(samlKeyPath, "utf-8");
-
-const samlCertPath = process.env.SAML_CERT_PATH || "./certs/cert.pem";
-winston.log("info", "Reading SAML certificate file from %s", samlCertPath);
-const samlCertFile = fs.readFileSync(samlCertPath, "utf-8");
-
-const httpsKeyPath = process.env.HTTPS_CERT_KEY_PATH || "./certs/key.pem";
-winston.log("info", "Reading HTTPS private key file from %s", httpsKeyPath);
-const httpsKeyFile = fs.readFileSync(httpsKeyPath, "utf-8");
-
-const httpsCertPath = process.env.HTTPS_CERT_PATH || "./certs/cert.pem";
-winston.log("info", "Reading HTTPS certificate file from %s", httpsCertPath);
-const httpsCertFile = fs.readFileSync(httpsCertPath, "utf-8");
-
 // Setup Passport.
 
 // Add the strategy to authenticate proxy clients.
-passport.use(tokenStrategy);
+passport.use(container.resolve(TOKEN_STRATEGY));
 // Add the strategy to authenticate the proxy to SPID.
-passport.use(spidStrategy(samlKeyFile));
+passport.use(container.resolve(SPID_STRATEGY));
 
 const tokenAuth = passport.authenticate("bearer", { session: false });
 const spidAuth = passport.authenticate("spid", { session: false });
@@ -97,7 +80,7 @@ app.post("/assertionConsumerService", spidAuth, function(
 });
 
 app.get("/metadata", function(req: express$Request, res: express$Response) {
-  acsController.metadata(req, res, samlCertFile, spidStrategy(samlKeyFile));
+  acsController.metadata(req, res);
 });
 
 app.get("/api/v1/profile", tokenAuth, function(
@@ -131,8 +114,8 @@ app.get("/api/v1/messages/:id", tokenAuth, function(
 // Setup and start the HTTPS server.
 
 const options = {
-  key: httpsKeyFile,
-  cert: httpsCertFile
+  key: container.resolve(HTTPS_KEY),
+  cert: container.resolve(HTTPS_CERT)
 };
 
 const server = https.createServer(options, app).listen(port, function() {

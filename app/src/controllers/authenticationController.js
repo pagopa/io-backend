@@ -14,14 +14,24 @@ import spidStrategy from "../strategies/spidStrategy";
  */
 export default class AuthenticationController {
   sessionStorage: SessionStorageInterface;
+  samlCert: string;
+  spidStrategy: spidStrategy;
 
   /**
    * Class constructor.
    *
    * @param sessionStorage
+   * @param samlCert
+   * @param spidStrategy
    */
-  constructor(sessionStorage: SessionStorageInterface) {
+  constructor(
+    sessionStorage: SessionStorageInterface,
+    samlCert: string,
+    spidStrategy: spidStrategy
+  ) {
     this.sessionStorage = sessionStorage;
+    this.samlCert = samlCert;
+    this.spidStrategy = spidStrategy;
   }
 
   /**
@@ -58,16 +68,11 @@ export default class AuthenticationController {
    *
    * @param req
    * @param res
-   * @param samlCertFile
-   * @param spidStrategy
    */
-  metadata(
-    req: express$Request,
-    res: express$Response,
-    samlCertFile: string,
-    spidStrategy: spidStrategy
-  ) {
-    const metadata = spidStrategy.generateServiceProviderMetadata(samlCertFile);
+  metadata(req: express$Request, res: express$Response) {
+    const metadata = this.spidStrategy.generateServiceProviderMetadata(
+      this.samlCert
+    );
 
     res
       .status(200)
