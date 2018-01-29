@@ -6,22 +6,25 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
-import tokenStrategy from "./strategies/tokenStrategy";
-import spidStrategy from "./strategies/spidStrategy";
 import container, {
   AUTHENTICATION_CONTROLLER,
+  HTTPS_CERT,
+  HTTPS_KEY,
   MESSAGES_CONTROLLER,
-  PROFILE_CONTROLLER
+  PROFILE_CONTROLLER,
+  SERVICES_CONTROLLER,
+  SPID_STRATEGY,
+  TOKEN_STRATEGY
 } from "./container";
 import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
+import ServicesController from "./controllers/servicesController";
 
 require("dotenv").load();
 
 const winston = require("winston");
 const bodyParser = require("body-parser");
-const fs = require("fs");
 const express = require("express");
 const https = require("https");
 const morgan = require("morgan");
@@ -32,9 +35,9 @@ const port = process.env.PORT || 443;
 // Setup Passport.
 
 // Add the strategy to authenticate proxy clients.
-passport.use(tokenStrategy);
+passport.use(container.resolve(TOKEN_STRATEGY));
 // Add the strategy to authenticate the proxy to SPID.
-passport.use(spidStrategy);
+passport.use(container.resolve(SPID_STRATEGY));
 
 const tokenAuth = passport.authenticate("bearer", { session: false });
 const spidAuth = passport.authenticate("spid", { session: false });
@@ -52,6 +55,10 @@ const profileController = (container.resolve(
 const messagesController = (container.resolve(
   MESSAGES_CONTROLLER
 ): MessagesController);
+
+const servicesController = (container.resolve(
+  SERVICES_CONTROLLER
+): ServicesController);
 
 // Create and setup the Express app.
 
@@ -76,6 +83,10 @@ app.post("/assertionConsumerService", spidAuth, function(
   res: express$Response
 ) {
   acsController.acs(req, res);
+});
+
+app.get("/metadata", function(req: express$Request, res: express$Response) {
+  acsController.metadata(req, res);
 });
 
 app.get("/api/v1/profile", tokenAuth, function(
@@ -106,19 +117,18 @@ app.get("/api/v1/messages/:id", tokenAuth, function(
   messagesController.getUserMessage(req, res);
 });
 
+app.get("/api/v1/services/:id", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  servicesController.getService(req, res);
+});
+
 // Setup and start the HTTPS server.
 
-const certKeyPath = process.env.HTTPS_CERT_KEY_PATH || "./certs/key.pem";
-winston.log("info", "Reading HTTPS private key file from %s", certKeyPath);
-const key = fs.readFileSync(certKeyPath, "utf-8");
-
-const certPath = process.env.HTTPS_CERT_PATH || "./certs/cert.pem";
-winston.log("info", "Reading HTTPS certificate file from %s", certPath);
-const cert = fs.readFileSync(certPath, "utf-8");
-
 const options = {
-  key: key,
-  cert: cert
+  key: container.resolve(HTTPS_KEY),
+  cert: container.resolve(HTTPS_CERT)
 };
 
 const server = https.createServer(options, app).listen(port, function() {

@@ -2,30 +2,30 @@
 
 "use strict";
 
-import * as t from "io-ts";
-import {ReadableReporter} from "../utils/validation_reporters";
+import t from "flow-runtime";
+import { left, right } from "fp-ts/lib/Either";
 
 const winston = require("winston");
 
-const UserModel = t.type({
-  created_at: t.number,
-  token: t.string,
-  session_index: t.string,
-  spid_idp: t.string,
-  fiscal_code: t.string,
-  name: t.string,
-  family_name: t.string,
-  preferred_email: t.string
-});
+const UserModel = t.object(
+  t.property("created_at", t.number()),
+  t.property("token", t.string()),
+  t.property("session_index", t.string()),
+  t.property("spid_idp", t.string()),
+  t.property("fiscal_code", t.string()),
+  t.property("name", t.string()),
+  t.property("family_name", t.string()),
+  t.property("preferred_email", t.string())
+);
 
-const SpidUserModel = t.type({
-  fiscalNumber: t.string,
-  name: t.string,
-  familyName: t.string,
-  sessionIndex: t.string,
-  issuer: t.any,
-  email: t.string
-});
+const SpidUserModel = t.object(
+  t.property("fiscalNumber", t.string()),
+  t.property("name", t.string()),
+  t.property("familyName", t.string()),
+  t.property("sessionIndex", t.string()),
+  t.property("issuer", t.any()),
+  t.property("email", t.any())
+);
 
 export type User = t.TypeOf<typeof UserModel>;
 export type SpidUser = t.TypeOf<typeof SpidUserModel>;
@@ -34,7 +34,7 @@ export type SpidUser = t.TypeOf<typeof SpidUserModel>;
  * Converts a SPID response to an User.
  *
  * @param from
- * @returns {{created_at: number, token: *, session_index: *, spid_idp: Array|number, fiscal_code: *, name: *, family_name: *}}
+ * @returns User
  */
 export function toUser(from: SpidUser): User {
   // Use the SAML sessionIndex as token.
@@ -63,12 +63,15 @@ export function extractUserFromRequest(
 ): Either<String, User> {
   const reqWithUser = ((from: Object): { user: User });
 
-  const validation = t.validate(reqWithUser.user, UserModel);
+  const validation = t.validate(UserModel, reqWithUser.user);
 
-  const message = ReadableReporter.report(validation);
-  winston.log("info", message);
+  if (validation.hasErrors()) {
+    winston.log("info", validation.errors);
 
-  return validation.mapLeft(() => message);
+    return left(validation.errors);
+  } else {
+    return right(reqWithUser.user);
+  }
 }
 
 /**
@@ -82,12 +85,15 @@ export function extractUserFromRequest(
 ): Either<String, SpidUser> {
   const reqWithUser = ((from: Object): { user: User });
 
-  const validation = t.validate(reqWithUser.user, SpidUserModel);
+  const validation = t.validate(SpidUserModel, reqWithUser.user);
 
-  const message = ReadableReporter.report(validation);
-  winston.log("info", message);
+  if (validation.hasErrors()) {
+    winston.log("info", validation.errors);
 
-  return validation.mapLeft(() => message);
+    return left(validation.errors);
+  } else {
+    return right(reqWithUser.user);
+  }
 }
 
 /**
@@ -97,10 +103,15 @@ export function extractUserFromRequest(
  * @returns {Either<String, User>}
  */
 export function extractUserFromJson(from: string): Either<String, User> {
-  const validation = t.validate(JSON.parse(from), UserModel);
+  const json = JSON.parse(from);
 
-  const message = ReadableReporter.report(validation);
-  winston.log("info", message);
+  const validation = t.validate(UserModel, json);
 
-  return validation.mapLeft(() => message);
+  if (validation.hasErrors()) {
+    winston.log("info", validation.errors);
+
+    return left(validation.errors);
+  } else {
+    return right(json);
+  }
 }

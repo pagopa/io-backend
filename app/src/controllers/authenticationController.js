@@ -3,8 +3,9 @@
 "use strict";
 
 import type { SpidUser } from "../types/user";
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import { extractUserFromSpid, toUser } from "../types/user";
+import type { SessionStorageInterface } from "../services/sessionStorageInterface";
+import spidStrategy from "../strategies/spidStrategy";
 
 /**
  * This controller handles the call from the IDP after
@@ -13,14 +14,24 @@ import { extractUserFromSpid, toUser } from "../types/user";
  */
 export default class AuthenticationController {
   sessionStorage: SessionStorageInterface;
+  samlCert: string;
+  spidStrategy: spidStrategy;
 
   /**
    * Class constructor.
    *
    * @param sessionStorage
+   * @param samlCert
+   * @param spidStrategy
    */
-  constructor(sessionStorage: SessionStorageInterface) {
+  constructor(
+    sessionStorage: SessionStorageInterface,
+    samlCert: string,
+    spidStrategy: spidStrategy
+  ) {
     this.sessionStorage = sessionStorage;
+    this.samlCert = samlCert;
+    this.spidStrategy = spidStrategy;
   }
 
   /**
@@ -50,5 +61,22 @@ export default class AuthenticationController {
         res.redirect(urlWithToken);
       }
     );
+  }
+
+  /**
+   * The metadata for this Service Provider.
+   *
+   * @param req
+   * @param res
+   */
+  metadata(req: express$Request, res: express$Response) {
+    const metadata = this.spidStrategy.generateServiceProviderMetadata(
+      this.samlCert
+    );
+
+    res
+      .status(200)
+      .set("Content-Type", "application/xml")
+      .send(metadata);
   }
 }

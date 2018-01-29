@@ -2,40 +2,32 @@
 
 "use strict";
 
-import {ExtendedProfile, GetProfileOKResponse} from "../api/models";
-import type {User} from "./user";
-import * as t from "io-ts";
-import {ReadableReporter} from "../utils/validation_reporters";
+import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
+import type { User } from "./user";
+import t from "flow-runtime";
+import { left, right } from "fp-ts/lib/Either";
 
 const winston = require("winston");
 
-const ProfileModel = t.intersection([
-  t.type({
-    family_name: t.string,
-    fiscal_code: t.string,
-    name: t.string,
-    version: t.number
-  }),
-  t.partial({
-    email: t.string,
-    is_email_set: t.boolean,
-    preferred_email:t.string,
-    is_preferred_email_set: t.boolean,
-    is_inbox_enabled: t.boolean,
-    preferred_languages: t.readonlyArray(t.string)
-  })
-]);
+const ProfileModel = t.object(
+  t.property("family_name", t.string()),
+  t.property("fiscal_code", t.string()),
+  t.property("name", t.string()),
+  t.property("version", t.number()),
+  t.property("email", t.string(), true),
+  t.property("is_email_set", t.boolean(), true),
+  t.property("preferred_email", t.string(), true),
+  t.property("is_preferred_email_set", t.boolean(), true),
+  t.property("is_inbox_enabled", t.boolean(), true),
+  t.property("preferred_languages", t.array(t.string()), true)
+);
 
-const UpsertProfileModel = t.intersection([
-  t.type({
-    version: t.number
-  }),
-  t.partial({
-    email: t.string,
-    is_inbox_enabled: t.boolean,
-    preferred_languages: t.readonlyArray(t.string)
-  })
-]);
+const UpsertProfileModel = t.object(
+  t.property("version", t.number()),
+  t.property("email", t.string(), true),
+  t.property("is_inbox_enabled", t.boolean(), true),
+  t.property("preferred_languages", t.array(t.string()), true)
+);
 
 export type Profile = t.TypeOf<typeof ProfileModel>;
 export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
@@ -50,15 +42,14 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
  * @returns {Profile}
  */
 export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
-  // $FlowFixMe
   return {
     name: user.name,
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
     email: from.email,
-    is_email_set: !!(from.email),
+    is_email_set: !!from.email,
     preferred_email: user.preferred_email,
-    is_preferred_email_set: !!(user.preferred_email),
+    is_preferred_email_set: !!user.preferred_email,
     preferred_languages: from.preferredLanguages,
     is_inbox_enabled: from.isInboxEnabled,
     version: from.version
@@ -73,11 +64,8 @@ export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
  */
 export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
   return {
-    // $FlowFixMe
     email: from.email,
-    // $FlowFixMe
     preferred_languages: from.preferred_languages,
-    // $FlowFixMe
     isInboxEnabled: from.is_inbox_enabled,
     version: from.version
   };
@@ -92,10 +80,13 @@ export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
 export function extractUpsertProfileFromRequest(
   from: express$Request
 ): Either<String, UpsertProfile> {
-  const validation = t.validate(from.body, UpsertProfileModel);
+  const validation = t.validate(UpsertProfileModel, from.body);
 
-  const message = ReadableReporter.report(validation);
-  winston.log("info", message);
+  if (validation.hasErrors()) {
+    winston.log("info", validation.errors);
 
-  return validation.mapLeft(() => message);
+    return left(validation.errors);
+  } else {
+    return right(from.body);
+  }
 }
