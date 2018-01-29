@@ -48,7 +48,7 @@ export function toUser(from: SpidUser): User {
     fiscal_code: from.fiscalNumber,
     name: from.name,
     family_name: from.familyName,
-    preferred_email: from.email,
+    preferred_email: from.email
   };
 }
 
@@ -80,7 +80,7 @@ export function extractUserFromRequest(
  * @param from
  * @returns {Either<String, SpidUser>}
  */
-  export function extractUserFromSpid(
+export function extractUserFromSpid(
   from: express$Request
 ): Either<String, SpidUser> {
   const reqWithUser = ((from: Object): { user: User });
