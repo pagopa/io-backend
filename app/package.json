@@ -37,7 +37,7 @@
     "passport-strategy": "^1.0.0",
     "passport-http-bearer": "^1.0.1",
     "redis": "^2.8.0",
-    "spid-passport": "git://github.com/lussoluca/spid-passport.git#16f3475",
+    "spid-passport": "git://github.com/lussoluca/spid-passport.git#166c99b",
     "winston": "^2.4.0"
   },
   "devDependencies": {

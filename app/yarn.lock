@@ -1688,7 +1688,7 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
-fp-ts@^0.6.4, fp-ts@^0.6.7:
+fp-ts@^0.6.7:
   version "0.6.7"
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-0.6.7.tgz#15a56c60fc10cb2daf1d4c6f3cfd5ccdaef526e2"
 
@@ -2085,12 +2085,6 @@ invariant@^2.2.0, invariant@^2.2.2:
 invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
-
-io-ts@^0.9.2:
-  version "0.9.4"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-0.9.4.tgz#b3ba3b64fa521dba7fef0b1e1ae9f90f9c62d3a4"
-  dependencies:
-    fp-ts "^0.6.4"
 
 ipaddr.js@1.5.2:
   version "1.5.2"
@@ -3848,9 +3842,9 @@ spdx-license-ids@^1.0.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
 
-"spid-passport@git://github.com/lussoluca/spid-passport.git#16f3475":
+"spid-passport@git://github.com/lussoluca/spid-passport.git#166c99b":
   version "1.0.0"
-  resolved "git://github.com/lussoluca/spid-passport.git#16f3475a24d2705787b6eb23ebe7b78200b94444"
+  resolved "git://github.com/lussoluca/spid-passport.git#166c99b3750f78561d8394fdc07312a61183899d"
   dependencies:
     passport "^0.4.0"
     passport-saml "^0.31.0"
