@@ -38,8 +38,16 @@ export const GetMessagesByUserOKResponseModel = t.object(
 );
 
 export const MessageResponseModel = t.object(
-  t.property("message", t.string()),
+  t.property("message", t.any()),
   t.property("notification", t.any(), true)
+);
+
+export const ServicePublicModel = t.object(
+  t.property("serviceId", t.string()),
+  t.property("serviceName", t.string()),
+  t.property("organizationName", t.string()),
+  t.property("departmentName", t.string()),
+  t.property("version", t.number(), true)
 );
 
 /**

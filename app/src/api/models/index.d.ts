@@ -221,6 +221,28 @@ export interface Service {
 
 /**
  * @class
+ * Initializes a new instance of the ServicePublic class.
+ * @constructor
+ * @summary Service (public)
+ *
+ * A Service associated to an user's subscription.
+ *
+ * @member {string} serviceId
+ * @member {string} serviceName
+ * @member {string} organizationName
+ * @member {string} departmentName
+ * @member {number} [version]
+ */
+export interface ServicePublic {
+  serviceId: string;
+  serviceName: string;
+  organizationName: string;
+  departmentName: string;
+  version?: number;
+}
+
+/**
+ * @class
  * Initializes a new instance of the GetMessagesByUserOKResponse class.
  * @constructor
  * @member {array} [items]

@@ -17,22 +17,14 @@ import {
 } from "../types/api";
 import ControllerBase from "./ControllerBase";
 import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
-import type { AdminApiClientFactoryInterface } from "../services/adminApiClientFactoryInterface";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
 export default class MessagesController extends ControllerBase {
-  adminApiClient: AdminApiClientFactoryInterface;
-
-  constructor(
-    apiClient: ApiClientFactoryInterface,
-    adminApiClient: AdminApiClientFactoryInterface
-  ) {
+  constructor(apiClient: ApiClientFactoryInterface) {
     super(apiClient);
-
-    this.adminApiClient = adminApiClient;
   }
 
   /**

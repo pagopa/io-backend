@@ -12,12 +12,14 @@ import container, {
   HTTPS_KEY,
   MESSAGES_CONTROLLER,
   PROFILE_CONTROLLER,
+  SERVICES_CONTROLLER,
   SPID_STRATEGY,
   TOKEN_STRATEGY
 } from "./container";
 import ProfileController from "./controllers/profileController";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
+import ServicesController from "./controllers/servicesController";
 
 require("dotenv").load();
 
@@ -53,6 +55,10 @@ const profileController = (container.resolve(
 const messagesController = (container.resolve(
   MESSAGES_CONTROLLER
 ): MessagesController);
+
+const servicesController = (container.resolve(
+  SERVICES_CONTROLLER
+): ServicesController);
 
 // Create and setup the Express app.
 
@@ -109,6 +115,13 @@ app.get("/api/v1/messages/:id", tokenAuth, function(
   res: express$Response
 ) {
   messagesController.getUserMessage(req, res);
+});
+
+app.get("/api/v1/services/:id", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  servicesController.getService(req, res);
 });
 
 // Setup and start the HTTPS server.

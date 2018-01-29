@@ -7,39 +7,36 @@
 'use strict';
 
 /**
- * @summary Service
+ * @summary Service (public)
   *
- * A Service tied to an user's subscription.
+ * A Service associated to an user's subscription.
  *
  */
-class Service {
+class ServicePublic {
   /**
-   * Create a Service.
+   * Create a ServicePublic.
    * @member {string} serviceId
    * @member {string} serviceName
    * @member {string} organizationName
    * @member {string} departmentName
-   * @member {array} authorizedCidrs
-   * @member {array} authorizedRecipients
    * @member {number} [version]
-   * @member {string} [id]
    */
   constructor() {
   }
 
   /**
-   * Defines the metadata of Service
+   * Defines the metadata of ServicePublic
    *
-   * @returns {object} metadata of Service
+   * @returns {object} metadata of ServicePublic
    *
    */
   mapper() {
     return {
       required: false,
-      serializedName: 'Service',
+      serializedName: 'ServicePublic',
       type: {
         name: 'Composite',
-        className: 'Service',
+        className: 'ServicePublic',
         modelProperties: {
           serviceId: {
             required: true,
@@ -69,46 +66,11 @@ class Service {
               name: 'String'
             }
           },
-          authorizedCidrs: {
-            required: true,
-            serializedName: 'authorized_cidrs',
-            type: {
-              name: 'Sequence',
-              element: {
-                  required: false,
-                  serializedName: 'StringElementType',
-                  type: {
-                    name: 'String'
-                  }
-              }
-            }
-          },
-          authorizedRecipients: {
-            required: true,
-            serializedName: 'authorized_recipients',
-            type: {
-              name: 'Sequence',
-              element: {
-                  required: false,
-                  serializedName: 'StringElementType',
-                  type: {
-                    name: 'String'
-                  }
-              }
-            }
-          },
           version: {
             required: false,
             serializedName: 'version',
             type: {
               name: 'Number'
-            }
-          },
-          id: {
-            required: false,
-            serializedName: 'id',
-            type: {
-              name: 'String'
             }
           }
         }
@@ -117,4 +79,4 @@ class Service {
   }
 }
 
-module.exports = Service;
+module.exports = ServicePublic;

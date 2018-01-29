@@ -26,8 +26,14 @@
   <div><strong>Markdown:</strong></div>
   <div id="markdown"></div>
   <br/>
-  <div><strong>Sender ID:</strong></div>
-  <div id="sender_service_id"></div>
+  <div><strong>Service name:</strong></div>
+  <div id="sender_service_name"></div>
+  <br/>
+  <div><strong>Organization name:</strong></div>
+  <div id="sender_organization_name"></div>
+  <br/>
+  <div><strong>Department name:</strong></div>
+  <div id="sender_department_name"></div>
 </div>
 
 <script>
@@ -57,6 +63,30 @@
           // Examine the text in the response
           response.json().then(function(data) {
             console.log(data);
+
+            fetch('./api/v1/services/' + data.sender_service_id, {
+              credentials: 'include',
+              headers: {
+                'Authorization': 'Bearer ' + token
+              },
+            })
+              .then(
+                function(response) {
+                  if (response.status !== 200) {
+                    console.log('Looks like there was a problem. Status Code: ' +
+                      response.status);
+                    return;
+                  }
+                  response.json().then(function(data) {
+                    $('#sender_service_name').append(data.serviceName);
+                    $('#sender_organization_name').append(data.organizationName);
+                    $('#sender_department_name').append(data.departmentName);
+                  });
+                }
+              ).catch(function(err) {
+              console.log('Fetch Error :-S', err);
+            });
+
             $('#subject').append(data.subject);
             $('#markdown').append(data.markdown);
             $('#sender_service_id').append(data.sender_service_id);

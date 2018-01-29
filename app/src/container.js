@@ -15,9 +15,9 @@ require("dotenv").load();
 import AuthenticationController from "./controllers/authenticationController";
 import ProfileController from "./controllers/profileController";
 import MessagesController from "./controllers/messagesController";
+import ServicesController from "./controllers/servicesController";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import ApiClientFactory from "./services/apiClientFactory";
-import AdminApiClientFactory from "./services/adminApiClientFactory";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
 
@@ -106,12 +106,6 @@ container.registerClass({
   [API_CLIENT]: [ApiClientFactory]
 });
 
-// Register a factory service to create admin API client.
-export const ADMIN_API_CLIENT = "adminApiClient";
-container.registerClass({
-  [ADMIN_API_CLIENT]: [AdminApiClientFactory]
-});
-
 // Register the authentication controller as a service.
 export const AUTHENTICATION_CONTROLLER = "authenticationController";
 container.registerClass({
@@ -128,6 +122,12 @@ container.registerClass({
 export const MESSAGES_CONTROLLER = "messagesController";
 container.registerClass({
   [MESSAGES_CONTROLLER]: [MessagesController]
+});
+
+// Register the services controller as a service.
+export const SERVICES_CONTROLLER = "servicesController";
+container.registerClass({
+  [SERVICES_CONTROLLER]: [ServicesController]
 });
 
 export default container;
