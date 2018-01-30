@@ -2,7 +2,7 @@
 
 "use strict";
 
-import type {User} from "../types/user";
+import type { User } from "../types/user";
 
 export interface SessionStorageInterface {
   /**

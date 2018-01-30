@@ -10,7 +10,7 @@ const winston = require("winston");
 const UserModel = t.object(
   t.property("created_at", t.number()),
   t.property("token", t.string()),
-  t.property("session_index", t.string()),
+  t.property("sessionIndex", t.string()),
   t.property("spid_idp", t.string()),
   t.property("fiscal_code", t.string()),
   t.property("name", t.string()),

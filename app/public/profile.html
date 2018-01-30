@@ -122,27 +122,22 @@
 
 
   $("#logout").submit(function() {
+    // Remove the token from the localStorage.
+    localStorage.removeItem("token");
 
+    // Retrieve the logout url and redirect to it.
     $.ajax({
-      async: true,
-      crossDomain: true,
       url: "./logout",
-      type: 'GET',
+      type: 'post',
       headers: {
         'Authorization': 'Bearer ' + token,
       },
       success: function(data) {
-        alert(data);
-      },
-      error: function(data) {
-        alert(JSON.stringify(data));
+        window.location.href = data.logoutUrl;
       }
     });
 
-
-    //remove toke from localStorage
-    localStorage.removeItem("token");
-
+    return false;
   });
 
 </script>

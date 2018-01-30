@@ -68,13 +68,12 @@ export default class AuthenticationController {
   }
 
   /**
-   * The Single logout service.
-   * The metadata for this Service Provider.
+   * Retrieves the logout url from the IDP.
    *
    * @param req
    * @param res
    */
-  slo(req: express$Request, res: express$Response) {
+  logout(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -84,17 +83,15 @@ export default class AuthenticationController {
         });
       },
       (user: User) => {
-        //delete Redis token
+        // Delete the Redis token.
         this.sessionStorage.del(user.token);
 
-        //logout from SPID
-        //req.query = {};
-        //req.query.entityID = user.spid_idp; //TODO: capire se riconosce l'idp o bisogna impostarlo (provare con idp non di test)
+        // Logout from SPID.
+        req.query = {};
+        req.query.entityID = user.spid_idp;
 
-        spidStrategy.logout(req, function(err, request) {
+        this.spidStrategy.logout(req, function(err, request) {
           if (!err) {
-            console.log(request);
-
             res.status(200).json({
               logoutUrl: request
             });
@@ -106,6 +103,16 @@ export default class AuthenticationController {
         });
       }
     );
+  }
+
+  /**
+   * The Single logout service.
+   *
+   * @param req
+   * @param res
+   */
+  slo(req: express$Request, res: express$Response) {
+    res.redirect("/");
   }
 
   /**
