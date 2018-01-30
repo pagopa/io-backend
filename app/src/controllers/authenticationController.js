@@ -2,9 +2,13 @@
 
 "use strict";
 
-import type {SpidUser, User} from "../types/user";
-import {extractUserFromRequest, extractUserFromSpid, toUser} from "../types/user";
-import type {SessionStorageInterface} from "../services/sessionStorageInterface";
+import type { SpidUser, User } from "../types/user";
+import {
+  extractUserFromRequest,
+  extractUserFromSpid,
+  toUser
+} from "../types/user";
+import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import spidStrategy from "../strategies/spidStrategy";
 
 /**
@@ -14,14 +18,24 @@ import spidStrategy from "../strategies/spidStrategy";
  */
 export default class AuthenticationController {
   sessionStorage: SessionStorageInterface;
+  samlCert: string;
+  spidStrategy: spidStrategy;
 
   /**
    * Class constructor.
    *
    * @param sessionStorage
+   * @param samlCert
+   * @param spidStrategy
    */
-  constructor(sessionStorage: SessionStorageInterface) {
+  constructor(
+    sessionStorage: SessionStorageInterface,
+    samlCert: string,
+    spidStrategy: spidStrategy
+  ) {
     this.sessionStorage = sessionStorage;
+    this.samlCert = samlCert;
+    this.spidStrategy = spidStrategy;
   }
 
   /**
@@ -54,7 +68,8 @@ export default class AuthenticationController {
   }
 
   /**
-   * Single Logout Overview.
+   * The Single logout service.
+   * The metadata for this Service Provider.
    *
    * @param req
    * @param res
@@ -88,9 +103,25 @@ export default class AuthenticationController {
               message: err.toString()
             });
           }
-
         });
       }
     );
+  }
+
+  /**
+   * The metadata for this Service Provider.
+   *
+   * @param req
+   * @param res
+   */
+  metadata(req: express$Request, res: express$Response) {
+    const metadata = this.spidStrategy.generateServiceProviderMetadata(
+      this.samlCert
+    );
+
+    res
+      .status(200)
+      .set("Content-Type", "application/xml")
+      .send(metadata);
   }
 }

@@ -12,17 +12,19 @@ import type { User } from "../types/user";
 
 const Strategy = require("passport-http-bearer");
 
-const tokenStrategy = new Strategy(function(token, done) {
-  const sessionStorage = (container.resolve(
-    SESSION_STORAGE
-  ): SessionStorageInterface);
+const tokenStrategy = () => {
+  return new Strategy(function(token, done) {
+    const sessionStorage = (container.resolve(
+      SESSION_STORAGE
+    ): SessionStorageInterface);
 
-  sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
-    maybeUser.fold(
-      message => done(null, false, { message }),
-      user => done(null, user)
-    );
+    sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
+      maybeUser.fold(
+        message => done(null, false, { message }),
+        user => done(null, user)
+      );
+    });
   });
-});
+};
 
 export default tokenStrategy;

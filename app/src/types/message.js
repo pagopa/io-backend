@@ -2,32 +2,49 @@
 
 "use strict";
 
-import { MessageResponse } from "../api/models";
-import * as t from "io-ts";
+import { CreatedMessage, MessageResponse } from "../api/models";
+import t from "flow-runtime";
 
-const MessageModel = t.intersection([
-  t.type({
-    id: t.string,
-    markdown: t.string
-  }),
-  t.partial({
-    subject: t.string
-  })
-]);
+const MessageModel = t.object(
+  t.property("id", t.string()),
+  t.property("markdown", t.string(), true),
+  t.property("sender_service_id", t.string()),
+  t.property("subject", t.string(), true)
+);
 
 export type Message = t.TypeOf<typeof MessageModel>;
 
 /**
- * Converts an API message to a Proxy message.
+ * Converts an API MessageResponse to a Proxy message.
  *
  * @param from
  * @returns {Message}
  */
-export function toAppMessage(from: MessageResponse): Message {
-  // $FlowFixMe
+export function messageResponseToAppMessage(from: MessageResponse): Message {
+  if (from.message.hasOwnProperty("content")) {
+    return {
+      id: from.message.id,
+      markdown: from.message.content.markdown,
+      sender_service_id: from.message.senderServiceId,
+      subject: from.message.content.subject
+    };
+  } else {
+    return {
+      id: from.message.id,
+      sender_service_id: from.message.senderServiceId
+    };
+  }
+}
+
+/**
+ * Converts an API CreatedMessage to a Proxy message.
+ *
+ * @param from
+ * @returns {Message}
+ */
+export function createdMessageToAppMessage(from: CreatedMessage): Message {
   return {
     id: from.id,
-    subject: "Lorem ipsum", //from.content.subject,
-    markdown: "Lorem ipsum" //from.content.markdown
+    sender_service_id: from.senderServiceId
   };
 }
