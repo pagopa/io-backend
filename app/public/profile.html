@@ -50,7 +50,6 @@
     localStorage.setItem("token", token);
 
     fetch("./api/v1/profile", {
-      credentials: "include",
       headers: {
         "Authorization": "Bearer " + token
       },
