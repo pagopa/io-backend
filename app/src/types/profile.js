@@ -9,17 +9,28 @@ import { left, right } from "fp-ts/lib/Either";
 
 const winston = require("winston");
 
-const ProfileModel = t.object(
+const ProfileWithEmailModel = t.object(
+  t.property("email", t.string(), true),
   t.property("family_name", t.string()),
   t.property("fiscal_code", t.string()),
-  t.property("name", t.string()),
-  t.property("version", t.number()),
-  t.property("email", t.string(), true),
-  t.property("is_email_set", t.boolean(), true),
-  t.property("preferred_email", t.string(), true),
-  t.property("is_preferred_email_set", t.boolean(), true),
+  t.property("has_profile", t.boolean()),
+  t.property("is_email_set", t.boolean()),
   t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("preferred_languages", t.array(t.string()), true)
+  t.property("name", t.string()),
+  t.property("preferred_languages", t.array(t.string()), true),
+  t.property("version", t.number())
+);
+
+const ProfileWithoutEmailModel = t.object(
+  t.property("family_name", t.string()),
+  t.property("fiscal_code", t.string()),
+  t.property("has_profile", t.boolean()),
+  t.property("is_email_set", t.boolean()),
+  t.property("is_inbox_enabled", t.boolean(), true),
+  t.property("name", t.string()),
+  t.property("preferred_email", t.string()),
+  t.property("preferred_languages", t.array(t.string()), true),
+  t.property("version", t.number())
 );
 
 const UpsertProfileModel = t.object(
@@ -29,7 +40,8 @@ const UpsertProfileModel = t.object(
   t.property("preferred_languages", t.array(t.string()), true)
 );
 
-export type Profile = t.TypeOf<typeof ProfileModel>;
+export type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmailModel>;
+export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmailModel>;
 export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
 
 /**
@@ -41,19 +53,34 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function toAppProfile(from: GetProfileOKResponse, user: User): Profile {
-  return {
-    name: user.name,
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    email: from.email,
-    is_email_set: !!from.email,
-    preferred_email: user.preferred_email,
-    is_preferred_email_set: !!user.preferred_email,
-    preferred_languages: from.preferredLanguages,
-    is_inbox_enabled: from.isInboxEnabled,
-    version: from.version
-  };
+export function toAppProfile(
+  from: GetProfileOKResponse | null,
+  user: User
+): ProfileWithEmail | ProfileWithoutEmail {
+  if (from === null) {
+    return {
+      family_name: user.family_name,
+      fiscal_code: user.fiscal_code,
+      has_profile: false,
+      is_email_set: false,
+      name: user.name,
+      preferred_email: user.preferred_email,
+      version: 0
+    };
+  } else {
+    return {
+      email: from.email,
+      family_name: user.family_name,
+      fiscal_code: user.fiscal_code,
+      has_profile: true,
+      is_email_set: !!from.email,
+      is_inbox_enabled: from.isInboxEnabled,
+      name: user.name,
+      preferred_email: user.preferred_email,
+      preferred_languages: from.preferredLanguages,
+      version: from.version
+    };
+  }
 }
 
 /**

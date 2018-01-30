@@ -130,8 +130,6 @@ paths:
             application/json:
               fiscal_code: "TMMEXQ60A10Y526X"
               email: "email@example.com"
-        "404":
-          description: No user found for the provided fiscal code.
         "500":
           description: There was an error in retrieving the user profile.
     post:
@@ -198,22 +196,32 @@ definitions:
     description: Describes the user's profile.
     type: object
     properties:
-      name:
-        type: string
+      email:
+        $ref: '#/definitions/EmailAddress'
       family_name:
         type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
-      email:
+      has_profile:
+        type: boolean
+      is_email_set:
+        type: boolean
+      is_inbox_enabled:
+        $ref: "#/definitions/IsInboxEnabled"
+      name:
+        type: string
+      preferred_email:
         $ref: '#/definitions/EmailAddress'
       preferred_languages:
         $ref: '#/definitions/PreferredLanguages'
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
       version:
         type: integer
     required:
       - fiscal_code
+      - family_name
+      - has_profile
+      - is_email_set
+      - name
       - version
 responses: {}
 parameters:

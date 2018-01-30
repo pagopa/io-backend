@@ -51,12 +51,19 @@ export const ServicePublicModel = t.object(
 );
 
 /**
- * Validates on object against the ProblemJsonModel data type.
+ * Validates on object against the ProblemJsonModel data type. On success
+ * call the passed callback function if it's set otherwise forward the original
+ * error to the client.
  *
  * @param value
  * @param res
+ * @param callback
  */
-export function validateProblemJson(value: any, res: express$Response) {
+export function validateProblemJson(
+  value: any,
+  res: express$Response,
+  callback: ?() => void
+) {
   const validation = t.validate(ProblemJsonModel, value);
 
   if (validation.hasErrors()) {
@@ -65,10 +72,14 @@ export function validateProblemJson(value: any, res: express$Response) {
       message: "Unrecoverable error."
     });
   } else {
-    res.status(value.status).json({
-      // Forward the error received from the API.
-      message: value.detail
-    });
+    if (callback !== null && callback !== undefined) {
+      callback();
+    } else {
+      res.status(value.status).json({
+        // Forward the error received from the API.
+        message: value.detail
+      });
+    }
   }
 }
 

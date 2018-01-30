@@ -55,7 +55,18 @@ export default class ProfileController extends ControllerBase {
               // Look if the response is a GetProfileOKResponse.
               validateResponse(maybeApiProfile, GetProfileOKResponseModel).fold(
                 // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeApiProfile, res),
+                () => {
+                  validateProblemJson(maybeApiProfile, res, () => {
+                    if (maybeApiProfile.status === 404) {
+                      res.status(200).json(toAppProfile(null, user));
+                    } else {
+                      res.status(maybeApiProfile.status).json({
+                        // Forward the error received from the API.
+                        message: maybeApiProfile.detail
+                      });
+                    }
+                  });
+                },
                 // All correct, return the response to the client.
                 apiProfile => {
                   res.json(toAppProfile(apiProfile, user));
