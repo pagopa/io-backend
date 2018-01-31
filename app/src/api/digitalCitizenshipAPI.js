@@ -85,7 +85,7 @@ function _getService(serviceId, options, callback) {
     if (err) {
       return callback(err);
     }
-    let statusCode = response.statusCode; console.log(responseBody);
+    let statusCode = response.statusCode;
     if (statusCode !== 200 && statusCode !== 404) {
       let error = new Error(responseBody);
       error.statusCode = response.statusCode;

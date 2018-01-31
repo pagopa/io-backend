@@ -45,7 +45,7 @@ export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmailModel>;
 export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
 
 /**
- * Converts an API profile to a Proxy profile.
+ * Converts an existing API profile to a Proxy profile.
  *
  * @param from
  *   Profile retrieved from the Digital Citizenship API.
@@ -53,34 +53,43 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function toAppProfile(
-  from: GetProfileOKResponse | null,
+export function ProfileWithEmailToAppProfile(
+  from: GetProfileOKResponse,
   user: User
 ): ProfileWithEmail | ProfileWithoutEmail {
-  if (from === null) {
-    return {
-      family_name: user.family_name,
-      fiscal_code: user.fiscal_code,
-      has_profile: false,
-      is_email_set: false,
-      name: user.name,
-      preferred_email: user.preferred_email,
-      version: 0
-    };
-  } else {
-    return {
-      email: from.email,
-      family_name: user.family_name,
-      fiscal_code: user.fiscal_code,
-      has_profile: true,
-      is_email_set: !!from.email,
-      is_inbox_enabled: from.isInboxEnabled,
-      name: user.name,
-      preferred_email: user.preferred_email,
-      preferred_languages: from.preferredLanguages,
-      version: from.version
-    };
-  }
+  return {
+    email: from.email,
+    family_name: user.family_name,
+    fiscal_code: user.fiscal_code,
+    has_profile: true,
+    is_email_set: !!from.email,
+    is_inbox_enabled: from.isInboxEnabled,
+    name: user.name,
+    preferred_email: user.preferred_email,
+    preferred_languages: from.preferredLanguages,
+    version: from.version
+  };
+}
+
+/**
+ * Converts an empty API profile to a Proxy profile.
+ *
+ * @param user
+ *   User data extracted from SPID.
+ * @returns {Profile}
+ */
+export function ProfileWithoutEmailToAppProfile(
+  user: User
+): ProfileWithEmail | ProfileWithoutEmail {
+  return {
+    family_name: user.family_name,
+    fiscal_code: user.fiscal_code,
+    has_profile: false,
+    is_email_set: false,
+    name: user.name,
+    preferred_email: user.preferred_email,
+    version: 0
+  };
 }
 
 /**

@@ -24,7 +24,7 @@ const SpidUserModel = t.object(
   t.property("familyName", t.string()),
   t.property("sessionIndex", t.string()),
   t.property("issuer", t.any()),
-  t.property("email", t.any())
+  t.property("email", t.string())
 );
 
 export type User = t.TypeOf<typeof UserModel>;

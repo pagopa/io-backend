@@ -9,6 +9,8 @@
 import t from "flow-runtime";
 import { left, right } from "fp-ts/lib/Either";
 
+const winston = require("winston");
+
 const ProblemJsonModel = t.object(
   t.property("type", t.string(), true),
   t.property("title", t.string(), true),
@@ -71,16 +73,33 @@ export function validateProblemJson(
       // If we reach this point something very bad has happened.
       message: "Unrecoverable error."
     });
+    winston.log(
+      "error",
+      "error in validating a ProblemJsonModel response: %s",
+      validation.errors
+    );
   } else {
     if (callback !== null && callback !== undefined) {
       callback();
     } else {
-      res.status(value.status).json({
-        // Forward the error received from the API.
-        message: value.detail
-      });
+      forwardAPIError(value, res);
     }
   }
+}
+
+/**
+ * Forwards an API error message to the client.
+ * @param value
+ * @param res
+ */
+export function forwardAPIError(
+  value: ProblemJsonModel,
+  res: express$Response
+) {
+  res.status(value.status).json({
+    message: "The API call returns an error"
+  });
+  winston.log("info", "error occurred in API call: %s", value.detail);
 }
 
 /**
