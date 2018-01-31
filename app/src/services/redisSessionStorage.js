@@ -29,7 +29,7 @@ export default class RedisSessionStorage implements SessionStorageInterface {
   set(token: string, user: User): void {
     // Sets field in the hash stored at token to user.
     // @see https://redis.io/commands/hset
-    this.client.hset("hash", token, JSON.stringify(user));
+    this.client.hset("sessions", token, JSON.stringify(user));
   }
 
   /**
@@ -41,11 +41,11 @@ export default class RedisSessionStorage implements SessionStorageInterface {
     return new Promise(function(resolve) {
       // Returns the value associated with field in the hash stored at token.
       // @see https://redis.io/commands/hget
-      client.hget("hash", token, function(err, value) {
+      client.hget("sessions", token, function(err, value) {
         if (err) {
           resolve(left(err));
         } else {
-          if (value === undefined) {
+          if (value === null || value === undefined) {
             resolve(
               left(
                 "There was an error extracting the user profile from the session."
@@ -72,6 +72,6 @@ export default class RedisSessionStorage implements SessionStorageInterface {
   del(token: string): void {
     // Removes the specified keys. A key is ignored if it does not exist.
     // @see https://redis.io/commands/hdel
-    this.client.hdel("hash", token);
+    this.client.hdel("sessions", token);
   }
 }

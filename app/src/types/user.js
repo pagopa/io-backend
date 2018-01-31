@@ -48,8 +48,8 @@ export function toUser(from: SpidUser): User {
     fiscal_code: from.fiscalNumber,
     name: from.name,
     family_name: from.familyName,
-    nameID: from.name, // The used nameID is needed for logout.
-    nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient" // The used nameIDFormat is needed for logout.
+    nameID: from.nameID, // The used nameID is needed for logout.
+    nameIDFormat: from.nameIDFormat // The used nameIDFormat is needed for logout.
   };
 }
 
