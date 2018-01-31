@@ -78,11 +78,22 @@ app.use(passport.initialize());
 
 app.get("/login", spidAuth);
 
-app.post("/assertionConsumerService", spidAuth, function(
+app.post("/assertionConsumerService", function(
   req: express$Request,
-  res: express$Response
+  res: express$Response,
+  next: express$NextFunction
 ) {
-  acsController.acs(req, res);
+  passport.authenticate("spid", function(err, user) {
+    if (err) {
+      const url = process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
+      res.redirect(url);
+      return;
+    }
+    if (!user) {
+      return res.redirect("/login");
+    }
+    acsController.acs(user, req, res);
+  })(req, res, next);
 });
 
 app.get("/metadata", function(req: express$Request, res: express$Response) {
