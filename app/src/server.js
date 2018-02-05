@@ -78,7 +78,13 @@ app.use(passport.initialize());
 
 app.get("/login", spidAuth);
 
-const withSpidAuth = (controller: AuthenticationController): any => {
+const withSpidAuth = (
+  controller: AuthenticationController
+): ((
+  req: express$Request,
+  res: express$Response,
+  next: express$NextFunction
+) => any) => {
   return function(
     req: express$Request,
     res: express$Response,
