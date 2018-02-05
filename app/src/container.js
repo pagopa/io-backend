@@ -77,9 +77,19 @@ container.register({
   [HTTPS_CERT]: awilix.asFunction(httpsCert).singleton()
 });
 
-// Url to the Redis server.
+// Redis server settings.
+const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600;
+const tokenDurationInSeconds =
+  parseInt(process.env.TOKEN_DURATION_IN_SECONDS) ||
+  DEFAULT_TOKEN_DURATION_IN_SECONDS;
+winston.log(
+  "info",
+  "Session token duration set to %s seconds",
+  tokenDurationInSeconds
+);
 container.register({
-  redisUrl: awilix.asValue(process.env.REDIS_URL)
+  redisUrl: awilix.asValue(process.env.REDIS_URL),
+  tokenDuration: awilix.asValue(tokenDurationInSeconds)
 });
 
 // Register the spidStrategy.
