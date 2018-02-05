@@ -37,12 +37,12 @@ export default class AuthenticationController {
   /**
    * The Assertion consumer service.
    *
-   * @param user
+   * @param userPayload
    * @param req
    * @param res
    */
-  acs(user: any, req: express$Request, res: express$Response) {
-    const maybeUser = validateSpidUser(user);
+  acs(userPayload: any, req: express$Request, res: express$Response) {
+    const maybeUser = validateSpidUser(userPayload);
 
     maybeUser.fold(
       (error: String) => {
