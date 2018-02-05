@@ -29,7 +29,8 @@ export default class RedisSessionStorage implements SessionStorageInterface {
    * {@inheritDoc}
    */
   set(token: string, user: User): void {
-    // Sets field in the hash stored at token to user.
+    // Set key to hold the string value. This data is set to expire (EX) after
+    // `this.tokenDuration` seconds.
     // @see https://redis.io/commands/set
     this.client.set(token, JSON.stringify(user), "EX", this.tokenDuration);
   }
@@ -41,7 +42,7 @@ export default class RedisSessionStorage implements SessionStorageInterface {
     const client = this.client;
 
     return new Promise(function(resolve) {
-      // Returns the value associated with field in the hash stored at token.
+      // Get the value of key.
       // @see https://redis.io/commands/get
       client.get(token, function(err, value) {
         if (err) {
