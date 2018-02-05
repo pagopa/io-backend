@@ -78,12 +78,33 @@ app.use(passport.initialize());
 
 app.get("/login", spidAuth);
 
-app.post("/assertionConsumerService", spidAuth, function(
+const withSpidAuth = (
+  controller: AuthenticationController
+): ((
   req: express$Request,
-  res: express$Response
-) {
-  acsController.acs(req, res);
-});
+  res: express$Response,
+  next: express$NextFunction
+) => any) => {
+  return function(
+    req: express$Request,
+    res: express$Response,
+    next: express$NextFunction
+  ) {
+    passport.authenticate("spid", (err, user) => {
+      if (err) {
+        const url = process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
+        res.redirect(url);
+        return;
+      }
+      if (!user) {
+        return res.redirect("/login");
+      }
+      controller.acs(user, req, res);
+    })(req, res, next);
+  };
+};
+
+app.post("/assertionConsumerService", withSpidAuth(acsController));
 
 app.get("/metadata", function(req: express$Request, res: express$Response) {
   acsController.metadata(req, res);
