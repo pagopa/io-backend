@@ -15,16 +15,28 @@
   "extends": [
     "eslint:recommended",
     "plugin:flowtype/recommended",
+    "plugin:jest/recommended",
     "plugin:import/errors",
     "plugin:import/warnings"
   ],
   "plugins": [
     "flowtype",
-    "prettier"
+    "prettier",
+    "jest"
   ],
   "rules": {
     "strict": 0,
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "no-trailing-spaces": "error",
+    "require-jsdoc": ["error", {
+      "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+      }
+    }]
   },
   "settings": {
     "flowtype": {
