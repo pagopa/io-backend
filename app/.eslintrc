@@ -36,7 +36,8 @@
           "ArrowFunctionExpression": false,
           "FunctionExpression": false
       }
-    }]
+    }],
+    "prefer-const": "error"
   },
   "settings": {
     "flowtype": {
