@@ -3,7 +3,7 @@
 "use strict";
 
 import type { SpidUser } from "../types/user";
-import { extractUserFromSpid, toUser } from "../types/user";
+import { toUser, validateSpidUser } from "../types/user";
 import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import spidStrategy from "../strategies/spidStrategy";
 
@@ -37,11 +37,12 @@ export default class AuthenticationController {
   /**
    * The Assertion consumer service.
    *
+   * @param userPayload
    * @param req
    * @param res
    */
-  acs(req: express$Request, res: express$Response) {
-    const maybeUser = extractUserFromSpid(req);
+  acs(userPayload: any, req: express$Request, res: express$Response) {
+    const maybeUser = validateSpidUser(userPayload);
 
     maybeUser.fold(
       (error: String) => {
