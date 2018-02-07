@@ -4,6 +4,7 @@
 
 import t from "flow-runtime";
 import { left, right } from "fp-ts/lib/Either";
+import { FiscalNumberType, IssuerType } from "./genericTypes";
 
 const winston = require("winston");
 
@@ -12,7 +13,7 @@ const UserModel = t.object(
   t.property("token", t.string()),
   t.property("sessionIndex", t.string()),
   t.property("spid_idp", t.string()),
-  t.property("fiscal_code", t.string()),
+  t.property("fiscal_code", FiscalNumberType),
   t.property("name", t.string()),
   t.property("family_name", t.string()),
   t.property("nameID", t.string()),
@@ -20,11 +21,11 @@ const UserModel = t.object(
 );
 
 const SpidUserModel = t.object(
-  t.property("fiscalNumber", t.string()),
+  t.property("fiscalNumber", FiscalNumberType),
   t.property("name", t.string()),
   t.property("familyName", t.string()),
   t.property("sessionIndex", t.string()),
-  t.property("issuer", t.any())
+  t.property("issuer", IssuerType)
 );
 
 export type User = t.TypeOf<typeof UserModel>;
