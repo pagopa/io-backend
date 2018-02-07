@@ -22,7 +22,10 @@
 
   <div id="name"></div>
   <div id="fiscal_code"></div>
+  <div id="has_profile"></div>
+  <div id="is_email_set"></div>
   <div id="email"></div>
+  <div id="preferred_email"></div>
   <div id="version"></div>
   <div id="is_inbox_enabled"></div>
 
@@ -55,65 +58,82 @@
   if (token) {
     localStorage.setItem("token", token);
 
-    fetch('./api/v1/profile', {
-      credentials: 'include',
+    fetch("./api/v1/profile", {
       headers: {
-        'Authorization': 'Bearer ' + token
+        "Authorization": "Bearer " + token
       },
     })
       .then(
         function(response) {
           if (response.status !== 200) {
-            console.log('Looks like there was a problem. Status Code: ' +
+            console.log("Looks like there was a problem. Status Code: " +
               response.status);
             return;
           }
 
           // Examine the text in the response
           response.json().then(function(data) {
-            $("#name").append(data.name + ' ' + data.family_name);
-            $("#fiscal_code").append(data.fiscal_code);
-            $("#email").append(data.email);
-            $("#version").append(data.version);
+            $("#name").append("Name: " + data.name + " " + data.family_name);
+            $("#fiscal_code").append("CF: "+ data.fiscal_code);
+            $("#has_profile").append("Has profile? "+ data.has_profile);
+            $("#is_email_set").append("Is email set? "+ data.is_email_set);
+            $("#version").append("Version "+ data.version);
+
+            if(data.has_profile) {
+              if(data.is_email_set) {
+                $("#email").append("Email: " + data.email);
+                $("#preferred_email").hide();
+              } else {
+                $("#preferred_email").append("Preferred Email: "+ data.preferred_email);
+                $("#email").hide();
+              }
+            } else {
+              $("#preferred_email").append("Preferred Email: "+ data.preferred_email);
+              $("#email").hide();
+            }
 
             $("#edit_email").val(data.email);
             $("#edit_version").val(data.version);
 
             if (data.is_inbox_enabled) {
               $("#is_inbox_enabled").append("Inbox enabled");
-              $("#edit_inbox_enabled").attr('checked', true);
+              $("#edit_inbox_enabled").attr("checked", true);
             } else {
               $("#is_inbox_enabled").append("Inbox non enabled");
-              $("#edit_inbox_enabled").attr('checked', false);
+              $("#edit_inbox_enabled").attr("checked", false);
             }
           });
         }
       )
       .catch(function(err) {
-        console.log('Fetch Error :-S', err);
+        console.log("Fetch Error :-S", err);
       });
   } else {
-    window.location = 'idp_list.html';
+    window.location = "idp_list.html";
   }
 
   $("#edit").submit(function() {
-    const data = {
-      email: $("#edit_email").val(),
-      is_inbox_enabled: $("#edit_inbox_enabled").is(':checked'),
+    let data = {
+      is_inbox_enabled: $("#edit_inbox_enabled").is(":checked"),
       version: parseInt($("#edit_version").val())
     };
+
+    const email_val = $("#edit_email").val();
+    if (email_val !== "") {
+      data["email"] = email_val;
+    }
 
     console.log(data);
 
     $.ajax({
       url: "./api/v1/profile",
-      type: 'post',
+      type: "post",
       data: JSON.stringify(data),
       headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json; charset=UTF-8",
       },
-      dataType: 'json',
+      dataType: "json",
       success: function(data) {
         console.info(data);
       }

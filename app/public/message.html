@@ -47,7 +47,6 @@
     localStorage.setItem("token", token);
 
     fetch('./api/v1/messages/' + id, {
-      credentials: 'include',
       headers: {
         'Authorization': 'Bearer ' + token
       },
@@ -65,7 +64,6 @@
             console.log(data);
 
             fetch('./api/v1/services/' + data.sender_service_id, {
-              credentials: 'include',
               headers: {
                 'Authorization': 'Bearer ' + token
               },

@@ -16,6 +16,8 @@ import {
   NotificationType
 } from "./genericTypes";
 
+const winston = require("winston");
+
 const ProblemJsonModel = t.object(
   t.property("type", t.string(), true),
   t.property("title", t.string(), true),
@@ -58,12 +60,19 @@ export const ServicePublicModel = t.object(
 );
 
 /**
- * Validates on object against the ProblemJsonModel data type.
+ * Validates on object against the ProblemJsonModel data type. On success
+ * call the passed callback function if it's set otherwise forward the original
+ * error to the client.
  *
  * @param value
  * @param res
+ * @param callback
  */
-export function validateProblemJson(value: any, res: express$Response) {
+export function validateProblemJson(
+  value: any,
+  res: express$Response,
+  callback: ?() => void
+) {
   const validation = t.validate(ProblemJsonModel, value);
 
   if (validation.hasErrors()) {
@@ -71,12 +80,33 @@ export function validateProblemJson(value: any, res: express$Response) {
       // If we reach this point something very bad has happened.
       message: "Unrecoverable error."
     });
+    winston.log(
+      "error",
+      "error in validating a ProblemJsonModel response: %s",
+      validation.errors
+    );
   } else {
-    res.status(value.status).json({
-      // Forward the error received from the API.
-      message: value.detail
-    });
+    if (callback !== null && callback !== undefined) {
+      callback();
+    } else {
+      forwardAPIError(value, res);
+    }
   }
+}
+
+/**
+ * Forwards an API error message to the client.
+ * @param value
+ * @param res
+ */
+export function forwardAPIError(
+  value: ProblemJsonModel,
+  res: express$Response
+) {
+  res.status(value.status).json({
+    message: "The API call returns an error"
+  });
+  winston.log("info", "error occurred in API call: %s", value.detail);
 }
 
 /**

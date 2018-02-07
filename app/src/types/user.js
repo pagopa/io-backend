@@ -16,6 +16,7 @@ const UserModel = t.object(
   t.property("fiscal_code", FiscalNumberType),
   t.property("name", t.string()),
   t.property("family_name", t.string()),
+  t.property("preferred_email", t.string()),
   t.property("nameID", t.string()),
   t.property("nameIDFormat", t.string())
 );
@@ -25,7 +26,8 @@ const SpidUserModel = t.object(
   t.property("name", t.string()),
   t.property("familyName", t.string()),
   t.property("sessionIndex", t.string()),
-  t.property("issuer", IssuerType)
+  t.property("issuer", IssuerType),
+  t.property("email", t.string())
 );
 
 export type User = t.TypeOf<typeof UserModel>;
@@ -49,6 +51,7 @@ export function toUser(from: SpidUser): User {
     fiscal_code: from.fiscalNumber,
     name: from.name,
     family_name: from.familyName,
+    preferred_email: from.email,
     nameID: from.nameID, // The used nameID is needed for logout.
     nameIDFormat: from.nameIDFormat // The used nameIDFormat is needed for logout.
   };

@@ -5,6 +5,7 @@
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
 import {
+  forwardAPIError,
   GetProfileOKResponseModel,
   UpsertProfileOKResponseModel,
   validateProblemJson,
@@ -15,7 +16,8 @@ import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInte
 import type { UpsertProfile } from "../types/profile";
 import {
   extractUpsertProfileFromRequest,
-  toAppProfile,
+  ProfileWithEmailToAppProfile,
+  ProfileWithoutEmailToAppProfile,
   toExtendedProfile
 } from "../types/profile";
 import ControllerBase from "./ControllerBase";
@@ -60,10 +62,23 @@ export default class ProfileController extends ControllerBase {
               // Look if the response is a GetProfileOKResponse.
               validateResponse(maybeApiProfile, GetProfileOKResponseModel).fold(
                 // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeApiProfile, res),
+                () => {
+                  validateProblemJson(maybeApiProfile, res, () => {
+                    if (maybeApiProfile.status === 404) {
+                      // If the profile doesn't exists on the API we still
+                      // return 200 to the App with the information we have
+                      // retrieved from SPID.
+                      res
+                        .status(200)
+                        .json(ProfileWithoutEmailToAppProfile(user));
+                    } else {
+                      forwardAPIError(maybeApiProfile, res);
+                    }
+                  });
+                },
                 // All correct, return the response to the client.
                 apiProfile => {
-                  res.json(toAppProfile(apiProfile, user));
+                  res.json(ProfileWithEmailToAppProfile(apiProfile, user));
                 }
               );
             },
@@ -118,7 +133,7 @@ export default class ProfileController extends ControllerBase {
                     () => validateProblemJson(maybeApiProfile, res),
                     // All correct, return the response to the client.
                     apiProfile => {
-                      res.json(toAppProfile(apiProfile, user));
+                      res.json(ProfileWithEmailToAppProfile(apiProfile, user));
                     }
                   );
                 },
