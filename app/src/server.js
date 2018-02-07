@@ -78,6 +78,17 @@ app.use(passport.initialize());
 
 app.get("/login", spidAuth);
 
+app.post("/logout", tokenAuth, function(
+  req: express$Request,
+  res: express$Response
+) {
+  acsController.logout(req, res);
+});
+
+app.post("/slo", function(req: express$Request, res: express$Response) {
+  acsController.slo(req, res);
+});
+
 const withSpidAuth = (
   controller: AuthenticationController
 ): ((

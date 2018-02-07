@@ -31,7 +31,7 @@ const spidStrategy = (samlKey: string) => {
         }
       },
       idp: {
-        testid: {
+        "spid-testenv-identityserver": {
           entryPoint: "https://spid-testenv-identityserver:9443/samlsso",
           logoutUrl: "https://spid-testenv-identityserver:9443/samlsso",
           cert:

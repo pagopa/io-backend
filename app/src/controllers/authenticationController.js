@@ -2,8 +2,12 @@
 
 "use strict";
 
-import type { SpidUser } from "../types/user";
-import { toUser, validateSpidUser } from "../types/user";
+import type { SpidUser, User } from "../types/user";
+import {
+  extractUserFromRequest,
+  toUser,
+  validateSpidUser
+} from "../types/user";
 import type { SessionStorageInterface } from "../services/sessionStorageInterface";
 import spidStrategy from "../strategies/spidStrategy";
 
@@ -62,6 +66,54 @@ export default class AuthenticationController {
         res.redirect(urlWithToken);
       }
     );
+  }
+
+  /**
+   * Retrieves the logout url from the IDP.
+   *
+   * @param req
+   * @param res
+   */
+  logout(req: express$Request, res: express$Response) {
+    const maybeUser = extractUserFromRequest(req);
+
+    maybeUser.fold(
+      (error: String) => {
+        res.status(500).json({
+          message: error
+        });
+      },
+      (user: User) => {
+        // Delete the Redis token.
+        this.sessionStorage.del(user.token);
+
+        // Logout from SPID.
+        req.query = {};
+        req.query.entityID = user.spid_idp;
+
+        this.spidStrategy.logout(req, function(err, request) {
+          if (!err) {
+            res.status(200).json({
+              logoutUrl: request
+            });
+          } else {
+            res.status(500).json({
+              message: err.toString()
+            });
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * The Single logout service.
+   *
+   * @param req
+   * @param res
+   */
+  slo(req: express$Request, res: express$Response) {
+    res.redirect("/");
   }
 
   /**

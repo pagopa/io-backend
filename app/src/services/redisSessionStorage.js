@@ -15,21 +15,24 @@ const redis = require("redis");
  */
 export default class RedisSessionStorage implements SessionStorageInterface {
   client: RedisClient;
+  tokenDuration: string;
 
   /**
    * Class constructor.
    */
-  constructor(redisUrl: string) {
+  constructor(redisUrl: string, tokenDuration: string) {
     this.client = redis.createClient(redisUrl);
+    this.tokenDuration = tokenDuration;
   }
 
   /**
    * {@inheritDoc}
    */
   set(token: string, user: User): void {
-    // Sets field in the hash stored at token to user.
-    // @see https://redis.io/commands/hset
-    this.client.hset("hash", token, JSON.stringify(user));
+    // Set key to hold the string value. This data is set to expire (EX) after
+    // `this.tokenDuration` seconds.
+    // @see https://redis.io/commands/set
+    this.client.set(token, JSON.stringify(user), "EX", this.tokenDuration);
   }
 
   /**
@@ -39,13 +42,13 @@ export default class RedisSessionStorage implements SessionStorageInterface {
     const client = this.client;
 
     return new Promise(function(resolve) {
-      // Returns the value associated with field in the hash stored at token.
-      // @see https://redis.io/commands/hget
-      client.hget("hash", token, function(err, value) {
+      // Get the value of key.
+      // @see https://redis.io/commands/get
+      client.get(token, function(err, value) {
         if (err) {
           resolve(left(err));
         } else {
-          if (value === undefined) {
+          if (value === null || value === undefined) {
             resolve(
               left(
                 "There was an error extracting the user profile from the session."
@@ -64,5 +67,14 @@ export default class RedisSessionStorage implements SessionStorageInterface {
         }
       });
     });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  del(token: string): void {
+    // Removes the specified keys. A key is ignored if it does not exist.
+    // @see https://redis.io/commands/hdel
+    this.client.hdel("sessions", token);
   }
 }

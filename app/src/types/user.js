@@ -10,12 +10,14 @@ const winston = require("winston");
 const UserModel = t.object(
   t.property("created_at", t.number()),
   t.property("token", t.string()),
-  t.property("session_index", t.string()),
+  t.property("sessionIndex", t.string()),
   t.property("spid_idp", t.string()),
   t.property("fiscal_code", t.string()),
   t.property("name", t.string()),
   t.property("family_name", t.string()),
-  t.property("preferred_email", t.string())
+  t.property("preferred_email", t.string()),
+  t.property("nameID", t.string()),
+  t.property("nameIDFormat", t.string())
 );
 
 const SpidUserModel = t.object(
@@ -34,7 +36,7 @@ export type SpidUser = t.TypeOf<typeof SpidUserModel>;
  * Converts a SPID User to a Proxy User.
  *
  * @param from
- * @returns User
+ * @returns {User}
  */
 export function toUser(from: SpidUser): User {
   // Use the SAML sessionIndex as token.
@@ -43,12 +45,14 @@ export function toUser(from: SpidUser): User {
   return {
     created_at: new Date().getTime(),
     token: token,
-    session_index: token, // The sessionIndex is needed for logout.
+    sessionIndex: token, // The sessionIndex is needed for logout.
     spid_idp: from.issuer._, // The used idp is needed for logout.
     fiscal_code: from.fiscalNumber,
     name: from.name,
     family_name: from.familyName,
-    preferred_email: from.email
+    preferred_email: from.email,
+    nameID: from.nameID, // The used nameID is needed for logout.
+    nameIDFormat: from.nameIDFormat // The used nameIDFormat is needed for logout.
   };
 }
 
