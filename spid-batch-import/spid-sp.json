@@ -7,35 +7,22 @@
 	},
 	"AssertionConsumerServices": [
 		{
-			"Location": "/SAML2/POST",
+			"Location": "https://italia-backend/assertionConsumerService",
 			"IsDefault": true
 		}
 	],
 	"SingleLogoutServices": [
 		{
-			"Location": "/Logout"
+			"Location": "https://italia-backend/slo"
 		}
 	],
 	"AttributeConsumingServices": [
 		{
 			"RequestedAttribute": [
-				"spidCode",
 				"name",
 				"familyName",
-				"placeOfBirth",
-				"countyOfBirth",
-				"dateOfBirth",
-				"gender",
-				"companyName",
-				"registeredOffice",
 				"fiscalNumber",
-				"ivaCode",
-				"idCard",
-				"mobilePhone",
 				"email",
-				"address",
-				"expirationDate",
-				"digitalAddress"
 			]
 		}
 	]

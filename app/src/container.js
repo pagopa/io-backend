@@ -142,6 +142,13 @@ container.registerClass({
 
 export default container;
 
+/**
+ * Reads a file from the filesystem.
+ *
+ * @param path
+ * @param type
+ * @returns {string}
+ */
 function readFile(path: string, type: string): string {
   winston.log("info", "Reading %s file from %s", type, path);
   return fs.readFileSync(path, "utf-8");

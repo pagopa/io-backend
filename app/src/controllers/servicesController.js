@@ -19,6 +19,11 @@ import { ServicePublicToAppService } from "../types/service";
  * forwarding the call to the API system.
  */
 export default class ServicesController extends ControllerBase {
+  /**
+   * Class constructor.
+   *
+   * @param apiClient
+   */
   constructor(apiClient: ApiClientFactoryInterface) {
     super(apiClient);
   }

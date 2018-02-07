@@ -68,4 +68,13 @@ export default class RedisSessionStorage implements SessionStorageInterface {
       });
     });
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  del(token: string): void {
+    // Removes the specified keys. A key is ignored if it does not exist.
+    // @see https://redis.io/commands/hdel
+    this.client.hdel("sessions", token);
+  }
 }

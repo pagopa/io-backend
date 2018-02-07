@@ -31,7 +31,7 @@ export type User = t.TypeOf<typeof UserModel>;
 export type SpidUser = t.TypeOf<typeof SpidUserModel>;
 
 /**
- * Converts a SPID response to an User.
+ * Converts a SPID User to a Proxy User.
  *
  * @param from
  * @returns {User}
@@ -54,6 +54,24 @@ export function toUser(from: SpidUser): User {
 }
 
 /**
+ * Validates a SPID User extracted from a SAML response.
+ *
+ * @param value
+ * @returns {Either<String, SpidUser>}
+ */
+export function validateSpidUser(value: any): Either<String, SpidUser> {
+  const validation = t.validate(SpidUserModel, value);
+
+  if (validation.hasErrors()) {
+    winston.log("info", validation.errors);
+
+    return left(validation.errors);
+  } else {
+    return right(value);
+  }
+}
+
+/**
  * Extracts the user added to the request by Passport from the request.
  *
  * @param from
@@ -65,28 +83,6 @@ export function extractUserFromRequest(
   const reqWithUser = ((from: Object): { user: User });
 
   const validation = t.validate(UserModel, reqWithUser.user);
-
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(reqWithUser.user);
-  }
-}
-
-/**
- * Extracts a user from a SPID response.
- *
- * @param from
- * @returns {Either<String, SpidUser>}
- */
-export function extractUserFromSpid(
-  from: express$Request
-): Either<String, SpidUser> {
-  const reqWithUser = ((from: Object): { user: User });
-
-  const validation = t.validate(SpidUserModel, reqWithUser.user);
 
   if (validation.hasErrors()) {
     winston.log("info", validation.errors);
