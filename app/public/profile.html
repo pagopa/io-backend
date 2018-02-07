@@ -36,6 +36,15 @@
     <input type="hidden" id="edit_version" value=""/><br/>
     <input type="submit" name="Save">
   </form>
+
+  <br/><br/>
+
+  <div>
+    <form id="logout">
+      <input type="submit" name="Logout" value="Logout" class="text-danger">
+    </form>
+  </div>
+
 </div>
 
 <script>
@@ -109,6 +118,26 @@
         console.info(data);
       }
     });
+  });
+
+
+  $("#logout").submit(function() {
+    // Remove the token from the localStorage.
+    localStorage.removeItem("token");
+
+    // Retrieve the logout url and redirect to it.
+    $.ajax({
+      url: "./logout",
+      type: 'post',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+      },
+      success: function(data) {
+        window.location.href = data.logoutUrl;
+      }
+    });
+
+    return false;
   });
 
 </script>
