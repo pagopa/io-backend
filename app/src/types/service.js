@@ -11,7 +11,7 @@ const ServiceModel = t.object(
   t.property("serviceName", t.string()),
   t.property("organizationName", t.string()),
   t.property("departmentName", t.string()),
-  t.property("version", NonNegativeNumberType, true)
+  t.property("version", NonNegativeNumberType)
 );
 
 export type Service = t.TypeOf<typeof ServiceModel>;
