@@ -25,6 +25,11 @@ import ControllerBase from "./ControllerBase";
  * app by forwarding the call to the API system.
  */
 export default class ProfileController extends ControllerBase {
+  /**
+   * Class constructor.
+   *
+   * @param apiClient
+   */
   constructor(apiClient: ApiClientFactoryInterface) {
     super(apiClient);
   }

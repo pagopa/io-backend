@@ -23,6 +23,11 @@ import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInte
  * forwarding the call to the API system.
  */
 export default class MessagesController extends ControllerBase {
+  /**
+   * Class constructor.
+   *
+   * @param apiClient
+   */
   constructor(apiClient: ApiClientFactoryInterface) {
     super(apiClient);
   }
