@@ -6,22 +6,27 @@ import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
 import type { User } from "./user";
 import t from "flow-runtime";
 import { left, right } from "fp-ts/lib/Either";
+import {
+  EmailType,
+  FiscalNumberType,
+  NonNegativeNumberType
+} from "./genericTypes";
 
 const winston = require("winston");
 
 const ProfileModel = t.object(
   t.property("family_name", t.string()),
-  t.property("fiscal_code", t.string()),
+  t.property("fiscal_code", FiscalNumberType),
   t.property("name", t.string()),
-  t.property("version", t.number()),
-  t.property("email", t.string(), true),
+  t.property("version", NonNegativeNumberType),
+  t.property("email", EmailType, true),
   t.property("is_inbox_enabled", t.boolean(), true),
   t.property("preferred_languages", t.array(t.string()), true)
 );
 
 const UpsertProfileModel = t.object(
-  t.property("version", t.number()),
-  t.property("email", t.string(), true),
+  t.property("version", NonNegativeNumberType),
+  t.property("email", EmailType, true),
   t.property("is_inbox_enabled", t.boolean(), true),
   t.property("preferred_languages", t.array(t.string()), true)
 );

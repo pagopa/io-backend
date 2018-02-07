@@ -1633,6 +1633,10 @@ flow-config-parser@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/flow-config-parser/-/flow-config-parser-0.3.0.tgz#704916efba88cd2518ab4d8f933079571276138f"
 
+flow-runtime-validators@^0.16.0:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/flow-runtime-validators/-/flow-runtime-validators-0.16.0.tgz#d7a355a1deb6d46bbd41a556c6d9d3799cacacc7"
+
 flow-runtime@^0.16.0:
   version "0.16.0"
   resolved "https://registry.yarnpkg.com/flow-runtime/-/flow-runtime-0.16.0.tgz#6da4aac36b8e26ea2dc80b38395ebecbfcb5a535"
