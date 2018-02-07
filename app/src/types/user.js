@@ -16,7 +16,7 @@ const UserModel = t.object(
   t.property("fiscal_code", FiscalNumberType),
   t.property("name", t.string()),
   t.property("family_name", t.string()),
-  t.property("preferred_email", t.string()),
+  t.property("preferred_email", EmailType),
   t.property("nameID", t.string()),
   t.property("nameIDFormat", t.string())
 );

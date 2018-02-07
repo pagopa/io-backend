@@ -4,133 +4,18 @@ import AuthenticationController from "../authenticationController";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import spidStrategy from "../../strategies/spidStrategy";
 import mockRes from "../__mocks__/response";
+import mockReq from "../__mocks__/request";
 import lolex from "lolex";
 
 const mockSet = jest.fn();
+const mockDel = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return jest.fn().mockImplementation(() => {
-    return { set: mockSet };
+    return { set: mockSet, del: mockDel };
   });
 });
 
-describe("Authentication Controller acs method", () => {
-  let clock;
-  const time = 1518010929530;
-
-  beforeEach(() => {
-    // toUser() saves the current timestamp into the User object, we need to
-    // mock time.
-    clock = lolex.install({ now: time });
-
-    RedisSessionStorage.mockClear();
-    mockSet.mockClear();
-  });
-  afterEach(() => {
-    clock = clock.uninstall();
-  });
-
-  it("redirects to the correct url if userPayload is a valid User", () => {
-    const res = mockRes();
-
-    const controller = new AuthenticationController(
-      new RedisSessionStorage(),
-      "",
-      null
-    );
-
-    const validUser = {
-      email: "luca.lusso@wellnet.it",
-      familyName: "Lusso",
-      fiscalNumber: "XUZTCT88A51Y311X",
-      issuer: {
-        _: "xxx"
-      },
-      name: "Luca",
-      nameID: "lussoluca",
-      nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-      sessionIndex: "123"
-    };
-
-    controller.acs(validUser, null, res);
-
-    const validatedUser = {
-      created_at: time,
-      family_name: "Lusso",
-      fiscal_code: "XUZTCT88A51Y311X",
-      name: "Luca",
-      nameID: "lussoluca",
-      nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-      preferred_email: "luca.lusso@wellnet.it",
-      sessionIndex: "123",
-      spid_idp: "xxx",
-      token: "123"
-    };
-
-    expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/profile.html?token=123");
-    expect(mockSet).toHaveBeenCalledWith("123", validatedUser);
-  });
-
-  it("return an error if userPayload is invalid", () => {
-    const res = mockRes();
-
-    const controller = new AuthenticationController(
-      new RedisSessionStorage(),
-      "",
-      null
-    );
-
-    // invalidUser lacks the required email field.
-    const invalidUser = {
-      familyName: "Lusso",
-      fiscalNumber: "XUZTCT88A51Y311X",
-      issuer: {
-        _: "xxx"
-      },
-      name: "Luca",
-      nameID: "lussoluca",
-      nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-      sessionIndex: "123"
-    };
-
-    controller.acs(invalidUser, null, res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(mockSet).not.toHaveBeenCalled();
-  });
-});
-
-describe("Authentication Controller slo method", () => {
-  it("redirects to the home page", () => {
-    const res = mockRes();
-
-    const controller = new AuthenticationController(null, "", null);
-
-    controller.slo(null, res);
-
-    expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/");
-  });
-});
-
-describe("Authentication Controller logout method", () => {
-  it("extracts the logout url", () => {
-    const res = mockRes();
-
-    const controller = new AuthenticationController(null, "", null);
-
-    controller.slo(null, res);
-
-    expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/");
-  });
-});
-
-describe("Authentication Controller metadata method", () => {
-  it("renders the correct metadata", () => {
-    const res = mockRes();
-    const samlCert = `
+const samlCert = `
 -----BEGIN CERTIFICATE-----
 MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
 MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
@@ -153,7 +38,7 @@ OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
 IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
 -----END CERTIFICATE-----
 `;
-    const samlKey = `
+const samlKey = `
 -----BEGIN PRIVATE KEY-----
 MIIEwQIBADANBgkqhkiG9w0BAQEFAASCBKswggSnAgEAAoIBAgCXozdOvdlQhX2z
 yOvnpZJZWyhjmiRqkBW7jkZHcmFRceeoVkXGn4bAFGGcqESFMVmaigTEm1c6gJpR
@@ -183,6 +68,167 @@ ZbWGZ+42VH2eDGouiadR4rWzJNQKjWd98Y5PzxdEjd6nneJ68iNqGbKOT6jXu8qj
 nCnxP/vK5rgVHU3nQfq+e/B6FVWZ
 -----END PRIVATE KEY-----
 `;
+const time = 1518010929530;
+const user = {
+  created_at: time,
+  family_name: "Lusso",
+  fiscal_code: "XUZTCT88A51Y311X",
+  name: "Luca",
+  nameID: "lussoluca",
+  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  preferred_email: "luca.lusso@wellnet.it",
+  sessionIndex: "123",
+  spid_idp: "xxx",
+  token: "123"
+};
+const validUserPayload = {
+  email: "luca.lusso@wellnet.it",
+  familyName: "Lusso",
+  fiscalNumber: "XUZTCT88A51Y311X",
+  issuer: {
+    _: "xxx"
+  },
+  name: "Luca",
+  nameID: "lussoluca",
+  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  sessionIndex: "123"
+};
+// invalidUser lacks the required email field.
+const invalidUserPayload = {
+  familyName: "Lusso",
+  fiscalNumber: "XUZTCT88A51Y311X",
+  issuer: {
+    _: "xxx"
+  },
+  name: "Luca",
+  nameID: "lussoluca",
+  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  sessionIndex: "123"
+};
+const spidStrategy_ = spidStrategy(samlKey);
+spidStrategy_.logout = jest.fn();
+
+describe("Authentication Controller acs method", () => {
+  let clock;
+
+  beforeEach(() => {
+    // toUser() saves the current timestamp into the User object, we need to
+    // mock time.
+    clock = lolex.install({ now: time });
+
+    RedisSessionStorage.mockClear();
+    mockSet.mockClear();
+    mockDel.mockClear();
+  });
+  afterEach(() => {
+    clock = clock.uninstall();
+  });
+
+  it("redirects to the correct url if userPayload is a valid User", () => {
+    const res = mockRes();
+
+    const controller = new AuthenticationController(
+      new RedisSessionStorage(),
+      "",
+      null
+    );
+
+    controller.acs(validUserPayload, null, res);
+
+    expect(controller).toBeTruthy();
+    expect(res.redirect).toHaveBeenCalledWith("/profile.html?token=123");
+    expect(mockSet).toHaveBeenCalledWith("123", user);
+  });
+
+  it("return an error if userPayload is invalid", () => {
+    const res = mockRes();
+
+    const controller = new AuthenticationController(
+      new RedisSessionStorage(),
+      "",
+      null
+    );
+
+    controller.acs(invalidUserPayload, null, res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+});
+
+describe("Authentication Controller slo method", () => {
+  it("redirects to the home page", () => {
+    const res = mockRes();
+
+    const controller = new AuthenticationController(null, "", null);
+
+    controller.slo(null, res);
+
+    expect(controller).toBeTruthy();
+    expect(res.redirect).toHaveBeenCalledWith("/");
+  });
+});
+
+describe("Authentication Controller logout method", () => {
+  it("extracts the logout url", () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    spidStrategy_.logout.mockImplementation((req, callback) => {
+      callback(null, "http://www.example.com");
+    });
+
+    req.user = user;
+
+    const controller = new AuthenticationController(
+      new RedisSessionStorage(),
+      "",
+      spidStrategy_
+    );
+
+    controller.logout(req, res);
+
+    expect(controller).toBeTruthy();
+    expect(mockDel).toHaveBeenCalledWith("123");
+    expect(spidStrategy_.logout.mock.calls[0][0]).toBe(req);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      logoutUrl: "http://www.example.com"
+    });
+  });
+
+  it("returns error if the generation of logout fails", () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    spidStrategy_.logout.mockImplementation((req, callback) => {
+      callback(new Error("Error message"));
+    });
+
+    req.user = user;
+
+    const controller = new AuthenticationController(
+      new RedisSessionStorage(),
+      "",
+      spidStrategy_
+    );
+
+    controller.logout(req, res);
+
+    expect(controller).toBeTruthy();
+    expect(mockDel).toHaveBeenCalledWith("123");
+    // expect(spidStrategy_.logout.mock.calls[0][0]).toBe(req);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Error: Error message"
+    });
+  });
+});
+
+describe("Authentication Controller metadata method", () => {
+  it("renders the correct metadata", () => {
+    const res = mockRes();
     const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://italia-backend" ID="https___italia_backend">
   <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
     <KeyDescriptor>
