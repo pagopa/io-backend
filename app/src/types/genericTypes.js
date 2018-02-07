@@ -5,6 +5,9 @@
 import t from "flow-runtime";
 import * as v from "flow-runtime-validators";
 
+/**
+ * A string that represents a valid italian Fiscal Number.
+ */
 export const FiscalNumberType = t.refinement(
   t.string(),
   v.regexp({
@@ -12,17 +15,41 @@ export const FiscalNumberType = t.refinement(
   })
 );
 
+/**
+ * A string that represents a valid email address.
+ */
 export const EmailType = t.refinement(t.string(), v.email());
 
+/**
+ * A string that represents a number greater than or equal to zero.
+ */
 export const NonNegativeNumberType = t.refinement(
   t.number(),
   v.number({ gte: 0 })
 );
 
+/**
+ * A string that represents an issuer object as returned by the SAML
+ * authentication.
+ *
+ * @see passport-saml
+ */
 export const IssuerType = t.object(t.property("_", t.string()));
 
+/**
+ * A string that represents a notification object as returned by the Digital
+ * Citizenship API.
+ *
+ * @see https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#NotificationStatus
+ */
 export const NotificationType = t.object(t.property("email", t.string()));
 
+/**
+ * A string that represents a message object as returned by the Digital
+ * Citizenship API.
+ *
+ * @see https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#MessageResponse
+ */
 export const MessageType = t.object(
   t.property("id", t.string()),
   t.property("fiscalCode", FiscalNumberType),
@@ -36,6 +63,12 @@ export const MessageType = t.object(
   )
 );
 
+/**
+ * A string that represents an item object as returned by the Digital
+ * Citizenship API.
+ *
+ * @see https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#CreatedMessage
+ */
 export const ItemType = t.object(
   t.property("id", t.string()),
   t.property("fiscalCode", FiscalNumberType),
