@@ -21,7 +21,7 @@ export const FiscalNumberType = t.refinement(
 export const EmailType = t.refinement(t.string(), v.email());
 
 /**
- * A string that represents a number greater than or equal to zero.
+ * A number greater than or equal to zero.
  */
 export const NonNegativeNumberType = t.refinement(
   t.number(),
@@ -29,24 +29,21 @@ export const NonNegativeNumberType = t.refinement(
 );
 
 /**
- * A string that represents an issuer object as returned by the SAML
- * authentication.
+ * The issuer object as returned by the SAML authentication.
  *
  * @see passport-saml
  */
 export const IssuerType = t.object(t.property("_", t.string()));
 
 /**
- * A string that represents a notification object as returned by the Digital
- * Citizenship API.
+ * The notification object as returned by the Digital Citizenship API.
  *
  * @see https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#NotificationStatus
  */
 export const NotificationType = t.object(t.property("email", t.string()));
 
 /**
- * A string that represents a message object as returned by the Digital
- * Citizenship API.
+ * The message object as returned by the Digital Citizenship API.
  *
  * @see https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#MessageResponse
  */
@@ -64,8 +61,7 @@ export const MessageType = t.object(
 );
 
 /**
- * A string that represents an item object as returned by the Digital
- * Citizenship API.
+ * The item object as returned by the Digital Citizenship API.
  *
  * @see https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#CreatedMessage
  */
