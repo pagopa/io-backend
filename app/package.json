@@ -10,6 +10,7 @@
     "flow": "flow",
     "hot-reload": "nodemon ./node_modules/.bin/babel-node src/server.js",
     "lint": "eslint 'src/**/*.js'",
+    "pretest": "yarn lint",
     "test": "jest --coverage",
     "start": "./node_modules/.bin/babel-node src/server.js"
   },

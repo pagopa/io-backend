@@ -64,7 +64,7 @@ describe("Messages Controller getUserMessage method", () => {
 
     req.user = user;
     req.params = {};
-    req.params.id = "123";
+    req.params.id = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 
     const controller = new MessagesController(new MessageService());
 
@@ -72,7 +72,7 @@ describe("Messages Controller getUserMessage method", () => {
 
     expect(mockGetUserMessage).toHaveBeenCalledWith(
       "XUZTCT88A51Y311X",
-      "123",
+      "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
       res
     );
   });
