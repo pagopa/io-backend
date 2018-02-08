@@ -23,4 +23,17 @@ export interface MessageServiceInterface {
     messageId: string,
     res: express$Response
   ): void;
+
+  /**
+   * Retrieves a single service identified by the messageId.
+   *
+   * @param fiscalCode
+   * @param serviceId
+   * @param res
+   */
+  getService(
+    fiscalCode: string,
+    serviceId: string,
+    res: express$Response
+  ): void;
 }

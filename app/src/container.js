@@ -22,6 +22,7 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import ApiClientFactory from "./services/apiClientFactory";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
+import ProfileService from "./services/profileService";
 
 const awilix = require("awilix");
 const fs = require("fs");
@@ -118,6 +119,18 @@ container.registerClass({
   [API_CLIENT]: [ApiClientFactory]
 });
 
+// Register the message service.
+export const MESSAGE_SERVICE = "messageService";
+container.registerClass({
+  [MESSAGE_SERVICE]: [MessageService]
+});
+
+// Register the message service.
+export const PROFILE_SERVICE = "profileService";
+container.registerClass({
+  [PROFILE_SERVICE]: [ProfileService]
+});
+
 // Register the authentication controller as a service.
 export const AUTHENTICATION_CONTROLLER = "authenticationController";
 container.registerClass({
@@ -128,12 +141,6 @@ container.registerClass({
 export const PROFILE_CONTROLLER = "profileController";
 container.registerClass({
   [PROFILE_CONTROLLER]: [ProfileController]
-});
-
-// Register the message service.
-export const MESSAGE_SERVICE = "messageService";
-container.registerClass({
-  [MESSAGE_SERVICE]: [MessageService]
 });
 
 // Register the messages controller as a service.

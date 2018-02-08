@@ -125,7 +125,7 @@ app.get("/api/v1/profile", tokenAuth, function(
   req: express$Request,
   res: express$Response
 ) {
-  profileController.getUserProfile(req, res);
+  profileController.getProfile(req, res);
 });
 
 app.post("/api/v1/profile", tokenAuth, function(
