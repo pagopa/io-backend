@@ -2,6 +2,8 @@
 
 "use strict";
 
+import MessageService from "./services/messageService";
+
 /**
  * Defines services and register them to the Service Container.
  *
@@ -126,6 +128,12 @@ container.registerClass({
 export const PROFILE_CONTROLLER = "profileController";
 container.registerClass({
   [PROFILE_CONTROLLER]: [ProfileController]
+});
+
+// Register the message service.
+export const MESSAGE_SERVICE = "messageService";
+container.registerClass({
+  [MESSAGE_SERVICE]: [MessageService]
 });
 
 // Register the messages controller as a service.

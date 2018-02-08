@@ -139,7 +139,7 @@ app.get("/api/v1/messages", tokenAuth, function(
   req: express$Request,
   res: express$Response
 ) {
-  messagesController.getUserMessages(req, res);
+  messagesController.getMessagesByUser(req, res);
 });
 
 app.get("/api/v1/messages/:id", tokenAuth, function(

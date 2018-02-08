@@ -3,17 +3,9 @@
 import AuthenticationController from "../authenticationController";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import spidStrategy from "../../strategies/spidStrategy";
-import mockRes from "../__mocks__/response";
-import mockReq from "../__mocks__/request";
+import mockRes from "../../__mocks__/response";
+import mockReq from "../../__mocks__/request";
 import lolex from "lolex";
-
-const mockSet = jest.fn();
-const mockDel = jest.fn();
-jest.mock("../../services/redisSessionStorage", () => {
-  return jest.fn().mockImplementation(() => {
-    return { set: mockSet, del: mockDel };
-  });
-});
 
 const samlCert = `
 -----BEGIN CERTIFICATE-----
@@ -105,6 +97,14 @@ const invalidUserPayload = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   sessionIndex: "123"
 };
+
+const mockSet = jest.fn();
+const mockDel = jest.fn();
+jest.mock("../../services/redisSessionStorage", () => {
+  return jest.fn().mockImplementation(() => {
+    return { set: mockSet, del: mockDel };
+  });
+});
 const spidStrategy_ = spidStrategy(samlKey);
 spidStrategy_.logout = jest.fn();
 
