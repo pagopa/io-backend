@@ -16,13 +16,15 @@
     "eslint:recommended",
     "plugin:flowtype/recommended",
     "plugin:jest/recommended",
+    "plugin:security/recommended",
     "plugin:import/errors",
     "plugin:import/warnings"
   ],
   "plugins": [
     "flowtype",
     "prettier",
-    "jest"
+    "jest",
+    "security"
   ],
   "rules": {
     "strict": 0,
