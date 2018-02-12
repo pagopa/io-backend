@@ -74,6 +74,8 @@
       "**/__tests__/*.js"
     ],
     "mapCoverage": true,
-    "setupFiles": ["<rootDir>/jest-set-up/index.js"]
+    "setupFiles": ["<rootDir>/jest-set-up/index.js"],
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   }
 }
