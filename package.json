@@ -72,6 +72,8 @@
     "testMatch": [
       "**/__tests__/*.js"
     ],
-    "mapCoverage": true
+    "mapCoverage": true,
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   }
 }
