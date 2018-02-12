@@ -2,6 +2,8 @@
 
 [![dependencies](https://david-dm.org/teamdigitale/italia-backend/status.svg)](https://david-dm.org/teamdigitale/italia-backend)
 
+[![Docker Build Status](https://img.shields.io/docker/build/teamdigitale/italia-backend.svg)](https://hub.docker.com/r/teamdigitale/italia-backend/)
+
 # Digital citizenship web and mobile backend
 
 This repository contains the code of the backend used by the [web](https://github.com/teamdigitale/italia-web) and
@@ -120,7 +122,7 @@ localhost.
 
 This problem seems to be dependent on how Docker for Mac (doesn't) manage well the /etc/hosts file. If you install
 Docker Toolbox it works fine (and can [coexist](https://docs.docker.com/docker-for-mac/docker-toolbox/#setting-up-to-run-docker-for-mac))
-(Read more at [https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448](https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448))  
+(Read more at [https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448](https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448))
 
 **When i run the scripts/import-spid-data.sh file, after the first entries the script display a lot of errors like
 `# users imported: -- Error [object Object]`**

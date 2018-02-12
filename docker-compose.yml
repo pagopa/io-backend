@@ -13,7 +13,7 @@ services:
     image: node:8.9.4-alpine
     restart: always
     volumes:
-      - "./app:/usr/src/app"
+      - ".:/usr/src/app"
       - "./keys:/usr/src/app/certs"
     working_dir: "/usr/src/app"
 
