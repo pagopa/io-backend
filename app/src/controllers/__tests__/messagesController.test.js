@@ -20,12 +20,12 @@ const user = {
 };
 
 const mockGetMessagesByUser = jest.fn();
-const mockGetUserMessage = jest.fn();
+const mockGetMessage = jest.fn();
 jest.mock("../../services/messageService", () => {
   return jest.fn().mockImplementation(() => {
     return {
       getMessagesByUser: mockGetMessagesByUser,
-      getUserMessage: mockGetUserMessage
+      getMessage: mockGetMessage
     };
   });
 });
@@ -34,7 +34,7 @@ describe("Messages Controller getUserMessages method", () => {
   beforeEach(() => {
     MessageService.mockClear();
     mockGetMessagesByUser.mockClear();
-    mockGetUserMessage.mockClear();
+    mockGetMessage.mockClear();
   });
 
   it("calls the getUserMessages on the MessageService", () => {
@@ -51,14 +51,14 @@ describe("Messages Controller getUserMessages method", () => {
   });
 });
 
-describe("Messages Controller getUserMessage method", () => {
+describe("Messages Controller getMessage method", () => {
   beforeEach(() => {
     MessageService.mockClear();
     mockGetMessagesByUser.mockClear();
-    mockGetUserMessage.mockClear();
+    mockGetMessage.mockClear();
   });
 
-  it("calls the getUserMessage on the MessageService", () => {
+  it("calls the getMessage on the MessageService", () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -68,9 +68,9 @@ describe("Messages Controller getUserMessage method", () => {
 
     const controller = new MessagesController(new MessageService());
 
-    controller.getUserMessage(req, res);
+    controller.getMessage(req, res);
 
-    expect(mockGetUserMessage).toHaveBeenCalledWith(
+    expect(mockGetMessage).toHaveBeenCalledWith(
       "XUZTCT88A51Y311X",
       "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
       res

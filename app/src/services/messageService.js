@@ -55,12 +55,12 @@ export default class MessageService implements MessageServiceInterface {
   /**
    * {@inheritDoc}
    */
-  getUserMessage(fiscalCode: string, messageId: string, res: express$Response) {
+  getMessage(fiscalCode: string, messageId: string, res: express$Response) {
     this.apiClient
       .getClient(fiscalCode)
       .getMessage(messageId)
       .then(
-        maybeApiMessage => this.manageUserMessageResponse(maybeApiMessage, res),
+        maybeApiMessage => this.manageMessageResponse(maybeApiMessage, res),
         err => {
           res.status(err.statusCode).json({
             message: err.message
@@ -114,7 +114,7 @@ export default class MessageService implements MessageServiceInterface {
    * @param maybeApiMessage
    * @param res
    */
-  manageUserMessageResponse(maybeApiMessage: any, res: express$Response) {
+  manageMessageResponse(maybeApiMessage: any, res: express$Response) {
     // Look if the response is a GetProfileOKResponse.
     validateResponse(maybeApiMessage, MessageResponseModel).fold(
       // Look if object is a ProblemJson.

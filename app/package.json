@@ -72,6 +72,7 @@
     "testMatch": [
       "**/__tests__/*.js"
     ],
-    "mapCoverage": true
+    "mapCoverage": true,
+    "setupFiles": ["<rootDir>/jest-set-up/index.js"]
   }
 }

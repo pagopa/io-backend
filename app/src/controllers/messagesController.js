@@ -51,7 +51,7 @@ export default class MessagesController {
    * @param req
    * @param res
    */
-  getUserMessage(req: express$Request, res: express$Response) {
+  getMessage(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -62,11 +62,7 @@ export default class MessagesController {
         });
       },
       (user: User) => {
-        this.messageService.getUserMessage(
-          user.fiscal_code,
-          req.params.id,
-          res
-        );
+        this.messageService.getMessage(user.fiscal_code, req.params.id, res);
       }
     );
   }

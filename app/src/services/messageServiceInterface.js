@@ -18,7 +18,7 @@ export interface MessageServiceInterface {
    * @param messageId
    * @param res
    */
-  getUserMessage(
+  getMessage(
     fiscalCode: string,
     messageId: string,
     res: express$Response

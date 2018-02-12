@@ -146,7 +146,7 @@ app.get("/api/v1/messages/:id", tokenAuth, function(
   req: express$Request,
   res: express$Response
 ) {
-  messagesController.getUserMessage(req, res);
+  messagesController.getMessage(req, res);
 });
 
 app.get("/api/v1/services/:id", tokenAuth, function(
