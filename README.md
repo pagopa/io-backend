@@ -13,6 +13,7 @@ This repository contains the code of the backend used by the [web](https://githu
 
 ## Table of content
 
+- [What is this?](#what-is-this?)
 - [How to run the application](#how-to-run-the-application)
     - [Dependencies](#dependencies)
     - [Installation steps](#installation-steps)
@@ -26,6 +27,27 @@ This repository contains the code of the backend used by the [web](https://githu
 - [Troubleshooting](#troubleshooting)
 
 ---
+
+## What is this?
+
+This is the backend that supports the [italia-app](https://github.com/teamdigitale/italia-app)
+mobile application.
+
+This project is part of the Italian Digital Citizenship initiative, see the
+[main repository](https://github.com/teamdigitale/digital-citizenship) for further information.
+
+## Authentication process
+
+The `italia-app` application will authenticate to the backend in two steps:
+
+  1. an initial user initiated SPID authentication process (SAML2 based)
+     that identifies the user and, on success, triggers the creation of a new
+     authentication session (associated to a session token)
+  2. subsequent API requests authenticated via a bearer session token
+
+### User authentication
+
+### API authentication
 
 ## How to run the application
 
