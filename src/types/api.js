@@ -43,7 +43,7 @@ export const UpsertProfileOKResponseModel = t.object(
 export const GetMessagesByUserOKResponseModel = t.object(
   t.property("pageSize", t.number(), true),
   t.property("next", t.string(), true),
-  t.property("items", t.array(ItemType), true)
+  t.property("items", t.array(ItemType))
 );
 
 export const MessageResponseModel = t.object(

@@ -4,36 +4,24 @@
 
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
-import {
-  forwardAPIError,
-  GetProfileOKResponseModel,
-  UpsertProfileOKResponseModel,
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
-import type { APIError } from "../types/error";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
+import ProfileService from "../services/profileService";
+import { extractUpsertProfileFromRequest } from "../types/profile";
 import type { UpsertProfile } from "../types/profile";
-import {
-  extractUpsertProfileFromRequest,
-  ProfileWithEmailToAppProfile,
-  ProfileWithoutEmailToAppProfile,
-  toExtendedProfile
-} from "../types/profile";
-import ControllerBase from "./ControllerBase";
 
 /**
  * This controller handles reading the user profile from the
  * app by forwarding the call to the API system.
  */
-export default class ProfileController extends ControllerBase {
+export default class ProfileController {
+  profileService: ProfileService;
+
   /**
    * Class constructor.
    *
-   * @param apiClient
+   * @param profileService
    */
-  constructor(apiClient: ApiClientFactoryInterface) {
-    super(apiClient);
+  constructor(profileService: ProfileService) {
+    this.profileService = profileService;
   }
 
   /**
@@ -43,7 +31,7 @@ export default class ProfileController extends ControllerBase {
    * @param req
    * @param res
    */
-  getUserProfile(req: express$Request, res: express$Response) {
+  getProfile(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -54,41 +42,7 @@ export default class ProfileController extends ControllerBase {
         });
       },
       (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getProfile()
-          .then(
-            maybeApiProfile => {
-              // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiProfile, GetProfileOKResponseModel).fold(
-                // Look if object is a ProblemJson.
-                () => {
-                  validateProblemJson(maybeApiProfile, res, () => {
-                    if (maybeApiProfile.status === 404) {
-                      // If the profile doesn't exists on the API we still
-                      // return 200 to the App with the information we have
-                      // retrieved from SPID.
-                      res
-                        .status(200)
-                        .json(ProfileWithoutEmailToAppProfile(user));
-                    } else {
-                      forwardAPIError(maybeApiProfile, res);
-                    }
-                  });
-                },
-                // All correct, return the response to the client.
-                apiProfile => {
-                  res.json(ProfileWithEmailToAppProfile(apiProfile, user));
-                }
-              );
-            },
-            (err: APIError) => {
-              res.status(err.statusCode).json({
-                // Here usually we have connection or transmission errors.
-                message: err.message
-              });
-            }
-          );
+        this.profileService.getProfile(user, res);
       }
     );
   }
@@ -119,31 +73,7 @@ export default class ProfileController extends ControllerBase {
             });
           },
           (upsertProfile: UpsertProfile) => {
-            this.apiClient
-              .getClient(user.fiscal_code)
-              .upsertProfile({ body: toExtendedProfile(upsertProfile) })
-              .then(
-                maybeApiProfile => {
-                  // Look if the response is a UpsertProfileOKResponse.
-                  validateResponse(
-                    maybeApiProfile,
-                    UpsertProfileOKResponseModel
-                  ).fold(
-                    // Look if the response is a ProblemJson.
-                    () => validateProblemJson(maybeApiProfile, res),
-                    // All correct, return the response to the client.
-                    apiProfile => {
-                      res.json(ProfileWithEmailToAppProfile(apiProfile, user));
-                    }
-                  );
-                },
-                (err: APIError) => {
-                  res.status(err.statusCode).json({
-                    // Here usually we have connection or transmission errors.
-                    message: err.message
-                  });
-                }
-              );
+            this.profileService.upsertProfile(user, upsertProfile, res);
           }
         );
       }

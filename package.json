@@ -58,6 +58,7 @@
     "flow-typed": "^2.2.3",
     "fp-ts": "^0.6.7",
     "jest": "^21.2.1",
+    "lolex": "^2.3.2",
     "nodemon": "^1.11.0",
     "prettier": "^1.7.4"
   },
@@ -73,6 +74,7 @@
       "**/__tests__/*.js"
     ],
     "mapCoverage": true,
+    "setupFiles": ["<rootDir>/jest-set-up/index.js"],
     "coverageDirectory": "./coverage/",
     "collectCoverage": true
   }

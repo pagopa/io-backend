@@ -2,6 +2,8 @@
 
 "use strict";
 
+import MessageService from "./services/messageService";
+
 /**
  * Defines services and register them to the Service Container.
  *
@@ -20,6 +22,7 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import ApiClientFactory from "./services/apiClientFactory";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
+import ProfileService from "./services/profileService";
 
 const awilix = require("awilix");
 const fs = require("fs");
@@ -114,6 +117,18 @@ container.registerClass({
 export const API_CLIENT = "apiClient";
 container.registerClass({
   [API_CLIENT]: [ApiClientFactory]
+});
+
+// Register the message service.
+export const MESSAGE_SERVICE = "messageService";
+container.registerClass({
+  [MESSAGE_SERVICE]: [MessageService]
+});
+
+// Register the profile service.
+export const PROFILE_SERVICE = "profileService";
+container.registerClass({
+  [PROFILE_SERVICE]: [ProfileService]
 });
 
 // Register the authentication controller as a service.

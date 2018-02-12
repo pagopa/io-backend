@@ -2,34 +2,24 @@
 
 "use strict";
 
-import type { APIError } from "../types/error";
-import {
-  createdMessageToAppMessage,
-  messageResponseToAppMessage
-} from "../types/message";
 import type { User } from "../types/user";
 import { extractUserFromRequest } from "../types/user";
-import {
-  GetMessagesByUserOKResponseModel,
-  MessageResponseModel,
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
-import ControllerBase from "./ControllerBase";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
+import MessageService from "../services/messageService";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class MessagesController extends ControllerBase {
+export default class MessagesController {
+  messageService: MessageService;
+
   /**
    * Class constructor.
    *
-   * @param apiClient
+   * @param messageService
    */
-  constructor(apiClient: ApiClientFactoryInterface) {
-    super(apiClient);
+  constructor(messageService: MessageService) {
+    this.messageService = messageService;
   }
 
   /**
@@ -39,7 +29,7 @@ export default class MessagesController extends ControllerBase {
    * @param req
    * @param res
    */
-  getUserMessages(req: express$Request, res: express$Response) {
+  getMessagesByUser(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -50,36 +40,7 @@ export default class MessagesController extends ControllerBase {
         });
       },
       (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getMessagesByUser()
-          .then(
-            maybeApiMessages => {
-              // Look if the response is a GetMessagesByUserOKResponse.
-              validateResponse(
-                maybeApiMessages,
-                GetMessagesByUserOKResponseModel
-              ).fold(
-                // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeApiMessages, res),
-                // All correct, return the response to the client.
-                apiMessages => {
-                  const appMessages = apiMessages.items.map(
-                    createdMessageToAppMessage
-                  );
-                  res.json({
-                    items: appMessages,
-                    pageSize: apiMessages.pageSize
-                  });
-                }
-              );
-            },
-            function(err: APIError) {
-              res.status(err.statusCode).json({
-                message: err.message
-              });
-            }
-          );
+        this.messageService.getMessagesByUser(user.fiscal_code, res);
       }
     );
   }
@@ -90,37 +51,18 @@ export default class MessagesController extends ControllerBase {
    * @param req
    * @param res
    */
-  getUserMessage(req: express$Request, res: express$Response) {
+  getMessage(req: express$Request, res: express$Response) {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
-      (error: String) => {
+      () => {
         res.status(500).json({
-          message: error
+          message:
+            "There was an error extracting the user profile from the request."
         });
       },
       (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getMessage(req.params.id)
-          .then(
-            maybeApiMessage => {
-              // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiMessage, MessageResponseModel).fold(
-                // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeApiMessage, res),
-                // All correct, return the response to the client.
-                apiMessage => {
-                  res.json(messageResponseToAppMessage(apiMessage));
-                }
-              );
-            },
-            function(err: APIError) {
-              res.status(err.statusCode).json({
-                message: err.message
-              });
-            }
-          );
+        this.messageService.getMessage(user.fiscal_code, req.params.id, res);
       }
     );
   }
