@@ -59,30 +59,25 @@ export default class ProfileService implements ProfileServiceInterface {
   /**
    * {@inheritDoc}
    */
-  upsertProfile(user: User, maybeUpsertProfile: any, res: express$Response) {
-    maybeUpsertProfile.fold(
-      (error: String) => {
-        res.status(500).json({
-          message: error
-        });
-      },
-      (upsertProfile: UpsertProfile) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .upsertProfile({ body: toExtendedProfile(upsertProfile) })
-          .then(
-            maybeApiProfile => {
-              this.manageUpsertProfileResponse(maybeApiProfile, user, res);
-            },
-            (err: APIError) => {
-              res.status(err.statusCode).json({
-                // Here usually we have connection or transmission errors.
-                message: err.message
-              });
-            }
-          );
-      }
-    );
+  upsertProfile(
+    user: User,
+    upsertProfile: UpsertProfile,
+    res: express$Response
+  ) {
+    this.apiClient
+      .getClient(user.fiscal_code)
+      .upsertProfile({ body: toExtendedProfile(upsertProfile) })
+      .then(
+        maybeApiProfile => {
+          this.manageUpsertProfileResponse(maybeApiProfile, user, res);
+        },
+        (err: APIError) => {
+          res.status(err.statusCode).json({
+            // Here usually we have connection or transmission errors.
+            message: err.message
+          });
+        }
+      );
   }
 
   /**

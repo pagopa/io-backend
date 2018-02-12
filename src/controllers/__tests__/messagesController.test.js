@@ -30,7 +30,7 @@ jest.mock("../../services/messageService", () => {
   });
 });
 
-describe("Messages Controller getUserMessages method", () => {
+describe("MessagesController#getUserMessages", () => {
   beforeEach(() => {
     MessageService.mockClear();
     mockGetMessagesByUser.mockClear();
@@ -51,7 +51,7 @@ describe("Messages Controller getUserMessages method", () => {
   });
 });
 
-describe("Messages Controller getMessage method", () => {
+describe("MessagesController#getMessage", () => {
   beforeEach(() => {
     MessageService.mockClear();
     mockGetMessagesByUser.mockClear();

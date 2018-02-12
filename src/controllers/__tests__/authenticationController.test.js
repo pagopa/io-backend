@@ -108,7 +108,7 @@ jest.mock("../../services/redisSessionStorage", () => {
 const spidStrategy_ = spidStrategy(samlKey);
 spidStrategy_.logout = jest.fn();
 
-describe("Authentication Controller acs method", () => {
+describe("AuthenticationController#acs", () => {
   let clock;
 
   beforeEach(() => {
@@ -157,7 +157,7 @@ describe("Authentication Controller acs method", () => {
   });
 });
 
-describe("Authentication Controller slo method", () => {
+describe("AuthenticationController#slo", () => {
   it("redirects to the home page", () => {
     const res = mockRes();
 
@@ -170,7 +170,7 @@ describe("Authentication Controller slo method", () => {
   });
 });
 
-describe("Authentication Controller logout method", () => {
+describe("AuthenticationController#logout", () => {
   it("extracts the logout url", () => {
     const req = mockReq();
     const res = mockRes();
@@ -218,7 +218,6 @@ describe("Authentication Controller logout method", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith("123");
-    // expect(spidStrategy_.logout.mock.calls[0][0]).toBe(req);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       message: "Error: Error message"
@@ -226,7 +225,7 @@ describe("Authentication Controller logout method", () => {
   });
 });
 
-describe("Authentication Controller metadata method", () => {
+describe("AuthenticationController#metadata", () => {
   it("renders the correct metadata", () => {
     const res = mockRes();
     const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://italia-backend" ID="https___italia_backend">

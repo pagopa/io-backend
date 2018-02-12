@@ -125,7 +125,7 @@ container.registerClass({
   [MESSAGE_SERVICE]: [MessageService]
 });
 
-// Register the message service.
+// Register the profile service.
 export const PROFILE_SERVICE = "profileService";
 container.registerClass({
   [PROFILE_SERVICE]: [ProfileService]

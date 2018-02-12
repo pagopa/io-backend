@@ -99,7 +99,7 @@ function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
 }
 
-describe("Messages Service getMessagesByUser method", () => {
+describe("MessageService#getMessagesByUser", () => {
   beforeEach(() => {
     ApiClientFactory.mockClear();
     mockGetClient.mockClear();
@@ -176,7 +176,7 @@ describe("Messages Service getMessagesByUser method", () => {
   });
 });
 
-describe("Messages Service getMessage method", () => {
+describe("MessageService#getMessage", () => {
   beforeEach(() => {
     ApiClientFactory.mockClear();
     mockGetClient.mockClear();
@@ -253,7 +253,7 @@ describe("Messages Service getMessage method", () => {
   });
 });
 
-describe("Messages Service getService method", () => {
+describe("MessageService#getService", () => {
   beforeEach(() => {
     ApiClientFactory.mockClear();
     mockGetClient.mockClear();
