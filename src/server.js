@@ -8,8 +8,6 @@
 
 import container, {
   AUTHENTICATION_CONTROLLER,
-  HTTPS_CERT,
-  HTTPS_KEY,
   MESSAGES_CONTROLLER,
   PROFILE_CONTROLLER,
   SERVICES_CONTROLLER,
@@ -26,11 +24,11 @@ require("dotenv").load();
 const winston = require("winston");
 const bodyParser = require("body-parser");
 const express = require("express");
-const https = require("https");
+const http = require("http");
 const morgan = require("morgan");
 const passport = require("passport");
 
-const port = process.env.PORT || 443;
+const port = process.env.PORT || 80;
 
 // Setup Passport.
 
@@ -156,13 +154,8 @@ app.get("/api/v1/services/:id", tokenAuth, function(
   servicesController.getService(req, res);
 });
 
-// Setup and start the HTTPS server.
+// Setup and start the HTTP server.
 
-const options = {
-  key: container.resolve(HTTPS_KEY),
-  cert: container.resolve(HTTPS_CERT)
-};
-
-const server = https.createServer(options, app).listen(port, function() {
+const server = http.createServer(app).listen(port, function() {
   winston.log("info", "Listening on port %d", server.address().port);
 });

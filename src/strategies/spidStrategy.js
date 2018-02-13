@@ -9,12 +9,16 @@
 
 const SpidStrategy = require("spid-passport");
 
-const spidStrategy = (samlKey: string) => {
+const spidStrategy = (
+  samlKey: string,
+  samlCallbackUrl: string,
+  samlIssuer: string
+) => {
   return new SpidStrategy(
     {
       sp: {
-        callbackUrl: "https://italia-backend/assertionConsumerService",
-        issuer: "https://italia-backend",
+        callbackUrl: samlCallbackUrl,
+        issuer: samlIssuer,
         privateCert: samlKey,
         decryptionPvk: samlKey,
         attributeConsumingServiceIndex: 1,
