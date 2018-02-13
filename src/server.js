@@ -119,6 +119,12 @@ app.get("/metadata", function(req: express$Request, res: express$Response) {
   acsController.metadata(req, res);
 });
 
+// Liveness probe for Kubernetes.
+// @see https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
+app.get("/ping", function(req: express$Request, res: express$Response) {
+  res.status(200).send("ok");
+});
+
 app.get("/api/v1/profile", tokenAuth, function(
   req: express$Request,
   res: express$Response
