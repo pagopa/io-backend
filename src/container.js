@@ -53,28 +53,14 @@ container.register({
   [SAML_CERT]: awilix.asFunction(samlCert).singleton()
 });
 
-// Private key used by the proxy HTTPS server.
-const httpsKey = () => {
-  return readFile(
-    process.env.HTTPS_KEY_PATH || "./certs/key.pem",
-    "HTTPS private key"
-  );
-};
-export const HTTPS_KEY = "httpsKey";
+// SAML settings.
+const SAML_CALLBACK_URL =
+  process.env.SAML_CALLBACK_URL ||
+  "http://italia-backend/assertionConsumerService";
+const SAML_ISSUER = process.env.SAML_ISSUER || "http://italia-backend";
 container.register({
-  [HTTPS_KEY]: awilix.asFunction(httpsKey).singleton()
-});
-
-// Public certificate used by the proxy HTTPS server.
-const httpsCert = () => {
-  return readFile(
-    process.env.HTTPS_CERT_PATH || "./certs/cert.pem",
-    "HTTPS certificate"
-  );
-};
-export const HTTPS_CERT = "httpsCert";
-container.register({
-  [HTTPS_CERT]: awilix.asFunction(httpsCert).singleton()
+  samlCallbackUrl: awilix.asValue(SAML_CALLBACK_URL),
+  samlIssuer: awilix.asValue(SAML_ISSUER)
 });
 
 // Redis server settings.
