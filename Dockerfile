@@ -21,6 +21,6 @@ COPY /src /usr/src/app/src
 COPY /public /usr/src/app/public
 COPY --from=builder /usr/src/app/node_modules /usr/src/app/node_modules
 
-EXPOSE 443
+EXPOSE 80
 
 CMD ["yarn", "start"]
