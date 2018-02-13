@@ -108,6 +108,27 @@ to regenerate the client code:
 * install the [AutoRest](https://github.com/Azure/autorest) tool
 * run the command `autorest --input-file=public_api_v1.yaml --nodejs --output-folder=app/src/api`
 
+### Architecture decision records
+
+In a world of evolutionary architecture, it's important to record certain design decisions for the benefit of future
+team members as well as for external oversight. Architecture Decision Records is a technique for capturing important 
+architectural decisions along with their context and consequences. We store these details in source control, along with
+code, as then they can provide a record that remains in sync with the code itself.
+
+We use
+[ADR](http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions)s to track architectural decisions of
+this initiative.
+
+This repository is configured for Nat Pryce's [_adr-tools_](https://github.com/npryce/adr-tools).
+
+Here's the decisions we taken so far:
+
+| ADR | Title                                                                                                                            | PR (discussion)    |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| 1   | [Record architecture decisions](doc/architecture/decisions/0001-record-architecture-decisions.md)                                |                    |
+| 2   | [Backend runs on Docker on local environments](doc/architecture/decisions/0002-backend-runs-on-docker-on-local-environments.md)  |                    |
+| 3   | [Use OpenAPI to defined the API specs](doc/architecture/decisions/0003-use-openapi-to-defined-the-api-specs.md)                  |                    |
+| 4   | [Use a dependency injection container](doc/architecture/decisions/0004-use-a-dependency-injection-container.md)                  |                    |
 ---
 
 ## Troubleshooting

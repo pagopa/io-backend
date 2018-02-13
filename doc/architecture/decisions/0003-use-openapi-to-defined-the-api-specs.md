@@ -1,4 +1,4 @@
-# 2. Use OpenAPI to defined the API specs
+# 3. Use OpenAPI to defined the API specs
 
 Date: 2017-07-17
 
