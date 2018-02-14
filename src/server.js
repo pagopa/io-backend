@@ -62,7 +62,8 @@ const servicesController = (container.resolve(
 
 const app = express();
 // Add a request logger.
-app.use(morgan(process.env.NODE_ENV));
+const level = process.env.NODE_ENV || "production";
+app.use(morgan(level));
 // Parse the incoming request body. This is needed by Passport spid strategy.
 app.use(bodyParser.json());
 // Parse an urlencoded body.
