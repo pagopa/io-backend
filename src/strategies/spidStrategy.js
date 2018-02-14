@@ -2,6 +2,8 @@
 
 "use strict";
 
+import container from "../container";
+
 /**
  * Builds and configure a Passport strategy to authenticate the proxy to the
  * different SPID IDPs..
@@ -9,11 +11,10 @@
 
 const SpidStrategy = require("spid-passport");
 
-const spidStrategy = (
-  samlKey: string,
-  samlCallbackUrl: string,
-  samlIssuer: string
-) => {
+const spidStrategy = () => {
+  const samlCallbackUrl = container.resolve("samlCallbackUrl");
+  const samlIssuer = container.resolve("samlIssuer");
+  const samlKey = container.resolve("samlKey");
   return new SpidStrategy(
     {
       sp: {
