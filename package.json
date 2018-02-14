@@ -10,6 +10,7 @@
     "hot-reload": "nodemon ./node_modules/.bin/babel-node src/server.js",
     "lint": "./node_modules/.bin/eslint 'src/**/*.js'",
     "flow": "./node_modules/.bin/flow check",
+    "flow-typed": "./node_modules/.bin/flow-typed update",
     "pretest": "yarn flow && yarn lint",
     "test": "jest --coverage",
     "start": "./node_modules/.bin/babel-node src/server.js"
