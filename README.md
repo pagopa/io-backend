@@ -45,24 +45,25 @@ The `italia-app` application will authenticate to the backend in two steps:
      authentication session (associated to a session token)
   2. subsequent requests to the backend will be authenticated via a bearer session token
   
-See the sequence diagram [here](https://www.planttext.com/?text=PO_H2e9044NVzolc1w9teJ9KQa5qqUrPH8TOqDrbTepy-xOY47eSEFVSEsdWddYP9o7EtiFk28hSSqtWKcZOJ-vkx0aj6rvbVZ2Zxxv7PqOXFkGx8dELm5Lh1OIZ8HmOs44aQLNEM1OY4XktgjiexqD0OkDivcnOPgGMwM46t8X_Mz0YzOomn0G4326cDbXS_jVl8IjbKUckANBP59cMTTNTcbA85EqO7tu1)
+See the sequence diagram [here](https://github.com/teamdigitale/italia-backend/doc/images/authentication_process.svg)
 
 ### User authentication
 
-When a client wants to login with the backend it will call the `/login` endpoint with the IDP entityID as parameter in
-the query string. The backend will then build an authorization URL and performs a redirect to the chosen IDP. The
-authentication process will continue to the IDP website. If the authentication process ends with success the IDP will
-redirect the client to an HTML page with a form that will auto-post itself to the `/assertionConsumerService` endpoint
-with a SAMLResponse as an hidden field. The backend will then parse and validate the SAMLResponse to extract all the
-user attributes, then it generates an unique token and saves an User object to the `SessionStorage` service using the
-token as key. Finally the backend will redirect the client to the value of the environment variable
-`CLIENT_REDIRECTION_URL` with the token in the query string. The client must saves the token and use it in all API
-request.
+When a client (the mobile app or a browser) wants to login with the backend it will call the `/login` endpoint with the
+IDP entityID as parameter in the query string. The backend will then builds an authorization URL and performs a redirect
+to the chosen IDP. The authentication process will continue to the IDP website. If the authentication process ends with
+success the IDP will redirect the client to an HTML page with a form that will auto-post itself to the
+`/assertionConsumerService` endpoint with a SAMLResponse as an hidden field. The backend will parse and validate the
+SAMLResponse to extract all the user attributes (fiscal code, first name, last name, email), then it will generates an
+unique alphanumeric string as token and saves an User object to the `SessionStorage` service using the token as key.
+Finally the backend will redirect the client to the value of the environment variable `CLIENT_REDIRECTION_URL` with the
+token in the query string. The client must saves the token and use it in all API request.
 
 ### Token authentication
 
 All API requests sent by the client to the backend must have an `Authorization: Bearer` header with the value of the 
-token obtained from the SPID authentication process.
+token obtained from the SPID authentication process. The token is used to retrieve the User object from the
+`SessionStorage` service. 
 
 ## How to run the application
 
