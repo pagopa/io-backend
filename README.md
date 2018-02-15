@@ -45,7 +45,7 @@ The `italia-app` application will authenticate to the backend in two steps:
      authentication session (associated to a session token)
   2. subsequent requests to the backend will be authenticated via a bearer session token
   
-See the sequence diagram [here](https://github.com/teamdigitale/italia-backend/doc/images/authentication_process.svg)
+![authentication_process](doc/images/authentication_process.svg)
 
 ### User authentication
 
