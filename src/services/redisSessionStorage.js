@@ -32,6 +32,10 @@ export default class RedisSessionStorage implements SessionStorageInterface {
     // Set key to hold the string value. This data is set to expire (EX) after
     // `this.tokenDuration` seconds.
     // @see https://redis.io/commands/set
+    //
+    // The flow types of the Redis client don't include the last two params
+    // that are indeed valid, so we're suppressing Flow errors for the next line
+    // $FlowFixMe
     this.client.set(token, JSON.stringify(user), "EX", this.tokenDuration);
   }
 

@@ -91,6 +91,7 @@ export default class AuthenticationController {
         req.query = {};
         req.query.entityID = user.spid_idp;
 
+        // $FlowFixMe
         this.spidStrategy.logout(req, function(err, request) {
           if (!err) {
             res.status(200).json({
@@ -123,6 +124,7 @@ export default class AuthenticationController {
    * @param res
    */
   metadata(req: express$Request, res: express$Response) {
+    // $FlowFixMe
     const metadata = this.spidStrategy.generateServiceProviderMetadata(
       this.samlCert
     );

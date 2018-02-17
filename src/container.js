@@ -92,38 +92,32 @@ container.register({
 
 // Register a session storage service backed by Redis.
 export const SESSION_STORAGE = "sessionStorage";
-container.registerClass({
-  [SESSION_STORAGE]: [RedisSessionStorage]
-});
+container.register({ [SESSION_STORAGE]: awilix.asClass(RedisSessionStorage) });
 
 // Register a factory service to create API client.
 export const API_CLIENT = "apiClient";
-container.registerClass({
-  [API_CLIENT]: [ApiClientFactory]
-});
+container.register({ [API_CLIENT]: awilix.asClass(ApiClientFactory) });
 
 // Register the authentication controller as a service.
 export const AUTHENTICATION_CONTROLLER = "authenticationController";
-container.registerClass({
-  [AUTHENTICATION_CONTROLLER]: [AuthenticationController]
+container.register({
+  [AUTHENTICATION_CONTROLLER]: awilix.asClass(AuthenticationController)
 });
 
 // Register the profile controller as a service.
 export const PROFILE_CONTROLLER = "profileController";
-container.registerClass({
-  [PROFILE_CONTROLLER]: [ProfileController]
-});
+container.register({ [PROFILE_CONTROLLER]: awilix.asClass(ProfileController) });
 
 // Register the messages controller as a service.
 export const MESSAGES_CONTROLLER = "messagesController";
-container.registerClass({
-  [MESSAGES_CONTROLLER]: [MessagesController]
+container.register({
+  [MESSAGES_CONTROLLER]: awilix.asClass(MessagesController)
 });
 
 // Register the services controller as a service.
 export const SERVICES_CONTROLLER = "servicesController";
-container.registerClass({
-  [SERVICES_CONTROLLER]: [ServicesController]
+container.register({
+  [SERVICES_CONTROLLER]: awilix.asClass(ServicesController)
 });
 
 export default container;
