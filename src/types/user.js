@@ -42,7 +42,7 @@ export type SpidUser = t.TypeOf<typeof SpidUserModel>;
  */
 export function toUser(from: SpidUser): User {
   // Use the SAML sessionIndex as token.
-  const token = crypto.randomBytes(48).toString('hex');
+  const token = crypto.randomBytes(48).toString("hex");
 
   return {
     created_at: new Date().getTime(),
