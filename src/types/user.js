@@ -41,8 +41,9 @@ export type SpidUser = t.TypeOf<typeof SpidUserModel>;
  * @returns {User}
  */
 export function toUser(from: SpidUser): User {
-  // Use the SAML sessionIndex as token.
-  const token = crypto.randomBytes(48).toString("hex");
+  // Use the crypto.randomBytes as token.
+  const SESSION_TOKEN_LENGTH_BYTES = 48;
+  const token = crypto.randomBytes(SESSION_TOKEN_LENGTH_BYTES).toString("hex");
 
   return {
     created_at: new Date().getTime(),
