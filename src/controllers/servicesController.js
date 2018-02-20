@@ -1,73 +1,70 @@
-// @flow
-
 "use strict";
-
-import type { APIError } from "../types/error";
-import type { User } from "../types/user";
-import { extractUserFromRequest } from "../types/user";
-import {
-  ServicePublicModel,
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
-import ControllerBase from "./ControllerBase";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
-import { ServicePublicToAppService } from "../types/service";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+{
+    APIError;
+}
+from;
+"../types/error";
+{
+    User;
+}
+from;
+"../types/user";
+const user_1 = require("../types/user");
+const api_1 = require("../types/api");
+const ControllerBase_1 = require("./ControllerBase");
+{
+    ApiClientFactoryInterface;
+}
+from;
+"../services/apiClientFactoryInterface";
+const service_1 = require("../types/service");
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class ServicesController extends ControllerBase {
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
-  constructor(apiClient: ApiClientFactoryInterface) {
-    super(apiClient);
-  }
-
-  /**
-   * Returns the service identified by the provided id
-   * code.
-   *
-   * @param req
-   * @param res
-   */
-  getService(req: express$Request, res: express$Response) {
-    const maybeUser = extractUserFromRequest(req);
-
-    maybeUser.fold(
-      () => {
-        res.status(500).json({
-          message:
-            "There was an error extracting the user profile from the request."
-        });
-      },
-      (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getService(req.params.id)
-          .then(
-            maybeService => {
-              // Look if the response is a GetMessagesByUserOKResponse.
-              validateResponse(maybeService, ServicePublicModel).fold(
+class ServicesController extends ControllerBase_1.default {
+    /**
+     * Class constructor.
+     *
+     * @param apiClient
+     */
+    constructor(apiClient) {
+        super(apiClient);
+    }
+    /**
+     * Returns the service identified by the provided id
+     * code.
+     *
+     * @param req
+     * @param res
+     */
+    getService(req, res) {
+        const maybeUser = user_1.extractUserFromRequest(req);
+        maybeUser.fold(() => {
+            res.status(500).json({
+                message: "There was an error extracting the user profile from the request."
+            });
+        }, (user) => {
+            this.apiClient
+                .getClient(user.fiscal_code)
+                .getService(req.params.id)
+                .then(maybeService => {
+                // Look if the response is a GetMessagesByUserOKResponse.
+                api_1.validateResponse(maybeService, api_1.ServicePublicModel).fold(
                 // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeService, res),
+                () => api_1.validateProblemJson(maybeService, res), 
                 // All correct, return the response to the client.
-                service => {
-                  res.json(ServicePublicToAppService(service));
-                }
-              );
-            },
-            function(err: APIError) {
-              res.status(err.statusCode).json({
-                message: err.message
-              });
-            }
-          );
-      }
-    );
-  }
+                    service => {
+                    res.json(service_1.ServicePublicToAppService(service));
+                });
+            }, function (err) {
+                res.status(err.statusCode).json({
+                    message: err.message
+                });
+            });
+        });
+    }
 }
+exports.default = ServicesController;
+//# sourceMappingURL=servicesController.js.map

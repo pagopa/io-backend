@@ -1,64 +1,18 @@
-// @flow
-
 "use strict";
-
 /**
  * Contains io-ts models for the API response types.
  */
-
-import t from "flow-runtime";
-import { left, right } from "fp-ts/lib/Either";
-import {
-  EmailType,
-  ItemType,
-  MessageType,
-  NonNegativeNumberType,
-  NotificationType
-} from "./genericTypes";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const flow_runtime_1 = require("flow-runtime");
+const Either_1 = require("fp-ts/lib/Either");
+const genericTypes_1 = require("./genericTypes");
 const winston = require("winston");
-
-const ProblemJsonModel = t.object(
-  t.property("type", t.string(), true),
-  t.property("title", t.string(), true),
-  t.property("status", t.number(), true),
-  t.property("detail", t.string(), true),
-  t.property("instance", t.string(), true)
-);
-
-export const GetProfileOKResponseModel = t.object(
-  t.property("preferredLanguages", t.array(t.string()), true),
-  t.property("email", EmailType, true),
-  t.property("isInboxEnabled", t.boolean()),
-  t.property("version", NonNegativeNumberType)
-);
-
-export const UpsertProfileOKResponseModel = t.object(
-  t.property("preferredLanguages", t.array(t.string()), true),
-  t.property("email", EmailType, true),
-  t.property("isInboxEnabled", t.boolean()),
-  t.property("version", NonNegativeNumberType)
-);
-
-export const GetMessagesByUserOKResponseModel = t.object(
-  t.property("pageSize", t.number(), true),
-  t.property("next", t.string(), true),
-  t.property("items", t.array(ItemType), true)
-);
-
-export const MessageResponseModel = t.object(
-  t.property("message", MessageType),
-  t.property("notification", NotificationType, true)
-);
-
-export const ServicePublicModel = t.object(
-  t.property("serviceId", t.string()),
-  t.property("serviceName", t.string()),
-  t.property("organizationName", t.string()),
-  t.property("departmentName", t.string()),
-  t.property("version", NonNegativeNumberType)
-);
-
+const ProblemJsonModel = flow_runtime_1.default.object(flow_runtime_1.default.property("type", flow_runtime_1.default.string(), true), flow_runtime_1.default.property("title", flow_runtime_1.default.string(), true), flow_runtime_1.default.property("status", flow_runtime_1.default.number(), true), flow_runtime_1.default.property("detail", flow_runtime_1.default.string(), true), flow_runtime_1.default.property("instance", flow_runtime_1.default.string(), true));
+exports.GetProfileOKResponseModel = flow_runtime_1.default.object(flow_runtime_1.default.property("preferredLanguages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true), flow_runtime_1.default.property("email", genericTypes_1.EmailType, true), flow_runtime_1.default.property("isInboxEnabled", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
+exports.UpsertProfileOKResponseModel = flow_runtime_1.default.object(flow_runtime_1.default.property("preferredLanguages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true), flow_runtime_1.default.property("email", genericTypes_1.EmailType, true), flow_runtime_1.default.property("isInboxEnabled", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
+exports.GetMessagesByUserOKResponseModel = flow_runtime_1.default.object(flow_runtime_1.default.property("pageSize", flow_runtime_1.default.number(), true), flow_runtime_1.default.property("next", flow_runtime_1.default.string(), true), flow_runtime_1.default.property("items", flow_runtime_1.default.array(genericTypes_1.ItemType), true));
+exports.MessageResponseModel = flow_runtime_1.default.object(flow_runtime_1.default.property("message", genericTypes_1.MessageType), flow_runtime_1.default.property("notification", genericTypes_1.NotificationType, true));
+exports.ServicePublicModel = flow_runtime_1.default.object(flow_runtime_1.default.property("serviceId", flow_runtime_1.default.string()), flow_runtime_1.default.property("serviceName", flow_runtime_1.default.string()), flow_runtime_1.default.property("organizationName", flow_runtime_1.default.string()), flow_runtime_1.default.property("departmentName", flow_runtime_1.default.string()), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
 /**
  * Validates on object against the ProblemJsonModel data type. On success
  * call the passed callback function if it's set otherwise forward the original
@@ -68,47 +22,37 @@ export const ServicePublicModel = t.object(
  * @param res
  * @param callback
  */
-export function validateProblemJson(
-  value: any,
-  res: express$Response,
-  callback: ?() => void
-) {
-  const validation = t.validate(ProblemJsonModel, value);
-
-  if (validation.hasErrors()) {
-    res.status(500).json({
-      // If we reach this point something very bad has happened.
-      message: "Unrecoverable error."
-    });
-    winston.log(
-      "error",
-      "error in validating a ProblemJsonModel response: %s",
-      validation.errors
-    );
-  } else {
-    if (callback !== null && callback !== undefined) {
-      callback();
-    } else {
-      forwardAPIError(value, res);
+function validateProblemJson(value, res, callback) {
+    const validation = flow_runtime_1.default.validate(ProblemJsonModel, value);
+    if (validation.hasErrors()) {
+        res.status(500).json({
+            // If we reach this point something very bad has happened.
+            message: "Unrecoverable error."
+        });
+        winston.log("error", "error in validating a ProblemJsonModel response: %s", validation.errors);
     }
-  }
+    else {
+        if (callback !== null && callback !== undefined) {
+            callback();
+        }
+        else {
+            forwardAPIError(value, res);
+        }
+    }
 }
-
+exports.validateProblemJson = validateProblemJson;
 /**
  * Forwards an API error message to the client.
  * @param value
  * @param res
  */
-export function forwardAPIError(
-  value: ProblemJsonModel,
-  res: express$Response
-) {
-  res.status(value.status).json({
-    message: "The API call returns an error"
-  });
-  winston.log("info", "error occurred in API call: %s", value.detail);
+function forwardAPIError(value, res) {
+    res.status(value.status).json({
+        message: "The API call returns an error"
+    });
+    winston.log("info", "error occurred in API call: %s", value.detail);
 }
-
+exports.forwardAPIError = forwardAPIError;
 /**
  * Validates that an API response match with a specific type.
  *
@@ -116,8 +60,9 @@ export function forwardAPIError(
  * @param type
  * @returns {Either<String, any>}
  */
-export function validateResponse(value: any, type: any): Either<String, any> {
-  const validation = t.validate(type, value);
-
-  return validation.hasErrors() ? left(validation.errors) : right(value);
+function validateResponse(value, type) {
+    const validation = flow_runtime_1.default.validate(type, value);
+    return validation.hasErrors() ? Either_1.left(validation.errors) : Either_1.right(value);
 }
+exports.validateResponse = validateResponse;
+//# sourceMappingURL=api.js.map

@@ -1,21 +1,8 @@
-// @flow
-
 "use strict";
-
-import t from "flow-runtime";
-import { ServicePublic } from "../api/models";
-import { NonNegativeNumberType } from "./genericTypes";
-
-const ServiceModel = t.object(
-  t.property("serviceId", t.string()),
-  t.property("serviceName", t.string()),
-  t.property("organizationName", t.string()),
-  t.property("departmentName", t.string()),
-  t.property("version", NonNegativeNumberType)
-);
-
-export type Service = t.TypeOf<typeof ServiceModel>;
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const flow_runtime_1 = require("flow-runtime");
+const genericTypes_1 = require("./genericTypes");
+const ServiceModel = flow_runtime_1.default.object(flow_runtime_1.default.property("serviceId", flow_runtime_1.default.string()), flow_runtime_1.default.property("serviceName", flow_runtime_1.default.string()), flow_runtime_1.default.property("organizationName", flow_runtime_1.default.string()), flow_runtime_1.default.property("departmentName", flow_runtime_1.default.string()), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
 /**
  * Converts an API ServicePublic to a Proxy service.
  *
@@ -26,12 +13,14 @@ export type Service = t.TypeOf<typeof ServiceModel>;
  * @param from
  * @returns {Service}
  */
-export function ServicePublicToAppService(from: ServicePublic): Service {
-  return {
-    serviceId: from.serviceId,
-    serviceName: from.serviceName,
-    organizationName: from.organizationName,
-    departmentName: from.departmentName,
-    version: from.version
-  };
+function ServicePublicToAppService(from) {
+    return {
+        serviceId: from.serviceId,
+        serviceName: from.serviceName,
+        organizationName: from.organizationName,
+        departmentName: from.departmentName,
+        version: from.version
+    };
 }
+exports.ServicePublicToAppService = ServicePublicToAppService;
+//# sourceMappingURL=service.js.map

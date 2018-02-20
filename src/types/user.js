@@ -1,118 +1,85 @@
-// @flow
-
 "use strict";
-
-import t from "flow-runtime";
-import { left, right } from "fp-ts/lib/Either";
-import { FiscalNumberType, IssuerType } from "./genericTypes";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const flow_runtime_1 = require("flow-runtime");
+const Either_1 = require("fp-ts/lib/Either");
+const genericTypes_1 = require("./genericTypes");
 const winston = require("winston");
-
-const UserModel = t.object(
-  t.property("created_at", t.number()),
-  t.property("token", t.string()),
-  t.property("sessionIndex", t.string()),
-  t.property("spid_idp", t.string()),
-  t.property("fiscal_code", FiscalNumberType),
-  t.property("name", t.string()),
-  t.property("family_name", t.string()),
-  t.property("preferred_email", t.string()),
-  t.property("nameID", t.string()),
-  t.property("nameIDFormat", t.string())
-);
-
-const SpidUserModel = t.object(
-  t.property("fiscalNumber", FiscalNumberType),
-  t.property("name", t.string()),
-  t.property("familyName", t.string()),
-  t.property("sessionIndex", t.string()),
-  t.property("issuer", IssuerType),
-  t.property("email", t.string())
-);
-
-export type User = t.TypeOf<typeof UserModel>;
-export type SpidUser = t.TypeOf<typeof SpidUserModel>;
-
+const UserModel = flow_runtime_1.default.object(flow_runtime_1.default.property("created_at", flow_runtime_1.default.number()), flow_runtime_1.default.property("token", flow_runtime_1.default.string()), flow_runtime_1.default.property("sessionIndex", flow_runtime_1.default.string()), flow_runtime_1.default.property("spid_idp", flow_runtime_1.default.string()), flow_runtime_1.default.property("fiscal_code", genericTypes_1.FiscalNumberType), flow_runtime_1.default.property("name", flow_runtime_1.default.string()), flow_runtime_1.default.property("family_name", flow_runtime_1.default.string()), flow_runtime_1.default.property("preferred_email", flow_runtime_1.default.string()), flow_runtime_1.default.property("nameID", flow_runtime_1.default.string()), flow_runtime_1.default.property("nameIDFormat", flow_runtime_1.default.string()));
+const SpidUserModel = flow_runtime_1.default.object(flow_runtime_1.default.property("fiscalNumber", genericTypes_1.FiscalNumberType), flow_runtime_1.default.property("name", flow_runtime_1.default.string()), flow_runtime_1.default.property("familyName", flow_runtime_1.default.string()), flow_runtime_1.default.property("sessionIndex", flow_runtime_1.default.string()), flow_runtime_1.default.property("issuer", genericTypes_1.IssuerType), flow_runtime_1.default.property("email", flow_runtime_1.default.string()));
 /**
  * Converts a SPID User to a Proxy User.
  *
  * @param from
  * @returns {User}
  */
-export function toUser(from: SpidUser): User {
-  // Use the SAML sessionIndex as token.
-  const token = from.sessionIndex;
-
-  return {
-    created_at: new Date().getTime(),
-    token: token,
-    sessionIndex: token, // The sessionIndex is needed for logout.
-    spid_idp: from.issuer._, // The used idp is needed for logout.
-    fiscal_code: from.fiscalNumber,
-    name: from.name,
-    family_name: from.familyName,
-    preferred_email: from.email,
-    nameID: from.nameID, // The used nameID is needed for logout.
-    nameIDFormat: from.nameIDFormat // The used nameIDFormat is needed for logout.
-  };
+function toUser(from) {
+    // Use the SAML sessionIndex as token.
+    const token = from.sessionIndex;
+    return {
+        created_at: new Date().getTime(),
+        token: token,
+        sessionIndex: token,
+        spid_idp: from.issuer._,
+        fiscal_code: from.fiscalNumber,
+        name: from.name,
+        family_name: from.familyName,
+        preferred_email: from.email,
+        nameID: from.nameID,
+        nameIDFormat: from.nameIDFormat // The used nameIDFormat is needed for logout.
+    };
 }
-
+exports.toUser = toUser;
 /**
  * Validates a SPID User extracted from a SAML response.
  *
  * @param value
  * @returns {Either<String, SpidUser>}
  */
-export function validateSpidUser(value: any): Either<String, SpidUser> {
-  const validation = t.validate(SpidUserModel, value);
-
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(value);
-  }
+function validateSpidUser(value) {
+    const validation = flow_runtime_1.default.validate(SpidUserModel, value);
+    if (validation.hasErrors()) {
+        winston.log("info", validation.errors);
+        return Either_1.left(validation.errors);
+    }
+    else {
+        return Either_1.right(value);
+    }
 }
-
+exports.validateSpidUser = validateSpidUser;
 /**
  * Extracts the user added to the request by Passport from the request.
  *
  * @param from
  * @returns {Either<String, User>}
  */
-export function extractUserFromRequest(
-  from: express$Request
-): Either<String, User> {
-  const reqWithUser = ((from: Object): { user: User });
-
-  const validation = t.validate(UserModel, reqWithUser.user);
-
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(reqWithUser.user);
-  }
+function extractUserFromRequest(from) {
+    const reqWithUser = ((from) => );
+    const validation = flow_runtime_1.default.validate(UserModel, reqWithUser.user);
+    if (validation.hasErrors()) {
+        winston.log("info", validation.errors);
+        return Either_1.left(validation.errors);
+    }
+    else {
+        return Either_1.right(reqWithUser.user);
+    }
 }
-
+exports.extractUserFromRequest = extractUserFromRequest;
 /**
  * Extracts a user from a json string.
  *
  * @param from
  * @returns {Either<String, User>}
  */
-export function extractUserFromJson(from: string): Either<String, User> {
-  const json = JSON.parse(from);
-
-  const validation = t.validate(UserModel, json);
-
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(json);
-  }
+function extractUserFromJson(from) {
+    const json = JSON.parse(from);
+    const validation = flow_runtime_1.default.validate(UserModel, json);
+    if (validation.hasErrors()) {
+        winston.log("info", validation.errors);
+        return Either_1.left(validation.errors);
+    }
+    else {
+        return Either_1.right(json);
+    }
 }
+exports.extractUserFromJson = extractUserFromJson;
+//# sourceMappingURL=user.js.map

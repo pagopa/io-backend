@@ -1,54 +1,17 @@
-// @flow
-
 "use strict";
-
-import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
-import type { User } from "./user";
-import t from "flow-runtime";
-import { left, right } from "fp-ts/lib/Either";
-import {
-  EmailType,
-  FiscalNumberType,
-  NonNegativeNumberType
-} from "./genericTypes";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+{
+    User;
+}
+from;
+"./user";
+const flow_runtime_1 = require("flow-runtime");
+const Either_1 = require("fp-ts/lib/Either");
+const genericTypes_1 = require("./genericTypes");
 const winston = require("winston");
-
-const ProfileWithEmailModel = t.object(
-  t.property("email", EmailType, true),
-  t.property("family_name", t.string()),
-  t.property("fiscal_code", FiscalNumberType),
-  t.property("has_profile", t.boolean()),
-  t.property("is_email_set", t.boolean()),
-  t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("name", t.string()),
-  t.property("preferred_languages", t.array(t.string()), true),
-  t.property("version", NonNegativeNumberType)
-);
-
-const ProfileWithoutEmailModel = t.object(
-  t.property("family_name", t.string()),
-  t.property("fiscal_code", FiscalNumberType),
-  t.property("has_profile", t.boolean()),
-  t.property("is_email_set", t.boolean()),
-  t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("name", t.string()),
-  t.property("preferred_email", EmailType),
-  t.property("preferred_languages", t.array(t.string()), true),
-  t.property("version", NonNegativeNumberType)
-);
-
-const UpsertProfileModel = t.object(
-  t.property("version", NonNegativeNumberType),
-  t.property("email", EmailType, true),
-  t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("preferred_languages", t.array(t.string()), true)
-);
-
-export type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmailModel>;
-export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmailModel>;
-export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
-
+const ProfileWithEmailModel = flow_runtime_1.default.object(flow_runtime_1.default.property("email", genericTypes_1.EmailType, true), flow_runtime_1.default.property("family_name", flow_runtime_1.default.string()), flow_runtime_1.default.property("fiscal_code", genericTypes_1.FiscalNumberType), flow_runtime_1.default.property("has_profile", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_email_set", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_inbox_enabled", flow_runtime_1.default.boolean(), true), flow_runtime_1.default.property("name", flow_runtime_1.default.string()), flow_runtime_1.default.property("preferred_languages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
+const ProfileWithoutEmailModel = flow_runtime_1.default.object(flow_runtime_1.default.property("family_name", flow_runtime_1.default.string()), flow_runtime_1.default.property("fiscal_code", genericTypes_1.FiscalNumberType), flow_runtime_1.default.property("has_profile", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_email_set", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_inbox_enabled", flow_runtime_1.default.boolean(), true), flow_runtime_1.default.property("name", flow_runtime_1.default.string()), flow_runtime_1.default.property("preferred_email", genericTypes_1.EmailType), flow_runtime_1.default.property("preferred_languages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
+const UpsertProfileModel = flow_runtime_1.default.object(flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType), flow_runtime_1.default.property("email", genericTypes_1.EmailType, true), flow_runtime_1.default.property("is_inbox_enabled", flow_runtime_1.default.boolean(), true), flow_runtime_1.default.property("preferred_languages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true));
 /**
  * Converts an existing API profile to a Proxy profile.
  *
@@ -58,24 +21,21 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function ProfileWithEmailToAppProfile(
-  from: GetProfileOKResponse,
-  user: User
-): ProfileWithEmail | ProfileWithoutEmail {
-  return {
-    email: from.email,
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    has_profile: true,
-    is_email_set: !!from.email,
-    is_inbox_enabled: from.isInboxEnabled,
-    name: user.name,
-    preferred_email: user.preferred_email,
-    preferred_languages: from.preferredLanguages,
-    version: from.version
-  };
+function ProfileWithEmailToAppProfile(from, user) {
+    return {
+        email: from.email,
+        family_name: user.family_name,
+        fiscal_code: user.fiscal_code,
+        has_profile: true,
+        is_email_set: !!from.email,
+        is_inbox_enabled: from.isInboxEnabled,
+        name: user.name,
+        preferred_email: user.preferred_email,
+        preferred_languages: from.preferredLanguages,
+        version: from.version
+    };
 }
-
+exports.ProfileWithEmailToAppProfile = ProfileWithEmailToAppProfile;
 /**
  * Converts an empty API profile to a Proxy profile.
  *
@@ -83,51 +43,48 @@ export function ProfileWithEmailToAppProfile(
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function ProfileWithoutEmailToAppProfile(
-  user: User
-): ProfileWithEmail | ProfileWithoutEmail {
-  return {
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    has_profile: false,
-    is_email_set: false,
-    name: user.name,
-    preferred_email: user.preferred_email,
-    version: 0
-  };
+function ProfileWithoutEmailToAppProfile(user) {
+    return {
+        family_name: user.family_name,
+        fiscal_code: user.fiscal_code,
+        has_profile: false,
+        is_email_set: false,
+        name: user.name,
+        preferred_email: user.preferred_email,
+        version: 0
+    };
 }
-
+exports.ProfileWithoutEmailToAppProfile = ProfileWithoutEmailToAppProfile;
 /**
  * Converts a UpsertProfile to an API ExtendedProfile.
  *
  * @param from
  * @returns {{email: *, preferredLanguages: *, isInboxEnabled: *, version: *}}
  */
-export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
-  return {
-    email: from.email,
-    preferred_languages: from.preferred_languages,
-    isInboxEnabled: from.is_inbox_enabled,
-    version: from.version
-  };
+function toExtendedProfile(from) {
+    return {
+        email: from.email,
+        preferred_languages: from.preferred_languages,
+        isInboxEnabled: from.is_inbox_enabled,
+        version: from.version
+    };
 }
-
+exports.toExtendedProfile = toExtendedProfile;
 /**
  * Extracts a user profile from the body of a request.
  *
  * @param from
  * @returns {Either<String, UpsertProfile>}
  */
-export function extractUpsertProfileFromRequest(
-  from: express$Request
-): Either<String, UpsertProfile> {
-  const validation = t.validate(UpsertProfileModel, from.body);
-
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(from.body);
-  }
+function extractUpsertProfileFromRequest(from) {
+    const validation = flow_runtime_1.default.validate(UpsertProfileModel, from.body);
+    if (validation.hasErrors()) {
+        winston.log("info", validation.errors);
+        return Either_1.left(validation.errors);
+    }
+    else {
+        return Either_1.right(from.body);
+    }
 }
+exports.extractUpsertProfileFromRequest = extractUpsertProfileFromRequest;
+//# sourceMappingURL=profile.js.map

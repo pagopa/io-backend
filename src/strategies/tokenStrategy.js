@@ -1,30 +1,27 @@
-// @flow
-
 "use strict";
-
 /**
  * Builds and configure a Passport strategy to authenticate the proxy clients.
  */
-
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
-import container, { SESSION_STORAGE } from "../container";
-import type { User } from "../types/user";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+{
+    SessionStorageInterface;
+}
+from;
+"../services/sessionStorageInterface";
+const container_1 = require("../container");
+{
+    User;
+}
+from;
+"../types/user";
 const Strategy = require("passport-http-bearer");
-
 const tokenStrategy = () => {
-  return new Strategy(function(token, done) {
-    const sessionStorage = (container.resolve(
-      SESSION_STORAGE
-    ): SessionStorageInterface);
-
-    sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
-      maybeUser.fold(
-        message => done(null, false, { message }),
-        user => done(null, user)
-      );
+    return new Strategy(function (token, done) {
+        const sessionStorage = container_1.default.resolve(container_1.SESSION_STORAGE);
+        sessionStorage.get(token).then((maybeUser) => {
+            maybeUser.fold(message => done(null, false, { message }), user => done(null, user));
+        });
     });
-  });
 };
-
-export default tokenStrategy;
+exports.default = tokenStrategy;
+//# sourceMappingURL=tokenStrategy.js.map

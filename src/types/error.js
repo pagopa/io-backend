@@ -1,9 +1,6 @@
-// @flow
-
 "use strict";
-
-type DetailedError = {
-  +statusCode: number
-};
-
-export type APIError = DetailedError & Error;
+Object.defineProperty(exports, "__esModule", { value: true });
++statusCode;
+number;
+;
+//# sourceMappingURL=error.js.map

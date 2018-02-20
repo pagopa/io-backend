@@ -1,127 +1,106 @@
-// @flow
-
 "use strict";
-
-import type { APIError } from "../types/error";
-import {
-  createdMessageToAppMessage,
-  messageResponseToAppMessage
-} from "../types/message";
-import type { User } from "../types/user";
-import { extractUserFromRequest } from "../types/user";
-import {
-  GetMessagesByUserOKResponseModel,
-  MessageResponseModel,
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
-import ControllerBase from "./ControllerBase";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+{
+    APIError;
+}
+from;
+"../types/error";
+const message_1 = require("../types/message");
+{
+    User;
+}
+from;
+"../types/user";
+const user_1 = require("../types/user");
+const api_1 = require("../types/api");
+const ControllerBase_1 = require("./ControllerBase");
+{
+    ApiClientFactoryInterface;
+}
+from;
+"../services/apiClientFactoryInterface";
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class MessagesController extends ControllerBase {
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
-  constructor(apiClient: ApiClientFactoryInterface) {
-    super(apiClient);
-  }
-
-  /**
-   * Returns the messages for the user identified by the provided fiscal
-   * code.
-   *
-   * @param req
-   * @param res
-   */
-  getUserMessages(req: express$Request, res: express$Response) {
-    const maybeUser = extractUserFromRequest(req);
-
-    maybeUser.fold(
-      () => {
-        res.status(500).json({
-          message:
-            "There was an error extracting the user profile from the request."
-        });
-      },
-      (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getMessagesByUser()
-          .then(
-            maybeApiMessages => {
-              // Look if the response is a GetMessagesByUserOKResponse.
-              validateResponse(
-                maybeApiMessages,
-                GetMessagesByUserOKResponseModel
-              ).fold(
+class MessagesController extends ControllerBase_1.default {
+    /**
+     * Class constructor.
+     *
+     * @param apiClient
+     */
+    constructor(apiClient) {
+        super(apiClient);
+    }
+    /**
+     * Returns the messages for the user identified by the provided fiscal
+     * code.
+     *
+     * @param req
+     * @param res
+     */
+    getUserMessages(req, res) {
+        const maybeUser = user_1.extractUserFromRequest(req);
+        maybeUser.fold(() => {
+            res.status(500).json({
+                message: "There was an error extracting the user profile from the request."
+            });
+        }, (user) => {
+            this.apiClient
+                .getClient(user.fiscal_code)
+                .getMessagesByUser()
+                .then(maybeApiMessages => {
+                // Look if the response is a GetMessagesByUserOKResponse.
+                api_1.validateResponse(maybeApiMessages, api_1.GetMessagesByUserOKResponseModel).fold(
                 // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeApiMessages, res),
+                () => api_1.validateProblemJson(maybeApiMessages, res), 
                 // All correct, return the response to the client.
-                apiMessages => {
-                  const appMessages = apiMessages.items.map(
-                    createdMessageToAppMessage
-                  );
-                  res.json({
-                    items: appMessages,
-                    pageSize: apiMessages.pageSize
-                  });
-                }
-              );
-            },
-            function(err: APIError) {
-              res.status(err.statusCode).json({
-                message: err.message
-              });
-            }
-          );
-      }
-    );
-  }
-
-  /**
-   * Returns the message identified by the message id.
-   *
-   * @param req
-   * @param res
-   */
-  getUserMessage(req: express$Request, res: express$Response) {
-    const maybeUser = extractUserFromRequest(req);
-
-    maybeUser.fold(
-      (error: String) => {
-        res.status(500).json({
-          message: error
+                    apiMessages => {
+                    const appMessages = apiMessages.items.map(message_1.createdMessageToAppMessage);
+                    res.json({
+                        items: appMessages,
+                        pageSize: apiMessages.pageSize
+                    });
+                });
+            }, function (err) {
+                res.status(err.statusCode).json({
+                    message: err.message
+                });
+            });
         });
-      },
-      (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getMessage(req.params.id)
-          .then(
-            maybeApiMessage => {
-              // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiMessage, MessageResponseModel).fold(
+    }
+    /**
+     * Returns the message identified by the message id.
+     *
+     * @param req
+     * @param res
+     */
+    getUserMessage(req, res) {
+        const maybeUser = user_1.extractUserFromRequest(req);
+        maybeUser.fold((error) => {
+            res.status(500).json({
+                message: error
+            });
+        }, (user) => {
+            this.apiClient
+                .getClient(user.fiscal_code)
+                .getMessage(req.params.id)
+                .then(maybeApiMessage => {
+                // Look if the response is a GetProfileOKResponse.
+                api_1.validateResponse(maybeApiMessage, api_1.MessageResponseModel).fold(
                 // Look if object is a ProblemJson.
-                () => validateProblemJson(maybeApiMessage, res),
+                () => api_1.validateProblemJson(maybeApiMessage, res), 
                 // All correct, return the response to the client.
-                apiMessage => {
-                  res.json(messageResponseToAppMessage(apiMessage));
-                }
-              );
-            },
-            function(err: APIError) {
-              res.status(err.statusCode).json({
-                message: err.message
-              });
-            }
-          );
-      }
-    );
-  }
+                    apiMessage => {
+                    res.json(message_1.messageResponseToAppMessage(apiMessage));
+                });
+            }, function (err) {
+                res.status(err.statusCode).json({
+                    message: err.message
+                });
+            });
+        });
+    }
 }
+exports.default = MessagesController;
+//# sourceMappingURL=messagesController.js.map
