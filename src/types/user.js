@@ -7,6 +7,7 @@ import { left, right } from "fp-ts/lib/Either";
 import { FiscalNumberType, IssuerType } from "./genericTypes";
 
 const winston = require("winston");
+const crypto = require("crypto");
 
 const UserModel = t.object(
   t.property("created_at", t.number()),
@@ -27,7 +28,9 @@ const SpidUserModel = t.object(
   t.property("familyName", t.string()),
   t.property("sessionIndex", t.string()),
   t.property("issuer", IssuerType),
-  t.property("email", t.string())
+  t.property("email", t.string()),
+  t.property("nameID", t.string()),
+  t.property("nameIDFormat", t.string())
 );
 
 export type User = t.TypeOf<typeof UserModel>;
@@ -40,13 +43,14 @@ export type SpidUser = t.TypeOf<typeof SpidUserModel>;
  * @returns {User}
  */
 export function toUser(from: SpidUser): User {
-  // Use the SAML sessionIndex as token.
-  const token = from.sessionIndex;
+  // Use the crypto.randomBytes as token.
+  const SESSION_TOKEN_LENGTH_BYTES = 48;
+  const token = crypto.randomBytes(SESSION_TOKEN_LENGTH_BYTES).toString("hex");
 
   return {
     created_at: new Date().getTime(),
     token: token,
-    sessionIndex: token, // The sessionIndex is needed for logout.
+    sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     spid_idp: from.issuer._, // The used idp is needed for logout.
     fiscal_code: from.fiscalNumber,
     name: from.name,

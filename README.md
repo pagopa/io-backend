@@ -13,6 +13,7 @@ This repository contains the code of the backend used by the [web](https://githu
 
 ## Table of content
 
+- [What is this?](#what-is-this?)
 - [How to run the application](#how-to-run-the-application)
     - [Dependencies](#dependencies)
     - [Installation steps](#installation-steps)
@@ -26,6 +27,49 @@ This repository contains the code of the backend used by the [web](https://githu
 - [Troubleshooting](#troubleshooting)
 
 ---
+
+## What is this?
+
+This is the backend that supports the [italia-app](https://github.com/teamdigitale/italia-app)
+mobile application.
+
+This project is part of the Italian Digital Citizenship initiative, see the
+[main repository](https://github.com/teamdigitale/digital-citizenship) for further information.
+
+## Authentication process
+
+The `italia-app` application will authenticate to the backend in two steps:
+
+  1. an initial user initiated SPID authentication process (SAML2 based)
+     that identifies the user and, on success, triggers the creation of a new
+     authentication session (associated to a session token)
+  2. subsequent requests to the backend will be authenticated via a bearer session token
+  
+![authentication_process](doc/images/authentication_process.svg)
+
+### User authentication
+
+When a client (the mobile app or a browser) wants to login with the backend it will call the `/login` endpoint with the
+IDP entityID as parameter in the query string. The backend will then builds an authorization URL and performs a redirect
+to the chosen IDP. The authentication process will continue to the IDP website. If the authentication process ends with
+success the IDP will redirect the client to an HTML page with a form that will auto-post itself to the
+`/assertionConsumerService` endpoint with a SAMLResponse as an hidden field. The backend will parse and validate the
+SAMLResponse to extract all the user attributes (fiscal code, first name, last name, email), then it will generates an
+unique alphanumeric string as token and saves an User object to the `SessionStorage` service using the token as key.
+Finally the backend will redirect the client to the value of the environment variable `CLIENT_REDIRECTION_URL` with the
+token in the query string. The client must saves the token and use it in all API request.
+
+The code that manage this flow are in the `spid-passport` package (more info
+[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.js` and
+`src/controllers/authenticationController.js` files.
+
+### Token authentication
+
+All API requests sent by the client to the backend must have an `Authorization: Bearer` header with the value of the 
+token obtained from the SPID authentication process. The token is used to retrieve the User object from the
+`SessionStorage` service.
+
+The code that manage this flow are in the `src/strategies/tokenStrategy.js` file. 
 
 ## How to run the application
 
