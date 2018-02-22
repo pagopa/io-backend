@@ -1,33 +1,43 @@
-import t from "flow-runtime";
-import { left, right } from "fp-ts/lib/Either";
-import { FiscalNumberType, IssuerType } from "./genericTypes";
+/**
+ *
+ */
 
-const winston = require("winston");
+import * as express from "express";
+import { Either } from "fp-ts/lib/Either";
+import * as t from "io-ts";
+import { any, number, string } from "io-ts";
+import { EmailAddress } from "./api/EmailAddress";
+import { FiscalCode } from "./api/FiscalCode";
 
-const UserModel = t.object(
-  t.property("created_at", t.number()),
-  t.property("token", t.string()),
-  t.property("sessionIndex", t.string()),
-  t.property("spid_idp", t.string()),
-  t.property("fiscal_code", FiscalNumberType),
-  t.property("name", t.string()),
-  t.property("family_name", t.string()),
-  t.property("preferred_email", t.string()),
-  t.property("nameID", t.string()),
-  t.property("nameIDFormat", t.string())
-);
+// required attributes
+export const User = t.interface({
+  created_at: number,
+  family_name: string,
+  fiscal_code: FiscalCode,
+  name: string,
+  nameID: string,
+  nameIDFormat: string,
+  preferred_email: EmailAddress,
+  sessionIndex: string,
+  spid_idp: string,
+  token: string
+});
 
-const SpidUserModel = t.object(
-  t.property("fiscalNumber", FiscalNumberType),
-  t.property("name", t.string()),
-  t.property("familyName", t.string()),
-  t.property("sessionIndex", t.string()),
-  t.property("issuer", IssuerType),
-  t.property("email", t.string())
-);
+export type User = t.TypeOf<typeof User>;
 
-export type User = t.TypeOf<typeof UserModel>;
-export type SpidUser = t.TypeOf<typeof SpidUserModel>;
+// required attributes
+export const SpidUser = t.interface({
+  email: EmailAddress,
+  familyName: string,
+  fiscalNumber: FiscalCode,
+  issuer: any,
+  name: string,
+  nameID: string,
+  nameIDFormat: string,
+  sessionIndex: string
+});
+
+export type SpidUser = t.TypeOf<typeof SpidUser>;
 
 /**
  * Converts a SPID User to a Proxy User.
@@ -41,15 +51,15 @@ export function toUser(from: SpidUser): User {
 
   return {
     created_at: new Date().getTime(),
-    token: token,
-    sessionIndex: token, // The sessionIndex is needed for logout.
-    spid_idp: from.issuer._, // The used idp is needed for logout.
+    family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,
-    family_name: from.familyName,
-    preferred_email: from.email,
     nameID: from.nameID, // The used nameID is needed for logout.
-    nameIDFormat: from.nameIDFormat // The used nameIDFormat is needed for logout.
+    nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
+    preferred_email: from.email,
+    sessionIndex: token, // The sessionIndex is needed for logout.
+    spid_idp: from.issuer._, // The used idp is needed for logout.
+    token
   };
 }
 
@@ -59,16 +69,12 @@ export function toUser(from: SpidUser): User {
  * @param value
  * @returns {Either<String, SpidUser>}
  */
-export function validateSpidUser(value: any): Either<String, SpidUser> {
-  const validation = t.validate(SpidUserModel, value);
+export function validateSpidUser(value: any): Either<string, SpidUser> {
+  const result = SpidUser.decode(value);
 
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(value);
-  }
+  return result.mapLeft(() => {
+    return "error";
+  });
 }
 
 /**
@@ -78,19 +84,13 @@ export function validateSpidUser(value: any): Either<String, SpidUser> {
  * @returns {Either<String, User>}
  */
 export function extractUserFromRequest(
-  from: express$Request
-): Either<String, User> {
-  const reqWithUser = ((from: Object): { user: User });
+  from: express.Request
+): Either<string, User> {
+  const result = User.decode(from.user);
 
-  const validation = t.validate(UserModel, reqWithUser.user);
-
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(reqWithUser.user);
-  }
+  return result.mapLeft(() => {
+    return "error";
+  });
 }
 
 /**
@@ -99,16 +99,12 @@ export function extractUserFromRequest(
  * @param from
  * @returns {Either<String, User>}
  */
-export function extractUserFromJson(from: string): Either<String, User> {
+export function extractUserFromJson(from: string): Either<string, User> {
   const json = JSON.parse(from);
 
-  const validation = t.validate(UserModel, json);
+  const result = User.decode(json);
 
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(json);
-  }
+  return result.mapLeft(() => {
+    return "error";
+  });
 }

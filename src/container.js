@@ -19,7 +19,7 @@ const spidStrategy_1 = require("./strategies/spidStrategy");
 const tokenStrategy_1 = require("./strategies/tokenStrategy");
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
-dotenv.load();
+dotenv.config();
 const container = awilix.createContainer({
     injectionMode: awilix.InjectionMode.CLASSIC
 });
@@ -97,7 +97,7 @@ container.register({
 });
 exports.default = container;
 /**
- * Reads a file from the filesystem.
+ * Reads a file from the filesystem..
  *
  * @param path
  * @param type

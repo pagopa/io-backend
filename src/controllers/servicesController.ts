@@ -1,26 +1,26 @@
-import type { APIError } from "../types/error";
-import type { User } from "../types/user";
-import { extractUserFromRequest } from "../types/user";
+/**
+ *
+ */
+
+import * as express from "express";
+import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
 import {
-  ServicePublicModel,
   validateProblemJson,
   validateResponse
 } from "../types/api";
-import ControllerBase from "./ControllerBase";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
+import { ServicePublic } from "../types/api/ServicePublic";
+import { APIError } from "../types/error";
 import { ServicePublicToAppService } from "../types/service";
+import { extractUserFromRequest, User } from "../types/user";
+import ControllerBase from "./ControllerBase";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
 export default class ServicesController extends ControllerBase {
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
-  constructor(apiClient: ApiClientFactoryInterface) {
+
+  constructor(apiClient: IApiClientFactoryInterface) {
     super(apiClient);
   }
 
@@ -31,7 +31,7 @@ export default class ServicesController extends ControllerBase {
    * @param req
    * @param res
    */
-  getService(req: express$Request, res: express$Response) {
+  public getService(req: express.Request, res: express.Response): void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -48,7 +48,7 @@ export default class ServicesController extends ControllerBase {
           .then(
             maybeService => {
               // Look if the response is a GetMessagesByUserOKResponse.
-              validateResponse(maybeService, ServicePublicModel).fold(
+              validateResponse(maybeService, ServicePublic).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeService, res),
                 // All correct, return the response to the client.
@@ -57,7 +57,7 @@ export default class ServicesController extends ControllerBase {
                 }
               );
             },
-            function(err: APIError) {
+            (err:APIError) => {
               res.status(err.statusCode).json({
                 message: err.message
               });

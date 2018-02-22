@@ -1,49 +1,90 @@
+/**
+ *
+ */
+
+import { Either } from "fp-ts/lib/Either";
+import * as t from "io-ts";
 import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
-import type { User } from "./user";
-import t from "flow-runtime";
-import { left, right } from "fp-ts/lib/Either";
-import {
-  EmailType,
-  FiscalNumberType,
-  NonNegativeNumberType
-} from "./genericTypes";
+import { User } from "./user";
 
-const winston = require("winston");
+import * as express from "express";
+import { boolean, string } from "io-ts";
+import { NonNegativeNumber } from "../utils/numbers";
+import { strictInterfaceWithOptionals } from "../utils/types";
+import { EmailAddress } from "./api/EmailAddress";
+import { FiscalCode } from "./api/FiscalCode";
+import { PreferredLanguage } from "./api/PreferredLanguages";
 
-const ProfileWithEmailModel = t.object(
-  t.property("email", EmailType, true),
-  t.property("family_name", t.string()),
-  t.property("fiscal_code", FiscalNumberType),
-  t.property("has_profile", t.boolean()),
-  t.property("is_email_set", t.boolean()),
-  t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("name", t.string()),
-  t.property("preferred_languages", t.array(t.string()), true),
-  t.property("version", NonNegativeNumberType)
+// required attributes
+const ProfileWithEmailR = t.interface({
+  family_name: string,
+  fiscal_code: FiscalCode,
+  has_profile: boolean,
+  is_email_set: boolean,
+  name: string,
+  preferred_email: EmailAddress,
+  version: NonNegativeNumber
+});
+
+// optional attributes
+const ProfileWithEmailO = t.partial({
+  email: EmailAddress,
+  is_inbox_enabled: boolean,
+  preferred_languages: PreferredLanguage
+});
+
+export const ProfileWithEmail = strictInterfaceWithOptionals(
+  ProfileWithEmailR.props,
+  ProfileWithEmailO.props,
+  "ProfileWithEmail"
 );
 
-const ProfileWithoutEmailModel = t.object(
-  t.property("family_name", t.string()),
-  t.property("fiscal_code", FiscalNumberType),
-  t.property("has_profile", t.boolean()),
-  t.property("is_email_set", t.boolean()),
-  t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("name", t.string()),
-  t.property("preferred_email", EmailType),
-  t.property("preferred_languages", t.array(t.string()), true),
-  t.property("version", NonNegativeNumberType)
+export type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
+
+// required attributes
+const ProfileWithoutEmailR = t.interface({
+  family_name: string,
+  fiscal_code: FiscalCode,
+  has_profile: boolean,
+  is_email_set: boolean,
+  name: string,
+  preferred_email: EmailAddress,
+  version: NonNegativeNumber
+});
+
+// optional attributes
+const ProfileWithoutEmailO = t.partial({
+  is_inbox_enabled: boolean,
+  preferred_languages: PreferredLanguage
+});
+
+export const ProfileWithoutEmail = strictInterfaceWithOptionals(
+  ProfileWithoutEmailR.props,
+  ProfileWithoutEmailO.props,
+  "ProfileWithoutEmail"
 );
 
-const UpsertProfileModel = t.object(
-  t.property("version", NonNegativeNumberType),
-  t.property("email", EmailType, true),
-  t.property("is_inbox_enabled", t.boolean(), true),
-  t.property("preferred_languages", t.array(t.string()), true)
+export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmail>;
+
+// required attributes
+const UpsertProfileR = t.interface({
+  version: NonNegativeNumber
+});
+
+// optional attributes
+const UpsertProfileO = t.partial({
+  email: EmailAddress,
+  is_inbox_enabled: boolean,
+  preferred_languages: PreferredLanguage
+});
+
+export const UpsertProfile = strictInterfaceWithOptionals(
+  UpsertProfileR.props,
+  UpsertProfileO.props,
+  "UpsertProfile"
 );
 
-export type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmailModel>;
-export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmailModel>;
-export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
+export type UpsertProfile = t.TypeOf<typeof UpsertProfile>;
 
 /**
  * Converts an existing API profile to a Proxy profile.
@@ -57,7 +98,7 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfileModel>;
 export function ProfileWithEmailToAppProfile(
   from: GetProfileOKResponse,
   user: User
-): ProfileWithEmail | ProfileWithoutEmail {
+): ProfileWithEmail {
   return {
     email: from.email,
     family_name: user.family_name,
@@ -81,7 +122,7 @@ export function ProfileWithEmailToAppProfile(
  */
 export function ProfileWithoutEmailToAppProfile(
   user: User
-): ProfileWithEmail | ProfileWithoutEmail {
+): ProfileWithoutEmail {
   return {
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
@@ -102,8 +143,8 @@ export function ProfileWithoutEmailToAppProfile(
 export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
   return {
     email: from.email,
-    preferred_languages: from.preferred_languages,
     isInboxEnabled: from.is_inbox_enabled,
+    preferredLanguages: from.preferred_languages,
     version: from.version
   };
 }
@@ -115,15 +156,11 @@ export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
  * @returns {Either<String, UpsertProfile>}
  */
 export function extractUpsertProfileFromRequest(
-  from: express$Request
-): Either<String, UpsertProfile> {
-  const validation = t.validate(UpsertProfileModel, from.body);
+  from: express.Request
+): Either<string, UpsertProfile> {
+  const result = UpsertProfile.decode(from.body);
 
-  if (validation.hasErrors()) {
-    winston.log("info", validation.errors);
-
-    return left(validation.errors);
-  } else {
-    return right(from.body);
-  }
+  return result.mapLeft(() => {
+    return "error";
+  });
 }

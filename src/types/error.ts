@@ -1,5 +1,9 @@
-type DetailedError = {
-  +statusCode: number
-};
+/**
+ *
+ */
 
-export type APIError = DetailedError & Error;
+interface IDetailedError {
+  readonly statusCode: number
+}
+
+export type APIError = IDetailedError & Error;

@@ -9,11 +9,11 @@
   "scripts": {
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
-    "hot-reload": "nodemon dist/server.js",
+    "hot-reload": "nodemon src/server.js",
     "lint": "tslint -p . -c tslint.json -t verbose",
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest --coverage",
-    "start": "node dist/server.js"
+    "start": "node src/server.js"
   },
   "repository": {
     "type": "git",
@@ -33,21 +33,27 @@
     "@types/morgan": "^1.7.35",
     "@types/winston": "^2.3.8",
     "@types/dotenv": "^4.0.2",
+    "@types/redis": "^2.8.5",
+    "@types/passport-http-bearer": "^1.0.31",
     "awilix": "^3.0.5",
     "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "morgan": "^1.8.1",
-    "ms-rest": "^2.2.7",
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",
     "passport-strategy": "^1.0.0",
     "redis": "^2.8.0",
     "spid-passport": "git://github.com/lussoluca/spid-passport.git#166c99b",
     "winston": "^2.4.0",
-    "typescript": "^2.7.0"
+    "typescript": "^2.7.0",
+    "json-set-map": "^1.0.2",
+    "io-ts": "^1.0.2",
+    "ulid": "^2.2.2",
+    "validator": "^9.2.0"
   },
   "devDependencies": {
+    "ms-rest": "^2.2.7",
     "ts-jest": "^22.0.0",
     "ts-node": "^4.1.0",
     "tslint": "^5.8.0",

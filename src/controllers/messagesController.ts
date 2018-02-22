@@ -1,30 +1,30 @@
-import type { APIError } from "../types/error";
+/**
+ *
+ */
+
+import * as express from "express";
+import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
+import {
+  validateProblemJson,
+  validateResponse
+} from "../types/api";
+import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
+import { CreatedMessageWithoutContent } from "../types/api/CreatedMessageWithoutContent";
+import { APIError } from "../types/error";
 import {
   createdMessageToAppMessage,
   messageResponseToAppMessage
 } from "../types/message";
-import type { User } from "../types/user";
-import { extractUserFromRequest } from "../types/user";
-import {
-  GetMessagesByUserOKResponseModel,
-  MessageResponseModel,
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
+import { extractUserFromRequest, User } from "../types/user";
 import ControllerBase from "./ControllerBase";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
 export default class MessagesController extends ControllerBase {
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
-  constructor(apiClient: ApiClientFactoryInterface) {
+
+  constructor(apiClient: IApiClientFactoryInterface) {
     super(apiClient);
   }
 
@@ -35,7 +35,7 @@ export default class MessagesController extends ControllerBase {
    * @param req
    * @param res
    */
-  getUserMessages(req: express$Request, res: express$Response) {
+  public getUserMessages(req: express.Request, res: express.Response):void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -54,7 +54,7 @@ export default class MessagesController extends ControllerBase {
               // Look if the response is a GetMessagesByUserOKResponse.
               validateResponse(
                 maybeApiMessages,
-                GetMessagesByUserOKResponseModel
+                CreatedMessageWithContent
               ).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessages, res),
@@ -70,7 +70,7 @@ export default class MessagesController extends ControllerBase {
                 }
               );
             },
-            function(err: APIError) {
+            (err:APIError) => {
               res.status(err.statusCode).json({
                 message: err.message
               });
@@ -86,11 +86,11 @@ export default class MessagesController extends ControllerBase {
    * @param req
    * @param res
    */
-  getUserMessage(req: express$Request, res: express$Response) {
+  public getUserMessage(req: express.Request, res: express.Response):void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
-      (error: String) => {
+      (error: string) => {
         res.status(500).json({
           message: error
         });
@@ -102,7 +102,7 @@ export default class MessagesController extends ControllerBase {
           .then(
             maybeApiMessage => {
               // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiMessage, MessageResponseModel).fold(
+              validateResponse(maybeApiMessage, CreatedMessageWithoutContent).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessage, res),
                 // All correct, return the response to the client.
@@ -111,7 +111,7 @@ export default class MessagesController extends ControllerBase {
                 }
               );
             },
-            function(err: APIError) {
+            (err:APIError) => {
               res.status(err.statusCode).json({
                 message: err.message
               });

@@ -13,13 +13,15 @@ import MessagesController from "./controllers/messagesController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import ApiClientFactory from "./services/apiClientFactory";
+import pippo from "./services/pippo";
+import minnie from "./services/minnie";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
-dotenv.load();
+dotenv.config();
 
 const container = awilix.createContainer({
   injectionMode: awilix.InjectionMode.CLASSIC
@@ -126,7 +128,7 @@ container.register({
 export default container;
 
 /**
- * Reads a file from the filesystem.
+ * Reads a file from the filesystem..
  *
  * @param path
  * @param type

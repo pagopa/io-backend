@@ -1,35 +1,34 @@
-import type { User } from "../types/user";
-import { extractUserFromRequest } from "../types/user";
+/**
+ *
+ */
+
+import * as express from "express";
+import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
 import {
   forwardAPIError,
-  GetProfileOKResponseModel,
-  UpsertProfileOKResponseModel,
   validateProblemJson,
   validateResponse
 } from "../types/api";
-import type { APIError } from "../types/error";
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
-import type { UpsertProfile } from "../types/profile";
+import { APIError } from "../types/error";
 import {
   extractUpsertProfileFromRequest,
   ProfileWithEmailToAppProfile,
   ProfileWithoutEmailToAppProfile,
-  toExtendedProfile
+  toExtendedProfile, UpsertProfile
 } from "../types/profile";
+import { extractUserFromRequest, User } from "../types/user";
 import ControllerBase from "./ControllerBase";
+import { ExtendedProfile } from "../types/api/ExtendedProfile";
 
 /**
  * This controller handles reading the user profile from the
  * app by forwarding the call to the API system.
  */
-export default class ProfileController extends ControllerBase {
-  /**
-   * Class constructor.
-   *
-   * @param apiClient
-   */
-  constructor(apiClient: ApiClientFactoryInterface) {
-    super(apiClient);
+export default class ProfileController {
+  private readonly apiClient: IApiClientFactoryInterface;
+
+  constructor(apiClient: IApiClientFactoryInterface) {
+    this.apiClient = apiClient;
   }
 
   /**
@@ -39,11 +38,11 @@ export default class ProfileController extends ControllerBase {
    * @param req
    * @param res
    */
-  getUserProfile(req: express$Request, res: express$Response) {
+  public getUserProfile(req: express.Request, res: express.Response):void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
-      (error: String) => {
+      (error: string) => {
         res.status(500).json({
           // Unable to extract the user from the request.
           message: error
@@ -56,7 +55,7 @@ export default class ProfileController extends ControllerBase {
           .then(
             maybeApiProfile => {
               // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiProfile, GetProfileOKResponseModel).fold(
+              validateResponse(maybeApiProfile, ExtendedProfile).fold(
                 // Look if object is a ProblemJson.
                 () => {
                   validateProblemJson(maybeApiProfile, res, () => {
@@ -96,11 +95,11 @@ export default class ProfileController extends ControllerBase {
    * @param req
    * @param res
    */
-  upsertProfile(req: express$Request, res: express$Response) {
+  public upsertProfile(req: express.Request, res: express.Response):void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
-      (error: String) => {
+      (error: string) => {
         res.status(500).json({
           // Unable to extract the user from the request.
           message: error
@@ -109,7 +108,7 @@ export default class ProfileController extends ControllerBase {
       (user: User) => {
         const maybeUpsertProfile = extractUpsertProfileFromRequest(req);
         maybeUpsertProfile.fold(
-          (error: String) => {
+          (error: string) => {
             res.status(500).json({
               message: error
             });
@@ -123,7 +122,7 @@ export default class ProfileController extends ControllerBase {
                   // Look if the response is a UpsertProfileOKResponse.
                   validateResponse(
                     maybeApiProfile,
-                    UpsertProfileOKResponseModel
+                    ExtendedProfile
                   ).fold(
                     // Look if the response is a ProblemJson.
                     () => validateProblemJson(maybeApiProfile, res),

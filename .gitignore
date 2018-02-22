@@ -8,3 +8,6 @@
 /logs/**/*.out
 /spid-batch-import/node_modules
 /.env
+src/**/*.js
+**/*.js.map
+

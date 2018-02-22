@@ -5,7 +5,7 @@ import container, {
   AUTHENTICATION_CONTROLLER,
   MESSAGES_CONTROLLER,
   PROFILE_CONTROLLER,
-  SERVICES_CONTROLLER,
+  SERVICES_CONTROLLER, SESSION_STORAGE,
   SPID_STRATEGY,
   TOKEN_STRATEGY
 } from "./container";
@@ -13,6 +13,7 @@ import AuthenticationController from "./controllers/authenticationController";
 import ProfileController from "./controllers/profileController";
 
 import * as bodyParser from "body-parser";
+import * as dotenv from "dotenv";
 import * as express from "express";
 import * as http from "http";
 import * as morgan from "morgan";
@@ -21,8 +22,9 @@ import * as winston from "winston";
 import MessagesController from "./controllers/messagesController";
 import ServicesController from "./controllers/servicesController";
 import { User } from "./types/user";
+import { ISessionStorage } from "./services/iSessionStorage";
 
-require("dotenv").load();
+dotenv.config();
 
 const port = process.env.PORT || 80;
 
@@ -80,8 +82,8 @@ app.post(
   }
 );
 
-app.post("/slo", (req: express.Request, res: express.Response) => {
-  acsController.slo(req, res);
+app.post("/slo", (_, res: express.Response) => {
+  acsController.slo(res);
 });
 
 const withSpidAuth = (
@@ -105,15 +107,15 @@ const withSpidAuth = (
       if (!user) {
         return res.redirect("/login");
       }
-      controller.acs(user, req, res);
+      controller.acs(user, res);
     })(req, res, next);
   };
 };
 
 app.post("/assertionConsumerService", withSpidAuth(acsController));
 
-app.get("/metadata", (req: express.Request, res: express.Response) => {
-  acsController.metadata(req, res);
+app.get("/metadata", (_, res: express.Response) => {
+  acsController.metadata(res);
 });
 
 // Liveness probe for Kubernetes.

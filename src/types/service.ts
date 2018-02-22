@@ -1,16 +1,21 @@
-import t from "flow-runtime";
+/**
+ *
+ */
+
+import * as t from "io-ts";
+import { number, string } from "io-ts";
 import { ServicePublic } from "../api/models";
-import { NonNegativeNumberType } from "./genericTypes";
 
-const ServiceModel = t.object(
-  t.property("serviceId", t.string()),
-  t.property("serviceName", t.string()),
-  t.property("organizationName", t.string()),
-  t.property("departmentName", t.string()),
-  t.property("version", NonNegativeNumberType)
-);
+// required attributes
+export const Service = t.interface({
+  departmentName: string,
+  organizationName: string,
+  serviceId: string,
+  serviceName: string,
+  version: number
+});
 
-export type Service = t.TypeOf<typeof ServiceModel>;
+export type Service = t.TypeOf<typeof Service>;
 
 /**
  * Converts an API ServicePublic to a Proxy service.
@@ -24,10 +29,10 @@ export type Service = t.TypeOf<typeof ServiceModel>;
  */
 export function ServicePublicToAppService(from: ServicePublic): Service {
   return {
+    departmentName: from.departmentName,
+    organizationName: from.organizationName,
     serviceId: from.serviceId,
     serviceName: from.serviceName,
-    organizationName: from.organizationName,
-    departmentName: from.departmentName,
-    version: from.version
+    version: from.version || 0
   };
 }

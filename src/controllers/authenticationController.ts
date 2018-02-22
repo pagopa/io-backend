@@ -1,34 +1,26 @@
-import type { SpidUser, User } from "../types/user";
+/**
+ *
+ */
+
+import * as express from "express";
+import { ISessionStorage } from "../services/iSessionStorage";
 import {
-  extractUserFromRequest,
-  toUser,
+  extractUserFromRequest, SpidUser,
+  toUser, User,
   validateSpidUser
 } from "../types/user";
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
-import spidStrategy from "../strategies/spidStrategy";
 
 /**
  * This controller handles the call from the IDP after
  * a successful authentication. In the request headers there are all the
- * attributes sent from the IDP.
+ * attributes sent from the IDP..
  */
 export default class AuthenticationController {
-  sessionStorage: SessionStorageInterface;
-  samlCert: string;
-  spidStrategy: spidStrategy;
+  public readonly sessionStorage: ISessionStorage;
+  public readonly samlCert: string;
+  public readonly spidStrategy: SpidStrategy;
 
-  /**
-   * Class constructor.
-   *
-   * @param sessionStorage
-   * @param samlCert
-   * @param spidStrategy
-   */
-  constructor(
-    sessionStorage: SessionStorageInterface,
-    samlCert: string,
-    spidStrategy: spidStrategy
-  ) {
+  constructor(sessionStorage: ISessionStorage, samlCert: string, spidStrategy: SpidStrategy) {
     this.sessionStorage = sessionStorage;
     this.samlCert = samlCert;
     this.spidStrategy = spidStrategy;
@@ -38,14 +30,13 @@ export default class AuthenticationController {
    * The Assertion consumer service.
    *
    * @param userPayload
-   * @param req
    * @param res
    */
-  acs(userPayload: any, req: express$Request, res: express$Response) {
+  public acs(userPayload: any, res: express.Response): void {
     const maybeUser = validateSpidUser(userPayload);
 
     maybeUser.fold(
-      (error: String) => {
+      (error: string) => {
         res.status(500).json({
           message: error
         });
@@ -70,11 +61,11 @@ export default class AuthenticationController {
    * @param req
    * @param res
    */
-  logout(req: express$Request, res: express$Response) {
+  public logout(req: express.Request, res: express.Response): void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
-      (error: String) => {
+      (error: string) => {
         res.status(500).json({
           message: error
         });
@@ -87,7 +78,7 @@ export default class AuthenticationController {
         req.query = {};
         req.query.entityID = user.spid_idp;
 
-        this.spidStrategy.logout(req, function(err, request) {
+        this.spidStrategy.logout(req, (err, request: express.Request) => {
           if (!err) {
             res.status(200).json({
               logoutUrl: request
@@ -104,21 +95,17 @@ export default class AuthenticationController {
 
   /**
    * The Single logout service.
-   *
-   * @param req
-   * @param res
    */
-  slo(req: express$Request, res: express$Response) {
+  public slo(res: express.Response): void {
     res.redirect("/");
   }
 
   /**
    * The metadata for this Service Provider.
    *
-   * @param req
    * @param res
    */
-  metadata(req: express$Request, res: express$Response) {
+  public metadata(res: express.Response): void {
     const metadata = this.spidStrategy.generateServiceProviderMetadata(
       this.samlCert
     );

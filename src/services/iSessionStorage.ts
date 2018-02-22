@@ -1,6 +1,11 @@
-import type { User } from "../types/user";
+/**
+ *
+ */
 
-export interface SessionStorageInterface {
+import { User } from "../types/user";
+import { Either } from "fp-ts/lib/Either";
+
+export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    *
@@ -15,7 +20,7 @@ export interface SessionStorageInterface {
    * @param token
    * @returns {*}
    */
-  get(token: string): Promise<User>;
+  get(token: string): Promise<Either<string, User>>;
 
   /**
    * Removes a value from the cache.

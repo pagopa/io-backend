@@ -1,22 +1,17 @@
-import type { User } from "../types/user";
+import { Either, left } from "fp-ts/lib/Either";
+import * as redis from "redis";
+import { User } from "../types/user";
 import { extractUserFromJson } from "../types/user";
-import type { SessionStorageInterface } from "./sessionStorageInterface";
-import type { RedisClient } from "redis";
-import { left } from "fp-ts/lib/Either";
-
-const redis = require("redis");
+import { ISessionStorage } from "./iSessionStorage";
 
 /**
  * This service uses the Redis client to store and retrieve session information.
  */
-export default class RedisSessionStorage implements SessionStorageInterface {
-  client: RedisClient;
-  tokenDuration: string;
+export default class RedisSessionStorage implements ISessionStorage {
+  private readonly client: redis.RedisClient;
+  private readonly tokenDuration: number;
 
-  /**
-   * Class constructor.
-   */
-  constructor(redisUrl: string, tokenDuration: string) {
+  constructor(redisUrl: string, tokenDuration: number) {
     this.client = redis.createClient(redisUrl);
     this.tokenDuration = tokenDuration;
   }
@@ -24,7 +19,7 @@ export default class RedisSessionStorage implements SessionStorageInterface {
   /**
    * {@inheritDoc}
    */
-  set(token: string, user: User): void {
+  public set(token: string, user: User): void {
     // Set key to hold the string value. This data is set to expire (EX) after
     // `this.tokenDuration` seconds.
     // @see https://redis.io/commands/set
@@ -34,13 +29,13 @@ export default class RedisSessionStorage implements SessionStorageInterface {
   /**
    * {@inheritDoc}
    */
-  get(token: string): Promise<Either<String, User>> {
+  public get(token: string): Promise<Either<string, User>> {
     const client = this.client;
 
-    return new Promise(function(resolve) {
+    return new Promise(resolve => {
       // Get the value of key.
       // @see https://redis.io/commands/get
-      client.get(token, function(err, value) {
+      client.get(token, (err, value) => {
         if (err) {
           resolve(left(err));
         } else {
@@ -68,7 +63,7 @@ export default class RedisSessionStorage implements SessionStorageInterface {
   /**
    * {@inheritDoc}
    */
-  del(token: string): void {
+  public del(token: string): void {
     // Removes the specified keys. A key is ignored if it does not exist.
     // @see https://redis.io/commands/hdel
     this.client.hdel("sessions", token);

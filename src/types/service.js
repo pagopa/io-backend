@@ -1,8 +1,18 @@
 "use strict";
+/**
+ *
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
-const flow_runtime_1 = require("flow-runtime");
-const genericTypes_1 = require("./genericTypes");
-const ServiceModel = flow_runtime_1.default.object(flow_runtime_1.default.property("serviceId", flow_runtime_1.default.string()), flow_runtime_1.default.property("serviceName", flow_runtime_1.default.string()), flow_runtime_1.default.property("organizationName", flow_runtime_1.default.string()), flow_runtime_1.default.property("departmentName", flow_runtime_1.default.string()), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
+const t = require("io-ts");
+const io_ts_1 = require("io-ts");
+// required attributes
+exports.Service = t.interface({
+    departmentName: io_ts_1.string,
+    organizationName: io_ts_1.string,
+    serviceId: io_ts_1.string,
+    serviceName: io_ts_1.string,
+    version: io_ts_1.number
+});
 /**
  * Converts an API ServicePublic to a Proxy service.
  *
@@ -15,11 +25,11 @@ const ServiceModel = flow_runtime_1.default.object(flow_runtime_1.default.proper
  */
 function ServicePublicToAppService(from) {
     return {
+        departmentName: from.departmentName,
+        organizationName: from.organizationName,
         serviceId: from.serviceId,
         serviceName: from.serviceName,
-        organizationName: from.organizationName,
-        departmentName: from.departmentName,
-        version: from.version
+        version: from.version || 0
     };
 }
 exports.ServicePublicToAppService = ServicePublicToAppService;

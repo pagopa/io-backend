@@ -1,17 +1,59 @@
 "use strict";
+/**
+ *
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
-{
-    User;
-}
-from;
-"./user";
-const flow_runtime_1 = require("flow-runtime");
-const Either_1 = require("fp-ts/lib/Either");
-const genericTypes_1 = require("./genericTypes");
-const winston = require("winston");
-const ProfileWithEmailModel = flow_runtime_1.default.object(flow_runtime_1.default.property("email", genericTypes_1.EmailType, true), flow_runtime_1.default.property("family_name", flow_runtime_1.default.string()), flow_runtime_1.default.property("fiscal_code", genericTypes_1.FiscalNumberType), flow_runtime_1.default.property("has_profile", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_email_set", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_inbox_enabled", flow_runtime_1.default.boolean(), true), flow_runtime_1.default.property("name", flow_runtime_1.default.string()), flow_runtime_1.default.property("preferred_languages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
-const ProfileWithoutEmailModel = flow_runtime_1.default.object(flow_runtime_1.default.property("family_name", flow_runtime_1.default.string()), flow_runtime_1.default.property("fiscal_code", genericTypes_1.FiscalNumberType), flow_runtime_1.default.property("has_profile", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_email_set", flow_runtime_1.default.boolean()), flow_runtime_1.default.property("is_inbox_enabled", flow_runtime_1.default.boolean(), true), flow_runtime_1.default.property("name", flow_runtime_1.default.string()), flow_runtime_1.default.property("preferred_email", genericTypes_1.EmailType), flow_runtime_1.default.property("preferred_languages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true), flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType));
-const UpsertProfileModel = flow_runtime_1.default.object(flow_runtime_1.default.property("version", genericTypes_1.NonNegativeNumberType), flow_runtime_1.default.property("email", genericTypes_1.EmailType, true), flow_runtime_1.default.property("is_inbox_enabled", flow_runtime_1.default.boolean(), true), flow_runtime_1.default.property("preferred_languages", flow_runtime_1.default.array(flow_runtime_1.default.string()), true));
+const t = require("io-ts");
+const io_ts_1 = require("io-ts");
+const numbers_1 = require("../utils/numbers");
+const types_1 = require("../utils/types");
+const EmailAddress_1 = require("./api/EmailAddress");
+const FiscalCode_1 = require("./api/FiscalCode");
+const PreferredLanguages_1 = require("./api/PreferredLanguages");
+// required attributes
+const ProfileWithEmailR = t.interface({
+    family_name: io_ts_1.string,
+    fiscal_code: FiscalCode_1.FiscalCode,
+    has_profile: io_ts_1.boolean,
+    is_email_set: io_ts_1.boolean,
+    name: io_ts_1.string,
+    preferred_email: EmailAddress_1.EmailAddress,
+    version: numbers_1.NonNegativeNumber
+});
+// optional attributes
+const ProfileWithEmailO = t.partial({
+    email: EmailAddress_1.EmailAddress,
+    is_inbox_enabled: io_ts_1.boolean,
+    preferred_languages: PreferredLanguages_1.PreferredLanguage
+});
+exports.ProfileWithEmail = types_1.strictInterfaceWithOptionals(ProfileWithEmailR.props, ProfileWithEmailO.props, "ProfileWithEmail");
+// required attributes
+const ProfileWithoutEmailR = t.interface({
+    family_name: io_ts_1.string,
+    fiscal_code: FiscalCode_1.FiscalCode,
+    has_profile: io_ts_1.boolean,
+    is_email_set: io_ts_1.boolean,
+    name: io_ts_1.string,
+    preferred_email: EmailAddress_1.EmailAddress,
+    version: numbers_1.NonNegativeNumber
+});
+// optional attributes
+const ProfileWithoutEmailO = t.partial({
+    is_inbox_enabled: io_ts_1.boolean,
+    preferred_languages: PreferredLanguages_1.PreferredLanguage
+});
+exports.ProfileWithoutEmail = types_1.strictInterfaceWithOptionals(ProfileWithoutEmailR.props, ProfileWithoutEmailO.props, "ProfileWithoutEmail");
+// required attributes
+const UpsertProfileR = t.interface({
+    version: numbers_1.NonNegativeNumber
+});
+// optional attributes
+const UpsertProfileO = t.partial({
+    email: EmailAddress_1.EmailAddress,
+    is_inbox_enabled: io_ts_1.boolean,
+    preferred_languages: PreferredLanguages_1.PreferredLanguage
+});
+exports.UpsertProfile = types_1.strictInterfaceWithOptionals(UpsertProfileR.props, UpsertProfileO.props, "UpsertProfile");
 /**
  * Converts an existing API profile to a Proxy profile.
  *
@@ -64,8 +106,8 @@ exports.ProfileWithoutEmailToAppProfile = ProfileWithoutEmailToAppProfile;
 function toExtendedProfile(from) {
     return {
         email: from.email,
-        preferred_languages: from.preferred_languages,
         isInboxEnabled: from.is_inbox_enabled,
+        preferredLanguages: from.preferred_languages,
         version: from.version
     };
 }
@@ -77,14 +119,10 @@ exports.toExtendedProfile = toExtendedProfile;
  * @returns {Either<String, UpsertProfile>}
  */
 function extractUpsertProfileFromRequest(from) {
-    const validation = flow_runtime_1.default.validate(UpsertProfileModel, from.body);
-    if (validation.hasErrors()) {
-        winston.log("info", validation.errors);
-        return Either_1.left(validation.errors);
-    }
-    else {
-        return Either_1.right(from.body);
-    }
+    const result = exports.UpsertProfile.decode(from.body);
+    return result.mapLeft(() => {
+        return "error";
+    });
 }
 exports.extractUpsertProfileFromRequest = extractUpsertProfileFromRequest;
 //# sourceMappingURL=profile.js.map

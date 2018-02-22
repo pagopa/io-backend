@@ -2,22 +2,20 @@
  * Builds and configure a Passport strategy to authenticate the proxy clients.
  */
 
-import type { SessionStorageInterface } from "../services/sessionStorageInterface";
+import { Either } from "fp-ts/lib/Either";
+import * as passport from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
-import type { User } from "../types/user";
-
-const Strategy = require("passport-http-bearer");
+import { ISessionStorage } from "../services/iSessionStorage";
+import { User } from "../types/user";
 
 const tokenStrategy = () => {
-  return new Strategy(function(token, done) {
-    const sessionStorage = container.resolve(
-      SESSION_STORAGE
-    );
+  return new passport.Strategy((token, done) => {
+    const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
-    sessionStorage.get(token).then((maybeUser: Either<String, User>) => {
+    sessionStorage.get(token).then((maybeUser: Either<string, User>) => {
       maybeUser.fold(
-        message => done(null, false, { message }),
-        user => done(null, user)
+        message => done(undefined, false, { message }),
+        user => done(undefined, user)
       );
     });
   });

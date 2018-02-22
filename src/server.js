@@ -5,12 +5,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const container_1 = require("./container");
 const bodyParser = require("body-parser");
+const dotenv = require("dotenv");
 const express = require("express");
 const http = require("http");
 const morgan = require("morgan");
 const passport = require("passport");
 const winston = require("winston");
-require("dotenv").load();
+dotenv.config();
 const port = process.env.PORT || 80;
 // Setup Passport.
 // Add the strategy to authenticate proxy clients.
@@ -41,8 +42,8 @@ app.get("/login", spidAuth);
 app.post("/logout", tokenAuth, (req, res) => {
     acsController.logout(req, res);
 });
-app.post("/slo", (req, res) => {
-    acsController.slo(req, res);
+app.post("/slo", (_, res) => {
+    acsController.slo(res);
 });
 const withSpidAuth = (controller) => {
     return (req, res, next) => {
@@ -55,13 +56,13 @@ const withSpidAuth = (controller) => {
             if (!user) {
                 return res.redirect("/login");
             }
-            controller.acs(user, req, res);
+            controller.acs(user, res);
         })(req, res, next);
     };
 };
 app.post("/assertionConsumerService", withSpidAuth(acsController));
-app.get("/metadata", (req, res) => {
-    acsController.metadata(req, res);
+app.get("/metadata", (_, res) => {
+    acsController.metadata(res);
 });
 // Liveness probe for Kubernetes.
 // @see

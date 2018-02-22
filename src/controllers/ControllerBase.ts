@@ -1,17 +1,17 @@
-import type { ApiClientFactoryInterface } from "../services/apiClientFactoryInterface";
-
 /**
  * Base class for all the controllers that need the apiClient service.
  */
+import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
+
 export default class ControllerBase {
-  apiClient: ApiClientFactoryInterface;
+  protected readonly apiClient: IApiClientFactoryInterface;
 
   /**
    * Class constructor.
    *
    * @param apiClient
    */
-  constructor(apiClient: ApiClientFactoryInterface) {
+  constructor(apiClient: IApiClientFactoryInterface) {
     this.apiClient = apiClient;
   }
 }

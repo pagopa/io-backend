@@ -1,5 +1,9 @@
-import DigitalCitizenshipAPI from "../api/digitalCitizenshipAPI";
-import type { ApiClientFactoryInterface } from "./apiClientFactoryInterface";
+/**
+ *
+ */
+
+import DigitalCitizenshipAPI = require("../api/digitalCitizenshipAPI");
+import { IApiClientFactoryInterface } from "./iApiClientFactory";
 
 /**
  * This service builds API client by wrapping the DigitalCitizenshipAPI client
@@ -7,17 +11,17 @@ import type { ApiClientFactoryInterface } from "./apiClientFactoryInterface";
  *
  * @see ../api/digitalCitizenshipAPI
  */
-export default class ApiClientFactory implements ApiClientFactoryInterface {
+export default class ApiClientFactory implements IApiClientFactoryInterface {
   /**
    * {@inheritDoc}
    */
-  getClient(fiscalCode: string): DigitalCitizenshipAPI {
+  public getClient(fiscalCode: string): DigitalCitizenshipAPI {
     const client = new DigitalCitizenshipAPI(fiscalCode, process.env.API_URL);
 
-    client.addFilter(function(requestOptions, next, callback) {
+    client.addFilter((requestOptions, next, callback) => {
       requestOptions.headers["Ocp-Apim-Subscription-Key"] = process.env.API_KEY;
 
-      next(requestOptions, function(error, result, response, body) {
+      next(requestOptions, (error, result, response, body) => {
         callback(error, result, response, body);
       });
     });
