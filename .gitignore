@@ -9,5 +9,6 @@
 /spid-batch-import/node_modules
 /.env
 src/**/*.js
+!src/api/**/*.js
 **/*.js.map
 
