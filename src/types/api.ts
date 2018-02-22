@@ -4,9 +4,33 @@
 
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
+import * as t from "io-ts";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import * as winston from "winston";
+import { strictInterfaceWithOptionals } from "../utils/types";
+import { EmailAddress } from "./api/EmailAddress";
+import { IsInboxEnabled } from "./api/IsInboxEnabled";
+import { PreferredLanguage } from "./api/PreferredLanguages";
 import { ProblemJson } from "./api/ProblemJson";
+
+// required attributes
+const ProfileR = t.interface({});
+
+// optional attributes
+const ProfileO = t.partial({
+  email: EmailAddress,
+  isInboxEnabled: IsInboxEnabled,
+  preferred_languages: PreferredLanguage,
+  version: t.number
+});
+
+export const Profile = strictInterfaceWithOptionals(
+  ProfileR.props,
+  ProfileO.props,
+  "Profile"
+);
+
+export type Profile = t.TypeOf<typeof Profile>;
 
 /**
  * Validates on object against the ProblemJsonModel data type. On success

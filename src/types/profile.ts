@@ -95,7 +95,7 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfile>;
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function ProfileWithEmailToAppProfile(
+export function profileWithEmailToAppProfile(
   from: GetProfileOKResponse,
   user: User
 ): ProfileWithEmail {
@@ -120,7 +120,7 @@ export function ProfileWithEmailToAppProfile(
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function ProfileWithoutEmailToAppProfile(
+export function profileWithoutEmailToAppProfile(
   user: User
 ): ProfileWithoutEmail {
   return {

@@ -16,16 +16,18 @@ import {
   messageResponseToAppMessage
 } from "../types/message";
 import { extractUserFromRequest, User } from "../types/user";
-import ControllerBase from "./ControllerBase";
+import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
+import * as winston from "winston";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class MessagesController extends ControllerBase {
+export default class MessagesController {
+  private readonly apiClient: IApiClientFactoryInterface;
 
   constructor(apiClient: IApiClientFactoryInterface) {
-    super(apiClient);
+    this.apiClient = apiClient;
   }
 
   /**
@@ -54,7 +56,7 @@ export default class MessagesController extends ControllerBase {
               // Look if the response is a GetMessagesByUserOKResponse.
               validateResponse(
                 maybeApiMessages,
-                CreatedMessageWithContent
+                CreatedMessageWithoutContent
               ).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessages, res),
@@ -71,9 +73,11 @@ export default class MessagesController extends ControllerBase {
               );
             },
             (err:APIError) => {
-              res.status(err.statusCode).json({
-                message: err.message
+              res.status(500).json({
+                // Here usually we have connection or transmission errors.
+                message: "The API call returns an error"
               });
+              winston.log("info", "error occurred in API call: %s", err.message);
             }
           );
       }
@@ -102,7 +106,7 @@ export default class MessagesController extends ControllerBase {
           .then(
             maybeApiMessage => {
               // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiMessage, CreatedMessageWithoutContent).fold(
+              validateResponse(maybeApiMessage, MessageResponseWithContent).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessage, res),
                 // All correct, return the response to the client.
@@ -112,9 +116,11 @@ export default class MessagesController extends ControllerBase {
               );
             },
             (err:APIError) => {
-              res.status(err.statusCode).json({
-                message: err.message
+              res.status(500).json({
+                // Here usually we have connection or transmission errors.
+                message: "The API call returns an error"
               });
+              winston.log("info", "error occurred in API call: %s", err.message);
             }
           );
       }

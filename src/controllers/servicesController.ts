@@ -12,16 +12,17 @@ import { ServicePublic } from "../types/api/ServicePublic";
 import { APIError } from "../types/error";
 import { ServicePublicToAppService } from "../types/service";
 import { extractUserFromRequest, User } from "../types/user";
-import ControllerBase from "./ControllerBase";
+import * as winston from "winston";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
-export default class ServicesController extends ControllerBase {
+export default class ServicesController {
+  private readonly apiClient: IApiClientFactoryInterface;
 
   constructor(apiClient: IApiClientFactoryInterface) {
-    super(apiClient);
+    this.apiClient = apiClient;
   }
 
   /**
@@ -58,9 +59,11 @@ export default class ServicesController extends ControllerBase {
               );
             },
             (err:APIError) => {
-              res.status(err.statusCode).json({
-                message: err.message
+              res.status(500).json({
+                // Here usually we have connection or transmission errors.
+                message: "The API call returns an error"
               });
+              winston.log("info", "error occurred in API call: %s", err.message);
             }
           );
       }

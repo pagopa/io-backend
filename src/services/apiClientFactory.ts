@@ -2,8 +2,10 @@
  *
  */
 
-import DigitalCitizenshipAPI = require("../api/digitalCitizenshipAPI");
+import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
+import { APICredentials } from "../utils/APICredential";
 import { IApiClientFactoryInterface } from "./iApiClientFactory";
+import { BaseFilter, RequestPipeline, SigningFilter } from "ms-rest-js";
 
 /**
  * This service builds API client by wrapping the DigitalCitizenshipAPI client
@@ -16,16 +18,7 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
    * {@inheritDoc}
    */
   public getClient(fiscalCode: string): DigitalCitizenshipAPI {
-    const client = new DigitalCitizenshipAPI(fiscalCode, process.env.API_URL);
-
-    client.addFilter((requestOptions, next, callback) => {
-      requestOptions.headers["Ocp-Apim-Subscription-Key"] = process.env.API_KEY;
-
-      next(requestOptions, (error, result, response, body) => {
-        callback(error, result, response, body);
-      });
-    });
-
-    return client;
+    const apiCredentials = new APICredentials(process.env.API_KEY);
+    return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, process.env.API_URL);
   }
 }

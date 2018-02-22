@@ -1,5 +1,6 @@
 /**
- *
+ * This controller handles reading the user profile from the
+ * app by forwarding the call to the API system.
  */
 
 import * as express from "express";
@@ -9,21 +10,17 @@ import {
   validateProblemJson,
   validateResponse
 } from "../types/api";
+import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
 import { APIError } from "../types/error";
 import {
   extractUpsertProfileFromRequest,
-  ProfileWithEmailToAppProfile,
-  ProfileWithoutEmailToAppProfile,
+  profileWithEmailToAppProfile,
+  profileWithoutEmailToAppProfile,
   toExtendedProfile, UpsertProfile
 } from "../types/profile";
 import { extractUserFromRequest, User } from "../types/user";
-import ControllerBase from "./ControllerBase";
-import { ExtendedProfile } from "../types/api/ExtendedProfile";
+import * as winston from "winston";
 
-/**
- * This controller handles reading the user profile from the
- * app by forwarding the call to the API system.
- */
 export default class ProfileController {
   private readonly apiClient: IApiClientFactoryInterface;
 
@@ -55,7 +52,7 @@ export default class ProfileController {
           .then(
             maybeApiProfile => {
               // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiProfile, ExtendedProfile).fold(
+              validateResponse(maybeApiProfile, GetProfileOKResponse).fold(
                 // Look if object is a ProblemJson.
                 () => {
                   validateProblemJson(maybeApiProfile, res, () => {
@@ -65,7 +62,7 @@ export default class ProfileController {
                       // retrieved from SPID.
                       res
                         .status(200)
-                        .json(ProfileWithoutEmailToAppProfile(user));
+                        .json(profileWithoutEmailToAppProfile(user));
                     } else {
                       forwardAPIError(maybeApiProfile, res);
                     }
@@ -73,15 +70,16 @@ export default class ProfileController {
                 },
                 // All correct, return the response to the client.
                 apiProfile => {
-                  res.json(ProfileWithEmailToAppProfile(apiProfile, user));
+                  res.json(profileWithEmailToAppProfile(apiProfile, user));
                 }
               );
             },
             (err: APIError) => {
-              res.status(err.statusCode).json({
+              res.status(500).json({
                 // Here usually we have connection or transmission errors.
-                message: err.message
+                message: "The API call returns an error"
               });
+              winston.log("info", "error occurred in API call: %s", err.message);
             }
           );
       }
@@ -122,21 +120,22 @@ export default class ProfileController {
                   // Look if the response is a UpsertProfileOKResponse.
                   validateResponse(
                     maybeApiProfile,
-                    ExtendedProfile
+                    GetProfileOKResponse
                   ).fold(
                     // Look if the response is a ProblemJson.
                     () => validateProblemJson(maybeApiProfile, res),
                     // All correct, return the response to the client.
                     apiProfile => {
-                      res.json(ProfileWithEmailToAppProfile(apiProfile, user));
+                      res.json(profileWithEmailToAppProfile(apiProfile, user));
                     }
                   );
                 },
                 (err: APIError) => {
-                  res.status(err.statusCode).json({
+                  res.status(500).json({
                     // Here usually we have connection or transmission errors.
-                    message: err.message
+                    message: "The API call returns an error"
                   });
+                  winston.log("info", "error occurred in API call: %s", err.message);
                 }
               );
           }

@@ -2,7 +2,7 @@
  *
  */
 
-import DigitalCitizenshipAPI = require("../api/digitalCitizenshipAPI");
+import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 
 export interface IApiClientFactoryInterface {
   /**

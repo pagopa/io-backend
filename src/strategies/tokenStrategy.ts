@@ -14,7 +14,7 @@ const tokenStrategy = () => {
 
     sessionStorage.get(token).then((maybeUser: Either<string, User>) => {
       maybeUser.fold(
-        message => done(undefined, false, { message }),
+        message => done(undefined, false, message),
         user => done(undefined, user)
       );
     });

@@ -3,9 +3,24 @@
  * Contains io-ts models for the API response types.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+const t = require("io-ts");
 const PathReporter_1 = require("io-ts/lib/PathReporter");
 const winston = require("winston");
+const types_1 = require("../utils/types");
+const EmailAddress_1 = require("./api/EmailAddress");
+const IsInboxEnabled_1 = require("./api/IsInboxEnabled");
+const PreferredLanguages_1 = require("./api/PreferredLanguages");
 const ProblemJson_1 = require("./api/ProblemJson");
+// required attributes
+const ProfileR = t.interface({});
+// optional attributes
+const ProfileO = t.partial({
+    email: EmailAddress_1.EmailAddress,
+    isInboxEnabled: IsInboxEnabled_1.IsInboxEnabled,
+    preferred_languages: PreferredLanguages_1.PreferredLanguage,
+    version: t.number
+});
+exports.Profile = types_1.strictInterfaceWithOptionals(ProfileR.props, ProfileO.props, "Profile");
 /**
  * Validates on object against the ProblemJsonModel data type. On success
  * call the passed callback function if it's set otherwise forward the original

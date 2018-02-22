@@ -63,7 +63,7 @@ exports.UpsertProfile = types_1.strictInterfaceWithOptionals(UpsertProfileR.prop
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-function ProfileWithEmailToAppProfile(from, user) {
+function profileWithEmailToAppProfile(from, user) {
     return {
         email: from.email,
         family_name: user.family_name,
@@ -77,7 +77,7 @@ function ProfileWithEmailToAppProfile(from, user) {
         version: from.version
     };
 }
-exports.ProfileWithEmailToAppProfile = ProfileWithEmailToAppProfile;
+exports.profileWithEmailToAppProfile = profileWithEmailToAppProfile;
 /**
  * Converts an empty API profile to a Proxy profile.
  *
@@ -85,7 +85,7 @@ exports.ProfileWithEmailToAppProfile = ProfileWithEmailToAppProfile;
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-function ProfileWithoutEmailToAppProfile(user) {
+function profileWithoutEmailToAppProfile(user) {
     return {
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
@@ -96,7 +96,7 @@ function ProfileWithoutEmailToAppProfile(user) {
         version: 0
     };
 }
-exports.ProfileWithoutEmailToAppProfile = ProfileWithoutEmailToAppProfile;
+exports.profileWithoutEmailToAppProfile = profileWithoutEmailToAppProfile;
 /**
  * Converts a UpsertProfile to an API ExtendedProfile.
  *
