@@ -5,7 +5,6 @@
 import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 import { APICredentials } from "../utils/APICredential";
 import { IApiClientFactoryInterface } from "./iApiClientFactory";
-import { BaseFilter, RequestPipeline, SigningFilter } from "ms-rest-js";
 
 /**
  * This service builds API client by wrapping the DigitalCitizenshipAPI client
