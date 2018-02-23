@@ -45,7 +45,7 @@ export type SpidUser = t.TypeOf<typeof SpidUser>;
  * @param from
  * @returns {User}
  */
-export function toUser(from: SpidUser): User {
+export function toAppUser(from: SpidUser): User {
   // Use the SAML sessionIndex as token.
   const token = from.sessionIndex;
 

@@ -3,15 +3,16 @@
  */
 
 import * as t from "io-ts";
-import { strictInterfaceWithOptionals } from "../../utils/types";
 import { number, readonlyArray, string } from "io-ts";
+import { strictInterfaceWithOptionals } from "../../utils/types";
+import { CreatedMessageWithoutContent } from "./CreatedMessageWithoutContent";
 
 // required attributes
 const GetMessagesByUserOKResponseR = t.interface({});
 
 // optional attributes
 const GetMessagesByUserOKResponseO = t.partial({
-  items: readonlyArray(),
+  items: readonlyArray(CreatedMessageWithoutContent),
   next: string,
   pageSize: number
 });

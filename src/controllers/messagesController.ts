@@ -3,21 +3,20 @@
  */
 
 import * as express from "express";
+import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
 import {
   validateProblemJson,
   validateResponse
 } from "../types/api";
-import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
-import { CreatedMessageWithoutContent } from "../types/api/CreatedMessageWithoutContent";
+import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
+import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { APIError } from "../types/error";
 import {
-  createdMessageToAppMessage,
-  messageResponseToAppMessage
+  toAppMessageWithContent,
+  toAppMessageWithoutContent
 } from "../types/message";
 import { extractUserFromRequest, User } from "../types/user";
-import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
-import * as winston from "winston";
 
 /**
  * This controller handles reading messages from the app by
@@ -56,14 +55,14 @@ export default class MessagesController {
               // Look if the response is a GetMessagesByUserOKResponse.
               validateResponse(
                 maybeApiMessages,
-                CreatedMessageWithoutContent
+                GetMessagesByUserOKResponse
               ).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessages, res),
                 // All correct, return the response to the client.
                 apiMessages => {
                   const appMessages = apiMessages.items.map(
-                    createdMessageToAppMessage
+                    toAppMessageWithoutContent
                   );
                   res.json({
                     items: appMessages,
@@ -105,13 +104,13 @@ export default class MessagesController {
           .getMessage(req.params.id)
           .then(
             maybeApiMessage => {
-              // Look if the response is a GetProfileOKResponse.
+              // Look if the response is a MessageResponseWithContent.
               validateResponse(maybeApiMessage, MessageResponseWithContent).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeApiMessage, res),
                 // All correct, return the response to the client.
                 apiMessage => {
-                  res.json(messageResponseToAppMessage(apiMessage));
+                  res.json(toAppMessageWithContent(apiMessage));
                 }
               );
             },

@@ -10,21 +10,20 @@ import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { PreferredLanguage } from "../api/PreferredLanguages";
 
 // required attributes
-const GetProfileOKResponseR = t.interface({});
+const UpsertProfileOKResponseR = t.interface({});
 
 // optional attributes
-const GetProfileOKResponseO = t.partial({
+const UpsertProfileOKResponseO = t.partial({
   email: EmailAddress,
   isInboxEnabled: IsInboxEnabled,
   preferredLanguages: PreferredLanguage,
   version: number
 });
 
-export const GetProfileOKResponse = strictInterfaceWithOptionals(
-  GetProfileOKResponseR.props,
-  GetProfileOKResponseO.props,
-  "GetProfileOKResponse"
+export const UpsertProfileOKResponse = strictInterfaceWithOptionals(
+  UpsertProfileOKResponseR.props,
+  UpsertProfileOKResponseO.props,
+  "UpsertProfileOKResponse"
 );
 
-export type GetProfileOKResponse = t.TypeOf<typeof GetProfileOKResponse>;
-
+export type UpsertProfileOKResponse = t.TypeOf<typeof UpsertProfileOKResponse>;

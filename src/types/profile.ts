@@ -4,7 +4,6 @@
 
 import { Either } from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { ExtendedProfile, GetProfileOKResponse } from "../api/models";
 import { User } from "./user";
 
 import * as express from "express";
@@ -14,6 +13,8 @@ import { strictInterfaceWithOptionals } from "../utils/types";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { PreferredLanguage } from "./api/PreferredLanguages";
+import { ExtendedProfile } from "./api_client/ExtendedProfile";
+import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
 // required attributes
 const ProfileWithEmailR = t.interface({
@@ -66,26 +67,6 @@ export const ProfileWithoutEmail = strictInterfaceWithOptionals(
 
 export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmail>;
 
-// required attributes
-const UpsertProfileR = t.interface({
-  version: NonNegativeNumber
-});
-
-// optional attributes
-const UpsertProfileO = t.partial({
-  email: EmailAddress,
-  is_inbox_enabled: boolean,
-  preferred_languages: PreferredLanguage
-});
-
-export const UpsertProfile = strictInterfaceWithOptionals(
-  UpsertProfileR.props,
-  UpsertProfileO.props,
-  "UpsertProfile"
-);
-
-export type UpsertProfile = t.TypeOf<typeof UpsertProfile>;
-
 /**
  * Converts an existing API profile to a Proxy profile.
  *
@@ -95,7 +76,7 @@ export type UpsertProfile = t.TypeOf<typeof UpsertProfile>;
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function profileWithEmailToAppProfile(
+export function toAppProfileWithEmail(
   from: GetProfileOKResponse,
   user: User
 ): ProfileWithEmail {
@@ -120,7 +101,7 @@ export function profileWithEmailToAppProfile(
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function profileWithoutEmailToAppProfile(
+export function toAppProfileWithoutEmail(
   user: User
 ): ProfileWithoutEmail {
   return {
@@ -135,30 +116,15 @@ export function profileWithoutEmailToAppProfile(
 }
 
 /**
- * Converts a UpsertProfile to an API ExtendedProfile.
- *
- * @param from
- * @returns {{email: *, preferredLanguages: *, isInboxEnabled: *, version: *}}
- */
-export function toExtendedProfile(from: UpsertProfile): ExtendedProfile {
-  return {
-    email: from.email,
-    isInboxEnabled: from.is_inbox_enabled,
-    preferredLanguages: from.preferred_languages,
-    version: from.version
-  };
-}
-
-/**
  * Extracts a user profile from the body of a request.
  *
  * @param from
- * @returns {Either<String, UpsertProfile>}
+ * @returns {Either<String, ExtendedProfile>}
  */
 export function extractUpsertProfileFromRequest(
   from: express.Request
-): Either<string, UpsertProfile> {
-  const result = UpsertProfile.decode(from.body);
+): Either<string, ExtendedProfile> {
+  const result = ExtendedProfile.decode(from.body);
 
   return result.mapLeft(() => {
     return "error";

@@ -27,7 +27,7 @@ export type Service = t.TypeOf<typeof Service>;
  * @param from
  * @returns {Service}
  */
-export function ServicePublicToAppService(from: ServicePublic): Service {
+export function toAppService(from: ServicePublic): Service {
   return {
     departmentName: from.departmentName,
     organizationName: from.organizationName,

@@ -13,25 +13,6 @@ import { IsInboxEnabled } from "./api/IsInboxEnabled";
 import { PreferredLanguage } from "./api/PreferredLanguages";
 import { ProblemJson } from "./api/ProblemJson";
 
-// required attributes
-const ProfileR = t.interface({});
-
-// optional attributes
-const ProfileO = t.partial({
-  email: EmailAddress,
-  isInboxEnabled: IsInboxEnabled,
-  preferred_languages: PreferredLanguage,
-  version: t.number
-});
-
-export const Profile = strictInterfaceWithOptionals(
-  ProfileR.props,
-  ProfileO.props,
-  "Profile"
-);
-
-export type Profile = t.TypeOf<typeof Profile>;
-
 /**
  * Validates on object against the ProblemJsonModel data type. On success
  * call the passed callback function if it's set otherwise forward the original

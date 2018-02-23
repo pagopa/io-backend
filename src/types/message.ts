@@ -5,8 +5,9 @@
 import * as t from "io-ts";
 
 import { string } from "io-ts";
-import { CreatedMessage, MessageResponse } from "../api/models";
 import { strictInterfaceWithOptionals } from "../utils/types";
+import { CreatedMessageWithoutContent } from "./api_client/CreatedMessageWithoutContent";
+import { MessageResponseWithContent } from "./api_client/MessageResponseWithContent";
 
 // required attributes
 const MessageR = t.interface({
@@ -34,20 +35,13 @@ export type Message = t.TypeOf<typeof Message>;
  * @param from
  * @returns {Message}
  */
-export function messageResponseToAppMessage(from: MessageResponse): Message {
-  if (from.message.hasOwnProperty("content")) {
-    return {
-      id: from.message.id || "",
-      markdown: (from.message.content !== undefined) ? from.message.content.markdown : "",
-      sender_service_id: from.message.senderServiceId,
-      subject: (from.message.content !== undefined) ? from.message.content.subject : ""
-    };
-  } else {
-    return {
-      id: from.message.id || "",
-      sender_service_id: from.message.senderServiceId
-    };
-  }
+export function toAppMessageWithContent(from: MessageResponseWithContent): Message {
+   return {
+     id: from.message.id || "",
+     markdown: (from.message.content !== undefined) ? from.message.content.markdown : "",
+     sender_service_id: from.message.senderServiceId,
+     subject: (from.message.content !== undefined) ? from.message.content.subject : ""
+   };
 }
 
 /**
@@ -56,7 +50,7 @@ export function messageResponseToAppMessage(from: MessageResponse): Message {
  * @param from
  * @returns {Message}
  */
-export function createdMessageToAppMessage(from: CreatedMessage): Message {
+export function toAppMessageWithoutContent(from: CreatedMessageWithoutContent): Message {
   return {
     id: from.id || "",
     sender_service_id: from.senderServiceId

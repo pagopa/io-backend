@@ -3,16 +3,16 @@
  */
 
 import * as express from "express";
+import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
 import {
   validateProblemJson,
   validateResponse
 } from "../types/api";
-import { ServicePublic } from "../types/api/ServicePublic";
+import { ServicePublic } from "../types/api_client/ServicePublic";
 import { APIError } from "../types/error";
-import { ServicePublicToAppService } from "../types/service";
+import { toAppService } from "../types/service";
 import { extractUserFromRequest, User } from "../types/user";
-import * as winston from "winston";
 
 /**
  * This controller handles reading messages from the app by
@@ -48,13 +48,13 @@ export default class ServicesController {
           .getService(req.params.id)
           .then(
             maybeService => {
-              // Look if the response is a GetMessagesByUserOKResponse.
+              // Look if the response is a ServicePublic.
               validateResponse(maybeService, ServicePublic).fold(
                 // Look if object is a ProblemJson.
                 () => validateProblemJson(maybeService, res),
                 // All correct, return the response to the client.
                 service => {
-                  res.json(ServicePublicToAppService(service));
+                  res.json(toAppService(service));
                 }
               );
             },

@@ -6,7 +6,7 @@ import * as express from "express";
 import { ISessionStorage } from "../services/iSessionStorage";
 import {
   extractUserFromRequest, SpidUser,
-  toUser, User,
+  toAppUser, User,
   validateSpidUser
 } from "../types/user";
 
@@ -42,7 +42,7 @@ export default class AuthenticationController {
         });
       },
       (spidUser: SpidUser) => {
-        const user = toUser(spidUser);
+        const user = toAppUser(spidUser);
 
         this.sessionStorage.set(user.token, user);
 

@@ -4,22 +4,23 @@
  */
 
 import * as express from "express";
+import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
 import {
   forwardAPIError,
   validateProblemJson,
   validateResponse
 } from "../types/api";
+import { ExtendedProfile } from "../types/api_client/ExtendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
+import { UpsertProfileOKResponse } from "../types/api_client/UpsertProfileOKResponse";
 import { APIError } from "../types/error";
 import {
   extractUpsertProfileFromRequest,
-  profileWithEmailToAppProfile,
-  profileWithoutEmailToAppProfile,
-  toExtendedProfile, UpsertProfile
+  toAppProfileWithEmail,
+  toAppProfileWithoutEmail
 } from "../types/profile";
 import { extractUserFromRequest, User } from "../types/user";
-import * as winston from "winston";
 
 export default class ProfileController {
   private readonly apiClient: IApiClientFactoryInterface;
@@ -62,7 +63,7 @@ export default class ProfileController {
                       // retrieved from SPID.
                       res
                         .status(200)
-                        .json(profileWithoutEmailToAppProfile(user));
+                        .json(toAppProfileWithoutEmail(user));
                     } else {
                       forwardAPIError(maybeApiProfile, res);
                     }
@@ -70,7 +71,7 @@ export default class ProfileController {
                 },
                 // All correct, return the response to the client.
                 apiProfile => {
-                  res.json(profileWithEmailToAppProfile(apiProfile, user));
+                  res.json(toAppProfileWithEmail(apiProfile, user));
                 }
               );
             },
@@ -111,22 +112,22 @@ export default class ProfileController {
               message: error
             });
           },
-          (upsertProfile: UpsertProfile) => {
+          (upsertProfile: ExtendedProfile) => {
             this.apiClient
               .getClient(user.fiscal_code)
-              .upsertProfile({ body: toExtendedProfile(upsertProfile) })
+              .upsertProfile({ body: upsertProfile })
               .then(
                 maybeApiProfile => {
                   // Look if the response is a UpsertProfileOKResponse.
                   validateResponse(
                     maybeApiProfile,
-                    GetProfileOKResponse
+                    UpsertProfileOKResponse
                   ).fold(
                     // Look if the response is a ProblemJson.
                     () => validateProblemJson(maybeApiProfile, res),
                     // All correct, return the response to the client.
                     apiProfile => {
-                      res.json(profileWithEmailToAppProfile(apiProfile, user));
+                      res.json(toAppProfileWithEmail(apiProfile, user));
                     }
                   );
                 },
