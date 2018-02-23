@@ -22,7 +22,6 @@ import * as winston from "winston";
 import MessagesController from "./controllers/messagesController";
 import ServicesController from "./controllers/servicesController";
 import { User } from "./types/user";
-import { ISessionStorage } from "./services/iSessionStorage";
 
 dotenv.config();
 
