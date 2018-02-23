@@ -91,7 +91,7 @@ const withSpidAuth = (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
-) => any) => {
+) => void) => {
   return (
     req: express.Request,
     res: express.Response,

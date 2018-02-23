@@ -23,4 +23,6 @@ export const MessageResponseWithContent = strictInterfaceWithOptionals(
   "MessageResponseWithContent"
 );
 
-export type MessageResponseWithContent = t.TypeOf<typeof MessageResponseWithContent>;
+export type MessageResponseWithContent = t.TypeOf<
+  typeof MessageResponseWithContent
+>;

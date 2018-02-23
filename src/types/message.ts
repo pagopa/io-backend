@@ -35,13 +35,17 @@ export type Message = t.TypeOf<typeof Message>;
  * @param from
  * @returns {Message}
  */
-export function toAppMessageWithContent(from: MessageResponseWithContent): Message {
-   return {
-     id: from.message.id || "",
-     markdown: (from.message.content !== undefined) ? from.message.content.markdown : "",
-     sender_service_id: from.message.senderServiceId,
-     subject: (from.message.content !== undefined) ? from.message.content.subject : ""
-   };
+export function toAppMessageWithContent(
+  from: MessageResponseWithContent
+): Message {
+  return {
+    id: from.message.id || "",
+    markdown:
+      from.message.content !== undefined ? from.message.content.markdown : "",
+    sender_service_id: from.message.senderServiceId,
+    subject:
+      from.message.content !== undefined ? from.message.content.subject : ""
+  };
 }
 
 /**
@@ -50,7 +54,9 @@ export function toAppMessageWithContent(from: MessageResponseWithContent): Messa
  * @param from
  * @returns {Message}
  */
-export function toAppMessageWithoutContent(from: CreatedMessageWithoutContent): Message {
+export function toAppMessageWithoutContent(
+  from: CreatedMessageWithoutContent
+): Message {
   return {
     id: from.id || "",
     sender_service_id: from.senderServiceId

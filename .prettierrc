@@ -1,3 +1,2 @@
-{
-  "parser": "flow"
-}
+# .prettierrc
+parser: typescript

@@ -22,8 +22,8 @@
     "readonly-keyword": true,
     "readonly-array": true,
     "no-let": true,
-    "no-object-mutation": true,
-    "no-method-signature": true,
+//    "no-object-mutation": true,
+//    "no-method-signature": true,
 
     // tslint-immutable: Functional style rules
     // "no-this": true,
@@ -31,5 +31,10 @@
     "no-mixed-interface": false,
     "prettier": true
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "src/api/**/*.ts"
+    ]
+  }
 }

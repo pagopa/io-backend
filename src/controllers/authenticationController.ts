@@ -2,11 +2,15 @@
  *
  */
 
+// tslint:disable:no-any
+
 import * as express from "express";
 import { ISessionStorage } from "../services/iSessionStorage";
 import {
-  extractUserFromRequest, SpidUser,
-  toAppUser, User,
+  extractUserFromRequest,
+  SpidUser,
+  toAppUser,
+  User,
   validateSpidUser
 } from "../types/user";
 
@@ -16,12 +20,11 @@ import {
  * attributes sent from the IDP..
  */
 export default class AuthenticationController {
-
   constructor(
     public readonly sessionStorage: ISessionStorage,
     public readonly samlCert: string,
     public readonly spidStrategy: SpidStrategy
-  ) { }
+  ) {}
 
   /**
    * The Assertion consumer service.

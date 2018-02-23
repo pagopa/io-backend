@@ -27,4 +27,3 @@ export const GetProfileOKResponse = strictInterfaceWithOptionals(
 );
 
 export type GetProfileOKResponse = t.TypeOf<typeof GetProfileOKResponse>;
-

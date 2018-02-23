@@ -2,8 +2,8 @@
  *
  */
 
-import { User } from "../types/user";
 import { Either } from "fp-ts/lib/Either";
+import { User } from "../types/user";
 
 export interface ISessionStorage {
   /**
