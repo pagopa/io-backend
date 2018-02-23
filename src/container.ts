@@ -13,8 +13,6 @@ import MessagesController from "./controllers/messagesController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import ApiClientFactory from "./services/apiClientFactory";
-import pippo from "./services/pippo";
-import minnie from "./services/minnie";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
