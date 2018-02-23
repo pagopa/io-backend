@@ -2,11 +2,15 @@
  *
  */
 
+// tslint:disable:no-any
+
 import * as express from "express";
 import { ISessionStorage } from "../services/iSessionStorage";
 import {
-  extractUserFromRequest, SpidUser,
-  toAppUser, User,
+  extractUserFromRequest,
+  SpidUser,
+  toAppUser,
+  User,
   validateSpidUser
 } from "../types/user";
 
@@ -16,11 +20,15 @@ import {
  * attributes sent from the IDP..
  */
 export default class AuthenticationController {
-  public readonly sessionStorage: ISessionStorage;
-  public readonly samlCert: string;
-  public readonly spidStrategy: SpidStrategy;
+  private readonly sessionStorage: ISessionStorage;
+  private readonly samlCert: string;
+  private readonly spidStrategy: SpidStrategy;
 
-  constructor(sessionStorage: ISessionStorage, samlCert: string, spidStrategy: SpidStrategy) {
+  constructor(
+    sessionStorage: ISessionStorage,
+    samlCert: string,
+    spidStrategy: SpidStrategy
+  ) {
     this.sessionStorage = sessionStorage;
     this.samlCert = samlCert;
     this.spidStrategy = spidStrategy;

@@ -1,4 +1,4 @@
-import { Either, left } from "fp-ts/lib/Either";
+import * as e from "fp-ts/lib/Either";
 import * as redis from "redis";
 import { User } from "../types/user";
 import { extractUserFromJson } from "../types/user";
@@ -29,7 +29,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public get(token: string): Promise<Either<string, User>> {
+  public get(token: string): Promise<e.Either<string, User>> {
     const client = this.client;
 
     return new Promise(resolve => {
@@ -37,11 +37,12 @@ export default class RedisSessionStorage implements ISessionStorage {
       // @see https://redis.io/commands/get
       client.get(token, (err, value) => {
         if (err) {
-          resolve(left(err));
+          e.left(err.message);
+          resolve("pippo");
         } else {
           if (value === null || value === undefined) {
             resolve(
-              left(
+              e.left(
                 "There was an error extracting the user profile from the session."
               )
             );

@@ -12,12 +12,17 @@ const tokenStrategy = () => {
   return new passport.Strategy((token, done) => {
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
-    sessionStorage.get(token).then((maybeUser: Either<string, User>) => {
-      maybeUser.fold(
-        message => done(undefined, false, message),
-        user => done(undefined, user)
-      );
-    });
+    sessionStorage.get(token).then(
+      (maybeUser: Either<string, User>) => {
+        maybeUser.fold(
+          () => done(undefined, false),
+          user => done(undefined, user)
+        );
+      },
+      () => {
+        done(undefined, false);
+      }
+    );
   });
 };
 

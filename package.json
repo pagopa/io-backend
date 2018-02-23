@@ -11,6 +11,7 @@
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon src/server.js",
     "lint": "tslint -p . -c tslint.json -t verbose",
+    "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest --coverage",
     "start": "node src/server.js"

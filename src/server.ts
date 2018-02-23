@@ -5,7 +5,7 @@ import container, {
   AUTHENTICATION_CONTROLLER,
   MESSAGES_CONTROLLER,
   PROFILE_CONTROLLER,
-  SERVICES_CONTROLLER, SESSION_STORAGE,
+  SERVICES_CONTROLLER,
   SPID_STRATEGY,
   TOKEN_STRATEGY
 } from "./container";
@@ -22,7 +22,6 @@ import * as winston from "winston";
 import MessagesController from "./controllers/messagesController";
 import ServicesController from "./controllers/servicesController";
 import { User } from "./types/user";
-import { ISessionStorage } from "./services/iSessionStorage";
 
 dotenv.config();
 
@@ -92,7 +91,7 @@ const withSpidAuth = (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
-) => any) => {
+) => void) => {
   return (
     req: express.Request,
     res: express.Response,

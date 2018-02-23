@@ -3,7 +3,7 @@
  */
 
 interface IDetailedError {
-  readonly statusCode: number
+  readonly statusCode: number;
 }
 
 export type APIError = IDetailedError & Error;

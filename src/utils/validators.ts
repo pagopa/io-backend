@@ -2,16 +2,13 @@
  * Contains io-ts models for the API response types.
  */
 
+// tslint:disable:no-any
+
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import * as winston from "winston";
-import { strictInterfaceWithOptionals } from "../utils/types";
-import { EmailAddress } from "./api/EmailAddress";
-import { IsInboxEnabled } from "./api/IsInboxEnabled";
-import { PreferredLanguage } from "./api/PreferredLanguages";
-import { ProblemJson } from "./api/ProblemJson";
+import { ProblemJson } from "../types/api/ProblemJson";
 
 /**
  * Validates on object against the ProblemJsonModel data type. On success

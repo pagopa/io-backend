@@ -6,11 +6,6 @@
 import * as express from "express";
 import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
-import {
-  forwardAPIError,
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
 import { ExtendedProfile } from "../types/api_client/ExtendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
 import { UpsertProfileOKResponse } from "../types/api_client/UpsertProfileOKResponse";
@@ -21,6 +16,11 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { extractUserFromRequest, User } from "../types/user";
+import {
+  forwardAPIError,
+  validateProblemJson,
+  validateResponse
+} from "../utils/validators";
 
 export default class ProfileController {
   private readonly apiClient: IApiClientFactoryInterface;
@@ -36,7 +36,7 @@ export default class ProfileController {
    * @param req
    * @param res
    */
-  public getUserProfile(req: express.Request, res: express.Response):void {
+  public getUserProfile(req: express.Request, res: express.Response): void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -61,9 +61,7 @@ export default class ProfileController {
                       // If the profile doesn't exists on the API we still
                       // return 200 to the App with the information we have
                       // retrieved from SPID.
-                      res
-                        .status(200)
-                        .json(toAppProfileWithoutEmail(user));
+                      res.status(200).json(toAppProfileWithoutEmail(user));
                     } else {
                       forwardAPIError(maybeApiProfile, res);
                     }
@@ -80,7 +78,11 @@ export default class ProfileController {
                 // Here usually we have connection or transmission errors.
                 message: "The API call returns an error"
               });
-              winston.log("info", "error occurred in API call: %s", err.message);
+              winston.log(
+                "info",
+                "error occurred in API call: %s",
+                err.message
+              );
             }
           );
       }
@@ -94,7 +96,7 @@ export default class ProfileController {
    * @param req
    * @param res
    */
-  public upsertProfile(req: express.Request, res: express.Response):void {
+  public upsertProfile(req: express.Request, res: express.Response): void {
     const maybeUser = extractUserFromRequest(req);
 
     maybeUser.fold(
@@ -136,7 +138,11 @@ export default class ProfileController {
                     // Here usually we have connection or transmission errors.
                     message: "The API call returns an error"
                   });
-                  winston.log("info", "error occurred in API call: %s", err.message);
+                  winston.log(
+                    "info",
+                    "error occurred in API call: %s",
+                    err.message
+                  );
                 }
               );
           }

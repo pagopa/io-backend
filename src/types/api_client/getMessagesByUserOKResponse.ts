@@ -23,4 +23,6 @@ export const GetMessagesByUserOKResponse = strictInterfaceWithOptionals(
   "GetProfileOKResponse"
 );
 
-export type GetMessagesByUserOKResponse = t.TypeOf<typeof GetMessagesByUserOKResponse>;
+export type GetMessagesByUserOKResponse = t.TypeOf<
+  typeof GetMessagesByUserOKResponse
+>;

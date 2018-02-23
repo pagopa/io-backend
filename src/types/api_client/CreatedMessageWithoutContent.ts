@@ -24,5 +24,6 @@ export const CreatedMessageWithoutContent = strictInterfaceWithOptionals(
   "CreatedMessageWithoutContent"
 );
 
-export type CreatedMessageWithoutContent = t.TypeOf<typeof CreatedMessageWithoutContent>;
-
+export type CreatedMessageWithoutContent = t.TypeOf<
+  typeof CreatedMessageWithoutContent
+>;

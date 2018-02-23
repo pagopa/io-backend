@@ -2,6 +2,8 @@
  *
  */
 
+// tslint:disable:no-any
+
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
 import * as t from "io-ts";

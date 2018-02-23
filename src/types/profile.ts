@@ -101,9 +101,7 @@ export function toAppProfileWithEmail(
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function toAppProfileWithoutEmail(
-  user: User
-): ProfileWithoutEmail {
+export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
   return {
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,

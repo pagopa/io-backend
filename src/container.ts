@@ -75,6 +75,11 @@ container.register({
   tokenDuration: awilix.asValue(tokenDurationInSeconds)
 });
 
+container.register({
+  apiKey: awilix.asValue(process.env.API_KEY),
+  apiUrl: awilix.asValue(process.env.API_URL)
+});
+
 // Register the spidStrategy.
 export const SPID_STRATEGY = "spidStrategy";
 container.register({

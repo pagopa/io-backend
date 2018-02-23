@@ -27,4 +27,3 @@ export const ExtendedProfile = strictInterfaceWithOptionals(
 );
 
 export type ExtendedProfile = t.TypeOf<typeof ExtendedProfile>;
-
