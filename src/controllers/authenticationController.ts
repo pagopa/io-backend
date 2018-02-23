@@ -21,9 +21,9 @@ import {
  */
 export default class AuthenticationController {
   constructor(
-    public readonly sessionStorage: ISessionStorage,
-    public readonly samlCert: string,
-    public readonly spidStrategy: SpidStrategy
+    private readonly sessionStorage: ISessionStorage,
+    private readonly samlCert: string,
+    private readonly spidStrategy: SpidStrategy
   ) {}
 
   /**
@@ -75,7 +75,6 @@ export default class AuthenticationController {
         this.sessionStorage.del(user.token);
 
         // Logout from SPID.
-        req.query
         req.query = {};
         req.query.entityID = user.spid_idp;
 

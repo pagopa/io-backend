@@ -8,13 +8,10 @@ import { ISessionStorage } from "./iSessionStorage";
  * This service uses the Redis client to store and retrieve session information.
  */
 export default class RedisSessionStorage implements ISessionStorage {
-  private readonly client: redis.RedisClient;
-
-  // TODO: pass RedisClient object to constructor and use property
-  //       initialization like tokenDuration to avoid property mutation
-  constructor(redisUrl: string, private readonly tokenDuration: number) {
-    this.client = redis.createClient(redisUrl);
-  }
+  constructor(
+    private readonly redisClient: redis.RedisClient,
+    private readonly tokenDuration: number
+  ) {}
 
   /**
    * {@inheritDoc}
@@ -23,14 +20,14 @@ export default class RedisSessionStorage implements ISessionStorage {
     // Set key to hold the string value. This data is set to expire (EX) after
     // `this.tokenDuration` seconds.
     // @see https://redis.io/commands/set
-    this.client.set(token, JSON.stringify(user), "EX", this.tokenDuration);
+    this.redisClient.set(token, JSON.stringify(user), "EX", this.tokenDuration);
   }
 
   /**
    * {@inheritDoc}
    */
   public get(token: string): Promise<Either<string, User>> {
-    const client = this.client;
+    const client = this.redisClient;
 
     return new Promise(resolve => {
       // Get the value of key.
@@ -40,11 +37,7 @@ export default class RedisSessionStorage implements ISessionStorage {
           resolve(left<string, User>(err.message));
         } else {
           if (value === null || value === undefined) {
-            resolve(
-              left<string, User>(
-                "There was an error extracting the user profile from the session."
-              )
-            );
+            resolve(left<string, User>("Session not found"));
           } else {
             const maybeUser = extractUserFromJson(value);
 
@@ -66,6 +59,6 @@ export default class RedisSessionStorage implements ISessionStorage {
   public del(token: string): void {
     // Removes the specified keys. A key is ignored if it does not exist.
     // @see https://redis.io/commands/hdel
-    this.client.hdel("sessions", token);
+    this.redisClient.hdel("sessions", token);
   }
 }

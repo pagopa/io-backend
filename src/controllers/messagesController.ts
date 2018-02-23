@@ -20,11 +20,7 @@ import { validateProblemJson, validateResponse } from "../utils/validators";
  * forwarding the call to the API system.
  */
 export default class MessagesController {
-  private readonly apiClient: IApiClientFactoryInterface;
-
-  constructor(apiClient: IApiClientFactoryInterface) {
-    this.apiClient = apiClient;
-  }
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
    * Returns the messages for the user identified by the provided fiscal

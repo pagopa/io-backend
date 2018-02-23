@@ -16,11 +16,7 @@ import { validateProblemJson, validateResponse } from "../utils/validators";
  * forwarding the call to the API system.
  */
 export default class ServicesController {
-  private readonly apiClient: IApiClientFactoryInterface;
-
-  constructor(apiClient: IApiClientFactoryInterface) {
-    this.apiClient = apiClient;
-  }
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
    * Returns the service identified by the provided id

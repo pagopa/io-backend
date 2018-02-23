@@ -7,6 +7,7 @@
 import * as awilix from "awilix";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
+import * as redis from "redis";
 import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -71,7 +72,6 @@ winston.log(
   tokenDurationInSeconds
 );
 container.register({
-  redisUrl: awilix.asValue(process.env.REDIS_URL),
   tokenDuration: awilix.asValue(tokenDurationInSeconds)
 });
 
@@ -93,6 +93,15 @@ container.register({
 });
 
 // Register a session storage service backed by Redis.
+container.register({
+  redisClient: awilix.asClass(redis.RedisClient)
+});
+container.register(
+  "redisClient",
+  awilix.asFunction(() => {
+    return redis.createClient(process.env.REDIS_URL || "redis://redis");
+  })
+);
 export const SESSION_STORAGE = "sessionStorage";
 container.register({
   [SESSION_STORAGE]: awilix.asClass(RedisSessionStorage)

@@ -23,11 +23,7 @@ import {
 } from "../utils/validators";
 
 export default class ProfileController {
-  private readonly apiClient: IApiClientFactoryInterface;
-
-  constructor(apiClient: IApiClientFactoryInterface) {
-    this.apiClient = apiClient;
-  }
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
    * Returns the profile for the user identified by the provided fiscal

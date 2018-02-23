@@ -13,18 +13,11 @@ import { IApiClientFactoryInterface } from "./iApiClientFactory";
  * @see ../api/digitalCitizenshipAPI
  */
 export default class ApiClientFactory implements IApiClientFactoryInterface {
-  private readonly apiKey: string;
-  private readonly apiUrl: string;
-
-  constructor(apiKey: string, apiUrl: string) {
-    this.apiKey = apiKey;
-    this.apiUrl = apiUrl;
-  }
+  constructor(public readonly apiKey: string, public readonly apiUrl: string) {}
 
   /**
    * {@inheritDoc}
    */
-  // TODO: environment must be read only from topmost code (i.e. server.js)
   public getClient(fiscalCode: string): DigitalCitizenshipAPI {
     const apiCredentials = new APICredentials(this.apiKey);
     return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, this.apiUrl);
