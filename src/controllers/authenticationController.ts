@@ -16,15 +16,12 @@ import {
  * attributes sent from the IDP..
  */
 export default class AuthenticationController {
-  public readonly sessionStorage: ISessionStorage;
-  public readonly samlCert: string;
-  public readonly spidStrategy: SpidStrategy;
 
-  constructor(sessionStorage: ISessionStorage, samlCert: string, spidStrategy: SpidStrategy) {
-    this.sessionStorage = sessionStorage;
-    this.samlCert = samlCert;
-    this.spidStrategy = spidStrategy;
-  }
+  constructor(
+    public readonly sessionStorage: ISessionStorage,
+    public readonly samlCert: string,
+    public readonly spidStrategy: SpidStrategy
+  ) { }
 
   /**
    * The Assertion consumer service.
@@ -75,6 +72,7 @@ export default class AuthenticationController {
         this.sessionStorage.del(user.token);
 
         // Logout from SPID.
+        req.query
         req.query = {};
         req.query.entityID = user.spid_idp;
 
