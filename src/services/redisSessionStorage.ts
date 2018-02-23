@@ -9,11 +9,11 @@ import { ISessionStorage } from "./iSessionStorage";
  */
 export default class RedisSessionStorage implements ISessionStorage {
   private readonly client: redis.RedisClient;
-  private readonly tokenDuration: number;
 
-  constructor(redisUrl: string, tokenDuration: number) {
+  // TODO: pass RedisClient object to constructor and use property
+  //       initialization like tokenDuration to avoid property mutation
+  constructor(redisUrl: string, private readonly tokenDuration: number) {
     this.client = redis.createClient(redisUrl);
-    this.tokenDuration = tokenDuration;
   }
 
   /**
@@ -37,11 +37,11 @@ export default class RedisSessionStorage implements ISessionStorage {
       // @see https://redis.io/commands/get
       client.get(token, (err, value) => {
         if (err) {
-          resolve(left(err));
+          resolve(left<string, User>(err.message));
         } else {
           if (value === null || value === undefined) {
             resolve(
-              left(
+              left<string, User>(
                 "There was an error extracting the user profile from the session."
               )
             );
