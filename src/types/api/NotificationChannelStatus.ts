@@ -23,8 +23,8 @@ import * as t from "io-ts";
 
 export type NotificationChannelStatus = t.TypeOf<
   typeof NotificationChannelStatus
-  >;
+>;
 
 export const NotificationChannelStatus = enumType<
   NotificationChannelStatusEnum
-  >(NotificationChannelStatusEnum, "NotificationChannelStatus");
+>(NotificationChannelStatusEnum, "NotificationChannelStatus");

@@ -8,13 +8,14 @@ import { strictInterfaceWithOptionals } from "../../utils/types";
 import { FiscalCode } from "../api/FiscalCode";
 
 // required attributes
-const CreatedMessageWithoutContentR = t.interface({});
+const CreatedMessageWithoutContentR = t.interface({
+  fiscalCode: FiscalCode,
+  senderServiceId: string
+});
 
 // optional attributes
 const CreatedMessageWithoutContentO = t.partial({
-  fiscalCode: FiscalCode,
   id: string,
-  senderServiceId: string,
   timeToLive: number
 });
 
@@ -24,5 +25,6 @@ export const CreatedMessageWithoutContent = strictInterfaceWithOptionals(
   "CreatedMessageWithoutContent"
 );
 
-export type CreatedMessageWithoutContent = t.TypeOf<typeof CreatedMessageWithoutContent>;
-
+export type CreatedMessageWithoutContent = t.TypeOf<
+  typeof CreatedMessageWithoutContent
+>;

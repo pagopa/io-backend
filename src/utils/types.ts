@@ -84,14 +84,14 @@ export function withoutUndefinedValues<T, K extends keyof T>(obj: T): T {
       const value = obj[key as K];
       return value !== undefined
         ? {
-          // see https://github.com/Microsoft/TypeScript/pull/13288
-          // tslint:disable-next-line:no-any
-          ...(acc as any),
-          // tslint:disable-next-line:no-any
-          [key]: isObject(value as any)
-            ? withoutUndefinedValues(value)
-            : value
-        }
+            // see https://github.com/Microsoft/TypeScript/pull/13288
+            // tslint:disable-next-line:no-any
+            ...(acc as any),
+            // tslint:disable-next-line:no-any
+            [key]: isObject(value as any)
+              ? withoutUndefinedValues(value)
+              : value
+          }
         : acc;
     },
     {} as T
@@ -110,14 +110,14 @@ export function withoutUndefinedValues<T, K extends keyof T>(obj: T): T {
 export function strictInterfaceWithOptionals<
   R extends t.Props,
   O extends t.Props
-  >(
+>(
   required: R,
   optional: O,
   name: string
 ): t.Type<
   t.TypeOfProps<R> & t.TypeOfPartialProps<O>,
   t.OutputOfProps<R> & t.OutputOfPartialProps<O>
-  > {
+> {
   const loose = t.intersection([t.interface(required), t.partial(optional)]);
   const props = Object.assign({}, required, optional);
   return new t.Type(

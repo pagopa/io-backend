@@ -5,25 +5,18 @@
 import * as express from "express";
 import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
-import {
-  validateProblemJson,
-  validateResponse
-} from "../types/api";
-import { ServicePublic } from "../types/api_client/ServicePublic";
+import { ServicePublic } from "../types/api_client/servicePublic";
 import { APIError } from "../types/error";
 import { toAppService } from "../types/service";
 import { extractUserFromRequest, User } from "../types/user";
+import { validateProblemJson, validateResponse } from "../utils/validators";
 
 /**
  * This controller handles reading messages from the app by
  * forwarding the call to the API system.
  */
 export default class ServicesController {
-  private readonly apiClient: IApiClientFactoryInterface;
-
-  constructor(apiClient: IApiClientFactoryInterface) {
-    this.apiClient = apiClient;
-  }
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
    * Returns the service identified by the provided id
@@ -58,12 +51,16 @@ export default class ServicesController {
                 }
               );
             },
-            (err:APIError) => {
+            (err: APIError) => {
               res.status(500).json({
                 // Here usually we have connection or transmission errors.
                 message: "The API call returns an error"
               });
-              winston.log("info", "error occurred in API call: %s", err.message);
+              winston.log(
+                "info",
+                "error occurred in API call: %s",
+                err.message
+              );
             }
           );
       }

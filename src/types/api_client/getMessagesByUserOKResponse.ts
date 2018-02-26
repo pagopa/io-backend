@@ -5,7 +5,7 @@
 import * as t from "io-ts";
 import { number, readonlyArray, string } from "io-ts";
 import { strictInterfaceWithOptionals } from "../../utils/types";
-import { CreatedMessageWithoutContent } from "./CreatedMessageWithoutContent";
+import { CreatedMessageWithoutContent } from "./createdMessageWithoutContent";
 
 // required attributes
 const GetMessagesByUserOKResponseR = t.interface({});
@@ -23,4 +23,6 @@ export const GetMessagesByUserOKResponse = strictInterfaceWithOptionals(
   "GetProfileOKResponse"
 );
 
-export type GetMessagesByUserOKResponse = t.TypeOf<typeof GetMessagesByUserOKResponse>;
+export type GetMessagesByUserOKResponse = t.TypeOf<
+  typeof GetMessagesByUserOKResponse
+>;

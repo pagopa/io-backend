@@ -38,7 +38,7 @@ export const WithinRangeString = <
   L extends number,
   H extends number,
   T extends IWithinRangeStringTag<L, H>
-  >(
+>(
   l: L,
   h: H
   // tslint:disable-next-line:no-any

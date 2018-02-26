@@ -13,11 +13,13 @@ import { IApiClientFactoryInterface } from "./iApiClientFactory";
  * @see ../api/digitalCitizenshipAPI
  */
 export default class ApiClientFactory implements IApiClientFactoryInterface {
+  constructor(public readonly apiKey: string, public readonly apiUrl: string) {}
+
   /**
    * {@inheritDoc}
    */
   public getClient(fiscalCode: string): DigitalCitizenshipAPI {
-    const apiCredentials = new APICredentials(process.env.API_KEY);
-    return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, process.env.API_URL);
+    const apiCredentials = new APICredentials(this.apiKey);
+    return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, this.apiUrl);
   }
 }

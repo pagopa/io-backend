@@ -6,17 +6,17 @@ import * as t from "io-ts";
 
 import { string } from "io-ts";
 import { strictInterfaceWithOptionals } from "../utils/types";
-import { CreatedMessageWithoutContent } from "./api_client/CreatedMessageWithoutContent";
-import { MessageResponseWithContent } from "./api_client/MessageResponseWithContent";
+import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithoutContent";
+import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
 
 // required attributes
 const MessageR = t.interface({
-  id: string,
   sender_service_id: string
 });
 
 // optional attributes
 const MessageO = t.partial({
+  id: string,
   markdown: string,
   subject: string
 });
@@ -35,13 +35,17 @@ export type Message = t.TypeOf<typeof Message>;
  * @param from
  * @returns {Message}
  */
-export function toAppMessageWithContent(from: MessageResponseWithContent): Message {
-   return {
-     id: from.message.id || "",
-     markdown: (from.message.content !== undefined) ? from.message.content.markdown : "",
-     sender_service_id: from.message.senderServiceId,
-     subject: (from.message.content !== undefined) ? from.message.content.subject : ""
-   };
+export function toAppMessageWithContent(
+  from: MessageResponseWithContent
+): Message {
+  return {
+    id: from.message.id || "",
+    markdown:
+      from.message.content !== undefined ? from.message.content.markdown : "",
+    sender_service_id: from.message.senderServiceId,
+    subject:
+      from.message.content !== undefined ? from.message.content.subject : ""
+  };
 }
 
 /**
@@ -50,9 +54,11 @@ export function toAppMessageWithContent(from: MessageResponseWithContent): Messa
  * @param from
  * @returns {Message}
  */
-export function toAppMessageWithoutContent(from: CreatedMessageWithoutContent): Message {
+export function toAppMessageWithoutContent(
+  from: CreatedMessageWithoutContent
+): Message {
   return {
-    id: from.id || "",
+    id: from.id,
     sender_service_id: from.senderServiceId
   };
 }

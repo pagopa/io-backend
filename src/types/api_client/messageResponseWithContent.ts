@@ -5,7 +5,7 @@
 import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "../../utils/types";
 import { NotificationStatus } from "../api/NotificationStatus";
-import { CreatedMessageWithContent } from "./CreatedMessageWithContent";
+import { CreatedMessageWithContent } from "./createdMessageWithContent";
 
 // required attributes
 const MessageResponseWithContentR = t.interface({
@@ -23,4 +23,6 @@ export const MessageResponseWithContent = strictInterfaceWithOptionals(
   "MessageResponseWithContent"
 );
 
-export type MessageResponseWithContent = t.TypeOf<typeof MessageResponseWithContent>;
+export type MessageResponseWithContent = t.TypeOf<
+  typeof MessageResponseWithContent
+>;

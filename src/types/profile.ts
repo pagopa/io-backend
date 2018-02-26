@@ -13,7 +13,7 @@ import { strictInterfaceWithOptionals } from "../utils/types";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { PreferredLanguage } from "./api/PreferredLanguages";
-import { ExtendedProfile } from "./api_client/ExtendedProfile";
+import { ExtendedProfile } from "./api_client/extendedProfile";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
 // required attributes
@@ -23,15 +23,15 @@ const ProfileWithEmailR = t.interface({
   has_profile: boolean,
   is_email_set: boolean,
   name: string,
-  preferred_email: EmailAddress,
-  version: NonNegativeNumber
+  preferred_email: EmailAddress
 });
 
 // optional attributes
 const ProfileWithEmailO = t.partial({
   email: EmailAddress,
   is_inbox_enabled: boolean,
-  preferred_languages: PreferredLanguage
+  preferred_languages: PreferredLanguage,
+  version: NonNegativeNumber
 });
 
 export const ProfileWithEmail = strictInterfaceWithOptionals(
@@ -49,14 +49,14 @@ const ProfileWithoutEmailR = t.interface({
   has_profile: boolean,
   is_email_set: boolean,
   name: string,
-  preferred_email: EmailAddress,
-  version: NonNegativeNumber
+  preferred_email: EmailAddress
 });
 
 // optional attributes
 const ProfileWithoutEmailO = t.partial({
   is_inbox_enabled: boolean,
-  preferred_languages: PreferredLanguage
+  preferred_languages: PreferredLanguage,
+  version: NonNegativeNumber
 });
 
 export const ProfileWithoutEmail = strictInterfaceWithOptionals(
@@ -101,9 +101,7 @@ export function toAppProfileWithEmail(
  *   User data extracted from SPID.
  * @returns {Profile}
  */
-export function toAppProfileWithoutEmail(
-  user: User
-): ProfileWithoutEmail {
+export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
   return {
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
@@ -111,7 +109,7 @@ export function toAppProfileWithoutEmail(
     is_email_set: false,
     name: user.name,
     preferred_email: user.preferred_email,
-    version: 0
+    version: 0 as NonNegativeNumber
   };
 }
 

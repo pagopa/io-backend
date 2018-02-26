@@ -3,19 +3,21 @@
  */
 
 import * as t from "io-ts";
-import { number, string } from "io-ts";
+import { string } from "io-ts";
+import { NonNegativeNumber } from "../../utils/numbers";
 import { strictInterfaceWithOptionals } from "../../utils/types";
 
 // required attributes
-const ServicePublicR = t.interface({});
-
-// optional attributes
-const ServicePublicO = t.partial({
+const ServicePublicR = t.interface({
   departmentName: string,
   organizationName: string,
   serviceId: string,
-  serviceName: string,
-  version: number
+  serviceName: string
+});
+
+// optional attributes
+const ServicePublicO = t.partial({
+  version: NonNegativeNumber
 });
 
 export const ServicePublic = strictInterfaceWithOptionals(

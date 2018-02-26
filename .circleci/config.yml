@@ -27,5 +27,5 @@ jobs:
           key: v1-dependencies-{{ checksum "yarn.lock" }}
 
       # Run tests
-      - run: yarn test
+      - run: yarn build
       - run: 'bash <(curl -s https://codecov.io/bash)'

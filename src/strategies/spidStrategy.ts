@@ -4,6 +4,7 @@
  */
 
 import * as SpidStrategy from "spid-passport";
+import { SpidUser } from "../types/user";
 
 const spidStrategy = (
   samlKey: string,
@@ -83,7 +84,12 @@ const spidStrategy = (
         privateCert: samlKey
       }
     },
-    (profile, done) => done(undefined, profile)
+    (
+      profile: SpidUser,
+      done: (err: Error | undefined, info: SpidUser) => void
+    ) => {
+      done(undefined, profile);
+    }
   );
 };
 

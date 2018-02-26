@@ -11,6 +11,7 @@
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon src/server.js",
     "lint": "tslint -p . -c tslint.json -t verbose",
+    "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest --coverage",
     "start": "node src/server.js"
@@ -71,15 +72,15 @@
   "jest": {
     "testEnvironment": "node",
     "moduleFileExtensions": [
+      "ts",
       "js"
     ],
     "transform": {
-      "^.+.js$": "<rootDir>/node_modules/babel-jest"
+      "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testMatch": [
-      "**/__tests__/*.js"
+      "**/__tests__/*.ts"
     ],
-    "mapCoverage": true,
     "coverageDirectory": "./coverage/",
     "collectCoverage": true
   }

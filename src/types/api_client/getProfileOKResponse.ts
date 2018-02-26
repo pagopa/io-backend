@@ -3,7 +3,7 @@
  */
 
 import * as t from "io-ts";
-import { number } from "io-ts";
+import { NonNegativeNumber } from "../../utils/numbers";
 import { strictInterfaceWithOptionals } from "../../utils/types";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
@@ -17,7 +17,7 @@ const GetProfileOKResponseO = t.partial({
   email: EmailAddress,
   isInboxEnabled: IsInboxEnabled,
   preferredLanguages: PreferredLanguage,
-  version: number
+  version: NonNegativeNumber
 });
 
 export const GetProfileOKResponse = strictInterfaceWithOptionals(
@@ -27,4 +27,3 @@ export const GetProfileOKResponse = strictInterfaceWithOptionals(
 );
 
 export type GetProfileOKResponse = t.TypeOf<typeof GetProfileOKResponse>;
-

@@ -7,7 +7,6 @@
 import { ServiceClientOptions } from "ms-rest-js";
 import { RequestOptionsBase } from "ms-rest-js";
 
-
 /**
  * @interface
  * An interface representing ProblemJson.
@@ -393,7 +392,8 @@ export interface DigitalCitizenshipAPIOptions extends ServiceClientOptions {
  *
  * @extends RequestOptionsBase
  */
-export interface DigitalCitizenshipAPISubmitMessageforUserOptionalParams extends RequestOptionsBase {
+export interface DigitalCitizenshipAPISubmitMessageforUserOptionalParams
+  extends RequestOptionsBase {
   /**
    * @member {NewMessage} [message]
    */
@@ -407,7 +407,8 @@ export interface DigitalCitizenshipAPISubmitMessageforUserOptionalParams extends
  *
  * @extends RequestOptionsBase
  */
-export interface DigitalCitizenshipAPIUpsertProfileOptionalParams extends RequestOptionsBase {
+export interface DigitalCitizenshipAPIUpsertProfileOptionalParams
+  extends RequestOptionsBase {
   /**
    * @member {ExtendedProfile} [body]
    */

@@ -9,14 +9,15 @@ import { FiscalCode } from "../api/FiscalCode";
 import { MessageContent } from "../api/MessageContent";
 
 // required attributes
-const CreatedMessageWithContentR = t.interface({});
+const CreatedMessageWithContentR = t.interface({
+  fiscalCode: FiscalCode,
+  senderServiceId: string
+});
 
 // optional attributes
 const CreatedMessageWithContentO = t.partial({
   content: MessageContent,
-  fiscalCode: FiscalCode,
   id: string,
-  senderServiceId: string,
   timeToLive: number
 });
 
@@ -26,4 +27,6 @@ export const CreatedMessageWithContent = strictInterfaceWithOptionals(
   "CreatedMessageWithContent"
 );
 
-export type CreatedMessageWithContent = t.TypeOf<typeof CreatedMessageWithContent>;
+export type CreatedMessageWithContent = t.TypeOf<
+  typeof CreatedMessageWithContent
+>;
