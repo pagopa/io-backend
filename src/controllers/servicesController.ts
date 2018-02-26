@@ -5,7 +5,7 @@
 import * as express from "express";
 import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
-import { ServicePublic } from "../types/api_client/ServicePublic";
+import { ServicePublic } from "../types/api_client/servicePublic";
 import { APIError } from "../types/error";
 import { toAppService } from "../types/service";
 import { extractUserFromRequest, User } from "../types/user";

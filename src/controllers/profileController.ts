@@ -6,9 +6,9 @@
 import * as express from "express";
 import * as winston from "winston";
 import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
-import { ExtendedProfile } from "../types/api_client/ExtendedProfile";
+import { ExtendedProfile } from "../types/api_client/extendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
-import { UpsertProfileOKResponse } from "../types/api_client/UpsertProfileOKResponse";
+import { UpsertProfileOKResponse } from "../types/api_client/upsertProfileOKResponse";
 import { APIError } from "../types/error";
 import {
   extractUpsertProfileFromRequest,

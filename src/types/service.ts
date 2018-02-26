@@ -5,6 +5,7 @@
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import { ServicePublic } from "../api/models";
+import { NonNegativeNumber } from "../utils/numbers";
 
 // required attributes
 export const Service = t.interface({
@@ -33,6 +34,6 @@ export function toAppService(from: ServicePublic): Service {
     organizationName: from.organizationName,
     serviceId: from.serviceId,
     serviceName: from.serviceName,
-    version: from.version || 0
+    version: from.version as NonNegativeNumber
   };
 }

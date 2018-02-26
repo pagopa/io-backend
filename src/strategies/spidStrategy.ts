@@ -83,7 +83,9 @@ const spidStrategy = (
         privateCert: samlKey
       }
     },
-    (profile, done) => done(undefined, profile)
+    // tslint:disable-next-line:no-any
+    (profile: any, done: (err: any, info: any) => void) =>
+      done(undefined, profile)
   );
 };
 

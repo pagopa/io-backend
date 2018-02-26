@@ -6,17 +6,17 @@ import * as t from "io-ts";
 
 import { string } from "io-ts";
 import { strictInterfaceWithOptionals } from "../utils/types";
-import { CreatedMessageWithoutContent } from "./api_client/CreatedMessageWithoutContent";
-import { MessageResponseWithContent } from "./api_client/MessageResponseWithContent";
+import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithoutContent";
+import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
 
 // required attributes
 const MessageR = t.interface({
-  id: string,
   sender_service_id: string
 });
 
 // optional attributes
 const MessageO = t.partial({
+  id: string,
   markdown: string,
   subject: string
 });
@@ -58,7 +58,7 @@ export function toAppMessageWithoutContent(
   from: CreatedMessageWithoutContent
 ): Message {
   return {
-    id: from.id || "",
+    id: from.id,
     sender_service_id: from.senderServiceId
   };
 }
