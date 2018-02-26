@@ -90,7 +90,7 @@ export function toAppProfileWithEmail(
     name: user.name,
     preferred_email: user.preferred_email,
     preferred_languages: from.preferredLanguages,
-    version: from.version as NonNegativeNumber
+    version: from.version
   };
 }
 

@@ -3,18 +3,29 @@
  */
 
 import * as t from "io-ts";
-import { number, string } from "io-ts";
-import { ServicePublic } from "../api/models";
+import { string } from "io-ts";
 import { NonNegativeNumber } from "../utils/numbers";
+import { strictInterfaceWithOptionals } from "../utils/types";
+import { ServicePublic } from "./api_client/servicePublic";
 
 // required attributes
-export const Service = t.interface({
+export const ServiceR = t.interface({
   departmentName: string,
   organizationName: string,
   serviceId: string,
-  serviceName: string,
-  version: number
+  serviceName: string
 });
+
+// optional attributes
+const ServiceO = t.partial({
+  version: NonNegativeNumber
+});
+
+export const Service = strictInterfaceWithOptionals(
+  ServiceR.props,
+  ServiceO.props,
+  "Service"
+);
 
 export type Service = t.TypeOf<typeof Service>;
 
@@ -34,6 +45,6 @@ export function toAppService(from: ServicePublic): Service {
     organizationName: from.organizationName,
     serviceId: from.serviceId,
     serviceName: from.serviceName,
-    version: from.version as NonNegativeNumber
+    version: from.version
   };
 }

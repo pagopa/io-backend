@@ -2,14 +2,13 @@
  *
  */
 
-// tslint:disable:no-any
-
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { any, number, string } from "io-ts";
+import { number, string } from "io-ts";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
+import { Issuer } from "./issuer";
 
 // required attributes
 export const User = t.interface({
@@ -32,7 +31,7 @@ export const SpidUser = t.interface({
   email: EmailAddress,
   familyName: string,
   fiscalNumber: FiscalCode,
-  issuer: any,
+  issuer: Issuer,
   name: string,
   nameID: string,
   nameIDFormat: string,
@@ -71,6 +70,7 @@ export function toAppUser(from: SpidUser): User {
  * @param value
  * @returns {Either<String, SpidUser>}
  */
+// tslint:disable-next-line:no-any
 export function validateSpidUser(value: any): Either<string, SpidUser> {
   const result = SpidUser.decode(value);
 
