@@ -13,7 +13,7 @@
     "lint": "tslint -p . -c tslint.json -t verbose",
     "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
     "prettify": "prettier --write './**/*.ts'",
-    "test": "jest --coverage",
+    "test": "jest",
     "start": "node src/server.js"
   },
   "repository": {
