@@ -28,5 +28,4 @@ jobs:
 
       # Run tests
       - run: yarn build
-      - run: yarn test
       - run: 'bash <(curl -s https://codecov.io/bash)'
