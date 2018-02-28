@@ -20,18 +20,18 @@ export default class ProfileController {
    * @param res
    */
   public getProfile(req: express.Request, res: express.Response): void {
-    const maybeUser = extractUserFromRequest(req);
+    const errorOrUser = extractUserFromRequest(req);
 
-    if (isLeft(maybeUser)) {
+    if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
-      const error = maybeUser.value;
+      const error = errorOrUser.value;
       res.status(500).json({
-        message: error
+        message: error.message
       });
       return;
     }
 
-    const user = maybeUser.value;
+    const user = errorOrUser.value;
     this.profileService
       .getProfile(user)
       .then(data => {
@@ -52,30 +52,32 @@ export default class ProfileController {
    * @param res
    */
   public upsertProfile(req: express.Request, res: express.Response): void {
-    const maybeUser = extractUserFromRequest(req);
+    const errorOrUser = extractUserFromRequest(req);
 
-    if (isLeft(maybeUser)) {
+    if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
-      const error = maybeUser.value;
+      const error = errorOrUser.value;
       res.status(500).json({
-        message: error
+        message: error.message
       });
       return;
     }
 
-    const maybeUpsertProfile = extractUpsertProfileFromRequest(req);
+    const errorOrUpsertProfile = extractUpsertProfileFromRequest(req);
 
-    if (isLeft(maybeUpsertProfile)) {
+    if (isLeft(errorOrUpsertProfile)) {
       // Unable to extract the upsert profile from the request.
-      const error = maybeUser.value;
+      const error = errorOrUpsertProfile.value;
       res.status(500).json({
-        message: error
+        message: error.message
       });
       return;
     }
 
+    const user = errorOrUser.value;
+    const upsertProfile = errorOrUpsertProfile.value;
     this.profileService
-      .upsertProfile(maybeUser.value, maybeUpsertProfile.value)
+      .upsertProfile(user, upsertProfile)
       .then(data => {
         res.json(data);
       })

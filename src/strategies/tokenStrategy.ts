@@ -13,8 +13,8 @@ const tokenStrategy = () => {
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
     sessionStorage.get(token).then(
-      (maybeUser: Either<string, User>) => {
-        maybeUser.fold(
+      (errorOrUser: Either<Error, User>) => {
+        errorOrUser.fold(
           () => done(undefined, false),
           user => done(undefined, user)
         );

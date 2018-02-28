@@ -121,10 +121,10 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
  */
 export function extractUpsertProfileFromRequest(
   from: express.Request
-): Either<string, ExtendedProfile> {
+): Either<Error, ExtendedProfile> {
   const result = ExtendedProfile.decode(from.body);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to extract the upsert profile");
   });
 }

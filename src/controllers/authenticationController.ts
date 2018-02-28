@@ -33,12 +33,12 @@ export default class AuthenticationController {
    * @param res
    */
   public acs(userPayload: any, res: express.Response): void {
-    const maybeUser = validateSpidUser(userPayload);
+    const errorOrUser = validateSpidUser(userPayload);
 
-    maybeUser.fold(
-      (error: string) => {
+    errorOrUser.fold(
+      (error: Error) => {
         res.status(500).json({
-          message: error
+          message: error.message
         });
       },
       (spidUser: SpidUser) => {
@@ -62,12 +62,12 @@ export default class AuthenticationController {
    * @param res
    */
   public logout(req: express.Request, res: express.Response): void {
-    const maybeUser = extractUserFromRequest(req);
+    const errorOrUser = extractUserFromRequest(req);
 
-    maybeUser.fold(
-      (error: string) => {
+    errorOrUser.fold(
+      (error: Error) => {
         res.status(500).json({
-          message: error
+          message: error.message
         });
       },
       (user: User) => {

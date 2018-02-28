@@ -71,11 +71,11 @@ export function toAppUser(from: SpidUser): User {
  * @returns {Either<String, SpidUser>}
  */
 // tslint:disable-next-line:no-any
-export function validateSpidUser(value: any): Either<string, SpidUser> {
+export function validateSpidUser(value: any): Either<Error, SpidUser> {
   const result = SpidUser.decode(value);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to decode the user");
   });
 }
 
@@ -87,11 +87,11 @@ export function validateSpidUser(value: any): Either<string, SpidUser> {
  */
 export function extractUserFromRequest(
   from: express.Request
-): Either<string, User> {
+): Either<Error, User> {
   const result = User.decode(from.user);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to decode the user");
   });
 }
 
@@ -101,12 +101,12 @@ export function extractUserFromRequest(
  * @param from
  * @returns {Either<String, User>}
  */
-export function extractUserFromJson(from: string): Either<string, User> {
+export function extractUserFromJson(from: string): Either<Error, User> {
   const json = JSON.parse(from);
 
   const result = User.decode(json);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to decode the user");
   });
 }

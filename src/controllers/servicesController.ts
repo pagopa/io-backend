@@ -22,19 +22,19 @@ export default class ServicesController {
    * @param res
    */
   public getService(req: express.Request, res: express.Response): void {
-    const maybeUser = extractUserFromRequest(req);
+    const errorOrUser = extractUserFromRequest(req);
 
-    if (isLeft(maybeUser)) {
+    if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
-      const error = maybeUser.value;
+      const error = errorOrUser.value;
       res.status(500).json({
-        message: error
+        message: error.message
       });
       return;
     }
 
     // TODO: validate req.params.id
-    const user = maybeUser.value;
+    const user = errorOrUser.value;
     this.messagesService
       .getService(user, req.params.id)
       .then(data => {

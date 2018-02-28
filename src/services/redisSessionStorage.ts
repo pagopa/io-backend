@@ -26,7 +26,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public get(token: string): Promise<Either<string, User>> {
+  public get(token: string): Promise<Either<Error, User>> {
     const client = this.redisClient;
 
     return new Promise(resolve => {
@@ -34,19 +34,19 @@ export default class RedisSessionStorage implements ISessionStorage {
       // @see https://redis.io/commands/get
       client.get(token, (err, value) => {
         if (err) {
-          resolve(left<string, User>(err.message));
+          resolve(left<Error, User>(new Error(err.message)));
         } else {
           if (value === null || value === undefined) {
-            resolve(left<string, User>("Session not found"));
+            resolve(left<Error, User>(new Error("Session not found")));
           } else {
-            const maybeUser = extractUserFromJson(value);
+            const errorOrUser = extractUserFromJson(value);
 
             // TODO: better error message.
-            maybeUser.mapLeft(() => {
+            errorOrUser.mapLeft(() => {
               return "Errors in validating the user profile";
             });
 
-            resolve(maybeUser);
+            resolve(errorOrUser);
           }
         }
       });

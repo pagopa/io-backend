@@ -28,15 +28,15 @@ export default class ProfileService {
         .getClient(user.fiscal_code)
         .getProfile();
 
-      const maybeApiProfile = GetProfileOKResponse.decode(profilePayload);
-      if (isLeft(maybeApiProfile)) {
-        const maybeProblemJson = ProblemJson.decode(profilePayload);
+      const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
+      if (isLeft(errorOrApiProfile)) {
+        const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
-        if (isLeft(maybeProblemJson)) {
+        if (isLeft(errorOrProblemJson)) {
           return Promise.reject(new Error("Unknown response."));
         }
 
-        const problemJson = maybeProblemJson.value;
+        const problemJson = errorOrProblemJson.value;
 
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
@@ -48,7 +48,7 @@ export default class ProfileService {
         return Promise.reject(new Error("Api error."));
       }
 
-      const apiProfile = maybeApiProfile.value;
+      const apiProfile = errorOrApiProfile.value;
       return Promise.resolve(toAppProfileWithEmail(apiProfile, user));
     } catch (err) {
       winston.log("error", "Error occurred in API call: %s", err.message);
@@ -56,24 +56,27 @@ export default class ProfileService {
     }
   }
 
-  public async upsertProfile(user: User, upsertProfile: ExtendedProfile) {
+  public async upsertProfile(
+    user: User,
+    upsertProfile: ExtendedProfile
+  ): Promise<ProfileWithEmail> {
     try {
       const profilePayload = await this.apiClient
         .getClient(user.fiscal_code)
         .upsertProfile({ body: upsertProfile });
 
-      const maybeApiProfile = UpsertProfileOKResponse.decode(profilePayload);
-      if (isLeft(maybeApiProfile)) {
-        const maybeProblemJson = ProblemJson.decode(profilePayload);
+      const errorOrApiProfile = UpsertProfileOKResponse.decode(profilePayload);
+      if (isLeft(errorOrApiProfile)) {
+        const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
-        if (isLeft(maybeProblemJson)) {
+        if (isLeft(errorOrProblemJson)) {
           return Promise.reject(new Error("Unknown response."));
         }
 
         return Promise.reject(new Error("Api error."));
       }
 
-      const apiProfile = maybeApiProfile.value;
+      const apiProfile = errorOrApiProfile.value;
       return Promise.resolve(toAppProfileWithEmail(apiProfile, user));
     } catch (err) {
       winston.log("error", "Error occurred in API call: %s", err.message);

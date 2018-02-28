@@ -20,7 +20,7 @@ export interface ISessionStorage {
    * @param token
    * @returns {*}
    */
-  get(token: string): Promise<Either<string, User>>;
+  get(token: string): Promise<Either<Error, User>>;
 
   /**
    * Removes a value from the cache.

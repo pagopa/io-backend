@@ -27,20 +27,20 @@ export default class MessagesService {
         .getClient(user.fiscal_code)
         .getMessagesByUser();
 
-      const maybeApiMessages = GetMessagesByUserOKResponse.decode(
+      const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
         messagesPayload
       );
-      if (isLeft(maybeApiMessages)) {
-        const maybeProblemJson = ProblemJson.decode(messagesPayload);
+      if (isLeft(errorOrApiMessages)) {
+        const errorOrProblemJson = ProblemJson.decode(messagesPayload);
 
-        if (isLeft(maybeProblemJson)) {
+        if (isLeft(errorOrProblemJson)) {
           return Promise.reject(new Error("Unknown response."));
         }
 
         return Promise.reject(new Error("Api error."));
       }
 
-      const apiMessages = maybeApiMessages.value;
+      const apiMessages = errorOrApiMessages.value;
 
       if (apiMessages.items === undefined) {
         return Promise.resolve({});
@@ -63,18 +63,18 @@ export default class MessagesService {
         .getClient(user.fiscal_code)
         .getMessage(messageId);
 
-      const maybeApiMessage = MessageResponseWithContent.decode(messagePayload);
-      if (isLeft(maybeApiMessage)) {
-        const maybeProblemJson = ProblemJson.decode(messagePayload);
+      const errorOrApiMessage = MessageResponseWithContent.decode(messagePayload);
+      if (isLeft(errorOrApiMessage)) {
+        const errorOrProblemJson = ProblemJson.decode(messagePayload);
 
-        if (isLeft(maybeProblemJson)) {
+        if (isLeft(errorOrProblemJson)) {
           return Promise.reject(new Error("Unknown response."));
         }
 
         return Promise.reject(new Error("Api error."));
       }
 
-      const apiMessage = maybeApiMessage.value;
+      const apiMessage = errorOrApiMessage.value;
       return Promise.resolve(toAppMessageWithContent(apiMessage));
     } catch (err) {
       winston.log("error", "Error occurred in API call: %s", err.message);
@@ -88,18 +88,18 @@ export default class MessagesService {
         .getClient(user.fiscal_code)
         .getService(serviceId);
 
-      const maybeApiService = ServicePublic.decode(servicePayload);
-      if (isLeft(maybeApiService)) {
-        const maybeProblemJson = ProblemJson.decode(servicePayload);
+      const errorOrApiService = ServicePublic.decode(servicePayload);
+      if (isLeft(errorOrApiService)) {
+        const errorOrProblemJson = ProblemJson.decode(servicePayload);
 
-        if (isLeft(maybeProblemJson)) {
+        if (isLeft(errorOrProblemJson)) {
           return Promise.reject(new Error("Unknown response."));
         }
 
         return Promise.reject(new Error("Api error."));
       }
 
-      const apiService = maybeApiService.value;
+      const apiService = errorOrApiService.value;
       return Promise.resolve(toAppService(apiService));
     } catch (err) {
       winston.log("error", "Error occurred in API call: %s", err.message);
