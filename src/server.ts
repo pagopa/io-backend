@@ -60,8 +60,16 @@ const servicesController: ServicesController = container.resolve(
 const app = express();
 
 // Redirect unsecure connections.
-const redirectSSL = require("redirect-ssl");
-app.use(redirectSSL);
+var express_enforces_ssl = require("express-enforces-ssl");
+// Trust proxy uses proxy X-Forwarded-Proto for ssl.
+app.enable("trust proxy");
+winston.log("info", "Enviroment %s", process.env.NODE_ENV);
+if (process.env.NODE_ENV !== "dev") {
+  app.use(express_enforces_ssl());
+}
+// Add security to http headers.
+var helmet = require("helmet");
+app.use(helmet());
 // Add a request logger.
 app.use(morgan(process.env.NODE_ENV || "development"));
 // Parse the incoming request body. This is needed by Passport spid strategy.
