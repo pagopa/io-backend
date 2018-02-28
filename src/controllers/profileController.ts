@@ -4,26 +4,13 @@
  */
 
 import * as express from "express";
-import * as winston from "winston";
-import { IApiClientFactoryInterface } from "../services/iApiClientFactory";
-import { ExtendedProfile } from "../types/api_client/extendedProfile";
-import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
-import { UpsertProfileOKResponse } from "../types/api_client/upsertProfileOKResponse";
-import { APIError } from "../types/error";
-import {
-  extractUpsertProfileFromRequest,
-  toAppProfileWithEmail,
-  toAppProfileWithoutEmail
-} from "../types/profile";
-import { extractUserFromRequest, User } from "../types/user";
-import {
-  forwardAPIError,
-  validateProblemJson,
-  validateResponse
-} from "../utils/validators";
+import { isLeft } from "fp-ts/lib/Either";
+import ProfileService from "../services/ProfileService";
+import { extractUpsertProfileFromRequest } from "../types/profile";
+import { extractUserFromRequest } from "../types/user";
 
 export default class ProfileController {
-  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   /**
    * Returns the profile for the user identified by the provided fiscal
@@ -32,57 +19,29 @@ export default class ProfileController {
    * @param req
    * @param res
    */
-  public getUserProfile(req: express.Request, res: express.Response): void {
+  public getProfile(req: express.Request, res: express.Response): void {
     const maybeUser = extractUserFromRequest(req);
 
-    maybeUser.fold(
-      (error: string) => {
+    if (isLeft(maybeUser)) {
+      // Unable to extract the user from the request.
+      const error = maybeUser.value;
+      res.status(500).json({
+        message: error
+      });
+      return;
+    }
+
+    const user = maybeUser.value;
+    this.profileService
+      .getProfile(user)
+      .then(data => {
+        res.json(data);
+      })
+      .catch(err =>
         res.status(500).json({
-          // Unable to extract the user from the request.
-          message: error
-        });
-      },
-      (user: User) => {
-        this.apiClient
-          .getClient(user.fiscal_code)
-          .getProfile()
-          .then(
-            maybeApiProfile => {
-              // Look if the response is a GetProfileOKResponse.
-              validateResponse(maybeApiProfile, GetProfileOKResponse).fold(
-                // Look if object is a ProblemJson.
-                () => {
-                  validateProblemJson(maybeApiProfile, res, () => {
-                    if (maybeApiProfile.status === 404) {
-                      // If the profile doesn't exists on the API we still
-                      // return 200 to the App with the information we have
-                      // retrieved from SPID.
-                      res.status(200).json(toAppProfileWithoutEmail(user));
-                    } else {
-                      forwardAPIError(maybeApiProfile, res);
-                    }
-                  });
-                },
-                // All correct, return the response to the client.
-                apiProfile => {
-                  res.json(toAppProfileWithEmail(apiProfile, user));
-                }
-              );
-            },
-            (err: APIError) => {
-              res.status(500).json({
-                // Here usually we have connection or transmission errors.
-                message: "The API call returns an error"
-              });
-              winston.log(
-                "info",
-                "error occurred in API call: %s",
-                err.message
-              );
-            }
-          );
-      }
-    );
+          message: err.message
+        })
+      );
   }
 
   /**
@@ -95,55 +54,35 @@ export default class ProfileController {
   public upsertProfile(req: express.Request, res: express.Response): void {
     const maybeUser = extractUserFromRequest(req);
 
-    maybeUser.fold(
-      (error: string) => {
+    if (isLeft(maybeUser)) {
+      // Unable to extract the user from the request.
+      const error = maybeUser.value;
+      res.status(500).json({
+        message: error
+      });
+      return;
+    }
+
+    const maybeUpsertProfile = extractUpsertProfileFromRequest(req);
+
+    if (isLeft(maybeUpsertProfile)) {
+      // Unable to extract the upsert profile from the request.
+      const error = maybeUser.value;
+      res.status(500).json({
+        message: error
+      });
+      return;
+    }
+
+    this.profileService
+      .upsertProfile(maybeUser.value, maybeUpsertProfile.value)
+      .then(data => {
+        res.json(data);
+      })
+      .catch(err =>
         res.status(500).json({
-          // Unable to extract the user from the request.
-          message: error
-        });
-      },
-      (user: User) => {
-        const maybeUpsertProfile = extractUpsertProfileFromRequest(req);
-        maybeUpsertProfile.fold(
-          (error: string) => {
-            res.status(500).json({
-              message: error
-            });
-          },
-          (upsertProfile: ExtendedProfile) => {
-            this.apiClient
-              .getClient(user.fiscal_code)
-              .upsertProfile({ body: upsertProfile })
-              .then(
-                maybeApiProfile => {
-                  // Look if the response is a UpsertProfileOKResponse.
-                  validateResponse(
-                    maybeApiProfile,
-                    UpsertProfileOKResponse
-                  ).fold(
-                    // Look if the response is a ProblemJson.
-                    () => validateProblemJson(maybeApiProfile, res),
-                    // All correct, return the response to the client.
-                    apiProfile => {
-                      res.json(toAppProfileWithEmail(apiProfile, user));
-                    }
-                  );
-                },
-                (err: APIError) => {
-                  res.status(500).json({
-                    // Here usually we have connection or transmission errors.
-                    message: "The API call returns an error"
-                  });
-                  winston.log(
-                    "info",
-                    "error occurred in API call: %s",
-                    err.message
-                  );
-                }
-              );
-          }
-        );
-      }
-    );
+          message: err.message
+        })
+      );
   }
 }

@@ -4,7 +4,8 @@
 
 import * as t from "io-ts";
 
-import { string } from "io-ts";
+import { readonlyArray, string } from "io-ts";
+import { NonNegativeNumber } from "../utils/numbers";
 import { strictInterfaceWithOptionals } from "../utils/types";
 import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
@@ -28,6 +29,24 @@ export const Message = strictInterfaceWithOptionals(
 );
 
 export type Message = t.TypeOf<typeof Message>;
+
+// required attributes
+const MessagesR = t.interface({});
+
+// optional attributes
+const MessagesO = t.partial({
+  items: readonlyArray(Message),
+  next: string,
+  pageSize: NonNegativeNumber
+});
+
+export const Messages = strictInterfaceWithOptionals(
+  MessagesR.props,
+  MessagesO.props,
+  "Messages"
+);
+
+export type Messages = t.TypeOf<typeof Messages>;
 
 /**
  * Converts an API MessageResponse to a Proxy message.
