@@ -4,7 +4,7 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import MessagesService from "../services/MessagesService";
+import MessagesService from "../services/messagesService";
 import { extractUserFromRequest } from "../types/user";
 
 /**

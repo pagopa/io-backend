@@ -17,8 +17,8 @@ import ApiClientFactory from "./services/apiClientFactory";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
-import ProfileService from "./services/ProfileService";
-import MessagesService from "./services/MessagesService";
+import ProfileService from "./services/profileService";
+import MessagesService from "./services/messagesService";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.

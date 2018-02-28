@@ -5,7 +5,7 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import ProfileService from "../services/ProfileService";
+import ProfileService from "../services/profileService";
 import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
 
