@@ -21,7 +21,7 @@ import * as passport from "passport";
 import * as winston from "winston";
 import MessagesController from "./controllers/messagesController";
 import ServicesController from "./controllers/servicesController";
-import { User } from "./types/user";
+import {User} from "./types/user";
 
 dotenv.config();
 
@@ -58,6 +58,10 @@ const servicesController: ServicesController = container.resolve(
 // Create and setup the Express app.
 
 const app = express();
+
+// Redirect unsecure connections.
+const redirectSSL = require("redirect-ssl");
+app.use(redirectSSL);
 // Add a request logger.
 app.use(morgan(process.env.NODE_ENV || "development"));
 // Parse the incoming request body. This is needed by Passport spid strategy.
