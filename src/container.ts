@@ -14,11 +14,11 @@ import MessagesController from "./controllers/messagesController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import ApiClientFactory from "./services/apiClientFactory";
+import MessagesService from "./services/messagesService";
+import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
-import ProfileService from "./services/profileService";
-import MessagesService from "./services/messagesService";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.

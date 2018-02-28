@@ -16,10 +16,12 @@ export class APICredentials implements ServiceClientCredentials {
    * {@inheritDoc}
    */
   public signRequest(webResource: WebResource): Promise<WebResource> {
-    if (!webResource.headers) {
-      webResource.headers = {};
-    }
-    webResource.headers["Ocp-Apim-Subscription-Key"] = this.apiKey;
-    return Promise.resolve(webResource);
+    return new Promise(resolve => {
+      if (!webResource.headers) {
+        webResource.headers = {};
+      }
+      webResource.headers["Ocp-Apim-Subscription-Key"] = this.apiKey;
+      return resolve(webResource);
+    });
   }
 }

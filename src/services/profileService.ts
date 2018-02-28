@@ -3,7 +3,6 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
-import * as winston from "winston";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
@@ -20,10 +19,10 @@ import { IApiClientFactoryInterface } from "./iApiClientFactory";
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
-  public async getProfile(
+  public getProfile(
     user: User
   ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
-    try {
+    return new Promise(async (resolve, reject) => {
       const profilePayload = await this.apiClient
         .getClient(user.fiscal_code)
         .getProfile();
@@ -33,7 +32,7 @@ export default class ProfileService {
         const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
         if (isLeft(errorOrProblemJson)) {
-          return Promise.reject(new Error("Unknown response."));
+          return reject(new Error("Unknown response."));
         }
 
         const problemJson = errorOrProblemJson.value;
@@ -42,25 +41,22 @@ export default class ProfileService {
         // return 200 to the App with the information we have
         // retrieved from SPID.
         if (problemJson.status === 404) {
-          return Promise.resolve(toAppProfileWithoutEmail(user));
+          return resolve(toAppProfileWithoutEmail(user));
         }
 
-        return Promise.reject(new Error("Api error."));
+        return reject(new Error("Api error."));
       }
 
       const apiProfile = errorOrApiProfile.value;
-      return Promise.resolve(toAppProfileWithEmail(apiProfile, user));
-    } catch (err) {
-      winston.log("error", "Error occurred in API call: %s", err.message);
-      return Promise.reject(Error("Error in calling the API."));
-    }
+      return resolve(toAppProfileWithEmail(apiProfile, user));
+    });
   }
 
-  public async upsertProfile(
+  public upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
   ): Promise<ProfileWithEmail> {
-    try {
+    return new Promise(async (resolve, reject) => {
       const profilePayload = await this.apiClient
         .getClient(user.fiscal_code)
         .upsertProfile({ body: upsertProfile });
@@ -70,17 +66,14 @@ export default class ProfileService {
         const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
         if (isLeft(errorOrProblemJson)) {
-          return Promise.reject(new Error("Unknown response."));
+          return reject(new Error("Unknown response."));
         }
 
-        return Promise.reject(new Error("Api error."));
+        return reject(new Error("Api error."));
       }
 
       const apiProfile = errorOrApiProfile.value;
-      return Promise.resolve(toAppProfileWithEmail(apiProfile, user));
-    } catch (err) {
-      winston.log("error", "Error occurred in API call: %s", err.message);
-      return Promise.reject(new Error("Error in calling the API."));
-    }
+      return resolve(toAppProfileWithEmail(apiProfile, user));
+    });
   }
 }
