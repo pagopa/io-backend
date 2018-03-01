@@ -1,5 +1,5 @@
 /**
- *
+ * Interface for the API client factories.
  */
 
 import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
@@ -7,8 +7,6 @@ import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 export interface IApiClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
-   *
-   * @param fiscalCode
    */
   getClient(fiscalCode: string): DigitalCitizenshipAPI;
 }

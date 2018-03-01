@@ -1,5 +1,6 @@
 /**
- *
+ * This file contains the User and SpidUser models and some functions to
+ * validate and convert type to and from them.
  */
 
 import * as express from "express";
@@ -42,9 +43,6 @@ export type SpidUser = t.TypeOf<typeof SpidUser>;
 
 /**
  * Converts a SPID User to a Proxy User.
- *
- * @param from
- * @returns {User}
  */
 export function toAppUser(from: SpidUser): User {
   // Use the SAML sessionIndex as token.
@@ -66,9 +64,6 @@ export function toAppUser(from: SpidUser): User {
 
 /**
  * Validates a SPID User extracted from a SAML response.
- *
- * @param value
- * @returns {Either<String, SpidUser>}
  */
 // tslint:disable-next-line:no-any
 export function validateSpidUser(value: any): Either<Error, SpidUser> {
@@ -80,10 +75,7 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
 }
 
 /**
- * Extracts the user added to the request by Passport from the request.
- *
- * @param from
- * @returns {Either<String, User>}
+ * Extracts the user added to the request by Passport.
  */
 export function extractUserFromRequest(
   from: express.Request
@@ -97,9 +89,6 @@ export function extractUserFromRequest(
 
 /**
  * Extracts a user from a json string.
- *
- * @param from
- * @returns {Either<String, User>}
  */
 export function extractUserFromJson(from: string): Either<Error, User> {
   const json = JSON.parse(from);

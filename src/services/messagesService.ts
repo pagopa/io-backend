@@ -1,5 +1,5 @@
 /**
- *
+ * This service retrieves messages from the API system using an API client.
  */
 
 import { isLeft } from "fp-ts/lib/Either";
@@ -20,6 +20,9 @@ import { IApiClientFactoryInterface } from "./iApiClientFactory";
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
+  /**
+   * Retrieves all messages for a specific user.
+   */
   public getMessagesByUser(user: User): Promise<Messages> {
     return new Promise(async (resolve, reject) => {
       const messagesPayload = await this.apiClient
@@ -53,6 +56,9 @@ export default class MessagesService {
     });
   }
 
+  /**
+   * Retrieves a specific message.
+   */
   public getMessage(user: User, messageId: string): Promise<Message> {
     return new Promise(async (resolve, reject) => {
       const messagePayload = await this.apiClient
@@ -77,6 +83,9 @@ export default class MessagesService {
     });
   }
 
+  /**
+   * Retrieve all the information about the service that has sent a message.
+   */
   public getService(user: User, serviceId: string): Promise<Service> {
     return new Promise(async (resolve, reject) => {
       const servicePayload = await this.apiClient

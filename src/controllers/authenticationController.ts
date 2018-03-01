@@ -1,8 +1,8 @@
 /**
- *
+ * This controller handles the call from the IDP after a successful
+ * authentication. In the request headers there are all the attributes sent from
+ * the IDP.
  */
-
-// tslint:disable:no-any
 
 import * as express from "express";
 import { ISessionStorage } from "../services/iSessionStorage";
@@ -14,11 +14,6 @@ import {
   validateSpidUser
 } from "../types/user";
 
-/**
- * This controller handles the call from the IDP after
- * a successful authentication. In the request headers there are all the
- * attributes sent from the IDP..
- */
 export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
@@ -28,10 +23,8 @@ export default class AuthenticationController {
 
   /**
    * The Assertion consumer service.
-   *
-   * @param userPayload
-   * @param res
    */
+  // tslint:disable-next-line:no-any
   public acs(userPayload: any, res: express.Response): void {
     const errorOrUser = validateSpidUser(userPayload);
 
@@ -57,9 +50,6 @@ export default class AuthenticationController {
 
   /**
    * Retrieves the logout url from the IDP.
-   *
-   * @param req
-   * @param res
    */
   public logout(req: express.Request, res: express.Response): void {
     const errorOrUser = extractUserFromRequest(req);
@@ -102,8 +92,6 @@ export default class AuthenticationController {
 
   /**
    * The metadata for this Service Provider.
-   *
-   * @param res
    */
   public metadata(res: express.Response): void {
     const metadata = this.spidStrategy.generateServiceProviderMetadata(

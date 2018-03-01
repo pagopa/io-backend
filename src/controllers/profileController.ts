@@ -15,9 +15,6 @@ export default class ProfileController {
   /**
    * Returns the profile for the user identified by the provided fiscal
    * code.
-   *
-   * @param req
-   * @param res
    */
   public getProfile(req: express.Request, res: express.Response): void {
     const errorOrUser = extractUserFromRequest(req);
@@ -47,9 +44,6 @@ export default class ProfileController {
   /**
    * Create or update the preferences for the user identified by the provided
    * fiscal code.
-   *
-   * @param req
-   * @param res
    */
   public upsertProfile(req: express.Request, res: express.Response): void {
     const errorOrUser = extractUserFromRequest(req);

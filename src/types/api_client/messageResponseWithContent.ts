@@ -1,5 +1,6 @@
 /**
- *
+ * This file adds a wrapper to the MessageResponseWithContent to allow runtime
+ * validation.
  */
 
 import * as t from "io-ts";

@@ -1,5 +1,6 @@
 /**
- *
+ * This controller handles reading messages from the app by
+ * forwarding the call to the API system.
  */
 
 import * as express from "express";
@@ -7,19 +8,12 @@ import { isLeft } from "fp-ts/lib/Either";
 import MessagesService from "../services/messagesService";
 import { extractUserFromRequest } from "../types/user";
 
-/**
- * This controller handles reading messages from the app by
- * forwarding the call to the API system.
- */
 export default class ServicesController {
   constructor(private readonly messagesService: MessagesService) {}
 
   /**
    * Returns the service identified by the provided id
    * code.
-   *
-   * @param req
-   * @param res
    */
   public getService(req: express.Request, res: express.Response): void {
     const errorOrUser = extractUserFromRequest(req);

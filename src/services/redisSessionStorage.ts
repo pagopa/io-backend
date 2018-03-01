@@ -1,12 +1,13 @@
+/**
+ * This service uses the Redis client to store and retrieve session information.
+ */
+
 import { Either, left } from "fp-ts/lib/Either";
 import * as redis from "redis";
 import { User } from "../types/user";
 import { extractUserFromJson } from "../types/user";
 import { ISessionStorage } from "./iSessionStorage";
 
-/**
- * This service uses the Redis client to store and retrieve session information.
- */
 export default class RedisSessionStorage implements ISessionStorage {
   constructor(
     private readonly redisClient: redis.RedisClient,

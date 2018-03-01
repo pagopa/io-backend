@@ -1,5 +1,6 @@
 /**
- *
+ * This file contains the Message and Messages models and some functions to
+ * validate and convert type to and from them.
  */
 
 import * as t from "io-ts";
@@ -50,9 +51,6 @@ export type Messages = t.TypeOf<typeof Messages>;
 
 /**
  * Converts an API MessageResponse to a Proxy message.
- *
- * @param from
- * @returns {Message}
  */
 export function toAppMessageWithContent(
   from: MessageResponseWithContent
@@ -69,9 +67,6 @@ export function toAppMessageWithContent(
 
 /**
  * Converts an API CreatedMessage to a Proxy message.
- *
- * @param from
- * @returns {Message}
  */
 export function toAppMessageWithoutContent(
   from: CreatedMessageWithoutContent

@@ -1,5 +1,6 @@
 /**
- *
+ * This service retrieves and updates the user profile from the API system using
+ * an API client.
  */
 
 import { isLeft } from "fp-ts/lib/Either";
@@ -19,6 +20,9 @@ import { IApiClientFactoryInterface } from "./iApiClientFactory";
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
+  /**
+   * Retrieves the profile for a specific user.
+   */
   public getProfile(
     user: User
   ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
@@ -52,6 +56,9 @@ export default class ProfileService {
     });
   }
 
+  /**
+   * Upsert the profile of a specific user.
+   */
   public upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile

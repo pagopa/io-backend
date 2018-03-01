@@ -1,5 +1,6 @@
 /**
- *
+ * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
+ * some functions to validate and convert type to and from them.
  */
 
 import { Either } from "fp-ts/lib/Either";
@@ -70,11 +71,8 @@ export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmail>;
 /**
  * Converts an existing API profile to a Proxy profile.
  *
- * @param from
- *   Profile retrieved from the Digital Citizenship API.
- * @param user
- *   User data extracted from SPID.
- * @returns {Profile}
+ * @param {GetProfileOKResponse} from The profile retrieved from the Digital Citizenship API.
+ * @param {User} user The user data extracted from SPID.
  */
 export function toAppProfileWithEmail(
   from: GetProfileOKResponse,
@@ -97,9 +95,7 @@ export function toAppProfileWithEmail(
 /**
  * Converts an empty API profile to a Proxy profile.
  *
- * @param user
- *   User data extracted from SPID.
- * @returns {Profile}
+ * @param {User} user The user data extracted from SPID.
  */
 export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
   return {
@@ -115,9 +111,6 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
 
 /**
  * Extracts a user profile from the body of a request.
- *
- * @param from
- * @returns {Either<String, ExtendedProfile>}
  */
 export function extractUpsertProfileFromRequest(
   from: express.Request
