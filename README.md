@@ -6,6 +6,8 @@
 
 [![Docker Build Status](https://img.shields.io/docker/build/teamdigitale/italia-backend.svg)](https://hub.docker.com/r/teamdigitale/italia-backend/)
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/teamdigitale/italia-backend/maintainability)
+
 # Digital citizenship web and mobile backend
 
 This repository contains the code of the backend used by the [web](https://github.com/teamdigitale/italia-web) and
