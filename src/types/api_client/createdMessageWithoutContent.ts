@@ -1,5 +1,6 @@
 /**
- *
+ * This file adds a wrapper to the CreatedMessageWithoutContent to allow runtime
+ * validation.
  */
 
 import * as t from "io-ts";

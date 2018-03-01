@@ -1,6 +1,6 @@
 /**
  * Builds and configure a Passport strategy to authenticate the proxy to the
- * different SPID IDPs..
+ * different SPID IDPs.
  */
 
 import * as SpidStrategy from "spid-passport";

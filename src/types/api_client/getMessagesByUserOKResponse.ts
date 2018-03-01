@@ -1,9 +1,11 @@
 /**
- *
+ * This file adds a wrapper to the GetMessagesByUserOKResponse to allow runtime
+ * validation.
  */
 
 import * as t from "io-ts";
-import { number, readonlyArray, string } from "io-ts";
+import { readonlyArray, string } from "io-ts";
+import { NonNegativeNumber } from "../../utils/numbers";
 import { strictInterfaceWithOptionals } from "../../utils/types";
 import { CreatedMessageWithoutContent } from "./createdMessageWithoutContent";
 
@@ -14,13 +16,13 @@ const GetMessagesByUserOKResponseR = t.interface({});
 const GetMessagesByUserOKResponseO = t.partial({
   items: readonlyArray(CreatedMessageWithoutContent),
   next: string,
-  pageSize: number
+  pageSize: NonNegativeNumber
 });
 
 export const GetMessagesByUserOKResponse = strictInterfaceWithOptionals(
   GetMessagesByUserOKResponseR.props,
   GetMessagesByUserOKResponseO.props,
-  "GetProfileOKResponse"
+  "GetMessagesByUserOKResponse"
 );
 
 export type GetMessagesByUserOKResponse = t.TypeOf<

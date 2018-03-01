@@ -1,5 +1,6 @@
 /**
- *
+ * This file contains the User and SpidUser models and some functions to
+ * validate and convert type to and from them.
  */
 
 import * as crypto from "crypto";
@@ -43,9 +44,6 @@ export type SpidUser = t.TypeOf<typeof SpidUser>;
 
 /**
  * Converts a SPID User to a Proxy User.
- *
- * @param from
- * @returns {User}
  */
 export function toAppUser(from: SpidUser): User {
   // Use the crypto.randomBytes as token.
@@ -68,47 +66,38 @@ export function toAppUser(from: SpidUser): User {
 
 /**
  * Validates a SPID User extracted from a SAML response.
- *
- * @param value
- * @returns {Either<String, SpidUser>}
  */
 // tslint:disable-next-line:no-any
-export function validateSpidUser(value: any): Either<string, SpidUser> {
+export function validateSpidUser(value: any): Either<Error, SpidUser> {
   const result = SpidUser.decode(value);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to decode the user");
   });
 }
 
 /**
- * Extracts the user added to the request by Passport from the request.
- *
- * @param from
- * @returns {Either<String, User>}
+ * Extracts the user added to the request by Passport.
  */
 export function extractUserFromRequest(
   from: express.Request
-): Either<string, User> {
+): Either<Error, User> {
   const result = User.decode(from.user);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to decode the user");
   });
 }
 
 /**
  * Extracts a user from a json string.
- *
- * @param from
- * @returns {Either<String, User>}
  */
-export function extractUserFromJson(from: string): Either<string, User> {
+export function extractUserFromJson(from: string): Either<Error, User> {
   const json = JSON.parse(from);
 
   const result = User.decode(json);
 
   return result.mapLeft(() => {
-    return "error";
+    return new Error("Unable to decode the user");
   });
 }
