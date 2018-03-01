@@ -15,13 +15,15 @@ import ProfileController from "./controllers/profileController";
 import * as bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import * as express from "express";
+import expressEnforcesSsl = require("express-enforces-ssl");
+import * as helmet from "helmet";
 import * as http from "http";
 import * as morgan from "morgan";
 import * as passport from "passport";
 import * as winston from "winston";
 import MessagesController from "./controllers/messagesController";
 import ServicesController from "./controllers/servicesController";
-import {User} from "./types/user";
+import { User } from "./types/user";
 
 dotenv.config();
 
@@ -60,15 +62,12 @@ const servicesController: ServicesController = container.resolve(
 const app = express();
 
 // Redirect unsecure connections.
-var express_enforces_ssl = require("express-enforces-ssl");
-// Trust proxy uses proxy X-Forwarded-Proto for ssl.
-app.enable("trust proxy");
-winston.log("info", "Enviroment %s", process.env.NODE_ENV);
 if (process.env.NODE_ENV !== "dev") {
-  app.use(express_enforces_ssl());
+  // Trust proxy uses proxy X-Forwarded-Proto for ssl.
+  app.enable("trust proxy");
+  app.use(expressEnforcesSsl());
 }
 // Add security to http headers.
-var helmet = require("helmet");
 app.use(helmet());
 // Add a request logger.
 app.use(morgan(process.env.NODE_ENV || "development"));

@@ -33,6 +33,12 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-1.1.0.tgz#93b1be91f63c184450385272c47b6496fd028e02"
 
+"@types/express-enforces-ssl@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/express-enforces-ssl/-/express-enforces-ssl-1.1.1.tgz#9b686f3aeb7279ae170bd1493546c836da43aac6"
+  dependencies:
+    "@types/express" "*"
+
 "@types/express-serve-static-core@*":
   version "4.11.1"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.11.1.tgz#f6f7212382d59b19d696677bcaa48a37280f5d45"
@@ -61,6 +67,12 @@
     "@types/events" "*"
     "@types/minimatch" "*"
     "@types/node" "*"
+
+"@types/helmet@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@types/helmet/-/helmet-0.0.37.tgz#6b150f30219c0d6563e8e0a3fbcad8dd90fa4f68"
+  dependencies:
+    "@types/express" "*"
 
 "@types/is-stream@^1.1.0":
   version "1.1.0"
