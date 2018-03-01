@@ -1,5 +1,6 @@
 /**
- *
+ * This file adds a wrapper to the GetProfileOKResponse to allow runtime
+ * validation.
  */
 
 import * as t from "io-ts";

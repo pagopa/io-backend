@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/teamdigitale/italia-backend.svg?style=svg)](https://circleci.com/gh/teamdigitale/italia-backend)
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/italia-backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=teamdigitale/italia-backend&amp;utm_campaign=Badge_Grade)
 
 [![codecov](https://codecov.io/gh/teamdigitale/italia-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/teamdigitale/italia-backend)
@@ -5,6 +7,8 @@
 [![dependencies](https://david-dm.org/teamdigitale/italia-backend/status.svg)](https://david-dm.org/teamdigitale/italia-backend)
 
 [![Docker Build Status](https://img.shields.io/docker/build/teamdigitale/italia-backend.svg)](https://hub.docker.com/r/teamdigitale/italia-backend/)
+
+[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/teamdigitale/italia-backend/maintainability)
 
 # Digital citizenship web and mobile backend
 

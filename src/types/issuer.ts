@@ -1,5 +1,5 @@
 /**
- *
+ * This file contains the Issuer model.
  */
 
 import * as t from "io-ts";

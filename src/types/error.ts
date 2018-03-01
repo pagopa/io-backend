@@ -1,5 +1,5 @@
 /**
- *
+ * This file extend the base Error with a statusCode field.
  */
 
 interface IDetailedError {

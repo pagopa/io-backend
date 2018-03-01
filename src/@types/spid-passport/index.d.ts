@@ -1,5 +1,5 @@
 /**
- *
+ * This files contains the typescript declaration of module spid-passport.
  */
 
 declare module "spid-passport";

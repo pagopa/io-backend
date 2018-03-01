@@ -13,13 +13,21 @@ export class APICredentials implements ServiceClientCredentials {
   }
 
   /**
-   * {@inheritDoc}
+   * Signs a request with the Authentication header.
+   *
+   * This method adds to the webResource parameter a specific header used to
+   * authenticate the request to the API system.
+   *
+   * @param {WebResource} webResource The WebResource/request to be signed.
+   * @returns {Promise<WebResource>} The signed request object;
    */
   public signRequest(webResource: WebResource): Promise<WebResource> {
-    if (!webResource.headers) {
-      webResource.headers = {};
-    }
-    webResource.headers["Ocp-Apim-Subscription-Key"] = this.apiKey;
-    return Promise.resolve(webResource);
+    return new Promise(resolve => {
+      if (!webResource.headers) {
+        webResource.headers = {};
+      }
+      webResource.headers["Ocp-Apim-Subscription-Key"] = this.apiKey;
+      return resolve(webResource);
+    });
   }
 }

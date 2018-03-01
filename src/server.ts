@@ -139,7 +139,7 @@ app.get(
   "/api/v1/profile",
   tokenAuth,
   (req: express.Request, res: express.Response) => {
-    profileController.getUserProfile(req, res);
+    profileController.getProfile(req, res);
   }
 );
 
@@ -155,7 +155,7 @@ app.get(
   "/api/v1/messages",
   tokenAuth,
   (req: express.Request, res: express.Response) => {
-    messagesController.getUserMessages(req, res);
+    messagesController.getMessagesByUser(req, res);
   }
 );
 
@@ -163,7 +163,7 @@ app.get(
   "/api/v1/messages/:id",
   tokenAuth,
   (req: express.Request, res: express.Response) => {
-    messagesController.getUserMessage(req, res);
+    messagesController.getMessage(req, res);
   }
 );
 
