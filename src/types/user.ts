@@ -2,6 +2,7 @@
  *
  */
 
+import * as crypto from "crypto";
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
 import * as t from "io-ts";
@@ -47,8 +48,9 @@ export type SpidUser = t.TypeOf<typeof SpidUser>;
  * @returns {User}
  */
 export function toAppUser(from: SpidUser): User {
-  // Use the SAML sessionIndex as token.
-  const token = from.sessionIndex;
+  // Use the crypto.randomBytes as token.
+  const SESSION_TOKEN_LENGTH_BYTES = 48;
+  const token = crypto.randomBytes(SESSION_TOKEN_LENGTH_BYTES).toString("hex");
 
   return {
     created_at: new Date().getTime(),
@@ -58,7 +60,7 @@ export function toAppUser(from: SpidUser): User {
     nameID: from.nameID, // The used nameID is needed for logout.
     nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
     preferred_email: from.email,
-    sessionIndex: token, // The sessionIndex is needed for logout.
+    sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     spid_idp: from.issuer._, // The used idp is needed for logout.
     token
   };
