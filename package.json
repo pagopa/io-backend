@@ -60,9 +60,9 @@
     "winston": "^2.4.0"
   },
   "devDependencies": {
-    "@types/jest": "^22.1.4",
-    "@types/supertest": "^2.0.4",
+    "@types/jest": "^22.0.0",
     "@types/superagent": "^3.5.7",
+    "@types/supertest": "^2.0.4",
     "fp-ts": "^1.0.0",
     "jest": "^22.0.0",
     "ms-rest-js": "^0.2.5",
