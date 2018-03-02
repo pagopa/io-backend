@@ -15,7 +15,6 @@ LABEL maintainer="https://teamdigitale.governo.it"
 
 WORKDIR /usr/src/app
 
-COPY /.babelrc /usr/src/app/.babelrc
 COPY /package.json /usr/src/app/package.json
 COPY /src /usr/src/app/src
 COPY /public /usr/src/app/public
