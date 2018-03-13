@@ -5,7 +5,9 @@ RUN apk update && apk upgrade && \
 
 WORKDIR /usr/src/app
 
+COPY /src /usr/src/app/src
 COPY /package.json /usr/src/app/package.json
+COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
 
 RUN yarn install \
