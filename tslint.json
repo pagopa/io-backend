@@ -3,6 +3,7 @@
   "extends": [
     "typestrict",
     "tslint:recommended",
+    "tslint-sonarts",
     "tslint-immutable",
     "tslint-plugin-prettier",
     "tslint-config-prettier"
