@@ -53,7 +53,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-strategy": "^1.0.0",
     "redis": "^2.8.0",
-    "spid-passport": "git://github.com/lussoluca/spid-passport.git#7c86f4f",
+    "spid-passport": "git://github.com/lussoluca/spid-passport.git#a2e1047",
     "typescript": "^2.7.0",
     "ulid": "^2.2.2",
     "validator": "^9.2.0",
