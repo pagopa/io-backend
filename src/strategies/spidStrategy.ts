@@ -66,7 +66,7 @@ const spidStrategy = (
         }
       },
       sp: {
-        attributeConsumingServiceIndex: 1,
+        attributeConsumingServiceIndex: 0,
         attributes: {
           attributes: ["fiscalNumber", "name", "familyName", "email"],
           name: "Required attributes"
