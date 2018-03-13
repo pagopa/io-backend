@@ -19,8 +19,8 @@ LABEL maintainer="https://teamdigitale.governo.it"
 WORKDIR /usr/src/app
 
 COPY /package.json /usr/src/app/package.json
-COPY /src /usr/src/app/src
 COPY /public /usr/src/app/public
+COPY --from=builder /usr/src/app/src /usr/src/app/src
 COPY --from=builder /usr/src/app/node_modules /usr/src/app/node_modules
 
 EXPOSE 80
