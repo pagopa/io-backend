@@ -1,7 +1,7 @@
 // NODE_ENV *before* you require app.js or it will use the wrong (global) NODE_ENV
 // tslint:disable:no-let
 let originalNodeEnv: string;
-originalNodeEnv = process.env.NODE_ENV || "development";
+originalNodeEnv = process.env.NODE_ENV || "dev";
 process.env.NODE_ENV = "production";
 
 import * as request from "supertest";
