@@ -1,5 +1,6 @@
 import { MessageBodyMarkdown } from "./MessageBodyMarkdown";
 import { MessageSubject } from "./MessageSubject";
+
 import { strictInterfaceWithOptionals } from "../../utils/types";
 
 import * as t from "io-ts";

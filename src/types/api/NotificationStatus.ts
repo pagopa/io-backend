@@ -2,10 +2,11 @@
  *
  */
 
-import * as t from "io-ts";
-
 import { NotificationChannelStatus } from "./NotificationChannelStatus";
+
 import { strictInterfaceWithOptionals } from "../../utils/types";
+
+import * as t from "io-ts";
 
 // required attributes
 const NotificationStatusR = t.interface({});

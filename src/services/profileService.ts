@@ -64,7 +64,7 @@ export default class ProfileService {
     upsertProfile: ExtendedProfile
   ): Promise<ProfileWithEmail> {
     return new Promise(async (resolve, reject) => {
-      const profilePayload = await this.apiClient
+      const profilePayload = this.apiClient
         .getClient(user.fiscal_code)
         .upsertProfile({ body: upsertProfile });
 

@@ -1,8 +1,9 @@
 import * as t from "io-ts";
 
 import { HttpStatusCode } from "./HttpStatusCode";
-import { strictInterfaceWithOptionals } from "../../utils/types";
+
 import { withDefault } from "../../utils/default";
+import { strictInterfaceWithOptionals } from "../../utils/types";
 
 /**
  *
