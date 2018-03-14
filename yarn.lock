@@ -4145,9 +4145,9 @@ spdx-license-ids@^1.0.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
 
-"spid-passport@git://github.com/lussoluca/spid-passport.git#84ef6cc":
+"spid-passport@git://github.com/lussoluca/spid-passport.git#e0f52e4":
   version "1.0.0"
-  resolved "git://github.com/lussoluca/spid-passport.git#84ef6cca9cdbad568838a6775f00c8050fe9ce9e"
+  resolved "git://github.com/lussoluca/spid-passport.git#e0f52e437d77031e805b94beef39289f99e96908"
   dependencies:
     passport "^0.4.0"
     passport-saml "^0.31.0"
