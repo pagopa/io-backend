@@ -19,6 +19,7 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
+import TokenService from "./services/tokenService";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -116,6 +117,12 @@ container.register(
 export const SESSION_STORAGE = "sessionStorage";
 container.register({
   [SESSION_STORAGE]: awilix.asClass(RedisSessionStorage)
+});
+
+// Register the token service.
+export const TOKEN_SERVICE = "tokenService";
+container.register({
+  [TOKEN_SERVICE]: awilix.asClass(TokenService)
 });
 
 // Register a factory service to create API client.
