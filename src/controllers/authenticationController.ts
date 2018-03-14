@@ -29,6 +29,7 @@ export default class AuthenticationController {
     const errorOrUser = validateSpidUser(userPayload);
 
     errorOrUser.fold(
+      // tslint:disable-next-line:no-identical-functions
       (error: Error) => {
         res.status(500).json({
           message: error.message
@@ -55,6 +56,7 @@ export default class AuthenticationController {
     const errorOrUser = extractUserFromRequest(req);
 
     errorOrUser.fold(
+      // tslint:disable-next-line:no-identical-functions
       (error: Error) => {
         res.status(500).json({
           message: error.message
@@ -94,6 +96,7 @@ export default class AuthenticationController {
    * The metadata for this Service Provider.
    */
   public metadata(res: express.Response): void {
+    // tslint:disable-next-line:no-use-of-empty-return-value
     const metadata = this.spidStrategy.generateServiceProviderMetadata(
       this.samlCert
     );
