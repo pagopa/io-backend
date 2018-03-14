@@ -9,7 +9,8 @@ import { SpidUser } from "../types/user";
 const spidStrategy = (
   samlKey: string,
   samlCallbackUrl: string,
-  samlIssuer: string
+  samlIssuer: string,
+  samlAttributeConsumingServiceIndex: number
 ) => {
   return new SpidStrategy(
     {
@@ -66,7 +67,7 @@ const spidStrategy = (
         }
       },
       sp: {
-        attributeConsumingServiceIndex: 0,
+        attributeConsumingServiceIndex: samlAttributeConsumingServiceIndex,
         attributes: {
           attributes: ["fiscalNumber", "name", "familyName", "email"],
           name: "Required attributes"

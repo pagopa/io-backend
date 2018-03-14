@@ -57,7 +57,12 @@ const SAML_CALLBACK_URL =
   process.env.SAML_CALLBACK_URL ||
   "http://italia-backend/assertionConsumerService";
 const SAML_ISSUER = process.env.SAML_ISSUER || "http://italia-backend";
+const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
+  process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX || 1;
 container.register({
+  samlAttributeConsumingServiceIndex: awilix.asValue(
+    SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX
+  ),
   samlCallbackUrl: awilix.asValue(SAML_CALLBACK_URL),
   samlIssuer: awilix.asValue(SAML_ISSUER)
 });
