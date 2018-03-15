@@ -29,12 +29,7 @@ export default class AuthenticationController {
     const errorOrUser = validateSpidUser(userPayload);
 
     errorOrUser.fold(
-      // tslint:disable-next-line:no-identical-functions
-      (error: Error) => {
-        res.status(500).json({
-          message: error.message
-        });
-      },
+      (error: Error) => this.return500Error(error, res),
       (spidUser: SpidUser) => {
         const user = toAppUser(spidUser);
 
@@ -56,12 +51,7 @@ export default class AuthenticationController {
     const errorOrUser = extractUserFromRequest(req);
 
     errorOrUser.fold(
-      // tslint:disable-next-line:no-identical-functions
-      (error: Error) => {
-        res.status(500).json({
-          message: error.message
-        });
-      },
+      (error: Error) => this.return500Error(error, res),
       (user: User) => {
         // Delete the Redis token.
         this.sessionStorage.del(user.token);
@@ -104,5 +94,11 @@ export default class AuthenticationController {
       .status(200)
       .set("Content-Type", "application/xml")
       .send(metadata);
+  }
+
+  private return500Error(error: Error, res: express.Response): void {
+    res.status(500).json({
+      message: error.message
+    });
   }
 }
