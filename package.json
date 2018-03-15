@@ -1,6 +1,6 @@
 {
   "name": "italia-backend",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "Italia app and web backend",
   "main": "index.js",
   "engines": {
@@ -53,7 +53,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-strategy": "^1.0.0",
     "redis": "^2.8.0",
-    "spid-passport": "git://github.com/lussoluca/spid-passport.git#6d631a4",
+    "spid-passport": "git://github.com/lussoluca/spid-passport.git#e0f52e4",
     "typescript": "^2.7.0",
     "ulid": "^2.2.2",
     "validator": "^9.2.0",
