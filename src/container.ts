@@ -20,7 +20,6 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import TokenService from "./services/tokenService";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
-import TokenService from "./services/tokenService";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
