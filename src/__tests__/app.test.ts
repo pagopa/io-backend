@@ -5,16 +5,15 @@ originalNodeEnv = process.env.NODE_ENV || "dev";
 process.env.NODE_ENV = "production";
 
 import * as request from "supertest";
-import app from "../app";
+import { newApp } from "../app";
+import { EnvironmentNodeEnvEnum } from "../types/environment";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
 
-describe("Test the root path", () => {
-  afterAll(() => {
-    process.env.NODE_ENV = originalNodeEnv;
-  });
+const app = newApp(EnvironmentNodeEnvEnum.PRODUCTION);
 
+describe("Test the root path", () => {
   // test case: ping. Cannot fail.
   test("It should 200 and ok if pinged", () => {
     return request(app)

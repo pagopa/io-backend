@@ -64,7 +64,7 @@ describe("user type", () => {
   /* test case: extract user info from Express request */
   it("should get a user from Express request with extractUserFromRequest", async () => {
     // Express request mock
-    const req = mockReq() as any;
+    const req = mockReq();
 
     // populate mock request with User
     req.user = mockedUser;

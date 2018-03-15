@@ -1,9 +1,11 @@
+// tslint:disable:no-any
+
 /**
  * mockRes
  * @returns {{append, attachment, cookie, clearCookie, download, end, format, get, json, jsonp, links, location, redirect, render, send, sendFile, sendStatus, set, status, type, vary, reset: resetMock}}
  */
 
-export default function mockRes() {
+export default function mockRes(): any {
   const response = {
     append: jest.fn(),
     attachment: jest.fn(),
@@ -58,7 +60,7 @@ export default function mockRes() {
 /**
  * resetMock
  */
-export function resetMock(this: any) {
+export function resetMock(this: any): any {
   this.append.mockClear();
   this.attachment.mockClear();
   this.cookie.mockClear();

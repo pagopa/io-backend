@@ -179,7 +179,7 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("redirects to the correct url if userPayload is a valid User", () => {
-    const res = mockRes() as any;
+    const res = mockRes();
 
     controller.acs(validUserPayload, res);
 
@@ -191,7 +191,7 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("return an error if userPayload is invalid", () => {
-    const res = mockRes() as any;
+    const res = mockRes();
 
     controller.acs(invalidUserPayload, res);
 
@@ -207,7 +207,7 @@ describe("AuthenticationController#slo", () => {
   });
 
   it("redirects to the home page", () => {
-    const res = mockRes() as any;
+    const res = mockRes();
 
     controller.slo(res);
 
@@ -223,8 +223,8 @@ describe("AuthenticationController#logout", () => {
   });
 
   it("extracts the logout url", () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
     spidStrategyInstance.logout.mockImplementation((_: any, callback: any) => {
       callback(undefined, "http://www.example.com");
@@ -244,8 +244,8 @@ describe("AuthenticationController#logout", () => {
   });
 
   it("returns error if the generation user data is invalid", () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
     req.user = invalidUserPayload;
 
@@ -260,8 +260,8 @@ describe("AuthenticationController#logout", () => {
   });
 
   it("returns error if the generation of logout fails", () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
     spidStrategyInstance.logout.mockImplementation(
       (_: any, callback: (error: Error) => void) => {
@@ -288,7 +288,7 @@ describe("AuthenticationController#metadata", () => {
   });
 
   it("renders the correct metadata", () => {
-    const res = mockRes() as any;
+    const res = mockRes();
     const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://italia-backend" ID="http___italia_backend">
   <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
     <KeyDescriptor>

@@ -64,6 +64,7 @@ export default class ProfileService {
     upsertProfile: ExtendedProfile
   ): Promise<ProfileWithEmail> {
     return new Promise(async (resolve, reject) => {
+      // tslint:disable-next-line: await-promise
       const profilePayload = await this.apiClient
         .getClient(user.fiscal_code)
         .upsertProfile({ body: upsertProfile });

@@ -15,8 +15,7 @@ const aTimestamp = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-
-const aServiceId = "service-id" as string;
+const aServiceId: string = "service-id";
 
 const proxyService: Service = {
   departmentName: "Department name",
@@ -59,12 +58,19 @@ describe("serviceController#getService", () => {
   });
 
   it("calls the getService on the serviceController with valid values", async () => {
+<<<<<<< HEAD
     const req = mockReq() as any;
     const res = mockRes() as any;
 
     mockGetService.mockImplementation(() => {
       return Promise.resolve(proxyService);
     });
+=======
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetService.mockReturnValue(Promise.resolve(proxyService));
+>>>>>>> AGID-35/test-ts-marco
 
     req.user = mockedUser;
     req.params = { id: aServiceId };
@@ -82,12 +88,19 @@ describe("serviceController#getService", () => {
   });
 
   it("calls the getService on the serviceController with empty user", async () => {
+<<<<<<< HEAD
     const req = mockReq() as any;
     const res = mockRes() as any;
 
     mockGetService.mockImplementation(() => {
       return Promise.resolve(proxyService);
     });
+=======
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetService.mockReturnValue(Promise.resolve(proxyService));
+>>>>>>> AGID-35/test-ts-marco
 
     req.user = "";
     req.params = { id: aServiceId };
@@ -107,6 +120,7 @@ describe("serviceController#getService", () => {
   });
 
   it("calls the getService on the serviceController with valid user but user is not in proxy", async () => {
+<<<<<<< HEAD
     const req = mockReq() as any;
     const res = mockRes() as any;
 
@@ -119,6 +133,15 @@ describe("serviceController#getService", () => {
     res.status = jest.fn().mockImplementation(() => ({
       json: jest.fn()
     }));
+=======
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetService.mockReturnValue(Promise.reject(new Error("reject")));
+
+    req.user = mockedUser;
+    req.params = { id: aServiceId };
+>>>>>>> AGID-35/test-ts-marco
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const messageService = new MessagesService(apiClient);
@@ -130,5 +153,11 @@ describe("serviceController#getService", () => {
 
     expect(mockGetService).toHaveBeenCalledWith(mockedUser, aServiceId);
     expect(res.status).toHaveBeenCalledWith(500);
+<<<<<<< HEAD
+=======
+    expect(res.json).toHaveBeenCalledWith({
+      message: "reject"
+    });
+>>>>>>> AGID-35/test-ts-marco
   });
 });

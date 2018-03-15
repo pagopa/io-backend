@@ -97,7 +97,7 @@ describe("profile type", () => {
   /*test case: Extracts a user profile from the body of a request.*/
   it("should get a user upsert profile from request", async () => {
     // Express request mock
-    const req = mockReq() as any;
+    const req = mockReq();
 
     // populate mock request with user Extended Profile
     req.body = mockedExtendedProfile;

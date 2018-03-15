@@ -17,6 +17,7 @@ import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
+import TokenService from "./services/tokenService";
 import spidStrategy from "./strategies/spidStrategy";
 import tokenStrategy from "./strategies/tokenStrategy";
 import TokenService from "./services/tokenService";

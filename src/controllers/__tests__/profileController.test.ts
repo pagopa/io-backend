@@ -79,14 +79,10 @@ describe("ProfileController#getProfile", () => {
   });
 
   it("calls the getProfile on the ProfileService with valid values", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetProfile.mockImplementation(() => {
-      return new Promise(resolve => {
-        process.nextTick(() => resolve(proxyUserResponse));
-      });
-    });
+    mockGetProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
 
     req.user = mockedUser;
 
@@ -103,14 +99,10 @@ describe("ProfileController#getProfile", () => {
   });
 
   it("calls the getProfile on the ProfileService with empty user", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetProfile.mockImplementation(() => {
-      return new Promise(resolve => {
-        process.nextTick(() => resolve(proxyUserResponse));
-      });
-    });
+    mockGetProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
 
     req.user = "";
 
@@ -130,16 +122,11 @@ describe("ProfileController#getProfile", () => {
   });
 
   it("calls the getProfile on the ProfileService with valid user but user is not in proxy", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetProfile.mockImplementation(() => {
-      return Promise.reject("reject");
-    });
+    mockGetProfile.mockReturnValue(Promise.reject(new Error("reject")));
 
-    res.status = jest.fn().mockImplementation(() => ({
-      json: jest.fn()
-    }));
     req.user = mockedUser;
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
@@ -152,6 +139,9 @@ describe("ProfileController#getProfile", () => {
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "reject"
+    });
   });
 });
 
@@ -161,14 +151,10 @@ describe("ProfileController#upsertProfile", () => {
   });
 
   it("calls the upsertProfile on the ProfileService with valid values", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockUpsertProfile.mockImplementation(() => {
-      return new Promise(resolve => {
-        process.nextTick(() => resolve(proxyUserResponse));
-      });
-    });
+    mockUpsertProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
 
     req.user = mockedUser;
     req.body = mockedUpsertUser;
@@ -189,14 +175,10 @@ describe("ProfileController#upsertProfile", () => {
   });
 
   it("calls the upsertProfile on the ProfileService with empty user and valid upsert user", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockUpsertProfile.mockImplementation(() => {
-      return new Promise(resolve => {
-        process.nextTick(() => resolve(proxyUserResponse));
-      });
-    });
+    mockUpsertProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
 
     req.user = "";
     req.body = mockedUpsertUser;
@@ -216,14 +198,10 @@ describe("ProfileController#upsertProfile", () => {
   });
 
   it("calls the upsertProfile on the ProfileService with valid user and empty upsert user", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockUpsertProfile.mockImplementation(() => {
-      return new Promise(resolve => {
-        process.nextTick(() => resolve(proxyUserResponse));
-      });
-    });
+    mockUpsertProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
 
     req.user = mockedUser;
     req.body = "";
@@ -243,19 +221,13 @@ describe("ProfileController#upsertProfile", () => {
   });
 
   it("calls the upsertProfile on the ProfileService with valid values but user is not in proxy", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockUpsertProfile.mockImplementation(() => {
-      return Promise.reject("reject");
-    });
+    mockUpsertProfile.mockReturnValue(Promise.reject(new Error("reject")));
 
     req.user = mockedUser;
     req.body = mockedUpsertUser;
-
-    res.status = jest.fn().mockImplementation(() => ({
-      json: jest.fn()
-    }));
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
@@ -270,5 +242,8 @@ describe("ProfileController#upsertProfile", () => {
       mockedUpsertUser
     );
     expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "reject"
+    });
   });
 });

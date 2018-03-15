@@ -1,9 +1,11 @@
+// tslint:disable:no-any
+
 /**
  * mockReq
  * @returns {{header, accepts, acceptsEncodings, acceptsEncoding, acceptsCharsets, acceptsCharset, acceptsLanguages, acceptsLanguage, range, param, is, reset: resetMock}}
  */
 
-export default function mockReq() {
+export default function mockReq(): any {
   const request = {
     accepts: jest.fn(),
     acceptsCharset: jest.fn(),
@@ -37,7 +39,7 @@ export default function mockReq() {
 /**
  * resetMock
  */
-export function resetMock(this: any) {
+export function resetMock(this: any): any {
   this.header.mockClear();
   this.accepts.mockClear();
   this.acceptsEncodings.mockClear();

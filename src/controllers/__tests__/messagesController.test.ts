@@ -13,7 +13,7 @@ const aTimestamp = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const anId = "string-id" as string;
+const anId: string = "string-id";
 
 const proxyMessagesResponse = {
   items: [
@@ -71,12 +71,12 @@ describe("MessagesController#getMessageByUser", () => {
   });
 
   it("calls the getMessageByUser on the messagesController with valid values", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetMessagesByUser.mockImplementation(() => {
-      return Promise.resolve(proxyMessagesResponse);
-    });
+    mockGetMessagesByUser.mockReturnValue(
+      Promise.resolve(proxyMessagesResponse)
+    );
 
     req.user = mockedUser;
 
@@ -93,12 +93,12 @@ describe("MessagesController#getMessageByUser", () => {
   });
 
   it("calls the getMessageByUser on the messagesController with empty user", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetMessagesByUser.mockImplementation(() => {
-      return Promise.resolve(proxyMessagesResponse);
-    });
+    mockGetMessagesByUser.mockReturnValue(
+      Promise.resolve(proxyMessagesResponse)
+    );
 
     req.user = "";
 
@@ -117,17 +117,12 @@ describe("MessagesController#getMessageByUser", () => {
   });
 
   it("calls the getMessageByUser on the messagesController with valid values but user is not in proxy", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetMessagesByUser.mockImplementation(() => {
-      return Promise.reject("reject");
-    });
+    mockGetMessagesByUser.mockReturnValue(Promise.reject(new Error("reject")));
 
     req.user = mockedUser;
-    res.status = jest.fn().mockImplementation(() => ({
-      json: jest.fn()
-    }));
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const messageService = new MessagesService(apiClient);
@@ -139,6 +134,9 @@ describe("MessagesController#getMessageByUser", () => {
 
     expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
     expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "reject"
+    });
   });
 });
 
@@ -148,12 +146,10 @@ describe("MessagesController#getMessage", () => {
   });
 
   it("calls the getMessage on the messagesController with valid values", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetMessage.mockImplementation(() => {
-      return Promise.resolve(proxyMessageResponse);
-    });
+    mockGetMessage.mockReturnValue(Promise.resolve(proxyMessageResponse));
 
     req.user = mockedUser;
     req.params = { id: anId };
@@ -171,12 +167,10 @@ describe("MessagesController#getMessage", () => {
   });
 
   it("calls the getMessage on the messagesController with empty user", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetMessage.mockImplementation(() => {
-      return Promise.resolve(proxyMessageResponse);
-    });
+    mockGetMessage.mockReturnValue(Promise.resolve(proxyMessageResponse));
 
     req.user = "";
     req.params = { id: anId };
@@ -196,18 +190,13 @@ describe("MessagesController#getMessage", () => {
   });
 
   it("calls the getMessage on the messagesController with valid user but user is not in proxy", async () => {
-    const req = mockReq() as any;
-    const res = mockRes() as any;
+    const req = mockReq();
+    const res = mockRes();
 
-    mockGetMessage.mockImplementation(() => {
-      return Promise.reject("reject");
-    });
+    mockGetMessage.mockReturnValue(Promise.reject(new Error("reject")));
 
     req.user = mockedUser;
     req.params = { id: anId };
-    res.status = jest.fn().mockImplementation(() => ({
-      json: jest.fn()
-    }));
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const messageService = new MessagesService(apiClient);
@@ -219,5 +208,8 @@ describe("MessagesController#getMessage", () => {
 
     expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
     expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "reject"
+    });
   });
 });
