@@ -42,6 +42,8 @@ export const SpidUser = t.interface({
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
 
+const messageErrorOnDecodeUser = "Unable to decode the user";
+
 /**
  * Converts a SPID User to a Proxy User.
  */
@@ -82,7 +84,7 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
   const result = SpidUser.decode(valueWithoutPrefix);
 
   return result.mapLeft(() => {
-    return new Error("Unable to decode the user");
+    return new Error(messageErrorOnDecodeUser);
   });
 }
 
@@ -95,7 +97,7 @@ export function extractUserFromRequest(
   const result = User.decode(from.user);
 
   return result.mapLeft(() => {
-    return new Error("Unable to decode the user");
+    return new Error(messageErrorOnDecodeUser);
   });
 }
 
@@ -108,6 +110,6 @@ export function extractUserFromJson(from: string): Either<Error, User> {
   const result = User.decode(json);
 
   return result.mapLeft(() => {
-    return new Error("Unable to decode the user");
+    return new Error(messageErrorOnDecodeUser);
   });
 }
