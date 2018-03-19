@@ -5,6 +5,7 @@
  */
 
 import * as express from "express";
+import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
 import {
   extractUserFromRequest,
@@ -26,6 +27,9 @@ export default class AuthenticationController {
    */
   // tslint:disable-next-line:no-any
   public acs(userPayload: any, res: express.Response): void {
+    winston.debug("Called assertion consumer service with data:");
+    winston.debug(userPayload);
+
     const errorOrUser = validateSpidUser(userPayload);
 
     errorOrUser.fold(
