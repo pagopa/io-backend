@@ -71,7 +71,17 @@ export function toAppUser(from: SpidUser): User {
  */
 // tslint:disable-next-line:no-any
 export function validateSpidUser(value: any): Either<Error, SpidUser> {
-  const result = SpidUser.decode(value);
+  const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
+  const fiscalNumberWithoutPrefix = value.fiscalNumber.replace(
+    FISCAL_NUMBER_INTERNATIONAL_PREFIX,
+    ""
+  );
+  const valueWithoutPrefix = {
+    ...value,
+    fiscalNumber: fiscalNumberWithoutPrefix
+  };
+
+  const result = SpidUser.decode(valueWithoutPrefix);
 
   return result.mapLeft(() => {
     return new Error(messageErrorOnDecodeUser);
