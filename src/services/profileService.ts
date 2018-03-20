@@ -4,6 +4,7 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
+import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
@@ -59,28 +60,29 @@ export default class ProfileService {
   /**
    * Upsert the profile of a specific user.
    */
-  public upsertProfile(
+  public async upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
   ): Promise<ProfileWithEmail> {
-    return new Promise(async (resolve, reject) => {
-      const profilePayload = await this.apiClient
-        .getClient(user.fiscal_code)
-        .upsertProfile({ body: upsertProfile });
+    const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
+      body: upsertProfile
+    };
+    const profilePayload = await this.apiClient
+      .getClient(user.fiscal_code)
+      .upsertProfile(upsertOptions);
 
-      const errorOrApiProfile = UpsertProfileOKResponse.decode(profilePayload);
-      if (isLeft(errorOrApiProfile)) {
-        const errorOrProblemJson = ProblemJson.decode(profilePayload);
+    const errorOrApiProfile = UpsertProfileOKResponse.decode(profilePayload);
+    if (isLeft(errorOrApiProfile)) {
+      const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
-        if (isLeft(errorOrProblemJson)) {
-          return reject(new Error("Unknown response."));
-        }
-
-        return reject(new Error("Api error."));
+      if (isLeft(errorOrProblemJson)) {
+        throw new Error("Unknown response.");
+      } else {
+        throw new Error("Api error.");
       }
+    }
 
-      const apiProfile = errorOrApiProfile.value;
-      return resolve(toAppProfileWithEmail(apiProfile, user));
-    });
+    const apiProfile = errorOrApiProfile.value;
+    return toAppProfileWithEmail(apiProfile, user);
   }
 }

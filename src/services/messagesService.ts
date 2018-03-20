@@ -17,6 +17,9 @@ import { Service, toAppService } from "../types/service";
 import { User } from "../types/user";
 import { IApiClientFactoryInterface } from "./iApiClientFactory";
 
+const messageErrorOnUnknownResponse = "Unknown response.";
+const messageErrorOnApiError = "Api error.";
+
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
@@ -36,10 +39,10 @@ export default class MessagesService {
         const errorOrProblemJson = ProblemJson.decode(messagesPayload);
 
         if (isLeft(errorOrProblemJson)) {
-          return reject(new Error("Unknown response."));
+          return reject(new Error(messageErrorOnUnknownResponse));
         }
 
-        return reject(new Error("Api error."));
+        return reject(new Error(messageErrorOnApiError));
       }
 
       const apiMessages = errorOrApiMessages.value;
@@ -72,10 +75,10 @@ export default class MessagesService {
         const errorOrProblemJson = ProblemJson.decode(messagePayload);
 
         if (isLeft(errorOrProblemJson)) {
-          return reject(new Error("Unknown response."));
+          return reject(new Error(messageErrorOnUnknownResponse));
         }
 
-        return reject(new Error("Api error."));
+        return reject(new Error(messageErrorOnApiError));
       }
 
       const apiMessage = errorOrApiMessage.value;
@@ -97,10 +100,10 @@ export default class MessagesService {
         const errorOrProblemJson = ProblemJson.decode(servicePayload);
 
         if (isLeft(errorOrProblemJson)) {
-          return reject(new Error("Unknown response."));
+          return reject(new Error(messageErrorOnUnknownResponse));
         }
 
-        return reject(new Error("Api error."));
+        return reject(new Error(messageErrorOnApiError));
       }
 
       const apiService = errorOrApiService.value;
