@@ -110,4 +110,32 @@ export default class AuthenticationController {
       message: error.message
     });
   }
+
+  /**
+   * Returns data about the current user session
+   */
+  public getSessionState(req: express.Request, res: express.Response): void {
+    if (req.headers && req.headers.authorization) {
+      const parts = req.headers.authorization.split(" ");
+      if (parts.length === 2) {
+        const scheme = parts[0];
+        const credentials = parts[1];
+
+        if (/^Bearer$/i.test(scheme)) {
+          this.sessionStorage.get(credentials).then(
+            () => {
+              res.json({token: credentials});
+            }
+          ).catch(
+            () => {
+
+            }
+          );
+
+        }
+      }
+    } else {
+      res.status(500);
+    }
+  }
 }

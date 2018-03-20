@@ -123,6 +123,10 @@ export function newApp(env: EnvironmentNodeEnv): Express {
     };
   };
 
+  app.get("/session", (req: express.Request, res: express.Response) => {
+    acsController.getSessionState(req, res);
+  });
+
   app.post("/assertionConsumerService", withSpidAuth(acsController));
 
   app.get("/metadata", (_, res: express.Response) => {
