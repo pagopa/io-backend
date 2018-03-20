@@ -6,7 +6,7 @@ import ProfileService from "../profileService";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidAPIEmail = "from_api@example.com" as EmailAddress;
-const aValidSPIDEmail = "from_spid@example.com";
+const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 
 const validApiProfileResponse = {
   email: aValidAPIEmail,
@@ -66,7 +66,7 @@ const mockedUser: User = {
   name: "Luca",
   nameID: "lussoluca",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: aValidAPIEmail,
+  preferred_email: aValidSPIDEmail,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   token: "HexToKen"
