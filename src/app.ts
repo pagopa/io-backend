@@ -71,7 +71,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
   // Add security to http headers.
   app.use(helmet());
   // Add a request logger.
-  app.use(morgan(env || EnvironmentNodeEnvEnum.DEVELOPMENT));
+  app.use(morgan("combined"));
   // Parse the incoming request body. This is needed by Passport spid strategy.
   app.use(bodyParser.json());
   // Parse an urlencoded body.

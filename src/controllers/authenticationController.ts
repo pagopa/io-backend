@@ -5,6 +5,7 @@
  */
 
 import * as express from "express";
+import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
 import TokenService from "../services/tokenService";
 import {
@@ -28,14 +29,16 @@ export default class AuthenticationController {
    */
   // tslint:disable-next-line:no-any
   public acs(userPayload: any, res: express.Response): void {
+    winston.log(
+      "info",
+      "Called assertion consumer service with data:",
+      userPayload
+    );
+
     const errorOrUser = validateSpidUser(userPayload);
 
     errorOrUser.fold(
-      (error: Error) => {
-        res.status(500).json({
-          message: error.message
-        });
-      },
+      (error: Error) => this.return500Error(error, res),
       (spidUser: SpidUser) => {
         const user = toAppUser(spidUser, this.tokenService.getNewToken());
 
@@ -57,11 +60,7 @@ export default class AuthenticationController {
     const errorOrUser = extractUserFromRequest(req);
 
     errorOrUser.fold(
-      (error: Error) => {
-        res.status(500).json({
-          message: error.message
-        });
-      },
+      (error: Error) => this.return500Error(error, res),
       (user: User) => {
         // Delete the Redis token.
         this.sessionStorage.del(user.token);
@@ -104,5 +103,11 @@ export default class AuthenticationController {
       .status(200)
       .set("Content-Type", "application/xml")
       .send(metadata);
+  }
+
+  private return500Error(error: Error, res: express.Response): void {
+    res.status(500).json({
+      message: error.message
+    });
   }
 }
