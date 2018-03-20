@@ -26,88 +26,80 @@ export default class MessagesService {
   /**
    * Retrieves all messages for a specific user.
    */
-  public getMessagesByUser(user: User): Promise<Messages> {
-    return new Promise(async (resolve, reject) => {
-      const messagesPayload = await this.apiClient
-        .getClient(user.fiscal_code)
-        .getMessagesByUser();
+  public async getMessagesByUser(user: User): Promise<Messages> {
+    const messagesPayload = await this.apiClient
+      .getClient(user.fiscal_code)
+      .getMessagesByUser();
 
-      const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
-        messagesPayload
-      );
-      if (isLeft(errorOrApiMessages)) {
-        const errorOrProblemJson = ProblemJson.decode(messagesPayload);
+    const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
+      messagesPayload
+    );
+    if (isLeft(errorOrApiMessages)) {
+      const errorOrProblemJson = ProblemJson.decode(messagesPayload);
 
-        if (isLeft(errorOrProblemJson)) {
-          return reject(new Error(messageErrorOnUnknownResponse));
-        }
-
-        return reject(new Error(messageErrorOnApiError));
+      if (isLeft(errorOrProblemJson)) {
+        throw new Error(messageErrorOnUnknownResponse);
       }
 
-      const apiMessages = errorOrApiMessages.value;
+      throw new Error(messageErrorOnApiError);
+    }
 
-      if (apiMessages.items === undefined) {
-        return resolve({});
-      }
+    const apiMessages = errorOrApiMessages.value;
 
-      const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-      return resolve({
-        items: appMessages,
-        pageSize: apiMessages.pageSize
-      });
-    });
+    if (apiMessages.items === undefined) {
+      return {};
+    }
+
+    const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
+    return {
+      items: appMessages,
+      pageSize: apiMessages.pageSize
+    };
   }
 
   /**
    * Retrieves a specific message.
    */
-  public getMessage(user: User, messageId: string): Promise<Message> {
-    return new Promise(async (resolve, reject) => {
-      const messagePayload = await this.apiClient
-        .getClient(user.fiscal_code)
-        .getMessage(messageId);
+  public async getMessage(user: User, messageId: string): Promise<Message> {
+    const messagePayload = await this.apiClient
+      .getClient(user.fiscal_code)
+      .getMessage(messageId);
 
-      const errorOrApiMessage = MessageResponseWithContent.decode(
-        messagePayload
-      );
-      if (isLeft(errorOrApiMessage)) {
-        const errorOrProblemJson = ProblemJson.decode(messagePayload);
+    const errorOrApiMessage = MessageResponseWithContent.decode(messagePayload);
+    if (isLeft(errorOrApiMessage)) {
+      const errorOrProblemJson = ProblemJson.decode(messagePayload);
 
-        if (isLeft(errorOrProblemJson)) {
-          return reject(new Error(messageErrorOnUnknownResponse));
-        }
-
-        return reject(new Error(messageErrorOnApiError));
+      if (isLeft(errorOrProblemJson)) {
+        throw new Error(messageErrorOnUnknownResponse);
       }
 
-      const apiMessage = errorOrApiMessage.value;
-      return resolve(toAppMessageWithContent(apiMessage));
-    });
+      throw new Error(messageErrorOnApiError);
+    }
+
+    const apiMessage = errorOrApiMessage.value;
+    return toAppMessageWithContent(apiMessage);
   }
 
   /**
    * Retrieve all the information about the service that has sent a message.
    */
-  public getService(user: User, serviceId: string): Promise<Service> {
-    return new Promise(async (resolve, reject) => {
-      const servicePayload = await this.apiClient
-        .getClient(user.fiscal_code)
-        .getService(serviceId);
+  public async getService(user: User, serviceId: string): Promise<Service> {
+    const servicePayload = await this.apiClient
+      .getClient(user.fiscal_code)
+      .getService(serviceId);
 
-      const errorOrApiService = ServicePublic.decode(servicePayload);
-      if (isLeft(errorOrApiService)) {
-        const errorOrProblemJson = ProblemJson.decode(servicePayload);
+    const errorOrApiService = ServicePublic.decode(servicePayload);
+    if (isLeft(errorOrApiService)) {
+      const errorOrProblemJson = ProblemJson.decode(servicePayload);
 
-        if (isLeft(errorOrProblemJson)) {
-          return reject(new Error(messageErrorOnUnknownResponse));
-        }
-
-        return reject(new Error(messageErrorOnApiError));
+      if (isLeft(errorOrProblemJson)) {
+        throw new Error(messageErrorOnUnknownResponse);
       }
 
-      const apiService = errorOrApiService.value;
-      return resolve(toAppService(apiService));
-    });
+      throw new Error(messageErrorOnApiError);
+    }
+
+    const apiService = errorOrApiService.value;
+    return toAppService(apiService);
   }
 }
