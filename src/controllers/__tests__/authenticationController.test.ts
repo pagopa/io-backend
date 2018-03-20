@@ -75,6 +75,8 @@ const aTimestamp = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
+const aValidname = "Giuseppe Maria";
+const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 
 // authentication constant
 const mockToken =
@@ -85,9 +87,9 @@ const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
+  name: aValidname,
   nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  nameIDFormat: aValidIDFormat,
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   spid_idp: "xxx",
@@ -102,9 +104,9 @@ const validUserPayload = {
   issuer: {
     _: "xxx"
   },
-  name: "Giuseppe Maria",
+  name: aValidname,
   nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  nameIDFormat: aValidIDFormat,
   sessionIndex: "123sessionIndex"
 };
 // invalidUser lacks the required email field.
@@ -114,9 +116,9 @@ const invalidUserPayload = {
   issuer: {
     _: "xxx"
   },
-  name: "Giuseppe Maria",
+  name: aValidname,
   nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  nameIDFormat: aValidIDFormat,
   sessionIndex: "123sessionIndex"
 };
 

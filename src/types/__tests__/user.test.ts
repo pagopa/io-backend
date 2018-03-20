@@ -9,7 +9,6 @@ import { Issuer } from "../issuer";
 import {
   extractUserFromJson,
   extractUserFromRequest,
-  SpidUser,
   toAppUser,
   User,
   validateSpidUser
@@ -22,7 +21,7 @@ const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
 
 // mock for a valid SpidUser
-const mockedSpidUser: SpidUser = {
+const mockedSpidUser: any = {
   email: anEmailAddress,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
@@ -31,6 +30,11 @@ const mockedSpidUser: SpidUser = {
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   sessionIndex: "sessionIndex"
+};
+
+// mock for a invalid SpidUser
+const mockedInvalidSpidUser: any = {
+  aKey: "aValue"
 };
 
 // mock for a valid User
@@ -90,7 +94,7 @@ describe("user type", () => {
     }
 
     // validate incorrect SpidUser(User). Return left.
-    const userDataKO = validateSpidUser(mockedUser);
+    const userDataKO = validateSpidUser(mockedInvalidSpidUser);
 
     expect(isLeft(userDataKO)).toBeTruthy();
     if (isLeft(userDataKO)) {

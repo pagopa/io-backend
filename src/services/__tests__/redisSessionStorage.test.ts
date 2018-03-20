@@ -49,9 +49,8 @@ describe("sessionStorage", () => {
     );
     const spy = jest.spyOn(mockedRedisClient, "set");
 
-    const setValue = sessionStorage.set(mockedUser.token, mockedUser);
+    sessionStorage.set(mockedUser.token, mockedUser);
 
-    expect(setValue).toBe(undefined);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -97,6 +96,7 @@ describe("sessionStorage", () => {
 
     await flushPromises();
 
+    // tslint:disable-next-line:no-identical-functions
     getValue.catch(val => {
       expect(val).toBeDefined();
       expect(val._tag).toBe("Left");
@@ -142,9 +142,8 @@ describe("sessionStorage", () => {
     // TODO: here "hdel" should be refactored to "del"
     const spy = jest.spyOn(mockedRedisClient, "hdel");
 
-    const setValue = sessionStorage.del(mockedUser.token);
+    sessionStorage.del(mockedUser.token);
 
-    expect(setValue).toBe(undefined);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });

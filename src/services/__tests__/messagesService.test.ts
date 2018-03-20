@@ -4,9 +4,17 @@ import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 
-const validFiscalCode = "XUZTCT88A51Y311X";
-const validMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
-const validServiceId = "5a563817fcc896087002ea46c49a";
+const aValidFiscalCode = "XUZTCT88A51Y311X";
+const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
+const aValidSubject = "Lorem ipsum";
+const aValidDepartmentName = "Department name";
+const aValidOrganizationName = "Organization name";
+const aValidServiceID = "5a563817fcc896087002ea46c49a";
+const aValidServiceName = "Service name";
+
+const messageErrorOnUnknownResponse = "Unknown response.";
+const messageErrorOnApiError = "Api error.";
+
 const validApiMessagesResponse = {
   items: [
     {
@@ -53,7 +61,7 @@ const validApiMessageResponse = {
     content: {
       markdown:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
-      subject: "Lorem ipsum"
+      subject: aValidSubject
     },
     fiscalCode: "XUZTCT88A51Y311X",
     id: "01C3XE80E6X8PHY0NM8S8SDS1E",
@@ -67,7 +75,7 @@ const invalidApiMessageResponse = {
   message: {
     content: {
       markdown: "Lorem ipsum dolor sit amet",
-      subject: "Lorem ipsum"
+      subject: aValidSubject
     },
     id: "01C3XE80E6X8PHY0NM8S8SDS1E",
     senderServiceId: "5a563817fcc896087002ea46c49a"
@@ -81,25 +89,25 @@ const proxyMessageResponse = {
   markdown:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
   sender_service_id: "5a563817fcc896087002ea46c49a",
-  subject: "Lorem ipsum"
+  subject: aValidSubject
 };
 const validApiServiceResponse = {
-  departmentName: "Department name",
-  organizationName: "Organization name",
-  serviceId: "5a563817fcc896087002ea46c49a",
-  serviceName: "Service name",
+  departmentName: aValidDepartmentName,
+  organizationName: aValidOrganizationName,
+  serviceId: aValidServiceID,
+  serviceName: aValidServiceName,
   version: 42
 };
 const invalidApiServiceResponse = {
-  departmentName: "Department name",
-  serviceId: "5a563817fcc896087002ea46c49a",
+  departmentName: aValidDepartmentName,
+  serviceId: aValidServiceID,
   version: 42
 };
 const proxyServiceResponse = {
-  departmentName: "Department name",
-  organizationName: "Organization name",
-  serviceId: "5a563817fcc896087002ea46c49a",
-  serviceName: "Service name",
+  departmentName: aValidDepartmentName,
+  organizationName: aValidOrganizationName,
+  serviceId: aValidServiceID,
+  serviceName: aValidServiceName,
   version: 42
 };
 const problemJson = {
@@ -111,7 +119,7 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: validFiscalCode as FiscalCode,
+  fiscal_code: aValidFiscalCode as FiscalCode,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -155,12 +163,12 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
     expect(res).toEqual(proxyMessagesResponse);
   });
 
-  it("returns an error if the API returns an error", async () => {
+  it("returns an error if the getMessagesByUser API returns an error", async () => {
     mockGetMessagesByUser.mockImplementation(() => {
       return problemJson;
     });
@@ -170,13 +178,13 @@ describe("MessageService#getMessagesByUser", () => {
     try {
       await service.getMessagesByUser(mockedUser);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
       expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-      expect(e).toEqual(new Error("Api error."));
+      expect(e).toEqual(new Error(messageErrorOnApiError));
     }
   });
 
-  it("returns unknown response if the response from the API returns something wrong", async () => {
+  it("returns unknown response if the response from the getMessagesByUser API returns something wrong", async () => {
     mockGetMessagesByUser.mockImplementation(() => {
       return invalidApiMessagesResponse;
     });
@@ -186,9 +194,9 @@ describe("MessageService#getMessagesByUser", () => {
     try {
       await service.getMessagesByUser(mockedUser);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
       expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-      expect(e).toEqual(new Error("Unknown response."));
+      expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }
   });
 });
@@ -205,14 +213,14 @@ describe("MessageService#getMessage", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessage(mockedUser, validMessageId);
+    const res = await service.getMessage(mockedUser, aValidMessageId);
 
-    expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
-    expect(mockGetMessage).toHaveBeenCalledWith(validMessageId);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
     expect(res).toEqual(proxyMessageResponse);
   });
 
-  it("returns an error if the API returns an error", async () => {
+  it("returns an error if the getMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(() => {
       return problemJson;
     });
@@ -220,15 +228,15 @@ describe("MessageService#getMessage", () => {
     const service = new MessageService(api);
 
     try {
-      await service.getMessage(mockedUser, validMessageId);
+      await service.getMessage(mockedUser, aValidMessageId);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
-      expect(mockGetMessage).toHaveBeenCalledWith(validMessageId);
-      expect(e).toEqual(new Error("Api error."));
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
+      expect(e).toEqual(new Error(messageErrorOnApiError));
     }
   });
 
-  it("returns unknown response if the response from the API returns something wrong", async () => {
+  it("returns unknown response if the response from the getMessage API returns something wrong", async () => {
     mockGetMessage.mockImplementation(() => {
       return invalidApiMessageResponse;
     });
@@ -236,11 +244,11 @@ describe("MessageService#getMessage", () => {
     const service = new MessageService(api);
 
     try {
-      await service.getMessage(mockedUser, validMessageId);
+      await service.getMessage(mockedUser, aValidMessageId);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
-      expect(mockGetMessage).toHaveBeenCalledWith(validMessageId);
-      expect(e).toEqual(new Error("Unknown response."));
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
+      expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }
   });
 });
@@ -257,10 +265,10 @@ describe("MessageService#getService", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getService(mockedUser, validServiceId);
+    const res = await service.getService(mockedUser, aValidServiceID);
 
-    expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
-    expect(mockGetService).toHaveBeenCalledWith(validServiceId);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
     expect(res).toEqual(proxyServiceResponse);
   });
 
@@ -272,11 +280,11 @@ describe("MessageService#getService", () => {
     const service = new MessageService(api);
 
     try {
-      await service.getService(mockedUser, validServiceId);
+      await service.getService(mockedUser, aValidServiceID);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
-      expect(mockGetService).toHaveBeenCalledWith(validServiceId);
-      expect(e).toEqual(new Error("Api error."));
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
+      expect(e).toEqual(new Error(messageErrorOnApiError));
     }
   });
 
@@ -288,11 +296,11 @@ describe("MessageService#getService", () => {
     const service = new MessageService(api);
 
     try {
-      await service.getService(mockedUser, validServiceId);
+      await service.getService(mockedUser, aValidServiceID);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(validFiscalCode);
-      expect(mockGetService).toHaveBeenCalledWith(validServiceId);
-      expect(e).toEqual(new Error("Unknown response."));
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
+      expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }
   });
 });

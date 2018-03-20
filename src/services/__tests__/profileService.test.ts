@@ -4,44 +4,47 @@ import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
 
-const validFiscalCode = "XUZTCT88A51Y311X";
+const aValidFiscalCode = "XUZTCT88A51Y311X";
+const aValidAPIEmail = "from_api@example.com";
+const aValidSPIDEmail = "from_spid@example.com";
+
 const validApiProfileResponse = {
-  email: "from_api@example.com",
+  email: aValidAPIEmail,
   isInboxEnabled: true,
   preferredLanguages: "it_IT",
   version: 42
 };
 const proxyProfileWithEmailResponse = {
-  email: "from_api@example.com",
+  email: aValidAPIEmail,
   family_name: "Lusso",
   fiscal_code: "XUZTCT88A51Y311X",
   has_profile: true,
   is_email_set: true,
   is_inbox_enabled: true,
   name: "Luca",
-  preferred_email: "from_spid@example.com",
+  preferred_email: aValidSPIDEmail,
   preferred_languages: "it_IT",
   version: 42
 };
 const proxyProfileWithoutEmailResponse = {
   family_name: "Lusso",
-  fiscal_code: validFiscalCode,
+  fiscal_code: aValidFiscalCode,
   has_profile: false,
   is_email_set: false,
   is_inbox_enabled: false,
   name: "Luca",
-  preferred_email: "from_spid@example.com",
+  preferred_email: aValidSPIDEmail,
   version: 0
 };
 const proxyUpsertRequest = {
-  email: "from_api@example.com" as EmailAddress,
+  email: aValidAPIEmail as EmailAddress,
   is_inbox_enabled: true,
   preferred_languages: "it_IT",
   version: 42
 };
 const ApiProfileUpsertRequest = {
   body: {
-    email: "from_api@example.com",
+    email: aValidAPIEmail,
     is_inbox_enabled: true,
     preferred_languages: "it_IT",
     version: 42
@@ -59,7 +62,7 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Lusso",
-  fiscal_code: validFiscalCode as FiscalCode,
+  fiscal_code: aValidFiscalCode as FiscalCode,
   name: "Luca",
   nameID: "lussoluca",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
