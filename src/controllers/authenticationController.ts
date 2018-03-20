@@ -124,11 +124,11 @@ export default class AuthenticationController {
         if (/^Bearer$/i.test(scheme)) {
           this.sessionStorage.get(credentials).then(
             () => {
-              res.json({token: credentials});
+              res.json({expired: false});
             }
           ).catch(
             () => {
-
+              res.json({expired: false, newToken: ""});
             }
           );
 
