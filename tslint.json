@@ -30,6 +30,7 @@
     // "no-this": true,
     // "no-class": true,
     "no-mixed-interface": false,
+    "no-import-side-effect": true,
     "prettier": true
   },
   "rulesDirectory": [],
