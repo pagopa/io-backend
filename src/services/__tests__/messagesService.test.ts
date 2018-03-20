@@ -4,7 +4,8 @@ import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X";
+const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
+const aValidEmail = "test@example.com" as EmailAddress;
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
 const aValidDepartmentName = "Department name";
@@ -119,11 +120,11 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aValidFiscalCode as FiscalCode,
+  fiscal_code: aValidFiscalCode,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: "test@example.com" as EmailAddress,
+  preferred_email: aValidEmail,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   token: "HexToKen"

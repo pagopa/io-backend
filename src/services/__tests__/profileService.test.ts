@@ -4,8 +4,8 @@ import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X";
-const aValidAPIEmail = "from_api@example.com";
+const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
+const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com";
 
 const validApiProfileResponse = {
@@ -37,7 +37,7 @@ const proxyProfileWithoutEmailResponse = {
   version: 0
 };
 const proxyUpsertRequest = {
-  email: aValidAPIEmail as EmailAddress,
+  email: aValidAPIEmail,
   is_inbox_enabled: true,
   preferred_languages: "it_IT",
   version: 42
@@ -62,11 +62,11 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Lusso",
-  fiscal_code: aValidFiscalCode as FiscalCode,
+  fiscal_code: aValidFiscalCode,
   name: "Luca",
   nameID: "lussoluca",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: "from_spid@example.com" as EmailAddress,
+  preferred_email: aValidAPIEmail,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   token: "HexToKen"
