@@ -3,9 +3,8 @@
  * validate and convert type to and from them.
  */
 
-import * as crypto from "crypto";
 import * as express from "express";
-import { Either } from "fp-ts/lib/Either";
+import { Either, left } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import { EmailAddress } from "./api/EmailAddress";
@@ -47,11 +46,7 @@ const messageErrorOnDecodeUser = "Unable to decode the user";
 /**
  * Converts a SPID User to a Proxy User.
  */
-export function toAppUser(from: SpidUser): User {
-  // Use the crypto.randomBytes as token.
-  const SESSION_TOKEN_LENGTH_BYTES = 48;
-  const token = crypto.randomBytes(SESSION_TOKEN_LENGTH_BYTES).toString("hex");
-
+export function toAppUser(from: SpidUser, token: string): User {
   return {
     created_at: new Date().getTime(),
     family_name: from.familyName,
@@ -71,6 +66,10 @@ export function toAppUser(from: SpidUser): User {
  */
 // tslint:disable-next-line:no-any
 export function validateSpidUser(value: any): Either<Error, SpidUser> {
+  if (!value.hasOwnProperty("fiscalNumber")) {
+    return left(new Error(messageErrorOnDecodeUser));
+  }
+
   const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
   const fiscalNumberWithoutPrefix = value.fiscalNumber.replace(
     FISCAL_NUMBER_INTERNATIONAL_PREFIX,

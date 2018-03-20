@@ -13,7 +13,7 @@
     "lint": "tslint -p . -c tslint.json -t verbose",
     "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
     "prettify": "prettier --write './**/*.ts'",
-    "test": "jest --coverage",
+    "test": "jest",
     "start": "node src/server.js"
   },
   "repository": {
@@ -63,8 +63,12 @@
     "@types/jest": "^22.0.0",
     "@types/superagent": "^3.5.7",
     "@types/supertest": "^2.0.4",
+    "@types/lolex": "2.1.1",
+    "danger": "^3.1.7",
+    "danger-plugin-digitalcitizenship": "https://github.com/teamdigitale/danger-plugin-digitalcitizenship#v0.0.2",
     "fp-ts": "^1.0.0",
     "jest": "^22.0.0",
+    "lolex": "2.3.2",
     "ms-rest-js": "^0.2.5",
     "nodemon": "^1.11.0",
     "prettier": "^1.7.4",
@@ -77,9 +81,7 @@
     "tslint-config-prettier": "^1.6.0",
     "tslint-immutable": "^4.4.0",
     "tslint-plugin-prettier": "^1.3.0",
-    "tslint-sonarts": "^1.6.0",
-    "danger": "^3.1.7",
-    "danger-plugin-digitalcitizenship": "https://github.com/teamdigitale/danger-plugin-digitalcitizenship#v0.0.2"
+    "tslint-sonarts": "^1.6.0"
   },
   "jest": {
     "testEnvironment": "node",
@@ -96,8 +98,9 @@
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/**/*.{js,ts}",
-      "!src/api/",
+      "src/**/*.{ts}",
+      "!src/api/*.{ts}",
+      "!src/api/models/*.{ts}",
       "!src/**/*.d.ts"
     ]
   }

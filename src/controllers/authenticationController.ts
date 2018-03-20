@@ -7,6 +7,7 @@
 import * as express from "express";
 import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
+import TokenService from "../services/tokenService";
 import {
   extractUserFromRequest,
   SpidUser,
@@ -19,7 +20,8 @@ export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
     private readonly samlCert: string,
-    private readonly spidStrategy: SpidStrategy
+    private readonly spidStrategy: SpidStrategy,
+    private readonly tokenService: TokenService
   ) {}
 
   /**
@@ -38,7 +40,7 @@ export default class AuthenticationController {
     errorOrUser.fold(
       (error: Error) => this.return500Error(error, res),
       (spidUser: SpidUser) => {
-        const user = toAppUser(spidUser);
+        const user = toAppUser(spidUser, this.tokenService.getNewToken());
 
         this.sessionStorage.set(user.token, user);
 

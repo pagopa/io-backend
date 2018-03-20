@@ -103,6 +103,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     fiscal_code: user.fiscal_code,
     has_profile: false,
     is_email_set: false,
+    is_inbox_enabled: false,
     name: user.name,
     preferred_email: user.preferred_email,
     version: 0 as NonNegativeNumber
