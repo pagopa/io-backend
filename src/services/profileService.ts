@@ -4,6 +4,7 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
+import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
@@ -17,6 +18,9 @@ import {
 } from "../types/profile";
 import { User } from "../types/user";
 import { IApiClientFactoryInterface } from "./iApiClientFactory";
+
+const profileErrorOnUnknownResponse = "Unknown response.";
+const profileErrorOnApiError = "Api error.";
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -37,19 +41,25 @@ export default class ProfileService {
         const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
         if (isLeft(errorOrProblemJson)) {
-          return reject(new Error("Unknown response."));
+          winston.log(
+            "error",
+            "Unknown response from getProfile API:",
+            profilePayload
+          );
+          return reject(new Error(profileErrorOnUnknownResponse));
+        } else {
+          const problemJson = errorOrProblemJson.value;
+
+          // If the profile doesn't exists on the API we still
+          // return 200 to the App with the information we have
+          // retrieved from SPID.
+          if (problemJson.status === 404) {
+            return resolve(toAppProfileWithoutEmail(user));
+          }
+
+          winston.log("error", "API error in getProfile: %s", profilePayload);
+          return reject(new Error(profileErrorOnApiError));
         }
-
-        const problemJson = errorOrProblemJson.value;
-
-        // If the profile doesn't exists on the API we still
-        // return 200 to the App with the information we have
-        // retrieved from SPID.
-        if (problemJson.status === 404) {
-          return resolve(toAppProfileWithoutEmail(user));
-        }
-
-        return reject(new Error("Api error."));
       }
 
       const apiProfile = errorOrApiProfile.value;
@@ -76,9 +86,15 @@ export default class ProfileService {
       const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
       if (isLeft(errorOrProblemJson)) {
-        throw new Error("Unknown response.");
+        winston.log(
+          "error",
+          "Unknown response from upsertProfile API:",
+          profilePayload
+        );
+        throw new Error(profileErrorOnUnknownResponse);
       } else {
-        throw new Error("Api error.");
+        winston.log("error", "API error in upsertProfile:", profilePayload);
+        throw new Error(profileErrorOnApiError);
       }
     }
 

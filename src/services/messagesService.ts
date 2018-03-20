@@ -3,6 +3,7 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
+import * as winston from "winston";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
@@ -39,10 +40,20 @@ export default class MessagesService {
         const errorOrProblemJson = ProblemJson.decode(messagesPayload);
 
         if (isLeft(errorOrProblemJson)) {
+          winston.log(
+            "error",
+            "Unknown response from getMessagesByUser API:",
+            messagesPayload
+          );
           return reject(new Error(messageErrorOnUnknownResponse));
+        } else {
+          winston.log(
+            "error",
+            "API error in getMessagesByUser:",
+            messagesPayload
+          );
+          return reject(new Error(messageErrorOnApiError));
         }
-
-        return reject(new Error(messageErrorOnApiError));
       }
 
       const apiMessages = errorOrApiMessages.value;
@@ -75,10 +86,16 @@ export default class MessagesService {
         const errorOrProblemJson = ProblemJson.decode(messagePayload);
 
         if (isLeft(errorOrProblemJson)) {
+          winston.log(
+            "error",
+            "Unknown response from getMessage API:",
+            messagePayload
+          );
           return reject(new Error(messageErrorOnUnknownResponse));
+        } else {
+          winston.log("error", "API error in getMessage:", messagePayload);
+          return reject(new Error(messageErrorOnApiError));
         }
-
-        return reject(new Error(messageErrorOnApiError));
       }
 
       const apiMessage = errorOrApiMessage.value;
@@ -100,10 +117,16 @@ export default class MessagesService {
         const errorOrProblemJson = ProblemJson.decode(servicePayload);
 
         if (isLeft(errorOrProblemJson)) {
+          winston.log(
+            "error",
+            "Unknown response from getService API:",
+            servicePayload
+          );
           return reject(new Error(messageErrorOnUnknownResponse));
+        } else {
+          winston.log("error", "API error in getService:", servicePayload);
+          return reject(new Error(messageErrorOnApiError));
         }
-
-        return reject(new Error(messageErrorOnApiError));
       }
 
       const apiService = errorOrApiService.value;

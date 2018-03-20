@@ -27,8 +27,11 @@ export default class AuthenticationController {
    */
   // tslint:disable-next-line:no-any
   public acs(userPayload: any, res: express.Response): void {
-    winston.info("Called assertion consumer service with data:");
-    winston.info(userPayload);
+    winston.log(
+      "info",
+      "Called assertion consumer service with data:",
+      userPayload
+    );
 
     const errorOrUser = validateSpidUser(userPayload);
 
