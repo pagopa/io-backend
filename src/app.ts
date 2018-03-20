@@ -64,7 +64,7 @@ if (process.env.NODE_ENV !== "dev") {
 // Add security to http headers.
 app.use(helmet());
 // Add a request logger.
-app.use(morgan(process.env.NODE_ENV || "dev"));
+app.use(morgan("combined"));
 // Parse the incoming request body. This is needed by Passport spid strategy.
 app.use(bodyParser.json());
 // Parse an urlencoded body.
