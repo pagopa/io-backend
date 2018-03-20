@@ -28,43 +28,41 @@ export default class ProfileService {
   /**
    * Retrieves the profile for a specific user.
    */
-  public getProfile(
+  public async getProfile(
     user: User
   ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
-    return new Promise(async (resolve, reject) => {
-      const profilePayload = await this.apiClient
-        .getClient(user.fiscal_code)
-        .getProfile();
+    const profilePayload = await this.apiClient
+      .getClient(user.fiscal_code)
+      .getProfile();
 
-      const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
-      if (isLeft(errorOrApiProfile)) {
-        const errorOrProblemJson = ProblemJson.decode(profilePayload);
+    const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
+    if (isLeft(errorOrApiProfile)) {
+      const errorOrProblemJson = ProblemJson.decode(profilePayload);
 
-        if (isLeft(errorOrProblemJson)) {
-          winston.log(
-            "error",
-            "Unknown response from getProfile API:",
-            profilePayload
-          );
-          return reject(new Error(profileErrorOnUnknownResponse));
-        } else {
-          const problemJson = errorOrProblemJson.value;
+      if (isLeft(errorOrProblemJson)) {
+        winston.log(
+          "error",
+          "Unknown response from getProfile API:",
+          profilePayload
+        );
+        throw new Error(profileErrorOnUnknownResponse);
+      } else {
+        const problemJson = errorOrProblemJson.value;
 
-          // If the profile doesn't exists on the API we still
-          // return 200 to the App with the information we have
-          // retrieved from SPID.
-          if (problemJson.status === 404) {
-            return resolve(toAppProfileWithoutEmail(user));
-          }
-
-          winston.log("error", "API error in getProfile: %s", profilePayload);
-          return reject(new Error(profileErrorOnApiError));
+        // If the profile doesn't exists on the API we still
+        // return 200 to the App with the information we have
+        // retrieved from SPID.
+        if (problemJson.status === 404) {
+          return toAppProfileWithoutEmail(user);
         }
-      }
 
-      const apiProfile = errorOrApiProfile.value;
-      return resolve(toAppProfileWithEmail(apiProfile, user));
-    });
+        winston.log("error", "API error in getProfile: %s", profilePayload);
+        throw new Error(profileErrorOnApiError);
+      }
+    }
+
+    const apiProfile = errorOrApiProfile.value;
+    return toAppProfileWithEmail(apiProfile, user);
   }
 
   /**
