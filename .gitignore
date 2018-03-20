@@ -4,6 +4,7 @@
 
 # Exclude Yarn managed depencencies.
 /node_modules
+yarn-error.log
 
 # Exclude Jest coverage reports.
 /coverage
