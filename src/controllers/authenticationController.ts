@@ -5,8 +5,8 @@
  */
 
 import * as express from "express";
-import { Either, left } from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
 import TokenService from "../services/tokenService";
@@ -17,6 +17,11 @@ import {
   User,
   validateSpidUser
 } from "../types/user";
+
+export interface IsessionState {
+  readonly expired: boolean;
+  readonly newToken?: string;
+}
 
 export default class AuthenticationController {
   constructor(
@@ -110,45 +115,37 @@ export default class AuthenticationController {
   /**
    * Returns data about the current user session.
    */
-  public getSessionState(req: express.Request, res: express.Response): void {
-    const token = this.extractTokenFromRequest(req);
+  public async getSessionState(
+    req: express.Request
+  ): Promise<Either<Error, IsessionState>> {
+    try {
+      const maybeToken = await this.extractTokenFromRequest(req);
+      if (isNone(maybeToken)) {
+        return left(new Error("No token in the request"));
+      }
 
-    if (token.isNone()) {
-      res.status(500).json({ error: "no token in the request" });
-      return;
+      const errorOrSession = await this.sessionStorage.get(maybeToken.value);
+      if (isLeft(errorOrSession)) {
+        const errorOrNewToken = await this.refreshUserToken(maybeToken.value);
+        if (isLeft(errorOrNewToken)) {
+          const error = errorOrNewToken.value;
+          return left(error);
+        }
+        const newToken = errorOrNewToken.value;
+        return right({ expired: true, newToken });
+      }
+      return right({ expired: false });
+    } catch (err) {
+      return left(new Error("Error while loading the session"));
     }
-
-    this.sessionStorage
-      .get(token.value)
-      .then((errorOrUser: Either<Error, User>) => {
-        errorOrUser.fold(
-          () => {
-            this.refreshUserToken(token.value)
-              .then(newToken => {
-                res.json({ expired: true, newToken });
-              })
-              .catch(err => {
-                res.status(500).json({ error: err.message });
-                return;
-              });
-          },
-          () => {
-            res.json({ expired: false });
-            return;
-          }
-        );
-      })
-      .catch(() => {
-        // error while loading the session.
-        res.status(500).json({ error: "error while loading the session" });
-        return;
-      });
   }
 
   /**
    *
    */
-  private extractTokenFromRequest(req: express.Request): Option<string> {
+  private async extractTokenFromRequest(
+    req: express.Request
+  ): Promise<Option<string>> {
     if (req.headers && req.headers.authorization) {
       const authorization = req.headers.authorization as string;
       const parts = authorization.split(" ");
@@ -175,7 +172,7 @@ export default class AuthenticationController {
     try {
       return await this.sessionStorage.refresh(token);
     } catch (err) {
-      return left<Error, string>(new Error("error while refreshing the token"));
+      return left(new Error("Error while refreshing the token"));
     }
   }
 

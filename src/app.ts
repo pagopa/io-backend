@@ -123,8 +123,20 @@ export function newApp(env: EnvironmentNodeEnv): Express {
     };
   };
 
-  app.get("/session", (req: express.Request, res: express.Response) => {
-    acsController.getSessionState(req, res);
+  app.get("/session", async (req: express.Request, res: express.Response) => {
+    try {
+      const maybeResponse = await acsController.getSessionState(req);
+      maybeResponse.fold(
+        err => {
+          res.status(500).json({ error: err.message });
+        },
+        response => {
+          res.json(response);
+        }
+      );
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post("/assertionConsumerService", withSpidAuth(acsController));
