@@ -129,7 +129,7 @@ export default class AuthenticationController {
                         // error while refreshing the token.
                         err => {
                           res.status(500).json({
-                            error: err
+                            error: err.message
                           });
                           return;
                         },
@@ -169,6 +169,8 @@ export default class AuthenticationController {
       return;
     }
   }
+
+  // private refreshUserToken
 
   private return500Error(error: Error, res: express.Response): void {
     res.status(500).json({

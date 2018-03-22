@@ -10,8 +10,6 @@ import { ISessionStorage } from "./iSessionStorage";
 import TokenService from "./tokenService";
 
 const SESSION_NOT_FOUND_MESSAGE = "Session not found";
-const REDIS_DATA_FIELD = "data";
-const REDIS_TIMESTAMP_FIELD = "data";
 
 export default class RedisSessionStorage implements ISessionStorage {
   constructor(
@@ -26,53 +24,44 @@ export default class RedisSessionStorage implements ISessionStorage {
   public set(token: string, user: User): void {
     // Set a key to hold the fields value.
     // @see https://redis.io/commands/hmset
-    this.redisClient.hmset(
-      token,
-      REDIS_DATA_FIELD,
-      JSON.stringify(user),
-      REDIS_TIMESTAMP_FIELD,
-      Date.now()
-    );
+    this.redisClient.hmset(token, {
+      data: JSON.stringify(user),
+      timestamp: Date.now()
+    });
   }
 
   /**
    * {@inheritDoc}
    */
   public get(token: string): Promise<Either<Error, User>> {
-    const client = this.redisClient;
-
     return new Promise(resolve => {
       // Get the fields for this key.
       // @see https://redis.io/commands/hmget
-      client.hmget(
-        token,
-        REDIS_DATA_FIELD,
-        REDIS_TIMESTAMP_FIELD,
-        (err, value) => {
-          if (err) {
-            resolve(left<Error, User>(new Error(err.message)));
+      this.redisClient.hgetall(token, (err, value) => {
+        if (err) {
+          resolve(left<Error, User>(new Error(err.message)));
+        } else {
+          if (value === null || value === undefined) {
+            resolve(left<Error, User>(new Error(SESSION_NOT_FOUND_MESSAGE)));
           } else {
-            if (value === null || value === undefined) {
-              resolve(left<Error, User>(new Error(SESSION_NOT_FOUND_MESSAGE)));
-            } else {
-              // check if the token has expired. We don't remove expired token
-              // because client can later refresh the session.
-              if (+value[1] + this.tokenDuration * 1000 < Date.now()) {
-                resolve(left<Error, User>(new Error("Token has expired")));
-              }
-
-              const errorOrUser = extractUserFromJson(value[0]);
-
-              // TODO: better error message.
-              errorOrUser.mapLeft(() => {
-                return "Errors in validating the user profile";
-              });
-
-              resolve(errorOrUser);
+            // check if the token has expired. We don't remove expired token
+            // because client can later refresh the session.
+            const timestamp = +value.timestamp;
+            if (timestamp + this.tokenDuration * 1000 < Date.now()) {
+              resolve(left<Error, User>(new Error("Token has expired")));
             }
+
+            const errorOrUser = extractUserFromJson(value.data);
+
+            // TODO: better error message.
+            errorOrUser.mapLeft(() => {
+              return new Error("Errors in validating the user profile");
+            });
+
+            resolve(errorOrUser);
           }
         }
-      );
+      });
     });
   }
 
@@ -80,42 +69,33 @@ export default class RedisSessionStorage implements ISessionStorage {
    * {@inheritDoc}
    */
   public refresh(token: string): Promise<Either<Error, string>> {
-    const client = this.redisClient;
-
     return new Promise(resolve => {
       // Get the fields for this key.
       // @see https://redis.io/commands/hmget
-      client.hmget(
-        token,
-        REDIS_DATA_FIELD,
-        REDIS_TIMESTAMP_FIELD,
-        (err, value) => {
-          if (err) {
-            resolve(left<Error, string>(new Error(err.message)));
+      this.redisClient.hgetall(token, (err, value) => {
+        if (err) {
+          resolve(left<Error, string>(err));
+        } else {
+          if (value === null || value === undefined) {
+            resolve(left<Error, string>(new Error(SESSION_NOT_FOUND_MESSAGE)));
           } else {
-            if (value === null || value === undefined) {
-              resolve(
-                left<Error, string>(new Error(SESSION_NOT_FOUND_MESSAGE))
-              );
-            } else {
-              const errorOrUser = extractUserFromJson(value[0]);
-              errorOrUser.fold(
-                () => {
-                  resolve(
-                    left<Error, string>(new Error(SESSION_NOT_FOUND_MESSAGE))
-                  );
-                },
-                (user: User) => {
-                  const newToken = this.tokenService.getNewToken();
-                  this.set(newToken, user);
-                  this.del(token);
-                  resolve(right<Error, string>(newToken));
-                }
-              );
-            }
+            const errorOrUser = extractUserFromJson(value.data);
+            errorOrUser.fold(
+              () => {
+                resolve(
+                  left<Error, string>(new Error(SESSION_NOT_FOUND_MESSAGE))
+                );
+              },
+              (user: User) => {
+                const newToken = this.tokenService.getNewToken();
+                this.set(newToken, user);
+                this.del(token);
+                resolve(right<Error, string>(newToken));
+              }
+            );
           }
         }
-      );
+      });
     });
   }
 
@@ -125,6 +105,6 @@ export default class RedisSessionStorage implements ISessionStorage {
   public del(token: string): void {
     // Remove the specified key. A key is ignored if it does not exist.
     // @see https://redis.io/commands/hdel
-    this.redisClient.hdel(token, REDIS_DATA_FIELD, REDIS_TIMESTAMP_FIELD);
+    this.redisClient.hdel(token, "data", "timestamp");
   }
 }
