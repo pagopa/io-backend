@@ -5,6 +5,7 @@ import { FiscalCode } from "../../types/api/FiscalCode";
 import { User } from "../../types/user";
 import MockedRedisClient from "../__mocks__/redisClient";
 import RedisSessionStorage from "../redisSessionStorage";
+import TokenService from "../tokenService";
 
 const aTokenDuration = 3600;
 
@@ -24,6 +25,20 @@ const mockedUser: User = {
   spid_idp: "spid_idp_name",
   token: "HexToKen"
 };
+
+// authentication constant
+const mockToken =
+  "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
+jest.mock("../../services/tokenService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      getNewToken: jest.fn(() => {
+        return mockToken;
+      })
+    }))
+  };
+});
+const tokenService = new TokenService();
 
 /**
  * Wait for all promises to finish.
@@ -45,7 +60,8 @@ describe("sessionStorage", () => {
 
     const sessionStorage = new RedisSessionStorage(
       mockedRedisClient as any,
-      aTokenDuration
+      aTokenDuration,
+      tokenService
     );
     const spy = jest.spyOn(mockedRedisClient, "set");
 
@@ -60,7 +76,8 @@ describe("sessionStorage", () => {
 
     const sessionStorage = new RedisSessionStorage(
       mockedRedisClient as any,
-      aTokenDuration
+      aTokenDuration,
+      tokenService
     );
     const spy = jest.spyOn(mockedRedisClient, "get");
 
@@ -83,7 +100,8 @@ describe("sessionStorage", () => {
 
     const sessionStorage = new RedisSessionStorage(
       mockedRedisClient as any,
-      aTokenDuration
+      aTokenDuration,
+      tokenService
     );
     const spy = jest.spyOn(mockedRedisClient, "get");
 
@@ -112,7 +130,8 @@ describe("sessionStorage", () => {
 
     const sessionStorage = new RedisSessionStorage(
       mockedRedisClient as any,
-      aTokenDuration
+      aTokenDuration,
+      tokenService
     );
     const spy = jest.spyOn(mockedRedisClient, "get");
 
@@ -131,15 +150,15 @@ describe("sessionStorage", () => {
   });
 
   // test case: sessionStorage del storage works with valid values
-  // TODO refactoring after bugfix
   it("should delete sessionStorage with valid values", async () => {
     const mockedRedisClient = new MockedRedisClient();
 
     const sessionStorage = new RedisSessionStorage(
       mockedRedisClient as any,
-      aTokenDuration
+      aTokenDuration,
+      tokenService
     );
-    // TODO: here "hdel" should be refactored to "del"
+
     const spy = jest.spyOn(mockedRedisClient, "hdel");
 
     sessionStorage.del(mockedUser.token);

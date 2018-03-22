@@ -17,6 +17,11 @@ export interface ISessionStorage {
   get(token: string): Promise<Either<Error, User>>;
 
   /**
+   * Refresh an existing token.
+   */
+  refresh(token: string): Promise<Either<Error, string>>;
+
+  /**
    * Removes a value from the cache.
    */
   del(token: string): void;

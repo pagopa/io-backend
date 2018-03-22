@@ -5,6 +5,7 @@
  */
 
 import * as express from "express";
+import { Either } from "fp-ts/lib/Either";
 import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
 import TokenService from "../services/tokenService";
@@ -105,37 +106,73 @@ export default class AuthenticationController {
       .send(metadata);
   }
 
+  /**
+   * Returns data about the current user session.
+   */
+  public getSessionState(req: express.Request, res: express.Response): void {
+    if (req.headers && req.headers.authorization) {
+      const authorization = req.headers.authorization as string;
+      const parts = authorization.split(" ");
+      if (parts.length === 2) {
+        const scheme = parts[0];
+        const token = parts[1];
+
+        if (/^Bearer$/i.test(scheme)) {
+          this.sessionStorage
+            .get(token)
+            .then((errorOrUser: Either<Error, User>) => {
+              errorOrUser.fold(
+                () => {
+                  this.sessionStorage.refresh(token).then(
+                    (errorOrNewToken: Either<Error, string>) => {
+                      errorOrNewToken.fold(
+                        // error while refreshing the token.
+                        err => {
+                          res.status(500).json({
+                            error: err
+                          });
+                          return;
+                        },
+                        newToken => {
+                          res.json({ expired: true, newToken });
+                          return;
+                        }
+                      );
+                    },
+                    () => {
+                      // error while refreshing the token.
+                      res
+                        .status(500)
+                        .json({ error: "error while refreshing the token" });
+                      return;
+                    }
+                  );
+                },
+                () => {
+                  res.json({ expired: false });
+                  return;
+                }
+              );
+            })
+            .catch(() => {
+              // error while loading the session.
+              res
+                .status(500)
+                .json({ error: "error while loading the session" });
+              return;
+            });
+        }
+      }
+    } else {
+      // no token in the request.
+      res.status(500).json({ error: "no token in the request" });
+      return;
+    }
+  }
+
   private return500Error(error: Error, res: express.Response): void {
     res.status(500).json({
       message: error.message
     });
-  }
-
-  /**
-   * Returns data about the current user session
-   */
-  public getSessionState(req: express.Request, res: express.Response): void {
-    if (req.headers && req.headers.authorization) {
-      const parts = req.headers.authorization.split(" ");
-      if (parts.length === 2) {
-        const scheme = parts[0];
-        const credentials = parts[1];
-
-        if (/^Bearer$/i.test(scheme)) {
-          this.sessionStorage.get(credentials).then(
-            () => {
-              res.json({expired: false});
-            }
-          ).catch(
-            () => {
-              res.json({expired: false, newToken: ""});
-            }
-          );
-
-        }
-      }
-    } else {
-      res.status(500);
-    }
   }
 }

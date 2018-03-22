@@ -148,7 +148,11 @@ jest.mock("../../services/tokenService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
-const redisSessionStorage = new RedisSessionStorage(redisClient, 0);
+const redisSessionStorage = new RedisSessionStorage(
+  redisClient,
+  0,
+  tokenService
+);
 
 const spidStrategyInstance = spidStrategy(
   samlKey,
