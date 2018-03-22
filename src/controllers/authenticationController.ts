@@ -5,7 +5,8 @@
  */
 
 import * as express from "express";
-import { Either } from "fp-ts/lib/Either";
+import { Either, left } from "fp-ts/lib/Either";
+import { none, Option, some } from "fp-ts/lib/Option";
 import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
 import TokenService from "../services/tokenService";
@@ -110,6 +111,44 @@ export default class AuthenticationController {
    * Returns data about the current user session.
    */
   public getSessionState(req: express.Request, res: express.Response): void {
+    const token = this.extractTokenFromRequest(req);
+
+    if (token.isNone()) {
+      res.status(500).json({ error: "no token in the request" });
+      return;
+    }
+
+    this.sessionStorage
+      .get(token.value)
+      .then((errorOrUser: Either<Error, User>) => {
+        errorOrUser.fold(
+          () => {
+            this.refreshUserToken(token.value)
+              .then(newToken => {
+                res.json({ expired: true, newToken });
+              })
+              .catch(err => {
+                res.status(500).json({ error: err.message });
+                return;
+              });
+          },
+          () => {
+            res.json({ expired: false });
+            return;
+          }
+        );
+      })
+      .catch(() => {
+        // error while loading the session.
+        res.status(500).json({ error: "error while loading the session" });
+        return;
+      });
+  }
+
+  /**
+   *
+   */
+  private extractTokenFromRequest(req: express.Request): Option<string> {
     if (req.headers && req.headers.authorization) {
       const authorization = req.headers.authorization as string;
       const parts = authorization.split(" ");
@@ -118,59 +157,27 @@ export default class AuthenticationController {
         const token = parts[1];
 
         if (/^Bearer$/i.test(scheme)) {
-          this.sessionStorage
-            .get(token)
-            .then((errorOrUser: Either<Error, User>) => {
-              errorOrUser.fold(
-                () => {
-                  this.sessionStorage.refresh(token).then(
-                    (errorOrNewToken: Either<Error, string>) => {
-                      errorOrNewToken.fold(
-                        // error while refreshing the token.
-                        err => {
-                          res.status(500).json({
-                            error: err.message
-                          });
-                          return;
-                        },
-                        newToken => {
-                          res.json({ expired: true, newToken });
-                          return;
-                        }
-                      );
-                    },
-                    () => {
-                      // error while refreshing the token.
-                      res
-                        .status(500)
-                        .json({ error: "error while refreshing the token" });
-                      return;
-                    }
-                  );
-                },
-                () => {
-                  res.json({ expired: false });
-                  return;
-                }
-              );
-            })
-            .catch(() => {
-              // error while loading the session.
-              res
-                .status(500)
-                .json({ error: "error while loading the session" });
-              return;
-            });
+          return some(token);
+        } else {
+          return none;
         }
       }
-    } else {
-      // no token in the request.
-      res.status(500).json({ error: "no token in the request" });
-      return;
     }
+    return none;
   }
 
-  // private refreshUserToken
+  /**
+   *
+   */
+  private async refreshUserToken(
+    token: string
+  ): Promise<Either<Error, string>> {
+    try {
+      return await this.sessionStorage.refresh(token);
+    } catch (err) {
+      return left<Error, string>(new Error("error while refreshing the token"));
+    }
+  }
 
   private return500Error(error: Error, res: express.Response): void {
     res.status(500).json({
