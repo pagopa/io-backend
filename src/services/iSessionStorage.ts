@@ -4,6 +4,7 @@
 
 import { Either } from "fp-ts/lib/Either";
 import { User } from "../types/user";
+import { ISessionState } from "./redisSessionStorage";
 
 export interface ISessionStorage {
   /**
@@ -14,12 +15,12 @@ export interface ISessionStorage {
   /**
    * Retrieves a value from the cache.
    */
-  get(token: string): Promise<Either<Error, User>>;
+  get(token: string): Promise<Either<Error, ISessionState>>;
 
   /**
    * Refresh an existing token.
    */
-  refresh(token: string): Promise<Either<Error, string>>;
+  refresh(token: string): Promise<Either<Error, ISessionState>>;
 
   /**
    * Removes a value from the cache.

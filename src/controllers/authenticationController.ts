@@ -9,6 +9,7 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
+import { ISessionState } from "../services/redisSessionStorage";
 import TokenService from "../services/tokenService";
 import {
   extractUserFromRequest,
@@ -17,11 +18,6 @@ import {
   User,
   validateSpidUser
 } from "../types/user";
-
-export interface IsessionState {
-  readonly expired: boolean;
-  readonly newToken?: string;
-}
 
 export default class AuthenticationController {
   constructor(
@@ -117,7 +113,7 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<Either<Error, IsessionState>> {
+  ): Promise<Either<Error, ISessionState>> {
     try {
       const maybeToken = await this.extractTokenFromRequest(req);
       if (isNone(maybeToken)) {
@@ -126,22 +122,32 @@ export default class AuthenticationController {
 
       const errorOrSession = await this.sessionStorage.get(maybeToken.value);
       if (isLeft(errorOrSession)) {
-        const errorOrNewToken = await this.refreshUserToken(maybeToken.value);
-        if (isLeft(errorOrNewToken)) {
-          const error = errorOrNewToken.value;
+        const errorOrSessionState = await this.refreshUserToken(
+          maybeToken.value
+        );
+
+        if (isLeft(errorOrSessionState)) {
+          const error = errorOrSessionState.value;
           return left(error);
         }
-        const newToken = errorOrNewToken.value;
-        return right({ expired: true, newToken });
+
+        const sessionState = errorOrSessionState.value;
+        return right(sessionState);
       }
-      return right({ expired: false });
+
+      const session = errorOrSession.value;
+      const publicSession = {
+        expireAt: session.expireAt,
+        expired: session.expired
+      };
+      return right(publicSession);
     } catch (err) {
       return left(new Error("Error while loading the session"));
     }
   }
 
   /**
-   *
+   * Extracts the Bearer token from the authorization header in the request.
    */
   private async extractTokenFromRequest(
     req: express.Request
@@ -164,11 +170,11 @@ export default class AuthenticationController {
   }
 
   /**
-   *
+   * Refresh a user token in the session storage and returns the new token.
    */
   private async refreshUserToken(
     token: string
-  ): Promise<Either<Error, string>> {
+  ): Promise<Either<Error, ISessionState>> {
     try {
       return await this.sessionStorage.refresh(token);
     } catch (err) {
