@@ -39,7 +39,12 @@ export default class AuthenticationController {
     const spidUser = errorOrUser.value;
     const user = toAppUser(spidUser, this.tokenService.getNewToken());
 
-    const errorOrBool = await this.sessionStorage.set(user.token, user);
+    const timestamp = Date.now();
+    const errorOrBool = await this.sessionStorage.set(
+      user.token,
+      user,
+      timestamp
+    );
 
     if (isLeft(errorOrBool)) {
       const error = errorOrBool.value;

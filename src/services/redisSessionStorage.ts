@@ -11,7 +11,7 @@ import TokenService from "./tokenService";
 
 export interface ISessionState {
   readonly expired: boolean;
-  readonly expireAt: string;
+  readonly expireAt?: number;
   readonly newToken?: string;
   readonly user?: User;
 }
@@ -26,7 +26,11 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public set(token: string, user: User): Promise<Either<Error, boolean>> {
+  public set(
+    token: string,
+    user: User,
+    timestamp: number
+  ): Promise<Either<Error, boolean>> {
     return new Promise(resolve => {
       // Set a key to hold the fields value.
       // @see https://redis.io/commands/hmset
@@ -34,7 +38,7 @@ export default class RedisSessionStorage implements ISessionStorage {
         token,
         {
           data: JSON.stringify(user),
-          timestamp: Date.now()
+          timestamp
         },
         (err, response) => {
           if (err) {
@@ -66,7 +70,7 @@ export default class RedisSessionStorage implements ISessionStorage {
         }
 
         // Check if the token has expired. We don't remove expired token
-        // because client can later refresh the session.
+        // because a client can later refresh the session.
         const timestamp = +value.timestamp;
         if (timestamp + this.tokenDurationSecs * 1000 < Date.now()) {
           return resolve(
@@ -85,7 +89,7 @@ export default class RedisSessionStorage implements ISessionStorage {
           user =>
             resolve(
               right<Error, ISessionState>({
-                expireAt: "",
+                expireAt: timestamp + this.tokenDurationSecs * 1000,
                 expired: false,
                 user
               })
@@ -101,7 +105,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   public refresh(token: string): Promise<Either<Error, ISessionState>> {
     return new Promise(resolve => {
       // Get the fields for this key.
-      // @see https://redis.io/commands/hmget
+      // @see https://redis.io/commands/hgetall
       this.redisClient.hgetall(token, (err, value) => {
         if (err) {
           // Client returns an error.
@@ -126,11 +130,11 @@ export default class RedisSessionStorage implements ISessionStorage {
             const newToken = this.tokenService.getNewToken();
 
             // Set a session with the new token, delete the old one.
-            Promise.all([this.set(newToken, user), this.del(token)])
+            const timestamp = Date.now();
+            Promise.all([this.set(newToken, user, timestamp), this.del(token)])
               .then(() =>
                 resolve(
                   right<Error, ISessionState>({
-                    expireAt: "",
                     expired: true,
                     newToken
                   })

@@ -10,7 +10,11 @@ export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    */
-  set(token: string, user: User): Promise<Either<Error, boolean>>;
+  set(
+    token: string,
+    user: User,
+    timestamp: number
+  ): Promise<Either<Error, boolean>>;
 
   /**
    * Retrieves a value from the cache.
