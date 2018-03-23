@@ -65,7 +65,7 @@ describe("sessionStorage", () => {
     );
     const spy = jest.spyOn(mockedRedisClient, "set");
 
-    sessionStorage.set(mockedUser.token, mockedUser);
+    await sessionStorage.set(mockedUser.token, mockedUser);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -108,7 +108,10 @@ describe("sessionStorage", () => {
     const invalidFiscalCodeUser: User = mockedUser;
     invalidFiscalCodeUser.fiscal_code = "INVALID-FC" as any;
 
-    sessionStorage.set(invalidFiscalCodeUser.token, invalidFiscalCodeUser);
+    await sessionStorage.set(
+      invalidFiscalCodeUser.token,
+      invalidFiscalCodeUser
+    );
 
     const getValue = sessionStorage.get(mockedUser.token);
 
@@ -135,7 +138,7 @@ describe("sessionStorage", () => {
     );
     const spy = jest.spyOn(mockedRedisClient, "get");
 
-    sessionStorage.set(mockedUser.token, mockedUser);
+    await sessionStorage.set(mockedUser.token, mockedUser);
 
     const getValue = sessionStorage.get(mockedUser.token);
 
@@ -161,7 +164,7 @@ describe("sessionStorage", () => {
 
     const spy = jest.spyOn(mockedRedisClient, "hdel");
 
-    sessionStorage.del(mockedUser.token);
+    await sessionStorage.del(mockedUser.token);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });

@@ -74,17 +74,17 @@ container.register({
 
 // Redis server settings.
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = "3600";
-const tokenDurationInSeconds: number = parseInt(
+const tokenDurationSecs: number = parseInt(
   process.env.TOKEN_DURATION_IN_SECONDS || DEFAULT_TOKEN_DURATION_IN_SECONDS,
   10
 );
 winston.log(
   "info",
   "Session token duration set to %s seconds",
-  tokenDurationInSeconds
+  tokenDurationSecs
 );
 container.register({
-  tokenDuration: awilix.asValue(tokenDurationInSeconds)
+  tokenDurationSecs: awilix.asValue(tokenDurationSecs)
 });
 
 container.register({

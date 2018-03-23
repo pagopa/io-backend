@@ -7,15 +7,12 @@
 import * as express from "express";
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
-import * as winston from "winston";
 import { ISessionStorage } from "../services/iSessionStorage";
 import { ISessionState } from "../services/redisSessionStorage";
 import TokenService from "../services/tokenService";
 import {
   extractUserFromRequest,
-  SpidUser,
   toAppUser,
-  User,
   validateSpidUser
 } from "../types/user";
 
@@ -31,67 +28,112 @@ export default class AuthenticationController {
    * The Assertion consumer service.
    */
   // tslint:disable-next-line:no-any
-  public acs(userPayload: any, res: express.Response): void {
-    winston.log(
-      "info",
-      "Called assertion consumer service with data:",
-      userPayload
-    );
-
+  public async acs(userPayload: any): Promise<Either<Error, string>> {
     const errorOrUser = validateSpidUser(userPayload);
 
-    errorOrUser.fold(
-      (error: Error) => this.return500Error(error, res),
-      (spidUser: SpidUser) => {
-        const user = toAppUser(spidUser, this.tokenService.getNewToken());
+    if (isLeft(errorOrUser)) {
+      const error = errorOrUser.value;
+      return left(error);
+    }
 
-        this.sessionStorage.set(user.token, user);
+    const spidUser = errorOrUser.value;
+    const user = toAppUser(spidUser, this.tokenService.getNewToken());
 
-        const url =
-          process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
-        const urlWithToken = url.replace("{token}", user.token);
+    const errorOrBool = await this.sessionStorage.set(user.token, user);
 
-        res.redirect(urlWithToken);
-      }
-    );
+    if (isLeft(errorOrBool)) {
+      const error = errorOrBool.value;
+      return left(error);
+    }
+    const response = errorOrBool.value;
+
+    if (!response) {
+      return left(new Error("Error creating the user session"));
+    }
+    const url =
+      process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
+    const urlWithToken = url.replace("{token}", user.token);
+
+    return right(urlWithToken);
   }
 
   /**
    * Retrieves the logout url from the IDP.
    */
-  public logout(req: express.Request, res: express.Response): void {
+  public async logout(req: express.Request): Promise<Either<Error, string>> {
     const errorOrUser = extractUserFromRequest(req);
 
-    errorOrUser.fold(
-      (error: Error) => this.return500Error(error, res),
-      (user: User) => {
-        // Delete the Redis token.
-        this.sessionStorage.del(user.token);
+    if (isLeft(errorOrUser)) {
+      const error = errorOrUser.value;
+      return left(error);
+    }
 
-        // Logout from SPID.
-        req.query = {};
-        req.query.entityID = user.spid_idp;
+    const user = errorOrUser.value;
 
-        this.spidStrategy.logout(req, (err, request: express.Request) => {
-          if (!err) {
-            res.status(200).json({
-              logoutUrl: request
-            });
-          } else {
-            res.status(500).json({
-              message: err.toString()
-            });
-          }
-        });
+    const errorOrBool = await this.sessionStorage.del(user.token);
+
+    if (isLeft(errorOrBool)) {
+      const error = errorOrBool.value;
+      return left(error);
+    }
+
+    const response = errorOrBool.value;
+
+    if (!response) {
+      return left(new Error("Error creating the user session"));
+    }
+
+    // Logout from SPID.
+    req.query = {};
+    req.query.entityID = user.spid_idp;
+
+    return await this.spidLogout(req);
+  }
+
+  /**
+   * Returns data about the current user session.
+   */
+  public async getSessionState(
+    req: express.Request
+  ): Promise<Either<Error, string>> {
+    const maybeToken = await this.extractTokenFromRequest(req);
+    if (isNone(maybeToken)) {
+      return left(new Error("No token in the request"));
+    }
+
+    const token = maybeToken.value;
+    const errorOrSession = await this.sessionStorage.get(token);
+    if (isLeft(errorOrSession)) {
+      // Previous token not found or expired, try to refresh.
+      const errorOrSessionState = await this.refreshUserToken(token);
+
+      if (isLeft(errorOrSessionState)) {
+        // Unable to refresh token or session not found.
+        const error = errorOrSessionState.value;
+        return left(error);
       }
-    );
+
+      // Return the new session information.
+      const sessionState = errorOrSessionState.value;
+      return right(JSON.stringify(sessionState));
+    }
+
+    // The session contains the user, remove it before return.
+    const session = errorOrSession.value;
+    const publicSession = {
+      expireAt: session.expireAt,
+      expired: session.expired
+    };
+
+    // Return the actual session information.
+    return right(JSON.stringify(publicSession));
   }
 
   /**
    * The Single logout service.
    */
-  public slo(res: express.Response): void {
-    res.redirect("/");
+  public async slo(): Promise<Either<Error, string>> {
+    return right("/");
   }
 
   /**
@@ -109,64 +151,53 @@ export default class AuthenticationController {
   }
 
   /**
-   * Returns data about the current user session.
+   * Wrap the spidStrategy.logout function in a new Promise.
    */
-  public async getSessionState(
-    req: express.Request
-  ): Promise<Either<Error, ISessionState>> {
-    try {
-      const maybeToken = await this.extractTokenFromRequest(req);
-      if (isNone(maybeToken)) {
-        return left(new Error("No token in the request"));
-      }
-
-      const errorOrSession = await this.sessionStorage.get(maybeToken.value);
-      if (isLeft(errorOrSession)) {
-        const errorOrSessionState = await this.refreshUserToken(
-          maybeToken.value
-        );
-
-        if (isLeft(errorOrSessionState)) {
-          const error = errorOrSessionState.value;
-          return left(error);
+  private spidLogout(req: express.Request): Promise<Either<Error, string>> {
+    return new Promise(resolve => {
+      this.spidStrategy.logout(req, (err, request: express.Request) => {
+        if (!err) {
+          return resolve(
+            right<Error, string>(
+              JSON.stringify({
+                logoutUrl: request
+              })
+            )
+          );
+        } else {
+          return resolve(left<Error, string>(err));
         }
-
-        const sessionState = errorOrSessionState.value;
-        return right(sessionState);
-      }
-
-      const session = errorOrSession.value;
-      const publicSession = {
-        expireAt: session.expireAt,
-        expired: session.expired
-      };
-      return right(publicSession);
-    } catch (err) {
-      return left(new Error("Error while loading the session"));
-    }
+      });
+    });
   }
 
   /**
    * Extracts the Bearer token from the authorization header in the request.
    */
-  private async extractTokenFromRequest(
+  private extractTokenFromRequest(
     req: express.Request
   ): Promise<Option<string>> {
-    if (req.headers && req.headers.authorization) {
-      const authorization = req.headers.authorization as string;
-      const parts = authorization.split(" ");
-      if (parts.length === 2) {
-        const scheme = parts[0];
-        const token = parts[1];
+    return new Promise(resolve => {
+      if (
+        req.headers &&
+        req.headers.authorization &&
+        typeof req.headers.authorization === "string"
+      ) {
+        const authorization = req.headers.authorization;
+        const parts = authorization.split(" ");
+        if (parts.length === 2) {
+          const scheme = parts[0];
+          const token = parts[1];
 
-        if (/^Bearer$/i.test(scheme)) {
-          return some(token);
-        } else {
-          return none;
+          if (/^Bearer$/i.test(scheme)) {
+            resolve(some(token));
+          } else {
+            resolve(none);
+          }
         }
       }
-    }
-    return none;
+      resolve(none);
+    });
   }
 
   /**
@@ -175,16 +206,6 @@ export default class AuthenticationController {
   private async refreshUserToken(
     token: string
   ): Promise<Either<Error, ISessionState>> {
-    try {
-      return await this.sessionStorage.refresh(token);
-    } catch (err) {
-      return left(new Error("Error while refreshing the token"));
-    }
-  }
-
-  private return500Error(error: Error, res: express.Response): void {
-    res.status(500).json({
-      message: error.message
-    });
+    return await this.sessionStorage.refresh(token);
   }
 }

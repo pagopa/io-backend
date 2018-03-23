@@ -10,7 +10,7 @@ export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    */
-  set(token: string, user: User): void;
+  set(token: string, user: User): Promise<Either<Error, boolean>>;
 
   /**
    * Retrieves a value from the cache.
@@ -25,5 +25,5 @@ export interface ISessionStorage {
   /**
    * Removes a value from the cache.
    */
-  del(token: string): void;
+  del(token: string): Promise<Either<Error, boolean>>;
 }

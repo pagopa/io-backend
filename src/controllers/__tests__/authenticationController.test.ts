@@ -184,25 +184,19 @@ describe("AuthenticationController#acs", () => {
     clock = clock.uninstall();
   });
 
-  it("redirects to the correct url if userPayload is a valid User", () => {
-    const res = mockRes();
-
-    controller.acs(validUserPayload, res);
+  it("redirects to the correct url if userPayload is a valid User", async () => {
+    const response = await controller.acs(validUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith(
-      "/profile.html?token=" + mockToken
-    );
+    expect(response).toBe("/profile.html?token=" + mockToken);
     expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser);
   });
 
-  it("return an error if userPayload is invalid", () => {
-    const res = mockRes();
-
-    controller.acs(invalidUserPayload, res);
+  it("return an error if userPayload is invalid", async () => {
+    const response = await controller.acs(invalidUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(response).toBe(500);
     expect(mockSet).not.toHaveBeenCalled();
   });
 });
@@ -212,13 +206,11 @@ describe("AuthenticationController#slo", () => {
     jest.clearAllMocks();
   });
 
-  it("redirects to the home page", () => {
-    const res = mockRes();
-
-    controller.slo(res);
+  it("redirects to the home page", async () => {
+    const response = await controller.slo();
 
     expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/");
+    expect(response).toBe("/");
   });
 });
 
@@ -228,9 +220,8 @@ describe("AuthenticationController#logout", () => {
     jest.resetAllMocks();
   });
 
-  it("extracts the logout url", () => {
+  it("extracts the logout url", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     spidStrategyInstance.logout.mockImplementation((_: any, callback: any) => {
       callback(undefined, "http://www.example.com");
@@ -238,36 +229,32 @@ describe("AuthenticationController#logout", () => {
 
     req.user = mockedUser;
 
-    controller.logout(req, res);
+    const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
     expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
+    expect(response).toBe({
       logoutUrl: "http://www.example.com"
     });
   });
 
-  it("returns error if the generation user data is invalid", () => {
+  it("returns error if the generation user data is invalid", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     req.user = invalidUserPayload;
 
-    controller.logout(req, res);
+    const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
+    expect(response).toBe({
       message: "Unable to decode the user"
     });
   });
 
-  it("returns error if the generation of logout fails", () => {
+  it("returns error if the generation of logout fails", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     spidStrategyInstance.logout.mockImplementation(
       (_: any, callback: (error: Error) => void) => {
@@ -277,12 +264,11 @@ describe("AuthenticationController#logout", () => {
 
     req.user = mockedUser;
 
-    controller.logout(req, res);
+    const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
+    expect(response).toBe({
       message: "Error: Error message"
     });
   });
