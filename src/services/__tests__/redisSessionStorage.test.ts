@@ -9,8 +9,8 @@ import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";
 import TokenService from "../tokenService";
 
-const aTokenDuration = 3600;
-const aTimestamp = 1518010929530;
+const aTokenDurationSecs = 3600;
+const theCurrentTimestampMillis = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
@@ -61,9 +61,8 @@ mockRedisClient.del = mockDel;
 // tslint:disable-next-line:no-let
 let clock: any;
 beforeEach(() => {
-  // toUser() saves the current timestamp into the User object, we need to
-  // mock time.
-  clock = lolex.install({ now: aTimestamp });
+  // We need to mock time to test token expiration.
+  clock = lolex.install({ now: theCurrentTimestampMillis });
 
   jest.clearAllMocks();
 });
@@ -72,10 +71,10 @@ afterEach(() => {
 });
 
 describe("RedisSessionStorage#set", () => {
-  it("should set a new seession with valid values", async () => {
+  it("should set a new session with valid values", async () => {
     const sessionStorage = new RedisSessionStorage(
       mockRedisClient,
-      aTokenDuration,
+      aTokenDurationSecs,
       tokenService
     );
 
@@ -86,14 +85,14 @@ describe("RedisSessionStorage#set", () => {
     const res = await sessionStorage.set(
       aValidUser.token,
       aValidUser,
-      aTimestamp
+      theCurrentTimestampMillis
     );
 
     expect(mockHmset).toHaveBeenCalledTimes(1);
     expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
     expect(mockHmset.mock.calls[0][1]).toEqual({
       data: JSON.stringify(aValidUser),
-      timestamp: aTimestamp
+      timestamp: theCurrentTimestampMillis
     });
     expect(res).toEqual(right(true));
   });
@@ -103,7 +102,7 @@ describe("RedisSessionStorage#get", () => {
   it("should fail getting a session for an inexistent token", async () => {
     const sessionStorage = new RedisSessionStorage(
       mockRedisClient,
-      aTokenDuration,
+      aTokenDurationSecs,
       tokenService
     );
 
@@ -121,14 +120,14 @@ describe("RedisSessionStorage#get", () => {
   it("should fail getting a session with invalid value", async () => {
     const sessionStorage = new RedisSessionStorage(
       mockRedisClient,
-      aTokenDuration,
+      aTokenDurationSecs,
       tokenService
     );
 
     mockHgetall.mockImplementation((_, callback) => {
       callback(undefined, {
         data: JSON.stringify(anInvalidUser),
-        timestamp: aTimestamp
+        timestamp: theCurrentTimestampMillis
       });
     });
 
@@ -139,17 +138,42 @@ describe("RedisSessionStorage#get", () => {
     expect(res).toEqual(left(new Error("Unable to decode the user")));
   });
 
+  it("should fail getting an expired session", async () => {
+    const sessionStorage = new RedisSessionStorage(
+      mockRedisClient,
+      aTokenDurationSecs,
+      tokenService
+    );
+
+    const aTokenDurationMillis = aTokenDurationSecs * 1000;
+    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
+    const anExpiredTimestamp =
+      theCurrentTimestampMillis - aTimeLongerThanDuration;
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        data: JSON.stringify(aValidUser),
+        timestamp: anExpiredTimestamp
+      });
+    });
+
+    const res = await sessionStorage.get(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(res).toEqual(left(new Error("Token has expired")));
+  });
+
   it("should get a session with valid values", async () => {
     const sessionStorage = new RedisSessionStorage(
       mockRedisClient,
-      aTokenDuration,
+      aTokenDurationSecs,
       tokenService
     );
 
     mockHgetall.mockImplementation((_, callback) => {
       callback(undefined, {
         data: JSON.stringify(aValidUser),
-        timestamp: aTimestamp
+        timestamp: theCurrentTimestampMillis
       });
     });
 
@@ -159,7 +183,7 @@ describe("RedisSessionStorage#get", () => {
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
     expect(res).toEqual(
       right({
-        expireAt: aTimestamp + aTokenDuration * 1000,
+        expireAt: theCurrentTimestampMillis + aTokenDurationSecs * 1000,
         expired: false,
         user: aValidUser
       })
@@ -171,7 +195,7 @@ describe("RedisSessionStorage#del", () => {
   it("should delete a session", async () => {
     const sessionStorage = new RedisSessionStorage(
       mockRedisClient,
-      aTokenDuration,
+      aTokenDurationSecs,
       tokenService
     );
 
