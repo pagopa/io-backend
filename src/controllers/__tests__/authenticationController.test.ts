@@ -1,5 +1,6 @@
 // tslint:disable:no-any
 
+import { left, right } from "fp-ts/lib/Either";
 import * as lolex from "lolex";
 import * as redis from "redis";
 import mockReq from "../../__mocks__/request";
@@ -185,18 +186,20 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("redirects to the correct url if userPayload is a valid User", async () => {
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+
     const response = await controller.acs(validUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(response).toBe("/profile.html?token=" + mockToken);
-    expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser);
+    expect(response).toEqual(right("/profile.html?token=" + mockToken));
+    expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser, aTimestamp);
   });
 
   it("return an error if userPayload is invalid", async () => {
     const response = await controller.acs(invalidUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(response).toBe(500);
+    expect(response).toEqual(left(new Error("Unable to decode the user")));
     expect(mockSet).not.toHaveBeenCalled();
   });
 });
@@ -210,7 +213,7 @@ describe("AuthenticationController#slo", () => {
     const response = await controller.slo();
 
     expect(controller).toBeTruthy();
-    expect(response).toBe("/");
+    expect(response.value).toBe("/");
   });
 });
 
@@ -222,21 +225,26 @@ describe("AuthenticationController#logout", () => {
 
   it("extracts the logout url", async () => {
     const req = mockReq();
+    req.user = mockedUser;
 
     spidStrategyInstance.logout.mockImplementation((_: any, callback: any) => {
       callback(undefined, "http://www.example.com");
     });
 
-    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(right(true)));
 
     const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
     expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
-    expect(response).toBe({
-      logoutUrl: "http://www.example.com"
-    });
+    expect(response).toEqual(
+      right(
+        JSON.stringify({
+          logoutUrl: "http://www.example.com"
+        })
+      )
+    );
   });
 
   it("returns error if the generation user data is invalid", async () => {
@@ -248,13 +256,12 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(response).toBe({
-      message: "Unable to decode the user"
-    });
+    expect(response).toEqual(left(new Error("Unable to decode the user")));
   });
 
   it("returns error if the generation of logout fails", async () => {
     const req = mockReq();
+    req.user = mockedUser;
 
     spidStrategyInstance.logout.mockImplementation(
       (_: any, callback: (error: Error) => void) => {
@@ -262,15 +269,13 @@ describe("AuthenticationController#logout", () => {
       }
     );
 
-    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(right(true)));
 
     const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
-    expect(response).toBe({
-      message: "Error: Error message"
-    });
+    expect(response).toEqual(left(new Error("Error message")));
   });
 });
 
