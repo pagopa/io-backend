@@ -160,12 +160,12 @@ export default class RedisSessionStorage implements ISessionStorage {
     return new Promise(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/hdel
-      this.redisClient.hdel(token, "data", "timestamp", (err, response) => {
+      this.redisClient.del(token, (err, response) => {
         if (err) {
           return resolve(left<Error, boolean>(err));
         }
 
-        // hdel return the number of fields that were removed from the hash,
+        // del return the number of fields that were removed from the hash,
         // in our case is 2 ("data" and "timestamp").
         resolve(right<Error, boolean>(response === 2));
       });

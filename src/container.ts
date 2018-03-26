@@ -105,9 +105,6 @@ container.register({
 });
 
 // Register a session storage service backed by Redis.
-container.register({
-  redisClient: awilix.asClass(redis.RedisClient)
-});
 container.register(
   "redisClient",
   awilix.asFunction(() => {

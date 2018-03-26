@@ -69,6 +69,7 @@
     "fp-ts": "^1.0.0",
     "jest": "^22.0.0",
     "lolex": "2.3.2",
+    "mock-redis-client": "^0.91.13",
     "ms-rest-js": "^0.2.5",
     "nodemon": "^1.11.0",
     "prettier": "^1.7.4",

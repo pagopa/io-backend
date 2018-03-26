@@ -1,19 +1,23 @@
 // tslint:disable:no-any
 
+import { left, right } from "fp-ts/lib/Either";
+import * as lolex from "lolex";
+import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { User } from "../../types/user";
-import MockedRedisClient from "../__mocks__/redisClient";
 import RedisSessionStorage from "../redisSessionStorage";
 import TokenService from "../tokenService";
 
 const aTokenDuration = 3600;
+const aTimestamp = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 
 // mock for a valid User
-const mockedUser: User = {
+const aValidUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
@@ -24,6 +28,12 @@ const mockedUser: User = {
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   token: "HexToKen"
+};
+
+// mock for a invalid User
+const anInvalidUser: User = {
+  ...aValidUser,
+  fiscal_code: anInvalidFiscalNumber
 };
 
 // authentication constant
@@ -40,132 +50,140 @@ jest.mock("../../services/tokenService", () => {
 });
 const tokenService = new TokenService();
 
-/**
- * Wait for all promises to finish.
- *
- * @returns {Promise<any>}
- */
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
+const mockHmset = jest.fn();
+const mockHgetall = jest.fn();
+const mockDel = jest.fn();
+const mockRedisClient = createMockRedis().createClient();
+mockRedisClient.hmset = mockHmset;
+mockRedisClient.hgetall = mockHgetall;
+mockRedisClient.del = mockDel;
 
-describe("sessionStorage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+// tslint:disable-next-line:no-let
+let clock: any;
+beforeEach(() => {
+  // toUser() saves the current timestamp into the User object, we need to
+  // mock time.
+  clock = lolex.install({ now: aTimestamp });
 
-  // test case: sessionStorage set storage works with valid values
-  it("should set sessionStorage with valid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
+  jest.clearAllMocks();
+});
+afterEach(() => {
+  clock = clock.uninstall();
+});
 
+describe("RedisSessionStorage#set", () => {
+  it("should set a new seession with valid values", async () => {
     const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
+      mockRedisClient,
       aTokenDuration,
       tokenService
     );
-    const spy = jest.spyOn(mockedRedisClient, "set");
 
-    await sessionStorage.set(mockedUser.token, mockedUser);
-
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
-
-  // test case: sessionStorage get inexistent key
-  it("should fail getting a sessionStorage with inexistent values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
-
-    const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
-      aTokenDuration,
-      tokenService
-    );
-    const spy = jest.spyOn(mockedRedisClient, "get");
-
-    const getValue = sessionStorage.get("notSetValue");
-
-    await flushPromises();
-
-    getValue.catch(val => {
-      expect(val).toBeDefined();
-      expect(val._tag).toBe("Left");
-      expect(val.value).toEqual(new Error("Session not found"));
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
     });
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    const res = await sessionStorage.set(
+      aValidUser.token,
+      aValidUser,
+      aTimestamp
+    );
+
+    expect(mockHmset).toHaveBeenCalledTimes(1);
+    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHmset.mock.calls[0][1]).toEqual({
+      data: JSON.stringify(aValidUser),
+      timestamp: aTimestamp
+    });
+    expect(res).toEqual(right(true));
   });
+});
 
-  // test case: sessionStorage set and get storage fail with invalid values
-  it("should set and get a sessionStorage with invalid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
-
+describe("RedisSessionStorage#get", () => {
+  it("should fail getting a session for an inexistent token", async () => {
     const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
+      mockRedisClient,
       aTokenDuration,
       tokenService
     );
-    const spy = jest.spyOn(mockedRedisClient, "get");
 
-    const invalidFiscalCodeUser: User = mockedUser;
-    invalidFiscalCodeUser.fiscal_code = "INVALID-FC" as any;
-
-    await sessionStorage.set(
-      invalidFiscalCodeUser.token,
-      invalidFiscalCodeUser
-    );
-
-    const getValue = sessionStorage.get(mockedUser.token);
-
-    await flushPromises();
-
-    // tslint:disable-next-line:no-identical-functions
-    getValue.catch(val => {
-      expect(val).toBeDefined();
-      expect(val._tag).toBe("Left");
-      expect(val.value).toEqual(new Error("Session not found"));
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, undefined);
     });
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    const res = await sessionStorage.get("inexistent token");
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe("inexistent token");
+    expect(res).toEqual(left(new Error("Session not found")));
   });
 
-  // test case: sessionStorage set and get storage works with valid values
-  it("should set and get a sessionStorage with valid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
-
+  it("should fail getting a session with invalid value", async () => {
     const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
+      mockRedisClient,
       aTokenDuration,
       tokenService
     );
-    const spy = jest.spyOn(mockedRedisClient, "get");
 
-    await sessionStorage.set(mockedUser.token, mockedUser);
-
-    const getValue = sessionStorage.get(mockedUser.token);
-
-    await flushPromises();
-
-    getValue.catch(val => {
-      expect(val).toBeDefined();
-      expect(val._tag).toBe("Right");
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        data: JSON.stringify(anInvalidUser),
+        timestamp: aTimestamp
+      });
     });
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    const res = await sessionStorage.get(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(res).toEqual(left(new Error("Unable to decode the user")));
   });
 
-  // test case: sessionStorage del storage works with valid values
-  it("should delete sessionStorage with valid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
-
+  it("should get a session with valid values", async () => {
     const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
+      mockRedisClient,
       aTokenDuration,
       tokenService
     );
 
-    const spy = jest.spyOn(mockedRedisClient, "hdel");
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        data: JSON.stringify(aValidUser),
+        timestamp: aTimestamp
+      });
+    });
 
-    await sessionStorage.del(mockedUser.token);
+    const res = await sessionStorage.get(aValidUser.token);
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(res).toEqual(
+      right({
+        expireAt: aTimestamp + aTokenDuration * 1000,
+        expired: false,
+        user: aValidUser
+      })
+    );
+  });
+});
+
+describe("RedisSessionStorage#del", () => {
+  it("should delete a session", async () => {
+    const sessionStorage = new RedisSessionStorage(
+      mockRedisClient,
+      aTokenDuration,
+      tokenService
+    );
+
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+
+    const res = await sessionStorage.del(aValidUser.token);
+
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(res).toEqual(right(true));
   });
 });
