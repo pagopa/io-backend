@@ -74,7 +74,8 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     // Check if the token has expired. We don't remove expired token
     // because a client can later refresh the session.
-    const expire = session.timestampEpochMillis + this.tokenDurationSecs * 1000;
+    const expire =
+      (session.timestampEpochMillis as number) + this.tokenDurationSecs * 1000;
     if (expire < Date.now()) {
       return left<Error, ISessionState>(new Error("Token has expired"));
     }
@@ -105,18 +106,16 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     // Set a session with the new token, delete the old one.
     const timestamp = Date.now();
-    Promise.all([this.set(newToken, user, timestamp), this.del(token)])
-      .then(() => {
-        return right({
+    return Promise.all([this.set(newToken, user, timestamp), this.del(token)])
+      .then(() =>
+        right<Error, ISessionState>({
           expired: true,
           newToken
-        });
-      })
-      .catch(() => {
-        return left<Error, ISessionState>(
-          new Error("Error refreshing the token")
-        );
-      });
+        })
+      )
+      .catch(() =>
+        left<Error, ISessionState>(new Error("Error refreshing the token"))
+      );
   }
 
   /**
