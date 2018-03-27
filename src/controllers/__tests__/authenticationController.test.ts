@@ -193,7 +193,9 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(right("/profile.html?token=" + mockToken));
+    expect(response).toEqual(
+      right({ body: "/profile.html?token=" + mockToken, status: 301 })
+    );
     expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser, aTimestamp);
   });
 
@@ -215,7 +217,7 @@ describe("AuthenticationController#slo", () => {
     const response = controller.slo();
 
     expect(controller).toBeTruthy();
-    expect(response.value).toBe("/");
+    expect(response.value).toEqual({ body: "/", status: 301 });
   });
 });
 
@@ -241,11 +243,7 @@ describe("AuthenticationController#logout", () => {
     expect(mockDel).toHaveBeenCalledWith(mockToken);
     expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
     expect(response).toEqual(
-      right(
-        JSON.stringify({
-          logoutUrl: "http://www.example.com"
-        })
-      )
+      right({ body: { logoutUrl: "http://www.example.com" }, status: 200 })
     );
   });
 

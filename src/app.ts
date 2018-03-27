@@ -34,30 +34,20 @@ import { User } from "./types/user";
 /**
  * Return a response to the client.
  */
-function respond(response: Either<Error, string>, res: express.Response): void {
-  response.fold(
-    err => {
-      res.status(500).json({ error: err.message });
-    },
-    data => {
-      res.send(data);
-    }
-  );
-}
-
-/**
- * Return a redirect to the client.
- */
-function redirect(
-  response: Either<Error, string>,
+function respond(
+  response: Either<Error, IResponse>,
   res: express.Response
 ): void {
   response.fold(
     err => {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ message: err.message });
     },
-    url => {
-      res.redirect(url);
+    data => {
+      if (data.status === 301) {
+        res.redirect(data.body);
+      } else {
+        res.json(data.body);
+      }
     }
   );
 }
@@ -89,10 +79,16 @@ const withSpidAuth = (
         return res.redirect(clientLoginRedirectionUrl);
       }
       const maybeResponse = await controller.acs(user);
-      redirect(maybeResponse, res);
+      respond(maybeResponse, res);
     })(req, res, next);
   };
 };
+
+export interface IResponse {
+  // tslint:disable-next-line:no-any
+  readonly body: any;
+  readonly status: number;
+}
 
 export function newApp(env: EnvironmentNodeEnv): Express {
   // Setup Passport.
@@ -160,7 +156,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.post("/slo", (_, res: express.Response) => {
     const maybeResponse = acsController.slo();
-    redirect(maybeResponse, res);
+    respond(maybeResponse, res);
   });
 
   app.get("/session", async (req: express.Request, res: express.Response) => {

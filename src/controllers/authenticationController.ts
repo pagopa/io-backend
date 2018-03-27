@@ -7,6 +7,7 @@
 import * as express from "express";
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
+import { IResponse } from "../app";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import {
@@ -28,7 +29,7 @@ export default class AuthenticationController {
    * The Assertion consumer service.
    */
   // tslint:disable-next-line:no-any
-  public async acs(userPayload: any): Promise<Either<Error, string>> {
+  public async acs(userPayload: any): Promise<Either<Error, IResponse>> {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
@@ -60,13 +61,16 @@ export default class AuthenticationController {
       user.token
     );
 
-    return right(urlWithToken);
+    return right({
+      body: urlWithToken,
+      status: 301
+    });
   }
 
   /**
    * Retrieves the logout url from the IDP.
    */
-  public async logout(req: express.Request): Promise<Either<Error, string>> {
+  public async logout(req: express.Request): Promise<Either<Error, IResponse>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -101,7 +105,7 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<Either<Error, string>> {
+  ): Promise<Either<Error, IResponse>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
       return left(new Error("No token in the request"));
@@ -121,7 +125,10 @@ export default class AuthenticationController {
 
       // Return the new session information.
       const sessionState = errorOrSessionState.value;
-      return right(JSON.stringify(sessionState));
+      return right({
+        body: sessionState,
+        status: 200
+      });
     }
 
     // The session contains the user, remove it before return.
@@ -132,14 +139,20 @@ export default class AuthenticationController {
     };
 
     // Return the actual session information.
-    return right(JSON.stringify(publicSession));
+    return right({
+      body: publicSession,
+      status: 200
+    });
   }
 
   /**
    * The Single logout service.
    */
-  public slo(): Either<Error, string> {
-    return right("/");
+  public slo(): Either<Error, IResponse> {
+    return right({
+      body: "/",
+      status: 301
+    });
   }
 
   /**
@@ -159,19 +172,20 @@ export default class AuthenticationController {
   /**
    * Wrap the spidStrategy.logout function in a new Promise.
    */
-  private spidLogout(req: express.Request): Promise<Either<Error, string>> {
+  private spidLogout(req: express.Request): Promise<Either<Error, IResponse>> {
     return new Promise(resolve => {
       this.spidStrategy.logout(req, (err, request: express.Request) => {
         if (!err) {
           return resolve(
-            right<Error, string>(
-              JSON.stringify({
+            right<Error, IResponse>({
+              body: {
                 logoutUrl: request
-              })
-            )
+              },
+              status: 200
+            })
           );
         } else {
-          return resolve(left<Error, string>(err));
+          return resolve(left<Error, IResponse>(err));
         }
       });
     });
