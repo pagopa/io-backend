@@ -91,8 +91,8 @@ describe("RedisSessionStorage#set", () => {
     expect(mockHmset).toHaveBeenCalledTimes(1);
     expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
     expect(mockHmset.mock.calls[0][1]).toEqual({
-      data: JSON.stringify(aValidUser),
-      timestamp: theCurrentTimestampMillis
+      timestampEpochMillis: theCurrentTimestampMillis,
+      user: JSON.stringify(aValidUser)
     });
     expect(res).toEqual(right(true));
   });
@@ -114,7 +114,9 @@ describe("RedisSessionStorage#get", () => {
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe("inexistent token");
-    expect(res).toEqual(left(new Error("Session not found")));
+    expect(res).toEqual(
+      left(new Error("Session not found or unable to decode the user"))
+    );
   });
 
   it("should fail getting a session with invalid value", async () => {
@@ -126,8 +128,8 @@ describe("RedisSessionStorage#get", () => {
 
     mockHgetall.mockImplementation((_, callback) => {
       callback(undefined, {
-        data: JSON.stringify(anInvalidUser),
-        timestamp: theCurrentTimestampMillis
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(anInvalidUser)
       });
     });
 
@@ -135,7 +137,9 @@ describe("RedisSessionStorage#get", () => {
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
-    expect(res).toEqual(left(new Error("Unable to decode the user")));
+    expect(res).toEqual(
+      left(new Error("Session not found or unable to decode the user"))
+    );
   });
 
   it("should fail getting an expired session", async () => {
@@ -151,8 +155,8 @@ describe("RedisSessionStorage#get", () => {
       theCurrentTimestampMillis - aTimeLongerThanDuration;
     mockHgetall.mockImplementation((_, callback) => {
       callback(undefined, {
-        data: JSON.stringify(aValidUser),
-        timestamp: anExpiredTimestamp
+        timestampEpochMillis: String(anExpiredTimestamp),
+        user: JSON.stringify(aValidUser)
       });
     });
 
@@ -172,8 +176,8 @@ describe("RedisSessionStorage#get", () => {
 
     mockHgetall.mockImplementation((_, callback) => {
       callback(undefined, {
-        data: JSON.stringify(aValidUser),
-        timestamp: theCurrentTimestampMillis
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
       });
     });
 

@@ -2071,7 +2071,16 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
-io-ts@^1.0.2:
+io-ts-types@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.4.tgz#7474316d2d04cc5a915cde84b024c5662bd5ebd0"
+  dependencies:
+    fp-ts "^1.0.0"
+    io-ts "^1.0.0"
+    monocle-ts "^1.0.0"
+    newtype-ts "^0.2.0"
+
+io-ts@^1.0.0, io-ts@^1.0.2:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.0.5.tgz#dec6032f8febb4e8a6c614230823accb50f802fe"
   dependencies:
@@ -3069,6 +3078,12 @@ moment@~2.18.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 
+monocle-ts@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.0.0.tgz#6ea0f4c5c6b6959157452994bfec7ed170973b8c"
+  dependencies:
+    fp-ts "^1.0.0"
+
 morgan@^1.8.1:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/morgan/-/morgan-1.9.0.tgz#d01fa6c65859b76fcf31b3cb53a3821a311d8051"
@@ -3129,6 +3144,13 @@ natural-compare@^1.4.0:
 negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
+
+newtype-ts@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/newtype-ts/-/newtype-ts-0.2.0.tgz#8306c9bdf73d54bf92c2fda6cb59e31d259a43e1"
+  dependencies:
+    fp-ts "^1.0.0"
+    monocle-ts "^1.0.0"
 
 no-case@^2.2.0:
   version "2.3.2"

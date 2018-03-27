@@ -64,10 +64,12 @@ function redirect(
 
 /**
  * Catch SPID authentication errors and redirect the client to
- * process.env.CLIENT_ERROR_REDIRECTION_URL.
+ * clientErrorRedirectionUrl.
  */
 const withSpidAuth = (
-  controller: AuthenticationController
+  controller: AuthenticationController,
+  clientErrorRedirectionUrl: string,
+  clientLoginRedirectionUrl: string
 ): ((
   req: express.Request,
   res: express.Response,
@@ -80,12 +82,11 @@ const withSpidAuth = (
   ) => {
     passport.authenticate("spid", async (err, user: User) => {
       if (err) {
-        const url = process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
-        res.redirect(url);
+        res.redirect(clientErrorRedirectionUrl);
         return;
       }
       if (!user) {
-        return res.redirect("/login");
+        return res.redirect(clientLoginRedirectionUrl);
       }
       const maybeResponse = await controller.acs(user);
       redirect(maybeResponse, res);
@@ -157,8 +158,8 @@ export function newApp(env: EnvironmentNodeEnv): Express {
     }
   );
 
-  app.post("/slo", async (_, res: express.Response) => {
-    const maybeResponse = await acsController.slo();
+  app.post("/slo", (_, res: express.Response) => {
+    const maybeResponse = acsController.slo();
     redirect(maybeResponse, res);
   });
 
@@ -167,7 +168,14 @@ export function newApp(env: EnvironmentNodeEnv): Express {
     respond(maybeResponse, res);
   });
 
-  app.post("/assertionConsumerService", withSpidAuth(acsController));
+  app.post(
+    "/assertionConsumerService",
+    withSpidAuth(
+      acsController,
+      container.resolve("clientErrorRedirectionUrl"),
+      container.resolve("clientLoginRedirectionUrl")
+    )
+  );
 
   app.get("/metadata", (_, res: express.Response) => {
     acsController.metadata(res);

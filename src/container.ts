@@ -72,6 +72,19 @@ container.register({
   samlIssuer: awilix.asValue(SAML_ISSUER)
 });
 
+// Redirection urls
+container.register({
+  clientErrorRedirectionUrl: awilix.asValue(
+    process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html"
+  ),
+  clientLoginRedirectionUrl: awilix.asValue(
+    process.env.CLIENT_REDIRECTION_URL || "/login"
+  ),
+  clientProfileRedirectionUrl: awilix.asValue(
+    process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}"
+  )
+});
+
 // Redis server settings.
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = "3600";
 const tokenDurationSecs: number = parseInt(

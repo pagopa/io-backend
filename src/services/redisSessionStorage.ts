@@ -2,12 +2,19 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import * as t from "io-ts";
+import { IntegerFromString } from "io-ts-types";
 import * as redis from "redis";
 import { User } from "../types/user";
-import { extractUserFromJson } from "../types/user";
-import { ISessionStorage } from "./iSessionStorage";
+import { ISessionStorage } from "./ISessionStorage";
 import TokenService from "./tokenService";
+
+const Session = t.interface({
+  timestampEpochMillis: IntegerFromString,
+  user: User
+});
+type Session = t.TypeOf<typeof Session>;
 
 export interface ISessionState {
   readonly expired: boolean;
@@ -29,7 +36,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   public set(
     token: string,
     user: User,
-    timestamp: number
+    timestampEpochMillis: number
   ): Promise<Either<Error, boolean>> {
     return new Promise(resolve => {
       // Set a key to hold the fields value.
@@ -37,8 +44,8 @@ export default class RedisSessionStorage implements ISessionStorage {
       this.redisClient.hmset(
         token,
         {
-          data: JSON.stringify(user),
-          timestamp
+          timestampEpochMillis,
+          user: JSON.stringify(user)
         },
         (err, response) => {
           if (err) {
@@ -54,103 +61,62 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public get(token: string): Promise<Either<Error, ISessionState>> {
-    return new Promise(resolve => {
-      // Get the fields for this key.
-      // @see https://redis.io/commands/hmget
-      this.redisClient.hgetall(token, (err, value) => {
-        if (err) {
-          // Client returns an error.
-          return resolve(left<Error, ISessionState>(new Error(err.message)));
-        }
+  public async get(token: string): Promise<Either<Error, ISessionState>> {
+    const errorOrSession = await this.getSession(token);
 
-        if (value === null || value === undefined) {
-          // Null and undefined values are considered "not found".
-          return resolve(this.sessionNotFound());
-        }
+    if (isLeft(errorOrSession)) {
+      const error = errorOrSession.value;
+      return left(error);
+    }
 
-        // Check if the token has expired. We don't remove expired token
-        // because a client can later refresh the session.
-        const timestamp = +value.timestamp;
-        if (timestamp + this.tokenDurationSecs * 1000 < Date.now()) {
-          return resolve(
-            left<Error, ISessionState>(new Error("Token has expired"))
-          );
-        }
+    const session = errorOrSession.value;
+    const user = session.user;
 
-        // We got a value, let's see if it's a valid User.
-        const errorOrUser = extractUserFromJson(value.data);
+    // Check if the token has expired. We don't remove expired token
+    // because a client can later refresh the session.
+    const expire = session.timestampEpochMillis + this.tokenDurationSecs * 1000;
+    if (expire < Date.now()) {
+      return left<Error, ISessionState>(new Error("Token has expired"));
+    }
 
-        errorOrUser.fold(
-          // Not a valid User, return an error.
-          () => resolve(this.unableToDecodeUser()),
-
-          // We got a valid user from the session.
-          user =>
-            resolve(
-              right<Error, ISessionState>({
-                expireAt: timestamp + this.tokenDurationSecs * 1000,
-                expired: false,
-                user
-              })
-            )
-        );
-      });
+    return right<Error, ISessionState>({
+      expireAt: expire,
+      expired: false,
+      user
     });
   }
 
   /**
    * {@inheritDoc}
    */
-  public refresh(token: string): Promise<Either<Error, ISessionState>> {
-    return new Promise(resolve => {
-      // Get the fields for this key.
-      // @see https://redis.io/commands/hgetall
-      this.redisClient.hgetall(token, (err, value) => {
-        if (err) {
-          // Client returns an error.
-          return resolve(left<Error, ISessionState>(err));
-        }
+  public async refresh(token: string): Promise<Either<Error, ISessionState>> {
+    const errorOrSession = await this.getSession(token);
 
-        if (value === null || value === undefined) {
-          // Null and undefined values are considered "not found".
-          return resolve(this.sessionNotFound());
-        }
+    if (isLeft(errorOrSession)) {
+      const error = errorOrSession.value;
+      return left(error);
+    }
 
-        // We got a value, let's see if it's a valid User.
-        const errorOrUser = extractUserFromJson(value.data);
+    const session = errorOrSession.value;
+    const user = session.user;
 
-        errorOrUser.fold(
-          // Not a valid User, return an error.
-          () => resolve(this.unableToDecodeUser()),
+    // Compute a new token.
+    const newToken = this.tokenService.getNewToken();
 
-          // We got a valid user from the session.
-          (user: User) => {
-            // Compute a new token.
-            const newToken = this.tokenService.getNewToken();
-
-            // Set a session with the new token, delete the old one.
-            const timestamp = Date.now();
-            Promise.all([this.set(newToken, user, timestamp), this.del(token)])
-              .then(() =>
-                resolve(
-                  right<Error, ISessionState>({
-                    expired: true,
-                    newToken
-                  })
-                )
-              )
-              .catch(() =>
-                resolve(
-                  left<Error, ISessionState>(
-                    new Error("Error refreshing the token")
-                  )
-                )
-              );
-          }
+    // Set a session with the new token, delete the old one.
+    const timestamp = Date.now();
+    Promise.all([this.set(newToken, user, timestamp), this.del(token)])
+      .then(() => {
+        return right({
+          expired: true,
+          newToken
+        });
+      })
+      .catch(() => {
+        return left<Error, ISessionState>(
+          new Error("Error refreshing the token")
         );
       });
-    });
   }
 
   /**
@@ -166,8 +132,40 @@ export default class RedisSessionStorage implements ISessionStorage {
         }
 
         // del return the number of fields that were removed from the hash,
-        // in our case is 2 ("data" and "timestamp").
+        // in our case is 2 ("user" and "timestampEpochMillis").
         resolve(right<Error, boolean>(response === 2));
+      });
+    });
+  }
+
+  /**
+   * Return a Session for this token.
+   */
+  private getSession(token: string): Promise<Either<Error, Session>> {
+    return new Promise(resolve => {
+      this.redisClient.hgetall(token, (err, value) => {
+        if (err) {
+          // Client returns an error.
+          return resolve(left<Error, Session>(err));
+        }
+
+        try {
+          const errorOrDeserializedUser = JSON.parse(value.user);
+
+          const errorOrSession = Session.decode({
+            timestampEpochMillis: value.timestampEpochMillis,
+            user: errorOrDeserializedUser
+          });
+
+          if (isLeft(errorOrSession)) {
+            return resolve(this.sessionNotFoundOrUnableToDecodeUser<Session>());
+          }
+
+          const session = errorOrSession.value;
+          return resolve(right<Error, Session>(session));
+        } catch (error) {
+          return resolve(this.sessionNotFoundOrUnableToDecodeUser<Session>());
+        }
       });
     });
   }
@@ -175,14 +173,9 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * Return a Session not found error.
    */
-  private sessionNotFound(): Either<Error, ISessionState> {
-    return left<Error, ISessionState>(new Error("Session not found"));
-  }
-
-  /**
-   * Unable to decode the user stored in the session.
-   */
-  private unableToDecodeUser(): Either<Error, ISessionState> {
-    return left<Error, ISessionState>(new Error("Unable to decode the user"));
+  private sessionNotFoundOrUnableToDecodeUser<T>(): Either<Error, T> {
+    return left<Error, T>(
+      new Error("Session not found or unable to decode the user")
+    );
   }
 }

@@ -168,7 +168,8 @@ const controller = new AuthenticationController(
   redisSessionStorage,
   samlCert,
   spidStrategyInstance,
-  tokenService
+  tokenService,
+  "/profile.html?token={token}"
 );
 
 describe("AuthenticationController#acs", () => {
@@ -210,8 +211,8 @@ describe("AuthenticationController#slo", () => {
     jest.clearAllMocks();
   });
 
-  it("redirects to the home page", async () => {
-    const response = await controller.slo();
+  it("redirects to the home page", () => {
+    const response = controller.slo();
 
     expect(controller).toBeTruthy();
     expect(response.value).toBe("/");

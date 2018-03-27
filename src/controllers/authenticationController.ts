@@ -7,8 +7,7 @@
 import * as express from "express";
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
-import { ISessionStorage } from "../services/iSessionStorage";
-import { ISessionState } from "../services/redisSessionStorage";
+import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import {
   extractUserFromRequest,
@@ -21,7 +20,8 @@ export default class AuthenticationController {
     private readonly sessionStorage: ISessionStorage,
     private readonly samlCert: string,
     private readonly spidStrategy: SpidStrategy,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly clientProfileRedirectionUrl: string
   ) {}
 
   /**
@@ -55,9 +55,10 @@ export default class AuthenticationController {
     if (!response) {
       return left(new Error("Error creating the user session"));
     }
-    const url =
-      process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
-    const urlWithToken = url.replace("{token}", user.token);
+    const urlWithToken = this.clientProfileRedirectionUrl.replace(
+      "{token}",
+      user.token
+    );
 
     return right(urlWithToken);
   }
@@ -110,7 +111,7 @@ export default class AuthenticationController {
     const errorOrSession = await this.sessionStorage.get(token);
     if (isLeft(errorOrSession)) {
       // Previous token not found or expired, try to refresh.
-      const errorOrSessionState = await this.refreshUserToken(token);
+      const errorOrSessionState = await this.sessionStorage.refresh(token);
 
       if (isLeft(errorOrSessionState)) {
         // Unable to refresh token or session not found.
@@ -137,7 +138,7 @@ export default class AuthenticationController {
   /**
    * The Single logout service.
    */
-  public async slo(): Promise<Either<Error, string>> {
+  public slo(): Either<Error, string> {
     return right("/");
   }
 
@@ -203,14 +204,5 @@ export default class AuthenticationController {
       }
       resolve(none);
     });
-  }
-
-  /**
-   * Refresh a user token in the session storage and returns the new token.
-   */
-  private async refreshUserToken(
-    token: string
-  ): Promise<Either<Error, ISessionState>> {
-    return await this.sessionStorage.refresh(token);
   }
 }

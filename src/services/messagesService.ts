@@ -16,7 +16,7 @@ import {
 } from "../types/message";
 import { Service, toAppService } from "../types/service";
 import { User } from "../types/user";
-import { IApiClientFactoryInterface } from "./iApiClientFactory";
+import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
