@@ -73,6 +73,15 @@ container.register({
 });
 
 // Redirection urls
+const clientProfileRedirectionUrl =
+  process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
+
+if (!clientProfileRedirectionUrl.includes("{token}")) {
+  winston.log(
+    "error",
+    "CLIENT_REDIRECTION_URL must contains a {token} placeholder"
+  );
+}
 container.register({
   clientErrorRedirectionUrl: awilix.asValue(
     process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html"
@@ -80,9 +89,9 @@ container.register({
   clientLoginRedirectionUrl: awilix.asValue(
     process.env.CLIENT_REDIRECTION_URL || "/login"
   ),
-  clientProfileRedirectionUrl: awilix.asValue(
-    process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}"
-  )
+  getClientProfileRedirectionUrl: awilix.asValue((token: string) => {
+    return clientProfileRedirectionUrl.replace("{token}", token);
+  })
 });
 
 // Redis server settings.

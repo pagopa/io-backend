@@ -16,20 +16,32 @@ import {
   validateSpidUser
 } from "../types/user";
 
+export interface IPublicSession {
+  readonly expired: boolean;
+  readonly expireAt?: number;
+  readonly newToken?: string;
+}
+
+export interface ILogoutRedirect {
+  readonly logoutUrl: string;
+}
+
 export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
     private readonly samlCert: string,
     private readonly spidStrategy: SpidStrategy,
     private readonly tokenService: TokenService,
-    private readonly clientProfileRedirectionUrl: string
+    private readonly getClientProfileRedirectionUrl: (token: string) => string
   ) {}
 
   /**
    * The Assertion consumer service.
    */
-  // tslint:disable-next-line:no-any
-  public async acs(userPayload: any): Promise<Either<Error, IResponse>> {
+  public async acs(
+    // tslint:disable-next-line:no-any
+    userPayload: any
+  ): Promise<Either<Error, IResponse<string>>> {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
@@ -41,25 +53,22 @@ export default class AuthenticationController {
     const user = toAppUser(spidUser, this.tokenService.getNewToken());
 
     const timestamp = Date.now();
-    const errorOrBool = await this.sessionStorage.set(
+    const errorOrResponse = await this.sessionStorage.set(
       user.token,
       user,
       timestamp
     );
 
-    if (isLeft(errorOrBool)) {
-      const error = errorOrBool.value;
+    if (isLeft(errorOrResponse)) {
+      const error = errorOrResponse.value;
       return left(error);
     }
-    const response = errorOrBool.value;
+    const response = errorOrResponse.value;
 
     if (!response) {
       return left(new Error("Error creating the user session"));
     }
-    const urlWithToken = this.clientProfileRedirectionUrl.replace(
-      "{token}",
-      user.token
-    );
+    const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
 
     return right({
       body: urlWithToken,
@@ -70,7 +79,9 @@ export default class AuthenticationController {
   /**
    * Retrieves the logout url from the IDP.
    */
-  public async logout(req: express.Request): Promise<Either<Error, IResponse>> {
+  public async logout(
+    req: express.Request
+  ): Promise<Either<Error, IResponse<ILogoutRedirect>>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -80,20 +91,24 @@ export default class AuthenticationController {
 
     const user = errorOrUser.value;
 
-    const errorOrBool = await this.sessionStorage.del(user.token);
+    const errorOrResponse = await this.sessionStorage.del(user.token);
 
-    if (isLeft(errorOrBool)) {
-      const error = errorOrBool.value;
+    if (isLeft(errorOrResponse)) {
+      const error = errorOrResponse.value;
       return left(error);
     }
 
-    const response = errorOrBool.value;
+    const response = errorOrResponse.value;
 
     if (!response) {
       return left(new Error("Error creating the user session"));
     }
 
     // Logout from SPID.
+    // The logout function in spid-passport expects an entityID attribute
+    // passed in the query string. Here we recover the IDP chosen for the
+    // login (and stored in the User object) to forge a request suitable
+    // for the login function.
     req.query = {};
     req.query.entityID = user.spid_idp;
 
@@ -105,7 +120,7 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<Either<Error, IResponse>> {
+  ): Promise<Either<Error, IResponse<IPublicSession>>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
       return left(new Error("No token in the request"));
@@ -148,7 +163,7 @@ export default class AuthenticationController {
   /**
    * The Single logout service.
    */
-  public slo(): Either<Error, IResponse> {
+  public slo(): Either<Error, IResponse<string>> {
     return right({
       body: "/",
       status: 301
@@ -172,20 +187,22 @@ export default class AuthenticationController {
   /**
    * Wrap the spidStrategy.logout function in a new Promise.
    */
-  private spidLogout(req: express.Request): Promise<Either<Error, IResponse>> {
+  private spidLogout(
+    req: express.Request
+  ): Promise<Either<Error, IResponse<ILogoutRedirect>>> {
     return new Promise(resolve => {
-      this.spidStrategy.logout(req, (err, request: express.Request) => {
+      this.spidStrategy.logout(req, (err, logoutUrl) => {
         if (!err) {
           return resolve(
-            right<Error, IResponse>({
+            right<Error, IResponse<ILogoutRedirect>>({
               body: {
-                logoutUrl: request
+                logoutUrl
               },
               status: 200
             })
           );
         } else {
-          return resolve(left<Error, IResponse>(err));
+          return resolve(left<Error, IResponse<ILogoutRedirect>>(err));
         }
       });
     });

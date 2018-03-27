@@ -171,12 +171,16 @@ const spidStrategyInstance = spidStrategy(
 );
 spidStrategyInstance.logout = jest.fn();
 
+const getClientProfileRedirectionUrl = (token: string): string => {
+  return "/profile.html?token={token}".replace("{token}", token);
+};
+
 const controller = new AuthenticationController(
   redisSessionStorage,
   samlCert,
   spidStrategyInstance,
   tokenService,
-  "/profile.html?token={token}"
+  getClientProfileRedirectionUrl
 );
 
 describe("AuthenticationController#acs", () => {

@@ -3,25 +3,10 @@
  */
 
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
-import * as t from "io-ts";
-import { IntegerFromString } from "io-ts-types";
 import * as redis from "redis";
 import { User } from "../types/user";
-import { ISessionStorage } from "./ISessionStorage";
+import { ISessionState, ISessionStorage, Session } from "./ISessionStorage";
 import TokenService from "./tokenService";
-
-const Session = t.interface({
-  timestampEpochMillis: IntegerFromString,
-  user: User
-});
-type Session = t.TypeOf<typeof Session>;
-
-export interface ISessionState {
-  readonly expired: boolean;
-  readonly expireAt?: number;
-  readonly newToken?: string;
-  readonly user?: User;
-}
 
 export default class RedisSessionStorage implements ISessionStorage {
   constructor(
@@ -106,16 +91,19 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     // Set a session with the new token, delete the old one.
     const timestamp = Date.now();
-    return Promise.all([this.set(newToken, user, timestamp), this.del(token)])
-      .then(() =>
-        right<Error, ISessionState>({
-          expired: true,
-          newToken
-        })
-      )
-      .catch(() =>
-        left<Error, ISessionState>(new Error("Error refreshing the token"))
+    const [setResult, delResult] = await Promise.all([
+      this.set(newToken, user, timestamp),
+      this.del(token)
+    ]);
+    if (isLeft(setResult.alt(delResult))) {
+      return left<Error, ISessionState>(
+        new Error("Error refreshing the token")
       );
+    }
+    return right<Error, ISessionState>({
+      expired: true,
+      newToken
+    });
   }
 
   /**
