@@ -1,4 +1,7 @@
-// tslint:disable:no-any
+/* tslint:disable:no-any */
+/* tslint:disable:no-duplicate-string */
+/* tslint:disable:no-let */
+/* tslint:disable:no-identical-functions */
 
 import { left, right } from "fp-ts/lib/Either";
 import * as lolex from "lolex";
@@ -82,6 +85,8 @@ const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 // authentication constant
 const mockToken =
   "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
+const aRefreshedToken =
+  "ac83a77d6e4c19a02b50b8abf1223b8d858f6aaf23ba286898ad5fe5e24e8893b2b96c3a4c575bff285dac2481580737";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -126,11 +131,13 @@ const invalidUserPayload = {
 const mockSet = jest.fn();
 const mockGet = jest.fn();
 const mockDel = jest.fn();
+const mockRefresh = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
       get: mockGet,
+      refresh: mockRefresh,
       set: mockSet
     }))
   };
@@ -199,12 +206,32 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser, aTimestamp);
   });
 
-  it("return an error if userPayload is invalid", async () => {
+  it("should fail if userPayload is invalid", async () => {
     const response = await controller.acs(invalidUserPayload);
 
     expect(controller).toBeTruthy();
     expect(response).toEqual(left(new Error("Unable to decode the user")));
     expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("should fail if the session can not be saved", async () => {
+    mockSet.mockReturnValue(Promise.resolve(right(false)));
+
+    const response = await controller.acs(validUserPayload);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(
+      left(new Error("Error creating the user session"))
+    );
+  });
+
+  it("should fail if Redis client returns an error", async () => {
+    mockSet.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+
+    const response = await controller.acs(validUserPayload);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("Redis error")));
   });
 });
 
@@ -247,7 +274,7 @@ describe("AuthenticationController#logout", () => {
     );
   });
 
-  it("returns error if the generation user data is invalid", async () => {
+  it("should fail if the generation user data is invalid", async () => {
     const req = mockReq();
 
     req.user = invalidUserPayload;
@@ -259,7 +286,7 @@ describe("AuthenticationController#logout", () => {
     expect(response).toEqual(left(new Error("Unable to decode the user")));
   });
 
-  it("returns error if the generation of logout fails", async () => {
+  it("should fail if the generation of logout fails", async () => {
     const req = mockReq();
     req.user = mockedUser;
 
@@ -276,6 +303,145 @@ describe("AuthenticationController#logout", () => {
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
     expect(response).toEqual(left(new Error("Error message")));
+  });
+
+  it("should fail if the session can not be saved", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(right(false)));
+
+    const response = await controller.logout(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(
+      left(new Error("Error creating the user session"))
+    );
+  });
+
+  it("should fail if Redis client returns an error", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+
+    const response = await controller.logout(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("Redis error")));
+  });
+});
+
+describe("AuthenticationController#getSessionState", () => {
+  it("returns correct session state for expired session", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockToken;
+
+    const aSessionState = { expired: true, newToken: aRefreshedToken };
+    mockGet.mockReturnValue(
+      Promise.resolve(left(new Error("Token has expired")))
+    );
+    mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(mockGet).toHaveBeenCalledWith(mockToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(response).toEqual(
+      right({
+        body: aSessionState,
+        status: 200
+      })
+    );
+  });
+
+  it("returns correct session state for valid session", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockToken;
+
+    const aSessionState = { expired: true, newToken: aRefreshedToken };
+    mockGet.mockReturnValue(
+      Promise.resolve(
+        right({
+          expireAt: 123,
+          expired: false,
+          user: mockedUser
+        })
+      )
+    );
+    mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(mockGet).toHaveBeenCalledWith(mockToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(response).toEqual(
+      right({
+        body: {
+          expireAt: 123,
+          expired: false
+        },
+        status: 200
+      })
+    );
+  });
+
+  it("should fail if no token found in the request", async () => {
+    const req = mockReq();
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("No token in the request")));
+  });
+
+  it("should fail if invalid token found in the request, no Bearer string", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Invalid token";
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("No token in the request")));
+  });
+
+  it("should fail if invalid token found in the request, too much arguments", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer 123 456";
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("No token in the request")));
+  });
+
+  it("should fail if there was error in refreshing the token", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockToken;
+
+    mockGet.mockReturnValue(
+      Promise.resolve(left(new Error("Token has expired")))
+    );
+    mockRefresh.mockReturnValue(
+      Promise.resolve(left(new Error("Error refreshing the token")))
+    );
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(mockGet).toHaveBeenCalledWith(mockToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 });
 
