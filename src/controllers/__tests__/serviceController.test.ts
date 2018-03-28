@@ -1,4 +1,4 @@
-// tslint:disable:no-any
+/* tslint:disable:no-any */
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";

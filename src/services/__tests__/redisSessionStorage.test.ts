@@ -1,18 +1,26 @@
-// tslint:disable:no-any
+/* tslint:disable:no-any */
+/* tslint:disable:no-duplicate-string */
+/* tslint:disable:no-let */
+/* tslint:disable:no-identical-functions */
 
+import { left, right } from "fp-ts/lib/Either";
+import * as lolex from "lolex";
+import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { User } from "../../types/user";
-import MockedRedisClient from "../__mocks__/redisClient";
 import RedisSessionStorage from "../redisSessionStorage";
+import TokenService from "../tokenService";
 
-const aTokenDuration = 3600;
+const aTokenDurationSecs = 3600;
+const theCurrentTimestampMillis = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 
 // mock for a valid User
-const mockedUser: User = {
+const aValidUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
@@ -25,125 +33,344 @@ const mockedUser: User = {
   token: "HexToKen"
 };
 
-/**
- * Wait for all promises to finish.
- *
- * @returns {Promise<any>}
- */
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
+// mock for a invalid User
+const anInvalidUser: User = {
+  ...aValidUser,
+  fiscal_code: anInvalidFiscalNumber
+};
 
-describe("sessionStorage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+// authentication constant
+const mockToken =
+  "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
+jest.mock("../../services/tokenService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      getNewToken: jest.fn(() => {
+        return mockToken;
+      })
+    }))
+  };
+});
 
-  // test case: sessionStorage set storage works with valid values
-  it("should set sessionStorage with valid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
+const mockGetNewToken = jest.fn();
+jest.mock("../../services/tokenService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      getNewToken: mockGetNewToken
+    }))
+  };
+});
+const tokenService = new TokenService();
 
-    const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
-      aTokenDuration
-    );
-    const spy = jest.spyOn(mockedRedisClient, "set");
+const mockHmset = jest.fn();
+const mockHgetall = jest.fn();
+const mockDel = jest.fn();
+const mockRedisClient = createMockRedis().createClient();
+mockRedisClient.hmset = mockHmset;
+mockRedisClient.hgetall = mockHgetall;
+mockRedisClient.del = mockDel;
 
-    sessionStorage.set(mockedUser.token, mockedUser);
+const sessionStorage = new RedisSessionStorage(
+  mockRedisClient,
+  aTokenDurationSecs,
+  tokenService
+);
 
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
+let clock: any;
+beforeEach(() => {
+  // We need to mock time to test token expiration.
+  clock = lolex.install({ now: theCurrentTimestampMillis });
 
-  // test case: sessionStorage get inexistent key
-  it("should fail getting a sessionStorage with inexistent values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
+  jest.clearAllMocks();
+});
+afterEach(() => {
+  clock = clock.uninstall();
+});
 
-    const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
-      aTokenDuration
-    );
-    const spy = jest.spyOn(mockedRedisClient, "get");
-
-    const getValue = sessionStorage.get("notSetValue");
-
-    await flushPromises();
-
-    getValue.catch(val => {
-      expect(val).toBeDefined();
-      expect(val._tag).toBe("Left");
-      expect(val.value).toEqual(new Error("Session not found"));
+describe("RedisSessionStorage#set", () => {
+  it("should set a new session with valid values", async () => {
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
     });
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    const response = await sessionStorage.set(
+      aValidUser.token,
+      aValidUser,
+      theCurrentTimestampMillis
+    );
+
+    expect(mockHmset).toHaveBeenCalledTimes(1);
+    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHmset.mock.calls[0][1]).toEqual({
+      timestampEpochMillis: theCurrentTimestampMillis,
+      user: JSON.stringify(aValidUser)
+    });
+    expect(response).toEqual(right(true));
   });
 
-  // test case: sessionStorage set and get storage fail with invalid values
-  it("should set and get a sessionStorage with invalid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
-
-    const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
-      aTokenDuration
-    );
-    const spy = jest.spyOn(mockedRedisClient, "get");
-
-    const invalidFiscalCodeUser: User = mockedUser;
-    invalidFiscalCodeUser.fiscal_code = "INVALID-FC" as any;
-
-    sessionStorage.set(invalidFiscalCodeUser.token, invalidFiscalCodeUser);
-
-    const getValue = sessionStorage.get(mockedUser.token);
-
-    await flushPromises();
-
-    // tslint:disable-next-line:no-identical-functions
-    getValue.catch(val => {
-      expect(val).toBeDefined();
-      expect(val._tag).toBe("Left");
-      expect(val.value).toEqual(new Error("Session not found"));
+  it("should fail if Redis client returns an error", async () => {
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(new Error("hmset error"), undefined);
     });
 
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
-
-  // test case: sessionStorage set and get storage works with valid values
-  it("should set and get a sessionStorage with valid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
-
-    const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
-      aTokenDuration
+    const response = await sessionStorage.set(
+      aValidUser.token,
+      aValidUser,
+      theCurrentTimestampMillis
     );
-    const spy = jest.spyOn(mockedRedisClient, "get");
 
-    sessionStorage.set(mockedUser.token, mockedUser);
+    expect(mockHmset).toHaveBeenCalledTimes(1);
+    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHmset.mock.calls[0][1]).toEqual({
+      timestampEpochMillis: theCurrentTimestampMillis,
+      user: JSON.stringify(aValidUser)
+    });
+    expect(response).toEqual(left(new Error("hmset error")));
+  });
+});
 
-    const getValue = sessionStorage.get(mockedUser.token);
-
-    await flushPromises();
-
-    getValue.catch(val => {
-      expect(val).toBeDefined();
-      expect(val._tag).toBe("Right");
+describe("RedisSessionStorage#get", () => {
+  it("should fail getting a session for an inexistent token", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, undefined);
     });
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    const response = await sessionStorage.get("inexistent token");
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe("inexistent token");
+    expect(response).toEqual(
+      left(new Error("Session not found or unable to decode the user"))
+    );
   });
 
-  // test case: sessionStorage del storage works with valid values
-  // TODO refactoring after bugfix
-  it("should delete sessionStorage with valid values", async () => {
-    const mockedRedisClient = new MockedRedisClient();
+  it("should fail getting a session with invalid value", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(anInvalidUser)
+      });
+    });
 
-    const sessionStorage = new RedisSessionStorage(
-      mockedRedisClient as any,
-      aTokenDuration
+    const response = await sessionStorage.get(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(
+      left(new Error("Session not found or unable to decode the user"))
     );
-    // TODO: here "hdel" should be refactored to "del"
-    const spy = jest.spyOn(mockedRedisClient, "hdel");
+  });
 
-    sessionStorage.del(mockedUser.token);
+  it("should fail getting an expired session", async () => {
+    const aTokenDurationMillis = aTokenDurationSecs * 1000;
+    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
+    const anExpiredTimestamp =
+      theCurrentTimestampMillis - aTimeLongerThanDuration;
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(anExpiredTimestamp),
+        user: JSON.stringify(aValidUser)
+      });
+    });
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    const response = await sessionStorage.get(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Token has expired")));
+  });
+
+  it("should get a session with valid values", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+
+    const response = await sessionStorage.get(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(
+      right({
+        expireAt: theCurrentTimestampMillis + aTokenDurationSecs * 1000,
+        expired: false,
+        user: aValidUser
+      })
+    );
+  });
+});
+
+describe("RedisSessionStorage#del", () => {
+  it("should delete a session", async () => {
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+
+    const response = await sessionStorage.del(aValidUser.token);
+
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(right(true));
+  });
+
+  it("should fail if Redis client returns an error", async () => {
+    mockDel.mockImplementation((_, callback) => {
+      callback(new Error("del error"), undefined);
+    });
+
+    const response = await sessionStorage.del(aValidUser.token);
+
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("del error")));
+  });
+});
+
+describe("RedisSessionStorage#refresh", () => {
+  it("should return a new session", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
+    });
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHmset).toHaveBeenCalledTimes(1);
+    expect(mockHmset.mock.calls[0][0]).toBe("123456");
+    expect(mockHmset.mock.calls[0][1]).toEqual({
+      timestampEpochMillis: theCurrentTimestampMillis,
+      user: JSON.stringify(aValidUser)
+    });
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(
+      right({
+        expired: true,
+        newToken: "123456"
+      })
+    );
+  });
+
+  it("should fail if session not found or unable to decode the user", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(
+        new Error("Session not found or unable to decode the user"),
+        undefined
+      );
+    });
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(
+      left(new Error("Session not found or unable to decode the user"))
+    );
+  });
+
+  it("should fail if session delete fails for a Redis error", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
+    });
+    mockDel.mockImplementation((_, callback) => {
+      callback(new Error("del error"), undefined);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
+
+  it("should fail if session delete fails with incorrect response", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
+    });
+    const numberOfFieldsRemoved = 1;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
+
+  it("should fail if session set fails for a Redis error", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(new Error("hmset error"), true);
+    });
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
+
+  it("should fail if session set fails with incorrect response", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, false);
+    });
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 });

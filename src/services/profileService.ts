@@ -17,7 +17,7 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
-import { IApiClientFactoryInterface } from "./iApiClientFactory";
+import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const profileErrorOnUnknownResponse = "Unknown response.";
 const profileErrorOnApiError = "Api error.";

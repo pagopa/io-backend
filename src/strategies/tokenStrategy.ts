@@ -5,18 +5,17 @@
 import { Either } from "fp-ts/lib/Either";
 import * as passport from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
-import { ISessionStorage } from "../services/iSessionStorage";
-import { User } from "../types/user";
+import { ISessionState, ISessionStorage } from "../services/ISessionStorage";
 
 const tokenStrategy = () => {
   return new passport.Strategy((token, done) => {
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
     sessionStorage.get(token).then(
-      (errorOrUser: Either<Error, User>) => {
-        errorOrUser.fold(
+      (errorOrSessionState: Either<Error, ISessionState>) => {
+        errorOrSessionState.fold(
           () => done(undefined, false),
-          user => done(undefined, user)
+          sessionState => done(undefined, sessionState.user)
         );
       },
       () => {

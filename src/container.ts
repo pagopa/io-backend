@@ -72,19 +72,41 @@ container.register({
   samlIssuer: awilix.asValue(SAML_ISSUER)
 });
 
+// Redirection urls
+const clientProfileRedirectionUrl =
+  process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
+
+if (!clientProfileRedirectionUrl.includes("{token}")) {
+  winston.log(
+    "error",
+    "CLIENT_REDIRECTION_URL must contains a {token} placeholder"
+  );
+}
+container.register({
+  clientErrorRedirectionUrl: awilix.asValue(
+    process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html"
+  ),
+  clientLoginRedirectionUrl: awilix.asValue(
+    process.env.CLIENT_REDIRECTION_URL || "/login"
+  ),
+  getClientProfileRedirectionUrl: awilix.asValue((token: string) => {
+    return clientProfileRedirectionUrl.replace("{token}", token);
+  })
+});
+
 // Redis server settings.
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = "3600";
-const tokenDurationInSeconds: number = parseInt(
+const tokenDurationSecs: number = parseInt(
   process.env.TOKEN_DURATION_IN_SECONDS || DEFAULT_TOKEN_DURATION_IN_SECONDS,
   10
 );
 winston.log(
   "info",
   "Session token duration set to %s seconds",
-  tokenDurationInSeconds
+  tokenDurationSecs
 );
 container.register({
-  tokenDuration: awilix.asValue(tokenDurationInSeconds)
+  tokenDurationSecs: awilix.asValue(tokenDurationSecs)
 });
 
 container.register({
@@ -105,9 +127,6 @@ container.register({
 });
 
 // Register a session storage service backed by Redis.
-container.register({
-  redisClient: awilix.asClass(redis.RedisClient)
-});
 container.register(
   "redisClient",
   awilix.asFunction(() => {

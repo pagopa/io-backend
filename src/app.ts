@@ -10,7 +10,10 @@ import container, {
   SPID_STRATEGY,
   TOKEN_STRATEGY
 } from "./container";
-import AuthenticationController from "./controllers/authenticationController";
+import AuthenticationController, {
+  ILogoutRedirect,
+  IPublicSession
+} from "./controllers/authenticationController";
 import ProfileController from "./controllers/profileController";
 
 import * as bodyParser from "body-parser";
@@ -24,11 +27,69 @@ import ServicesController from "./controllers/servicesController";
 
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
+import { Either } from "fp-ts/lib/Either";
 import {
   EnvironmentNodeEnv,
   EnvironmentNodeEnvEnum
 } from "./types/environment";
-import { User } from "./types/user";
+
+/**
+ * Return a response to the client.
+ */
+function respond(
+  response: Either<Error, IResponse<string | IPublicSession | ILogoutRedirect>>,
+  res: express.Response
+): void {
+  response.fold(
+    err => {
+      res.status(500).json({ message: err.message });
+    },
+    data => {
+      if (data.status === 301 && typeof data.body === "string") {
+        res.redirect(data.body);
+      } else {
+        res.json(data.body);
+      }
+    }
+  );
+}
+
+/**
+ * Catch SPID authentication errors and redirect the client to
+ * clientErrorRedirectionUrl.
+ */
+function withSpidAuth(
+  controller: AuthenticationController,
+  clientErrorRedirectionUrl: string,
+  clientLoginRedirectionUrl: string
+): ((
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => void) {
+  return (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    passport.authenticate("spid", async (err, user) => {
+      if (err) {
+        res.redirect(clientErrorRedirectionUrl);
+        return;
+      }
+      if (!user) {
+        return res.redirect(clientLoginRedirectionUrl);
+      }
+      const maybeResponse = await controller.acs(user);
+      respond(maybeResponse, res);
+    })(req, res, next);
+  };
+}
+
+export interface IResponse<T> {
+  readonly body: T;
+  readonly status: number;
+}
 
 export function newApp(env: EnvironmentNodeEnv): Express {
   // Setup Passport.
@@ -88,42 +149,30 @@ export function newApp(env: EnvironmentNodeEnv): Express {
   app.post(
     "/logout",
     tokenAuth,
-    (req: express.Request, res: express.Response) => {
-      acsController.logout(req, res);
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await acsController.logout(req);
+      respond(maybeResponse, res);
     }
   );
 
   app.post("/slo", (_, res: express.Response) => {
-    acsController.slo(res);
+    const maybeResponse = acsController.slo();
+    respond(maybeResponse, res);
   });
 
-  const withSpidAuth = (
-    controller: AuthenticationController
-  ): ((
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => void) => {
-    return (
-      req: express.Request,
-      res: express.Response,
-      next: express.NextFunction
-    ) => {
-      passport.authenticate("spid", (err, user: User) => {
-        if (err) {
-          const url = process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
-          res.redirect(url);
-          return;
-        }
-        if (!user) {
-          return res.redirect("/login");
-        }
-        controller.acs(user, res);
-      })(req, res, next);
-    };
-  };
+  app.get("/session", async (req: express.Request, res: express.Response) => {
+    const maybeResponse = await acsController.getSessionState(req);
+    respond(maybeResponse, res);
+  });
 
-  app.post("/assertionConsumerService", withSpidAuth(acsController));
+  app.post(
+    "/assertionConsumerService",
+    withSpidAuth(
+      acsController,
+      container.resolve("clientErrorRedirectionUrl"),
+      container.resolve("clientLoginRedirectionUrl")
+    )
+  );
 
   app.get("/metadata", (_, res: express.Response) => {
     acsController.metadata(res);

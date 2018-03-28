@@ -1,5 +1,9 @@
-// tslint:disable:no-any
+/* tslint:disable:no-any */
+/* tslint:disable:no-duplicate-string */
+/* tslint:disable:no-let */
+/* tslint:disable:no-identical-functions */
 
+import { left, right } from "fp-ts/lib/Either";
 import * as lolex from "lolex";
 import * as redis from "redis";
 import mockReq from "../../__mocks__/request";
@@ -81,6 +85,8 @@ const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 // authentication constant
 const mockToken =
   "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
+const aRefreshedToken =
+  "ac83a77d6e4c19a02b50b8abf1223b8d858f6aaf23ba286898ad5fe5e24e8893b2b96c3a4c575bff285dac2481580737";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -125,11 +131,13 @@ const invalidUserPayload = {
 const mockSet = jest.fn();
 const mockGet = jest.fn();
 const mockDel = jest.fn();
+const mockRefresh = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
       get: mockGet,
+      refresh: mockRefresh,
       set: mockSet
     }))
   };
@@ -148,7 +156,12 @@ jest.mock("../../services/tokenService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
-const redisSessionStorage = new RedisSessionStorage(redisClient, 0);
+const tokenDurationSecs = 0;
+const redisSessionStorage = new RedisSessionStorage(
+  redisClient,
+  tokenDurationSecs,
+  tokenService
+);
 
 const spidStrategyInstance = spidStrategy(
   samlKey,
@@ -158,11 +171,16 @@ const spidStrategyInstance = spidStrategy(
 );
 spidStrategyInstance.logout = jest.fn();
 
+const getClientProfileRedirectionUrl = (token: string): string => {
+  return "/profile.html?token={token}".replace("{token}", token);
+};
+
 const controller = new AuthenticationController(
   redisSessionStorage,
   samlCert,
   spidStrategyInstance,
-  tokenService
+  tokenService,
+  getClientProfileRedirectionUrl
 );
 
 describe("AuthenticationController#acs", () => {
@@ -180,26 +198,44 @@ describe("AuthenticationController#acs", () => {
     clock = clock.uninstall();
   });
 
-  it("redirects to the correct url if userPayload is a valid User", () => {
-    const res = mockRes();
+  it("redirects to the correct url if userPayload is a valid User", async () => {
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
 
-    controller.acs(validUserPayload, res);
+    const response = await controller.acs(validUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith(
-      "/profile.html?token=" + mockToken
+    expect(response).toEqual(
+      right({ body: "/profile.html?token=" + mockToken, status: 301 })
     );
-    expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser, aTimestamp);
   });
 
-  it("return an error if userPayload is invalid", () => {
-    const res = mockRes();
-
-    controller.acs(invalidUserPayload, res);
+  it("should fail if userPayload is invalid", async () => {
+    const response = await controller.acs(invalidUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(response).toEqual(left(new Error("Unable to decode the user")));
     expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("should fail if the session can not be saved", async () => {
+    mockSet.mockReturnValue(Promise.resolve(right(false)));
+
+    const response = await controller.acs(validUserPayload);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(
+      left(new Error("Error creating the user session"))
+    );
+  });
+
+  it("should fail if Redis client returns an error", async () => {
+    mockSet.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+
+    const response = await controller.acs(validUserPayload);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("Redis error")));
   });
 });
 
@@ -209,12 +245,10 @@ describe("AuthenticationController#slo", () => {
   });
 
   it("redirects to the home page", () => {
-    const res = mockRes();
-
-    controller.slo(res);
+    const response = controller.slo();
 
     expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/");
+    expect(response.value).toEqual({ body: "/", status: 301 });
   });
 });
 
@@ -224,46 +258,41 @@ describe("AuthenticationController#logout", () => {
     jest.resetAllMocks();
   });
 
-  it("extracts the logout url", () => {
+  it("extracts the logout url", async () => {
     const req = mockReq();
-    const res = mockRes();
+    req.user = mockedUser;
 
     spidStrategyInstance.logout.mockImplementation((_: any, callback: any) => {
       callback(undefined, "http://www.example.com");
     });
 
-    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(right(true)));
 
-    controller.logout(req, res);
+    const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
     expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      logoutUrl: "http://www.example.com"
-    });
+    expect(response).toEqual(
+      right({ body: { logoutUrl: "http://www.example.com" }, status: 200 })
+    );
   });
 
-  it("returns error if the generation user data is invalid", () => {
+  it("should fail if the generation user data is invalid", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     req.user = invalidUserPayload;
 
-    controller.logout(req, res);
+    const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
+    expect(response).toEqual(left(new Error("Unable to decode the user")));
   });
 
-  it("returns error if the generation of logout fails", () => {
+  it("should fail if the generation of logout fails", async () => {
     const req = mockReq();
-    const res = mockRes();
+    req.user = mockedUser;
 
     spidStrategyInstance.logout.mockImplementation(
       (_: any, callback: (error: Error) => void) => {
@@ -271,16 +300,152 @@ describe("AuthenticationController#logout", () => {
       }
     );
 
-    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(right(true)));
 
-    controller.logout(req, res);
+    const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Error: Error message"
-    });
+    expect(response).toEqual(left(new Error("Error message")));
+  });
+
+  it("should fail if the session can not be saved", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(right(false)));
+
+    const response = await controller.logout(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(
+      left(new Error("Error creating the user session"))
+    );
+  });
+
+  it("should fail if Redis client returns an error", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    mockDel.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+
+    const response = await controller.logout(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("Redis error")));
+  });
+});
+
+describe("AuthenticationController#getSessionState", () => {
+  it("returns correct session state for expired session", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockToken;
+
+    const aSessionState = { expired: true, newToken: aRefreshedToken };
+    mockGet.mockReturnValue(
+      Promise.resolve(left(new Error("Token has expired")))
+    );
+    mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(mockGet).toHaveBeenCalledWith(mockToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(response).toEqual(
+      right({
+        body: aSessionState,
+        status: 200
+      })
+    );
+  });
+
+  it("returns correct session state for valid session", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockToken;
+
+    const aSessionState = { expired: true, newToken: aRefreshedToken };
+    mockGet.mockReturnValue(
+      Promise.resolve(
+        right({
+          expireAt: 123,
+          expired: false,
+          user: mockedUser
+        })
+      )
+    );
+    mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(mockGet).toHaveBeenCalledWith(mockToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(response).toEqual(
+      right({
+        body: {
+          expireAt: 123,
+          expired: false
+        },
+        status: 200
+      })
+    );
+  });
+
+  it("should fail if no token found in the request", async () => {
+    const req = mockReq();
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("No token in the request")));
+  });
+
+  it("should fail if invalid token found in the request, no Bearer string", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Invalid token";
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("No token in the request")));
+  });
+
+  it("should fail if invalid token found in the request, too much arguments", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer 123 456";
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(left(new Error("No token in the request")));
+  });
+
+  it("should fail if there was error in refreshing the token", async () => {
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockToken;
+
+    mockGet.mockReturnValue(
+      Promise.resolve(left(new Error("Token has expired")))
+    );
+    mockRefresh.mockReturnValue(
+      Promise.resolve(left(new Error("Error refreshing the token")))
+    );
+
+    const response = await controller.getSessionState(req);
+
+    expect(controller).toBeTruthy();
+    expect(mockGet).toHaveBeenCalledWith(mockToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 });
 

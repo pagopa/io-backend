@@ -1,4 +1,4 @@
-// tslint:disable:no-any
+/* tslint:disable:no-any */
 
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";

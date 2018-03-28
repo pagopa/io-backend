@@ -7,7 +7,7 @@
 
 import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 import { APICredentials } from "../utils/APICredential";
-import { IApiClientFactoryInterface } from "./iApiClientFactory";
+import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ApiClientFactory implements IApiClientFactoryInterface {
   constructor(public readonly apiKey: string, public readonly apiUrl: string) {}

@@ -31,6 +31,7 @@ const validApiMessagesResponse = {
   ],
   pageSize: 2
 };
+const emptyApiMessagesResponse = {};
 const invalidApiMessagesResponse = {
   items: [
     {
@@ -57,6 +58,7 @@ const proxyMessagesResponse = {
   ],
   pageSize: 2
 };
+const emptyProxyMessagesResponse = {};
 const validApiMessageResponse = {
   message: {
     content: {
@@ -167,6 +169,20 @@ describe("MessageService#getMessagesByUser", () => {
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
     expect(res).toEqual(proxyMessagesResponse);
+  });
+
+  it("returns an empty list if the of messages from the API is empty", async () => {
+    mockGetMessagesByUser.mockImplementation(() => {
+      return emptyApiMessagesResponse;
+    });
+
+    const service = new MessageService(api);
+
+    const res = await service.getMessagesByUser(mockedUser);
+
+    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith();
+    expect(res).toEqual(emptyProxyMessagesResponse);
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {

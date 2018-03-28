@@ -2071,7 +2071,16 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
-io-ts@^1.0.2:
+io-ts-types@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.4.tgz#7474316d2d04cc5a915cde84b024c5662bd5ebd0"
+  dependencies:
+    fp-ts "^1.0.0"
+    io-ts "^1.0.0"
+    monocle-ts "^1.0.0"
+    newtype-ts "^0.2.0"
+
+io-ts@^1.0.0, io-ts@^1.0.2:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.0.5.tgz#dec6032f8febb4e8a6c614230823accb50f802fe"
   dependencies:
@@ -2878,7 +2887,7 @@ lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
 
-lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.4:
+lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.4, lodash@^4.5.0:
   version "4.17.5"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
 
@@ -3058,9 +3067,22 @@ mixin-deep@^1.2.0:
   dependencies:
     minimist "0.0.8"
 
+mock-redis-client@^0.91.13:
+  version "0.91.13"
+  resolved "https://registry.yarnpkg.com/mock-redis-client/-/mock-redis-client-0.91.13.tgz#029740320f4d5a64ffd2febef6e181f716b81e22"
+  dependencies:
+    lodash "^4.5.0"
+    node-redis-mock "^0.2.14"
+
 moment@~2.18.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
+
+monocle-ts@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.0.0.tgz#6ea0f4c5c6b6959157452994bfec7ed170973b8c"
+  dependencies:
+    fp-ts "^1.0.0"
 
 morgan@^1.8.1:
   version "1.9.0"
@@ -3123,6 +3145,13 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
+newtype-ts@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/newtype-ts/-/newtype-ts-0.2.0.tgz#8306c9bdf73d54bf92c2fda6cb59e31d259a43e1"
+  dependencies:
+    fp-ts "^1.0.0"
+    monocle-ts "^1.0.0"
+
 no-case@^2.2.0:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.2.tgz#60b813396be39b3f1288a4c1ed5d1e7d28b464ac"
@@ -3176,6 +3205,10 @@ node-pre-gyp@^0.6.39:
     semver "^5.3.0"
     tar "^2.2.1"
     tar-pack "^3.4.0"
+
+node-redis-mock@^0.2.14:
+  version "0.2.16"
+  resolved "https://registry.yarnpkg.com/node-redis-mock/-/node-redis-mock-0.2.16.tgz#e225de04bba19a44e2e4a445d5d3eb20e8fca7f5"
 
 nodemon@^1.11.0:
   version "1.17.2"
