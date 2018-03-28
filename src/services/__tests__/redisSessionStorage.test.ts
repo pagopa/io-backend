@@ -204,7 +204,7 @@ describe("RedisSessionStorage#get", () => {
 
 describe("RedisSessionStorage#del", () => {
   it("should delete a session", async () => {
-    const numberOfFieldsRemoved = 2;
+    const numberOfFieldsRemoved = 1;
     mockDel.mockImplementation((_, callback) => {
       callback(undefined, numberOfFieldsRemoved);
     });
@@ -240,7 +240,7 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(undefined, true);
     });
-    const numberOfFieldsRemoved = 2;
+    const numberOfFieldsRemoved = 1;
     mockDel.mockImplementation((_, callback) => {
       callback(undefined, numberOfFieldsRemoved);
     });
@@ -315,7 +315,7 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(undefined, true);
     });
-    const numberOfFieldsRemoved = 1;
+    const numberOfFieldsRemoved = 0;
     mockDel.mockImplementation((_, callback) => {
       callback(undefined, numberOfFieldsRemoved);
     });
@@ -338,7 +338,7 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(new Error("hmset error"), true);
     });
-    const numberOfFieldsRemoved = 2;
+    const numberOfFieldsRemoved = 1;
     mockDel.mockImplementation((_, callback) => {
       callback(undefined, numberOfFieldsRemoved);
     });
@@ -361,7 +361,7 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(undefined, false);
     });
-    const numberOfFieldsRemoved = 2;
+    const numberOfFieldsRemoved = 1;
     mockDel.mockImplementation((_, callback) => {
       callback(undefined, numberOfFieldsRemoved);
     });
