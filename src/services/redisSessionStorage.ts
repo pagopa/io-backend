@@ -126,9 +126,8 @@ export default class RedisSessionStorage implements ISessionStorage {
           return resolve(left<Error, boolean>(err));
         }
 
-        // del return the number of fields that were removed from the hash,
-        // in our case is 2 ("user" and "timestampEpochMillis").
-        resolve(right<Error, boolean>(response === 2));
+        // del return 1 on success, 0 otherwise.
+        resolve(right<Error, boolean>(response === 1));
       });
     });
   }

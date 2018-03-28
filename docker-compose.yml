@@ -13,13 +13,13 @@ services:
     image: node:8.9.4-alpine
     restart: always
     volumes:
-      - ".:/usr/src/app"
-      - "./certs:/usr/src/app/certs"
+      - ".:/usr/src/app:delegated"
+      - "./certs:/usr/src/app/certs:delegated"
     working_dir: "/usr/src/app"
 
   redis:
     container_name: redis
-    image: wodby/redis
+    image: wodby/redis:4.0-2.1.5
     environment:
       REDIS_TIMEOUT: 300
       REDIS_TCP_KEEPALIVE: 60
@@ -32,7 +32,7 @@ services:
       - "9443:9443"
     restart: always
     volumes:
-      - "./logs/idp:/spid-testenvironment/is/identity-server/repository/logs"
+      - "./logs/idp:/spid-testenvironment/is/identity-server/repository/logs:delegated"
 
   spid-testenv-backoffice:
     container_name: spid-testenv-backoffice
@@ -46,4 +46,4 @@ services:
       - "8080:8080"
     restart: always
     volumes:
-      - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js"
+      - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js:delegated"
