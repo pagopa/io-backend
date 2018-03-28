@@ -204,9 +204,9 @@ describe("RedisSessionStorage#get", () => {
 
 describe("RedisSessionStorage#del", () => {
   it("should delete a session", async () => {
-    const numberOfFieldsRemoved = 1;
+    const successfullyDelete = 1;
     mockDel.mockImplementation((_, callback) => {
-      callback(undefined, numberOfFieldsRemoved);
+      callback(undefined, successfullyDelete);
     });
 
     const response = await sessionStorage.del(aValidUser.token);
@@ -240,9 +240,9 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(undefined, true);
     });
-    const numberOfFieldsRemoved = 1;
+    const successfullyDelete = 1;
     mockDel.mockImplementation((_, callback) => {
-      callback(undefined, numberOfFieldsRemoved);
+      callback(undefined, successfullyDelete);
     });
     mockGetNewToken.mockReturnValue("123456");
 
@@ -315,9 +315,9 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(undefined, true);
     });
-    const numberOfFieldsRemoved = 0;
+    const successfullyDelete = 0;
     mockDel.mockImplementation((_, callback) => {
-      callback(undefined, numberOfFieldsRemoved);
+      callback(undefined, successfullyDelete);
     });
     mockGetNewToken.mockReturnValue("123456");
 
@@ -338,9 +338,9 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(new Error("hmset error"), true);
     });
-    const numberOfFieldsRemoved = 1;
+    const successfullyDelete = 1;
     mockDel.mockImplementation((_, callback) => {
-      callback(undefined, numberOfFieldsRemoved);
+      callback(undefined, successfullyDelete);
     });
     mockGetNewToken.mockReturnValue("123456");
 
@@ -361,9 +361,9 @@ describe("RedisSessionStorage#refresh", () => {
     mockHmset.mockImplementation((_, __, callback) => {
       callback(undefined, false);
     });
-    const numberOfFieldsRemoved = 1;
+    const successfullyDelete = 1;
     mockDel.mockImplementation((_, callback) => {
-      callback(undefined, numberOfFieldsRemoved);
+      callback(undefined, successfullyDelete);
     });
     mockGetNewToken.mockReturnValue("123456");
 
