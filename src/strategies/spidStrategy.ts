@@ -74,7 +74,6 @@ const spidStrategy = (
           attributes: ["fiscalNumber", "name", "familyName", "email"],
           name: "Required attributes"
         },
-        authnContext: "https://www.spid.gov.it/SpidL1",
         callbackUrl: samlCallbackUrl,
         decryptionPvk: samlKey,
         identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",

@@ -175,9 +175,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/validator@^6.3.0":
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-6.3.0.tgz#d7454bd67c6a933a9dbe939ae16edbf0f6894e70"
+"@types/validator@^9.2.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-9.4.0.tgz#a4a80a31d3e4e094806ec446557808423379858d"
 
 "@types/winston@^2.3.8":
   version "2.3.8"
@@ -4182,9 +4182,9 @@ spdx-license-ids@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.0.tgz#7a7cd28470cc6d3a1cfe6d66886f6bc430d3ac87"
 
-"spid-passport@git://github.com/lussoluca/spid-passport.git#e0f52e4":
+"spid-passport@git://github.com/lussoluca/spid-passport.git#e14ead5":
   version "1.0.0"
-  resolved "git://github.com/lussoluca/spid-passport.git#e0f52e437d77031e805b94beef39289f99e96908"
+  resolved "git://github.com/lussoluca/spid-passport.git#e14ead5cd8bbcd608d113745986aed057f51fdd3"
   dependencies:
     passport "^0.4.0"
     passport-saml "^0.31.0"
