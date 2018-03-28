@@ -282,4 +282,95 @@ describe("RedisSessionStorage#refresh", () => {
       left(new Error("Session not found or unable to decode the user"))
     );
   });
+
+  it("should fail if session delete fails for a Redis error", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
+    });
+    mockDel.mockImplementation((_, callback) => {
+      callback(new Error("del error"), undefined);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
+
+  it("should fail if session delete fails with incorrect response", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, true);
+    });
+    const numberOfFieldsRemoved = 1;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
+
+  it("should fail if session set fails for a Redis error", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(new Error("hmset error"), true);
+    });
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
+
+  it("should fail if session set fails with incorrect response", async () => {
+    mockHgetall.mockImplementation((_, callback) => {
+      callback(undefined, {
+        timestampEpochMillis: String(theCurrentTimestampMillis),
+        user: JSON.stringify(aValidUser)
+      });
+    });
+    mockHmset.mockImplementation((_, __, callback) => {
+      callback(undefined, false);
+    });
+    const numberOfFieldsRemoved = 2;
+    mockDel.mockImplementation((_, callback) => {
+      callback(undefined, numberOfFieldsRemoved);
+    });
+    mockGetNewToken.mockReturnValue("123456");
+
+    const response = await sessionStorage.refresh(aValidUser.token);
+
+    expect(mockHgetall).toHaveBeenCalledTimes(1);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(response).toEqual(left(new Error("Error refreshing the token")));
+  });
 });

@@ -95,11 +95,19 @@ export default class RedisSessionStorage implements ISessionStorage {
       this.set(newToken, user, timestamp),
       this.del(token)
     ]);
-    if (isLeft(setResult.alt(delResult))) {
+
+    if (isLeft(setResult) || isLeft(delResult)) {
       return left<Error, ISessionState>(
         new Error("Error refreshing the token")
       );
     }
+
+    if (!setResult.value || !delResult.value) {
+      return left<Error, ISessionState>(
+        new Error("Error refreshing the token")
+      );
+    }
+
     return right<Error, ISessionState>({
       expired: true,
       newToken
