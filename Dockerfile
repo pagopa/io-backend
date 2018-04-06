@@ -10,7 +10,7 @@ COPY /package.json /usr/src/app/package.json
 COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
 
-RUN yarn install \
+RUN yarn install --production \
   && yarn build
 
 FROM node:8.9.4-alpine

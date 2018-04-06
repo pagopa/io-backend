@@ -7,6 +7,7 @@
 import { ServiceClientOptions } from "ms-rest-js";
 import { RequestOptionsBase } from "ms-rest-js";
 
+
 /**
  * @interface
  * An interface representing ProblemJson.
@@ -43,6 +44,29 @@ export interface ProblemJson {
    * It may or may not yield further information if dereferenced.
    */
   instance?: string;
+}
+
+/**
+ * @interface
+ * An interface representing NotificationChannelStatus.
+ */
+export interface NotificationChannelStatus {
+  /**
+   * @member {string} channel
+   */
+  channel: string;
+  /**
+   * @member {string} status
+   */
+  status: string;
+  /**
+   * @member {Date} updatedAt
+   */
+  updatedAt: Date;
+  /**
+   * @member {number} [version]
+   */
+  version?: number;
 }
 
 /**
@@ -95,13 +119,21 @@ export interface NewMessage {
 
 /**
  * @interface
- * An interface representing NotificationStatus.
+ * An interface representing MessageStatus.
  */
-export interface NotificationStatus {
+export interface MessageStatus {
   /**
-   * @member {string} [email]
+   * @member {string} status
    */
-  email?: string;
+  status: string;
+  /**
+   * @member {Date} updatedAt
+   */
+  updatedAt: Date;
+  /**
+   * @member {number} [version]
+   */
+  version?: number;
 }
 
 /**
@@ -156,6 +188,17 @@ export interface CreatedMessageWithoutContent {
 
 /**
  * @interface
+ * An interface representing MessageResponseNotificationStatus.
+ */
+export interface MessageResponseNotificationStatus {
+  /**
+   * @member {string} [email]
+   */
+  email?: string;
+}
+
+/**
+ * @interface
  * An interface representing MessageResponseWithContent.
  */
 export interface MessageResponseWithContent {
@@ -164,9 +207,13 @@ export interface MessageResponseWithContent {
    */
   message: CreatedMessageWithContent;
   /**
-   * @member {NotificationStatus} [notification]
+   * @member {MessageResponseNotificationStatus} [notification]
    */
-  notification?: NotificationStatus;
+  notification?: MessageResponseNotificationStatus;
+  /**
+   * @member {string} [status]
+   */
+  status?: string;
 }
 
 /**
@@ -179,9 +226,13 @@ export interface MessageResponseWithoutContent {
    */
   message: CreatedMessageWithoutContent;
   /**
-   * @member {NotificationStatus} [notification]
+   * @member {MessageResponseNotificationStatus} [notification]
    */
-  notification?: NotificationStatus;
+  notification?: MessageResponseNotificationStatus;
+  /**
+   * @member {string} [status]
+   */
+  status?: string;
 }
 
 /**
@@ -236,6 +287,10 @@ export interface ExtendedProfile {
    * @member {boolean} [isInboxEnabled]
    */
   isInboxEnabled?: boolean;
+  /**
+   * @member {boolean} [isWebhookEnabled]
+   */
+  isWebhookEnabled?: boolean;
   /**
    * @member {number} [version]
    */
@@ -344,6 +399,10 @@ export interface GetProfileOKResponse {
    */
   isInboxEnabled?: boolean;
   /**
+   * @member {boolean} [isWebhookEnabled]
+   */
+  isWebhookEnabled?: boolean;
+  /**
    * @member {number} [version]
    */
   version?: number;
@@ -366,6 +425,10 @@ export interface UpsertProfileOKResponse {
    * @member {boolean} [isInboxEnabled]
    */
   isInboxEnabled?: boolean;
+  /**
+   * @member {boolean} [isWebhookEnabled]
+   */
+  isWebhookEnabled?: boolean;
   /**
    * @member {number} [version]
    */
@@ -392,8 +455,7 @@ export interface DigitalCitizenshipAPIOptions extends ServiceClientOptions {
  *
  * @extends RequestOptionsBase
  */
-export interface DigitalCitizenshipAPISubmitMessageforUserOptionalParams
-  extends RequestOptionsBase {
+export interface DigitalCitizenshipAPISubmitMessageforUserOptionalParams extends RequestOptionsBase {
   /**
    * @member {NewMessage} [message]
    */
@@ -407,8 +469,7 @@ export interface DigitalCitizenshipAPISubmitMessageforUserOptionalParams
  *
  * @extends RequestOptionsBase
  */
-export interface DigitalCitizenshipAPIUpsertProfileOptionalParams
-  extends RequestOptionsBase {
+export interface DigitalCitizenshipAPIUpsertProfileOptionalParams extends RequestOptionsBase {
   /**
    * @member {ExtendedProfile} [body]
    */

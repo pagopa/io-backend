@@ -14,7 +14,8 @@
     "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "generate-api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --typescript --input-file=/dev/stdin --output-folder=src/api --add-credentials"
   },
   "repository": {
     "type": "git",
@@ -65,6 +66,7 @@
     "@types/superagent": "^3.5.7",
     "@types/supertest": "^2.0.4",
     "@types/lolex": "2.1.1",
+    "autorest": "^2.0.4262",
     "danger": "^3.1.7",
     "danger-plugin-digitalcitizenship": "https://github.com/teamdigitale/danger-plugin-digitalcitizenship#v0.0.2",
     "fp-ts": "^1.0.0",
@@ -76,6 +78,7 @@
     "prettier": "^1.7.4",
     "superagent": "^3.8.2",
     "supertest": "^2.0.0",
+    "swagger-cli": "^1.0.1",
     "typestrict": "^0.0.7",
     "ts-jest": "^22.0.0",
     "ts-node": "^5.0.0",

@@ -47,17 +47,17 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
      */
     constructor(fiscalCode, credentials, baseUri, options) {
         if (fiscalCode === null || fiscalCode === undefined) {
-            throw new Error("'fiscalCode' cannot be null.");
+            throw new Error('\'fiscalCode\' cannot be null.');
         }
         if (credentials === null || credentials === undefined) {
-            throw new Error("'credentials' cannot be null.");
+            throw new Error('\'credentials\' cannot be null.');
         }
         if (!options)
             options = {};
         super(credentials, options);
         this.baseUri = baseUri;
         if (!this.baseUri) {
-            this.baseUri = "https://localhost/api/v1";
+            this.baseUri = 'https://localhost/api/v1';
         }
         this.fiscalCode = fiscalCode;
         this.credentials = credentials;
@@ -65,7 +65,7 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
         if (options.cursor !== null && options.cursor !== undefined) {
             this.cursor = options.cursor;
         }
-        this.serializer = new msRest.Serializer(Mappers);
+        this.serializer = new msRest.Serializer(Mappers, false);
     }
     // methods on the client.
     /**
@@ -88,10 +88,8 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             let client = this;
             // Validate
             try {
-                if (serviceId === null ||
-                    serviceId === undefined ||
-                    typeof serviceId.valueOf() !== "string") {
-                    throw new Error("serviceId cannot be null or undefined and it must be of type string.");
+                if (serviceId === null || serviceId === undefined || typeof serviceId.valueOf() !== 'string') {
+                    throw new Error('serviceId cannot be null or undefined and it must be of type string.');
                 }
             }
             catch (error) {
@@ -99,15 +97,15 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             }
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "services/{service_id}";
-            requestUrl = requestUrl.replace("{service_id}", encodeURIComponent(serviceId));
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'services/{service_id}';
+            requestUrl = requestUrl.replace('{service_id}', encodeURIComponent(serviceId));
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "GET";
+            httpRequest.method = 'GET';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -126,35 +124,30 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 200) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ServicePublic;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -192,10 +185,8 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             let client = this;
             // Validate
             try {
-                if (this.fiscalCode === null ||
-                    this.fiscalCode === undefined ||
-                    typeof this.fiscalCode.valueOf() !== "string") {
-                    throw new Error("this.fiscalCode cannot be null or undefined and it must be of type string.");
+                if (this.fiscalCode === null || this.fiscalCode === undefined || typeof this.fiscalCode.valueOf() !== 'string') {
+                    throw new Error('this.fiscalCode cannot be null or undefined and it must be of type string.');
                 }
                 if (this.fiscalCode !== null && this.fiscalCode !== undefined) {
                     if (this.fiscalCode.length > 16) {
@@ -208,8 +199,8 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                         throw new Error('"this.fiscalCode" should satisfy the constraint - "Pattern": /[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]/');
                     }
                 }
-                if (id === null || id === undefined || typeof id.valueOf() !== "string") {
-                    throw new Error("id cannot be null or undefined and it must be of type string.");
+                if (id === null || id === undefined || typeof id.valueOf() !== 'string') {
+                    throw new Error('id cannot be null or undefined and it must be of type string.');
                 }
             }
             catch (error) {
@@ -217,18 +208,16 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             }
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl +
-                (baseUrl.endsWith("/") ? "" : "/") +
-                "messages/{fiscal_code}/{id}";
-            requestUrl = requestUrl.replace("{fiscal_code}", encodeURIComponent(this.fiscalCode));
-            requestUrl = requestUrl.replace("{id}", encodeURIComponent(id));
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'messages/{fiscal_code}/{id}';
+            requestUrl = requestUrl.replace('{fiscal_code}', encodeURIComponent(this.fiscalCode));
+            requestUrl = requestUrl.replace('{id}', encodeURIComponent(id));
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "GET";
+            httpRequest.method = 'GET';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -247,35 +236,30 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 200) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.MessageResponseWithContent;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -287,11 +271,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 }
                 // Deserialize Response
                 if (statusCode === 404) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -330,15 +314,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             let client = this;
             // Validate
             try {
-                if (this.cursor !== null &&
-                    this.cursor !== undefined &&
-                    typeof this.cursor.valueOf() !== "string") {
-                    throw new Error("this.cursor must be of type string.");
+                if (this.cursor !== null && this.cursor !== undefined && typeof this.cursor.valueOf() !== 'string') {
+                    throw new Error('this.cursor must be of type string.');
                 }
-                if (this.fiscalCode === null ||
-                    this.fiscalCode === undefined ||
-                    typeof this.fiscalCode.valueOf() !== "string") {
-                    throw new Error("this.fiscalCode cannot be null or undefined and it must be of type string.");
+                if (this.fiscalCode === null || this.fiscalCode === undefined || typeof this.fiscalCode.valueOf() !== 'string') {
+                    throw new Error('this.fiscalCode cannot be null or undefined and it must be of type string.');
                 }
                 if (this.fiscalCode !== null && this.fiscalCode !== undefined) {
                     if (this.fiscalCode.length > 16) {
@@ -357,22 +337,22 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             }
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "messages/{fiscal_code}";
-            requestUrl = requestUrl.replace("{fiscal_code}", encodeURIComponent(this.fiscalCode));
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'messages/{fiscal_code}';
+            requestUrl = requestUrl.replace('{fiscal_code}', encodeURIComponent(this.fiscalCode));
             let queryParamsArray = [];
             if (this.cursor !== null && this.cursor !== undefined) {
-                queryParamsArray.push("cursor=" + encodeURIComponent(this.cursor));
+                queryParamsArray.push('cursor=' + encodeURIComponent(this.cursor));
             }
             if (queryParamsArray.length > 0) {
-                requestUrl += "?" + queryParamsArray.join("&");
+                requestUrl += '?' + queryParamsArray.join('&');
             }
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "GET";
+            httpRequest.method = 'GET';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -391,35 +371,30 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 200) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.GetMessagesByUserOKResponse;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -431,11 +406,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 }
                 // Deserialize Response
                 if (statusCode === 404) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -471,13 +446,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
     submitMessageforUserWithHttpOperationResponse(options) {
         return __awaiter(this, void 0, void 0, function* () {
             let client = this;
-            let message = options && options.message !== undefined ? options.message : undefined;
+            let message = (options && options.message !== undefined) ? options.message : undefined;
             // Validate
             try {
-                if (this.fiscalCode === null ||
-                    this.fiscalCode === undefined ||
-                    typeof this.fiscalCode.valueOf() !== "string") {
-                    throw new Error("this.fiscalCode cannot be null or undefined and it must be of type string.");
+                if (this.fiscalCode === null || this.fiscalCode === undefined || typeof this.fiscalCode.valueOf() !== 'string') {
+                    throw new Error('this.fiscalCode cannot be null or undefined and it must be of type string.');
                 }
                 if (this.fiscalCode !== null && this.fiscalCode !== undefined) {
                     if (this.fiscalCode.length > 16) {
@@ -496,15 +469,15 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             }
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "messages/{fiscal_code}";
-            requestUrl = requestUrl.replace("{fiscal_code}", encodeURIComponent(this.fiscalCode));
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'messages/{fiscal_code}';
+            requestUrl = requestUrl.replace('{fiscal_code}', encodeURIComponent(this.fiscalCode));
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "POST";
+            httpRequest.method = 'POST';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -518,7 +491,7 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             try {
                 if (message !== null && message !== undefined) {
                     let requestModelMapper = Mappers.NewMessage;
-                    requestModel = client.serializer.serialize(requestModelMapper, message, "message");
+                    requestModel = client.serializer.serialize(requestModelMapper, message, 'message');
                     requestContent = JSON.stringify(requestModel);
                 }
             }
@@ -539,35 +512,30 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 400) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -579,11 +547,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 }
                 // Deserialize Response
                 if (statusCode === 500) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -619,10 +587,8 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             let client = this;
             // Validate
             try {
-                if (this.fiscalCode === null ||
-                    this.fiscalCode === undefined ||
-                    typeof this.fiscalCode.valueOf() !== "string") {
-                    throw new Error("this.fiscalCode cannot be null or undefined and it must be of type string.");
+                if (this.fiscalCode === null || this.fiscalCode === undefined || typeof this.fiscalCode.valueOf() !== 'string') {
+                    throw new Error('this.fiscalCode cannot be null or undefined and it must be of type string.');
                 }
                 if (this.fiscalCode !== null && this.fiscalCode !== undefined) {
                     if (this.fiscalCode.length > 16) {
@@ -641,15 +607,15 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             }
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "profiles/{fiscal_code}";
-            requestUrl = requestUrl.replace("{fiscal_code}", encodeURIComponent(this.fiscalCode));
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'profiles/{fiscal_code}';
+            requestUrl = requestUrl.replace('{fiscal_code}', encodeURIComponent(this.fiscalCode));
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "GET";
+            httpRequest.method = 'GET';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -668,35 +634,30 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 200) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.GetProfileOKResponse;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -708,11 +669,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 }
                 // Deserialize Response
                 if (statusCode === 404) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -748,13 +709,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
     upsertProfileWithHttpOperationResponse(options) {
         return __awaiter(this, void 0, void 0, function* () {
             let client = this;
-            let body = options && options.body !== undefined ? options.body : undefined;
+            let body = (options && options.body !== undefined) ? options.body : undefined;
             // Validate
             try {
-                if (this.fiscalCode === null ||
-                    this.fiscalCode === undefined ||
-                    typeof this.fiscalCode.valueOf() !== "string") {
-                    throw new Error("this.fiscalCode cannot be null or undefined and it must be of type string.");
+                if (this.fiscalCode === null || this.fiscalCode === undefined || typeof this.fiscalCode.valueOf() !== 'string') {
+                    throw new Error('this.fiscalCode cannot be null or undefined and it must be of type string.');
                 }
                 if (this.fiscalCode !== null && this.fiscalCode !== undefined) {
                     if (this.fiscalCode.length > 16) {
@@ -773,15 +732,15 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             }
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "profiles/{fiscal_code}";
-            requestUrl = requestUrl.replace("{fiscal_code}", encodeURIComponent(this.fiscalCode));
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'profiles/{fiscal_code}';
+            requestUrl = requestUrl.replace('{fiscal_code}', encodeURIComponent(this.fiscalCode));
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "POST";
+            httpRequest.method = 'POST';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -795,7 +754,7 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             try {
                 if (body !== null && body !== undefined) {
                     let requestModelMapper = Mappers.ExtendedProfile;
-                    requestModel = client.serializer.serialize(requestModelMapper, body, "body");
+                    requestModel = client.serializer.serialize(requestModelMapper, body, 'body');
                     requestContent = JSON.stringify(requestModel);
                 }
             }
@@ -816,35 +775,30 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 200) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.UpsertProfileOKResponse;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -856,11 +810,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 }
                 // Deserialize Response
                 if (statusCode === 400) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -872,11 +826,11 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 }
                 // Deserialize Response
                 if (statusCode === 500) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = Mappers.ProblemJson;
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -912,14 +866,14 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
             let client = this;
             // Construct URL
             let baseUrl = this.baseUri;
-            let requestUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "info";
+            let requestUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'info';
             // Create HTTP transport objects
             let httpRequest = new WebResource();
-            httpRequest.method = "GET";
+            httpRequest.method = 'GET';
             httpRequest.url = requestUrl;
             httpRequest.headers = {};
             // Set Headers
-            httpRequest.headers["Content-Type"] = "application/json; charset=utf-8";
+            httpRequest.headers['Content-Type'] = 'application/json; charset=utf-8';
             if (options && options.customHeaders) {
                 for (let headerName in options.customHeaders) {
                     if (options.customHeaders.hasOwnProperty(headerName)) {
@@ -938,41 +892,36 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                     error.statusCode = response.status;
                     error.request = msRest.stripRequest(httpRequest);
                     error.response = msRest.stripResponse(response);
-                    let parsedErrorResponse = operationRes.bodyAsJson;
+                    let parsedErrorResponse = operationRes.parsedBody;
                     try {
                         if (parsedErrorResponse) {
                             let internalError = null;
                             if (parsedErrorResponse.error)
                                 internalError = parsedErrorResponse.error;
-                            error.code = internalError
-                                ? internalError.code
-                                : parsedErrorResponse.code;
-                            error.message = internalError
-                                ? internalError.message
-                                : parsedErrorResponse.message;
+                            error.code = internalError ? internalError.code : parsedErrorResponse.code;
+                            error.message = internalError ? internalError.message : parsedErrorResponse.message;
                         }
                     }
                     catch (defaultError) {
-                        error.message =
-                            `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
-                                `- "${operationRes.bodyAsText}" for the default response.`;
+                        error.message = `Error "${defaultError.message}" occurred in deserializing the responseBody ` +
+                            `- "${operationRes.bodyAsText}" for the default response.`;
                         return Promise.reject(error);
                     }
                     return Promise.reject(error);
                 }
                 // Deserialize Response
                 if (statusCode === 200) {
-                    let parsedResponse = operationRes.bodyAsJson;
+                    let parsedResponse = operationRes.parsedBody;
                     try {
                         if (parsedResponse !== null && parsedResponse !== undefined) {
                             let resultMapper = {
                                 required: false,
-                                serializedName: "parsedResponse",
+                                serializedName: 'parsedResponse',
                                 type: {
-                                    name: "Object"
+                                    name: 'Object'
                                 }
                             };
-                            operationRes.bodyAsJson = client.serializer.deserialize(resultMapper, parsedResponse, "operationRes.bodyAsJson");
+                            operationRes.parsedBody = client.serializer.deserialize(resultMapper, parsedResponse, 'operationRes.parsedBody');
                         }
                     }
                     catch (error) {
@@ -990,17 +939,15 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
         });
     }
     getService(serviceId, options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.getServiceWithHttpOperationResponse(serviceId, options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.getServiceWithHttpOperationResponse(serviceId, options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1009,23 +956,21 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
     }
     getMessage(id, options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.getMessageWithHttpOperationResponse(id, options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.getMessageWithHttpOperationResponse(id, options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1034,23 +979,21 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
     }
     getMessagesByUser(options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.getMessagesByUserWithHttpOperationResponse(options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.getMessagesByUserWithHttpOperationResponse(options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1059,23 +1002,21 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
     }
     submitMessageforUser(options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.submitMessageforUserWithHttpOperationResponse(options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.submitMessageforUserWithHttpOperationResponse(options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1084,23 +1025,21 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
     }
     getProfile(options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.getProfileWithHttpOperationResponse(options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.getProfileWithHttpOperationResponse(options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1109,23 +1048,21 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
     }
     upsertProfile(options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.upsertProfileWithHttpOperationResponse(options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.upsertProfileWithHttpOperationResponse(options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1134,23 +1071,21 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
     }
     getInfo(options, callback) {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             callback = options;
             options = undefined;
         }
         let cb = callback;
         if (!callback) {
-            return this.getInfoWithHttpOperationResponse(options)
-                .then((operationRes) => {
-                return Promise.resolve(operationRes.bodyAsJson);
-            })
-                .catch((err) => {
+            return this.getInfoWithHttpOperationResponse(options).then((operationRes) => {
+                return Promise.resolve(operationRes.parsedBody);
+            }).catch((err) => {
                 return Promise.reject(err);
             });
         }
@@ -1159,7 +1094,7 @@ class DigitalCitizenshipAPI extends msRest.ServiceClient {
                 if (err) {
                     return cb(err);
                 }
-                let result = data.bodyAsJson;
+                let result = data.parsedBody;
                 return cb(err, result, data.request, data.response);
             });
         }
