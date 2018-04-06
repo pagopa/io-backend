@@ -4,27 +4,27 @@
  */
 
 import * as t from "io-ts";
+import { readonlyArray } from "io-ts";
 import { NonNegativeNumber } from "../../utils/numbers";
-import { strictInterfaceWithOptionals } from "../../utils/types";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { PreferredLanguage } from "../api/PreferredLanguages";
 
 // required attributes
-const GetProfileOKResponseR = t.interface({});
+const GetProfileOKResponseR = t.interface({
+  isInboxEnabled: IsInboxEnabled,
+  version: NonNegativeNumber
+});
 
 // optional attributes
 const GetProfileOKResponseO = t.partial({
   email: EmailAddress,
-  isInboxEnabled: IsInboxEnabled,
-  preferredLanguages: PreferredLanguage,
-  version: NonNegativeNumber
+  preferredLanguages: readonlyArray(PreferredLanguage)
 });
 
-export const GetProfileOKResponse = strictInterfaceWithOptionals(
-  GetProfileOKResponseR.props,
-  GetProfileOKResponseO.props,
-  "GetProfileOKResponse"
-);
+export const GetProfileOKResponse = t.intersection([
+  GetProfileOKResponseR,
+  GetProfileOKResponseO
+]);
 
 export type GetProfileOKResponse = t.TypeOf<typeof GetProfileOKResponse>;

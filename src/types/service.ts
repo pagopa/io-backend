@@ -6,7 +6,6 @@
 import * as t from "io-ts";
 import { string } from "io-ts";
 import { NonNegativeNumber } from "../utils/numbers";
-import { strictInterfaceWithOptionals } from "../utils/types";
 import { ServicePublic } from "./api_client/servicePublic";
 
 // required attributes
@@ -22,11 +21,7 @@ const ServiceO = t.partial({
   version: NonNegativeNumber
 });
 
-export const Service = strictInterfaceWithOptionals(
-  ServiceR.props,
-  ServiceO.props,
-  "Service"
-);
+export const Service = t.intersection([ServiceR, ServiceO]);
 
 export type Service = t.TypeOf<typeof Service>;
 

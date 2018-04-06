@@ -5,7 +5,6 @@
 
 import * as t from "io-ts";
 import { number, string } from "io-ts";
-import { strictInterfaceWithOptionals } from "../../utils/types";
 import { FiscalCode } from "../api/FiscalCode";
 
 // required attributes
@@ -20,11 +19,10 @@ const CreatedMessageWithoutContentO = t.partial({
   timeToLive: number
 });
 
-export const CreatedMessageWithoutContent = strictInterfaceWithOptionals(
-  CreatedMessageWithoutContentR.props,
-  CreatedMessageWithoutContentO.props,
-  "CreatedMessageWithoutContent"
-);
+export const CreatedMessageWithoutContent = t.intersection([
+  CreatedMessageWithoutContentR,
+  CreatedMessageWithoutContentO
+]);
 
 export type CreatedMessageWithoutContent = t.TypeOf<
   typeof CreatedMessageWithoutContent

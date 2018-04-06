@@ -4,7 +4,6 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
-import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
@@ -17,13 +16,13 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
+import APIServiceBase from "./APIServiceBase";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-const profileErrorOnUnknownResponse = "Unknown response.";
-const profileErrorOnApiError = "Api error.";
-
-export default class ProfileService {
-  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
+export default class ProfileService extends APIServiceBase {
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {
+    super();
+  }
 
   /**
    * Retrieves the profile for a specific user.
@@ -31,34 +30,33 @@ export default class ProfileService {
   public async getProfile(
     user: User
   ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
-    const profilePayload = await this.apiClient
+    const httpOperationResponse = await this.apiClient
       .getClient(user.fiscal_code)
-      .getProfile();
+      .getProfileWithHttpOperationResponse();
 
-    const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
-    if (isLeft(errorOrApiProfile)) {
+    // tslint:disable-next-line:no-any
+    const profilePayload = httpOperationResponse.bodyAsJson as any;
+    const status = httpOperationResponse.response.status;
+
+    if (status !== 200) {
       const errorOrProblemJson = ProblemJson.decode(profilePayload);
-
       if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from getProfile API:",
-          profilePayload
-        );
-        throw new Error(profileErrorOnUnknownResponse);
-      } else {
-        const problemJson = errorOrProblemJson.value;
+        throw this.unknownResponseError(errorOrProblemJson, "getProfile");
+      }
 
+      if (status !== 404) {
+        throw this.apiError(profilePayload, "getProfile");
+      } else {
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
         // retrieved from SPID.
-        if (problemJson.status === 404) {
-          return toAppProfileWithoutEmail(user);
-        }
-
-        winston.log("error", "API error in getProfile: %s", profilePayload);
-        throw new Error(profileErrorOnApiError);
+        return toAppProfileWithoutEmail(user);
       }
+    }
+
+    const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
+    if (isLeft(errorOrApiProfile)) {
+      throw this.unknownResponseError(errorOrApiProfile, "getProfile");
     }
 
     const apiProfile = errorOrApiProfile.value;
@@ -75,25 +73,26 @@ export default class ProfileService {
     const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
-    const profilePayload = await this.apiClient
+    const httpOperationResponse = await this.apiClient
       .getClient(user.fiscal_code)
-      .upsertProfile(upsertOptions);
+      .upsertProfileWithHttpOperationResponse(upsertOptions);
+
+    // tslint:disable-next-line:no-any
+    const profilePayload = httpOperationResponse.bodyAsJson as any;
+    const status = httpOperationResponse.response.status;
+
+    if (status !== 200) {
+      const errorOrProblemJson = ProblemJson.decode(profilePayload);
+      if (isLeft(errorOrProblemJson)) {
+        throw this.unknownResponseError(errorOrProblemJson, "upsertProfile");
+      } else {
+        throw this.apiError(profilePayload, "upsertProfile");
+      }
+    }
 
     const errorOrApiProfile = UpsertProfileOKResponse.decode(profilePayload);
     if (isLeft(errorOrApiProfile)) {
-      const errorOrProblemJson = ProblemJson.decode(profilePayload);
-
-      if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from upsertProfile API:",
-          profilePayload
-        );
-        throw new Error(profileErrorOnUnknownResponse);
-      } else {
-        winston.log("error", "API error in upsertProfile:", profilePayload);
-        throw new Error(profileErrorOnApiError);
-      }
+      throw this.unknownResponseError(errorOrApiProfile, "upsertProfile");
     }
 
     const apiProfile = errorOrApiProfile.value;

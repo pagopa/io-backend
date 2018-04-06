@@ -7,45 +7,83 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProblemJson = {
     required: false,
-    serializedName: "ProblemJson",
+    serializedName: 'ProblemJson',
     type: {
-        name: "Composite",
-        className: "ProblemJson",
+        name: 'Composite',
+        className: 'ProblemJson',
         modelProperties: {
             type: {
                 required: false,
-                serializedName: "type",
-                defaultValue: "about:blank",
+                serializedName: 'type',
+                defaultValue: 'about:blank',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             title: {
                 required: false,
-                serializedName: "title",
+                serializedName: 'title',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             status: {
                 required: false,
-                serializedName: "status",
+                serializedName: 'status',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             detail: {
                 required: false,
-                serializedName: "detail",
+                serializedName: 'detail',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             instance: {
                 required: false,
-                serializedName: "instance",
+                serializedName: 'instance',
                 type: {
-                    name: "String"
+                    name: 'String'
+                }
+            }
+        }
+    }
+};
+exports.NotificationChannelStatus = {
+    required: false,
+    serializedName: 'NotificationChannelStatus',
+    type: {
+        name: 'Composite',
+        className: 'NotificationChannelStatus',
+        modelProperties: {
+            channel: {
+                required: true,
+                serializedName: 'channel',
+                type: {
+                    name: 'String'
+                }
+            },
+            status: {
+                required: true,
+                serializedName: 'status',
+                type: {
+                    name: 'String'
+                }
+            },
+            updatedAt: {
+                required: true,
+                serializedName: 'updated_at',
+                type: {
+                    name: 'DateTime'
+                }
+            },
+            version: {
+                required: false,
+                serializedName: 'version',
+                type: {
+                    name: 'Number'
                 }
             }
         }
@@ -53,23 +91,23 @@ exports.ProblemJson = {
 };
 exports.MessageContent = {
     required: false,
-    serializedName: "MessageContent",
+    serializedName: 'MessageContent',
     type: {
-        name: "Composite",
-        className: "MessageContent",
+        name: 'Composite',
+        className: 'MessageContent',
         modelProperties: {
             subject: {
                 required: false,
-                serializedName: "subject",
+                serializedName: 'subject',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             markdown: {
                 required: true,
-                serializedName: "markdown",
+                serializedName: 'markdown',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             }
         }
@@ -77,16 +115,16 @@ exports.MessageContent = {
 };
 exports.NewMessageDefaultAddresses = {
     required: false,
-    serializedName: "NewMessageDefaultAddresses",
+    serializedName: 'NewMessageDefaultAddresses',
     type: {
-        name: "Composite",
-        className: "NewMessageDefaultAddresses",
+        name: 'Composite',
+        className: 'NewMessageDefaultAddresses',
         modelProperties: {
             email: {
                 required: false,
-                serializedName: "email",
+                serializedName: 'email',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             }
         }
@@ -94,49 +132,63 @@ exports.NewMessageDefaultAddresses = {
 };
 exports.NewMessage = {
     required: false,
-    serializedName: "NewMessage",
+    serializedName: 'NewMessage',
     type: {
-        name: "Composite",
-        className: "NewMessage",
+        name: 'Composite',
+        className: 'NewMessage',
         modelProperties: {
             timeToLive: {
                 required: false,
-                serializedName: "time_to_live",
+                serializedName: 'time_to_live',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             content: {
                 required: true,
-                serializedName: "content",
+                serializedName: 'content',
                 type: {
-                    name: "Composite",
-                    className: "MessageContent"
+                    name: 'Composite',
+                    className: 'MessageContent'
                 }
             },
             defaultAddresses: {
                 required: false,
-                serializedName: "default_addresses",
+                serializedName: 'default_addresses',
                 type: {
-                    name: "Composite",
-                    className: "NewMessageDefaultAddresses"
+                    name: 'Composite',
+                    className: 'NewMessageDefaultAddresses'
                 }
             }
         }
     }
 };
-exports.NotificationStatus = {
+exports.MessageStatus = {
     required: false,
-    serializedName: "NotificationStatus",
+    serializedName: 'MessageStatus',
     type: {
-        name: "Composite",
-        className: "NotificationStatus",
+        name: 'Composite',
+        className: 'MessageStatus',
         modelProperties: {
-            email: {
-                required: false,
-                serializedName: "email",
+            status: {
+                required: true,
+                serializedName: 'status',
                 type: {
-                    name: "String"
+                    name: 'String'
+                }
+            },
+            updatedAt: {
+                required: true,
+                serializedName: 'updated_at',
+                type: {
+                    name: 'DateTime'
+                }
+            },
+            version: {
+                required: false,
+                serializedName: 'version',
+                type: {
+                    name: 'Number'
                 }
             }
         }
@@ -144,45 +196,45 @@ exports.NotificationStatus = {
 };
 exports.CreatedMessageWithContent = {
     required: false,
-    serializedName: "CreatedMessageWithContent",
+    serializedName: 'CreatedMessageWithContent',
     type: {
-        name: "Composite",
-        className: "CreatedMessageWithContent",
+        name: 'Composite',
+        className: 'CreatedMessageWithContent',
         modelProperties: {
             id: {
                 required: false,
-                serializedName: "id",
+                serializedName: 'id',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             fiscalCode: {
                 required: true,
-                serializedName: "fiscal_code",
+                serializedName: 'fiscal_code',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             timeToLive: {
                 required: false,
-                serializedName: "time_to_live",
+                serializedName: 'time_to_live',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             content: {
                 required: false,
-                serializedName: "content",
+                serializedName: 'content',
                 type: {
-                    name: "Composite",
-                    className: "MessageContent"
+                    name: 'Composite',
+                    className: 'MessageContent'
                 }
             },
             senderServiceId: {
                 required: true,
-                serializedName: "sender_service_id",
+                serializedName: 'sender_service_id',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             }
         }
@@ -190,37 +242,54 @@ exports.CreatedMessageWithContent = {
 };
 exports.CreatedMessageWithoutContent = {
     required: false,
-    serializedName: "CreatedMessageWithoutContent",
+    serializedName: 'CreatedMessageWithoutContent',
     type: {
-        name: "Composite",
-        className: "CreatedMessageWithoutContent",
+        name: 'Composite',
+        className: 'CreatedMessageWithoutContent',
         modelProperties: {
             id: {
                 required: false,
-                serializedName: "id",
+                serializedName: 'id',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             fiscalCode: {
                 required: true,
-                serializedName: "fiscal_code",
+                serializedName: 'fiscal_code',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             timeToLive: {
                 required: false,
-                serializedName: "time_to_live",
+                serializedName: 'time_to_live',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             senderServiceId: {
                 required: true,
-                serializedName: "sender_service_id",
+                serializedName: 'sender_service_id',
                 type: {
-                    name: "String"
+                    name: 'String'
+                }
+            }
+        }
+    }
+};
+exports.MessageResponseNotificationStatus = {
+    required: false,
+    serializedName: 'MessageResponseNotificationStatus',
+    type: {
+        name: 'Composite',
+        className: 'MessageResponseNotificationStatus',
+        modelProperties: {
+            email: {
+                required: false,
+                serializedName: 'email',
+                type: {
+                    name: 'String'
                 }
             }
         }
@@ -228,25 +297,32 @@ exports.CreatedMessageWithoutContent = {
 };
 exports.MessageResponseWithContent = {
     required: false,
-    serializedName: "MessageResponseWithContent",
+    serializedName: 'MessageResponseWithContent',
     type: {
-        name: "Composite",
-        className: "MessageResponseWithContent",
+        name: 'Composite',
+        className: 'MessageResponseWithContent',
         modelProperties: {
             message: {
                 required: true,
-                serializedName: "message",
+                serializedName: 'message',
                 type: {
-                    name: "Composite",
-                    className: "CreatedMessageWithContent"
+                    name: 'Composite',
+                    className: 'CreatedMessageWithContent'
                 }
             },
             notification: {
                 required: false,
-                serializedName: "notification",
+                serializedName: 'notification',
                 type: {
-                    name: "Composite",
-                    className: "NotificationStatus"
+                    name: 'Composite',
+                    className: 'MessageResponseNotificationStatus'
+                }
+            },
+            status: {
+                required: false,
+                serializedName: 'status',
+                type: {
+                    name: 'String'
                 }
             }
         }
@@ -254,25 +330,32 @@ exports.MessageResponseWithContent = {
 };
 exports.MessageResponseWithoutContent = {
     required: false,
-    serializedName: "MessageResponseWithoutContent",
+    serializedName: 'MessageResponseWithoutContent',
     type: {
-        name: "Composite",
-        className: "MessageResponseWithoutContent",
+        name: 'Composite',
+        className: 'MessageResponseWithoutContent',
         modelProperties: {
             message: {
                 required: true,
-                serializedName: "message",
+                serializedName: 'message',
                 type: {
-                    name: "Composite",
-                    className: "CreatedMessageWithoutContent"
+                    name: 'Composite',
+                    className: 'CreatedMessageWithoutContent'
                 }
             },
             notification: {
                 required: false,
-                serializedName: "notification",
+                serializedName: 'notification',
                 type: {
-                    name: "Composite",
-                    className: "NotificationStatus"
+                    name: 'Composite',
+                    className: 'MessageResponseNotificationStatus'
+                }
+            },
+            status: {
+                required: false,
+                serializedName: 'status',
+                type: {
+                    name: 'String'
                 }
             }
         }
@@ -280,26 +363,26 @@ exports.MessageResponseWithoutContent = {
 };
 exports.PaginationResponse = {
     required: false,
-    serializedName: "PaginationResponse",
+    serializedName: 'PaginationResponse',
     type: {
-        name: "Composite",
-        className: "PaginationResponse",
+        name: 'Composite',
+        className: 'PaginationResponse',
         modelProperties: {
             pageSize: {
                 required: false,
-                serializedName: "page_size",
+                serializedName: 'page_size',
                 constraints: {
                     InclusiveMinimum: 1
                 },
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             next: {
                 required: false,
-                serializedName: "next",
+                serializedName: 'next',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             }
         }
@@ -307,21 +390,21 @@ exports.PaginationResponse = {
 };
 exports.LimitedProfile = {
     required: false,
-    serializedName: "LimitedProfile",
+    serializedName: 'LimitedProfile',
     type: {
-        name: "Composite",
-        className: "LimitedProfile",
+        name: 'Composite',
+        className: 'LimitedProfile',
         modelProperties: {
             preferredLanguages: {
                 required: false,
-                serializedName: "preferred_languages",
+                serializedName: 'preferred_languages',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "stringElementType",
+                        serializedName: 'stringElementType',
                         type: {
-                            name: "String"
+                            name: 'String'
                         }
                     }
                 }
@@ -331,44 +414,51 @@ exports.LimitedProfile = {
 };
 exports.ExtendedProfile = {
     required: false,
-    serializedName: "ExtendedProfile",
+    serializedName: 'ExtendedProfile',
     type: {
-        name: "Composite",
-        className: "ExtendedProfile",
+        name: 'Composite',
+        className: 'ExtendedProfile',
         modelProperties: {
             email: {
                 required: false,
-                serializedName: "email",
+                serializedName: 'email',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             preferredLanguages: {
                 required: false,
-                serializedName: "preferred_languages",
+                serializedName: 'preferred_languages',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "stringElementType",
+                        serializedName: 'stringElementType',
                         type: {
-                            name: "String"
+                            name: 'String'
                         }
                     }
                 }
             },
             isInboxEnabled: {
                 required: false,
-                serializedName: "is_inbox_enabled",
+                serializedName: 'is_inbox_enabled',
                 type: {
-                    name: "Boolean"
+                    name: 'Boolean'
+                }
+            },
+            isWebhookEnabled: {
+                required: false,
+                serializedName: 'is_webhook_enabled',
+                type: {
+                    name: 'Boolean'
                 }
             },
             version: {
                 required: false,
-                serializedName: "version",
+                serializedName: 'version',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             }
         }
@@ -376,79 +466,79 @@ exports.ExtendedProfile = {
 };
 exports.Service = {
     required: false,
-    serializedName: "Service",
+    serializedName: 'Service',
     type: {
-        name: "Composite",
-        className: "Service",
+        name: 'Composite',
+        className: 'Service',
         modelProperties: {
             serviceId: {
                 required: true,
-                serializedName: "service_id",
+                serializedName: 'service_id',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             serviceName: {
                 required: true,
-                serializedName: "service_name",
+                serializedName: 'service_name',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             organizationName: {
                 required: true,
-                serializedName: "organization_name",
+                serializedName: 'organization_name',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             departmentName: {
                 required: true,
-                serializedName: "department_name",
+                serializedName: 'department_name',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             authorizedCidrs: {
                 required: true,
-                serializedName: "authorized_cidrs",
+                serializedName: 'authorized_cidrs',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "stringElementType",
+                        serializedName: 'stringElementType',
                         type: {
-                            name: "String"
+                            name: 'String'
                         }
                     }
                 }
             },
             authorizedRecipients: {
                 required: true,
-                serializedName: "authorized_recipients",
+                serializedName: 'authorized_recipients',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "stringElementType",
+                        serializedName: 'stringElementType',
                         type: {
-                            name: "String"
+                            name: 'String'
                         }
                     }
                 }
             },
             version: {
                 required: false,
-                serializedName: "version",
+                serializedName: 'version',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             id: {
                 required: false,
-                serializedName: "id",
+                serializedName: 'id',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             }
         }
@@ -456,44 +546,44 @@ exports.Service = {
 };
 exports.ServicePublic = {
     required: false,
-    serializedName: "ServicePublic",
+    serializedName: 'ServicePublic',
     type: {
-        name: "Composite",
-        className: "ServicePublic",
+        name: 'Composite',
+        className: 'ServicePublic',
         modelProperties: {
             serviceId: {
                 required: true,
-                serializedName: "service_id",
+                serializedName: 'service_id',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             serviceName: {
                 required: true,
-                serializedName: "service_name",
+                serializedName: 'service_name',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             organizationName: {
                 required: true,
-                serializedName: "organization_name",
+                serializedName: 'organization_name',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             departmentName: {
                 required: true,
-                serializedName: "department_name",
+                serializedName: 'department_name',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             version: {
                 required: false,
-                serializedName: "version",
+                serializedName: 'version',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             }
         }
@@ -501,39 +591,39 @@ exports.ServicePublic = {
 };
 exports.GetMessagesByUserOKResponse = {
     required: false,
-    serializedName: "GetMessagesByUserOKResponse",
+    serializedName: 'GetMessagesByUserOKResponse',
     type: {
-        name: "Composite",
-        className: "GetMessagesByUserOKResponse",
+        name: 'Composite',
+        className: 'GetMessagesByUserOKResponse',
         modelProperties: {
             pageSize: {
                 required: false,
-                serializedName: "page_size",
+                serializedName: 'page_size',
                 constraints: {
                     InclusiveMinimum: 1
                 },
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             },
             next: {
                 required: false,
-                serializedName: "next",
+                serializedName: 'next',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             items: {
                 required: false,
-                serializedName: "items",
+                serializedName: 'items',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "CreatedMessageWithoutContentElementType",
+                        serializedName: 'CreatedMessageWithoutContentElementType',
                         type: {
-                            name: "Composite",
-                            className: "CreatedMessageWithoutContent"
+                            name: 'Composite',
+                            className: 'CreatedMessageWithoutContent'
                         }
                     }
                 }
@@ -543,44 +633,51 @@ exports.GetMessagesByUserOKResponse = {
 };
 exports.GetProfileOKResponse = {
     required: false,
-    serializedName: "GetProfileOKResponse",
+    serializedName: 'GetProfileOKResponse',
     type: {
-        name: "Composite",
-        className: "GetProfileOKResponse",
+        name: 'Composite',
+        className: 'GetProfileOKResponse',
         modelProperties: {
             preferredLanguages: {
                 required: false,
-                serializedName: "preferred_languages",
+                serializedName: 'preferred_languages',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "stringElementType",
+                        serializedName: 'stringElementType',
                         type: {
-                            name: "String"
+                            name: 'String'
                         }
                     }
                 }
             },
             email: {
                 required: false,
-                serializedName: "email",
+                serializedName: 'email',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             isInboxEnabled: {
                 required: false,
-                serializedName: "is_inbox_enabled",
+                serializedName: 'is_inbox_enabled',
                 type: {
-                    name: "Boolean"
+                    name: 'Boolean'
+                }
+            },
+            isWebhookEnabled: {
+                required: false,
+                serializedName: 'is_webhook_enabled',
+                type: {
+                    name: 'Boolean'
                 }
             },
             version: {
                 required: false,
-                serializedName: "version",
+                serializedName: 'version',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             }
         }
@@ -588,44 +685,51 @@ exports.GetProfileOKResponse = {
 };
 exports.UpsertProfileOKResponse = {
     required: false,
-    serializedName: "UpsertProfileOKResponse",
+    serializedName: 'UpsertProfileOKResponse',
     type: {
-        name: "Composite",
-        className: "UpsertProfileOKResponse",
+        name: 'Composite',
+        className: 'UpsertProfileOKResponse',
         modelProperties: {
             preferredLanguages: {
                 required: false,
-                serializedName: "preferred_languages",
+                serializedName: 'preferred_languages',
                 type: {
-                    name: "Sequence",
+                    name: 'Sequence',
                     element: {
                         required: false,
-                        serializedName: "stringElementType",
+                        serializedName: 'stringElementType',
                         type: {
-                            name: "String"
+                            name: 'String'
                         }
                     }
                 }
             },
             email: {
                 required: false,
-                serializedName: "email",
+                serializedName: 'email',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             },
             isInboxEnabled: {
                 required: false,
-                serializedName: "is_inbox_enabled",
+                serializedName: 'is_inbox_enabled',
                 type: {
-                    name: "Boolean"
+                    name: 'Boolean'
+                }
+            },
+            isWebhookEnabled: {
+                required: false,
+                serializedName: 'is_webhook_enabled',
+                type: {
+                    name: 'Boolean'
                 }
             },
             version: {
                 required: false,
-                serializedName: "version",
+                serializedName: 'version',
                 type: {
-                    name: "Number"
+                    name: 'Number'
                 }
             }
         }
@@ -634,14 +738,14 @@ exports.UpsertProfileOKResponse = {
 exports.DigitalCitizenshipAPIOptions = {
     required: false,
     type: {
-        name: "Composite",
-        className: "DigitalCitizenshipAPIOptions",
+        name: 'Composite',
+        className: 'DigitalCitizenshipAPIOptions',
         modelProperties: {
             cursor: {
                 required: false,
-                serializedName: "cursor",
+                serializedName: 'cursor',
                 type: {
-                    name: "String"
+                    name: 'String'
                 }
             }
         }
@@ -649,17 +753,17 @@ exports.DigitalCitizenshipAPIOptions = {
 };
 exports.DigitalCitizenshipAPISubmitMessageforUserOptionalParams = {
     required: false,
-    serializedName: "SubmitMessageforUserOptions",
+    serializedName: 'SubmitMessageforUserOptions',
     type: {
-        name: "Composite",
-        className: "DigitalCitizenshipAPISubmitMessageforUserOptionalParams",
+        name: 'Composite',
+        className: 'DigitalCitizenshipAPISubmitMessageforUserOptionalParams',
         modelProperties: {
             message: {
                 required: false,
-                serializedName: "message",
+                serializedName: 'message',
                 type: {
-                    name: "Composite",
-                    className: "NewMessage"
+                    name: 'Composite',
+                    className: 'NewMessage'
                 }
             }
         }
@@ -667,17 +771,17 @@ exports.DigitalCitizenshipAPISubmitMessageforUserOptionalParams = {
 };
 exports.DigitalCitizenshipAPIUpsertProfileOptionalParams = {
     required: false,
-    serializedName: "UpsertProfileOptions",
+    serializedName: 'UpsertProfileOptions',
     type: {
-        name: "Composite",
-        className: "DigitalCitizenshipAPIUpsertProfileOptionalParams",
+        name: 'Composite',
+        className: 'DigitalCitizenshipAPIUpsertProfileOptionalParams',
         modelProperties: {
             body: {
                 required: false,
-                serializedName: "body",
+                serializedName: 'body',
                 type: {
-                    name: "Composite",
-                    className: "ExtendedProfile"
+                    name: 'Composite',
+                    className: 'ExtendedProfile'
                 }
             }
         }

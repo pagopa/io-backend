@@ -14,5 +14,5 @@ const port = process.env.PORT || 80;
 const app = newApp(process.env.NODE_ENV);
 
 const server = http.createServer(app).listen(port, () => {
-  winston.log("info", "Listening on port %d", server.address().port);
+  winston.info("Listening on port %d", server.address().port);
 });

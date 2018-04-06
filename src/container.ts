@@ -77,10 +77,7 @@ const clientProfileRedirectionUrl =
   process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
 
 if (!clientProfileRedirectionUrl.includes("{token}")) {
-  winston.log(
-    "error",
-    "CLIENT_REDIRECTION_URL must contains a {token} placeholder"
-  );
+  winston.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
 }
 container.register({
   clientErrorRedirectionUrl: awilix.asValue(
@@ -100,11 +97,7 @@ const tokenDurationSecs: number = parseInt(
   process.env.TOKEN_DURATION_IN_SECONDS || DEFAULT_TOKEN_DURATION_IN_SECONDS,
   10
 );
-winston.log(
-  "info",
-  "Session token duration set to %s seconds",
-  tokenDurationSecs
-);
+winston.info("Session token duration set to %s seconds", tokenDurationSecs);
 container.register({
   tokenDurationSecs: awilix.asValue(tokenDurationSecs)
 });
@@ -196,7 +189,7 @@ export default container;
  * @returns {string}
  */
 function readFile(path: string, type: string): string {
-  winston.log("info", "Reading %s file from %s", type, path);
+  winston.info("Reading %s file from %s", type, path);
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   return fs.readFileSync(path, "utf-8");
 }

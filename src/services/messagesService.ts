@@ -3,7 +3,6 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
-import * as winston from "winston";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
@@ -16,50 +15,53 @@ import {
 } from "../types/message";
 import { Service, toAppService } from "../types/service";
 import { User } from "../types/user";
+import { NonNegativeNumber } from "../utils/numbers";
+import APIServiceBase from "./APIServiceBase";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-const messageErrorOnUnknownResponse = "Unknown response.";
-const messageErrorOnApiError = "Api error.";
-
-export default class MessagesService {
-  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
+export default class MessagesService extends APIServiceBase {
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {
+    super();
+  }
 
   /**
    * Retrieves all messages for a specific user.
    */
   public async getMessagesByUser(user: User): Promise<Messages> {
-    const messagesPayload = await this.apiClient
+    const httpOperationResponse = await this.apiClient
       .getClient(user.fiscal_code)
-      .getMessagesByUser();
+      .getMessagesByUserWithHttpOperationResponse();
+
+    const messagesPayload = this.extractBodyFromResponse(httpOperationResponse);
+    const status = this.extractStatusFromResponse(httpOperationResponse);
+
+    if (status !== 200) {
+      const errorOrProblemJson = ProblemJson.decode(messagesPayload);
+      if (isLeft(errorOrProblemJson)) {
+        throw this.unknownResponseError(
+          errorOrProblemJson,
+          "getMessagesByUser"
+        );
+      }
+
+      if (status !== 404) {
+        throw this.apiError(messagesPayload, "getMessagesByUser");
+      }
+
+      return {
+        items: [],
+        pageSize: 0 as NonNegativeNumber
+      };
+    }
 
     const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
       messagesPayload
     );
     if (isLeft(errorOrApiMessages)) {
-      const errorOrProblemJson = ProblemJson.decode(messagesPayload);
-
-      if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from getMessagesByUser API:",
-          messagesPayload
-        );
-        throw new Error(messageErrorOnUnknownResponse);
-      } else {
-        winston.log(
-          "error",
-          "API error in getMessagesByUser:",
-          messagesPayload
-        );
-        throw new Error(messageErrorOnApiError);
-      }
+      throw this.unknownResponseError(errorOrApiMessages, "getMessagesByUser");
     }
 
     const apiMessages = errorOrApiMessages.value;
-
-    if (apiMessages.items === undefined) {
-      return {};
-    }
 
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
     return {
@@ -72,25 +74,29 @@ export default class MessagesService {
    * Retrieves a specific message.
    */
   public async getMessage(user: User, messageId: string): Promise<Message> {
-    const messagePayload = await this.apiClient
+    const httpOperationResponse = await this.apiClient
       .getClient(user.fiscal_code)
-      .getMessage(messageId);
+      .getMessageWithHttpOperationResponse(messageId);
+
+    // tslint:disable-next-line:no-any
+    const messagePayload = httpOperationResponse.bodyAsJson as any;
+    const status = httpOperationResponse.response.status;
+
+    if (status !== 200) {
+      const errorOrProblemJson = ProblemJson.decode(messagePayload);
+      if (isLeft(errorOrProblemJson)) {
+        throw this.unknownResponseError(
+          errorOrProblemJson,
+          "getMessagesByUser"
+        );
+      } else {
+        throw this.apiError(messagePayload, "getMessagesByUser");
+      }
+    }
 
     const errorOrApiMessage = MessageResponseWithContent.decode(messagePayload);
     if (isLeft(errorOrApiMessage)) {
-      const errorOrProblemJson = ProblemJson.decode(messagePayload);
-
-      if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from getMessage API:",
-          messagePayload
-        );
-        throw new Error(messageErrorOnUnknownResponse);
-      } else {
-        winston.log("error", "API error in getMessage:", messagePayload);
-        throw new Error(messageErrorOnApiError);
-      }
+      throw this.unknownResponseError(errorOrApiMessage, "getMessage");
     }
 
     const apiMessage = errorOrApiMessage.value;
@@ -101,25 +107,26 @@ export default class MessagesService {
    * Retrieve all the information about the service that has sent a message.
    */
   public async getService(user: User, serviceId: string): Promise<Service> {
-    const servicePayload = await this.apiClient
+    const httpOperationResponse = await this.apiClient
       .getClient(user.fiscal_code)
-      .getService(serviceId);
+      .getServiceWithHttpOperationResponse(serviceId);
+
+    // tslint:disable-next-line:no-any
+    const servicePayload = httpOperationResponse.bodyAsJson as any;
+    const status = httpOperationResponse.response.status;
+
+    if (status !== 200) {
+      const errorOrProblemJson = ProblemJson.decode(servicePayload);
+      if (isLeft(errorOrProblemJson)) {
+        throw this.unknownResponseError(errorOrProblemJson, "getService");
+      } else {
+        throw this.apiError(servicePayload, "getService");
+      }
+    }
 
     const errorOrApiService = ServicePublic.decode(servicePayload);
     if (isLeft(errorOrApiService)) {
-      const errorOrProblemJson = ProblemJson.decode(servicePayload);
-
-      if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from getService API:",
-          servicePayload
-        );
-        throw new Error(messageErrorOnUnknownResponse);
-      } else {
-        winston.log("error", "API error in getService:", servicePayload);
-        throw new Error(messageErrorOnApiError);
-      }
+      throw this.unknownResponseError(errorOrApiService, "getService");
     }
 
     const apiService = errorOrApiService.value;
