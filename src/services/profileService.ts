@@ -34,9 +34,8 @@ export default class ProfileService extends APIServiceBase {
       .getClient(user.fiscal_code)
       .getProfileWithHttpOperationResponse();
 
-    // tslint:disable-next-line:no-any
-    const profilePayload = httpOperationResponse.bodyAsJson as any;
-    const status = httpOperationResponse.response.status;
+    const profilePayload = this.extractBodyFromResponse(httpOperationResponse);
+    const status = this.extractStatusFromResponse(httpOperationResponse);
 
     if (status !== 200) {
       const errorOrProblemJson = ProblemJson.decode(profilePayload);
@@ -77,9 +76,8 @@ export default class ProfileService extends APIServiceBase {
       .getClient(user.fiscal_code)
       .upsertProfileWithHttpOperationResponse(upsertOptions);
 
-    // tslint:disable-next-line:no-any
-    const profilePayload = httpOperationResponse.bodyAsJson as any;
-    const status = httpOperationResponse.response.status;
+    const profilePayload = this.extractBodyFromResponse(httpOperationResponse);
+    const status = this.extractStatusFromResponse(httpOperationResponse);
 
     if (status !== 200) {
       const errorOrProblemJson = ProblemJson.decode(profilePayload);

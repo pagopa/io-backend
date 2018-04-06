@@ -78,9 +78,8 @@ export default class MessagesService extends APIServiceBase {
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
 
-    // tslint:disable-next-line:no-any
-    const messagePayload = httpOperationResponse.bodyAsJson as any;
-    const status = httpOperationResponse.response.status;
+    const messagePayload = this.extractBodyFromResponse(httpOperationResponse);
+    const status = this.extractStatusFromResponse(httpOperationResponse);
 
     if (status !== 200) {
       const errorOrProblemJson = ProblemJson.decode(messagePayload);
@@ -111,9 +110,8 @@ export default class MessagesService extends APIServiceBase {
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
 
-    // tslint:disable-next-line:no-any
-    const servicePayload = httpOperationResponse.bodyAsJson as any;
-    const status = httpOperationResponse.response.status;
+    const servicePayload = this.extractBodyFromResponse(httpOperationResponse);
+    const status = this.extractStatusFromResponse(httpOperationResponse);
 
     if (status !== 200) {
       const errorOrProblemJson = ProblemJson.decode(servicePayload);
