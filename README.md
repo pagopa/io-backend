@@ -155,9 +155,7 @@ In general follow the [Node Best Practices](https://devcenter.heroku.com/article
 The API client is generated with the [AutoRest](https://github.com/Azure/autorest) tool, in case of API change you need
 to regenerate the client code:
 
-* download the latest API specs from [https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/public_api_v1.yaml]
-* install the [AutoRest](https://github.com/Azure/autorest) tool
-* run the command `autorest --input-file=public_api_v1.yaml --nodejs --output-folder=app/src/api`
+* run the command `yarn generate-api-client`
 
 ### Architecture decision records
 
