@@ -185,6 +185,12 @@
   dependencies:
     "@types/node" "*"
 
+"@types/xml2js@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.2.tgz#a4b84b3879ffd4710953fd92cabfde9a8a4e8456"
+  dependencies:
+    "@types/node" "*"
+
 abab@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
@@ -403,9 +409,9 @@ atob@^2.0.0:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.0.3.tgz#19c7a760473774468f20b2d2d03372ad7d4cbf5d"
 
-autorest@^2.0.4262:
-  version "2.0.4262"
-  resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4262.tgz#2e9a3740896d8ee2e22b0597e96525a258d7e66c"
+autorest@^2.0.4272:
+  version "2.0.4272"
+  resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4272.tgz#8f0734741e5d9041a35de501d4257a64926cfd9c"
 
 awilix@^3.0.5:
   version "3.0.6"
@@ -3107,9 +3113,9 @@ mock-redis-client@^0.91.13:
     lodash "^4.5.0"
     node-redis-mock "^0.2.14"
 
-moment@~2.18.1:
-  version "2.18.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
+moment@^2.21.0:
+  version "2.22.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.0.tgz#7921ade01017dd45186e7fee5f424f0b8663a730"
 
 monocle-ts@^1.0.0:
   version "1.0.0"
@@ -3127,9 +3133,9 @@ morgan@^1.8.1:
     on-finished "~2.3.0"
     on-headers "~1.0.1"
 
-ms-rest-js@^0.2.5:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/ms-rest-js/-/ms-rest-js-0.2.6.tgz#1856ff620766bcca9bc23a9f01a26e019d0f80d5"
+ms-rest-js@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/ms-rest-js/-/ms-rest-js-0.3.0.tgz#0680beb6812f5cd4092864606ffbc78af9fdb327"
   dependencies:
     "@types/form-data" "^2.2.1"
     "@types/is-stream" "^1.1.0"
@@ -3141,9 +3147,10 @@ ms-rest-js@^0.2.5:
     form-data "^2.3.2"
     is-buffer "^2.0.0"
     is-stream "^1.1.0"
-    moment "~2.18.1"
+    moment "^2.21.0"
     url-parse "^1.2.0"
     uuid "^3.2.1"
+    xml2js "^0.4.19"
 
 ms@2.0.0:
   version "2.0.0"
@@ -4970,7 +4977,7 @@ xml-name-validator@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-3.0.0.tgz#6ae73e06de4d8c6e47f9fb181f78d648ad457c6a"
 
-xml2js@0.4.x:
+xml2js@0.4.x, xml2js@^0.4.19:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.19.tgz#686c20f213209e94abf0d1bcf1efaa291c7827a7"
   dependencies:
