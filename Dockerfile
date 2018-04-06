@@ -1,8 +1,6 @@
 FROM circleci/node:8.9.4 as builder
 
-USER root
-
-RUN apt-get install libunwind8
+RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-3.2
 
 WORKDIR /usr/src/app
 
@@ -11,7 +9,8 @@ COPY /package.json /usr/src/app/package.json
 COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
 
-RUN yarn install \
+RUN sudo chmod -R 777 /usr/src/app \
+  && yarn install \
   && yarn build \
   && yarn generate-api-client
 
