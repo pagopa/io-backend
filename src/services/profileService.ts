@@ -4,6 +4,7 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
+import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
@@ -16,13 +17,15 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
-import APIServiceBase from "./APIServiceBase";
+import SimpleHttpOperationResponse from "../utils/simpleResponse";
+import { ReadableReporter } from "../utils/validation_reporters";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-export default class ProfileService extends APIServiceBase {
-  constructor(private readonly apiClient: IApiClientFactoryInterface) {
-    super();
-  }
+const profileErrorOnUnknownResponse = "Unknown response.";
+const profileErrorOnApiError = "Api error.";
+
+export default class ProfileService {
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
    * Retrieves the profile for a specific user.
@@ -30,21 +33,26 @@ export default class ProfileService extends APIServiceBase {
   public async getProfile(
     user: User
   ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
-    const httpOperationResponse = await this.apiClient
+    const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getProfileWithHttpOperationResponse();
 
-    const profilePayload = this.extractBodyFromResponse(httpOperationResponse);
-    const status = this.extractStatusFromResponse(httpOperationResponse);
+    const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (status !== 200) {
-      const errorOrProblemJson = ProblemJson.decode(profilePayload);
+    if (simpleResponse.status() !== 200) {
+      const errorOrProblemJson = ProblemJson.decode(
+        simpleResponse.bodyAsJson()
+      );
       if (isLeft(errorOrProblemJson)) {
-        throw this.unknownResponseError(errorOrProblemJson, "getProfile");
+        winston.error(
+          "Unknown response from getProfile API: %s",
+          ReadableReporter.report(errorOrProblemJson)
+        );
+        throw new Error(profileErrorOnUnknownResponse);
       }
 
-      if (status !== 404) {
-        throw this.apiError(profilePayload, "getProfile");
+      if (simpleResponse.status() !== 404) {
+        throw new Error(profileErrorOnApiError);
       } else {
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
@@ -53,9 +61,15 @@ export default class ProfileService extends APIServiceBase {
       }
     }
 
-    const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
+    const errorOrApiProfile = GetProfileOKResponse.decode(
+      simpleResponse.bodyAsJson()
+    );
     if (isLeft(errorOrApiProfile)) {
-      throw this.unknownResponseError(errorOrApiProfile, "getProfile");
+      winston.error(
+        "Unknown response from getProfile API: %s",
+        ReadableReporter.report(errorOrApiProfile)
+      );
+      throw new Error(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;
@@ -72,25 +86,36 @@ export default class ProfileService extends APIServiceBase {
     const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
-    const httpOperationResponse = await this.apiClient
+    const response = await this.apiClient
       .getClient(user.fiscal_code)
       .upsertProfileWithHttpOperationResponse(upsertOptions);
 
-    const profilePayload = this.extractBodyFromResponse(httpOperationResponse);
-    const status = this.extractStatusFromResponse(httpOperationResponse);
+    const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (status !== 200) {
-      const errorOrProblemJson = ProblemJson.decode(profilePayload);
+    if (simpleResponse.status() !== 200) {
+      const errorOrProblemJson = ProblemJson.decode(
+        simpleResponse.bodyAsJson()
+      );
       if (isLeft(errorOrProblemJson)) {
-        throw this.unknownResponseError(errorOrProblemJson, "upsertProfile");
+        winston.error(
+          "Unknown response from upsertProfile API: %s",
+          ReadableReporter.report(errorOrProblemJson)
+        );
+        throw new Error(profileErrorOnUnknownResponse);
       } else {
-        throw this.apiError(profilePayload, "upsertProfile");
+        throw new Error(profileErrorOnApiError);
       }
     }
 
-    const errorOrApiProfile = UpsertProfileOKResponse.decode(profilePayload);
+    const errorOrApiProfile = UpsertProfileOKResponse.decode(
+      simpleResponse.bodyAsJson()
+    );
     if (isLeft(errorOrApiProfile)) {
-      throw this.unknownResponseError(errorOrApiProfile, "upsertProfile");
+      winston.error(
+        "Unknown response from upsertProfile API: %s",
+        ReadableReporter.report(errorOrApiProfile)
+      );
+      throw new Error(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;

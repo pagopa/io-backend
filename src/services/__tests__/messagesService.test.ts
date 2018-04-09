@@ -90,7 +90,7 @@ const validApiMessageResponse = {
       senderServiceId: "5a563817fcc896087002ea46c49a"
     },
     notification: {
-      email: "SENT_TO_CHANNEL"
+      email: "SENT"
     }
   },
   response: {
@@ -108,7 +108,7 @@ const invalidApiMessageResponse = {
       senderServiceId: "5a563817fcc896087002ea46c49a"
     },
     notification: {
-      email: "SENT_TO_CHANNEL"
+      email: "SENT"
     }
   },
   response: {
