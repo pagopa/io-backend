@@ -7,7 +7,6 @@ import * as t from "io-ts";
 
 import { readonlyArray, string } from "io-ts";
 import { NonNegativeNumber } from "../utils/numbers";
-import { strictInterfaceWithOptionals } from "../utils/types";
 import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
 
@@ -23,29 +22,22 @@ const MessageO = t.partial({
   subject: string
 });
 
-export const Message = strictInterfaceWithOptionals(
-  MessageR.props,
-  MessageO.props,
-  "Message"
-);
+export const Message = t.intersection([MessageR, MessageO]);
 
 export type Message = t.TypeOf<typeof Message>;
 
 // required attributes
-const MessagesR = t.interface({});
-
-// optional attributes
-const MessagesO = t.partial({
+const MessagesR = t.interface({
   items: readonlyArray(Message),
-  next: string,
   pageSize: NonNegativeNumber
 });
 
-export const Messages = strictInterfaceWithOptionals(
-  MessagesR.props,
-  MessagesO.props,
-  "Messages"
-);
+// optional attributes
+const MessagesO = t.partial({
+  next: string
+});
+
+export const Messages = t.intersection([MessagesR, MessagesO]);
 
 export type Messages = t.TypeOf<typeof Messages>;
 

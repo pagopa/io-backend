@@ -4,7 +4,6 @@
  */
 
 import * as t from "io-ts";
-import { strictInterfaceWithOptionals } from "../../utils/types";
 import { NotificationStatus } from "../api/NotificationStatus";
 import { CreatedMessageWithContent } from "./createdMessageWithContent";
 
@@ -18,11 +17,10 @@ const MessageResponseWithContentO = t.partial({
   notification: NotificationStatus
 });
 
-export const MessageResponseWithContent = strictInterfaceWithOptionals(
-  MessageResponseWithContentR.props,
-  MessageResponseWithContentO.props,
-  "MessageResponseWithContent"
-);
+export const MessageResponseWithContent = t.intersection([
+  MessageResponseWithContentR,
+  MessageResponseWithContentO
+]);
 
 export type MessageResponseWithContent = t.TypeOf<
   typeof MessageResponseWithContent

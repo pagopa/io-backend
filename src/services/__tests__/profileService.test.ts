@@ -9,10 +9,15 @@ const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 
 const validApiProfileResponse = {
-  email: aValidAPIEmail,
-  isInboxEnabled: true,
-  preferredLanguages: "it_IT",
-  version: 42
+  parsedBody: {
+    email: aValidAPIEmail,
+    isInboxEnabled: true,
+    preferredLanguages: ["it_IT"],
+    version: 42
+  },
+  response: {
+    status: 200
+  }
 };
 const proxyProfileWithEmailResponse = {
   email: aValidAPIEmail,
@@ -23,7 +28,7 @@ const proxyProfileWithEmailResponse = {
   is_inbox_enabled: true,
   name: "Luca",
   preferred_email: aValidSPIDEmail,
-  preferred_languages: "it_IT",
+  preferred_languages: ["it_IT"],
   version: 42
 };
 const proxyProfileWithoutEmailResponse = {
@@ -39,23 +44,30 @@ const proxyProfileWithoutEmailResponse = {
 const proxyUpsertRequest = {
   email: aValidAPIEmail,
   is_inbox_enabled: true,
-  preferred_languages: "it_IT",
+  preferred_languages: ["it_IT"],
   version: 42
 };
 const ApiProfileUpsertRequest = {
   body: {
     email: aValidAPIEmail,
     is_inbox_enabled: true,
-    preferred_languages: "it_IT",
+    preferred_languages: ["it_IT"],
     version: 42
   }
 };
 const emptyApiProfileResponse = {
-  status: 404
+  parsedBody: {},
+  response: {
+    status: 404
+  }
 };
 const problemJson = {
-  detail: "Error.",
-  status: 500
+  parsedBody: {
+    detail: "Error."
+  },
+  response: {
+    status: 500
+  }
 };
 
 // mock for a valid User
@@ -76,8 +88,8 @@ const mockGetProfile = jest.fn();
 const mockUpsertProfile = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
-    getProfile: mockGetProfile,
-    upsertProfile: mockUpsertProfile
+    getProfileWithHttpOperationResponse: mockGetProfile,
+    upsertProfileWithHttpOperationResponse: mockUpsertProfile
   };
 });
 jest.mock("../../services/apiClientFactory", () => {

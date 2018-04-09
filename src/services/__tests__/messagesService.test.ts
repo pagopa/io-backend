@@ -17,33 +17,48 @@ const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
 
 const validApiMessagesResponse = {
-  items: [
-    {
-      fiscalCode: "XUZTCT88A51Y311X",
-      id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
-    },
-    {
-      fiscalCode: "XUZTCT88A51Y311X",
-      id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
-    }
-  ],
-  pageSize: 2
+  parsedBody: {
+    items: [
+      {
+        fiscalCode: "XUZTCT88A51Y311X",
+        id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
+        senderServiceId: "5a563817fcc896087002ea46c49a"
+      },
+      {
+        fiscalCode: "XUZTCT88A51Y311X",
+        id: "01C3XE80E6X8PHY0NM8S8SDS1E",
+        senderServiceId: "5a563817fcc896087002ea46c49a"
+      }
+    ],
+    pageSize: 2
+  },
+  response: {
+    status: 200
+  }
 };
-const emptyApiMessagesResponse = {};
+const emptyApiMessagesResponse = {
+  parsedBody: {},
+  response: {
+    status: 404
+  }
+};
 const invalidApiMessagesResponse = {
-  items: [
-    {
-      id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
-    },
-    {
-      fiscalCode: "XUZTCT88A51Y311X",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
-    }
-  ],
-  pageSize: 2
+  parsedBody: {
+    items: [
+      {
+        id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
+        senderServiceId: "5a563817fcc896087002ea46c49a"
+      },
+      {
+        fiscalCode: "XUZTCT88A51Y311X",
+        senderServiceId: "5a563817fcc896087002ea46c49a"
+      }
+    ],
+    pageSize: 2
+  },
+  response: {
+    status: 200
+  }
 };
 const proxyMessagesResponse = {
   items: [
@@ -58,33 +73,46 @@ const proxyMessagesResponse = {
   ],
   pageSize: 2
 };
-const emptyProxyMessagesResponse = {};
+const emptyProxyMessagesResponse = {
+  items: [],
+  pageSize: 0
+};
 const validApiMessageResponse = {
-  message: {
-    content: {
-      markdown:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
-      subject: aValidSubject
+  parsedBody: {
+    message: {
+      content: {
+        markdown:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
+        subject: aValidSubject
+      },
+      fiscalCode: "XUZTCT88A51Y311X",
+      id: "01C3XE80E6X8PHY0NM8S8SDS1E",
+      senderServiceId: "5a563817fcc896087002ea46c49a"
     },
-    fiscalCode: "XUZTCT88A51Y311X",
-    id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-    senderServiceId: "5a563817fcc896087002ea46c49a"
+    notification: {
+      email: "SENT"
+    }
   },
-  notification: {
-    email: "SENT_TO_CHANNEL"
+  response: {
+    status: 200
   }
 };
 const invalidApiMessageResponse = {
-  message: {
-    content: {
-      markdown: "Lorem ipsum dolor sit amet",
-      subject: aValidSubject
+  parsedBody: {
+    message: {
+      content: {
+        markdown: "Lorem ipsum dolor sit amet",
+        subject: aValidSubject
+      },
+      id: "01C3XE80E6X8PHY0NM8S8SDS1E",
+      senderServiceId: "5a563817fcc896087002ea46c49a"
     },
-    id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-    senderServiceId: "5a563817fcc896087002ea46c49a"
+    notification: {
+      email: "SENT"
+    }
   },
-  notification: {
-    email: "SENT_TO_CHANNEL"
+  response: {
+    status: 200
   }
 };
 const proxyMessageResponse = {
@@ -95,16 +123,26 @@ const proxyMessageResponse = {
   subject: aValidSubject
 };
 const validApiServiceResponse = {
-  departmentName: aValidDepartmentName,
-  organizationName: aValidOrganizationName,
-  serviceId: aValidServiceID,
-  serviceName: aValidServiceName,
-  version: 42
+  parsedBody: {
+    departmentName: aValidDepartmentName,
+    organizationName: aValidOrganizationName,
+    serviceId: aValidServiceID,
+    serviceName: aValidServiceName,
+    version: 42
+  },
+  response: {
+    status: 200
+  }
 };
 const invalidApiServiceResponse = {
-  departmentName: aValidDepartmentName,
-  serviceId: aValidServiceID,
-  version: 42
+  parsedBody: {
+    departmentName: aValidDepartmentName,
+    serviceId: aValidServiceID,
+    version: 42
+  },
+  response: {
+    status: 200
+  }
 };
 const proxyServiceResponse = {
   departmentName: aValidDepartmentName,
@@ -114,8 +152,12 @@ const proxyServiceResponse = {
   version: 42
 };
 const problemJson = {
-  detail: "Error.",
-  status: 500
+  parsedBody: {
+    detail: "Error."
+  },
+  response: {
+    status: 500
+  }
 };
 
 // mock for a valid User
@@ -137,9 +179,9 @@ const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
-    getMessage: mockGetMessage,
-    getMessagesByUser: mockGetMessagesByUser,
-    getService: mockGetService
+    getMessageWithHttpOperationResponse: mockGetMessage,
+    getMessagesByUserWithHttpOperationResponse: mockGetMessagesByUser,
+    getServiceWithHttpOperationResponse: mockGetService
   };
 });
 jest.mock("../../services/apiClientFactory", () => {

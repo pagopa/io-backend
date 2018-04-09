@@ -10,7 +10,6 @@ import { User } from "./user";
 import * as express from "express";
 import { boolean, string } from "io-ts";
 import { NonNegativeNumber } from "../utils/numbers";
-import { strictInterfaceWithOptionals } from "../utils/types";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { PreferredLanguage } from "./api/PreferredLanguages";
@@ -18,28 +17,27 @@ import { ExtendedProfile } from "./api_client/extendedProfile";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
 // required attributes
-const ProfileWithEmailR = t.interface({
+const ProfileWithEmailR = t.type({
   family_name: string,
   fiscal_code: FiscalCode,
   has_profile: boolean,
   is_email_set: boolean,
+  is_inbox_enabled: boolean,
   name: string,
-  preferred_email: EmailAddress
+  preferred_email: EmailAddress,
+  version: NonNegativeNumber
 });
 
 // optional attributes
 const ProfileWithEmailO = t.partial({
   email: EmailAddress,
-  is_inbox_enabled: boolean,
-  preferred_languages: PreferredLanguage,
-  version: NonNegativeNumber
+  preferred_languages: PreferredLanguage
 });
 
-export const ProfileWithEmail = strictInterfaceWithOptionals(
-  ProfileWithEmailR.props,
-  ProfileWithEmailO.props,
-  "ProfileWithEmail"
-);
+export const ProfileWithEmail = t.intersection([
+  ProfileWithEmailR,
+  ProfileWithEmailO
+]);
 
 export type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
 
@@ -49,22 +47,21 @@ const ProfileWithoutEmailR = t.interface({
   fiscal_code: FiscalCode,
   has_profile: boolean,
   is_email_set: boolean,
+  is_inbox_enabled: boolean,
   name: string,
-  preferred_email: EmailAddress
+  preferred_email: EmailAddress,
+  version: NonNegativeNumber
 });
 
 // optional attributes
 const ProfileWithoutEmailO = t.partial({
-  is_inbox_enabled: boolean,
-  preferred_languages: PreferredLanguage,
-  version: NonNegativeNumber
+  preferred_languages: PreferredLanguage
 });
 
-export const ProfileWithoutEmail = strictInterfaceWithOptionals(
-  ProfileWithoutEmailR.props,
-  ProfileWithoutEmailO.props,
-  "ProfileWithoutEmail"
-);
+export const ProfileWithoutEmail = t.intersection([
+  ProfileWithoutEmailR,
+  ProfileWithoutEmailO
+]);
 
 export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmail>;
 

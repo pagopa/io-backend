@@ -4,7 +4,6 @@
 
 import * as t from "io-ts";
 import { number } from "io-ts";
-import { strictInterfaceWithOptionals } from "../../utils/types";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { PreferredLanguage } from "../api/PreferredLanguages";
@@ -20,10 +19,9 @@ const ExtendedProfileO = t.partial({
   version: number
 });
 
-export const ExtendedProfile = strictInterfaceWithOptionals(
-  ExtendedProfileR.props,
-  ExtendedProfileO.props,
-  "ExtendedProfile"
-);
+export const ExtendedProfile = t.intersection([
+  ExtendedProfileR,
+  ExtendedProfileO
+]);
 
 export type ExtendedProfile = t.TypeOf<typeof ExtendedProfile>;

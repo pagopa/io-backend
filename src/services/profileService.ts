@@ -17,6 +17,8 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
+import SimpleHttpOperationResponse from "../utils/simpleResponse";
+import { ReadableReporter } from "../utils/validation_reporters";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const profileErrorOnUnknownResponse = "Unknown response.";
@@ -31,34 +33,43 @@ export default class ProfileService {
   public async getProfile(
     user: User
   ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
-    const profilePayload = await this.apiClient
+    const response = await this.apiClient
       .getClient(user.fiscal_code)
-      .getProfile();
+      .getProfileWithHttpOperationResponse();
 
-    const errorOrApiProfile = GetProfileOKResponse.decode(profilePayload);
-    if (isLeft(errorOrApiProfile)) {
-      const errorOrProblemJson = ProblemJson.decode(profilePayload);
+    const simpleResponse = new SimpleHttpOperationResponse(response);
 
+    if (!simpleResponse.isOk()) {
+      const errorOrProblemJson = ProblemJson.decode(
+        simpleResponse.parsedBody()
+      );
       if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from getProfile API:",
-          profilePayload
+        winston.error(
+          "Unknown response from getProfile API: %s",
+          ReadableReporter.report(errorOrProblemJson)
         );
         throw new Error(profileErrorOnUnknownResponse);
-      } else {
-        const problemJson = errorOrProblemJson.value;
+      }
 
+      if (!simpleResponse.isNotFound()) {
+        throw new Error(profileErrorOnApiError);
+      } else {
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
         // retrieved from SPID.
-        if (problemJson.status === 404) {
-          return toAppProfileWithoutEmail(user);
-        }
-
-        winston.log("error", "API error in getProfile: %s", profilePayload);
-        throw new Error(profileErrorOnApiError);
+        return toAppProfileWithoutEmail(user);
       }
+    }
+
+    const errorOrApiProfile = GetProfileOKResponse.decode(
+      simpleResponse.parsedBody()
+    );
+    if (isLeft(errorOrApiProfile)) {
+      winston.error(
+        "Unknown response from getProfile API: %s",
+        ReadableReporter.report(errorOrApiProfile)
+      );
+      throw new Error(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;
@@ -75,25 +86,36 @@ export default class ProfileService {
     const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
-    const profilePayload = await this.apiClient
+    const response = await this.apiClient
       .getClient(user.fiscal_code)
-      .upsertProfile(upsertOptions);
+      .upsertProfileWithHttpOperationResponse(upsertOptions);
 
-    const errorOrApiProfile = UpsertProfileOKResponse.decode(profilePayload);
-    if (isLeft(errorOrApiProfile)) {
-      const errorOrProblemJson = ProblemJson.decode(profilePayload);
+    const simpleResponse = new SimpleHttpOperationResponse(response);
 
+    if (!simpleResponse.isOk()) {
+      const errorOrProblemJson = ProblemJson.decode(
+        simpleResponse.parsedBody()
+      );
       if (isLeft(errorOrProblemJson)) {
-        winston.log(
-          "error",
-          "Unknown response from upsertProfile API:",
-          profilePayload
+        winston.error(
+          "Unknown response from upsertProfile API: %s",
+          ReadableReporter.report(errorOrProblemJson)
         );
         throw new Error(profileErrorOnUnknownResponse);
       } else {
-        winston.log("error", "API error in upsertProfile:", profilePayload);
         throw new Error(profileErrorOnApiError);
       }
+    }
+
+    const errorOrApiProfile = UpsertProfileOKResponse.decode(
+      simpleResponse.parsedBody()
+    );
+    if (isLeft(errorOrApiProfile)) {
+      winston.error(
+        "Unknown response from upsertProfile API: %s",
+        ReadableReporter.report(errorOrApiProfile)
+      );
+      throw new Error(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;

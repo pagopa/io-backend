@@ -6,24 +6,23 @@
 import * as t from "io-ts";
 import { readonlyArray, string } from "io-ts";
 import { NonNegativeNumber } from "../../utils/numbers";
-import { strictInterfaceWithOptionals } from "../../utils/types";
 import { CreatedMessageWithoutContent } from "./createdMessageWithoutContent";
 
 // required attributes
-const GetMessagesByUserOKResponseR = t.interface({});
-
-// optional attributes
-const GetMessagesByUserOKResponseO = t.partial({
+const GetMessagesByUserOKResponseR = t.interface({
   items: readonlyArray(CreatedMessageWithoutContent),
-  next: string,
   pageSize: NonNegativeNumber
 });
 
-export const GetMessagesByUserOKResponse = strictInterfaceWithOptionals(
-  GetMessagesByUserOKResponseR.props,
-  GetMessagesByUserOKResponseO.props,
-  "GetMessagesByUserOKResponse"
-);
+// optional attributes
+const GetMessagesByUserOKResponseO = t.partial({
+  next: string
+});
+
+export const GetMessagesByUserOKResponse = t.intersection([
+  GetMessagesByUserOKResponseR,
+  GetMessagesByUserOKResponseO
+]);
 
 export type GetMessagesByUserOKResponse = t.TypeOf<
   typeof GetMessagesByUserOKResponse

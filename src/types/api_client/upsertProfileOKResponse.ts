@@ -4,27 +4,29 @@
  */
 
 import * as t from "io-ts";
-import { number } from "io-ts";
-import { strictInterfaceWithOptionals } from "../../utils/types";
+import { readonlyArray } from "io-ts";
+import { NonNegativeNumber } from "../../utils/numbers";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
+import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import { PreferredLanguage } from "../api/PreferredLanguages";
 
 // required attributes
-const UpsertProfileOKResponseR = t.interface({});
+const UpsertProfileOKResponseR = t.interface({
+  isInboxEnabled: IsInboxEnabled,
+  isWebhookEnabled: IsWebhookEnabled,
+  version: NonNegativeNumber
+});
 
 // optional attributes
 const UpsertProfileOKResponseO = t.partial({
   email: EmailAddress,
-  isInboxEnabled: IsInboxEnabled,
-  preferredLanguages: PreferredLanguage,
-  version: number
+  preferredLanguages: readonlyArray(PreferredLanguage)
 });
 
-export const UpsertProfileOKResponse = strictInterfaceWithOptionals(
-  UpsertProfileOKResponseR.props,
-  UpsertProfileOKResponseO.props,
-  "UpsertProfileOKResponse"
-);
+export const UpsertProfileOKResponse = t.intersection([
+  UpsertProfileOKResponseR,
+  UpsertProfileOKResponseO
+]);
 
 export type UpsertProfileOKResponse = t.TypeOf<typeof UpsertProfileOKResponse>;

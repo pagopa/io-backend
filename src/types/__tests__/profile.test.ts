@@ -3,30 +3,33 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import {
-  extractUpsertProfileFromRequest,
-  toAppProfileWithEmail,
-  toAppProfileWithoutEmail
-} from "../../types/profile";
 import { NonNegativeNumber } from "../../utils/numbers";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
+import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import { PreferredLanguage } from "../api/PreferredLanguages";
 import { ExtendedProfile } from "../api_client/extendedProfile";
 import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
+import {
+  extractUpsertProfileFromRequest,
+  toAppProfileWithEmail,
+  toAppProfileWithoutEmail
+} from "../profile";
 import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aNonNegativeNumber = 1 as NonNegativeNumber;
 const aPreferredLanguage = "it_IT" as PreferredLanguage;
+const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
 
 // mock for the profile retrieved from the Digital Citizenship API
 const mockedGetProfileOKResponse: GetProfileOKResponse = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
+  isWebhookEnabled: anIsWebhookEnabled,
   preferredLanguages: aPreferredLanguage,
   version: aNonNegativeNumber
 };
