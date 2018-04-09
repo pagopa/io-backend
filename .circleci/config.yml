@@ -26,6 +26,12 @@ jobs:
             - ~/.cache/yarn
           key: v1-dependencies-{{ checksum "yarn.lock" }}
 
+      # Install required libraries
+      - run: sudo apt-get install libunwind8
+
+      # Generate API client
+      - run: yarn generate-api-client
+
       # Run tests
       - run: yarn lint
       - run: yarn build-noemit
