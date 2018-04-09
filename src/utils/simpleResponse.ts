@@ -7,7 +7,7 @@ export default class SimpleResponse {
 
   // tslint:disable-next-line:no-any
   public bodyAsJson(): any {
-    return this.httpOperationResponse.bodyAsJson;
+    return this.httpOperationResponse.parsedBody;
   }
 
   public status(): number {

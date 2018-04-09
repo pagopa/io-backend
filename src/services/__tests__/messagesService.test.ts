@@ -17,7 +17,7 @@ const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
 
 const validApiMessagesResponse = {
-  bodyAsJson: {
+  parsedBody: {
     items: [
       {
         fiscalCode: "XUZTCT88A51Y311X",
@@ -37,13 +37,13 @@ const validApiMessagesResponse = {
   }
 };
 const emptyApiMessagesResponse = {
-  bodyAsJson: {},
+  parsedBody: {},
   response: {
     status: 404
   }
 };
 const invalidApiMessagesResponse = {
-  bodyAsJson: {
+  parsedBody: {
     items: [
       {
         id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
@@ -78,7 +78,7 @@ const emptyProxyMessagesResponse = {
   pageSize: 0
 };
 const validApiMessageResponse = {
-  bodyAsJson: {
+  parsedBody: {
     message: {
       content: {
         markdown:
@@ -98,7 +98,7 @@ const validApiMessageResponse = {
   }
 };
 const invalidApiMessageResponse = {
-  bodyAsJson: {
+  parsedBody: {
     message: {
       content: {
         markdown: "Lorem ipsum dolor sit amet",
@@ -123,7 +123,7 @@ const proxyMessageResponse = {
   subject: aValidSubject
 };
 const validApiServiceResponse = {
-  bodyAsJson: {
+  parsedBody: {
     departmentName: aValidDepartmentName,
     organizationName: aValidOrganizationName,
     serviceId: aValidServiceID,
@@ -135,7 +135,7 @@ const validApiServiceResponse = {
   }
 };
 const invalidApiServiceResponse = {
-  bodyAsJson: {
+  parsedBody: {
     departmentName: aValidDepartmentName,
     serviceId: aValidServiceID,
     version: 42
@@ -152,7 +152,7 @@ const proxyServiceResponse = {
   version: 42
 };
 const problemJson = {
-  bodyAsJson: {
+  parsedBody: {
     detail: "Error."
   },
   response: {

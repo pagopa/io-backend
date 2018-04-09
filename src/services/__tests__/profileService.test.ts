@@ -9,7 +9,7 @@ const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 
 const validApiProfileResponse = {
-  bodyAsJson: {
+  parsedBody: {
     email: aValidAPIEmail,
     isInboxEnabled: true,
     preferredLanguages: ["it_IT"],
@@ -56,13 +56,13 @@ const ApiProfileUpsertRequest = {
   }
 };
 const emptyApiProfileResponse = {
-  bodyAsJson: {},
+  parsedBody: {},
   response: {
     status: 404
   }
 };
 const problemJson = {
-  bodyAsJson: {
+  parsedBody: {
     detail: "Error."
   },
   response: {
