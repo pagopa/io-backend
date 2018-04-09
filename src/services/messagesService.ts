@@ -37,9 +37,9 @@ export default class MessagesService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.status() !== 200) {
+    if (!simpleResponse.isOk()) {
       const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.bodyAsJson()
+        simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
         winston.error(
@@ -49,7 +49,7 @@ export default class MessagesService {
         throw new Error(messageErrorOnUnknownResponse);
       }
 
-      if (simpleResponse.status() !== 404) {
+      if (!simpleResponse.isNotFound()) {
         throw new Error(messageErrorOnApiError);
       }
 
@@ -60,7 +60,7 @@ export default class MessagesService {
     }
 
     const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
-      simpleResponse.bodyAsJson()
+      simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiMessages)) {
       winston.error(
@@ -89,9 +89,9 @@ export default class MessagesService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.status() !== 200) {
+    if (!simpleResponse.isOk()) {
       const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.bodyAsJson()
+        simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
         winston.error(
@@ -105,7 +105,7 @@ export default class MessagesService {
     }
 
     const errorOrApiMessage = MessageResponseWithContent.decode(
-      simpleResponse.bodyAsJson()
+      simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiMessage)) {
       winston.error(
@@ -129,9 +129,9 @@ export default class MessagesService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.status() !== 200) {
+    if (!simpleResponse.isOk()) {
       const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.bodyAsJson()
+        simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
         winston.error(
@@ -144,7 +144,7 @@ export default class MessagesService {
       }
     }
 
-    const errorOrApiService = ServicePublic.decode(simpleResponse.bodyAsJson());
+    const errorOrApiService = ServicePublic.decode(simpleResponse.parsedBody());
     if (isLeft(errorOrApiService)) {
       winston.error(
         "Unknown response from getService API: %s",

@@ -39,9 +39,9 @@ export default class ProfileService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.status() !== 200) {
+    if (!simpleResponse.isOk()) {
       const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.bodyAsJson()
+        simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
         winston.error(
@@ -51,7 +51,7 @@ export default class ProfileService {
         throw new Error(profileErrorOnUnknownResponse);
       }
 
-      if (simpleResponse.status() !== 404) {
+      if (!simpleResponse.isNotFound()) {
         throw new Error(profileErrorOnApiError);
       } else {
         // If the profile doesn't exists on the API we still
@@ -62,7 +62,7 @@ export default class ProfileService {
     }
 
     const errorOrApiProfile = GetProfileOKResponse.decode(
-      simpleResponse.bodyAsJson()
+      simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiProfile)) {
       winston.error(
@@ -92,9 +92,9 @@ export default class ProfileService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.status() !== 200) {
+    if (!simpleResponse.isOk()) {
       const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.bodyAsJson()
+        simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
         winston.error(
@@ -108,7 +108,7 @@ export default class ProfileService {
     }
 
     const errorOrApiProfile = UpsertProfileOKResponse.decode(
-      simpleResponse.bodyAsJson()
+      simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiProfile)) {
       winston.error(

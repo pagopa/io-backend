@@ -1,5 +1,5 @@
 /**
- * True if the webook is enabled.
+ * True if the webhook is enabled.
  */
 
 import * as t from "io-ts";
