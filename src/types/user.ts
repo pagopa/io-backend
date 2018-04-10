@@ -10,6 +10,7 @@ import { number, string } from "io-ts";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { Issuer } from "./issuer";
+import { SpidLevel, SpidLevelEnum } from "./spidLevel";
 
 // required attributes
 export const User = t.interface({
@@ -22,6 +23,7 @@ export const User = t.interface({
   preferred_email: EmailAddress,
   sessionIndex: string,
   spid_idp: string,
+  spid_level: SpidLevel,
   token: string
 });
 
@@ -29,6 +31,7 @@ export type User = t.TypeOf<typeof User>;
 
 // required attributes
 export const SpidUser = t.interface({
+  authnContextClassRef: SpidLevel,
   email: EmailAddress,
   familyName: string,
   fiscalNumber: FiscalCode,
@@ -57,6 +60,7 @@ export function toAppUser(from: SpidUser, token: string): User {
     preferred_email: from.email,
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     spid_idp: from.issuer._, // The used idp is needed for logout.
+    spid_level: from.authnContextClassRef,
     token
   };
 }
@@ -70,6 +74,7 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
     return left(new Error(messageErrorOnDecodeUser));
   }
 
+  // Remove the international prefix from fiscal number.
   const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
   const fiscalNumberWithoutPrefix = value.fiscalNumber.replace(
     FISCAL_NUMBER_INTERNATIONAL_PREFIX,
@@ -80,7 +85,19 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
     fiscalNumber: fiscalNumberWithoutPrefix
   };
 
-  const result = SpidUser.decode(valueWithoutPrefix);
+  // Set SPID level to a default (SPID_L2) if the expected value is not available
+  // in the SAML assertion.
+  // Actually the value returned by the test idp is invalid
+  // @see https://github.com/italia/spid-testenv/issues/26
+  const valueWithDefaultSPIDLevel = {
+    ...valueWithoutPrefix,
+    authnContextClassRef:
+      valueWithoutPrefix.authnContextClassRef in SpidLevelEnum
+        ? valueWithoutPrefix.authnContextClassRef
+        : SpidLevelEnum.SPID_L2
+  };
+
+  const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 
   return result.mapLeft(() => {
     return new Error(messageErrorOnDecodeUser);

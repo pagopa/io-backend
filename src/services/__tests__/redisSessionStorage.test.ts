@@ -18,6 +18,7 @@ const theCurrentTimestampMillis = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 // mock for a valid User
 const aValidUser: User = {
@@ -30,6 +31,7 @@ const aValidUser: User = {
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
+  spid_level: aValidSpidLevel,
   token: "HexToKen"
 };
 
@@ -261,7 +263,8 @@ describe("RedisSessionStorage#refresh", () => {
     expect(response).toEqual(
       right({
         expired: true,
-        newToken: "123456"
+        newToken: "123456",
+        user: aValidUser
       })
     );
   });

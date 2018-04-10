@@ -19,6 +19,7 @@ const anEmailAddress = "x@example.com" as EmailAddress;
 const anIssuer = { _: "onelogin_saml" } as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 // mock for a valid SpidUser
 const mockedSpidUser: any = {
@@ -48,6 +49,7 @@ const mockedUser: User = {
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
+  spid_level: aValidSpidLevel,
   token: "HexToKen"
 };
 

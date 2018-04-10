@@ -7,6 +7,7 @@ import ProfileService from "../profileService";
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 const validApiProfileResponse = {
   parsedBody: {
@@ -84,6 +85,7 @@ const mockedUser: User = {
   preferred_email: aValidSPIDEmail,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
+  spid_level: aValidSpidLevel,
   token: "HexToKen"
 };
 

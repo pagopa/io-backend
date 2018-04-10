@@ -12,6 +12,7 @@ const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
@@ -171,6 +172,7 @@ const mockedUser: User = {
   preferred_email: aValidEmail,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
+  spid_level: aValidSpidLevel,
   token: "HexToKen"
 };
 

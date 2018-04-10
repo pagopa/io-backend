@@ -17,7 +17,7 @@ export interface ISessionState {
   readonly expired: boolean;
   readonly expireAt?: number;
   readonly newToken?: string;
-  readonly user?: User;
+  readonly user: User;
 }
 
 export interface ISessionStorage {

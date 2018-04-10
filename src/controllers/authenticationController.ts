@@ -10,6 +10,7 @@ import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import { IResponse } from "../app";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
+import { SpidLevel } from "../types/spidLevel";
 import {
   extractUserFromRequest,
   toAppUser,
@@ -20,6 +21,7 @@ export interface IPublicSession {
   readonly expired: boolean;
   readonly expireAt?: number;
   readonly newToken?: string;
+  readonly spidLevel?: SpidLevel;
 }
 
 export interface ILogoutRedirect {
@@ -150,7 +152,8 @@ export default class AuthenticationController {
     const session = errorOrSession.value;
     const publicSession = {
       expireAt: session.expireAt,
-      expired: session.expired
+      expired: session.expired,
+      spidLevel: session.user.spid_level
     };
 
     // Return the actual session information.

@@ -7,6 +7,7 @@
     "node": "8.9.4"
   },
   "scripts": {
+    "prepare": "patch-package",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon src/server.js",
@@ -53,6 +54,7 @@
     "json-set-map": "^1.0.2",
     "morgan": "^1.8.1",
     "ms-rest-js": "^0.3.0",
+    "patch-package": "^5.1.1",
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",
     "passport-strategy": "^1.0.0",

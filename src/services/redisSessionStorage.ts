@@ -110,7 +110,8 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     return right<Error, ISessionState>({
       expired: true,
-      newToken
+      newToken,
+      user
     });
   }
 

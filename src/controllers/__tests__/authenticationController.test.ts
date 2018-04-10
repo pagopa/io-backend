@@ -81,6 +81,7 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
 const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 // authentication constant
 const mockToken =
@@ -99,6 +100,7 @@ const mockedUser: User = {
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   spid_idp: "xxx",
+  spid_level: aValidSpidLevel,
   token: mockToken
 };
 
@@ -387,7 +389,8 @@ describe("AuthenticationController#getSessionState", () => {
       right({
         body: {
           expireAt: 123,
-          expired: false
+          expired: false,
+          spidLevel: "https://www.spid.gov.it/SpidL2"
         },
         status: 200
       })
