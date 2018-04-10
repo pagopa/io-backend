@@ -23,6 +23,7 @@ const ProfileWithEmailR = t.type({
   has_profile: boolean,
   is_email_set: boolean,
   is_inbox_enabled: boolean,
+  is_webhook_enabled: boolean,
   name: string,
   preferred_email: EmailAddress,
   version: NonNegativeNumber
@@ -48,6 +49,7 @@ const ProfileWithoutEmailR = t.interface({
   has_profile: boolean,
   is_email_set: boolean,
   is_inbox_enabled: boolean,
+  is_webhook_enabled: boolean,
   name: string,
   preferred_email: EmailAddress,
   version: NonNegativeNumber
@@ -82,6 +84,7 @@ export function toAppProfileWithEmail(
     has_profile: true,
     is_email_set: !!from.email,
     is_inbox_enabled: from.isInboxEnabled,
+    is_webhook_enabled: from.isWebhookEnabled,
     name: user.name,
     preferred_email: user.preferred_email,
     preferred_languages: from.preferredLanguages,
@@ -101,6 +104,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     has_profile: false,
     is_email_set: false,
     is_inbox_enabled: false,
+    is_webhook_enabled: false,
     name: user.name,
     preferred_email: user.preferred_email,
     version: 0 as NonNegativeNumber

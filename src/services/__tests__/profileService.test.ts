@@ -12,6 +12,7 @@ const validApiProfileResponse = {
   parsedBody: {
     email: aValidAPIEmail,
     isInboxEnabled: true,
+    isWebhookEnabled: true,
     preferredLanguages: ["it_IT"],
     version: 42
   },
@@ -26,6 +27,7 @@ const proxyProfileWithEmailResponse = {
   has_profile: true,
   is_email_set: true,
   is_inbox_enabled: true,
+  is_webhook_enabled: true,
   name: "Luca",
   preferred_email: aValidSPIDEmail,
   preferred_languages: ["it_IT"],
@@ -37,6 +39,7 @@ const proxyProfileWithoutEmailResponse = {
   has_profile: false,
   is_email_set: false,
   is_inbox_enabled: false,
+  is_webhook_enabled: false,
   name: "Luca",
   preferred_email: aValidSPIDEmail,
   version: 0
