@@ -7,10 +7,11 @@ import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
+import * as winston from "winston";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { Issuer } from "./issuer";
-import { SpidLevel, SpidLevelEnum } from "./spidLevel";
+import { isSpidL, SpidLevel, SpidLevelEnum } from "./spidLevel";
 
 // required attributes
 export const User = t.interface({
@@ -91,11 +92,19 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
   // @see https://github.com/italia/spid-testenv/issues/26
   const valueWithDefaultSPIDLevel = {
     ...valueWithoutPrefix,
-    authnContextClassRef:
-      valueWithoutPrefix.authnContextClassRef in SpidLevelEnum
-        ? valueWithoutPrefix.authnContextClassRef
-        : SpidLevelEnum.SPID_L2
+    authnContextClassRef: isSpidL(valueWithoutPrefix.authnContextClassRef)
+      ? valueWithoutPrefix.authnContextClassRef
+      : SpidLevelEnum.SPID_L2
   };
+
+  // Log the invalid SPID level to audit IDP responses.
+  if (!isSpidL(valueWithoutPrefix.authnContextClassRef)) {
+    winston.warn(
+      "Response from IDP: %s doesn't contain a valid SPID level: %s",
+      value.issuer._,
+      value.authnContextClassRef
+    );
+  }
 
   const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 

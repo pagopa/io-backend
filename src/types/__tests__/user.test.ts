@@ -23,6 +23,7 @@ const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 // mock for a valid SpidUser
 const mockedSpidUser: any = {
+  authnContextClassRef: aValidSpidLevel,
   email: anEmailAddress,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,

@@ -21,7 +21,7 @@ export interface IPublicSession {
   readonly expired: boolean;
   readonly expireAt?: number;
   readonly newToken?: string;
-  readonly spidLevel?: SpidLevel;
+  readonly spidLevel: SpidLevel;
 }
 
 export interface ILogoutRedirect {
@@ -143,7 +143,11 @@ export default class AuthenticationController {
       // Return the new session information.
       const sessionState = errorOrSessionState.value;
       return right({
-        body: sessionState,
+        body: {
+          expired: sessionState.expired,
+          newToken: sessionState.newToken,
+          spidLevel: sessionState.user.spid_level
+        },
         status: 200
       });
     }
