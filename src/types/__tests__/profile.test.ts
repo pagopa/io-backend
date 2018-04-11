@@ -24,6 +24,7 @@ const aNonNegativeNumber = 1 as NonNegativeNumber;
 const aPreferredLanguage = "it_IT" as PreferredLanguage;
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 // mock for the profile retrieved from the Digital Citizenship API
 const mockedGetProfileOKResponse: GetProfileOKResponse = {
@@ -45,6 +46,7 @@ const mockedUser: User = {
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
+  spid_level: aValidSpidLevel,
   token: "HexToKen"
 };
 

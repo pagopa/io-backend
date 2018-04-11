@@ -18,6 +18,7 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const aPreferredLanguage = "it_IT" as PreferredLanguage;
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 const proxyUserResponse = {
   created_at: aTimestamp,
@@ -47,6 +48,7 @@ const mockedUser: User = {
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
+  spid_level: aValidSpidLevel,
   token: "123hexToken"
 };
 

@@ -81,6 +81,7 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
 const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
+const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
 // authentication constant
 const mockToken =
@@ -99,11 +100,13 @@ const mockedUser: User = {
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   spid_idp: "xxx",
+  spid_level: aValidSpidLevel,
   token: mockToken
 };
 
 // validUser has all every field correctly set.
 const validUserPayload = {
+  authnContextClassRef: aValidSpidLevel,
   email: anEmailAddress,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
@@ -117,6 +120,7 @@ const validUserPayload = {
 };
 // invalidUser lacks the required email field.
 const invalidUserPayload = {
+  authnContextClassRef: aValidSpidLevel,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
   issuer: {
@@ -341,11 +345,18 @@ describe("AuthenticationController#getSessionState", () => {
     req.headers = {};
     req.headers.authorization = "Bearer " + mockToken;
 
-    const aSessionState = { expired: true, newToken: aRefreshedToken };
     mockGet.mockReturnValue(
       Promise.resolve(left(new Error("Token has expired")))
     );
-    mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
+    mockRefresh.mockReturnValue(
+      Promise.resolve(
+        right({
+          expired: true,
+          newToken: aRefreshedToken,
+          user: { spid_level: aValidSpidLevel }
+        })
+      )
+    );
 
     const response = await controller.getSessionState(req);
 
@@ -354,7 +365,11 @@ describe("AuthenticationController#getSessionState", () => {
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
     expect(response).toEqual(
       right({
-        body: aSessionState,
+        body: {
+          expired: true,
+          newToken: aRefreshedToken,
+          spidLevel: aValidSpidLevel
+        },
         status: 200
       })
     );
@@ -387,7 +402,8 @@ describe("AuthenticationController#getSessionState", () => {
       right({
         body: {
           expireAt: 123,
-          expired: false
+          expired: false,
+          spidLevel: "https://www.spid.gov.it/SpidL2"
         },
         status: 200
       })
