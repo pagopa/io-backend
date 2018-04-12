@@ -28,6 +28,7 @@
   <div id="preferred_email"></div>
   <div id="version"></div>
   <div id="is_inbox_enabled"></div>
+  <div id="is_webhook_enabled"></div>
 
   <h2>Edit</h2>
 
@@ -36,6 +37,8 @@
     <input type="text" id="edit_email" value=""/><br/>
     <label for="edit_inbox_enabled">Inbox enabled:</label>
     <input type="checkbox" id="edit_inbox_enabled" checked/><br/>
+    <label for="edit_webhook_enabled">Webhook enabled:</label>
+    <input type="checkbox" id="edit_webhook_enabled" checked/><br/>
     <input type="hidden" id="edit_version" value=""/><br/>
     <input type="submit" name="Save">
   </form>
@@ -102,6 +105,14 @@
               $("#is_inbox_enabled").append("Inbox non enabled");
               $("#edit_inbox_enabled").attr("checked", false);
             }
+
+            if (data.is_webhook_enabled) {
+              $("#is_webhook_enabled").append("Webhook enabled");
+              $("#edit_webhook_enabled").attr("checked", true);
+            } else {
+              $("#is_webhook_enabled").append("Webhook non enabled");
+              $("#edit_webhook_enabled").attr("checked", false);
+            }
           });
         }
       )
@@ -114,6 +125,7 @@
 
   $("#edit").submit(function() {
     let data = {
+      isWebhookEnabled: $("#edit_webhook_enabled").is(":checked"),
       isInboxEnabled: $("#edit_inbox_enabled").is(":checked"),
       version: parseInt($("#edit_version").val())
     };

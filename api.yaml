@@ -163,21 +163,23 @@ paths:
           description: Profile cannot be updated.
 definitions:
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#MessageContent"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#FiscalCode"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#ExtendedProfile"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#LimitedProfile"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#IsInboxEnabled"
+  IsWebhookEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#IsWebhookEnabled"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/3d315e4/api/definitions.yaml#PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#PaginationResponse"
   Message:
     title: Message
     type: object
@@ -208,6 +210,8 @@ definitions:
         type: boolean
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
+      is_webhook_enabled:
+        $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
       preferred_email:

@@ -7,6 +7,7 @@ import ProfileService from "../../services/profileService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
 import { PreferredLanguage } from "../../types/api/PreferredLanguages";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
 import { User } from "../../types/user";
@@ -17,6 +18,7 @@ const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
+const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguage = "it_IT" as PreferredLanguage;
 const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
 
@@ -26,6 +28,7 @@ const proxyUserResponse = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   isInboxEnabled: anIsInboxEnabled,
+  isWebhookEnabled: anIsWebookEnabled,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -56,6 +59,7 @@ const mockedUser: User = {
 const mockedUpsertUser: ExtendedProfile = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
+  isWebhookEnabled: anIsWebookEnabled,
   preferredLanguages: aPreferredLanguage,
   version: 1 as number
 };
