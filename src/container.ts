@@ -6,11 +6,13 @@
 
 import * as awilix from "awilix";
 import * as dotenv from "dotenv";
+import { isLeft } from "fp-ts/lib/Either";
 import * as fs from "fs";
 import * as redis from "redis";
 import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import ApiClientFactory from "./services/apiClientFactory";
@@ -18,8 +20,11 @@ import MessagesService from "./services/messagesService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import TokenService from "./services/tokenService";
+import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
-import tokenStrategy from "./strategies/tokenStrategy";
+import urlTokenStrategy from "./strategies/urlTokenStrategy";
+import { CIDR } from "./types/api/CIDR";
+import { EnvironmentNodeEnvEnum } from "./types/environment";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -27,6 +32,23 @@ dotenv.config();
 
 const container = awilix.createContainer({
   injectionMode: awilix.InjectionMode.CLASSIC
+});
+
+// Server port.
+const DEFAULT_SERVER_PORT = "80";
+const serverPort: number = parseInt(
+  process.env.PORT || DEFAULT_SERVER_PORT,
+  10
+);
+container.register({
+  serverPort: awilix.asValue(serverPort)
+});
+
+// Server environment.
+const DEFAULT_ENVIRONMENT = EnvironmentNodeEnvEnum.DEVELOPMENT;
+const env: string = process.env.NODE_ENV || DEFAULT_ENVIRONMENT;
+container.register({
+  env: awilix.asValue(env)
 });
 
 // Private key used in SAML authentication to a SPID IDP.
@@ -107,16 +129,40 @@ container.register({
   apiUrl: awilix.asValue(process.env.API_URL)
 });
 
+// Notification URL pre shared key.
+const DEFAULT_PRE_SHARED_KEY = "12345";
+const preSharedKey: string =
+  process.env.PRE_SHARED_KEY || DEFAULT_PRE_SHARED_KEY;
+container.register({
+  preSharedKey: awilix.asValue(preSharedKey)
+});
+
+// Range IP allowed for notification.
+const errorOrCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
+if (isLeft(errorOrCIDR)) {
+  process.exit(0);
+} else {
+  container.register({
+    allowNotifyIPSourceRange: awilix.asValue(errorOrCIDR.value)
+  });
+}
+
 // Register the spidStrategy.
 export const SPID_STRATEGY = "spidStrategy";
 container.register({
   [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
 });
 
-// Register the tokenStrategy.
-export const TOKEN_STRATEGY = "tokenStrategy";
+// Register the bearerTokenStrategy.
+export const BEARER_TOKEN_STRATEGY = "bearerTokenStrategy";
 container.register({
-  [TOKEN_STRATEGY]: awilix.asFunction(tokenStrategy).singleton()
+  [BEARER_TOKEN_STRATEGY]: awilix.asFunction(bearerTokenStrategy).singleton()
+});
+
+// Register the urlTokenStrategy.
+export const URL_TOKEN_STRATEGY = "urlTokenStrategy";
+container.register({
+  [URL_TOKEN_STRATEGY]: awilix.asFunction(urlTokenStrategy).singleton()
 });
 
 // Register a session storage service backed by Redis.
@@ -177,6 +223,12 @@ container.register({
 export const SERVICES_CONTROLLER = "servicesController";
 container.register({
   [SERVICES_CONTROLLER]: awilix.asClass(ServicesController)
+});
+
+// Register the services controller as a service.
+export const NOTIFICATION_CONTROLLER = "notificationController";
+container.register({
+  [NOTIFICATION_CONTROLLER]: awilix.asClass(NotificationController)
 });
 
 export default container;

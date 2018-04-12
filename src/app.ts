@@ -4,11 +4,13 @@
 
 import container, {
   AUTHENTICATION_CONTROLLER,
+  BEARER_TOKEN_STRATEGY,
   MESSAGES_CONTROLLER,
+  NOTIFICATION_CONTROLLER,
   PROFILE_CONTROLLER,
   SERVICES_CONTROLLER,
   SPID_STRATEGY,
-  TOKEN_STRATEGY
+  URL_TOKEN_STRATEGY
 } from "./container";
 import AuthenticationController, {
   ILogoutRedirect,
@@ -28,10 +30,13 @@ import ServicesController from "./controllers/servicesController";
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import { Either } from "fp-ts/lib/Either";
+import NotificationController from "./controllers/notificationController";
+import { CIDR } from "./types/api/CIDR";
 import {
   EnvironmentNodeEnv,
   EnvironmentNodeEnvEnum
 } from "./types/environment";
+import checkIP from "./utils/middleware/checkIP";
 
 /**
  * Return a response to the client.
@@ -91,15 +96,21 @@ export interface IResponse<T> {
   readonly status: number;
 }
 
-export function newApp(env: EnvironmentNodeEnv): Express {
+export function newApp(
+  env: EnvironmentNodeEnv,
+  allowNotifyIPSourceRange: CIDR
+): Express {
   // Setup Passport.
 
   // Add the strategy to authenticate proxy clients.
-  passport.use(container.resolve(TOKEN_STRATEGY));
+  passport.use(container.resolve(BEARER_TOKEN_STRATEGY));
+  // Add the strategy to authenticate webhook calls.
+  passport.use(container.resolve(URL_TOKEN_STRATEGY));
   // Add the strategy to authenticate the proxy to SPID.
   passport.use(container.resolve(SPID_STRATEGY));
 
-  const tokenAuth = passport.authenticate("bearer", { session: false });
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+  const urlTokenAuth = passport.authenticate("authtoken", { session: false });
   const spidAuth = passport.authenticate("spid", { session: false });
 
   // Setup controllers.
@@ -118,6 +129,10 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   const servicesController: ServicesController = container.resolve(
     SERVICES_CONTROLLER
+  );
+
+  const notificationController: NotificationController = container.resolve(
+    NOTIFICATION_CONTROLLER
   );
 
   // Create and setup the Express app.
@@ -148,7 +163,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.post(
     "/logout",
-    tokenAuth,
+    bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
       const maybeResponse = await acsController.logout(req);
       respond(maybeResponse, res);
@@ -187,7 +202,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.get(
     "/api/v1/profile",
-    tokenAuth,
+    bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       profileController.getProfile(req, res);
     }
@@ -195,7 +210,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.post(
     "/api/v1/profile",
-    tokenAuth,
+    bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       profileController.upsertProfile(req, res);
     }
@@ -203,7 +218,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.get(
     "/api/v1/messages",
-    tokenAuth,
+    bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       messagesController.getMessagesByUser(req, res);
     }
@@ -211,7 +226,7 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.get(
     "/api/v1/messages/:id",
-    tokenAuth,
+    bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       messagesController.getMessage(req, res);
     }
@@ -219,9 +234,19 @@ export function newApp(env: EnvironmentNodeEnv): Express {
 
   app.get(
     "/api/v1/services/:id",
-    tokenAuth,
+    bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       servicesController.getService(req, res);
+    }
+  );
+
+  app.get(
+    "/api/v1/notify",
+    checkIP(allowNotifyIPSourceRange),
+    urlTokenAuth,
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await notificationController.notify(req);
+      respond(maybeResponse, res);
     }
   );
 
