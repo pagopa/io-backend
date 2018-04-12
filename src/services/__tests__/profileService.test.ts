@@ -48,6 +48,7 @@ const proxyProfileWithoutEmailResponse = {
 const proxyUpsertRequest = {
   email: aValidAPIEmail,
   is_inbox_enabled: true,
+  is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
   version: 42
 };
@@ -55,6 +56,7 @@ const ApiProfileUpsertRequest = {
   body: {
     email: aValidAPIEmail,
     is_inbox_enabled: true,
+    is_webhook_enabled: true,
     preferred_languages: ["it_IT"],
     version: 42
   }

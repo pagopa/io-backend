@@ -54,6 +54,7 @@ const mockedUser: User = {
 const mockedExtendedProfile: ExtendedProfile = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
+  isWebhookEnabled: anIsWebhookEnabled,
   preferredLanguages: aPreferredLanguage,
   version: 1 as number
 };
@@ -74,6 +75,9 @@ describe("profile type", () => {
     expect(userData.is_email_set).toBeTruthy();
     expect(userData.is_inbox_enabled).toBe(
       mockedGetProfileOKResponse.isInboxEnabled
+    );
+    expect(userData.is_webhook_enabled).toBe(
+      mockedGetProfileOKResponse.isWebhookEnabled
     );
     expect(userData.name).toBe(mockedUser.name);
     expect(userData.preferred_email).toBe(mockedUser.preferred_email);
