@@ -240,7 +240,7 @@ export function newApp(
     }
   );
 
-  app.get(
+  app.post(
     "/api/v1/notify",
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,

@@ -40,7 +40,7 @@ describe("Test redirect to HTTPS", () => {
 describe("Test the checkIP middleware", () => {
   it("should allow in-range IP", () => {
     return request(app)
-      .get("/api/v1/notify?token=12345")
+      .post("/api/v1/notify?token=12345")
       .set(X_FORWARDED_PROTO_HEADER, "https")
       .set("X-Client-Ip", "192.168.1.2")
       .expect(200);
@@ -48,7 +48,7 @@ describe("Test the checkIP middleware", () => {
 
   it("should block not in-range IP", () => {
     return request(app)
-      .get("/api/v1/notify")
+      .post("/api/v1/notify")
       .set(X_FORWARDED_PROTO_HEADER, "https")
       .set("X-Client-Ip", "192.0.0.0")
       .expect(401);

@@ -161,6 +161,27 @@ paths:
           description: Invalid payload.
         '500':
           description: Profile cannot be updated.
+  "/api/v1/notify":
+    x-swagger-router-controller: NotificationController
+    parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: "#/definitions/Notification"
+        x-examples:
+          application/json:
+            subject: "TMMEXQ60A10Y526X"
+            message: "..."
+    post:
+      operationId: notify
+      summary: Notify a user
+      description: |-
+        Post the notification to the user using a push notification.
+      responses:
+        "200":
+          description: Success.
+        "500":
+          description: There was an error in forwarding the notification to the Notification Hub.
 definitions:
   MessageContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#MessageContent"
