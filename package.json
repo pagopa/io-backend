@@ -46,6 +46,7 @@
     "@types/xml2js": "^0.4.2",
     "awilix": "^3.0.5",
     "body-parser": "^1.18.2",
+    "cidr-regex": "^2.0.8",
     "dotenv": "^5.0.1",
     "express": "^4.16.2",
     "express-enforces-ssl": "1.1.0",

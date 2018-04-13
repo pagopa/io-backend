@@ -31,12 +31,12 @@ import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import { Either } from "fp-ts/lib/Either";
 import NotificationController from "./controllers/notificationController";
-import { CIDR } from "./types/api/CIDR";
 import {
   EnvironmentNodeEnv,
   EnvironmentNodeEnvEnum
 } from "./types/environment";
 import checkIP from "./utils/middleware/checkIP";
+import { CIDRString } from "./utils/strings";
 
 /**
  * Return a response to the client.
@@ -98,7 +98,7 @@ export interface IResponse<T> {
 
 export function newApp(
   env: EnvironmentNodeEnv,
-  allowNotifyIPSourceRange: CIDR
+  allowNotifyIPSourceRange: CIDRString
 ): Express {
   // Setup Passport.
 

@@ -1,3 +1,4 @@
+import * as cidrRegex from "cidr-regex";
 import * as t from "io-ts";
 import { ulid } from "ulid";
 import * as validator from "validator";
@@ -113,3 +114,21 @@ export const IPString = tag<IIPStringTag>()(
 );
 
 export type IPString = t.TypeOf<typeof IPString>;
+
+/**
+ * A string that represents a valid CIDR.
+ */
+
+interface ICIDRStringTag {
+  readonly kind: "ICIDRStringTag";
+}
+
+export const CIDRString = tag<ICIDRStringTag>()(
+  t.refinement(
+    t.string,
+    s => cidrRegex({ exact: true }).test(s),
+    "string that represents a CIDR"
+  )
+);
+
+export type CIDRString = t.TypeOf<typeof CIDRString>;

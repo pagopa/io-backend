@@ -6,11 +6,11 @@ import * as http from "http";
 import * as winston from "winston";
 import { newApp } from "./app";
 import container from "./container";
-import { CIDR } from "./types/api/CIDR";
+import { CIDRString } from "./utils/strings";
 
 const port = container.resolve<number>("serverPort");
 const env = container.resolve<string>("env");
-const allowNotifyIPSourceRange = container.resolve<CIDR>(
+const allowNotifyIPSourceRange = container.resolve<CIDRString>(
   "allowNotifyIPSourceRange"
 );
 

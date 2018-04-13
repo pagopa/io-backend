@@ -23,8 +23,8 @@ import TokenService from "./services/tokenService";
 import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
-import { CIDR } from "./types/api/CIDR";
 import { EnvironmentNodeEnvEnum } from "./types/environment";
+import { CIDRString } from "./utils/strings";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -138,7 +138,7 @@ container.register({
 });
 
 // Range IP allowed for notification.
-const errorOrCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
+const errorOrCIDR = CIDRString.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
 if (isLeft(errorOrCIDR)) {
   process.exit(0);
 } else {

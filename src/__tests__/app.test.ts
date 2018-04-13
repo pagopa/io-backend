@@ -1,34 +1,56 @@
 import * as request from "supertest";
 import { newApp } from "../app";
 import { EnvironmentNodeEnvEnum } from "../types/environment";
+import { CIDRString } from "../utils/strings";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
 
-const app = newApp(EnvironmentNodeEnvEnum.PRODUCTION);
+const aValidCIDR = "192.168.0.0/16" as CIDRString;
 
-describe("Test the root path", () => {
+const app = newApp(EnvironmentNodeEnvEnum.PRODUCTION, aValidCIDR);
+const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
+
+describe("Test redirect to HTTPS", () => {
   // test case: ping. Cannot fail.
-  test("It should 200 and ok if pinged", () => {
+  it("should 200 and ok if pinged", () => {
     return request(app)
       .get("/ping")
-      .set("X-Forwarded-Proto", "https")
+      .set(X_FORWARDED_PROTO_HEADER, "https")
       .expect(200, "ok");
   });
 
   // test case: https forced. Already set: it trust the proxy and accept the header: X-Forwarded-Proto.
-  test("It should respond 200 if forwarded from an HTTPS connection", () => {
+  it("should respond 200 if forwarded from an HTTPS connection", () => {
     return request(app)
       .get("/")
-      .set("X-Forwarded-Proto", "https")
+      .set(X_FORWARDED_PROTO_HEADER, "https")
       .expect(200);
   });
 
   // test case: https forced. If proxy hasn't set X-Forwarded-Proto it should be forwarded to https.
-  test("It should respond 301 if forwarded from an HTTP connection", () => {
+  it("should respond 301 if forwarded from an HTTP connection", () => {
     return request(app)
       .get("/")
       .expect(301)
       .expect("Location", /https/);
+  });
+});
+
+describe("Test the checkIP middleware", () => {
+  it("should allow in-range IP", () => {
+    return request(app)
+      .get("/api/v1/notify?token=12345")
+      .set(X_FORWARDED_PROTO_HEADER, "https")
+      .set("X-Client-Ip", "192.168.1.2")
+      .expect(200);
+  });
+
+  it("should block not in-range IP", () => {
+    return request(app)
+      .get("/api/v1/notify")
+      .set(X_FORWARDED_PROTO_HEADER, "https")
+      .set("X-Client-Ip", "192.0.0.0")
+      .expect(401);
   });
 });
