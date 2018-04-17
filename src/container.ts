@@ -17,6 +17,7 @@ import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
+import NotificationService from "./services/notificationService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import TokenService from "./services/tokenService";
@@ -199,6 +200,12 @@ container.register({
 export const MESSAGES_SERVICE = "messagesService";
 container.register({
   [MESSAGES_SERVICE]: awilix.asClass(MessagesService)
+});
+
+// Register the notification service.
+export const NOTIFICATION_SERVICE = "notificationService";
+container.register({
+  [NOTIFICATION_SERVICE]: awilix.asClass(NotificationService)
 });
 
 // Register the authentication controller as a service.
