@@ -1,5 +1,5 @@
 /**
- *
+ * This controller handles webhook requests from the API backend.
  */
 
 import * as express from "express";
