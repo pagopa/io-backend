@@ -134,7 +134,7 @@ container.register({
 // Notification URL pre shared key.
 if (process.env.PRE_SHARED_KEY === undefined) {
   winston.error("Missing PRE_SHARED_KEY environment variable");
-  process.exit(0);
+  process.exit(1);
 } else {
   const preSharedKey: string = process.env.PRE_SHARED_KEY;
   container.register({
@@ -149,7 +149,7 @@ if (isLeft(errorOrCIDR)) {
     "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
     ReadableReporter.report(errorOrCIDR)
   );
-  process.exit(0);
+  process.exit(1);
 } else {
   container.register({
     allowNotifyIPSourceRange: awilix.asValue(errorOrCIDR.value)
