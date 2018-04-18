@@ -25,7 +25,8 @@ import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { EnvironmentNodeEnvEnum } from "./types/environment";
-import { CIDRString } from "./utils/strings";
+import { CIDR } from "./utils/strings";
+import { ReadableReporter } from "./utils/validation_reporters";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -131,16 +132,23 @@ container.register({
 });
 
 // Notification URL pre shared key.
-const DEFAULT_PRE_SHARED_KEY = "12345";
-const preSharedKey: string =
-  process.env.PRE_SHARED_KEY || DEFAULT_PRE_SHARED_KEY;
-container.register({
-  preSharedKey: awilix.asValue(preSharedKey)
-});
+if (process.env.PRE_SHARED_KEY === undefined) {
+  winston.error("Missing PRE_SHARED_KEY environment variable");
+  process.exit(0);
+} else {
+  const preSharedKey: string = process.env.PRE_SHARED_KEY;
+  container.register({
+    preSharedKey: awilix.asValue(preSharedKey)
+  });
+}
 
 // Range IP allowed for notification.
-const errorOrCIDR = CIDRString.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
+const errorOrCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
 if (isLeft(errorOrCIDR)) {
+  winston.error(
+    "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
+    ReadableReporter.report(errorOrCIDR)
+  );
   process.exit(0);
 } else {
   container.register({

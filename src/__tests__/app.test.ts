@@ -1,12 +1,12 @@
 import * as request from "supertest";
 import { newApp } from "../app";
 import { EnvironmentNodeEnvEnum } from "../types/environment";
-import { CIDRString } from "../utils/strings";
+import { CIDR } from "../utils/strings";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
 
-const aValidCIDR = "192.168.0.0/16" as CIDRString;
+const aValidCIDR = "192.168.0.0/16" as CIDR;
 
 const aValidNotification = {
   message: {

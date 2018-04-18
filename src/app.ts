@@ -36,7 +36,7 @@ import {
   EnvironmentNodeEnvEnum
 } from "./types/environment";
 import checkIP from "./utils/middleware/checkIP";
-import { CIDRString } from "./utils/strings";
+import { CIDR } from "./utils/strings";
 
 /**
  * Return a response to the client.
@@ -98,7 +98,7 @@ export interface IResponse<T> {
 
 export function newApp(
   env: EnvironmentNodeEnv,
-  allowNotifyIPSourceRange: CIDRString
+  allowNotifyIPSourceRange: CIDR
 ): Express {
   // Setup Passport.
 
