@@ -35,7 +35,11 @@ jobs:
       # Run tests
       - run: yarn lint
       - run: yarn build-noemit
-      - run: yarn test
+      - run:
+          name: Run tests
+          command: yarn test
+          environment:
+            PRE_SHARED_KEY: 12345
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
       # Run DangerJS
