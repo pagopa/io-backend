@@ -7,7 +7,8 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import * as winston from "winston";
 import { IResponse } from "../app";
 import NotificationService from "../services/notificationService";
-import { Notification } from "../types/notification";
+import { Device, Notification } from "../types/notification";
+import { extractUserFromRequest } from "../types/user";
 import { ReadableReporter } from "../utils/validation_reporters";
 
 export default class NotificationController {
@@ -35,5 +36,35 @@ export default class NotificationController {
       body: "ok",
       status: 200
     });
+  }
+
+  public async registerDevice(
+    req: express.Request
+  ): Promise<Either<Error, IResponse<string>>> {
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      // Unable to extract the user from the request.
+      const error = errorOrUser.value;
+      return left(error);
+    }
+
+    const errorOrDevice = Device.decode(req.body);
+
+    if (isLeft(errorOrDevice)) {
+      winston.error(
+        "Unable to parse the device data: %s",
+        ReadableReporter.report(errorOrDevice)
+      );
+      return left(new Error("Unable to parse the device data"));
+    }
+
+    const user = errorOrUser.value;
+    const device = errorOrDevice.value;
+
+    return await this.notificationService.registerDevice(
+      user.fiscal_code,
+      device
+    );
   }
 }

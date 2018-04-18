@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register/de-register device</title>
+
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>Register/de-register device</h1>
+
+  <a href="index.html">Home</a>
+
+  <br/><br/>
+
+  <form id="register">
+    <div class="form-group">
+      <label for="installationId">Installation ID:</label>
+      <input type="text" id="installationId" value="FRMTTR76M06B715E" class="form-control" required/>
+    </div>
+    <div class="form-group">
+      <label for="platform">Platform:</label>
+      <select id="platform" class="form-control" required>
+        <option value="apns">Apple</option>
+        <option value="gcm">Google</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="pushChannel">PNS handle:</label>
+      <input type="text" id="pushChannel" value="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000" class="form-control" required/>    </div>
+    <div class="form-group">
+      <input type="submit" value="Send test" class="btn btn-default"/>
+    </div>
+  </form>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location = "idp_list.html";
+  }
+
+  $("#register").submit(function() {
+    let data = {
+      "installationId": $("#installationId").val(),
+      "platform": $("#platform").val(),
+      "pushChannel": $("#pushChannel").val()
+    };
+
+    $.ajax({
+      url: "./api/v1/device/register",
+      type: "post",
+      data: JSON.stringify(data),
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json; charset=UTF-8"
+      },
+      dataType: "json",
+      success: function(data) {
+        console.info(data);
+      },
+      error: function(error) {
+        console.info(error);
+      }
+    });
+
+    return false;
+  });
+</script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

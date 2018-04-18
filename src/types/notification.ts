@@ -3,6 +3,7 @@
  */
 
 import * as t from "io-ts";
+import { string } from "io-ts";
 import { NonEmptyString } from "../utils/strings";
 import { CreatedMessageWithContent } from "./api_client/createdMessageWithContent";
 
@@ -21,3 +22,11 @@ export const Notification = t.interface({
 });
 
 export type Notification = t.TypeOf<typeof Notification>;
+
+export const Device = t.interface({
+  installationId: string,
+  platform: string,
+  pushChannel: string
+});
+
+export type Device = t.TypeOf<typeof Device>;
