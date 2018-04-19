@@ -47,7 +47,7 @@ container.register({
 });
 
 // Server environment.
-const DEFAULT_ENVIRONMENT = EnvironmentNodeEnvEnum.DEVELOPMENT;
+const DEFAULT_ENVIRONMENT = EnvironmentNodeEnvEnum.PRODUCTION;
 const env: string = process.env.NODE_ENV || DEFAULT_ENVIRONMENT;
 container.register({
   env: awilix.asValue(env)

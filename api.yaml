@@ -170,8 +170,20 @@ paths:
           $ref: "#/definitions/Notification"
         x-examples:
           application/json:
-            subject: "TMMEXQ60A10Y526X"
-            message: "..."
+            message:
+              fiscalCode: "TMMEXQ60A10Y526X"
+              senderServiceId: "12345"
+              content:
+                  subject: message subject, aliquip sint nulla in estinut
+                  markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+            senderMetadata: "TMMEXQ60A10Y526X"
+              departmentName: "Department name",
+              organizationName: "Organization name",
+              serviceName: "Service name"
     post:
       operationId: notify
       summary: Notify a user
@@ -214,6 +226,33 @@ definitions:
     required:
       - id
       - content
+  Notification:
+    title: Notification
+    description: A received Notification.
+    type: object
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithContent'
+      senderMetadata:
+        $ref: '#/definitions/CreatedMessageEventSenderMetadata'
+    required:
+      - message
+      - senderMetadata
+  CreatedMessageEventSenderMetadata:
+    title: CreatedMessageEventSenderMetadata
+    description: The metadata for a Notification.
+    type: object
+    properties:
+      departmentName:
+        type: string
+      organizationName:
+        type: string
+      serviceName:
+        type: string
+    required:
+      - departmentName
+      - organizationName
+      - serviceName
   Profile:
     title: Profile
     description: Describes the user's profile.

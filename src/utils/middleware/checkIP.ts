@@ -6,10 +6,10 @@ import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import * as rangeCheck from "range_check";
 import * as requestIp from "request-ip";
-import { IPString } from "../strings";
+import { CIDR, IPString } from "../strings";
 
 export default function checkIP(
-  range: string
+  range: CIDR
 ): (
   req: express.Request,
   res: express.Response,
