@@ -36,7 +36,7 @@
     "@types/glob": "^5.0.35",
     "@types/helmet": "^0.0.37",
     "@types/morgan": "^1.7.35",
-    "@types/passport": "^0.4.3",
+    "@types/passport": "^0.4.5",
     "@types/passport-http-bearer": "^1.0.31",
     "@types/passport-strategy": "^0.2.32",
     "@types/redis": "^2.8.5",
