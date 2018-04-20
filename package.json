@@ -69,7 +69,7 @@
     "@types/jest": "^22.0.0",
     "@types/superagent": "^3.5.7",
     "@types/supertest": "^2.0.4",
-    "@types/lolex": "2.1.1",
+    "@types/lolex": "2.1.2",
     "autorest": "^2.0.4272",
     "danger": "^3.1.7",
     "danger-plugin-digitalcitizenship": "^0.2.0",
