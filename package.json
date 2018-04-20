@@ -53,7 +53,7 @@
     "io-ts-types": "^0.3.4",
     "json-set-map": "^1.0.2",
     "morgan": "^1.8.1",
-    "ms-rest-js": "^0.3.0",
+    "ms-rest-js": "^0.3.1",
     "patch-package": "^5.1.1",
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",

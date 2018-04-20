@@ -1716,8 +1716,9 @@ fetch-cookie@~0.6.0:
     es6-denodeify "^0.1.1"
     tough-cookie "^2.3.1"
 
-fetch-ponyfill@amarzavery/fetch-ponyfill#master:
+"fetch-ponyfill@github:amarzavery/fetch-ponyfill#master":
   version "4.1.0"
+  uid "136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   resolved "https://codeload.github.com/amarzavery/fetch-ponyfill/tar.gz/136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   dependencies:
     fetch-cookie "~0.6.0"
@@ -3444,9 +3445,9 @@ morgan@^1.8.1:
     on-finished "~2.3.0"
     on-headers "~1.0.1"
 
-ms-rest-js@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/ms-rest-js/-/ms-rest-js-0.3.0.tgz#0680beb6812f5cd4092864606ffbc78af9fdb327"
+ms-rest-js@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/ms-rest-js/-/ms-rest-js-0.3.1.tgz#33162df9e2b263114958d2bca5a091542700276d"
   dependencies:
     "@types/form-data" "^2.2.1"
     "@types/is-stream" "^1.1.0"
@@ -3454,7 +3455,7 @@ ms-rest-js@^0.3.0:
     "@types/node-fetch" "^1.6.7"
     "@types/uuid" "^3.4.3"
     fetch-cookie "^0.7.0"
-    fetch-ponyfill amarzavery/fetch-ponyfill#master
+    fetch-ponyfill "github:amarzavery/fetch-ponyfill#master"
     form-data "^2.3.2"
     is-buffer "^2.0.0"
     is-stream "^1.1.0"
