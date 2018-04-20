@@ -38,7 +38,7 @@
     "@types/morgan": "^1.7.35",
     "@types/passport": "^0.4.3",
     "@types/passport-http-bearer": "^1.0.31",
-    "@types/passport-strategy": "^0.2.32",
+    "@types/passport-strategy": "^0.2.33",
     "@types/redis": "^2.8.5",
     "@types/validator": "^9.2.0",
     "@types/winston": "^2.3.8",
