@@ -2,22 +2,17 @@
  * This service post a notification to the Notification hub.
  */
 
-<<<<<<< HEAD
 import * as azure from "azure-sb";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { IResponse } from "../app";
 import { FiscalCode } from "../types/api/FiscalCode";
 import { Notification } from "../types/notification";
 import { Device } from "../types/notification";
-=======
-import { Notification } from "../types/notification";
->>>>>>> master
 
 export default class NotificationService {
   public async postNotification(_: Notification): Promise<void> {
     // TODO will be implemented by https://www.pivotaltracker.com/story/show/155934439
   }
-<<<<<<< HEAD
 
   public registerDevice(
     fiscalCode: FiscalCode,
@@ -58,6 +53,4 @@ export default class NotificationService {
       });
     });
   }
-=======
->>>>>>> master
 }
