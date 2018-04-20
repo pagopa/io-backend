@@ -1,4 +1,4 @@
-FROM circleci/node:8.9.4 as builder
+FROM circleci/node:9.11.1 as builder
 
 RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-3.2
 
