@@ -95,9 +95,9 @@
   version "22.2.0"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.0.tgz#55ce83139f7ad1b48b414c3927746614c6963c0f"
 
-"@types/lolex@2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@types/lolex/-/lolex-2.1.1.tgz#751bbad838366b3e9a0f7a81e30232ff56eb73dd"
+"@types/lolex@2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@types/lolex/-/lolex-2.1.2.tgz#40fb763baf260ed5de0685a6257ba98c1286e173"
 
 "@types/mime@*":
   version "2.0.0"
