@@ -4,7 +4,8 @@
 
 import * as t from "io-ts";
 import { string } from "io-ts";
-import { NonEmptyString } from "../utils/strings";
+import { NonEmptyString, PatternString } from "../utils/strings";
+import { enumType } from "../utils/types";
 import { CreatedMessageWithContent } from "./api_client/createdMessageWithContent";
 
 /**
@@ -23,10 +24,28 @@ export const Notification = t.interface({
 
 export type Notification = t.TypeOf<typeof Notification>;
 
+/**
+ * Type of device
+ */
+export enum DevicePlatformEnum {
+  apns = "apns",
+  gcm = "gcm"
+}
+
+export type DevicePlatform = t.TypeOf<typeof DevicePlatform>;
+
+export const DevicePlatform = enumType<DevicePlatformEnum>(
+  DevicePlatformEnum,
+  "DevicePlatform"
+);
+
+/**
+ * Device data
+ */
 export const Device = t.interface({
   installationId: string,
-  platform: string,
-  pushChannel: string
+  platform: DevicePlatform,
+  pushChannel: PatternString("[0-9a-fA-F]{64}")
 });
 
 export type Device = t.TypeOf<typeof Device>;

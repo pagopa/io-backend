@@ -194,6 +194,26 @@ paths:
           description: Success.
         "500":
           description: There was an error in forwarding the notification to the Notification Hub.
+  "/api/v1/device/register":
+    x-swagger-router-controller: NotificationController
+    parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: "#/definitions/Device"
+        x-examples:
+          application/json:
+            installationId: "12345",
+            platform: "apns",
+            pushChannel: "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000"
+    post:
+      operationId: registerDevice
+      summary: Register a device to the Azure Notification hub
+      responses:
+        "200":
+          description: Success.
+        "500":
+          description: There was an error in registering the device to the Notification Hub.
 definitions:
   MessageContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#MessageContent"
@@ -226,6 +246,21 @@ definitions:
     required:
       - id
       - content
+  Device:
+    title: Device
+    description: Device data.
+    type: object
+    properties:
+      installationId:
+        type: string
+      platform:
+        type: string
+      pushChannel:
+        type: string
+    required:
+     - installationId
+     - platform
+     - pushChannel
   Notification:
     title: Notification
     description: A received Notification.

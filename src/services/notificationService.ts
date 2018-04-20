@@ -10,6 +10,11 @@ import { Notification } from "../types/notification";
 import { Device } from "../types/notification";
 
 export default class NotificationService {
+  constructor(
+    private readonly hubName: string,
+    private readonly endpointOrConnectionString: string
+  ) {}
+
   public async postNotification(_: Notification): Promise<void> {
     // TODO will be implemented by https://www.pivotaltracker.com/story/show/155934439
   }
@@ -19,8 +24,8 @@ export default class NotificationService {
     device: Device
   ): Promise<Either<Error, IResponse<string>>> {
     const notificationHubService = azure.createNotificationHubService(
-      "agid-notificationhub-test",
-      "Endpoint=sb://agid-notificationhubns-test.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=pdhpgfVQuoPrA09+QagrdOgeHbvP2Hdgjs8EalN6GdQ="
+      this.hubName,
+      this.endpointOrConnectionString
     );
 
     const installation = {
@@ -40,7 +45,7 @@ export default class NotificationService {
 
     return new Promise(resolve => {
       notificationHubService.createOrUpdateInstallation(
-        // This any is needed because the `installation` argument of `createOrUpdateInstallation` method is wrong.
+        // This any is needed because the `installation` argument type of `createOrUpdateInstallation` method is wrong.
         // @see https://github.com/Azure/azure-sdk-for-node/issues/2450
         // tslint:disable-next-line:no-any
         (installation as any) as string,
