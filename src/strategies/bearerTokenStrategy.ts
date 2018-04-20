@@ -7,7 +7,7 @@ import * as passport from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
 import { ISessionState, ISessionStorage } from "../services/ISessionStorage";
 
-const tokenStrategy = () => {
+const bearerTokenStrategy = () => {
   return new passport.Strategy((token, done) => {
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
@@ -25,4 +25,4 @@ const tokenStrategy = () => {
   });
 };
 
-export default tokenStrategy;
+export default bearerTokenStrategy;
