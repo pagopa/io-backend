@@ -39,18 +39,24 @@ export default class NotificationService {
     };
 
     return new Promise(resolve => {
-      notificationHubService.createOrUpdateInstallation(installation, error => {
-        if (error !== null) {
-          return resolve(left<Error, IResponse<string>>(error));
-        }
+      notificationHubService.createOrUpdateInstallation(
+        // This any is needed because the `installation` argument of `createOrUpdateInstallation` method is wrong.
+        // @see https://github.com/Azure/azure-sdk-for-node/issues/2450
+        // tslint:disable-next-line:no-any
+        (installation as any) as string,
+        error => {
+          if (error !== null) {
+            return resolve(left<Error, IResponse<string>>(error));
+          }
 
-        return resolve(
-          right<Error, IResponse<string>>({
-            body: "ok",
-            status: 200
-          })
-        );
-      });
+          return resolve(
+            right<Error, IResponse<string>>({
+              body: "ok",
+              status: 200
+            })
+          );
+        }
+      );
     });
   }
 }
