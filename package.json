@@ -80,7 +80,7 @@
     "nodemon": "^1.17.3",
     "prettier": "^1.12.1",
     "superagent": "^3.8.2",
-    "supertest": "^2.0.0",
+    "supertest": "^3.0.0",
     "swagger-cli": "^1.0.1",
     "typestrict": "^0.0.7",
     "ts-jest": "^22.0.0",
