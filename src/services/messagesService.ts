@@ -3,6 +3,8 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
@@ -16,9 +18,7 @@ import {
 } from "../types/message";
 import { Service, toAppService } from "../types/service";
 import { User } from "../types/user";
-import { NonNegativeNumber } from "../utils/numbers";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
-import { ReadableReporter } from "../utils/validation_reporters";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const messageErrorOnUnknownResponse = "Unknown response.";

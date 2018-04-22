@@ -8,6 +8,8 @@ import * as awilix from "awilix";
 import * as dotenv from "dotenv";
 import { isLeft } from "fp-ts/lib/Either";
 import * as fs from "fs";
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
@@ -25,8 +27,6 @@ import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { EnvironmentNodeEnvEnum } from "./types/environment";
-import { CIDR } from "./utils/strings";
-import { ReadableReporter } from "./utils/validation_reporters";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.

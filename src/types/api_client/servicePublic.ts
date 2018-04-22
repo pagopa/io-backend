@@ -3,7 +3,7 @@
  */
 import * as t from "io-ts";
 import { string } from "io-ts";
-import { NonNegativeNumber } from "../../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 
 // required attributes
 const ServicePublicR = t.interface({

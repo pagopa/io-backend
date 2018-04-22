@@ -1,7 +1,7 @@
+import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 import { newApp } from "../app";
 import { EnvironmentNodeEnvEnum } from "../types/environment";
-import { CIDR } from "../utils/strings";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");

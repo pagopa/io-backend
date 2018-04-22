@@ -2,7 +2,7 @@
  * User's fiscal code.
  */
 
-import { PatternString } from "../../utils/strings";
+import { PatternString } from "italia-ts-commons/lib/strings";
 
 import * as t from "io-ts";
 

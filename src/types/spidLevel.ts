@@ -4,7 +4,7 @@
  * @see http://www.agid.gov.it/agenda-digitale/infrastrutture-architetture/spid/percorso-attuazione
  */
 
-import { enumType } from "../utils/types";
+import { enumType } from "italia-ts-commons/lib/types";
 
 export enum SpidLevelEnum {
   SPID_L1 = "https://www.spid.gov.it/SpidL1",

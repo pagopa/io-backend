@@ -4,6 +4,7 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
@@ -18,7 +19,6 @@ import {
 } from "../types/profile";
 import { User } from "../types/user";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
-import { ReadableReporter } from "../utils/validation_reporters";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const profileErrorOnUnknownResponse = "Unknown response.";

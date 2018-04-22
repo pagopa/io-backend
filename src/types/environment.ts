@@ -3,7 +3,7 @@
  */
 
 import * as t from "io-ts";
-import { enumType } from "../utils/types";
+import { enumType } from "italia-ts-commons/lib/types";
 
 export enum EnvironmentNodeEnvEnum {
   DEVELOPMENT = "dev",

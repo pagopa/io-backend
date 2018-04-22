@@ -3,7 +3,7 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { NonNegativeNumber } from "../../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";

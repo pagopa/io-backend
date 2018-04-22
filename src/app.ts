@@ -30,13 +30,13 @@ import ServicesController from "./controllers/servicesController";
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import { Either } from "fp-ts/lib/Either";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import NotificationController from "./controllers/notificationController";
 import {
   EnvironmentNodeEnv,
   EnvironmentNodeEnvEnum
 } from "./types/environment";
 import checkIP from "./utils/middleware/checkIP";
-import { CIDR } from "./utils/strings";
 
 /**
  * Return a response to the client.

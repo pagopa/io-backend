@@ -3,10 +3,10 @@
  */
 
 import * as http from "http";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
 import { newApp } from "./app";
 import container from "./container";
-import { CIDR } from "./utils/strings";
 
 const port = container.resolve<number>("serverPort");
 const env = container.resolve<string>("env");

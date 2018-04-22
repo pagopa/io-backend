@@ -9,7 +9,7 @@ import { User } from "./user";
 
 import * as express from "express";
 import { boolean, string } from "io-ts";
-import { NonNegativeNumber } from "../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { PreferredLanguage } from "./api/PreferredLanguages";

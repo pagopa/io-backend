@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -8,7 +9,6 @@ import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { Service } from "../../types/service";
 import { User } from "../../types/user";
-import { NonNegativeNumber } from "../../utils/numbers";
 import ServicesController from "../servicesController";
 
 const aTimestamp = 1518010929530;
