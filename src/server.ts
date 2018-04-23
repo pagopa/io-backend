@@ -3,13 +3,14 @@
  */
 
 import * as http from "http";
+import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
 import { newApp } from "./app";
 import container from "./container";
 
 const port = container.resolve<number>("serverPort");
-const env = container.resolve<string>("env");
+const env = container.resolve<NodeEnvironmentEnum>("env");
 const allowNotifyIPSourceRange = container.resolve<CIDR>(
   "allowNotifyIPSourceRange"
 );
