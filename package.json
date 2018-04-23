@@ -86,7 +86,7 @@
     "superagent": "^3.8.2",
     "supertest": "^3.0.0",
     "swagger-cli": "^1.0.1",
-    "typestrict": "^0.0.7",
+    "typestrict": "^0.0.8",
     "ts-jest": "^22.0.0",
     "ts-node": "^5.0.0",
     "tslint": "^5.8.0",
