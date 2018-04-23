@@ -53,7 +53,7 @@
     "typescript": "^2.7.0",
     "ulid": "^2.2.2",
     "validator": "^9.2.0",
-    "winston": "^2.4.0"
+    "winston": "^2.4.2"
   },
   "devDependencies": {
     "@types/dotenv": "^4.0.2",
