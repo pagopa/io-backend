@@ -32,7 +32,7 @@ const ProfileWithEmailR = t.type({
 // optional attributes
 const ProfileWithEmailO = t.partial({
   email: EmailAddress,
-  preferred_languages: PreferredLanguage
+  preferred_languages: t.readonlyArray(PreferredLanguage)
 });
 
 export const ProfileWithEmail = t.intersection([
