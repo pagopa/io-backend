@@ -2,7 +2,7 @@
  *
  */
 
-import { enumType } from "../../utils/types";
+import { enumType } from "italia-ts-commons/lib/types";
 
 import * as t from "io-ts";
 

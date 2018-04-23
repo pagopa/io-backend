@@ -4,7 +4,7 @@
  * one gets generated from the client attributes.
  */
 
-import { WithinRangeString } from "../../utils/strings";
+import { WithinRangeString } from "italia-ts-commons/lib/strings";
 
 import * as t from "io-ts";
 

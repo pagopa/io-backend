@@ -5,7 +5,7 @@
 
 import * as t from "io-ts";
 import { readonlyArray } from "io-ts";
-import { NonNegativeNumber } from "../../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";

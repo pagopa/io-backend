@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -7,8 +8,8 @@ import MessagesService from "../../services/messagesService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { Service } from "../../types/service";
+import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
-import { NonNegativeNumber } from "../../utils/numbers";
 import ServicesController from "../servicesController";
 
 const aTimestamp = 1518010929530;
@@ -16,7 +17,7 @@ const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aServiceId: string = "service-id";
-const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
+const aValidSpidLevel = SpidLevelEnum.SPID_L2;
 
 const proxyService: Service = {
   departmentName: "Department name",

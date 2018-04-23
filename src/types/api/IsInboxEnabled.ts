@@ -4,7 +4,7 @@
 
 import * as t from "io-ts";
 
-import { withDefault } from "../../utils/default";
+import { withDefault } from "italia-ts-commons/lib/types";
 
 export type IsInboxEnabled = t.TypeOf<typeof IsInboxEnabledBase>;
 

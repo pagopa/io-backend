@@ -6,6 +6,7 @@ import mockReq from "../../__mocks__/request";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { Issuer } from "../issuer";
+import { SpidLevelEnum } from "../spidLevel";
 import {
   extractUserFromJson,
   extractUserFromRequest,
@@ -19,7 +20,7 @@ const anEmailAddress = "x@example.com" as EmailAddress;
 const anIssuer = { _: "onelogin_saml" } as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
-const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
+const aValidSpidLevel = SpidLevelEnum.SPID_L2;
 
 // mock for a valid SpidUser
 const mockedSpidUser: any = {

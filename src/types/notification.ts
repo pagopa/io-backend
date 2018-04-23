@@ -3,7 +3,7 @@
  */
 
 import * as t from "io-ts";
-import { NonEmptyString } from "../utils/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { CreatedMessageWithContent } from "./api_client/createdMessageWithContent";
 
 /**

@@ -1,7 +1,7 @@
+import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 import { newApp } from "../app";
-import { EnvironmentNodeEnvEnum } from "../types/environment";
-import { CIDR } from "../utils/strings";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -24,7 +24,7 @@ const aValidNotification = {
   }
 };
 
-const app = newApp(EnvironmentNodeEnvEnum.PRODUCTION, aValidCIDR);
+const app = newApp(NodeEnvironmentEnum.PRODUCTION, aValidCIDR);
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 describe("Test redirect to HTTPS", () => {

@@ -3,7 +3,7 @@
  */
 
 import * as t from "io-ts";
-import { withDefault } from "../../utils/default";
+import { withDefault } from "italia-ts-commons/lib/types";
 import { HttpStatusCode } from "./HttpStatusCode";
 
 // required attributes
