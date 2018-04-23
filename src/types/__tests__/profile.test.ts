@@ -16,6 +16,7 @@ import {
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
 } from "../profile";
+import { SpidLevelEnum } from "../spidLevel";
 import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -24,14 +25,14 @@ const aNonNegativeNumber = 1 as NonNegativeNumber;
 const aPreferredLanguage = "it_IT" as PreferredLanguage;
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
-const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
+const aValidSpidLevel = SpidLevelEnum.SPID_L2;
 
 // mock for the profile retrieved from the Digital Citizenship API
 const mockedGetProfileOKResponse: GetProfileOKResponse = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebhookEnabled,
-  preferredLanguages: aPreferredLanguage,
+  preferredLanguages: [aPreferredLanguage],
   version: aNonNegativeNumber
 };
 

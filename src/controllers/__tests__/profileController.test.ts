@@ -10,6 +10,7 @@ import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
 import { PreferredLanguage } from "../../types/api/PreferredLanguages";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
+import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
 
@@ -20,7 +21,7 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguage = "it_IT" as PreferredLanguage;
-const aValidSpidLevel = "https://www.spid.gov.it/SpidL2";
+const aValidSpidLevel = SpidLevelEnum.SPID_L2;
 
 const proxyUserResponse = {
   created_at: aTimestamp,
