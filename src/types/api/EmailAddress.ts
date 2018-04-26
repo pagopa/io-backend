@@ -2,7 +2,7 @@
  * User's Email Address.
  */
 
-import { EmailString } from "../../utils/strings";
+import { EmailString } from "italia-ts-commons/lib/strings";
 
 import * as t from "io-ts";
 

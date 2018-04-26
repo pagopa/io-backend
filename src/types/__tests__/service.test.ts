@@ -1,4 +1,4 @@
-import { NonNegativeNumber } from "../../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { Service, toAppService } from "../service";
 
 const aNonNegativeNumber = 1 as NonNegativeNumber;

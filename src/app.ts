@@ -30,13 +30,13 @@ import ServicesController from "./controllers/servicesController";
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import { Either } from "fp-ts/lib/Either";
-import NotificationController from "./controllers/notificationController";
 import {
-  EnvironmentNodeEnv,
-  EnvironmentNodeEnvEnum
-} from "./types/environment";
+  NodeEnvironment,
+  NodeEnvironmentEnum
+} from "italia-ts-commons/lib/environment";
+import { CIDR } from "italia-ts-commons/lib/strings";
+import NotificationController from "./controllers/notificationController";
 import checkIP from "./utils/middleware/checkIP";
-import { CIDR } from "./utils/strings";
 
 /**
  * Return a response to the client.
@@ -97,7 +97,7 @@ export interface IResponse<T> {
 }
 
 export function newApp(
-  env: EnvironmentNodeEnv,
+  env: NodeEnvironment,
   allowNotifyIPSourceRange: CIDR
 ): Express {
   // Setup Passport.
@@ -139,7 +139,7 @@ export function newApp(
   const app = express();
 
   // Redirect unsecure connections.
-  if (env !== EnvironmentNodeEnvEnum.DEVELOPMENT) {
+  if (env !== NodeEnvironmentEnum.DEVELOPMENT) {
     // Trust proxy uses proxy X-Forwarded-Proto for ssl.
     app.enable("trust proxy");
     app.use(expressEnforcesSsl());

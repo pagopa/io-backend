@@ -4,12 +4,12 @@
 
 import * as express from "express";
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { IResponse } from "../app";
 import NotificationService from "../services/notificationService";
 import { Device, Notification } from "../types/notification";
 import { extractUserFromRequest } from "../types/user";
-import { ReadableReporter } from "../utils/validation_reporters";
 
 export default class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}

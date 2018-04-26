@@ -9,7 +9,7 @@ import { User } from "./user";
 
 import * as express from "express";
 import { boolean, string } from "io-ts";
-import { NonNegativeNumber } from "../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { PreferredLanguage } from "./api/PreferredLanguages";
@@ -32,7 +32,7 @@ const ProfileWithEmailR = t.type({
 // optional attributes
 const ProfileWithEmailO = t.partial({
   email: EmailAddress,
-  preferred_languages: PreferredLanguage
+  preferred_languages: t.readonlyArray(PreferredLanguage)
 });
 
 export const ProfileWithEmail = t.intersection([

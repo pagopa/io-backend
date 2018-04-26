@@ -6,7 +6,7 @@
 import * as t from "io-ts";
 
 import { readonlyArray, string } from "io-ts";
-import { NonNegativeNumber } from "../utils/numbers";
+import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
 

@@ -3,7 +3,7 @@
  * of the problem.
  */
 
-import { WithinRangeNumber } from "../../utils/numbers";
+import { WithinRangeNumber } from "italia-ts-commons/lib/numbers";
 
 import * as t from "io-ts";
 

@@ -4,8 +4,8 @@
 
 import * as t from "io-ts";
 import { string } from "io-ts";
-import { NonEmptyString, PatternString } from "../utils/strings";
-import { enumType } from "../utils/types";
+import { NonEmptyString, PatternString } from "italia-ts-commons/lib/strings";
+import { enumType } from "italia-ts-commons/lib/types";
 import { CreatedMessageWithContent } from "./api_client/createdMessageWithContent";
 
 /**

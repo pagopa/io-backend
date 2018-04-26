@@ -8,6 +8,12 @@ import * as awilix from "awilix";
 import * as dotenv from "dotenv";
 import { isLeft } from "fp-ts/lib/Either";
 import * as fs from "fs";
+import {
+  getNodeEnvironmentFromProcessEnv,
+  NodeEnvironmentEnum
+} from "italia-ts-commons/lib/environment";
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
@@ -24,9 +30,6 @@ import TokenService from "./services/tokenService";
 import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
-import { EnvironmentNodeEnvEnum } from "./types/environment";
-import { CIDR } from "./utils/strings";
-import { ReadableReporter } from "./utils/validation_reporters";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -46,9 +49,8 @@ container.register({
   serverPort: awilix.asValue(serverPort)
 });
 
-// Server environment.
-const DEFAULT_ENVIRONMENT = EnvironmentNodeEnvEnum.PRODUCTION;
-const env: string = process.env.NODE_ENV || DEFAULT_ENVIRONMENT;
+// Resolve NODE_ENV environment (defaults to PRODUCTION).
+const env: NodeEnvironmentEnum = getNodeEnvironmentFromProcessEnv(process.env);
 container.register({
   env: awilix.asValue(env)
 });

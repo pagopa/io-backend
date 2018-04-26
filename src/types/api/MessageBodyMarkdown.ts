@@ -4,7 +4,7 @@
  * limit in terms of content size (e.g. email, etc...).
  */
 
-import { WithinRangeString } from "../../utils/strings";
+import { WithinRangeString } from "italia-ts-commons/lib/strings";
 
 import * as t from "io-ts";
 
