@@ -6,7 +6,12 @@ import * as azure from "azure-sb";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { IResponse } from "../app";
 import { FiscalCode } from "../types/api/FiscalCode";
-import { Notification } from "../types/notification";
+import {
+  IInstallation,
+  InstallationID,
+  Notification,
+  toHash
+} from "../types/notification";
 import { Device } from "../types/notification";
 
 export default class NotificationService {
@@ -21,6 +26,7 @@ export default class NotificationService {
 
   public registerDevice(
     fiscalCode: FiscalCode,
+    installationID: InstallationID,
     device: Device
   ): Promise<Either<Error, IResponse<string>>> {
     const notificationHubService = azure.createNotificationHubService(
@@ -28,11 +34,11 @@ export default class NotificationService {
       this.endpointOrConnectionString
     );
 
-    const installation = {
-      installationId: device.installationId,
+    const installation: IInstallation = {
+      installationId: installationID,
       platform: device.platform,
       pushChannel: device.pushChannel,
-      tags: [fiscalCode],
+      tags: [toHash(fiscalCode)],
       templates: {
         template1: {
           body: '{"message":"$(message)"}'
@@ -46,7 +52,7 @@ export default class NotificationService {
     return new Promise(resolve => {
       notificationHubService.createOrUpdateInstallation(
         // This any is needed because the `installation` argument type of `createOrUpdateInstallation` method is wrong.
-        // @see https://github.com/Azure/azure-sdk-for-node/issues/2450
+        // @see https://www.pivotaltracker.com/story/show/157122753
         // tslint:disable-next-line:no-any
         (installation as any) as string,
         error => {

@@ -180,9 +180,9 @@ paths:
                     risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
                     fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
                     laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-            senderMetadata: "TMMEXQ60A10Y526X"
-              departmentName: "Department name",
-              organizationName: "Organization name",
+            senderMetadata:
+              departmentName: "Department name"
+              organizationName: "Organization name"
               serviceName: "Service name"
     post:
       operationId: notify
@@ -194,17 +194,29 @@ paths:
           description: Success.
         "500":
           description: There was an error in forwarding the notification to the Notification Hub.
-  "/api/v1/device/register":
+  "/api/v1/device/{installatgionID}":
     x-swagger-router-controller: NotificationController
     parameters:
-      - in: body
-        name: body
+      - in: path
+        name: installationID
         schema:
-          $ref: "#/definitions/Device"
+          $ref: "#/definitions/installationID"
         x-examples:
           application/json:
-            installationId: "12345",
-            platform: "apns",
+            installationId: "550e8400-e29b-41d4-a716-446655440000"
+      - in: body
+        name: platform
+        schema:
+          $ref: "#/definitions/Platform"
+        x-examples:
+          application/json:
+            platform: "apns"
+      - in: body
+        name: pushChannel
+        schema:
+          $ref: "#/definitions/PushChannel"
+        x-examples:
+          application/json:
             pushChannel: "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000"
     post:
       operationId: registerDevice
@@ -246,17 +258,28 @@ definitions:
     required:
       - id
       - content
+  InstallationId:
+    type: string
+    description: The device global unique identifier.
+    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+  Platform:
+    type: string
+    description: The device type.
+    enum: [apns, gcm]
+  PushChannel:
+    type: string
+    description: The PNS handle for this installation.
   Device:
     title: Device
     description: Device data.
     type: object
     properties:
       installationId:
-        type: string
+        $ref: '#/definitions/InstallationId'
       platform:
-        type: string
+        $ref: '#/definitions/Platform'
       pushChannel:
-        type: string
+        $ref: '#/definitions/PushChannel'
     required:
      - installationId
      - platform

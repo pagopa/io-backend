@@ -250,8 +250,8 @@ export function newApp(
     }
   );
 
-  app.post(
-    "/api/v1/device/register",
+  app.put(
+    "/api/v1/device/:id",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
       const maybeResponse = await notificationController.registerDevice(req);
