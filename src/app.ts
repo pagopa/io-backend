@@ -254,7 +254,9 @@ export function newApp(
     "/api/v1/device/:id",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await notificationController.registerDevice(req);
+      const maybeResponse = await notificationController.createOrUpdateInstallation(
+        req
+      );
       respond(maybeResponse, res);
     }
   );

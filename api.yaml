@@ -161,7 +161,7 @@ paths:
           description: Invalid payload.
         '500':
           description: Profile cannot be updated.
-  "/api/v1/notify":
+  "/notify":
     x-swagger-router-controller: NotificationController
     parameters:
       - in: body
@@ -194,33 +194,29 @@ paths:
           description: Success.
         "500":
           description: There was an error in forwarding the notification to the Notification Hub.
-  "/api/v1/device/{installatgionID}":
+  "/installation/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
-      - in: path
-        name: installationID
+      - name: installationID
+        in: path
+        required: true
         schema:
           $ref: "#/definitions/installationID"
         x-examples:
           application/json:
             installationId: "550e8400-e29b-41d4-a716-446655440000"
-      - in: body
-        name: platform
+    put:
+      operationId: createOrUpdateInstallation
+      summary: Create or update an Installation
+      description: Create or update an Installation to the Azure Notification hub.
+      - name: body
+        in: body
         schema:
-          $ref: "#/definitions/Platform"
+          $ref: "#/definitions/Device"
         x-examples:
           application/json:
             platform: "apns"
-      - in: body
-        name: pushChannel
-        schema:
-          $ref: "#/definitions/PushChannel"
-        x-examples:
-          application/json:
             pushChannel: "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000"
-    post:
-      operationId: registerDevice
-      summary: Register a device to the Azure Notification hub
       responses:
         "200":
           description: Success.
@@ -262,28 +258,23 @@ definitions:
     type: string
     description: The device global unique identifier.
     pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-  Platform:
-    type: string
-    description: The device type.
-    enum: [apns, gcm]
-  PushChannel:
-    type: string
-    description: The PNS handle for this installation.
   Device:
     title: Device
     description: Device data.
     type: object
     properties:
-      installationId:
-        $ref: '#/definitions/InstallationId'
       platform:
-        $ref: '#/definitions/Platform'
+        type: string
+        description: The device type.
+        enum: [apns, gcm]
       pushChannel:
-        $ref: '#/definitions/PushChannel'
+        type: string
+        description: |-
+          The Push Notification Service handle for this Installation.
+          See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
     required:
-     - installationId
-     - platform
-     - pushChannel
+      - platform
+      - pushChannel
   Notification:
     title: Notification
     description: A received Notification.

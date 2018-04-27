@@ -41,7 +41,14 @@ export const DevicePlatform = enumType<DevicePlatformEnum>(
 );
 
 /**
- * An installation ID.
+ * An Installation ID.
+ *
+ * The sixteen octets of an Installation ID are represented as 32 hexadecimal (base 16) digits, displayed in five groups
+ * separated by hyphens, in the form 8-4-4-4-12 for a total of 36 characters (32 alphanumeric characters and four
+ * hyphens).
+ * For example: 123e4567-e89b-12d3-a456-426655440000
+ *
+ * @see https://en.wikipedia.org/wiki/Universally_unique_identifier
  */
 export type InstallationID = t.TypeOf<typeof InstallationID>;
 
@@ -51,6 +58,8 @@ export const InstallationID = PatternString(
 
 /**
  * Device data.
+ *
+ * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
 export const Device = t.interface({
   platform: DevicePlatform,
@@ -61,6 +70,9 @@ export type Device = t.TypeOf<typeof Device>;
 
 /**
  * An hashed fiscal code.
+ *
+ * The fiscal code is used as a tag in the Notification Hub installation, to avoid expose the fiscal code to a third
+ * party system we use an hash instead.
  */
 interface IFiscalCodeHashTag {
   readonly kind: "IFiscalCodeHashTag";
@@ -72,6 +84,8 @@ export type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
 
 /**
  * Notification template.
+ *
+ * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
 export interface INotificationTemplate {
   readonly body: string;
@@ -79,6 +93,8 @@ export interface INotificationTemplate {
 
 /**
  * Notification templates.
+ *
+ * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
 export interface INotificationTemplates {
   readonly [name: string]: INotificationTemplate;
@@ -86,6 +102,8 @@ export interface INotificationTemplates {
 
 /**
  * Device installation data.
+ *
+ * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
 export interface IInstallation {
   readonly installationId: InstallationID;
@@ -98,7 +116,7 @@ export interface IInstallation {
 /**
  * Compute the sha256 hash of a string.
  */
-export const toHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
+export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
   const hash = crypto.createHash("sha256");
   hash.update(fiscalCode);
 

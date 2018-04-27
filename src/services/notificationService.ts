@@ -7,10 +7,12 @@ import { Either, left, right } from "fp-ts/lib/Either";
 import { IResponse } from "../app";
 import { FiscalCode } from "../types/api/FiscalCode";
 import {
+  DevicePlatformEnum,
   IInstallation,
+  INotificationTemplate,
   InstallationID,
   Notification,
-  toHash
+  toFiscalCodeHash
 } from "../types/notification";
 import { Device } from "../types/notification";
 
@@ -24,7 +26,7 @@ export default class NotificationService {
     // TODO will be implemented by https://www.pivotaltracker.com/story/show/155934439
   }
 
-  public registerDevice(
+  public createOrUpdateInstallation(
     fiscalCode: FiscalCode,
     installationID: InstallationID,
     device: Device
@@ -38,14 +40,12 @@ export default class NotificationService {
       installationId: installationID,
       platform: device.platform,
       pushChannel: device.pushChannel,
-      tags: [toHash(fiscalCode)],
+      tags: [toFiscalCodeHash(fiscalCode)],
       templates: {
-        template1: {
-          body: '{"message":"$(message)"}'
-        },
-        template2: {
-          body: '{"message":"$(message)"}'
-        }
+        template:
+          device.platform === DevicePlatformEnum.apns
+            ? this.getAPNSTemplate()
+            : this.getGCMTemplate()
       }
     };
 
@@ -69,5 +69,27 @@ export default class NotificationService {
         }
       );
     });
+  }
+
+  /**
+   * Build a template suitable for Apple's APNs.
+   *
+   * @see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-aspnet-cross-platform-notification
+   */
+  private getAPNSTemplate(): INotificationTemplate {
+    return {
+      body: '{"aps": {"alert": "$(message)"}}'
+    };
+  }
+
+  /**
+   * Build a template suitable for Google's GCM.
+   *
+   * @see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-aspnet-cross-platform-notification
+   */
+  private getGCMTemplate(): INotificationTemplate {
+    return {
+      body: '{"data": {"message": "$(message)"}}'
+    };
   }
 }

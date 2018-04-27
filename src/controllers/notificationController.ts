@@ -38,7 +38,7 @@ export default class NotificationController {
     });
   }
 
-  public async registerDevice(
+  public async createOrUpdateInstallation(
     req: express.Request
   ): Promise<Either<Error, IResponse<string>>> {
     const errorOrUser = extractUserFromRequest(req);
@@ -73,7 +73,7 @@ export default class NotificationController {
     const device = errorOrDevice.value;
     const installationID = errorOrInstallationID.value;
 
-    return await this.notificationService.registerDevice(
+    return await this.notificationService.createOrUpdateInstallation(
       user.fiscal_code,
       installationID,
       device
