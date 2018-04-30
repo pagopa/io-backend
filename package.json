@@ -74,7 +74,7 @@
     "@types/request-ip": "^0.0.33",
     "@types/superagent": "^3.5.7",
     "@types/supertest": "^2.0.4",
-    "@types/validator": "^9.2.0",
+    "@types/validator": "^9.4.1",
     "@types/winston": "^2.3.8",
     "@types/xml2js": "^0.4.2",
     "autorest": "^2.0.4272",

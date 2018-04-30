@@ -189,9 +189,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/validator@^9.2.0":
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-9.4.0.tgz#a4a80a31d3e4e094806ec446557808423379858d"
+"@types/validator@^9.4.1":
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-9.4.1.tgz#bea5a290e61f1cbf12af3fd878706aeec2ba0087"
 
 "@types/winston@^2.3.8":
   version "2.3.9"
