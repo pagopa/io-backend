@@ -194,7 +194,7 @@ paths:
           description: Success.
         "500":
           description: There was an error in forwarding the notification to the Notification Hub.
-  "/installation/{installationID}":
+  "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
       - name: installationID
@@ -212,7 +212,7 @@ paths:
       - name: body
         in: body
         schema:
-          $ref: "#/definitions/Device"
+          $ref: "#/definitions/Installation"
         x-examples:
           application/json:
             platform: "apns"
@@ -258,14 +258,14 @@ definitions:
     type: string
     description: The device global unique identifier.
     pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-  Device:
-    title: Device
-    description: Device data.
+  Installation:
+    title: Installation
+    description: Describes an app installation.
     type: object
     properties:
       platform:
         type: string
-        description: The device type.
+        description: The platform type where the installation happened.
         enum: [apns, gcm]
       pushChannel:
         type: string

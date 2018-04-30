@@ -16,6 +16,24 @@ import {
 } from "../types/notification";
 import { Device } from "../types/notification";
 
+/**
+ * A template suitable for Apple's APNs.
+ *
+ * @see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-aspnet-cross-platform-notification
+ */
+const APNSTemplate: INotificationTemplate = {
+  body: '{"aps": {"alert": "$(message)"}}'
+};
+
+/**
+ * Build a template suitable for Google's GCM.
+ *
+ * @see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-aspnet-cross-platform-notification
+ */
+const GCMTemplate: INotificationTemplate = {
+  body: '{"data": {"message": "$(message)"}}'
+};
+
 export default class NotificationService {
   constructor(
     private readonly hubName: string,
@@ -44,8 +62,8 @@ export default class NotificationService {
       templates: {
         template:
           device.platform === DevicePlatformEnum.apns
-            ? this.getAPNSTemplate()
-            : this.getGCMTemplate()
+            ? APNSTemplate
+            : GCMTemplate
       }
     };
 
@@ -69,27 +87,5 @@ export default class NotificationService {
         }
       );
     });
-  }
-
-  /**
-   * Build a template suitable for Apple's APNs.
-   *
-   * @see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-aspnet-cross-platform-notification
-   */
-  private getAPNSTemplate(): INotificationTemplate {
-    return {
-      body: '{"aps": {"alert": "$(message)"}}'
-    };
-  }
-
-  /**
-   * Build a template suitable for Google's GCM.
-   *
-   * @see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-aspnet-cross-platform-notification
-   */
-  private getGCMTemplate(): INotificationTemplate {
-    return {
-      body: '{"data": {"message": "$(message)"}}'
-    };
   }
 }

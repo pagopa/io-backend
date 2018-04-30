@@ -251,7 +251,7 @@ export function newApp(
   );
 
   app.put(
-    "/api/v1/installation/:id",
+    "/api/v1/installations/:id",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
       const maybeResponse = await notificationController.createOrUpdateInstallation(
