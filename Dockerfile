@@ -14,7 +14,7 @@ RUN sudo chmod -R 777 /usr/src/app \
   && yarn build \
   && yarn generate-api-client
 
-FROM node:8.9.4-alpine
+FROM node:10-alpine
 LABEL maintainer="https://teamdigitale.governo.it"
 
 WORKDIR /usr/src/app
