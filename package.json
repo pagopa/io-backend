@@ -31,6 +31,7 @@
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
     "awilix": "^3.0.5",
+    "azure-sb": "^0.10.6",
     "body-parser": "^1.18.2",
     "dotenv": "^5.0.1",
     "express": "^4.16.2",
@@ -57,6 +58,7 @@
     "winston": "^2.4.2"
   },
   "devDependencies": {
+    "@types/azure-sb": "^0.0.32",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.11.1",
     "@types/express-enforces-ssl": "^1.1.1",

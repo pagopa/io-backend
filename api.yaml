@@ -161,7 +161,7 @@ paths:
           description: Invalid payload.
         '500':
           description: Profile cannot be updated.
-  "/api/v1/notify":
+  "/notify":
     x-swagger-router-controller: NotificationController
     parameters:
       - in: body
@@ -180,9 +180,9 @@ paths:
                     risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
                     fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
                     laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-            senderMetadata: "TMMEXQ60A10Y526X"
-              departmentName: "Department name",
-              organizationName: "Organization name",
+            senderMetadata:
+              departmentName: "Department name"
+              organizationName: "Organization name"
               serviceName: "Service name"
     post:
       operationId: notify
@@ -194,6 +194,34 @@ paths:
           description: Success.
         "500":
           description: There was an error in forwarding the notification to the Notification Hub.
+  "/installations/{installationID}":
+    x-swagger-router-controller: NotificationController
+    parameters:
+      - name: installationID
+        in: path
+        required: true
+        schema:
+          $ref: "#/definitions/installationID"
+        x-examples:
+          application/json:
+            installationId: "550e8400-e29b-41d4-a716-446655440000"
+    put:
+      operationId: createOrUpdateInstallation
+      summary: Create or update an Installation
+      description: Create or update an Installation to the Azure Notification hub.
+      - name: body
+        in: body
+        schema:
+          $ref: "#/definitions/Installation"
+        x-examples:
+          application/json:
+            platform: "apns"
+            pushChannel: "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000"
+      responses:
+        "200":
+          description: Success.
+        "500":
+          description: There was an error in registering the device to the Notification Hub.
 definitions:
   MessageContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#MessageContent"
@@ -226,6 +254,27 @@ definitions:
     required:
       - id
       - content
+  InstallationId:
+    type: string
+    description: The device global unique identifier.
+    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+  Installation:
+    title: Installation
+    description: Describes an app installation.
+    type: object
+    properties:
+      platform:
+        type: string
+        description: The platform type where the installation happened.
+        enum: [apns, gcm]
+      pushChannel:
+        type: string
+        description: |-
+          The Push Notification Service handle for this Installation.
+          See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+    required:
+      - platform
+      - pushChannel
   Notification:
     title: Notification
     description: A received Notification.

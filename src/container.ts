@@ -134,15 +134,7 @@ container.register({
 });
 
 // Notification URL pre shared key.
-if (process.env.PRE_SHARED_KEY === undefined) {
-  winston.error("Missing PRE_SHARED_KEY environment variable");
-  process.exit(1);
-} else {
-  const preSharedKey: string = process.env.PRE_SHARED_KEY;
-  container.register({
-    preSharedKey: awilix.asValue(preSharedKey)
-  });
-}
+registerRequiredValue("PRE_SHARED_KEY", "preSharedKey");
 
 // Range IP allowed for notification.
 const errorOrCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
@@ -157,6 +149,10 @@ if (isLeft(errorOrCIDR)) {
     allowNotifyIPSourceRange: awilix.asValue(errorOrCIDR.value)
   });
 }
+
+// Azure Notification Hub credentials.
+registerRequiredValue("AZURE_NH_HUB_NAME", "hubName");
+registerRequiredValue("AZURE_NH_ENDPOINT", "endpointOrConnectionString");
 
 // Register the spidStrategy.
 export const SPID_STRATEGY = "spidStrategy";
@@ -261,4 +257,21 @@ function readFile(path: string, type: string): string {
   winston.info("Reading %s file from %s", type, path);
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   return fs.readFileSync(path, "utf-8");
+}
+
+/**
+ * Registers a required value reading from the environment.
+ *
+ * @param {string} envName
+ * @param {string} valueName
+ */
+function registerRequiredValue(envName: string, valueName: string): void {
+  if (process.env[envName] === undefined) {
+    winston.error("Missing %s environment variable", envName);
+    process.exit(1);
+  } else {
+    container.register({
+      [valueName]: awilix.asValue(process.env[envName])
+    });
+  }
 }
