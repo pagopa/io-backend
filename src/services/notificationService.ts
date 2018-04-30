@@ -40,8 +40,29 @@ export default class NotificationService {
     private readonly endpointOrConnectionString: string
   ) {}
 
-  public async postNotification(_: Notification): Promise<void> {
-    // TODO will be implemented by https://www.pivotaltracker.com/story/show/155934439
+  public notify(
+    fiscalCode: FiscalCode,
+    _: Notification
+  ): Promise<Either<Error, IResponse<string>>> {
+    const notificationHubService = azure.createNotificationHubService(
+      this.hubName,
+      this.endpointOrConnectionString
+    );
+
+    return new Promise(resolve => {
+      notificationHubService.send(toFiscalCodeHash(fiscalCode), "", error => {
+        if (error !== null) {
+          return resolve(left<Error, IResponse<string>>(error));
+        }
+
+        return resolve(
+          right<Error, IResponse<string>>({
+            body: "ok",
+            status: 200
+          })
+        );
+      });
+    });
   }
 
   public createOrUpdateInstallation(
