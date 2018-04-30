@@ -84,7 +84,7 @@
     "mock-redis-client": "^0.91.13",
     "nodemon": "^1.17.3",
     "prettier": "^1.12.1",
-    "superagent": "^3.8.2",
+    "superagent": "^3.8.3",
     "supertest": "^3.0.0",
     "swagger-cli": "^1.0.1",
     "typestrict": "^0.0.8",
