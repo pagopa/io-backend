@@ -22,6 +22,7 @@ This repository contains the code of the backend used by the [web](https://githu
     - [Dependencies](#dependencies)
     - [Installation steps](#installation-steps)
     - [Containers description](#container-description)
+    - [Environment variables](#environment-variables)
     - [Logs](#logs)
     - [SPID user management](#spid-user-management)
 - [How to contribute](#how-to-contribute)
@@ -120,6 +121,27 @@ If you are using Docker with a Docker Machine replace `localhost` with the IP of
 Nginx is reachable at [https://italia-backend:80]() \
 IDP is reachable at [https://spid-testenv-identityserver:9443]() (user: `admin`, password: `admin`) \
 IDP simple backoffice is reachable at [https://spid-testenv-identityserver:8080]()
+
+### Environment variables
+
+Those are all Environment variables needed by the application:
+
+| Variable name                          | Description                                                                       | type   |
+|----------------------------------------|-----------------------------------------------------------------------------------|--------|
+| API_KEY                                | The key used to authenticate to the API backend                                   | string |
+| API_URL                                | The API backend URL                                                               | string |
+| CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
+| CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
+| PORT                                   | The HTTP port the Express server is listening to                                  | int    |
+| REDIS_URL                              | The URL of a Redis instance                                                       | string |
+| TOKEN_DURATION_IN_SECONDS              | The number of seconds a session token is considered valid                         | int    |
+| SAML_CALLBACK_URL                      | The absolute URL of the assertion consumer service endpoint                       | string |
+| SAML_ISSUER                            | The issuer id for this Service Provider                                           | string |
+| SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
+| PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
+| ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
+| AZURE_NH_HUB_NAME                      | The hub name configured in the Azure Notification HUB                             | string |
+| AZURE_NH_ENDPOINT                      | The endpoint URL configured in the Azure Notification HUB                         | string |
 
 ### Logs
 

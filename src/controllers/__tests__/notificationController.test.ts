@@ -87,12 +87,12 @@ const anInvalidDevice = {
 };
 
 const mockCreateOrUpdateInstallation = jest.fn();
-const mockPostNotification = jest.fn();
+const mockNotify = jest.fn();
 jest.mock("../../services/notificationService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       createOrUpdateInstallation: mockCreateOrUpdateInstallation,
-      postNotification: mockPostNotification
+      notify: mockNotify
     }))
   };
 });
@@ -107,7 +107,7 @@ describe("NotificationController#notify", () => {
 
   it("should return success if data is correct", async () => {
     const req = mockReq();
-    mockPostNotification.mockReturnValue(
+    mockNotify.mockReturnValue(
       Promise.resolve(
         right({
           body: "ok",
@@ -116,6 +116,7 @@ describe("NotificationController#notify", () => {
       )
     );
 
+    req.user = mockedUser;
     req.body = aValidNotification;
 
     const res = await controller.notify(req);
@@ -128,9 +129,9 @@ describe("NotificationController#notify", () => {
     );
   });
 
-  it("should fail if cannot decode the notification", async () => {
+  it("should fail if cannot decode the user", async () => {
     const req = mockReq();
-    mockPostNotification.mockReturnValue(
+    mockNotify.mockReturnValue(
       Promise.resolve(
         right({
           body: "ok",
@@ -139,6 +140,27 @@ describe("NotificationController#notify", () => {
       )
     );
 
+    req.user = mockedInvalidUser;
+    req.params = { id: aValidInstallationID };
+    req.body = anAppleDevice;
+
+    const res = await controller.notify(req);
+
+    expect(res).toEqual(left(new Error("Unable to decode the user")));
+  });
+
+  it("should fail if cannot decode the notification", async () => {
+    const req = mockReq();
+    mockNotify.mockReturnValue(
+      Promise.resolve(
+        right({
+          body: "ok",
+          status: 200
+        })
+      )
+    );
+
+    req.user = mockedUser;
     req.body = anInvalidNotification;
 
     const res = await controller.notify(req);

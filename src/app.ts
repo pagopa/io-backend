@@ -25,6 +25,7 @@ import * as morgan from "morgan";
 import * as passport from "passport";
 
 import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
 import ServicesController from "./controllers/servicesController";
 
 import { Express } from "express";
@@ -35,7 +36,6 @@ import {
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-import NotificationController from "./controllers/notificationController";
 import checkIP from "./utils/middleware/checkIP";
 
 /**
