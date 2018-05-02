@@ -126,8 +126,9 @@ IDP simple backoffice is reachable at [https://spid-testenv-identityserver:8080]
 
 Those are all Environment variables needed by the application:
 
-| API_KEY                                | The key used to authenticate to the API backend                                   | string |
+| Variable name                          | Description                                                                       | type   |
 |----------------------------------------|-----------------------------------------------------------------------------------|--------|
+| API_KEY                                | The key used to authenticate to the API backend                                   | string |
 | API_URL                                | The API backend URL                                                               | string |
 | CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
 | CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
