@@ -3,7 +3,7 @@
  */
 
 import * as express from "express";
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, left } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { IResponse } from "../app";
@@ -38,13 +38,10 @@ export default class NotificationController {
     const user = errorOrUser.value;
     const notification = errorOrNotification.value;
 
-    await this.notificationService.notify(user.fiscal_code, notification);
-
-    // TODO correct return will be implemented by https://www.pivotaltracker.com/story/show/155934439
-    return right({
-      body: "ok",
-      status: 200
-    });
+    return await this.notificationService.notify(
+      user.fiscal_code,
+      notification
+    );
   }
 
   public async createOrUpdateInstallation(

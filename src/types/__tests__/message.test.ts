@@ -107,35 +107,4 @@ describe("message type", () => {
       expect(messageWithContent.subject).toBeDefined();
     }
   });
-
-  // test case: Converts an API MessageResponse to a Proxy message. The Api MessageResponse has undefined data.
-  it("should get a proxy message with empty strings instead of undefined values", async () => {
-    // create copy of mockedMessageResponseWithContent
-    const mockedMessageResponseWithUndefinedContent = mockedMessageResponseWithContent;
-    // remove two attributes that must be checked
-    mockedMessageResponseWithUndefinedContent.message.id = undefined;
-    mockedMessageResponseWithUndefinedContent.message.content = undefined;
-
-    // Converts an API CreatedMessage to a Proxy message
-    const messageWithContent: Message = toAppMessageWithContent(
-      mockedMessageResponseWithUndefinedContent
-    );
-
-    // id = from.message.id || ""
-    expect(messageWithContent.id).toBe("");
-    expect(messageWithContent.id).toBeDefined();
-
-    // markdown: from.message.content !== undefined ? from.message.content.markdown : "",
-    expect(messageWithContent.markdown).toBe("");
-    expect(messageWithContent.markdown).toBeDefined();
-
-    // markdown: sender_service_id: from.message.senderServiceId,
-    expect(messageWithContent.sender_service_id).toBe(
-      mockedMessageResponseWithContent.message.senderServiceId
-    );
-
-    // subject: from.message.content !== undefined ? from.message.content.subject : ""
-    expect(messageWithContent.subject).toBe("");
-    expect(messageWithContent.subject).toBeDefined();
-  });
 });
