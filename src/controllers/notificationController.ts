@@ -38,10 +38,7 @@ export default class NotificationController {
     const user = errorOrUser.value;
     const notification = errorOrNotification.value;
 
-    return this.notificationService.notify(
-      user.fiscal_code,
-      notification
-    );
+    return this.notificationService.notify(user.fiscal_code, notification);
   }
 
   public async createOrUpdateInstallation(
