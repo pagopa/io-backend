@@ -38,7 +38,7 @@ export default class NotificationController {
     const user = errorOrUser.value;
     const notification = errorOrNotification.value;
 
-    return await this.notificationService.notify(
+    return this.notificationService.notify(
       user.fiscal_code,
       notification
     );
@@ -79,7 +79,7 @@ export default class NotificationController {
     const device = errorOrDevice.value;
     const installationID = errorOrInstallationID.value;
 
-    return await this.notificationService.createOrUpdateInstallation(
+    return this.notificationService.createOrUpdateInstallation(
       user.fiscal_code,
       installationID,
       device
