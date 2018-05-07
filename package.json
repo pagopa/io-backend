@@ -80,7 +80,7 @@
     "autorest": "^2.0.4272",
     "danger": "^3.6.0",
     "danger-plugin-digitalcitizenship": "^0.2.0",
-    "fp-ts": "^1.0.0",
+    "fp-ts": "^1.4.0",
     "jest": "^22.4.3",
     "lolex": "2.3.2",
     "mock-redis-client": "^0.91.13",
