@@ -439,9 +439,9 @@ atob@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.0.tgz#ab2b150e51d7b122b9efc8d7340c06b6c41076bc"
 
-autorest@^2.0.4272:
-  version "2.0.4275"
-  resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4275.tgz#c1ac19af961b0c0d49c3fde9a390a83e29beae9f"
+autorest@^2.0.4277:
+  version "2.0.4277"
+  resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4277.tgz#340b38f1e844b841e40b6638f25e8a6af6e15eb9"
 
 awilix@^3.0.5:
   version "3.0.7"
@@ -5362,8 +5362,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"vm2@github:patriksimek/vm2#custom_files":
+vm2@patriksimek/vm2#custom_files:
   version "3.5.0"
+  uid "7e82f90ac705fc44fad044147cb0df09b4c79a57"
   resolved "https://codeload.github.com/patriksimek/vm2/tar.gz/7e82f90ac705fc44fad044147cb0df09b4c79a57"
 
 voca@^1.4.0:
