@@ -77,7 +77,7 @@
     "@types/validator": "^9.4.1",
     "@types/winston": "^2.3.8",
     "@types/xml2js": "^0.4.2",
-    "autorest": "^2.0.4272",
+    "autorest": "^2.0.4277",
     "danger": "^3.6.0",
     "danger-plugin-digitalcitizenship": "^0.2.0",
     "fp-ts": "^1.0.0",
