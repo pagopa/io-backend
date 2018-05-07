@@ -78,7 +78,7 @@
     "@types/winston": "^2.3.8",
     "@types/xml2js": "^0.4.2",
     "autorest": "^2.0.4272",
-    "danger": "^3.6.0",
+    "danger": "^3.6.5",
     "danger-plugin-digitalcitizenship": "^0.2.0",
     "fp-ts": "^1.0.0",
     "jest": "^22.4.3",
