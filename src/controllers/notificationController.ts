@@ -17,14 +17,6 @@ export default class NotificationController {
   public async notify(
     req: express.Request
   ): Promise<Either<Error, IResponse<string>>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return left(error);
-    }
-
     const errorOrNotification = Notification.decode(req.body);
 
     if (isLeft(errorOrNotification)) {
@@ -35,10 +27,9 @@ export default class NotificationController {
       return left(new Error("Unable to parse the notification body"));
     }
 
-    const user = errorOrUser.value;
     const notification = errorOrNotification.value;
 
-    return this.notificationService.notify(user.fiscal_code, notification);
+    return this.notificationService.notify(notification);
   }
 
   public async createOrUpdateInstallation(

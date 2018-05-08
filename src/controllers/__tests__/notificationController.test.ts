@@ -50,13 +50,14 @@ const aValidNotification = {
       markdown: "test".repeat(80),
       subject: "this is a message"
     },
-    fiscalCode: aFiscalNumber,
-    senderServiceId: "234567"
+    fiscal_code: aFiscalNumber,
+    id: "01CCKCY7QQ7WCHWTH8NB504386",
+    sender_service_id: "234567"
   },
   senderMetadata: {
-    departmentName: "test department",
-    organizationName: "test organization",
-    serviceName: "test service"
+    department_name: "test department",
+    organization_name: "test organization",
+    service_name: "test service"
   }
 };
 
@@ -66,18 +67,18 @@ const anInvalidNotification = {
       markdown: "invalid",
       subject: "this is a message"
     },
-    fiscalCode: anInvalidFiscalNumber,
-    senderServiceId: "234567"
+    fiscal_code: anInvalidFiscalNumber,
+    sender_service_id: "234567"
   },
   senderMetadata: {
-    departmentName: "test department",
-    organizationName: "test organization",
-    serviceName: "test service"
+    department_name: "test department",
+    organization_name: "test organization",
+    service_name: "test service"
   }
 };
 
 const aPushChannel =
-  "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000";
+  "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
   platform: DevicePlatformEnum.apns,
   pushChannel: aPushChannel
@@ -116,7 +117,6 @@ describe("NotificationController#notify", () => {
       )
     );
 
-    req.user = mockedUser;
     req.body = aValidNotification;
 
     const res = await controller.notify(req);
@@ -127,26 +127,6 @@ describe("NotificationController#notify", () => {
         status: 200
       })
     );
-  });
-
-  it("should fail if cannot decode the user", async () => {
-    const req = mockReq();
-    mockNotify.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
-    );
-
-    req.user = mockedInvalidUser;
-    req.params = { id: aValidInstallationID };
-    req.body = anAppleDevice;
-
-    const res = await controller.notify(req);
-
-    expect(res).toEqual(left(new Error("Unable to decode the user")));
   });
 
   it("should fail if cannot decode the notification", async () => {
@@ -160,7 +140,6 @@ describe("NotificationController#notify", () => {
       )
     );
 
-    req.user = mockedUser;
     req.body = anInvalidNotification;
 
     const res = await controller.notify(req);

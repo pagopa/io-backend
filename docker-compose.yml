@@ -9,9 +9,8 @@ services:
     expose:
       - "80"
     ports:
-      - "80:80"
+      - "81:80"
     image: node:8.9.4-alpine
-    restart: always
     volumes:
       - ".:/usr/src/app:delegated"
       - "./certs:/usr/src/app/certs:delegated"
@@ -19,18 +18,17 @@ services:
 
   redis:
     container_name: redis
-    image: wodby/redis:4.0-2.1.5
     environment:
       REDIS_TIMEOUT: 300
       REDIS_TCP_KEEPALIVE: 60
       REDIS_MAXMEMORY: 182m
+    image: wodby/redis:4.0-2.1.5
 
   spid-testenv-identityserver:
     container_name: spid-testenv-identityserver
     image: italia/spid-testenv-identityserver:docker-compose
     ports:
       - "9443:9443"
-    restart: always
     volumes:
       - "./logs/idp:/spid-testenvironment/is/identity-server/repository/logs:delegated"
 
@@ -43,7 +41,6 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     image: italia/spid-testenv-backoffice:latest
     ports:
-      - "8080:8080"
-    restart: always
+      - "8081:8080"
     volumes:
       - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js:delegated"
