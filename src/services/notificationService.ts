@@ -24,7 +24,8 @@ import Response = Azure.ServiceBus.Response;
  * @see https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CreatingtheNotificationPayload.html
  */
 const APNSTemplate: INotificationTemplate = {
-  body: '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}}'
+  body:
+    '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)"}'
 };
 
 /**
@@ -33,7 +34,8 @@ const APNSTemplate: INotificationTemplate = {
  * @see https://developers.google.com/cloud-messaging/concept-options
  */
 const GCMTemplate: INotificationTemplate = {
-  body: '{"notification": {"title": "$(title)", "body": "$(message)"}}'
+  body:
+    '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)"}}'
 };
 
 export default class NotificationService {
@@ -43,7 +45,6 @@ export default class NotificationService {
   ) {}
 
   public notify(
-    fiscalCode: FiscalCode,
     notification: Notification
   ): Promise<Either<Error, IResponse<string>>> {
     const notificationHubService = azure.createNotificationHubService(
@@ -54,10 +55,11 @@ export default class NotificationService {
     return new Promise(resolve => {
       const payload = {
         message: notification.message.content.markdown,
+        message_id: notification.message.id,
         title: notification.message.content.subject
       };
       notificationHubService.send(
-        toFiscalCodeHash(fiscalCode),
+        toFiscalCodeHash(notification.message.fiscal_code),
         payload,
         (error, response) => {
           return resolve(this.buildResponse(error, response));

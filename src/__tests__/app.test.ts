@@ -24,13 +24,14 @@ const aValidNotification = {
       markdown: "test".repeat(80),
       subject: "this is a message"
     },
-    fiscalCode: "FRMTTR76M06B715E",
-    senderServiceId: "234567"
+    fiscal_code: "FRMTTR76M06B715E",
+    id: "01CCKCY7QQ7WCHWTH8NB504386",
+    sender_service_id: "234567"
   },
   senderMetadata: {
-    departmentName: "test department",
-    organizationName: "test organization",
-    serviceName: "test service"
+    department_name: "test department",
+    organization_name: "test organization",
+    service_name: "test service"
   }
 };
 

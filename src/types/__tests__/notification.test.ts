@@ -7,6 +7,8 @@ describe("notification type", () => {
   it("should create the correct sha256 hash", async () => {
     const hashed = toFiscalCodeHash(aFiscalCode);
 
-    expect(hashed).toBe("0/cCAv1NW9mV1v6ZYzfBt3sKSmMSAwSNr7oSHScV6lI=");
+    expect(hashed).toBe(
+      "d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52"
+    );
   });
 });

@@ -4,23 +4,24 @@
 
 import * as crypto from "crypto";
 import * as t from "io-ts";
+import { string } from "io-ts";
 import { NonEmptyString, PatternString } from "italia-ts-commons/lib/strings";
 import { enumType, tag } from "italia-ts-commons/lib/types";
 import { FiscalCode } from "./api/FiscalCode";
-import { CreatedMessageWithContent } from "./api_client/createdMessageWithContent";
-
-/**
- * Sender metadata associated to a message.
- */
-export const CreatedMessageEventSenderMetadata = t.interface({
-  departmentName: NonEmptyString,
-  organizationName: NonEmptyString,
-  serviceName: NonEmptyString
-});
+import { MessageContent } from "./api/MessageContent";
 
 export const Notification = t.interface({
-  message: CreatedMessageWithContent,
-  senderMetadata: CreatedMessageEventSenderMetadata
+  message: t.interface({
+    content: MessageContent,
+    fiscal_code: FiscalCode,
+    id: string,
+    sender_service_id: string
+  }),
+  senderMetadata: t.interface({
+    department_name: NonEmptyString,
+    organization_name: NonEmptyString,
+    service_name: NonEmptyString
+  })
 });
 
 export type Notification = t.TypeOf<typeof Notification>;
@@ -63,7 +64,7 @@ export const InstallationID = PatternString(
  */
 export const Device = t.interface({
   platform: DevicePlatform,
-  pushChannel: PatternString("[0-9a-fA-F]{64}")
+  pushChannel: string
 });
 
 export type Device = t.TypeOf<typeof Device>;
@@ -108,7 +109,7 @@ export interface INotificationTemplates {
 export interface IInstallation {
   readonly installationId: InstallationID;
   readonly platform: DevicePlatform;
-  readonly pushChannel: PatternString<"[0-9a-fA-F]{64}">;
+  readonly pushChannel: string;
   readonly tags: [FiscalCodeHash];
   readonly templates: INotificationTemplates;
 }
@@ -120,5 +121,5 @@ export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
   const hash = crypto.createHash("sha256");
   hash.update(fiscalCode);
 
-  return hash.digest("base64") as FiscalCodeHash;
+  return hash.digest("hex") as FiscalCodeHash;
 };
