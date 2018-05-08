@@ -226,27 +226,27 @@ paths:
           description: There was an error in registering the device to the Notification Hub.
 definitions:
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/MessageContent"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/FiscalCode"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/ExtendedProfile"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/LimitedProfile"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/IsWebhookEnabled"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PaginationResponse"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/CreatedMessageWithContent"
   CreatedMessageEventSenderMetadata:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#CreatedMessageEventSenderMetadata"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/CreatedMessageEventSenderMetadata"
   Message:
     title: Message
     type: object
