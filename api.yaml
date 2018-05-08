@@ -50,32 +50,14 @@ paths:
         "200":
           description: Found.
           schema:
-            allOf:
-              - type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/definitions/Message"
-              - $ref: "#/definitions/PaginationResponse"
+            - $ref: "#/definitions/Messages"
           examples:
             application/json:
               items:
                 - id: 01BX9NSMKVXXS5PSP2FATZMYYY
-                  content:
-                    subject: amet sunt dolor nulla esseesseanim
-                    markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                  sender_service_id: "5a25abf4fcc89605c082f042c49a"
                 - id: 01BX9NSMKVXXS5PSP2FATZM123
-                  content:
-                    subject: idUt quis tempor esseesseanim
-                    markdown: Nullam dapibus metus sed elementum efficitur. Curabitur facilisis sagittis risus nec sodales.
-                      Vestibulum in eros sapien. Donec ac odio sit amet dui semper ornare eget nec odio. Pellentesque habitant
-                      morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent nibh ex, mattis sit amet
-                      felis id, sodales euismod velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  sender_service_id: "5a25abf4fcc89605c082f042c49a"
               page_size: 2
               next: https://example.com/next
         "404":
@@ -99,18 +81,18 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/Message"
+            $ref: "#/definitions/MessageWithContent"
           examples:
             application/json:
               message:
                 id: 01BX9NSMKAAAS5PSP2FATZM6BQ
-                content:
-                  subject: message subject, aliquip sint nulla in estinut
-                  markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                subject: message subject, aliquip sint nulla in estinut
+                markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                  Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                  risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                  fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                  laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                sender_service_id: "5a25abf4fcc89605c082f042c49a"
         "404":
           description: No message found for the provided ID.
         "500":
@@ -226,41 +208,73 @@ paths:
         "500":
           description: There was an error in registering the device to the Notification Hub.
 definitions:
-  MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/MessageContent"
+  MessageSubject:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageSubject"
+  MessageBodyMarkdown:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageBodyMarkdown"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/FiscalCode"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ExtendedProfile"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/LimitedProfile"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/IsWebhookEnabled"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PaginationResponse"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/CreatedMessageWithContent"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/ServicePublic"
-  Message:
-    title: Message
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServicePublic"
+  SenderMetadata:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
+  MessageWithContent:
+    title: Message with content
     type: object
     properties:
       id:
         type: string
-      content:
-        $ref: '#/definitions/MessageContent'
+      subject:
+        $ref: "#/definitions/MessageSubject"
+      markdown:
+        $ref: "#/definitions/MessageBodyMarkdown"
       sender_service_id:
         type: string
     required:
       - id
       - content
+  MessageWithoutContent:
+    title: Message without content
+    type: object
+    properties:
+      id:
+        type: string
+      sender_service_id:
+        type: string
+    required:
+      - id
+      - sender_service_id
+  Messages:
+    title: A list of messages
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/MessageWithoutContent"
+      page_size:
+        type: string
+      next:
+        type: string
+    required:
+      - items
+      - page_size
   installationID:
     type: string
     description: The device global unique identifier.
@@ -290,25 +304,10 @@ definitions:
       message:
         $ref: '#/definitions/CreatedMessageWithContent'
       senderMetadata:
-        $ref: '#/definitions/CreatedMessageEventSenderMetadata'
+        $ref: '#/definitions/SenderMetadata'
     required:
       - message
       - senderMetadata
-  CreatedMessageEventSenderMetadata:
-    title: CreatedMessageEventSenderMetadata
-    description: The metadata for a Notification.
-    type: object
-    properties:
-      departmentName:
-        type: string
-      organizationName:
-        type: string
-      serviceName:
-        type: string
-    required:
-      - departmentName
-      - organizationName
-      - serviceName
   Profile:
     title: Profile
     description: Describes the user's profile.
