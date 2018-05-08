@@ -11,8 +11,8 @@ import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUs
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic } from "../types/api_client/servicePublic";
 import {
-  Message,
   Messages,
+  MessageWithContent,
   toAppMessageWithContent,
   toAppMessageWithoutContent
 } from "../types/message";
@@ -55,7 +55,7 @@ export default class MessagesService {
 
       return {
         items: [],
-        pageSize: 0 as NonNegativeNumber
+        page_size: 0 as NonNegativeNumber
       };
     }
 
@@ -75,14 +75,17 @@ export default class MessagesService {
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
     return {
       items: appMessages,
-      pageSize: apiMessages.pageSize
+      page_size: apiMessages.pageSize
     };
   }
 
   /**
    * Retrieves a specific message.
    */
-  public async getMessage(user: User, messageId: string): Promise<Message> {
+  public async getMessage(
+    user: User,
+    messageId: string
+  ): Promise<MessageWithContent> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);

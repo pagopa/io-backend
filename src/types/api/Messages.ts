@@ -7,8 +7,7 @@
 /* tslint:disable:no-any */
 /* tslint:disable:object-literal-sort-keys */
 
-import { MessageSubject } from "./MessageSubject";
-import { MessageBodyMarkdown } from "./MessageBodyMarkdown";
+import { MessageWithoutContent } from "./MessageWithoutContent";
 
 /**
  *
@@ -18,19 +17,21 @@ import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "italia-ts-commons/lib/types";
 
 // required attributes
-const MessageContentR = t.interface({
-  markdown: MessageBodyMarkdown
+const MessagesR = t.interface({
+  items: t.readonlyArray(MessageWithoutContent),
+
+  page_size: t.string
 });
 
 // optional attributes
-const MessageContentO = t.partial({
-  subject: MessageSubject
+const MessagesO = t.partial({
+  next: t.string
 });
 
-export const MessageContent = strictInterfaceWithOptionals(
-  MessageContentR.props,
-  MessageContentO.props,
-  "MessageContent"
+export const Messages = strictInterfaceWithOptionals(
+  MessagesR.props,
+  MessagesO.props,
+  "Messages"
 );
 
-export type MessageContent = t.TypeOf<typeof MessageContent>;
+export type Messages = t.TypeOf<typeof Messages>;

@@ -8,7 +8,11 @@ import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { IResponse } from "../app";
 import NotificationService from "../services/notificationService";
-import { Device, InstallationID, Notification } from "../types/notification";
+import {
+  Installation,
+  InstallationID,
+  Notification
+} from "../types/notification";
 import { extractUserFromRequest } from "../types/user";
 
 export default class NotificationController {
@@ -53,7 +57,7 @@ export default class NotificationController {
       return left(new Error("Unable to parse the installation ID"));
     }
 
-    const errorOrDevice = Device.decode(req.body);
+    const errorOrDevice = Installation.decode(req.body);
 
     if (isLeft(errorOrDevice)) {
       winston.error(

@@ -7,13 +7,13 @@
 	},
 	"AssertionConsumerServices": [
 		{
-			"Location": "http://italia-backend:81/assertionConsumerService",
+			"Location": "http://italia-backend/assertionConsumerService",
 			"IsDefault": true
 		}
 	],
 	"SingleLogoutServices": [
 		{
-			"Location": "http://italia-backend:81/slo"
+			"Location": "http://italia-backend/slo"
 		}
 	],
 	"AttributeConsumingServices": [

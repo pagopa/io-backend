@@ -73,11 +73,11 @@ const proxyMessagesResponse = {
       sender_service_id: "5a563817fcc896087002ea46c49a"
     }
   ],
-  pageSize: 2
+  page_size: 2
 };
 const emptyProxyMessagesResponse = {
   items: [],
-  pageSize: 0
+  page_size: 0
 };
 const validApiMessageResponse = {
   parsedBody: {

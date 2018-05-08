@@ -8,15 +8,15 @@
 /* tslint:disable:object-literal-sort-keys */
 
 /**
- * User's fiscal code.
+ * The device global unique identifier.
  */
 
 import { PatternString } from "italia-ts-commons/lib/strings";
 
 import * as t from "io-ts";
 
-export type FiscalCode = t.TypeOf<typeof FiscalCode>;
+export type installationID = t.TypeOf<typeof installationID>;
 
-export const FiscalCode = PatternString(
-  "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+export const installationID = PatternString(
+  "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 );

@@ -107,7 +107,9 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/Profile"
+            oneOf:
+              - $ref: "#/definitions/ProfileWithEmail"
+              - $ref: "#/definitions/ProfileWithoutEmail"
           examples:
             application/json:
               fiscal_code: "TMMEXQ60A10Y526X"
@@ -208,6 +210,8 @@ paths:
         "500":
           description: There was an error in registering the device to the Notification Hub.
 definitions:
+  MessageContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageContent"
   MessageSubject:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageSubject"
   MessageBodyMarkdown:
@@ -232,8 +236,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/CreatedMessageWithContent"
   ServicePublic:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServicePublic"
-  SenderMetadata:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
+#  SenderMetadata:
+#    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
   MessageWithContent:
     title: Message with content
     type: object
@@ -303,13 +307,13 @@ definitions:
     properties:
       message:
         $ref: '#/definitions/CreatedMessageWithContent'
-      senderMetadata:
-        $ref: '#/definitions/SenderMetadata'
+#      senderMetadata:
+#        $ref: '#/definitions/SenderMetadata'
     required:
       - message
-      - senderMetadata
-  Profile:
-    title: Profile
+#      - senderMetadata
+  ProfileWithEmail:
+    title: Profile with wmail
     description: Describes the user's profile.
     type: object
     properties:
@@ -336,11 +340,51 @@ definitions:
       version:
         type: integer
     required:
-      - fiscal_code
       - family_name
+      - fiscal_code
       - has_profile
       - is_email_set
+      - is_inbox_enabled
+      - is_webhook_enabled
       - name
+      - preferred_email
+      - version
+  ProfileWithoutEmail:
+    title: Profile without email
+    description: Describes the user's profile.
+    type: object
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      has_profile:
+        type: boolean
+      is_email_set:
+        type: boolean
+      is_inbox_enabled:
+        $ref: "#/definitions/IsInboxEnabled"
+      is_webhook_enabled:
+        $ref: "#/definitions/IsWebhookEnabled"
+      name:
+        type: string
+      preferred_email:
+        $ref: '#/definitions/EmailAddress'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      version:
+        type: integer
+    required:
+      - family_name
+      - fiscal_code
+      - has_profile
+      - is_email_set
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - name
+      - preferred_email
       - version
 responses: {}
 parameters:

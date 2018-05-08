@@ -8,7 +8,8 @@ import { CreatedMessageWithContent } from "../api_client/createdMessageWithConte
 import { CreatedMessageWithoutContent } from "../api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "../api_client/messageResponseWithContent";
 import {
-  Message,
+  MessageWithContent,
+  MessageWithoutContent,
   toAppMessageWithContent,
   toAppMessageWithoutContent
 } from "../message";
@@ -48,7 +49,7 @@ describe("message type", () => {
   // test case: Converts an API CreatedMessage to a Proxy message
   it("should get a proxy message without a content", async () => {
     // Converts an API CreatedMessage to a Proxy message
-    const messageWithoutContent: Message = toAppMessageWithoutContent(
+    const messageWithoutContent: MessageWithoutContent = toAppMessageWithoutContent(
       mockedCreatedMessageWithoutContent
     );
 
@@ -58,14 +59,12 @@ describe("message type", () => {
     expect(messageWithoutContent.sender_service_id).toBe(
       mockedCreatedMessageWithoutContent.senderServiceId
     );
-    expect(messageWithoutContent.markdown).toBeUndefined();
-    expect(messageWithoutContent.subject).toBeUndefined();
   });
 
   // test case: Converts an API MessageResponse to a Proxy message.
   it("should get a proxy message with a content", async () => {
     // Converts an API CreatedMessage to a Proxy message
-    const messageWithContent: Message = toAppMessageWithContent(
+    const messageWithContent: MessageWithContent = toAppMessageWithContent(
       mockedMessageResponseWithContent
     );
 

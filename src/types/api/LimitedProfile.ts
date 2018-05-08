@@ -7,30 +7,27 @@
 /* tslint:disable:no-any */
 /* tslint:disable:object-literal-sort-keys */
 
-import { MessageSubject } from "./MessageSubject";
-import { MessageBodyMarkdown } from "./MessageBodyMarkdown";
+import { PreferredLanguages } from "./PreferredLanguages";
 
 /**
- *
+ * Describes the citizen's profile, mostly interesting for preferences attributes.
  */
 
 import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "italia-ts-commons/lib/types";
 
 // required attributes
-const MessageContentR = t.interface({
-  markdown: MessageBodyMarkdown
-});
+const LimitedProfileR = t.interface({});
 
 // optional attributes
-const MessageContentO = t.partial({
-  subject: MessageSubject
+const LimitedProfileO = t.partial({
+  preferred_languages: PreferredLanguages
 });
 
-export const MessageContent = strictInterfaceWithOptionals(
-  MessageContentR.props,
-  MessageContentO.props,
-  "MessageContent"
+export const LimitedProfile = strictInterfaceWithOptionals(
+  LimitedProfileR.props,
+  LimitedProfileO.props,
+  "LimitedProfile"
 );
 
-export type MessageContent = t.TypeOf<typeof MessageContent>;
+export type LimitedProfile = t.TypeOf<typeof LimitedProfile>;

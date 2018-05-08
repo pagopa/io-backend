@@ -26,6 +26,9 @@ npm-debug.log
 # Excluded auto-generated API client.
 /src/api/
 
+# Excluded auto-generated API types.
+/types/api/
+
 # Include required js files.
 !/docker/spid/config.js
 !/spid-batch-import/spid-idp-spimport.js

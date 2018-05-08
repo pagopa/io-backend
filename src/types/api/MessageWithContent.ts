@@ -18,19 +18,23 @@ import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "italia-ts-commons/lib/types";
 
 // required attributes
-const MessageContentR = t.interface({
-  markdown: MessageBodyMarkdown
+const MessageWithContentR = t.interface({
+  id: t.string
 });
 
 // optional attributes
-const MessageContentO = t.partial({
-  subject: MessageSubject
+const MessageWithContentO = t.partial({
+  subject: MessageSubject,
+
+  markdown: MessageBodyMarkdown,
+
+  sender_service_id: t.string
 });
 
-export const MessageContent = strictInterfaceWithOptionals(
-  MessageContentR.props,
-  MessageContentO.props,
-  "MessageContent"
+export const MessageWithContent = strictInterfaceWithOptionals(
+  MessageWithContentR.props,
+  MessageWithContentO.props,
+  "MessageWithContent"
 );
 
-export type MessageContent = t.TypeOf<typeof MessageContent>;
+export type MessageWithContent = t.TypeOf<typeof MessageWithContent>;

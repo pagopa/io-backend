@@ -28,7 +28,7 @@ const proxyMessagesResponse = {
       sender_service_id: "5a563817fcc896087002ea46c49a"
     }
   ],
-  pageSize: 2
+  page_size: 2
 };
 const proxyMessageResponse = {
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",

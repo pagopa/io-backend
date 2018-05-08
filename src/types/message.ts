@@ -11,25 +11,38 @@ import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithout
 import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
 
 // required attributes
-const MessageR = t.interface({
+const MessageWithContentR = t.interface({
+  id: string,
   sender_service_id: string
 });
 
 // optional attributes
-const MessageO = t.partial({
-  id: string,
+const MessageWithContentO = t.partial({
   markdown: string,
   subject: string
 });
 
-export const Message = t.intersection([MessageR, MessageO]);
+export const MessageWithContent = t.intersection([
+  MessageWithContentR,
+  MessageWithContentO
+]);
 
-export type Message = t.TypeOf<typeof Message>;
+export type MessageWithContent = t.TypeOf<typeof MessageWithContent>;
+
+// required attributes
+const MessageWithoutContentR = t.interface({
+  id: string,
+  sender_service_id: string
+});
+
+export const MessageWithoutContent = t.intersection([MessageWithoutContentR]);
+
+export type MessageWithoutContent = t.TypeOf<typeof MessageWithoutContent>;
 
 // required attributes
 const MessagesR = t.interface({
-  items: readonlyArray(Message),
-  pageSize: NonNegativeNumber
+  items: readonlyArray(MessageWithoutContent),
+  page_size: NonNegativeNumber
 });
 
 // optional attributes
@@ -46,7 +59,7 @@ export type Messages = t.TypeOf<typeof Messages>;
  */
 export function toAppMessageWithContent(
   from: MessageResponseWithContent
-): Message {
+): MessageWithContent {
   return {
     id: from.message.id || "",
     markdown:
@@ -62,7 +75,7 @@ export function toAppMessageWithContent(
  */
 export function toAppMessageWithoutContent(
   from: CreatedMessageWithoutContent
-): Message {
+): MessageWithoutContent {
   return {
     id: from.id,
     sender_service_id: from.senderServiceId

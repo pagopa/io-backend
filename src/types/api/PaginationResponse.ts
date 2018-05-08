@@ -7,30 +7,27 @@
 /* tslint:disable:no-any */
 /* tslint:disable:object-literal-sort-keys */
 
-import { MessageSubject } from "./MessageSubject";
-import { MessageBodyMarkdown } from "./MessageBodyMarkdown";
-
 /**
- *
+ * Pagination response parameters.
  */
 
 import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "italia-ts-commons/lib/types";
 
 // required attributes
-const MessageContentR = t.interface({
-  markdown: MessageBodyMarkdown
-});
+const PaginationResponseR = t.interface({});
 
 // optional attributes
-const MessageContentO = t.partial({
-  subject: MessageSubject
+const PaginationResponseO = t.partial({
+  page_size: t.number,
+
+  next: t.string
 });
 
-export const MessageContent = strictInterfaceWithOptionals(
-  MessageContentR.props,
-  MessageContentO.props,
-  "MessageContent"
+export const PaginationResponse = strictInterfaceWithOptionals(
+  PaginationResponseR.props,
+  PaginationResponseO.props,
+  "PaginationResponse"
 );
 
-export type MessageContent = t.TypeOf<typeof MessageContent>;
+export type PaginationResponse = t.TypeOf<typeof PaginationResponse>;

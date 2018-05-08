@@ -12,7 +12,7 @@ import { boolean, string } from "io-ts";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
-import { PreferredLanguage } from "./api/PreferredLanguages";
+import { PreferredLanguages } from "./api/PreferredLanguages";
 import { ExtendedProfile } from "./api_client/extendedProfile";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
@@ -32,7 +32,7 @@ const ProfileWithEmailR = t.type({
 // optional attributes
 const ProfileWithEmailO = t.partial({
   email: EmailAddress,
-  preferred_languages: t.readonlyArray(PreferredLanguage)
+  preferred_languages: t.readonlyArray(PreferredLanguages)
 });
 
 export const ProfileWithEmail = t.intersection([
@@ -57,7 +57,7 @@ const ProfileWithoutEmailR = t.interface({
 
 // optional attributes
 const ProfileWithoutEmailO = t.partial({
-  preferred_languages: PreferredLanguage
+  preferred_languages: PreferredLanguages
 });
 
 export const ProfileWithoutEmail = t.intersection([

@@ -7,30 +7,33 @@
 /* tslint:disable:no-any */
 /* tslint:disable:object-literal-sort-keys */
 
-import { MessageSubject } from "./MessageSubject";
-import { MessageBodyMarkdown } from "./MessageBodyMarkdown";
-
 /**
- *
+ * A Service associated to an user's subscription.
  */
 
 import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "italia-ts-commons/lib/types";
 
 // required attributes
-const MessageContentR = t.interface({
-  markdown: MessageBodyMarkdown
+const ServicePublicR = t.interface({
+  service_id: t.string,
+
+  service_name: t.string,
+
+  organization_name: t.string,
+
+  department_name: t.string
 });
 
 // optional attributes
-const MessageContentO = t.partial({
-  subject: MessageSubject
+const ServicePublicO = t.partial({
+  version: t.number
 });
 
-export const MessageContent = strictInterfaceWithOptionals(
-  MessageContentR.props,
-  MessageContentO.props,
-  "MessageContent"
+export const ServicePublic = strictInterfaceWithOptionals(
+  ServicePublicR.props,
+  ServicePublicO.props,
+  "ServicePublic"
 );
 
-export type MessageContent = t.TypeOf<typeof MessageContent>;
+export type ServicePublic = t.TypeOf<typeof ServicePublic>;

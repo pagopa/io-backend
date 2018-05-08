@@ -7,30 +7,27 @@
 /* tslint:disable:no-any */
 /* tslint:disable:object-literal-sort-keys */
 
-import { MessageSubject } from "./MessageSubject";
-import { MessageBodyMarkdown } from "./MessageBodyMarkdown";
+import { CreatedMessageWithContent } from "./CreatedMessageWithContent";
 
 /**
- *
+ * A received Notification.
  */
 
 import * as t from "io-ts";
 import { strictInterfaceWithOptionals } from "italia-ts-commons/lib/types";
 
 // required attributes
-const MessageContentR = t.interface({
-  markdown: MessageBodyMarkdown
+const NotificationR = t.interface({
+  message: CreatedMessageWithContent
 });
 
 // optional attributes
-const MessageContentO = t.partial({
-  subject: MessageSubject
-});
+const NotificationO = t.partial({});
 
-export const MessageContent = strictInterfaceWithOptionals(
-  MessageContentR.props,
-  MessageContentO.props,
-  "MessageContent"
+export const Notification = strictInterfaceWithOptionals(
+  NotificationR.props,
+  NotificationO.props,
+  "Notification"
 );
 
-export type MessageContent = t.TypeOf<typeof MessageContent>;
+export type Notification = t.TypeOf<typeof Notification>;

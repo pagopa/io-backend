@@ -58,16 +58,16 @@ export const InstallationID = PatternString(
 );
 
 /**
- * Device data.
+ * Installation data.
  *
  * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
-export const Device = t.interface({
+export const Installation = t.interface({
   platform: DevicePlatform,
   pushChannel: string
 });
 
-export type Device = t.TypeOf<typeof Device>;
+export type Installation = t.TypeOf<typeof Installation>;
 
 /**
  * An hashed fiscal code.
@@ -102,7 +102,7 @@ export interface INotificationTemplates {
 }
 
 /**
- * Device installation data.
+ * Installation installation data.
  *
  * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */

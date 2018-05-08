@@ -15,7 +15,7 @@ import {
   Notification,
   toFiscalCodeHash
 } from "../types/notification";
-import { Device } from "../types/notification";
+import { Installation } from "../types/notification";
 import Response = Azure.ServiceBus.Response;
 
 /**
@@ -71,7 +71,7 @@ export default class NotificationService {
   public createOrUpdateInstallation(
     fiscalCode: FiscalCode,
     installationID: InstallationID,
-    device: Device
+    device: Installation
   ): Promise<Either<Error, IResponse<string>>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
