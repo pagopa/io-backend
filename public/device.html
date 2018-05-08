@@ -23,7 +23,7 @@
   <form id="register">
     <div class="form-group">
       <label for="installationId">Installation ID:</label>
-      <input type="text" id="installationId" value="FRMTTR76M06B715E" class="form-control" required/>
+      <input type="text" id="installationId" value="123e4567-e89b-12d3-a456-426655440000" class="form-control" required/>
     </div>
     <div class="form-group">
       <label for="platform">Platform:</label>
@@ -34,7 +34,7 @@
     </div>
     <div class="form-group">
       <label for="pushChannel">PNS handle:</label>
-      <input type="text" id="pushChannel" value="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000" class="form-control" required/>    </div>
+      <input type="text" id="pushChannel" value="fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p" class="form-control" required/>    </div>
     <div class="form-group">
       <input type="submit" value="Send test" class="btn btn-default"/>
     </div>
@@ -50,14 +50,13 @@
 
   $("#register").submit(function() {
     let data = {
-      "installationId": $("#installationId").val(),
       "platform": $("#platform").val(),
       "pushChannel": $("#pushChannel").val()
     };
 
     $.ajax({
-      url: "./api/v1/device/register",
-      type: "post",
+      url: "./api/v1/installations/" + $("#installationId").val(),
+      type: "put",
       data: JSON.stringify(data),
       headers: {
         "Authorization": "Bearer " + token,

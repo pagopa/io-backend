@@ -9,10 +9,11 @@ import { DevicePlatformEnum, InstallationID } from "../../types/notification";
 import NotificationService from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
-const aFiscalCodeHash = "0/cCAv1NW9mV1v6ZYzfBt3sKSmMSAwSNr7oSHScV6lI=";
+const aFiscalCodeHash =
+  "d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52";
 const anInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationID;
 const aPushChannel =
-  "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000";
+  "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
   platform: DevicePlatformEnum.apns,
   pushChannel: aPushChannel
@@ -24,7 +25,8 @@ const anAppleInstallation = {
   tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
   templates: {
     template: {
-      body: '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}}'
+      body:
+        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)"}'
     }
   }
 };
@@ -39,7 +41,8 @@ const aGoogleInstallation = {
   tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
   templates: {
     template: {
-      body: '{"notification": {"title": "$(title)", "body": "$(message)"}}'
+      body:
+        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)"}}'
     }
   }
 };
@@ -49,13 +52,14 @@ const aValidNotification = {
       markdown: "test".repeat(80) as MessageBodyMarkdown,
       subject: "this is a message" as MessageSubject
     },
-    fiscalCode: aFiscalCode,
-    senderServiceId: "234567"
+    fiscal_code: aFiscalCode,
+    id: "01CCKCY7QQ7WCHWTH8NB504386",
+    sender_service_id: "234567"
   },
   senderMetadata: {
-    departmentName: "test department" as NonEmptyString,
-    organizationName: "test organization" as NonEmptyString,
-    serviceName: "test service" as NonEmptyString
+    department_name: "test department" as NonEmptyString,
+    organization_name: "test organization" as NonEmptyString,
+    service_name: "test service" as NonEmptyString
   }
 };
 
@@ -162,7 +166,7 @@ describe("NotificationService#notify", () => {
 
     const service = new NotificationService("", "");
 
-    const res = await service.notify(aFiscalCode, aValidNotification);
+    const res = await service.notify(aValidNotification);
 
     expect(res).toEqual(
       right({
@@ -174,6 +178,7 @@ describe("NotificationService#notify", () => {
       aFiscalCodeHash,
       {
         message: aValidNotification.message.content.markdown,
+        message_id: aValidNotification.message.id,
         title: aValidNotification.message.content.subject
       },
       expect.any(Function)
@@ -187,13 +192,14 @@ describe("NotificationService#notify", () => {
 
     const service = new NotificationService("", "");
 
-    const res = await service.notify(aFiscalCode, aValidNotification);
+    const res = await service.notify(aValidNotification);
 
     expect(res).toEqual(left(new Error(aGenericError)));
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
         message: aValidNotification.message.content.markdown,
+        message_id: aValidNotification.message.id,
         title: aValidNotification.message.content.subject
       },
       expect.any(Function)

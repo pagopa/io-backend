@@ -171,8 +171,6 @@ paths:
         x-examples:
           application/json:
             message:
-              fiscalCode: "TMMEXQ60A10Y526X"
-              senderServiceId: "12345"
               content:
                   subject: message subject, aliquip sint nulla in estinut
                   markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
@@ -180,10 +178,14 @@ paths:
                     risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
                     fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
                     laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+              created_at: "2018-05-03T16:21:38.167Z"
+              fiscal_code: "TMMEXQ60A10Y526X"
+              id: "01CCKCY7QQ7WCHWTH8NB504386"
+              sender_service_id: "5a25abf4fcc89605c082f042c49a"
             senderMetadata:
-              departmentName: "Department name"
-              organizationName: "Organization name"
-              serviceName: "Service name"
+              department_name: "Department name"
+              organization_name: "Organization name"
+              service_name: "Service name"
     post:
       operationId: notify
       summary: Notify a user
@@ -215,8 +217,8 @@ paths:
           $ref: "#/definitions/Installation"
         x-examples:
           application/json:
-            platform: "apns"
-            pushChannel: "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000"
+            platform: "gcm"
+            pushChannel: "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p"
       responses:
         "200":
           description: Success.
@@ -224,23 +226,27 @@ paths:
           description: There was an error in registering the device to the Notification Hub.
 definitions:
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/MessageContent"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/FiscalCode"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/ExtendedProfile"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/LimitedProfile"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PreferredLanguages"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/IsWebhookEnabled"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PaginationResponse"
+  CreatedMessageWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/CreatedMessageWithContent"
+  CreatedMessageEventSenderMetadata:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/CreatedMessageEventSenderMetadata"
   Message:
     title: Message
     type: object

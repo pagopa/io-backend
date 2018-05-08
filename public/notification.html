@@ -34,6 +34,10 @@
       <textarea id="markdown" class="form-control" required>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In eget risus tristique, efficitur ipsum sit amet, maximus tellus. Cras blandit risus arcu, in volutpat purus tempus eget. Maecenas mattis neque sit amet nisl facilisis, vel tincidunt ante congue. Curabitur at tortor malesuada, porttitor lectus a, bibendum urna. In sollicitudin elementum consequat.</textarea>
     </div>
     <div class="form-group">
+      <label for="id">Message id:</label>
+      <input type="text" id="id" value="01CCKCY7QQ7WCHWTH8NB504386" class="form-control" required/>
+    </div>
+    <div class="form-group">
       <label for="sender_service_id">Sender service id:</label>
       <input type="text" id="sender_service_id" value="12345" class="form-control" required/>
     </div>
@@ -59,17 +63,18 @@
   $("#notification").submit(function() {
     let data = {
       "message": {
-        "fiscalCode": $("#to").val(),
-        "senderServiceId": $("#sender_service_id").val(),
         "content": {
           "markdown": $("#markdown").val(),
           "subject": $("#subject").val()
-        }
+        },
+        "fiscal_code": $("#to").val(),
+        "id": $("#id").val(),
+        "sender_service_id": $("#sender_service_id").val(),
       },
       "senderMetadata": {
-        "departmentName": $("#department_name").val(),
-        "organizationName": $("#organization_name").val(),
-        "serviceName": $("#service_name").val()
+        "department_name": $("#department_name").val(),
+        "organization_name": $("#organization_name").val(),
+        "service_name": $("#service_name").val()
       }
     };
 
