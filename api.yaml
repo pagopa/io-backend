@@ -11,11 +11,11 @@ paths:
   "/services/{service_id}":
     x-swagger-router-controller: ServicesController
     parameters:
-    - name: service_id
-      in: path
-      type: string
-      required: true
-      description: The ID of an existing Service.
+      - name: service_id
+        in: path
+        type: string
+        required: true
+        description: The ID of an existing Service.
     get:
       operationId: getService
       summary: Get Service
@@ -61,21 +61,21 @@ paths:
           examples:
             application/json:
               items:
-              - id: 01BX9NSMKVXXS5PSP2FATZMYYY
-                content:
-                  subject: amet sunt dolor nulla esseesseanim
-                  markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-              - id: 01BX9NSMKVXXS5PSP2FATZM123
-                content:
-                  subject: idUt quis tempor esseesseanim
-                  markdown: Nullam dapibus metus sed elementum efficitur. Curabitur facilisis sagittis risus nec sodales.
-                    Vestibulum in eros sapien. Donec ac odio sit amet dui semper ornare eget nec odio. Pellentesque habitant
-                    morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent nibh ex, mattis sit amet
-                    felis id, sodales euismod velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                - id: 01BX9NSMKVXXS5PSP2FATZMYYY
+                  content:
+                    subject: amet sunt dolor nulla esseesseanim
+                    markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                - id: 01BX9NSMKVXXS5PSP2FATZM123
+                  content:
+                    subject: idUt quis tempor esseesseanim
+                    markdown: Nullam dapibus metus sed elementum efficitur. Curabitur facilisis sagittis risus nec sodales.
+                      Vestibulum in eros sapien. Donec ac odio sit amet dui semper ornare eget nec odio. Pellentesque habitant
+                      morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent nibh ex, mattis sit amet
+                      felis id, sodales euismod velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
               page_size: 2
               next: https://example.com/next
         "404":
@@ -149,8 +149,8 @@ paths:
           description: Profile updated.
           schema:
             allOf:
-            - $ref: "#/definitions/LimitedProfile"
-            - $ref: "#/definitions/ExtendedProfile"
+              - $ref: "#/definitions/LimitedProfile"
+              - $ref: "#/definitions/ExtendedProfile"
           examples:
             application/json:
               email: foobar@example.com
@@ -212,14 +212,14 @@ paths:
       summary: Create or update an Installation
       description: Create or update an Installation to the Azure Notification hub.
       parameters:
-      - name: body
-        in: body
-        schema:
-          $ref: "#/definitions/Installation"
-        x-examples:
-          application/json:
-            platform: "gcm"
-            pushChannel: "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p"
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/Installation"
+          x-examples:
+            application/json:
+              platform: "gcm"
+              pushChannel: "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p"
       responses:
         "200":
           description: Success.
@@ -246,6 +246,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/PaginationResponse"
   CreatedMessageWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/CreatedMessageWithContent"
+  ServicePublic:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/definitions.yaml#/ServicePublic"
   Message:
     title: Message
     type: object
@@ -259,7 +261,7 @@ definitions:
     required:
       - id
       - content
-  InstallationId:
+  installationID:
     type: string
     description: The device global unique identifier.
     pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
