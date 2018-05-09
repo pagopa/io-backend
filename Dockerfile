@@ -11,8 +11,8 @@ COPY /yarn.lock /usr/src/app/yarn.lock
 
 RUN sudo chmod -R 777 /usr/src/app \
   && yarn install \
-  && yarn build \
-  && yarn generate-api-client
+  && yarn generate-api-client \
+  && yarn build
 
 FROM node:8.9.4-alpine
 LABEL maintainer="https://teamdigitale.governo.it"
