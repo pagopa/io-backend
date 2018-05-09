@@ -16,7 +16,8 @@
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest -i",
     "start": "node src/server.js",
-    "generate-api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --typescript --input-file=/dev/stdin --output-folder=src/api --add-credentials"
+    "generate-api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --typescript --input-file=/dev/stdin --output-folder=src/api --add-credentials",
+    "generate-proxy-api-models": "gen-api-models --api-spec api.yaml --strict false --out-dir src/types/api"
   },
   "repository": {
     "type": "git",
@@ -82,7 +83,7 @@
     "danger": "^3.6.0",
     "danger-plugin-digitalcitizenship": "^0.2.0",
     "fp-ts": "^1.0.0",
-    "italia-utils": "^3.1.0",
+    "italia-utils": "^3.4.0",
     "jest": "^22.4.3",
     "lolex": "2.3.2",
     "mock-redis-client": "^0.91.13",

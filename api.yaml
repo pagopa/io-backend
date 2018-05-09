@@ -187,7 +187,7 @@ paths:
         in: path
         required: true
         schema:
-          $ref: "#/definitions/installationID"
+          $ref: "#/definitions/InstallationID"
         x-examples:
           application/json:
             installationId: "550e8400-e29b-41d4-a716-446655440000"
@@ -236,8 +236,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/CreatedMessageWithContent"
   ServicePublic:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServicePublic"
-#  SenderMetadata:
-#    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
+  SenderMetadata:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
   MessageWithContent:
     title: Message with content
     type: object
@@ -279,7 +279,7 @@ definitions:
     required:
       - items
       - page_size
-  installationID:
+  InstallationID:
     type: string
     description: The device global unique identifier.
     pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
@@ -307,11 +307,11 @@ definitions:
     properties:
       message:
         $ref: '#/definitions/CreatedMessageWithContent'
-#      senderMetadata:
-#        $ref: '#/definitions/SenderMetadata'
+      senderMetadata:
+        $ref: '#/definitions/SenderMetadata'
     required:
       - message
-#      - senderMetadata
+      - senderMetadata
   ProfileWithEmail:
     title: Profile with wmail
     description: Describes the user's profile.
