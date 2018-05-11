@@ -27,7 +27,7 @@ npm-debug.log
 /src/api/
 
 # Excluded auto-generated API types.
-/types/api/
+/src/types/api/*.ts
 
 # Include required js files.
 !/docker/spid/config.js

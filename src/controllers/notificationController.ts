@@ -8,11 +8,9 @@ import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { IResponse } from "../app";
 import NotificationService from "../services/notificationService";
-import {
-  Installation,
-  InstallationID,
-  Notification
-} from "../types/notification";
+import { Installation } from "../types/api/Installation";
+import { InstallationID } from "../types/api/InstallationID";
+import { Notification } from "../types/api/Notification";
 import { extractUserFromRequest } from "../types/user";
 
 export default class NotificationController {

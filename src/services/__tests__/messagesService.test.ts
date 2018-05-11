@@ -147,10 +147,10 @@ const invalidApiServiceResponse = {
   }
 };
 const proxyServiceResponse = {
-  departmentName: aValidDepartmentName,
-  organizationName: aValidOrganizationName,
-  serviceId: aValidServiceID,
-  serviceName: aValidServiceName,
+  department_name: aValidDepartmentName,
+  organization_name: aValidOrganizationName,
+  service_id: aValidServiceID,
+  service_name: aValidServiceName,
   version: 42
 };
 const problemJson = {

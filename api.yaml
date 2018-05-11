@@ -84,15 +84,14 @@ paths:
             $ref: "#/definitions/MessageWithContent"
           examples:
             application/json:
-              message:
-                id: 01BX9NSMKAAAS5PSP2FATZM6BQ
-                subject: message subject, aliquip sint nulla in estinut
-                markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                  Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                  risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                  fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                  laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-                sender_service_id: "5a25abf4fcc89605c082f042c49a"
+              id: 01BX9NSMKAAAS5PSP2FATZM6BQ
+              subject: message subject, aliquip sint nulla in estinut
+              markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+              sender_service_id: "5a25abf4fcc89605c082f042c49a"
         "404":
           description: No message found for the provided ID.
         "500":
@@ -112,7 +111,15 @@ paths:
               - $ref: "#/definitions/ProfileWithoutEmail"
           examples:
             application/json:
+              family_name: "Rossi"
               fiscal_code: "TMMEXQ60A10Y526X"
+              has_profile: true
+              is_email_set: false
+              is_inbox_enabled: true
+              is_webhook_enabled: false
+              name: "Mario"
+              preferred_email: "preferred@example.com"
+              version: 1
               email: "email@example.com"
         "500":
           description: There was an error in retrieving the user profile.
@@ -128,6 +135,10 @@ paths:
           x-examples:
             application/json:
               email: foobar@example.com
+              preferred_languages: [ it_IT ]
+              is_inbox_enabled: true
+              is_webhook_enabled: false
+              version: 1
       responses:
         '200':
           description: Profile updated.
@@ -138,7 +149,10 @@ paths:
           examples:
             application/json:
               email: foobar@example.com
-              version: 0
+              preferred_languages: [ it_IT ]
+              is_inbox_enabled: true
+              is_webhook_enabled: false
+              version: 1
         "404":
           description: No user found for the provided fiscal code.
         '400':
@@ -147,34 +161,34 @@ paths:
           description: Profile cannot be updated.
   "/notify":
     x-swagger-router-controller: NotificationController
-    parameters:
-      - in: body
-        name: body
-        schema:
-          $ref: "#/definitions/Notification"
-        x-examples:
-          application/json:
-            message:
-              content:
-                  subject: message subject, aliquip sint nulla in estinut
-                  markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                    Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                    risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                    fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                    laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-              created_at: "2018-05-03T16:21:38.167Z"
-              fiscal_code: "TMMEXQ60A10Y526X"
-              id: "01CCKCY7QQ7WCHWTH8NB504386"
-              sender_service_id: "5a25abf4fcc89605c082f042c49a"
-            senderMetadata:
-              department_name: "Department name"
-              organization_name: "Organization name"
-              service_name: "Service name"
     post:
       operationId: notify
       summary: Notify a user
       description: |-
         Post the notification to the user using a push notification.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/Notification"
+          x-examples:
+            application/json:
+              message:
+                content:
+                    subject: message subject, aliquip sint nulla in estinut
+                    markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
+                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
+                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
+                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
+                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
+                created_at: "2018-05-03T16:21:38.167Z"
+                fiscal_code: "TMMEXQ60A10Y526X"
+                id: "01CCKCY7QQ7WCHWTH8NB504386"
+                sender_service_id: "5a25abf4fcc89605c082f042c49a"
+              senderMetadata:
+                department_name: "Department name"
+                organization_name: "Organization name"
+                service_name: "Service name"
       responses:
         "200":
           description: Success.
@@ -183,14 +197,13 @@ paths:
   "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
+    parameters:
       - name: installationID
         in: path
         required: true
+        description: The ID of the message.
         schema:
           $ref: "#/definitions/InstallationID"
-        x-examples:
-          application/json:
-            installationId: "550e8400-e29b-41d4-a716-446655440000"
     put:
       operationId: createOrUpdateInstallation
       summary: Create or update an Installation
@@ -226,6 +239,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/LimitedProfile"
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PreferredLanguages"
+  PreferredLanguage:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PreferredLanguage"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
@@ -238,6 +253,16 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServicePublic"
   SenderMetadata:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
+  DepartmentName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/DepartmentName"
+  OrganizationName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/OrganizationName"
+  ServiceName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServiceName"
+  MessageResponseNotificationStatus:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageResponseNotificationStatus"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ProblemJson"
   MessageWithContent:
     title: Message with content
     type: object
@@ -273,30 +298,21 @@ definitions:
         items:
           $ref: "#/definitions/MessageWithoutContent"
       page_size:
-        type: string
+        $ref: '#/definitions/PageSize'
       next:
         type: string
     required:
       - items
       - page_size
-  InstallationID:
-    type: string
-    description: The device global unique identifier.
-    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
   Installation:
     title: Installation
     description: Describes an app installation.
     type: object
     properties:
       platform:
-        type: string
-        description: The platform type where the installation happened.
-        enum: [apns, gcm]
+        $ref: '#/definitions/Platform'
       pushChannel:
-        type: string
-        description: |-
-          The Push Notification Service handle for this Installation.
-          See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+        $ref: '#/definitions/PushChannel'
     required:
       - platform
       - pushChannel
@@ -324,9 +340,9 @@ definitions:
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
       has_profile:
-        type: boolean
+        $ref: "#/definitions/HasProfile"
       is_email_set:
-        type: boolean
+        $ref: "#/definitions/IsEmailSet"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
       is_webhook_enabled:
@@ -336,9 +352,11 @@ definitions:
       preferred_email:
         $ref: '#/definitions/EmailAddress'
       preferred_languages:
-        $ref: '#/definitions/PreferredLanguages'
+        type: array
+        items:
+          $ref: '#/definitions/PreferredLanguage'
       version:
-        type: integer
+        $ref: '#/definitions/Version'
     required:
       - family_name
       - fiscal_code
@@ -354,16 +372,14 @@ definitions:
     description: Describes the user's profile.
     type: object
     properties:
-      email:
-        $ref: '#/definitions/EmailAddress'
       family_name:
         type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
       has_profile:
-        type: boolean
+        $ref: "#/definitions/HasProfile"
       is_email_set:
-        type: boolean
+        $ref: "#/definitions/IsEmailSet"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
       is_webhook_enabled:
@@ -373,9 +389,11 @@ definitions:
       preferred_email:
         $ref: '#/definitions/EmailAddress'
       preferred_languages:
-        $ref: '#/definitions/PreferredLanguages'
+        type: array
+        items:
+          $ref: '#/definitions/PreferredLanguage'
       version:
-        type: integer
+        $ref: '#/definitions/Version'
     required:
       - family_name
       - fiscal_code
@@ -386,6 +404,41 @@ definitions:
       - name
       - preferred_email
       - version
+  InstallationID:
+    type: string
+    description: |-
+      The sixteen octets of an Installation ID are represented as 32 hexadecimal (base 16) digits, displayed in five groups
+      separated by hyphens, in the form 8-4-4-4-12 for a total of 36 characters (32 alphanumeric characters and four
+      hyphens).
+      See https://en.wikipedia.org/wiki/Universally_unique_identifier
+    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+  HasProfile:
+    type: boolean
+    default: false
+    description: True if the user has a remote profile.
+  IsEmailSet:
+    type: boolean
+    default: false
+    description:  True if the user has presonalized the email.
+  Version:
+    type: integer
+    minimum: 0
+    description: The entity version.
+  PageSize:
+    type: integer
+    minimum: 0
+    description: Number of items returned for each page.
+  Platform:
+    description: The platform type where the installation happened.
+    type: string
+    x-extensible-enum:
+      - apns
+      - gcm
+  PushChannel:
+    description: |-
+      The Push Notification Service handle for this Installation.
+      See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+    type: string
 responses: {}
 parameters:
   PaginationRequest:

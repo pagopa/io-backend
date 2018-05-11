@@ -1,15 +1,14 @@
 import { FiscalCode } from "../api/FiscalCode";
 import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
 import { MessageContent } from "../api/MessageContent";
+import { MessageResponseNotificationStatus } from "../api/MessageResponseNotificationStatus";
 import { MessageSubject } from "../api/MessageSubject";
-import { NotificationChannelStatus } from "../api/NotificationChannelStatus";
-import { NotificationStatus } from "../api/NotificationStatus";
+import { MessageWithContent } from "../api/MessageWithContent";
+import { MessageWithoutContent } from "../api/MessageWithoutContent";
 import { CreatedMessageWithContent } from "../api_client/createdMessageWithContent";
 import { CreatedMessageWithoutContent } from "../api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "../api_client/messageResponseWithContent";
 import {
-  MessageWithContent,
-  MessageWithoutContent,
   toAppMessageWithContent,
   toAppMessageWithoutContent
 } from "../message";
@@ -36,8 +35,8 @@ const aMessage: CreatedMessageWithContent = {
   timeToLive: 12345
 };
 // mock for a valid NotificationStatus
-const aNotification: NotificationStatus = {
-  email: "QUEUED" as NotificationChannelStatus
+const aNotification: MessageResponseNotificationStatus = {
+  email: "QUEUED"
 };
 // mock for a valid MessageResponseWithContent
 const mockedMessageResponseWithContent: MessageResponseWithContent = {

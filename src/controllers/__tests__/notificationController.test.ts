@@ -3,7 +3,8 @@ import mockReq from "../../__mocks__/request";
 import NotificationService from "../../services/notificationService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
-import { DevicePlatformEnum, InstallationID } from "../../types/notification";
+import { InstallationID } from "../../types/api/InstallationID";
+import { PlatformEnum } from "../../types/api/Platform";
 import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
@@ -50,6 +51,7 @@ const aValidNotification = {
       markdown: "test".repeat(80),
       subject: "this is a message"
     },
+    created_at: "",
     fiscal_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
@@ -80,7 +82,7 @@ const anInvalidNotification = {
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
-  platform: DevicePlatformEnum.apns,
+  platform: PlatformEnum.apns,
   pushChannel: aPushChannel
 };
 const anInvalidDevice = {

@@ -8,7 +8,6 @@ import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
-import { PreferredLanguage } from "../api/PreferredLanguages";
 import { ExtendedProfile } from "../api_client/extendedProfile";
 import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
@@ -22,7 +21,7 @@ import { User } from "../user";
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aNonNegativeNumber = 1 as NonNegativeNumber;
-const aPreferredLanguage = "it_IT" as PreferredLanguage;
+const aPreferredLanguages: ReadonlyArray<any> = ["it_IT"];
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const aValidSpidLevel = SpidLevelEnum.SPID_L2;
@@ -32,7 +31,7 @@ const mockedGetProfileOKResponse: GetProfileOKResponse = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebhookEnabled,
-  preferredLanguages: [aPreferredLanguage],
+  preferredLanguages: aPreferredLanguages,
   version: aNonNegativeNumber
 };
 
@@ -56,7 +55,7 @@ const mockedExtendedProfile: ExtendedProfile = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebhookEnabled,
-  preferredLanguages: aPreferredLanguage,
+  preferredLanguages: aPreferredLanguages,
   version: 1 as number
 };
 

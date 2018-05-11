@@ -4,13 +4,16 @@
 import * as t from "io-ts";
 import { string } from "io-ts";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { DepartmentName } from "../api/DepartmentName";
+import { OrganizationName } from "../api/OrganizationName";
+import { ServiceName } from "../api/ServiceName";
 
 // required attributes
 const ServicePublicR = t.interface({
-  departmentName: string,
-  organizationName: string,
+  departmentName: DepartmentName,
+  organizationName: OrganizationName,
   serviceId: string,
-  serviceName: string
+  serviceName: ServiceName
 });
 
 // optional attributes

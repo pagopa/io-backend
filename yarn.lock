@@ -2450,9 +2450,9 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
-io-ts-types@^0.3.4:
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.4.tgz#7474316d2d04cc5a915cde84b024c5662bd5ebd0"
+io-ts-types@^0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.5.tgz#a0dc12922c37127820eba9b9ae818a5e0f055d8e"
   dependencies:
     fp-ts "^1.0.0"
     io-ts "^1.0.0"
@@ -2465,9 +2465,9 @@ io-ts@^1.0.0, io-ts@^1.0.5:
   dependencies:
     fp-ts "^1.0.0"
 
-io-ts@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.0.6.tgz#65d7f09f0202aaeb94e5ea7a841700fb326947a1"
+io-ts@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.1.1.tgz#4c4354edc056d5ba31eb3f9838f876767325e8cf"
   dependencies:
     fp-ts "^1.0.0"
 
@@ -2830,9 +2830,9 @@ italia-ts-commons@^1.3.0:
     json-set-map "^1.0.2"
     validator "^9.4.1"
 
-italia-utils@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-3.4.0.tgz#9536eed8b257741a645bc82986874c8aeda03440"
+italia-utils@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-3.6.1.tgz#e869f8aa071e45aff023c30443700e41ad0cfb3d"
   dependencies:
     fs-extra "^6.0.0"
     nunjucks "^3.1.2"

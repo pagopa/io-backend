@@ -7,16 +7,16 @@ import { Azure } from "azure-sb";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { IResponse } from "../app";
 import { FiscalCode } from "../types/api/FiscalCode";
+import { Installation } from "../types/api/Installation";
+import Response = Azure.ServiceBus.Response;
+import { InstallationID } from "../types/api/InstallationID";
+import { Notification } from "../types/api/Notification";
+import { PlatformEnum } from "../types/api/Platform";
 import {
-  DevicePlatformEnum,
   IInstallation,
   INotificationTemplate,
-  InstallationID,
-  Notification,
   toFiscalCodeHash
 } from "../types/notification";
-import { Installation } from "../types/notification";
-import Response = Azure.ServiceBus.Response;
 
 /**
  * A template suitable for Apple's APNs.
@@ -85,9 +85,7 @@ export default class NotificationService {
       tags: [toFiscalCodeHash(fiscalCode)],
       templates: {
         template:
-          device.platform === DevicePlatformEnum.apns
-            ? APNSTemplate
-            : GCMTemplate
+          device.platform === PlatformEnum.apns ? APNSTemplate : GCMTemplate
       }
     };
 

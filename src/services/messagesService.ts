@@ -6,17 +6,18 @@ import { isLeft } from "fp-ts/lib/Either";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
+import { Messages } from "../types/api/Messages";
+import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
+import { ServicePublic as proxyServicePublic } from "../types/api/ServicePublic";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
-import { ServicePublic } from "../types/api_client/servicePublic";
+import { ServicePublic as apiServicePublic } from "../types/api_client/servicePublic";
 import {
-  Messages,
-  MessageWithContent,
   toAppMessageWithContent,
   toAppMessageWithoutContent
 } from "../types/message";
-import { Service, toAppService } from "../types/service";
+import { toAppService } from "../types/service";
 import { User } from "../types/user";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
@@ -125,7 +126,10 @@ export default class MessagesService {
   /**
    * Retrieve all the information about the service that has sent a message.
    */
-  public async getService(user: User, serviceId: string): Promise<Service> {
+  public async getService(
+    user: User,
+    serviceId: string
+  ): Promise<proxyServicePublic> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -147,7 +151,9 @@ export default class MessagesService {
       }
     }
 
-    const errorOrApiService = ServicePublic.decode(simpleResponse.parsedBody());
+    const errorOrApiService = apiServicePublic.decode(
+      simpleResponse.parsedBody()
+    );
     if (isLeft(errorOrApiService)) {
       winston.error(
         "Unknown response from getService API: %s",

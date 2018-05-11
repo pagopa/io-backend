@@ -4,68 +4,14 @@
  */
 
 import { Either } from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { User } from "./user";
 
 import * as express from "express";
-import { boolean, string } from "io-ts";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { EmailAddress } from "./api/EmailAddress";
-import { FiscalCode } from "./api/FiscalCode";
-import { PreferredLanguages } from "./api/PreferredLanguages";
+import { ProfileWithEmail } from "./api/ProfileWithEmail";
+import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
 import { ExtendedProfile } from "./api_client/extendedProfile";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
-
-// required attributes
-const ProfileWithEmailR = t.type({
-  family_name: string,
-  fiscal_code: FiscalCode,
-  has_profile: boolean,
-  is_email_set: boolean,
-  is_inbox_enabled: boolean,
-  is_webhook_enabled: boolean,
-  name: string,
-  preferred_email: EmailAddress,
-  version: NonNegativeNumber
-});
-
-// optional attributes
-const ProfileWithEmailO = t.partial({
-  email: EmailAddress,
-  preferred_languages: t.readonlyArray(PreferredLanguages)
-});
-
-export const ProfileWithEmail = t.intersection([
-  ProfileWithEmailR,
-  ProfileWithEmailO
-]);
-
-export type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
-
-// required attributes
-const ProfileWithoutEmailR = t.interface({
-  family_name: string,
-  fiscal_code: FiscalCode,
-  has_profile: boolean,
-  is_email_set: boolean,
-  is_inbox_enabled: boolean,
-  is_webhook_enabled: boolean,
-  name: string,
-  preferred_email: EmailAddress,
-  version: NonNegativeNumber
-});
-
-// optional attributes
-const ProfileWithoutEmailO = t.partial({
-  preferred_languages: PreferredLanguages
-});
-
-export const ProfileWithoutEmail = t.intersection([
-  ProfileWithoutEmailR,
-  ProfileWithoutEmailO
-]);
-
-export type ProfileWithoutEmail = t.TypeOf<typeof ProfileWithoutEmail>;
 
 /**
  * Converts an existing API profile to a Proxy profile.
