@@ -197,7 +197,6 @@ paths:
   "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
-    parameters:
       - name: installationID
         in: path
         required: true
