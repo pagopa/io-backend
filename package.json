@@ -83,7 +83,7 @@
     "danger-plugin-digitalcitizenship": "^0.2.0",
     "fp-ts": "^1.0.0",
     "jest": "^22.4.3",
-    "lolex": "2.3.2",
+    "lolex": "2.5.0",
     "mock-redis-client": "^0.91.13",
     "nodemon": "^1.17.3",
     "prettier": "^1.12.1",
