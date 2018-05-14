@@ -88,7 +88,7 @@
     "nodemon": "^1.17.3",
     "prettier": "^1.12.1",
     "superagent": "^3.8.3",
-    "supertest": "^3.0.0",
+    "supertest": "^3.1.0",
     "swagger-cli": "^1.0.1",
     "swagger-parser": "^4.1.0",
     "ts-jest": "^22.0.0",
