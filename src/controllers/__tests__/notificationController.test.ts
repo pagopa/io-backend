@@ -222,7 +222,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     expect(res).toEqual(left(new Error("Unable to parse the installation ID")));
   });
 
-  it("should fail if cannot decode the device data", async () => {
+  it("should fail if cannot decode the installation data", async () => {
     const req = mockReq();
     mockCreateOrUpdateInstallation.mockReturnValue(
       Promise.resolve(
@@ -239,6 +239,8 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     const res = await controller.createOrUpdateInstallation(req);
 
-    expect(res).toEqual(left(new Error("Unable to parse the device data")));
+    expect(res).toEqual(
+      left(new Error("Unable to parse the installation data"))
+    );
   });
 });

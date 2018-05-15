@@ -71,21 +71,23 @@ export default class NotificationService {
   public createOrUpdateInstallation(
     fiscalCode: FiscalCode,
     installationID: InstallationID,
-    device: Installation
+    installation: Installation
   ): Promise<Either<Error, IResponse<string>>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
     );
 
-    const installation: IInstallation = {
+    const azureInstallation: IInstallation = {
       installationId: installationID,
-      platform: device.platform,
-      pushChannel: device.pushChannel,
+      platform: installation.platform,
+      pushChannel: installation.pushChannel,
       tags: [toFiscalCodeHash(fiscalCode)],
       templates: {
         template:
-          device.platform === PlatformEnum.apns ? APNSTemplate : GCMTemplate
+          installation.platform === PlatformEnum.apns
+            ? APNSTemplate
+            : GCMTemplate
       }
     };
 
@@ -94,7 +96,7 @@ export default class NotificationService {
         // This any is needed because the `installation` argument type of `createOrUpdateInstallation` method is wrong.
         // @see https://www.pivotaltracker.com/story/show/157122753
         // tslint:disable-next-line:no-any
-        (installation as any) as string,
+        (azureInstallation as any) as string,
         (error, response) => {
           return resolve(this.buildResponse(error, response));
         }

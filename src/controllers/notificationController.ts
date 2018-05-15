@@ -55,24 +55,24 @@ export default class NotificationController {
       return left(new Error("Unable to parse the installation ID"));
     }
 
-    const errorOrDevice = Installation.decode(req.body);
+    const errorOrInstallation = Installation.decode(req.body);
 
-    if (isLeft(errorOrDevice)) {
+    if (isLeft(errorOrInstallation)) {
       winston.error(
-        "Unable to parse the device data: %s",
-        ReadableReporter.report(errorOrDevice)
+        "Unable to parse the installation data: %s",
+        ReadableReporter.report(errorOrInstallation)
       );
-      return left(new Error("Unable to parse the device data"));
+      return left(new Error("Unable to parse the installation data"));
     }
 
     const user = errorOrUser.value;
-    const device = errorOrDevice.value;
+    const installation = errorOrInstallation.value;
     const installationID = errorOrInstallationID.value;
 
     return this.notificationService.createOrUpdateInstallation(
       user.fiscal_code,
       installationID,
-      device
+      installation
     );
   }
 }

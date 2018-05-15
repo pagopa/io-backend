@@ -9,10 +9,10 @@ import * as winston from "winston";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
-import { ServicePublic as proxyServicePublic } from "../types/api/ServicePublic";
+import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
-import { ServicePublic as apiServicePublic } from "../types/api_client/servicePublic";
+import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
 import {
   toAppMessageWithContent,
   toAppMessageWithoutContent
@@ -129,7 +129,7 @@ export default class MessagesService {
   public async getService(
     user: User,
     serviceId: string
-  ): Promise<proxyServicePublic> {
+  ): Promise<ProxyServicePublic> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -151,7 +151,7 @@ export default class MessagesService {
       }
     }
 
-    const errorOrApiService = apiServicePublic.decode(
+    const errorOrApiService = ApiServicePublic.decode(
       simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiService)) {

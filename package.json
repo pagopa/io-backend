@@ -16,8 +16,8 @@
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest -i",
     "start": "node src/server.js",
-    "generate-api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --typescript --input-file=/dev/stdin --output-folder=src/api --add-credentials",
-    "generate-proxy-api-models": "gen-api-models --api-spec api.yaml --no-strict --out-dir src/types/api"
+    "generate:api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --typescript --input-file=/dev/stdin --output-folder=src/api --add-credentials",
+    "generate:proxy-api-models": "gen-api-models --api-spec api.yaml --no-strict --out-dir src/types/api"
   },
   "repository": {
     "type": "git",
