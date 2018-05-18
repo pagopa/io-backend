@@ -16,7 +16,7 @@
     "prettify": "prettier --write './**/*.ts'",
     "test": "jest -i",
     "start": "node src/server.js",
-    "generate:api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --typescript --input-file=/dev/stdin --output-folder=src/api --add-credentials",
+    "generate:api-client": "swagger-cli bundle https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.38.0/api/public_api_v1.yaml | autorest --nodejs --input-file=/dev/stdin --output-folder=src/api --add-credentials",
     "generate:proxy-api-models": "gen-api-models --api-spec api.yaml --no-strict --out-dir src/types/api"
   },
   "repository": {
@@ -42,8 +42,9 @@
     "io-ts-types": "^0.3.5",
     "italia-ts-commons": "^1.3.0",
     "json-set-map": "^1.0.2",
+    "moment": "^2.22.1",
     "morgan": "^1.8.1",
-    "ms-rest-js": "^0.3.1",
+    "ms-rest": "^2.3.3",
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
@@ -115,7 +116,7 @@
       "**/__tests__/*.ts"
     ],
     "coverageDirectory": "./coverage/",
-    "collectCoverage": true,
+    "collectCoverage": false,
     "collectCoverageFrom": [
       "src/**/*.{ts}",
       "!src/api/*.{ts}",

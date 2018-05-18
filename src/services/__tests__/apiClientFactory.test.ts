@@ -1,4 +1,4 @@
-import { DigitalCitizenshipAPI } from "../../api/digitalCitizenshipAPI";
+import { DigitalCitizenshipAPI } from "../../api";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import ApiClient from "../apiClientFactory";
 
