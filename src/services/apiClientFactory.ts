@@ -5,7 +5,7 @@
  * @see ../api/digitalCitizenshipAPI
  */
 
-import { DigitalCitizenshipAPI } from "../api";
+import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 import { APICredentials } from "../utils/APICredential";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -17,6 +17,6 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
    */
   public getClient(fiscalCode: string): DigitalCitizenshipAPI {
     const apiCredentials = new APICredentials(this.apiKey);
-    return new DigitalCitizenshipAPI(apiCredentials, fiscalCode, this.apiUrl);
+    return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, this.apiUrl);
   }
 }

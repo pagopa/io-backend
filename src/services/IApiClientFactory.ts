@@ -2,7 +2,7 @@
  * Interface for the API client factories.
  */
 
-import { DigitalCitizenshipAPI } from "../api";
+import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
 
 export interface IApiClientFactoryInterface {
   /**

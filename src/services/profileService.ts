@@ -6,6 +6,7 @@
 import { isLeft } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
+import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
@@ -82,7 +83,7 @@ export default class ProfileService {
     user: User,
     upsertProfile: ExtendedProfile
   ): Promise<ProfileWithEmail> {
-    const upsertOptions = {
+    const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
     const response = await this.apiClient

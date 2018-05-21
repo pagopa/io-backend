@@ -2,7 +2,9 @@
  * This class provides ad implementation of ServiceClientCredentials that adds
  * a security header to the API calls.
  */
-import { ServiceClientCredentials, WebResource } from "ms-rest";
+
+import { ServiceClientCredentials } from "ms-rest-js/lib/credentials/serviceClientCredentials";
+import { WebResource } from "ms-rest-js/lib/webResource";
 
 export class APICredentials implements ServiceClientCredentials {
   private readonly apiKey: string;

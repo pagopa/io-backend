@@ -1,24 +1,24 @@
 /**
  * Wraps the msRest.HttpOperationResponse class to provide simpler methods to access response data.
  */
-import { HttpOperationResponse } from "ms-rest";
+
+import * as msRest from "ms-rest-js";
 
 export default class SimpleResponse {
   constructor(
-    // tslint:disable-next-line:no-any
-    private readonly httpOperationResponse: HttpOperationResponse<any>
+    private readonly httpOperationResponse: msRest.HttpOperationResponse
   ) {}
 
   // tslint:disable-next-line:no-any
   public parsedBody(): any {
-    return this.httpOperationResponse.body;
+    return this.httpOperationResponse.parsedBody;
   }
 
   public isOk(): boolean {
-    return this.httpOperationResponse.response.statusCode === 200;
+    return this.httpOperationResponse.response.status === 200;
   }
 
   public isNotFound(): boolean {
-    return this.httpOperationResponse.response.statusCode === 404;
+    return this.httpOperationResponse.response.status === 404;
   }
 }
