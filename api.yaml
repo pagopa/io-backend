@@ -223,45 +223,45 @@ paths:
           description: There was an error in registering the device to the Notification Hub.
 definitions:
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageContent"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageSubject"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageBodyMarkdown"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/FiscalCode"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ExtendedProfile"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/LimitedProfile"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguages"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguage"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsWebhookEnabled"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PaginationResponse"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/CreatedMessageWithContent"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServicePublic"
   SenderMetadata:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/SenderMetadata"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/SenderMetadata"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/DepartmentName"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/OrganizationName"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServiceName"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageResponseNotificationStatus"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/master/api/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ProblemJson"
   MessageWithContent:
     title: Message with content
     type: object
