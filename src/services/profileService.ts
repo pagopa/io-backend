@@ -8,12 +8,12 @@ import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
+import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
+import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
 import { UpsertProfileOKResponse } from "../types/api_client/upsertProfileOKResponse";
 import {
-  ProfileWithEmail,
-  ProfileWithoutEmail,
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
 } from "../types/profile";

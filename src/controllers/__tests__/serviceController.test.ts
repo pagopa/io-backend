@@ -5,9 +5,12 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
+import { DepartmentName } from "../../types/api/DepartmentName";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
-import { Service } from "../../types/service";
+import { OrganizationName } from "../../types/api/OrganizationName";
+import { ServiceName } from "../../types/api/ServiceName";
+import { ServicePublic } from "../../types/api/ServicePublic";
 import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
 import ServicesController from "../servicesController";
@@ -19,11 +22,11 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aServiceId: string = "service-id";
 const aValidSpidLevel = SpidLevelEnum.SPID_L2;
 
-const proxyService: Service = {
-  departmentName: "Department name",
-  organizationName: "Organization name",
-  serviceId: "5a563817fcc896087002ea46c49a",
-  serviceName: "Service name",
+const proxyService: ServicePublic = {
+  department_name: "Department name" as DepartmentName,
+  organization_name: "Organization name" as OrganizationName,
+  service_id: "5a563817fcc896087002ea46c49a",
+  service_name: "Service name" as ServiceName,
   version: 42 as NonNegativeNumber
 };
 

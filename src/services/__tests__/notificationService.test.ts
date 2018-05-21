@@ -3,9 +3,10 @@
 import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "../../types/api/FiscalCode";
+import { InstallationID } from "../../types/api/InstallationID";
 import { MessageBodyMarkdown } from "../../types/api/MessageBodyMarkdown";
 import { MessageSubject } from "../../types/api/MessageSubject";
-import { DevicePlatformEnum, InstallationID } from "../../types/notification";
+import { PlatformEnum } from "../../types/api/Platform";
 import NotificationService from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -15,12 +16,12 @@ const anInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationI
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
-  platform: DevicePlatformEnum.apns,
+  platform: PlatformEnum.apns,
   pushChannel: aPushChannel
 };
 const anAppleInstallation = {
   installationId: anInstallationID,
-  platform: DevicePlatformEnum.apns,
+  platform: PlatformEnum.apns,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
   templates: {
@@ -31,12 +32,12 @@ const anAppleInstallation = {
   }
 };
 const aGoogleDevice = {
-  platform: DevicePlatformEnum.gcm,
+  platform: PlatformEnum.gcm,
   pushChannel: aPushChannel
 };
 const aGoogleInstallation = {
   installationId: anInstallationID,
-  platform: DevicePlatformEnum.gcm,
+  platform: PlatformEnum.gcm,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
   templates: {
@@ -52,6 +53,7 @@ const aValidNotification = {
       markdown: "test".repeat(80) as MessageBodyMarkdown,
       subject: "this is a message" as MessageSubject
     },
+    created_at: "",
     fiscal_code: aFiscalCode,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"

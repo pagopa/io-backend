@@ -6,17 +6,18 @@ import { isLeft } from "fp-ts/lib/Either";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
+import { Messages } from "../types/api/Messages";
+import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
+import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
-import { ServicePublic } from "../types/api_client/servicePublic";
+import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
 import {
-  Message,
-  Messages,
   toAppMessageWithContent,
   toAppMessageWithoutContent
 } from "../types/message";
-import { Service, toAppService } from "../types/service";
+import { toAppService } from "../types/service";
 import { User } from "../types/user";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
@@ -55,7 +56,7 @@ export default class MessagesService {
 
       return {
         items: [],
-        pageSize: 0 as NonNegativeNumber
+        page_size: 0 as NonNegativeNumber
       };
     }
 
@@ -75,14 +76,17 @@ export default class MessagesService {
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
     return {
       items: appMessages,
-      pageSize: apiMessages.pageSize
+      page_size: apiMessages.pageSize
     };
   }
 
   /**
    * Retrieves a specific message.
    */
-  public async getMessage(user: User, messageId: string): Promise<Message> {
+  public async getMessage(
+    user: User,
+    messageId: string
+  ): Promise<MessageWithContent> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
@@ -122,7 +126,10 @@ export default class MessagesService {
   /**
    * Retrieve all the information about the service that has sent a message.
    */
-  public async getService(user: User, serviceId: string): Promise<Service> {
+  public async getService(
+    user: User,
+    serviceId: string
+  ): Promise<ProxyServicePublic> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -144,7 +151,9 @@ export default class MessagesService {
       }
     }
 
-    const errorOrApiService = ServicePublic.decode(simpleResponse.parsedBody());
+    const errorOrApiService = ApiServicePublic.decode(
+      simpleResponse.parsedBody()
+    );
     if (isLeft(errorOrApiService)) {
       winston.error(
         "Unknown response from getService API: %s",

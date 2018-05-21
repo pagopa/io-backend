@@ -94,10 +94,11 @@ A Linux/macOS environment is required at the moment.
 2. go to the project's folder
 3. run `scripts/build-tools.sh` to build the `tools` Docker image
 4. run `scripts/yarn.sh` to install backend dependencies
-5. run `scripts/generate-api-client.sh` to generate the Autorest API Client
-6. run `scripts/build.sh` to compile the Typescript files
-7. run `docker-compose up -d` to start the containers
-8. edit your `/etc/hosts` file by adding:
+5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api.yml
+6. run `scripts/generate-api-client.sh` to generate the Autorest API Client
+7. run `scripts/build.sh` to compile the Typescript files
+8. run `docker-compose up -d` to start the containers
+9. edit your `/etc/hosts` file by adding:
 
 ```
 localhost    spid-testenv-identityserver
@@ -178,7 +179,7 @@ In general follow the [Node Best Practices](https://devcenter.heroku.com/article
 The API client is generated with the [AutoRest](https://github.com/Azure/autorest) tool, in case of API change you need
 to regenerate the client code:
 
-* run the command `yarn generate-api-client`
+* run the command `yarn generate:api-client`
 
 ### Architecture decision records
 

@@ -1,14 +1,14 @@
 import { FiscalCode } from "../api/FiscalCode";
 import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
 import { MessageContent } from "../api/MessageContent";
+import { MessageResponseNotificationStatus } from "../api/MessageResponseNotificationStatus";
 import { MessageSubject } from "../api/MessageSubject";
-import { NotificationChannelStatus } from "../api/NotificationChannelStatus";
-import { NotificationStatus } from "../api/NotificationStatus";
+import { MessageWithContent } from "../api/MessageWithContent";
+import { MessageWithoutContent } from "../api/MessageWithoutContent";
 import { CreatedMessageWithContent } from "../api_client/createdMessageWithContent";
 import { CreatedMessageWithoutContent } from "../api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "../api_client/messageResponseWithContent";
 import {
-  Message,
   toAppMessageWithContent,
   toAppMessageWithoutContent
 } from "../message";
@@ -35,8 +35,8 @@ const aMessage: CreatedMessageWithContent = {
   timeToLive: 12345
 };
 // mock for a valid NotificationStatus
-const aNotification: NotificationStatus = {
-  email: "QUEUED" as NotificationChannelStatus
+const aNotification: MessageResponseNotificationStatus = {
+  email: "QUEUED"
 };
 // mock for a valid MessageResponseWithContent
 const mockedMessageResponseWithContent: MessageResponseWithContent = {
@@ -48,7 +48,7 @@ describe("message type", () => {
   // test case: Converts an API CreatedMessage to a Proxy message
   it("should get a proxy message without a content", async () => {
     // Converts an API CreatedMessage to a Proxy message
-    const messageWithoutContent: Message = toAppMessageWithoutContent(
+    const messageWithoutContent: MessageWithoutContent = toAppMessageWithoutContent(
       mockedCreatedMessageWithoutContent
     );
 
@@ -58,14 +58,12 @@ describe("message type", () => {
     expect(messageWithoutContent.sender_service_id).toBe(
       mockedCreatedMessageWithoutContent.senderServiceId
     );
-    expect(messageWithoutContent.markdown).toBeUndefined();
-    expect(messageWithoutContent.subject).toBeUndefined();
   });
 
   // test case: Converts an API MessageResponse to a Proxy message.
   it("should get a proxy message with a content", async () => {
     // Converts an API CreatedMessage to a Proxy message
-    const messageWithContent: Message = toAppMessageWithContent(
+    const messageWithContent: MessageWithContent = toAppMessageWithContent(
       mockedMessageResponseWithContent
     );
 

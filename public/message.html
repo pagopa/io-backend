@@ -76,9 +76,9 @@
                     return;
                   }
                   response.json().then(function(data) {
-                    $('#sender_service_name').append(data.serviceName);
-                    $('#sender_organization_name').append(data.organizationName);
-                    $('#sender_department_name').append(data.departmentName);
+                    $('#sender_service_name').append(data.service_name);
+                    $('#sender_organization_name').append(data.organization_name);
+                    $('#sender_department_name').append(data.department_name);
                   });
                 }
               ).catch(function(err) {

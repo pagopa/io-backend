@@ -12,12 +12,12 @@ import { MessageContent } from "../api/MessageContent";
 const CreatedMessageWithContentR = t.interface({
   content: MessageContent,
   fiscalCode: FiscalCode,
+  id: string,
   senderServiceId: string
 });
 
 // optional attributes
 const CreatedMessageWithContentO = t.partial({
-  id: string,
   timeToLive: number
 });
 
