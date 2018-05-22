@@ -2,10 +2,10 @@
  * This service retrieves messages from the API system using an API client.
  */
 
-import { isLeft } from "fp-ts/lib/Either";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
+import { IResponse } from "../app";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
@@ -31,7 +31,9 @@ export default class MessagesService {
   /**
    * Retrieves all messages for a specific user.
    */
-  public async getMessagesByUser(user: User): Promise<Messages> {
+  public async getMessagesByUser(
+    user: User
+  ): Promise<Either<ProblemJson, IResponse<Messages>>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessagesByUserWithHttpOperationResponse();
@@ -47,17 +49,15 @@ export default class MessagesService {
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(messageErrorOnUnknownResponse);
+        return left(new Error(messageErrorOnUnknownResponse));
       }
 
-      if (!simpleResponse.isNotFound()) {
-        throw new Error(messageErrorOnApiError);
+      const problemJson = errorOrProblemJson.value;
+      if (simpleResponse.isNotFound()) {
+        return left(problemJson);
+      } else {
+        return left(new Error(messageErrorOnApiError));
       }
-
-      return {
-        items: [],
-        page_size: 0 as NonNegativeNumber
-      };
     }
 
     const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
@@ -68,16 +68,19 @@ export default class MessagesService {
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
-      throw new Error(messageErrorOnUnknownResponse);
+      return left(new Error(messageErrorOnUnknownResponse));
     }
 
     const apiMessages = errorOrApiMessages.value;
 
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-    return {
-      items: appMessages,
-      page_size: apiMessages.pageSize
-    };
+    return right({
+      body: {
+        items: appMessages,
+        page_size: apiMessages.pageSize
+      },
+      status: 200
+    });
   }
 
   /**
@@ -86,7 +89,7 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<MessageWithContent> {
+  ): Promise<Either<ProblemJson, IResponse<MessageWithContent>>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
@@ -102,9 +105,14 @@ export default class MessagesService {
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(messageErrorOnUnknownResponse);
+        return left(new Error(messageErrorOnUnknownResponse));
+      }
+
+      const problemJson = errorOrProblemJson.value;
+      if (simpleResponse.isNotFound()) {
+        return left(problemJson);
       } else {
-        throw new Error(messageErrorOnApiError);
+        return left(new Error(messageErrorOnApiError));
       }
     }
 
@@ -116,11 +124,14 @@ export default class MessagesService {
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
-      throw new Error(messageErrorOnUnknownResponse);
+      return left(new Error(messageErrorOnUnknownResponse));
     }
 
     const apiMessage = errorOrApiMessage.value;
-    return toAppMessageWithContent(apiMessage);
+    return right({
+      body: toAppMessageWithContent(apiMessage),
+      status: 200
+    });
   }
 
   /**
@@ -129,7 +140,7 @@ export default class MessagesService {
   public async getService(
     user: User,
     serviceId: string
-  ): Promise<ProxyServicePublic> {
+  ): Promise<Either<ProblemJson, IResponse<ProxyServicePublic>>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -145,9 +156,14 @@ export default class MessagesService {
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(messageErrorOnUnknownResponse);
+        return left(new Error(messageErrorOnUnknownResponse));
+      }
+
+      const problemJson = errorOrProblemJson.value;
+      if (simpleResponse.isNotFound()) {
+        return left(problemJson);
       } else {
-        throw new Error(messageErrorOnApiError);
+        return left(new Error(messageErrorOnApiError));
       }
     }
 
@@ -159,10 +175,13 @@ export default class MessagesService {
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );
-      throw new Error(messageErrorOnUnknownResponse);
+      return left(new Error(messageErrorOnUnknownResponse));
     }
 
     const apiService = errorOrApiService.value;
-    return toAppService(apiService);
+    return right({
+      body: toAppService(apiService),
+      status: 200
+    });
   }
 }

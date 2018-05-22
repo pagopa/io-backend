@@ -1,8 +1,8 @@
 /* tslint:disable:no-any */
 
+import { left, right } from "fp-ts/lib/Either";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import mockReq from "../../__mocks__/request";
-import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import { DepartmentName } from "../../types/api/DepartmentName";
@@ -54,10 +54,6 @@ jest.mock("../../services/messagesService", () => {
   };
 });
 
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
-
 describe("serviceController#getService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,9 +61,8 @@ describe("serviceController#getService", () => {
 
   it("calls the getService on the serviceController with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetService.mockReturnValue(Promise.resolve(proxyService));
+    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
 
     req.user = mockedUser;
     req.params = { id: aServiceId };
@@ -76,19 +71,16 @@ describe("serviceController#getService", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new ServicesController(messageService);
 
-    controller.getService(req, res);
-
-    await flushPromises();
+    const response = await controller.getService(req);
 
     expect(mockGetService).toHaveBeenCalledWith(mockedUser, aServiceId);
-    expect(res.json).toHaveBeenCalledWith(proxyService);
+    expect(response).toEqual(right(proxyService));
   });
 
   it("calls the getService on the serviceController with empty user", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetService.mockReturnValue(Promise.resolve(proxyService));
+    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
 
     req.user = "";
     req.params = { id: aServiceId };
@@ -97,21 +89,18 @@ describe("serviceController#getService", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new ServicesController(messageService);
 
-    controller.getService(req, res);
-
-    await flushPromises();
+    const response = await controller.getService(req);
 
     expect(mockGetService).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
+    expect(response).toEqual(
+      left({ status: 500, title: "Unable to decode the user" })
+    );
   });
 
   it("calls the getService on the serviceController with valid user but user is not in proxy", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetService.mockReturnValue(Promise.reject(new Error("reject")));
+    mockGetService.mockReturnValue(left("reject"));
 
     req.user = mockedUser;
     req.params = { id: aServiceId };
@@ -120,14 +109,9 @@ describe("serviceController#getService", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new ServicesController(messageService);
 
-    controller.getService(req, res);
-
-    await flushPromises();
+    const response = await controller.getService(req);
 
     expect(mockGetService).toHaveBeenCalledWith(mockedUser, aServiceId);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
-    });
+    expect(response).toEqual(left("reject"));
   });
 });

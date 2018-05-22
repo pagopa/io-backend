@@ -11,6 +11,7 @@ import NotificationService from "../services/notificationService";
 import { Installation } from "../types/api/Installation";
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
+import { ProblemJson } from "../types/api/ProblemJson";
 import { extractUserFromRequest } from "../types/user";
 
 export default class NotificationController {
@@ -18,7 +19,7 @@ export default class NotificationController {
 
   public async notify(
     req: express.Request
-  ): Promise<Either<Error, IResponse<string>>> {
+  ): Promise<Either<ProblemJson, IResponse<string>>> {
     const errorOrNotification = Notification.decode(req.body);
 
     if (isLeft(errorOrNotification)) {
@@ -26,7 +27,10 @@ export default class NotificationController {
         "Unable to parse the notification body: %s",
         ReadableReporter.report(errorOrNotification)
       );
-      return left(new Error("Unable to parse the notification body"));
+      return left({
+        status: 500,
+        title: "Unable to parse the notification body"
+      });
     }
 
     const notification = errorOrNotification.value;
@@ -36,7 +40,7 @@ export default class NotificationController {
 
   public async createOrUpdateInstallation(
     req: express.Request
-  ): Promise<Either<Error, IResponse<string>>> {
+  ): Promise<Either<ProblemJson, IResponse<string>>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -52,7 +56,10 @@ export default class NotificationController {
         "Unable to parse the installation ID: %s",
         ReadableReporter.report(errorOrInstallationID)
       );
-      return left(new Error("Unable to parse the installation ID"));
+      return left({
+        status: 500,
+        title: "Unable to parse the installation ID"
+      });
     }
 
     const errorOrInstallation = Installation.decode(req.body);
@@ -62,7 +69,10 @@ export default class NotificationController {
         "Unable to parse the installation data: %s",
         ReadableReporter.report(errorOrInstallation)
       );
-      return left(new Error("Unable to parse the installation data"));
+      return left({
+        status: 500,
+        title: "Unable to parse the installation data"
+      });
     }
 
     const user = errorOrUser.value;

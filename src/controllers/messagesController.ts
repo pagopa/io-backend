@@ -4,8 +4,12 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
+import { Either, isLeft, left } from "fp-ts/lib/Either";
+import { IResponse } from "../app";
 import MessagesService from "../services/messagesService";
+import { Messages } from "../types/api/Messages";
+import { MessageWithContent } from "../types/api/MessageWithContent";
+import { ProblemJson } from "../types/api/ProblemJson";
 import { extractUserFromRequest } from "../types/user";
 
 export default class MessagesController {
@@ -15,57 +19,43 @@ export default class MessagesController {
    * Returns the messages for the user identified by the provided fiscal
    * code.
    */
-  public getMessagesByUser(req: express.Request, res: express.Response): void {
+  public async getMessagesByUser(
+    req: express.Request
+  ): Promise<Either<ProblemJson, IResponse<Messages>>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
+      return left({
+        status: 500,
+        title: error.message
       });
-      return;
     }
 
     const user = errorOrUser.value;
-    this.messagesService
-      .getMessagesByUser(user)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.messagesService.getMessagesByUser(user);
   }
 
   /**
    * Returns the message identified by the message id.
    */
-  public getMessage(req: express.Request, res: express.Response): void {
+  public async getMessage(
+    req: express.Request
+  ): Promise<Either<ProblemJson, IResponse<MessageWithContent>>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
+      return left({
+        status: 500,
+        title: error.message
       });
-      return;
     }
 
     // TODO: validate req.params.id
     const user = errorOrUser.value;
-    this.messagesService
-      .getMessage(user, req.params.id)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.messagesService.getMessage(user, req.params.id);
   }
 }

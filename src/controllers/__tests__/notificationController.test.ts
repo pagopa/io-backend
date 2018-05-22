@@ -147,7 +147,10 @@ describe("NotificationController#notify", () => {
     const res = await controller.notify(req);
 
     expect(res).toEqual(
-      left(new Error("Unable to parse the notification body"))
+      left({
+        status: 500,
+        title: "Unable to parse the notification body"
+      })
     );
   });
 });
@@ -219,7 +222,12 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     const res = await controller.createOrUpdateInstallation(req);
 
-    expect(res).toEqual(left(new Error("Unable to parse the installation ID")));
+    expect(res).toEqual(
+      left({
+        status: 500,
+        title: "Unable to parse the installation ID"
+      })
+    );
   });
 
   it("should fail if cannot decode the installation data", async () => {
@@ -240,7 +248,10 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = await controller.createOrUpdateInstallation(req);
 
     expect(res).toEqual(
-      left(new Error("Unable to parse the installation data"))
+      left({
+        status: 500,
+        title: "Unable to parse the installation data"
+      })
     );
   });
 });

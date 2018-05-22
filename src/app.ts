@@ -36,24 +36,42 @@ import {
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
+import { Messages } from "./types/api/Messages";
+import { MessageWithContent } from "./types/api/MessageWithContent";
+import { ProblemJson } from "./types/api/ProblemJson";
+import { ProfileWithEmail } from "./types/api/ProfileWithEmail";
+import { ProfileWithoutEmail } from "./types/api/ProfileWithoutEmail";
+import { ServicePublic as ProxyServicePublic } from "./types/api/ServicePublic";
 import checkIP from "./utils/middleware/checkIP";
 
 /**
  * Return a response to the client.
  */
 function respond(
-  response: Either<Error, IResponse<string | IPublicSession | ILogoutRedirect>>,
+  response: Either<
+    ProblemJson,
+    IResponse<
+      | string
+      | IPublicSession
+      | ILogoutRedirect
+      | ProfileWithoutEmail
+      | ProfileWithEmail
+      | Messages
+      | MessageWithContent
+      | ProxyServicePublic
+    >
+  >,
   res: express.Response
 ): void {
   response.fold(
     err => {
-      res.status(500).json({ message: err.message });
+      res.status(err.status || 500).json(err);
     },
     data => {
       if (data.status === 301 && typeof data.body === "string") {
         res.redirect(data.body);
       } else {
-        res.json(data.body);
+        res.status(data.status).json(data.body);
       }
     }
   );
@@ -203,40 +221,45 @@ export function newApp(
   app.get(
     "/api/v1/profile",
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      profileController.getProfile(req, res);
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await profileController.getProfile(req);
+      respond(maybeResponse, res);
     }
   );
 
   app.post(
     "/api/v1/profile",
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      profileController.upsertProfile(req, res);
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await profileController.upsertProfile(req);
+      respond(maybeResponse, res);
     }
   );
 
   app.get(
     "/api/v1/messages",
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      messagesController.getMessagesByUser(req, res);
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await messagesController.getMessagesByUser(req);
+      respond(maybeResponse, res);
     }
   );
 
   app.get(
     "/api/v1/messages/:id",
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      messagesController.getMessage(req, res);
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await messagesController.getMessage(req);
+      respond(maybeResponse, res);
     }
   );
 
   app.get(
     "/api/v1/services/:id",
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      servicesController.getService(req, res);
+    async (req: express.Request, res: express.Response) => {
+      const maybeResponse = await servicesController.getService(req);
+      respond(maybeResponse, res);
     }
   );
 

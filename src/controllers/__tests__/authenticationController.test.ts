@@ -219,7 +219,9 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(invalidUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left(new Error("Unable to decode the user")));
+    expect(response).toEqual(
+      left({ status: 500, title: "Unable to decode the user" })
+    );
     expect(mockSet).not.toHaveBeenCalled();
   });
 
@@ -230,7 +232,7 @@ describe("AuthenticationController#acs", () => {
 
     expect(controller).toBeTruthy();
     expect(response).toEqual(
-      left(new Error("Error creating the user session"))
+      left({ status: 500, title: "Error creating the user session" })
     );
   });
 
@@ -240,7 +242,7 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left(new Error("Redis error")));
+    expect(response).toEqual(left({ status: 500, title: "Redis error" }));
   });
 });
 
@@ -292,7 +294,9 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(response).toEqual(left(new Error("Unable to decode the user")));
+    expect(response).toEqual(
+      left({ status: 500, title: "Unable to decode the user" })
+    );
   });
 
   it("should fail if the generation of logout fails", async () => {
@@ -311,7 +315,9 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
-    expect(response).toEqual(left(new Error("Error message")));
+    expect(response).toEqual(
+      left({ status: 500, title: new Error("Error message") })
+    );
   });
 
   it("should fail if the session can not be saved", async () => {
@@ -323,7 +329,7 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(response).toEqual(
-      left(new Error("Error creating the user session"))
+      left({ status: 500, title: "Error creating the user session" })
     );
   });
 
@@ -335,7 +341,7 @@ describe("AuthenticationController#logout", () => {
     const response = await controller.logout(req);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left(new Error("Redis error")));
+    expect(response).toEqual(left({ status: 500, title: "Redis error" }));
   });
 });
 
@@ -417,7 +423,9 @@ describe("AuthenticationController#getSessionState", () => {
     const response = await controller.getSessionState(req);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left(new Error("No token in the request")));
+    expect(response).toEqual(
+      left({ status: 500, title: "No token in the request" })
+    );
   });
 
   it("should fail if invalid token found in the request, no Bearer string", async () => {
@@ -429,7 +437,9 @@ describe("AuthenticationController#getSessionState", () => {
     const response = await controller.getSessionState(req);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left(new Error("No token in the request")));
+    expect(response).toEqual(
+      left({ status: 500, title: "No token in the request" })
+    );
   });
 
   it("should fail if invalid token found in the request, too much arguments", async () => {
@@ -441,7 +451,9 @@ describe("AuthenticationController#getSessionState", () => {
     const response = await controller.getSessionState(req);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left(new Error("No token in the request")));
+    expect(response).toEqual(
+      left({ status: 500, title: "No token in the request" })
+    );
   });
 
   it("should fail if there was error in refreshing the token", async () => {
@@ -462,7 +474,9 @@ describe("AuthenticationController#getSessionState", () => {
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockToken);
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
-    expect(response).toEqual(left(new Error("Error refreshing the token")));
+    expect(response).toEqual(
+      left({ status: 500, title: "Error refreshing the token" })
+    );
   });
 });
 

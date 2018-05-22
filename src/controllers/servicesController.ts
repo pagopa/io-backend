@@ -4,8 +4,11 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
+import { Either, isLeft, left } from "fp-ts/lib/Either";
+import { IResponse } from "../app";
 import MessagesService from "../services/messagesService";
+import { ProblemJson } from "../types/api/ProblemJson";
+import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { extractUserFromRequest } from "../types/user";
 
 export default class ServicesController {
@@ -15,29 +18,22 @@ export default class ServicesController {
    * Returns the service identified by the provided id
    * code.
    */
-  public getService(req: express.Request, res: express.Response): void {
+  public async getService(
+    req: express.Request
+  ): Promise<Either<ProblemJson, IResponse<ProxyServicePublic>>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
+      return left({
+        status: 500,
+        title: error.message
       });
-      return;
     }
 
     // TODO: validate req.params.id
     const user = errorOrUser.value;
-    this.messagesService
-      .getService(user, req.params.id)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.messagesService.getService(user, req.params.id);
   }
 }

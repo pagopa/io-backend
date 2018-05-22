@@ -7,6 +7,8 @@ host: localhost
 basePath: /api/v1
 schemes:
   - https
+security:
+  - Bearer: []
 paths:
   "/services/{service_id}":
     x-swagger-router-controller: ServicesController
@@ -34,6 +36,8 @@ paths:
               version: 1
         '404':
           description: No service found for the provided ID.
+          schema:
+            $ref: "#/definitions/ProblemJson"
       parameters: []
   "/messages":
     x-swagger-router-controller: MessagesController
@@ -62,8 +66,12 @@ paths:
               next: https://example.com/next
         "404":
           description: No message found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the messages.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/messages/{id}":
     x-swagger-router-controller: MessagesController
     parameters:
@@ -94,8 +102,12 @@ paths:
               sender_service_id: "5a25abf4fcc89605c082f042c49a"
         "404":
           description: No message found for the provided ID.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the message.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/profile":
     x-swagger-router-controller: ProfileController
     get:
@@ -123,6 +135,8 @@ paths:
               email: "email@example.com"
         "500":
           description: There was an error in retrieving the user profile.
+          schema:
+            $ref: "#/definitions/ProblemJson"
     post:
       operationId: upsertProfile
       summary: Set User's profile
@@ -153,47 +167,14 @@ paths:
               is_inbox_enabled: true
               is_webhook_enabled: false
               version: 1
-        "404":
-          description: No user found for the provided fiscal code.
         '400':
           description: Invalid payload.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         '500':
           description: Profile cannot be updated.
-  "/notify":
-    x-swagger-router-controller: NotificationController
-    post:
-      operationId: notify
-      summary: Notify a user
-      description: |-
-        Post the notification to the user using a push notification.
-      parameters:
-        - in: body
-          name: body
           schema:
-            $ref: "#/definitions/Notification"
-          x-examples:
-            application/json:
-              message:
-                content:
-                    subject: message subject, aliquip sint nulla in estinut
-                    markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-                created_at: "2018-05-03T16:21:38.167Z"
-                fiscal_code: "TMMEXQ60A10Y526X"
-                id: "01CCKCY7QQ7WCHWTH8NB504386"
-                sender_service_id: "5a25abf4fcc89605c082f042c49a"
-              senderMetadata:
-                department_name: "Department name"
-                organization_name: "Organization name"
-                service_name: "Service name"
-      responses:
-        "200":
-          description: Success.
-        "500":
-          description: There was an error in forwarding the notification to the Notification Hub.
+            $ref: "#/definitions/ProblemJson"
   "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
@@ -217,10 +198,12 @@ paths:
               platform: "gcm"
               pushChannel: "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p"
       responses:
-        "200":
+        "201":
           description: Success.
         "500":
           description: There was an error in registering the device to the Notification Hub.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
   MessageContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageContent"
@@ -246,12 +229,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsWebhookEnabled"
   PaginationResponse:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PaginationResponse"
-  CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/CreatedMessageWithContent"
   ServicePublic:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServicePublic"
-  SenderMetadata:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/SenderMetadata"
   DepartmentName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/DepartmentName"
   OrganizationName:
@@ -315,18 +294,6 @@ definitions:
     required:
       - platform
       - pushChannel
-  Notification:
-    title: Notification
-    description: A received Notification.
-    type: object
-    properties:
-      message:
-        $ref: '#/definitions/CreatedMessageWithContent'
-      senderMetadata:
-        $ref: '#/definitions/SenderMetadata'
-    required:
-      - message
-      - senderMetadata
   ProfileWithEmail:
     title: Profile with wmail
     description: Describes the user's profile.
@@ -450,3 +417,8 @@ consumes:
   - application/json
 produces:
   - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

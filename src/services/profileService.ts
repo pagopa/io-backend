@@ -3,10 +3,11 @@
  * an API client.
  */
 
-import { isLeft } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
+import { IResponse } from "../app";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
@@ -32,7 +33,9 @@ export default class ProfileService {
    */
   public async getProfile(
     user: User
-  ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
+  ): Promise<
+    Either<ProblemJson, IResponse<ProfileWithoutEmail | ProfileWithEmail>>
+  > {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getProfileWithHttpOperationResponse();
@@ -48,16 +51,19 @@ export default class ProfileService {
           "Unknown response from getProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(profileErrorOnUnknownResponse);
+        return left(new Error(profileErrorOnUnknownResponse));
       }
 
-      if (!simpleResponse.isNotFound()) {
-        throw new Error(profileErrorOnApiError);
-      } else {
+      if (simpleResponse.isNotFound()) {
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
         // retrieved from SPID.
-        return toAppProfileWithoutEmail(user);
+        return right({
+          body: toAppProfileWithoutEmail(user),
+          status: 200
+        });
+      } else {
+        return left(new Error(profileErrorOnApiError));
       }
     }
 
@@ -69,11 +75,14 @@ export default class ProfileService {
         "Unknown response from getProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      throw new Error(profileErrorOnUnknownResponse);
+      return left(new Error(profileErrorOnUnknownResponse));
     }
 
     const apiProfile = errorOrApiProfile.value;
-    return toAppProfileWithEmail(apiProfile, user);
+    return right({
+      body: toAppProfileWithEmail(apiProfile, user),
+      status: 200
+    });
   }
 
   /**
@@ -82,7 +91,7 @@ export default class ProfileService {
   public async upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
-  ): Promise<ProfileWithEmail> {
+  ): Promise<Either<ProblemJson, IResponse<ProfileWithEmail>>> {
     const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
@@ -101,9 +110,9 @@ export default class ProfileService {
           "Unknown response from upsertProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(profileErrorOnUnknownResponse);
+        return left(new Error(profileErrorOnUnknownResponse));
       } else {
-        throw new Error(profileErrorOnApiError);
+        return left(new Error(profileErrorOnApiError));
       }
     }
 
@@ -115,10 +124,13 @@ export default class ProfileService {
         "Unknown response from upsertProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      throw new Error(profileErrorOnUnknownResponse);
+      return left(new Error(profileErrorOnUnknownResponse));
     }
 
     const apiProfile = errorOrApiProfile.value;
-    return toAppProfileWithEmail(apiProfile, user);
+    return right({
+      body: toAppProfileWithEmail(apiProfile, user),
+      status: 200
+    });
   }
 }

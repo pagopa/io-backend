@@ -10,6 +10,7 @@ import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import { IResponse } from "../app";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
+import { ProblemJson } from "../types/api/ProblemJson";
 import { SpidLevel } from "../types/spidLevel";
 import {
   extractUserFromRequest,
@@ -43,12 +44,15 @@ export default class AuthenticationController {
   public async acs(
     // tslint:disable-next-line:no-any
     userPayload: any
-  ): Promise<Either<Error, IResponse<string>>> {
+  ): Promise<Either<ProblemJson, IResponse<string>>> {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return left(error);
+      return left({
+        status: 500,
+        title: error.message
+      });
     }
 
     const spidUser = errorOrUser.value;
@@ -63,12 +67,18 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return left(error);
+      return left({
+        status: 500,
+        title: error.message
+      });
     }
     const response = errorOrResponse.value;
 
     if (!response) {
-      return left(new Error("Error creating the user session"));
+      return left({
+        status: 500,
+        title: "Error creating the user session"
+      });
     }
     const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
 
@@ -83,12 +93,15 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<Either<Error, IResponse<ILogoutRedirect>>> {
+  ): Promise<Either<ProblemJson, IResponse<ILogoutRedirect>>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return left(error);
+      return left({
+        status: 500,
+        title: error.message
+      });
     }
 
     const user = errorOrUser.value;
@@ -97,13 +110,19 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return left(error);
+      return left({
+        status: 500,
+        title: error.message
+      });
     }
 
     const response = errorOrResponse.value;
 
     if (!response) {
-      return left(new Error("Error creating the user session"));
+      return left({
+        status: 500,
+        title: "Error creating the user session"
+      });
     }
 
     // Logout from SPID.
@@ -114,7 +133,7 @@ export default class AuthenticationController {
     req.query = {};
     req.query.entityID = user.spid_idp;
 
-    return await this.spidLogout(req);
+    return this.spidLogout(req);
   }
 
   /**
@@ -122,10 +141,13 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<Either<Error, IResponse<IPublicSession>>> {
+  ): Promise<Either<ProblemJson, IResponse<IPublicSession>>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
-      return left(new Error("No token in the request"));
+      return left({
+        status: 500,
+        title: "No token in the request"
+      });
     }
 
     const token = maybeToken.value;
@@ -137,7 +159,10 @@ export default class AuthenticationController {
       if (isLeft(errorOrSessionState)) {
         // Unable to refresh token or session not found.
         const error = errorOrSessionState.value;
-        return left(error);
+        return left({
+          status: 500,
+          title: error.message
+        });
       }
 
       // Return the new session information.
@@ -170,7 +195,7 @@ export default class AuthenticationController {
   /**
    * The Single logout service.
    */
-  public slo(): Either<Error, IResponse<string>> {
+  public slo(): Either<ProblemJson, IResponse<string>> {
     return right({
       body: "/",
       status: 301
@@ -196,12 +221,12 @@ export default class AuthenticationController {
    */
   private spidLogout(
     req: express.Request
-  ): Promise<Either<Error, IResponse<ILogoutRedirect>>> {
+  ): Promise<Either<ProblemJson, IResponse<ILogoutRedirect>>> {
     return new Promise(resolve => {
       this.spidStrategy.logout(req, (err, logoutUrl) => {
         if (!err) {
           return resolve(
-            right<Error, IResponse<ILogoutRedirect>>({
+            right<ProblemJson, IResponse<ILogoutRedirect>>({
               body: {
                 logoutUrl
               },
@@ -209,7 +234,12 @@ export default class AuthenticationController {
             })
           );
         } else {
-          return resolve(left<Error, IResponse<ILogoutRedirect>>(err));
+          return resolve(
+            left<ProblemJson, IResponse<ILogoutRedirect>>({
+              status: 500,
+              title: err
+            })
+          );
         }
       });
     });

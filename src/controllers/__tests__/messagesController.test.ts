@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
+import { left, right } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
-import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import { EmailAddress } from "../../types/api/EmailAddress";
@@ -64,10 +64,6 @@ jest.mock("../../services/messagesService", () => {
   };
 });
 
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
-
 describe("MessagesController#getMessageByUser", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,10 +71,9 @@ describe("MessagesController#getMessageByUser", () => {
 
   it("calls the getMessageByUser on the messagesController with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(proxyMessagesResponse)
+      Promise.resolve(right(proxyMessagesResponse))
     );
 
     req.user = mockedUser;
@@ -87,20 +82,17 @@ describe("MessagesController#getMessageByUser", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessagesByUser(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessagesByUser(req);
 
     expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
-    expect(res.json).toHaveBeenCalledWith(proxyMessagesResponse);
+    expect(response).toEqual(right(proxyMessagesResponse));
   });
 
   it("calls the getMessageByUser on the messagesController with empty user", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(proxyMessagesResponse)
+      Promise.resolve(right(proxyMessagesResponse))
     );
 
     req.user = "";
@@ -109,21 +101,18 @@ describe("MessagesController#getMessageByUser", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessagesByUser(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessagesByUser(req);
 
     expect(mockGetMessagesByUser).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
+    expect(response).toEqual(
+      left({ status: 500, title: "Unable to decode the user" })
+    );
   });
 
   it("calls the getMessageByUser on the messagesController with valid values but user is not in proxy", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetMessagesByUser.mockReturnValue(Promise.reject(new Error("reject")));
+    mockGetMessagesByUser.mockReturnValue(left("reject"));
 
     req.user = mockedUser;
 
@@ -131,15 +120,10 @@ describe("MessagesController#getMessageByUser", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessagesByUser(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessagesByUser(req);
 
     expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
-    });
+    expect(response).toEqual(left("reject"));
   });
 });
 
@@ -150,9 +134,10 @@ describe("MessagesController#getMessage", () => {
 
   it("calls the getMessage on the messagesController with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetMessage.mockReturnValue(Promise.resolve(proxyMessageResponse));
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(right(proxyMessageResponse))
+    );
 
     req.user = mockedUser;
     req.params = { id: anId };
@@ -161,19 +146,18 @@ describe("MessagesController#getMessage", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessage(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessage(req);
 
     expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
-    expect(res.json).toHaveBeenCalledWith(proxyMessageResponse);
+    expect(response).toEqual(right(proxyMessageResponse));
   });
 
   it("calls the getMessage on the messagesController with empty user", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetMessage.mockReturnValue(Promise.resolve(proxyMessageResponse));
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(right(proxyMessageResponse))
+    );
 
     req.user = "";
     req.params = { id: anId };
@@ -182,21 +166,18 @@ describe("MessagesController#getMessage", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessage(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessage(req);
 
     expect(mockGetMessage).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
+    expect(response).toEqual(
+      left({ status: 500, title: "Unable to decode the user" })
+    );
   });
 
   it("calls the getMessage on the messagesController with valid user but user is not in proxy", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetMessage.mockReturnValue(Promise.reject(new Error("reject")));
+    mockGetMessage.mockReturnValue(left("reject"));
 
     req.user = mockedUser;
     req.params = { id: anId };
@@ -205,14 +186,9 @@ describe("MessagesController#getMessage", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessage(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessage(req);
 
     expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
-    });
+    expect(response).toEqual(left("reject"));
   });
 });

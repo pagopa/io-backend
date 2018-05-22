@@ -1,3 +1,4 @@
+import { right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/spidLevel";
@@ -126,7 +127,12 @@ describe("ProfileService#getProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
-    expect(res).toEqual(proxyProfileWithEmailResponse);
+    expect(res).toEqual(
+      right({
+        body: proxyProfileWithEmailResponse,
+        status: 200
+      })
+    );
   });
 
   it("returns a default user profile if the response from the API is not found", async () => {
@@ -140,7 +146,12 @@ describe("ProfileService#getProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
-    expect(res).toEqual(proxyProfileWithoutEmailResponse);
+    expect(res).toEqual(
+      right({
+        body: proxyProfileWithoutEmailResponse,
+        status: 200
+      })
+    );
   });
 
   it("returns an error if the API returns an error", async () => {
@@ -176,7 +187,12 @@ describe("ProfileService#upsertProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockUpsertProfile).toHaveBeenCalledWith(ApiProfileUpsertRequest);
-    expect(res).toEqual(proxyProfileWithEmailResponse);
+    expect(res).toEqual(
+      right({
+        body: proxyProfileWithEmailResponse,
+        status: 200
+      })
+    );
   });
 
   it("fails to create a new user profile to the API", async () => {
