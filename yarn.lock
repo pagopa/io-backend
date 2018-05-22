@@ -1817,8 +1817,9 @@ fetch-cookie@~0.6.0:
     es6-denodeify "^0.1.1"
     tough-cookie "^2.3.1"
 
-fetch-ponyfill@amarzavery/fetch-ponyfill#master:
+"fetch-ponyfill@github:amarzavery/fetch-ponyfill#master":
   version "4.1.0"
+  uid "136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   resolved "https://codeload.github.com/amarzavery/fetch-ponyfill/tar.gz/136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   dependencies:
     fetch-cookie "~0.6.0"
@@ -2744,6 +2745,13 @@ isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
 
+isomorphic-xml2js@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/isomorphic-xml2js/-/isomorphic-xml2js-0.0.3.tgz#522287ed51f8bea657afaf37c9494e23bdef53e9"
+  dependencies:
+    "@types/xml2js" "^0.4.2"
+    xml2js "^0.4.19"
+
 isstream@0.1.x, isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
@@ -3592,10 +3600,6 @@ mock-redis-client@^0.91.13:
     lodash "^4.5.0"
     node-redis-mock "^0.2.14"
 
-moment@^2.21.0:
-  version "2.22.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.1.tgz#529a2e9bf973f259c9643d237fda84de3a26e8ad"
-
 monocle-ts@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.0.0.tgz#6ea0f4c5c6b6959157452994bfec7ed170973b8c"
@@ -3616,9 +3620,9 @@ mpns@2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/mpns/-/mpns-2.1.3.tgz#4328bb23ca79669e3383389074c898713e22ccb9"
 
-ms-rest-js@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/ms-rest-js/-/ms-rest-js-0.3.1.tgz#33162df9e2b263114958d2bca5a091542700276d"
+ms-rest-js@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/ms-rest-js/-/ms-rest-js-0.4.0.tgz#f26a742753fb42df0649397b0620dde2f2610948"
   dependencies:
     "@types/form-data" "^2.2.1"
     "@types/is-stream" "^1.1.0"
@@ -3626,14 +3630,13 @@ ms-rest-js@^0.3.1:
     "@types/node-fetch" "^1.6.7"
     "@types/uuid" "^3.4.3"
     fetch-cookie "^0.7.0"
-    fetch-ponyfill amarzavery/fetch-ponyfill#master
+    fetch-ponyfill "github:amarzavery/fetch-ponyfill#master"
     form-data "^2.3.2"
     is-buffer "^2.0.0"
     is-stream "^1.1.0"
-    moment "^2.21.0"
+    isomorphic-xml2js "^0.0.3"
     url-parse "^1.2.0"
     uuid "^3.2.1"
-    xml2js "^0.4.19"
 
 ms@2.0.0:
   version "2.0.0"
@@ -5433,6 +5436,7 @@ verror@1.10.0:
 
 vm2@patriksimek/vm2#custom_files:
   version "3.5.0"
+  uid "7e82f90ac705fc44fad044147cb0df09b4c79a57"
   resolved "https://codeload.github.com/patriksimek/vm2/tar.gz/7e82f90ac705fc44fad044147cb0df09b4c79a57"
 
 voca@^1.4.0:
