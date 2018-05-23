@@ -2,10 +2,9 @@
  * This service retrieves messages from the API system using an API client.
  */
 
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { isLeft } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as winston from "winston";
-import { IResponse } from "../app";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
@@ -19,11 +18,25 @@ import {
 } from "../types/message";
 import { toAppService } from "../types/service";
 import { User } from "../types/user";
+import {
+  IResponseErrorFatal,
+  IResponseErrorNotFound,
+  IResponseSuccessJson,
+  ResponseErrorFatal,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "../utils/response";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
+const messageNotFound = "Not found.";
+
+export type messagesResponse<T> =
+  | IResponseErrorFatal
+  | IResponseErrorNotFound
+  | IResponseSuccessJson<T>;
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -33,7 +46,7 @@ export default class MessagesService {
    */
   public async getMessagesByUser(
     user: User
-  ): Promise<Either<ProblemJson, IResponse<Messages>>> {
+  ): Promise<messagesResponse<Messages>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessagesByUserWithHttpOperationResponse();
@@ -49,14 +62,14 @@ export default class MessagesService {
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return left(new Error(messageErrorOnUnknownResponse));
+        return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
       }
 
-      const problemJson = errorOrProblemJson.value;
       if (simpleResponse.isNotFound()) {
-        return left(problemJson);
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
-        return left(new Error(messageErrorOnApiError));
+        winston.error("Api error: %s", simpleResponse.parsedBody());
+        return ResponseErrorFatal(messageErrorOnApiError, "");
       }
     }
 
@@ -68,18 +81,15 @@ export default class MessagesService {
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
-      return left(new Error(messageErrorOnUnknownResponse));
+      return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
     }
 
     const apiMessages = errorOrApiMessages.value;
 
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-    return right({
-      body: {
-        items: appMessages,
-        page_size: apiMessages.pageSize
-      },
-      status: 200
+    return ResponseSuccessJson({
+      items: appMessages,
+      page_size: apiMessages.pageSize
     });
   }
 
@@ -89,7 +99,7 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<Either<ProblemJson, IResponse<MessageWithContent>>> {
+  ): Promise<messagesResponse<MessageWithContent>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
@@ -105,14 +115,14 @@ export default class MessagesService {
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return left(new Error(messageErrorOnUnknownResponse));
+        return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
       }
 
-      const problemJson = errorOrProblemJson.value;
       if (simpleResponse.isNotFound()) {
-        return left(problemJson);
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
-        return left(new Error(messageErrorOnApiError));
+        winston.error("Api error: %s", simpleResponse.parsedBody());
+        return ResponseErrorFatal(messageErrorOnApiError, "");
       }
     }
 
@@ -124,14 +134,11 @@ export default class MessagesService {
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
-      return left(new Error(messageErrorOnUnknownResponse));
+      return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
     }
 
     const apiMessage = errorOrApiMessage.value;
-    return right({
-      body: toAppMessageWithContent(apiMessage),
-      status: 200
-    });
+    return ResponseSuccessJson(toAppMessageWithContent(apiMessage));
   }
 
   /**
@@ -140,7 +147,7 @@ export default class MessagesService {
   public async getService(
     user: User,
     serviceId: string
-  ): Promise<Either<ProblemJson, IResponse<ProxyServicePublic>>> {
+  ): Promise<messagesResponse<ProxyServicePublic>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -156,14 +163,13 @@ export default class MessagesService {
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return left(new Error(messageErrorOnUnknownResponse));
+        return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
       }
 
-      const problemJson = errorOrProblemJson.value;
       if (simpleResponse.isNotFound()) {
-        return left(problemJson);
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
-        return left(new Error(messageErrorOnApiError));
+        return ResponseErrorFatal(messageErrorOnApiError, "");
       }
     }
 
@@ -175,13 +181,10 @@ export default class MessagesService {
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );
-      return left(new Error(messageErrorOnUnknownResponse));
+      return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
     }
 
     const apiService = errorOrApiService.value;
-    return right({
-      body: toAppService(apiService),
-      status: 200
-    });
+    return ResponseSuccessJson(toAppService(apiService));
   }
 }

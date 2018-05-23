@@ -4,12 +4,11 @@
  */
 
 import * as express from "express";
-import { Either, isLeft, left } from "fp-ts/lib/Either";
-import { IResponse } from "../app";
-import MessagesService from "../services/messagesService";
-import { ProblemJson } from "../types/api/ProblemJson";
+import { isLeft } from "fp-ts/lib/Either";
+import MessagesService, { messagesResponse } from "../services/messagesService";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { extractUserFromRequest } from "../types/user";
+import { ResponseErrorFatal } from "../utils/response";
 
 export default class ServicesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -20,16 +19,13 @@ export default class ServicesController {
    */
   public async getService(
     req: express.Request
-  ): Promise<Either<ProblemJson, IResponse<ProxyServicePublic>>> {
+  ): Promise<messagesResponse<ProxyServicePublic>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return left({
-        status: 500,
-        title: error.message
-      });
+      return ResponseErrorFatal(error.message, "");
     }
 
     // TODO: validate req.params.id

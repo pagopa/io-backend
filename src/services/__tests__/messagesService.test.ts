@@ -1,4 +1,4 @@
-import { left, right } from "fp-ts/lib/Either";
+import { right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/spidLevel";
@@ -210,12 +210,11 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual(
-      right({
-        body: proxyMessagesResponse,
-        status: 200
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
   });
 
   it("returns an empty list if the of messages from the API is empty", async () => {
@@ -229,7 +228,10 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual(left({ type: "about:blank" }));
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseErrorNotFound"
+    });
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
@@ -283,8 +285,9 @@ describe("MessageService#getMessage", () => {
     expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
     expect(res).toEqual(
       right({
-        body: proxyMessageResponse,
-        status: 200
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: proxyMessageResponse
       })
     );
   });
@@ -340,8 +343,9 @@ describe("MessageService#getService", () => {
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
     expect(res).toEqual(
       right({
-        body: proxyServiceResponse,
-        status: 200
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: proxyServiceResponse
       })
     );
   });

@@ -12,10 +12,6 @@ import container, {
   SPID_STRATEGY,
   URL_TOKEN_STRATEGY
 } from "./container";
-import AuthenticationController, {
-  ILogoutRedirect,
-  IPublicSession
-} from "./controllers/authenticationController";
 import ProfileController from "./controllers/profileController";
 
 import * as bodyParser from "body-parser";
@@ -30,52 +26,13 @@ import ServicesController from "./controllers/servicesController";
 
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
-import { Either } from "fp-ts/lib/Either";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-import { Messages } from "./types/api/Messages";
-import { MessageWithContent } from "./types/api/MessageWithContent";
-import { ProblemJson } from "./types/api/ProblemJson";
-import { ProfileWithEmail } from "./types/api/ProfileWithEmail";
-import { ProfileWithoutEmail } from "./types/api/ProfileWithoutEmail";
-import { ServicePublic as ProxyServicePublic } from "./types/api/ServicePublic";
+import AuthenticationController from "./controllers/authenticationController";
 import checkIP from "./utils/middleware/checkIP";
-
-/**
- * Return a response to the client.
- */
-function respond(
-  response: Either<
-    ProblemJson,
-    IResponse<
-      | string
-      | IPublicSession
-      | ILogoutRedirect
-      | ProfileWithoutEmail
-      | ProfileWithEmail
-      | Messages
-      | MessageWithContent
-      | ProxyServicePublic
-    >
-  >,
-  res: express.Response
-): void {
-  response.fold(
-    err => {
-      res.status(err.status || 500).json(err);
-    },
-    data => {
-      if (data.status === 301 && typeof data.body === "string") {
-        res.redirect(data.body);
-      } else {
-        res.status(data.status).json(data.body);
-      }
-    }
-  );
-}
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -103,15 +60,10 @@ function withSpidAuth(
       if (!user) {
         return res.redirect(clientLoginRedirectionUrl);
       }
-      const maybeResponse = await controller.acs(user);
-      respond(maybeResponse, res);
+      const response = await controller.acs(user);
+      response.apply(res);
     })(req, res, next);
   };
-}
-
-export interface IResponse<T> {
-  readonly body: T;
-  readonly status: number;
 }
 
 export function newApp(
@@ -183,19 +135,19 @@ export function newApp(
     "/logout",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await acsController.logout(req);
-      respond(maybeResponse, res);
+      const response = await acsController.logout(req);
+      response.apply(res);
     }
   );
 
   app.post("/slo", (_, res: express.Response) => {
-    const maybeResponse = acsController.slo();
-    respond(maybeResponse, res);
+    const response = acsController.slo();
+    response.apply(res);
   });
 
   app.get("/session", async (req: express.Request, res: express.Response) => {
-    const maybeResponse = await acsController.getSessionState(req);
-    respond(maybeResponse, res);
+    const response = await acsController.getSessionState(req);
+    response.apply(res);
   });
 
   app.post(
@@ -208,7 +160,8 @@ export function newApp(
   );
 
   app.get("/metadata", (_, res: express.Response) => {
-    acsController.metadata(res);
+    const response = acsController.metadata();
+    response.apply(res);
   });
 
   // Liveness probe for Kubernetes.
@@ -222,8 +175,8 @@ export function newApp(
     "/api/v1/profile",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await profileController.getProfile(req);
-      respond(maybeResponse, res);
+      const response = await profileController.getProfile(req);
+      response.apply(res);
     }
   );
 
@@ -231,8 +184,8 @@ export function newApp(
     "/api/v1/profile",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await profileController.upsertProfile(req);
-      respond(maybeResponse, res);
+      const response = await profileController.upsertProfile(req);
+      response.apply(res);
     }
   );
 
@@ -240,8 +193,8 @@ export function newApp(
     "/api/v1/messages",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await messagesController.getMessagesByUser(req);
-      respond(maybeResponse, res);
+      const response = await messagesController.getMessagesByUser(req);
+      response.apply(res);
     }
   );
 
@@ -249,8 +202,8 @@ export function newApp(
     "/api/v1/messages/:id",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await messagesController.getMessage(req);
-      respond(maybeResponse, res);
+      const response = await messagesController.getMessage(req);
+      response.apply(res);
     }
   );
 
@@ -258,8 +211,8 @@ export function newApp(
     "/api/v1/services/:id",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await servicesController.getService(req);
-      respond(maybeResponse, res);
+      const response = await servicesController.getService(req);
+      response.apply(res);
     }
   );
 
@@ -268,8 +221,8 @@ export function newApp(
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await notificationController.notify(req);
-      respond(maybeResponse, res);
+      const response = await notificationController.notify(req);
+      response.apply(res);
     }
   );
 
@@ -277,10 +230,10 @@ export function newApp(
     "/api/v1/installations/:id",
     bearerTokenAuth,
     async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await notificationController.createOrUpdateInstallation(
+      const response = await notificationController.createOrUpdateInstallation(
         req
       );
-      respond(maybeResponse, res);
+      response.apply(res);
     }
   );
 

@@ -4,13 +4,12 @@
  */
 
 import * as express from "express";
-import { Either, isLeft, left } from "fp-ts/lib/Either";
-import { IResponse } from "../app";
-import MessagesService from "../services/messagesService";
+import { isLeft } from "fp-ts/lib/Either";
+import MessagesService, { messagesResponse } from "../services/messagesService";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
-import { ProblemJson } from "../types/api/ProblemJson";
 import { extractUserFromRequest } from "../types/user";
+import { ResponseErrorFatal } from "../utils/response";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -21,16 +20,13 @@ export default class MessagesController {
    */
   public async getMessagesByUser(
     req: express.Request
-  ): Promise<Either<ProblemJson, IResponse<Messages>>> {
+  ): Promise<messagesResponse<Messages>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return left({
-        status: 500,
-        title: error.message
-      });
+      return ResponseErrorFatal(error.message, "");
     }
 
     const user = errorOrUser.value;
@@ -42,16 +38,13 @@ export default class MessagesController {
    */
   public async getMessage(
     req: express.Request
-  ): Promise<Either<ProblemJson, IResponse<MessageWithContent>>> {
+  ): Promise<messagesResponse<MessageWithContent>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return left({
-        status: 500,
-        title: error.message
-      });
+      return ResponseErrorFatal(error.message, "");
     }
 
     // TODO: validate req.params.id

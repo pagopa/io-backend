@@ -252,10 +252,14 @@ describe("AuthenticationController#slo", () => {
   });
 
   it("redirects to the home page", () => {
+    const res = mockRes();
+
     const response = controller.slo();
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response.value).toEqual({ body: "/", status: 301 });
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith("/");
   });
 });
 
@@ -556,7 +560,8 @@ OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
 IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
 </X509Certificate></X509Data></KeyInfo></Signature></EntityDescriptor>`;
 
-    controller.metadata(res);
+    const matadata = controller.metadata();
+    matadata.apply(res);
 
     expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(200);

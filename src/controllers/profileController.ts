@@ -4,14 +4,21 @@
  */
 
 import * as express from "express";
-import { Either, isLeft, left } from "fp-ts/lib/Either";
-import { IResponse } from "../app";
-import ProfileService from "../services/profileService";
-import { ProblemJson } from "../types/api/ProblemJson";
+import { isLeft } from "fp-ts/lib/Either";
+import ProfileService, { profileResponse } from "../services/profileService";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
+import {
+  IResponseErrorValidation,
+  ResponseErrorFatal,
+  ResponseErrorValidation
+} from "../utils/response";
+
+export type profileResponseWithValidationError<T> =
+  | profileResponse<T>
+  | IResponseErrorValidation;
 
 export default class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -22,18 +29,13 @@ export default class ProfileController {
    */
   public async getProfile(
     req: express.Request
-  ): Promise<
-    Either<ProblemJson, IResponse<ProfileWithoutEmail | ProfileWithEmail>>
-  > {
+  ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return left({
-        status: 500,
-        title: error.message
-      });
+      return ResponseErrorFatal(error.message, "");
     }
 
     const user = errorOrUser.value;
@@ -46,16 +48,13 @@ export default class ProfileController {
    */
   public async upsertProfile(
     req: express.Request
-  ): Promise<Either<ProblemJson, IResponse<ProfileWithEmail>>> {
+  ): Promise<profileResponseWithValidationError<ProfileWithEmail>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return left({
-        status: 500,
-        title: error.message
-      });
+      return ResponseErrorFatal(error.message, "");
     }
 
     const errorOrUpsertProfile = extractUpsertProfileFromRequest(req);
@@ -63,10 +62,7 @@ export default class ProfileController {
     if (isLeft(errorOrUpsertProfile)) {
       // Unable to extract the upsert profile from the request.
       const error = errorOrUpsertProfile.value;
-      return left({
-        status: 400,
-        title: error.message
-      });
+      return ResponseErrorValidation(error.message, "");
     }
 
     const user = errorOrUser.value;
