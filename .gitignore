@@ -33,3 +33,6 @@ npm-debug.log
 !/docker/spid/config.js
 !/spid-batch-import/spid-idp-spimport.js
 !/spid-batch-import/spid-idp-userimport.js
+
+# Exclude certificates
+*.pem
