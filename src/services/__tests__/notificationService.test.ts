@@ -1,6 +1,5 @@
 /* tslint:disable:no-null-keyword */
 
-import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { InstallationID } from "../../types/api/InstallationID";
@@ -98,12 +97,11 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       anAppleDevice
     );
 
-    expect(res).toEqual(
-      right({
-        body: "ok",
-        status: 200
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: "ok"
+    });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       anAppleInstallation,
       expect.any(Function)
@@ -123,12 +121,11 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       aGoogleDevice
     );
 
-    expect(res).toEqual(
-      right({
-        body: "ok",
-        status: 200
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: "ok"
+    });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       aGoogleInstallation,
       expect.any(Function)
@@ -148,7 +145,10 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       anAppleDevice
     );
 
-    expect(res).toEqual(left(new Error(aGenericError)));
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseErrorFatal"
+    });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       anAppleInstallation,
       expect.any(Function)
@@ -170,12 +170,11 @@ describe("NotificationService#notify", () => {
 
     const res = await service.notify(aValidNotification);
 
-    expect(res).toEqual(
-      right({
-        body: "ok",
-        status: 200
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: "ok"
+    });
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
@@ -196,7 +195,10 @@ describe("NotificationService#notify", () => {
 
     const res = await service.notify(aValidNotification);
 
-    expect(res).toEqual(left(new Error(aGenericError)));
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseErrorFatal"
+    });
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {

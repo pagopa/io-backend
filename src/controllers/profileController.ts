@@ -35,7 +35,7 @@ export default class ProfileController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const user = errorOrUser.value;
@@ -54,7 +54,7 @@ export default class ProfileController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const errorOrUpsertProfile = extractUpsertProfileFromRequest(req);
@@ -62,7 +62,7 @@ export default class ProfileController {
     if (isLeft(errorOrUpsertProfile)) {
       // Unable to extract the upsert profile from the request.
       const error = errorOrUpsertProfile.value;
-      return ResponseErrorValidation(error.message, "");
+      return ResponseErrorValidation(error.message);
     }
 
     const user = errorOrUser.value;

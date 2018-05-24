@@ -1,8 +1,8 @@
-import { right } from "fp-ts/lib/Either";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 import { newApp } from "../app";
+import { ResponseSuccessJson } from "../utils/response";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -66,14 +66,7 @@ describe("Test redirect to HTTPS", () => {
 
 describe("Test the checkIP middleware", () => {
   it("should allow in-range IP", () => {
-    mockNotify.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
-    );
+    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
 
     return request(app)
       .post("/api/v1/notify?token=12345")

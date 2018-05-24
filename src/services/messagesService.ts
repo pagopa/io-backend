@@ -62,14 +62,14 @@ export default class MessagesService {
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
+        return ResponseErrorFatal(messageErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound, "");
+        return ResponseErrorNotFound(messageNotFound);
       } else {
         winston.error("Api error: %s", simpleResponse.parsedBody());
-        return ResponseErrorFatal(messageErrorOnApiError, "");
+        return ResponseErrorFatal(messageErrorOnApiError);
       }
     }
 
@@ -81,7 +81,7 @@ export default class MessagesService {
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
-      return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
+      return ResponseErrorFatal(messageErrorOnUnknownResponse);
     }
 
     const apiMessages = errorOrApiMessages.value;
@@ -115,14 +115,14 @@ export default class MessagesService {
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
+        return ResponseErrorFatal(messageErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound, "");
+        return ResponseErrorNotFound(messageNotFound);
       } else {
         winston.error("Api error: %s", simpleResponse.parsedBody());
-        return ResponseErrorFatal(messageErrorOnApiError, "");
+        return ResponseErrorFatal(messageErrorOnApiError);
       }
     }
 
@@ -134,7 +134,7 @@ export default class MessagesService {
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
-      return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
+      return ResponseErrorFatal(messageErrorOnUnknownResponse);
     }
 
     const apiMessage = errorOrApiMessage.value;
@@ -163,13 +163,13 @@ export default class MessagesService {
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
+        return ResponseErrorFatal(messageErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound, "");
+        return ResponseErrorNotFound(messageNotFound);
       } else {
-        return ResponseErrorFatal(messageErrorOnApiError, "");
+        return ResponseErrorFatal(messageErrorOnApiError);
       }
     }
 
@@ -181,7 +181,7 @@ export default class MessagesService {
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );
-      return ResponseErrorFatal(messageErrorOnUnknownResponse, "");
+      return ResponseErrorFatal(messageErrorOnUnknownResponse);
     }
 
     const apiService = errorOrApiService.value;

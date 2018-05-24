@@ -1,4 +1,3 @@
-import { right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/spidLevel";
@@ -287,13 +286,11 @@ describe("MessageService#getMessage", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
-    expect(res).toEqual(
-      right({
-        apply: expect.any(Function),
-        kind: "IResponseSuccessJson",
-        value: proxyMessageResponse
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
   });
 
   it("returns an error if the getMessage API returns an error", async () => {
@@ -345,13 +342,11 @@ describe("MessageService#getService", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
-    expect(res).toEqual(
-      right({
-        apply: expect.any(Function),
-        kind: "IResponseSuccessJson",
-        value: proxyServiceResponse
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyServiceResponse
+    });
   });
 
   it("returns an error if the API returns an error", async () => {

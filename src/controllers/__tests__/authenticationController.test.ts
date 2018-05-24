@@ -133,6 +133,12 @@ const invalidUserPayload = {
   sessionIndex: "123sessionIndex"
 };
 
+const anErrorResponse = {
+  detail: undefined,
+  status: 500,
+  type: undefined
+};
+
 const mockSet = jest.fn();
 const mockGet = jest.fn();
 const mockDel = jest.fn();
@@ -205,44 +211,63 @@ describe("AuthenticationController#acs", () => {
 
   it("redirects to the correct url if userPayload is a valid User", async () => {
     mockSet.mockReturnValue(Promise.resolve(right(true)));
+    const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      right({ body: "/profile.html?token=" + mockToken, status: 301 })
+    expect(res.redirect).toHaveBeenCalledWith(
+      "/profile.html?token=" + mockToken,
+      301
     );
     expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser, aTimestamp);
   });
 
   it("should fail if userPayload is invalid", async () => {
+    const res = mockRes();
+
     const response = await controller.acs(invalidUserPayload);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      left({ status: 500, title: "Unable to decode the user" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Unable to decode the user"
+    });
     expect(mockSet).not.toHaveBeenCalled();
   });
 
   it("should fail if the session can not be saved", async () => {
     mockSet.mockReturnValue(Promise.resolve(right(false)));
+    const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      left({ status: 500, title: "Error creating the user session" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Error creating the user session"
+    });
   });
 
   it("should fail if Redis client returns an error", async () => {
     mockSet.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+    const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left({ status: 500, title: "Redis error" }));
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Redis error"
+    });
   });
 });
 
@@ -258,8 +283,7 @@ describe("AuthenticationController#slo", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(301);
-    expect(res.redirect).toHaveBeenCalledWith("/");
+    expect(res.redirect).toHaveBeenCalledWith("/", 301);
   });
 });
 
@@ -270,6 +294,7 @@ describe("AuthenticationController#logout", () => {
   });
 
   it("extracts the logout url", async () => {
+    const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
 
@@ -280,30 +305,33 @@ describe("AuthenticationController#logout", () => {
     mockDel.mockReturnValue(Promise.resolve(right(true)));
 
     const response = await controller.logout(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
     expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
-    expect(response).toEqual(
-      right({ body: { logoutUrl: "http://www.example.com" }, status: 200 })
-    );
+    expect(res.redirect).toHaveBeenCalledWith("http://www.example.com", 301);
   });
 
   it("should fail if the generation user data is invalid", async () => {
+    const res = mockRes();
     const req = mockReq();
-
     req.user = invalidUserPayload;
 
     const response = await controller.logout(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(response).toEqual(
-      left({ status: 500, title: "Unable to decode the user" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Unable to decode the user"
+    });
   });
 
   it("should fail if the generation of logout fails", async () => {
+    const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
 
@@ -316,41 +344,55 @@ describe("AuthenticationController#logout", () => {
     mockDel.mockReturnValue(Promise.resolve(right(true)));
 
     const response = await controller.logout(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockToken);
-    expect(response).toEqual(
-      left({ status: 500, title: new Error("Error message") })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Error message"
+    });
   });
 
   it("should fail if the session can not be saved", async () => {
+    const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
     mockDel.mockReturnValue(Promise.resolve(right(false)));
 
     const response = await controller.logout(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      left({ status: 500, title: "Error creating the user session" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Error creating the user session"
+    });
   });
 
   it("should fail if Redis client returns an error", async () => {
+    const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
     mockDel.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
 
     const response = await controller.logout(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(left({ status: 500, title: "Redis error" }));
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Redis error"
+    });
   });
 });
 
 describe("AuthenticationController#getSessionState", () => {
   it("returns correct session state for expired session", async () => {
+    const res = mockRes();
     const req = mockReq();
 
     req.headers = {};
@@ -370,23 +412,21 @@ describe("AuthenticationController#getSessionState", () => {
     );
 
     const response = await controller.getSessionState(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockToken);
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
-    expect(response).toEqual(
-      right({
-        body: {
-          expired: true,
-          newToken: aRefreshedToken,
-          spidLevel: aValidSpidLevel
-        },
-        status: 200
-      })
-    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      expired: true,
+      newToken: aRefreshedToken,
+      spidLevel: aValidSpidLevel
+    });
   });
 
   it("returns correct session state for valid session", async () => {
+    const res = mockRes();
     const req = mockReq();
 
     req.headers = {};
@@ -405,62 +445,72 @@ describe("AuthenticationController#getSessionState", () => {
     mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
 
     const response = await controller.getSessionState(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockToken);
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
-    expect(response).toEqual(
-      right({
-        body: {
-          expireAt: 123,
-          expired: false,
-          spidLevel: "https://www.spid.gov.it/SpidL2"
-        },
-        status: 200
-      })
-    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      expireAt: 123,
+      expired: false,
+      spidLevel: "https://www.spid.gov.it/SpidL2"
+    });
   });
 
   it("should fail if no token found in the request", async () => {
+    const res = mockRes();
     const req = mockReq();
 
     const response = await controller.getSessionState(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      left({ status: 500, title: "No token in the request" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "No token in the request"
+    });
   });
 
   it("should fail if invalid token found in the request, no Bearer string", async () => {
+    const res = mockRes();
     const req = mockReq();
 
     req.headers = {};
     req.headers.authorization = "Invalid token";
 
     const response = await controller.getSessionState(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      left({ status: 500, title: "No token in the request" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "No token in the request"
+    });
   });
 
   it("should fail if invalid token found in the request, too much arguments", async () => {
+    const res = mockRes();
     const req = mockReq();
 
     req.headers = {};
     req.headers.authorization = "Bearer 123 456";
 
     const response = await controller.getSessionState(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(response).toEqual(
-      left({ status: 500, title: "No token in the request" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "No token in the request"
+    });
   });
 
   it("should fail if there was error in refreshing the token", async () => {
+    const res = mockRes();
     const req = mockReq();
 
     req.headers = {};
@@ -474,13 +524,16 @@ describe("AuthenticationController#getSessionState", () => {
     );
 
     const response = await controller.getSessionState(req);
+    response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockToken);
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
-    expect(response).toEqual(
-      left({ status: 500, title: "Error refreshing the token" })
-    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      title: "Error refreshing the token"
+    });
   });
 });
 

@@ -56,7 +56,7 @@ export default class ProfileService {
           "Unknown response from getProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(profileErrorOnUnknownResponse, "");
+        return ResponseErrorFatal(profileErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
@@ -65,7 +65,7 @@ export default class ProfileService {
         // retrieved from SPID.
         return ResponseSuccessJson(toAppProfileWithoutEmail(user));
       } else {
-        return ResponseErrorFatal(profileErrorOnApiError, "");
+        return ResponseErrorFatal(profileErrorOnApiError);
       }
     }
 
@@ -77,7 +77,7 @@ export default class ProfileService {
         "Unknown response from getProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      return ResponseErrorFatal(profileErrorOnUnknownResponse, "");
+      return ResponseErrorFatal(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;
@@ -109,9 +109,9 @@ export default class ProfileService {
           "Unknown response from upsertProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(profileErrorOnUnknownResponse, "");
+        return ResponseErrorFatal(profileErrorOnUnknownResponse);
       } else {
-        return ResponseErrorFatal(profileErrorOnApiError, "");
+        return ResponseErrorFatal(profileErrorOnApiError);
       }
     }
 
@@ -123,7 +123,7 @@ export default class ProfileService {
         "Unknown response from upsertProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      return ResponseErrorFatal(profileErrorOnUnknownResponse, "");
+      return ResponseErrorFatal(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;

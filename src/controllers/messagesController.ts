@@ -26,7 +26,7 @@ export default class MessagesController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const user = errorOrUser.value;
@@ -44,7 +44,7 @@ export default class MessagesController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     // TODO: validate req.params.id

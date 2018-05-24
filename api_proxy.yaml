@@ -260,7 +260,8 @@ definitions:
         $ref: "#/definitions/Timestamp"
     required:
       - id
-      - content
+      - sender_service_id
+      - created_at
   MessageWithoutContent:
     title: Message without content
     type: object

@@ -38,7 +38,7 @@ interface IResponseErrorGeneric extends IResponse<"IResponseErrorGeneric"> {}
 function ResponseErrorGeneric(
   status: HttpStatusCode,
   title: string,
-  detail: string,
+  detail?: string,
   problemType?: string
 ): IResponseErrorGeneric {
   const problem: ProblemJson = {
@@ -115,7 +115,7 @@ export interface IResponseRedirect extends IResponse<"IResponseRedirect"> {}
  */
 export function ResponseRedirect(o: string): IResponseRedirect {
   return {
-    apply: res => res.redirect(o),
+    apply: res => res.redirect(o, 301),
     kind: "IResponseRedirect"
   };
 }
@@ -131,7 +131,7 @@ export interface IResponseErrorNotFound
  */
 export function ResponseErrorNotFound(
   title: string,
-  detail: string
+  detail?: string
 ): IResponseErrorNotFound {
   return {
     ...ResponseErrorGeneric(HTTP_STATUS_404, title, detail),
@@ -150,7 +150,7 @@ export interface IResponseErrorValidation
  */
 export function ResponseErrorValidation(
   title: string,
-  detail: string
+  detail?: string
 ): IResponseErrorValidation {
   return {
     ...ResponseErrorGeneric(HTTP_STATUS_400, title, detail),
@@ -168,7 +168,7 @@ export interface IResponseErrorFatal extends IResponse<"IResponseErrorFatal"> {}
  */
 export function ResponseErrorFatal(
   title: string,
-  detail: string
+  detail?: string
 ): IResponseErrorFatal {
   return {
     ...ResponseErrorGeneric(HTTP_STATUS_500, title, detail),

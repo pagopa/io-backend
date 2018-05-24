@@ -53,7 +53,7 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const spidUser = errorOrUser.value;
@@ -68,12 +68,12 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
     const response = errorOrResponse.value;
 
     if (!response) {
-      return ResponseErrorFatal("Error creating the user session", "");
+      return ResponseErrorFatal("Error creating the user session");
     }
     const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
 
@@ -90,7 +90,7 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const user = errorOrUser.value;
@@ -99,13 +99,13 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const response = errorOrResponse.value;
 
     if (!response) {
-      return ResponseErrorFatal("Error creating the user session", "");
+      return ResponseErrorFatal("Error creating the user session");
     }
 
     // Logout from SPID.
@@ -127,7 +127,7 @@ export default class AuthenticationController {
   ): Promise<IResponseErrorFatal | IResponseSuccessJson<IPublicSession>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
-      return ResponseErrorFatal("No token in the request", "");
+      return ResponseErrorFatal("No token in the request");
     }
 
     const token = maybeToken.value;
@@ -139,7 +139,7 @@ export default class AuthenticationController {
       if (isLeft(errorOrSessionState)) {
         // Unable to refresh token or session not found.
         const error = errorOrSessionState.value;
-        return ResponseErrorFatal(error.message, "");
+        return ResponseErrorFatal(error.message);
       }
 
       // Return the new session information.
@@ -192,7 +192,7 @@ export default class AuthenticationController {
         if (!err) {
           return resolve(ResponseRedirect(logoutUrl));
         } else {
-          return resolve(ResponseErrorFatal(err, ""));
+          return resolve(ResponseErrorFatal(err.message));
         }
       });
     });

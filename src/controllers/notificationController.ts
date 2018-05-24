@@ -30,7 +30,7 @@ export default class NotificationController {
         "Unable to parse the notification body: %s",
         ReadableReporter.report(errorOrNotification)
       );
-      return ResponseErrorFatal("Unable to parse the notification body", "");
+      return ResponseErrorFatal("Unable to parse the notification body");
     }
 
     const notification = errorOrNotification.value;
@@ -46,7 +46,7 @@ export default class NotificationController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorFatal(error.message);
     }
 
     const errorOrInstallationID = InstallationID.decode(req.params.id);
@@ -56,7 +56,7 @@ export default class NotificationController {
         "Unable to parse the installation ID: %s",
         ReadableReporter.report(errorOrInstallationID)
       );
-      return ResponseErrorFatal("Unable to parse the installation ID", "");
+      return ResponseErrorFatal("Unable to parse the installation ID");
     }
 
     const errorOrInstallation = Installation.decode(req.body);
@@ -66,7 +66,7 @@ export default class NotificationController {
         "Unable to parse the installation data: %s",
         ReadableReporter.report(errorOrInstallation)
       );
-      return ResponseErrorFatal("Unable to parse the installation data", "");
+      return ResponseErrorFatal("Unable to parse the installation data");
     }
 
     const user = errorOrUser.value;
