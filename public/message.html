@@ -26,6 +26,9 @@
   <div><strong>Markdown:</strong></div>
   <div id="markdown"></div>
   <br/>
+  <div><strong>Created at:</strong></div>
+  <div id="created_at"></div>
+  <br/>
   <div><strong>Service name:</strong></div>
   <div id="sender_service_name"></div>
   <br/>
@@ -87,6 +90,7 @@
 
             $('#subject').append(data.subject);
             $('#markdown').append(data.markdown);
+            $('#created_at').append(data.created_at);
             $('#sender_service_id').append(data.sender_service_id);
           });
         }

@@ -51,7 +51,7 @@ const aValidNotification = {
       markdown: "test".repeat(80),
       subject: "this is a message"
     },
-    created_at: "",
+    created_at: new Date(),
     fiscal_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"

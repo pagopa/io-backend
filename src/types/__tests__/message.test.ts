@@ -29,6 +29,7 @@ const aMessage: CreatedMessageWithContent = {
     markdown: "message" as MessageBodyMarkdown,
     subject: "subject" as MessageSubject
   } as MessageContent,
+  createdAt: new Date(),
   fiscalCode: aFiscalCode,
   id: "string",
   senderServiceId: "string",
@@ -77,6 +78,11 @@ describe("message type", () => {
       );
       expect(messageWithContent.id).toBeDefined();
     }
+
+    // created_at
+    expect(messageWithContent.created_at).toBe(
+      mockedMessageResponseWithContent.message.createdAt
+    );
 
     // markdown: from.message.content !== undefined ? from.message.content.markdown : "",
     if (mockedMessageResponseWithContent.message.content === undefined) {
