@@ -15,6 +15,7 @@ export function toAppMessageWithContent(
   from: MessageResponseWithContent
 ): MessageWithContent {
   return {
+    created_at: from.message.createdAt,
     id: from.message.id,
     markdown: from.message.content.markdown,
     sender_service_id: from.message.senderServiceId,
