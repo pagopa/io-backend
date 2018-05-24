@@ -15,6 +15,7 @@ const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
 const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aTimestamp = 1518010929530;
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
@@ -84,6 +85,7 @@ const validApiMessageResponse = {
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
         subject: aValidSubject
       },
+      createdAt: new Date(aTimestamp),
       fiscalCode: "XUZTCT88A51Y311X",
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
       senderServiceId: "5a563817fcc896087002ea46c49a"
@@ -103,6 +105,7 @@ const invalidApiMessageResponse = {
         markdown: "Lorem ipsum dolor sit amet",
         subject: aValidSubject
       },
+      createdAt: new Date(aTimestamp),
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
       senderServiceId: "5a563817fcc896087002ea46c49a"
     },
@@ -115,6 +118,7 @@ const invalidApiMessageResponse = {
   }
 };
 const proxyMessageResponse = {
+  created_at: new Date(aTimestamp),
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",
   markdown:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",

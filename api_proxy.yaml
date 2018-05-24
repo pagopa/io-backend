@@ -100,6 +100,7 @@ paths:
                 fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
                 laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
               sender_service_id: "5a25abf4fcc89605c082f042c49a"
+              created_at: "2018-05-21T12:45:41.105Z"
         "404":
           description: No message found for the provided ID.
           schema:
@@ -241,6 +242,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageResponseNotificationStatus"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ProblemJson"
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/Timestamp"
   MessageWithContent:
     title: Message with content
     type: object
@@ -253,6 +256,8 @@ definitions:
         $ref: "#/definitions/MessageBodyMarkdown"
       sender_service_id:
         type: string
+      created_at:
+        $ref: "#/definitions/Timestamp"
     required:
       - id
       - content
