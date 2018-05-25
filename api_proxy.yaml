@@ -209,8 +209,13 @@ paths:
               platform: "gcm"
               pushChannel: "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p"
       responses:
-        "201":
+        "200":
           description: Success.
+          schema:
+            type: string
+          examples:
+            application/json:
+              "ok"
         "401":
           description: Bearer token null or expired.
         "500":
@@ -219,43 +224,43 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/DepartmentName"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ExtendedProfile"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/FiscalCode"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/LimitedProfile"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageResponseNotificationStatus"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageSubject"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/OrganizationName"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PaginationResponse"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ProblemJson"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ServicePublic"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ServiceName"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/Timestamp"
   MessageWithContent:
     type: object
     title: Message with content
