@@ -6,7 +6,7 @@
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
-import MessagesService, { messagesResponse } from "../services/messagesService";
+import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { extractUserFromRequest } from "../types/user";
@@ -20,7 +20,7 @@ export default class MessagesController {
    */
   public async getMessagesByUser(
     req: express.Request
-  ): Promise<messagesResponse<Messages>> {
+  ): Promise<MessagesResponse<Messages>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -38,7 +38,7 @@ export default class MessagesController {
    */
   public async getMessage(
     req: express.Request
-  ): Promise<messagesResponse<MessageWithContent>> {
+  ): Promise<MessagesResponse<MessageWithContent>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

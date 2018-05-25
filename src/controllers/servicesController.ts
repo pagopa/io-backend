@@ -6,7 +6,7 @@
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
-import MessagesService, { messagesResponse } from "../services/messagesService";
+import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { extractUserFromRequest } from "../types/user";
 
@@ -19,7 +19,7 @@ export default class ServicesController {
    */
   public async getService(
     req: express.Request
-  ): Promise<messagesResponse<ProxyServicePublic>> {
+  ): Promise<MessagesResponse<ProxyServicePublic>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

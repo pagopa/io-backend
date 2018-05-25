@@ -33,7 +33,7 @@ const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
 const messageNotFound = "Not found.";
 
-export type messagesResponse<T> =
+export type MessagesResponse<T> =
   | IResponseErrorInternal
   | IResponseErrorNotFound
   | IResponseSuccessJson<T>;
@@ -46,7 +46,7 @@ export default class MessagesService {
    */
   public async getMessagesByUser(
     user: User
-  ): Promise<messagesResponse<Messages>> {
+  ): Promise<MessagesResponse<Messages>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessagesByUserWithHttpOperationResponse();
@@ -99,7 +99,7 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<messagesResponse<MessageWithContent>> {
+  ): Promise<MessagesResponse<MessageWithContent>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
@@ -147,7 +147,7 @@ export default class MessagesService {
   public async getService(
     user: User,
     serviceId: string
-  ): Promise<messagesResponse<ProxyServicePublic>> {
+  ): Promise<MessagesResponse<ProxyServicePublic>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
