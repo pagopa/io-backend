@@ -218,65 +218,65 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 definitions:
-  MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageContent"
-  MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageSubject"
-  MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageBodyMarkdown"
-  FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/FiscalCode"
+  DepartmentName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/DepartmentName"
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ExtendedProfile"
-  LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/LimitedProfile"
-  PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguages"
-  PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguage"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/FiscalCode"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsWebhookEnabled"
-  PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PaginationResponse"
-  ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServicePublic"
-  DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/DepartmentName"
-  OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/OrganizationName"
-  ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServiceName"
+  LimitedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/LimitedProfile"
+  MessageBodyMarkdown:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageBodyMarkdown"
+  MessageContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageResponseNotificationStatus"
+  MessageSubject:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageSubject"
+  OrganizationName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/OrganizationName"
+  PaginationResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PaginationResponse"
+  PreferredLanguage:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguage"
+  PreferredLanguages:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ProblemJson"
+  ServicePublic:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServicePublic"
+  ServiceName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServiceName"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/Timestamp"
   MessageWithContent:
-    title: Message with content
     type: object
+    title: Message with content
     properties:
+      created_at:
+        $ref: "#/definitions/Timestamp"
       id:
         type: string
-      subject:
-        $ref: "#/definitions/MessageSubject"
       markdown:
         $ref: "#/definitions/MessageBodyMarkdown"
       sender_service_id:
         type: string
-      created_at:
-        $ref: "#/definitions/Timestamp"
+      subject:
+        $ref: "#/definitions/MessageSubject"
     required:
+      - created_at
       - id
       - sender_service_id
-      - created_at
   MessageWithoutContent:
-    title: Message without content
     type: object
+    title: Message without content
     properties:
       id:
         type: string
@@ -286,24 +286,24 @@ definitions:
       - id
       - sender_service_id
   Messages:
-    title: A list of messages
     type: object
+    title: A list of messages
     properties:
       items:
         type: array
         items:
           $ref: "#/definitions/MessageWithoutContent"
-      page_size:
-        $ref: '#/definitions/PageSize'
       next:
         type: string
+      page_size:
+        $ref: '#/definitions/PageSize'
     required:
       - items
       - page_size
   Installation:
+    type: object
     title: Installation
     description: Describes an app installation.
-    type: object
     properties:
       platform:
         $ref: '#/definitions/Platform'
@@ -313,9 +313,9 @@ definitions:
       - platform
       - pushChannel
   ProfileWithEmail:
+    type: object
     title: Profile with wmail
     description: Describes the user's profile.
-    type: object
     properties:
       email:
         $ref: '#/definitions/EmailAddress'
@@ -352,9 +352,9 @@ definitions:
       - preferred_email
       - version
   ProfileWithoutEmail:
+    type: object
     title: Profile without email
     description: Describes the user's profile.
-    type: object
     properties:
       family_name:
         type: string
@@ -413,22 +413,22 @@ definitions:
     minimum: 0
     description: Number of items returned for each page.
   Platform:
-    description: The platform type where the installation happened.
     type: string
+    description: The platform type where the installation happened.
     x-extensible-enum:
       - apns
       - gcm
   PushChannel:
+    type: string
     description: |-
       The Push Notification Service handle for this Installation.
       See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
-    type: string
 responses: {}
 parameters:
   PaginationRequest:
+    type: string
     name: cursor
     in: query
-    type: string
     minimum: 1
     description: An opaque identifier that points to the next item in the collection.
 consumes:
