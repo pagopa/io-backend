@@ -33,6 +33,7 @@ import {
 import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import checkIP from "./utils/middleware/checkIP";
+import { IResponse } from "./utils/response";
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -63,6 +64,15 @@ function withSpidAuth(
       const response = await controller.acs(user);
       response.apply(res);
     })(req, res, next);
+  };
+}
+
+function toExpressHandler<T>(
+  handler: (req: express.Request) => Promise<IResponse<T>>
+): <P>(object: P, req: express.Request, res: express.Response) => void {
+  return async (object, req, res) => {
+    const response = await handler.call(object, req);
+    response.apply(res);
   };
 }
 
@@ -134,20 +144,17 @@ export function newApp(
   app.post(
     "/logout",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await acsController.logout(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(acsController.logout)(acsController, req, res);
     }
   );
 
-  app.post("/slo", (_, res: express.Response) => {
-    const response = acsController.slo();
-    response.apply(res);
+  app.post("/slo", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.slo)(acsController, req, res);
   });
 
-  app.get("/session", async (req: express.Request, res: express.Response) => {
-    const response = await acsController.getSessionState(req);
-    response.apply(res);
+  app.get("/session", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.getSessionState)(acsController, req, res);
   });
 
   app.post(
@@ -159,9 +166,8 @@ export function newApp(
     )
   );
 
-  app.get("/metadata", (_, res: express.Response) => {
-    const response = acsController.metadata();
-    response.apply(res);
+  app.get("/metadata", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.metadata)(acsController, req, res);
   });
 
   // Liveness probe for Kubernetes.
@@ -174,45 +180,60 @@ export function newApp(
   app.get(
     "/api/v1/profile",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await profileController.getProfile(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(profileController.getProfile)(
+        profileController,
+        req,
+        res
+      );
     }
   );
 
   app.post(
     "/api/v1/profile",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await profileController.upsertProfile(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(profileController.upsertProfile)(
+        profileController,
+        req,
+        res
+      );
     }
   );
 
   app.get(
     "/api/v1/messages",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await messagesController.getMessagesByUser(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(messagesController.getMessagesByUser)(
+        messagesController,
+        req,
+        res
+      );
     }
   );
 
   app.get(
     "/api/v1/messages/:id",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await messagesController.getMessage(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(messagesController.getMessage)(
+        messagesController,
+        req,
+        res
+      );
     }
   );
 
   app.get(
     "/api/v1/services/:id",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await servicesController.getService(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(servicesController.getService)(
+        servicesController,
+        req,
+        res
+      );
     }
   );
 
@@ -220,20 +241,24 @@ export function newApp(
     "/api/v1/notify",
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await notificationController.notify(req);
-      response.apply(res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(notificationController.notify)(
+        notificationController,
+        req,
+        res
+      );
     }
   );
 
   app.put(
     "/api/v1/installations/:id",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const response = await notificationController.createOrUpdateInstallation(
-        req
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(notificationController.createOrUpdateInstallation)(
+        notificationController,
+        req,
+        res
       );
-      response.apply(res);
     }
   );
 

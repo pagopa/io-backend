@@ -276,10 +276,10 @@ describe("AuthenticationController#slo", () => {
     jest.clearAllMocks();
   });
 
-  it("redirects to the home page", () => {
+  it("redirects to the home page", async () => {
     const res = mockRes();
 
-    const response = controller.slo();
+    const response = await controller.slo();
     response.apply(res);
 
     expect(controller).toBeTruthy();
@@ -542,7 +542,7 @@ describe("AuthenticationController#metadata", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the correct metadata", () => {
+  it("renders the correct metadata", async () => {
     const res = mockRes();
     const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://italia-backend" ID="http___italia_backend">
   <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
@@ -613,7 +613,7 @@ OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
 IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
 </X509Certificate></X509Data></KeyInfo></Signature></EntityDescriptor>`;
 
-    const matadata = controller.metadata();
+    const matadata = await controller.metadata();
     matadata.apply(res);
 
     expect(controller).toBeTruthy();

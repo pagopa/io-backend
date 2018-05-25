@@ -166,14 +166,14 @@ export default class AuthenticationController {
   /**
    * The Single logout service.
    */
-  public slo(): IResponseRedirect {
+  public async slo(): Promise<IResponseRedirect> {
     return ResponseRedirect("/");
   }
 
   /**
    * The metadata for this Service Provider.
    */
-  public metadata(): IResponseSuccessXml<string> {
+  public async metadata(): Promise<IResponseSuccessXml<string>> {
     const metadata = this.spidStrategy.generateServiceProviderMetadata(
       this.samlCert
     );
