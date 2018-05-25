@@ -76,10 +76,6 @@ const proxyMessagesResponse = {
   ],
   page_size: 2
 };
-const emptyProxyMessagesResponse = {
-  items: [],
-  page_size: 0
-};
 const validApiMessageResponse = {
   parsedBody: {
     message: {
@@ -217,7 +213,11 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual(proxyMessagesResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
   });
 
   it("returns an empty list if the of messages from the API is empty", async () => {
@@ -231,7 +231,10 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual(emptyProxyMessagesResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseErrorNotFound"
+    });
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
@@ -283,7 +286,11 @@ describe("MessageService#getMessage", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
-    expect(res).toEqual(proxyMessageResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
   });
 
   it("returns an error if the getMessage API returns an error", async () => {
@@ -335,7 +342,11 @@ describe("MessageService#getService", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
-    expect(res).toEqual(proxyServiceResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyServiceResponse
+    });
   });
 
   it("returns an error if the API returns an error", async () => {

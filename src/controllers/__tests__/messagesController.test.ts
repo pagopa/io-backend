@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -54,6 +55,13 @@ const mockedUser: User = {
   token: "123hexToken"
 };
 
+const anErrorResponse = {
+  detail: undefined,
+  status: 500,
+  title: "Internal server error",
+  type: undefined
+};
+
 const mockGetMessage = jest.fn();
 const mockGetMessagesByUser = jest.fn();
 jest.mock("../../services/messagesService", () => {
@@ -65,21 +73,16 @@ jest.mock("../../services/messagesService", () => {
   };
 });
 
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
-
-describe("MessagesController#getMessageByUser", () => {
+describe("MessagesController#getMessagesByUser", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("calls the getMessageByUser on the messagesController with valid values", async () => {
+  it("calls the getMessagesByUser on the messagesController with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(proxyMessagesResponse)
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
     req.user = mockedUser;
@@ -88,20 +91,22 @@ describe("MessagesController#getMessageByUser", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessagesByUser(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessagesByUser(req);
 
     expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
-    expect(res.json).toHaveBeenCalledWith(proxyMessagesResponse);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
   });
 
-  it("calls the getMessageByUser on the messagesController with empty user", async () => {
+  it("calls the getMessagesByUser on the messagesController with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(proxyMessagesResponse)
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
     req.user = "";
@@ -110,36 +115,13 @@ describe("MessagesController#getMessageByUser", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessagesByUser(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessagesByUser(req);
+    response.apply(res);
 
     expect(mockGetMessagesByUser).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
-  });
-
-  it("calls the getMessageByUser on the messagesController with valid values but user is not in proxy", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetMessagesByUser.mockReturnValue(Promise.reject(new Error("reject")));
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
-
-    controller.getMessagesByUser(req, res);
-
-    await flushPromises();
-
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
+      ...anErrorResponse,
+      detail: "Unable to decode the user"
     });
   });
 });
@@ -151,9 +133,10 @@ describe("MessagesController#getMessage", () => {
 
   it("calls the getMessage on the messagesController with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetMessage.mockReturnValue(Promise.resolve(proxyMessageResponse));
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
 
     req.user = mockedUser;
     req.params = { id: anId };
@@ -162,19 +145,23 @@ describe("MessagesController#getMessage", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessage(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessage(req);
 
     expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
-    expect(res.json).toHaveBeenCalledWith(proxyMessageResponse);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
   });
 
   it("calls the getMessage on the messagesController with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetMessage.mockReturnValue(Promise.resolve(proxyMessageResponse));
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
 
     req.user = "";
     req.params = { id: anId };
@@ -183,37 +170,13 @@ describe("MessagesController#getMessage", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new MessagesController(messageService);
 
-    controller.getMessage(req, res);
-
-    await flushPromises();
+    const response = await controller.getMessage(req);
+    response.apply(res);
 
     expect(mockGetMessage).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
-  });
-
-  it("calls the getMessage on the messagesController with valid user but user is not in proxy", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetMessage.mockReturnValue(Promise.reject(new Error("reject")));
-
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
-
-    controller.getMessage(req, res);
-
-    await flushPromises();
-
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
+      ...anErrorResponse,
+      detail: "Unable to decode the user"
     });
   });
 });

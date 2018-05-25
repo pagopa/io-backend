@@ -5,9 +5,20 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import ProfileService from "../services/profileService";
+import {
+  IResponseErrorValidation,
+  ResponseErrorInternal,
+  ResponseErrorValidation
+} from "italia-ts-commons/lib/responses";
+import ProfileService, { profileResponse } from "../services/profileService";
+import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
+import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
+
+export type profileResponseWithValidationError<T> =
+  | profileResponse<T>
+  | IResponseErrorValidation;
 
 export default class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -16,45 +27,34 @@ export default class ProfileController {
    * Returns the profile for the user identified by the provided fiscal
    * code.
    */
-  public getProfile(req: express.Request, res: express.Response): void {
+  public async getProfile(
+    req: express.Request
+  ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
-      });
-      return;
+      return ResponseErrorInternal(error.message);
     }
 
     const user = errorOrUser.value;
-    this.profileService
-      .getProfile(user)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.profileService.getProfile(user);
   }
 
   /**
    * Create or update the preferences for the user identified by the provided
    * fiscal code.
    */
-  public upsertProfile(req: express.Request, res: express.Response): void {
+  public async upsertProfile(
+    req: express.Request
+  ): Promise<profileResponseWithValidationError<ProfileWithEmail>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
-      });
-      return;
+      return ResponseErrorInternal(error.message);
     }
 
     const errorOrUpsertProfile = extractUpsertProfileFromRequest(req);
@@ -62,23 +62,11 @@ export default class ProfileController {
     if (isLeft(errorOrUpsertProfile)) {
       // Unable to extract the upsert profile from the request.
       const error = errorOrUpsertProfile.value;
-      res.status(500).json({
-        message: error.message
-      });
-      return;
+      return ResponseErrorValidation("Bad request", error.message);
     }
 
     const user = errorOrUser.value;
     const upsertProfile = errorOrUpsertProfile.value;
-    this.profileService
-      .upsertProfile(user, upsertProfile)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.profileService.upsertProfile(user, upsertProfile);
   }
 }

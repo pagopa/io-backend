@@ -94,7 +94,7 @@ A Linux/macOS environment is required at the moment.
 2. go to the project's folder
 3. run `scripts/build-tools.sh` to build the `tools` Docker image
 4. run `scripts/yarn.sh` to install backend dependencies
-5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api.yml
+5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
 6. run `scripts/generate-api-client.sh` to generate the Autorest API Client
 7. run `scripts/build.sh` to compile the Typescript files
 8. run `docker-compose up -d` to start the containers

@@ -126,7 +126,11 @@ describe("ProfileService#getProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
-    expect(res).toEqual(proxyProfileWithEmailResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyProfileWithEmailResponse
+    });
   });
 
   it("returns a default user profile if the response from the API is not found", async () => {
@@ -140,7 +144,11 @@ describe("ProfileService#getProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
-    expect(res).toEqual(proxyProfileWithoutEmailResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyProfileWithoutEmailResponse
+    });
   });
 
   it("returns an error if the API returns an error", async () => {
@@ -176,7 +184,11 @@ describe("ProfileService#upsertProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockUpsertProfile).toHaveBeenCalledWith(ApiProfileUpsertRequest);
-    expect(res).toEqual(proxyProfileWithEmailResponse);
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyProfileWithEmailResponse
+    });
   });
 
   it("fails to create a new user profile to the API", async () => {

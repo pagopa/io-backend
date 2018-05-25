@@ -1,5 +1,6 @@
-import { left, right } from "fp-ts/lib/Either";
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
+import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
@@ -69,6 +70,7 @@ const anInvalidNotification = {
       markdown: "invalid",
       subject: "this is a message"
     },
+    created_at: new Date(),
     fiscal_code: anInvalidFiscalNumber,
     sender_service_id: "234567"
   },
@@ -79,6 +81,12 @@ const anInvalidNotification = {
   }
 };
 
+const anErrorResponse = {
+  detail: undefined,
+  status: 500,
+  title: "Internal server error",
+  type: undefined
+};
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
@@ -110,45 +118,35 @@ describe("NotificationController#notify", () => {
 
   it("should return success if data is correct", async () => {
     const req = mockReq();
-    mockNotify.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
-    );
+
+    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
 
     req.body = aValidNotification;
 
     const res = await controller.notify(req);
 
-    expect(res).toEqual(
-      right({
-        body: "ok",
-        status: 200
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: "ok"
+    });
   });
 
   it("should fail if cannot decode the notification", async () => {
     const req = mockReq();
-    mockNotify.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
-    );
+    const res = mockRes();
+
+    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
 
     req.body = anInvalidNotification;
 
-    const res = await controller.notify(req);
+    const response = await controller.notify(req);
+    response.apply(res);
 
-    expect(res).toEqual(
-      left(new Error("Unable to parse the notification body"))
-    );
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Unable to parse the notification body"
+    });
   });
 });
 
@@ -159,13 +157,9 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
   it("should return success if data is correct", async () => {
     const req = mockReq();
+
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
+      Promise.resolve(ResponseSuccessJson("ok"))
     );
 
     req.user = mockedUser;
@@ -174,73 +168,73 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     const res = await controller.createOrUpdateInstallation(req);
 
-    expect(res).toEqual(
-      right({
-        body: "ok",
-        status: 200
-      })
-    );
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: "ok"
+    });
   });
 
   it("should fail if cannot decode the user", async () => {
     const req = mockReq();
+    const res = mockRes();
+
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
+      Promise.resolve(ResponseSuccessJson("ok"))
     );
 
     req.user = mockedInvalidUser;
     req.params = { id: aValidInstallationID };
     req.body = anAppleDevice;
 
-    const res = await controller.createOrUpdateInstallation(req);
+    const response = await controller.createOrUpdateInstallation(req);
+    response.apply(res);
 
-    expect(res).toEqual(left(new Error("Unable to decode the user")));
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Unable to decode the user"
+    });
   });
 
   it("should fail if cannot decode the Installation ID", async () => {
     const req = mockReq();
+    const res = mockRes();
+
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
+      Promise.resolve(ResponseSuccessJson("ok"))
     );
 
     req.user = mockedUser;
     req.params = { id: anInvalidInstallationID };
     req.body = anAppleDevice;
 
-    const res = await controller.createOrUpdateInstallation(req);
+    const response = await controller.createOrUpdateInstallation(req);
+    response.apply(res);
 
-    expect(res).toEqual(left(new Error("Unable to parse the installation ID")));
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Unable to parse the installation ID"
+    });
   });
 
   it("should fail if cannot decode the installation data", async () => {
     const req = mockReq();
+    const res = mockRes();
+
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(
-        right({
-          body: "ok",
-          status: 200
-        })
-      )
+      Promise.resolve(ResponseSuccessJson("ok"))
     );
 
     req.user = mockedUser;
     req.params = { id: aValidInstallationID };
     req.body = anInvalidDevice;
 
-    const res = await controller.createOrUpdateInstallation(req);
+    const response = await controller.createOrUpdateInstallation(req);
+    response.apply(res);
 
-    expect(res).toEqual(
-      left(new Error("Unable to parse the installation data"))
-    );
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Unable to parse the installation data"
+    });
   });
 });

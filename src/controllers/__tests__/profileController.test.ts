@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -70,6 +71,13 @@ const mockedUpsertUser: ExtendedProfile = {
   version: 1 as number
 };
 
+const anErrorResponse = {
+  detail: undefined,
+  status: 500,
+  title: "Internal server error",
+  type: undefined
+};
+
 const mockGetProfile = jest.fn();
 const mockUpsertProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
@@ -81,10 +89,6 @@ jest.mock("../../services/profileService", () => {
   };
 });
 
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
-
 describe("ProfileController#getProfile", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,9 +96,10 @@ describe("ProfileController#getProfile", () => {
 
   it("calls the getProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = mockedUser;
 
@@ -102,19 +107,23 @@ describe("ProfileController#getProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    controller.getProfile(req, res);
-
-    await flushPromises();
+    const response = await controller.getProfile(req);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
-    expect(res.json).toHaveBeenCalledWith(proxyUserResponse);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUserResponse
+    });
   });
 
   it("calls the getProfile on the ProfileService with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = "";
 
@@ -122,37 +131,14 @@ describe("ProfileController#getProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    controller.getProfile(req, res);
-
-    await flushPromises();
+    const response = await controller.getProfile(req);
+    response.apply(res);
 
     // getProfile is not called
     expect(mockGetProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
-  });
-
-  it("calls the getProfile on the ProfileService with valid user but user is not in proxy", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetProfile.mockReturnValue(Promise.reject(new Error("reject")));
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(profileService);
-
-    controller.getProfile(req, res);
-
-    await flushPromises();
-
-    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
+      ...anErrorResponse,
+      detail: "Unable to decode the user"
     });
   });
 });
@@ -164,9 +150,10 @@ describe("ProfileController#upsertProfile", () => {
 
   it("calls the upsertProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockUpsertProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
+    mockUpsertProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = mockedUser;
     req.body = mockedUpsertUser;
@@ -175,22 +162,26 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    controller.upsertProfile(req, res);
-
-    await flushPromises();
+    const response = await controller.upsertProfile(req);
 
     expect(mockUpsertProfile).toHaveBeenCalledWith(
       mockedUser,
       mockedUpsertUser
     );
-    expect(res.json).toHaveBeenCalledWith(proxyUserResponse);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUserResponse
+    });
   });
 
   it("calls the upsertProfile on the ProfileService with empty user and valid upsert user", async () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockUpsertProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
+    mockUpsertProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = "";
     req.body = mockedUpsertUser;
@@ -199,13 +190,13 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    controller.upsertProfile(req, res);
-
-    await flushPromises();
+    const response = await controller.upsertProfile(req);
+    response.apply(res);
 
     expect(mockUpsertProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
+      ...anErrorResponse,
+      detail: "Unable to decode the user"
     });
   });
 
@@ -213,7 +204,9 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockUpsertProfile.mockReturnValue(Promise.resolve(proxyUserResponse));
+    mockUpsertProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = mockedUser;
     req.body = "";
@@ -222,40 +215,15 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    controller.upsertProfile(req, res);
-
-    await flushPromises();
+    const response = await controller.upsertProfile(req);
+    response.apply(res);
 
     expect(mockUpsertProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to extract the upsert profile"
-    });
-  });
-
-  it("calls the upsertProfile on the ProfileService with valid values but user is not in proxy", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockUpsertProfile.mockReturnValue(Promise.reject(new Error("reject")));
-
-    req.user = mockedUser;
-    req.body = mockedUpsertUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(profileService);
-
-    controller.upsertProfile(req, res);
-
-    await flushPromises();
-
-    expect(mockUpsertProfile).toHaveBeenCalledWith(
-      mockedUser,
-      mockedUpsertUser
-    );
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
+      ...anErrorResponse,
+      detail: "Unable to extract the upsert profile",
+      status: 400,
+      title: "Bad request"
     });
   });
 });

@@ -1,6 +1,7 @@
 /* tslint:disable:no-any */
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -45,6 +46,13 @@ const mockedUser: User = {
   token: "123hexToken"
 };
 
+const anErrorResponse = {
+  detail: undefined,
+  status: 500,
+  title: "Internal server error",
+  type: undefined
+};
+
 const mockGetService = jest.fn();
 jest.mock("../../services/messagesService", () => {
   return {
@@ -54,10 +62,6 @@ jest.mock("../../services/messagesService", () => {
   };
 });
 
-function flushPromises<T>(): Promise<T> {
-  return new Promise(resolve => setImmediate(resolve));
-}
-
 describe("serviceController#getService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,9 +69,10 @@ describe("serviceController#getService", () => {
 
   it("calls the getService on the serviceController with valid values", async () => {
     const req = mockReq();
-    const res = mockRes();
 
-    mockGetService.mockReturnValue(Promise.resolve(proxyService));
+    mockGetService.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyService))
+    );
 
     req.user = mockedUser;
     req.params = { id: aServiceId };
@@ -76,19 +81,23 @@ describe("serviceController#getService", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new ServicesController(messageService);
 
-    controller.getService(req, res);
-
-    await flushPromises();
+    const response = await controller.getService(req);
 
     expect(mockGetService).toHaveBeenCalledWith(mockedUser, aServiceId);
-    expect(res.json).toHaveBeenCalledWith(proxyService);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyService
+    });
   });
 
   it("calls the getService on the serviceController with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetService.mockReturnValue(Promise.resolve(proxyService));
+    mockGetService.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyService))
+    );
 
     req.user = "";
     req.params = { id: aServiceId };
@@ -97,37 +106,13 @@ describe("serviceController#getService", () => {
     const messageService = new MessagesService(apiClient);
     const controller = new ServicesController(messageService);
 
-    controller.getService(req, res);
-
-    await flushPromises();
+    const response = await controller.getService(req);
+    response.apply(res);
 
     expect(mockGetService).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
-      message: "Unable to decode the user"
-    });
-  });
-
-  it("calls the getService on the serviceController with valid user but user is not in proxy", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetService.mockReturnValue(Promise.reject(new Error("reject")));
-
-    req.user = mockedUser;
-    req.params = { id: aServiceId };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new ServicesController(messageService);
-
-    controller.getService(req, res);
-
-    await flushPromises();
-
-    expect(mockGetService).toHaveBeenCalledWith(mockedUser, aServiceId);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "reject"
+      ...anErrorResponse,
+      detail: "Unable to decode the user"
     });
   });
 });

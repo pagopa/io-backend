@@ -35,6 +35,9 @@ jobs:
       # Generate API client
       - run: yarn generate:api-client
 
+      # Generate certificates
+      - run: yarn generate:test-certs
+
       # Run tests
       - run: yarn lint
       - run: yarn build-noemit
