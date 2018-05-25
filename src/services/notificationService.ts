@@ -4,6 +4,12 @@
 
 import * as azure from "azure-sb";
 import { Azure } from "azure-sb";
+import {
+  IResponseErrorInternal,
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import { FiscalCode } from "../types/api/FiscalCode";
 import { Installation } from "../types/api/Installation";
 import Response = Azure.ServiceBus.Response;
@@ -15,12 +21,6 @@ import {
   INotificationTemplate,
   toFiscalCodeHash
 } from "../types/notification";
-import {
-  IResponseErrorFatal,
-  IResponseSuccessJson,
-  ResponseErrorFatal,
-  ResponseSuccessJson
-} from "../utils/response";
 
 /**
  * A template suitable for Apple's APNs.
@@ -50,7 +50,7 @@ export default class NotificationService {
 
   public notify(
     notification: Notification
-  ): Promise<IResponseErrorFatal | IResponseSuccessJson<string>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
@@ -76,7 +76,7 @@ export default class NotificationService {
     fiscalCode: FiscalCode,
     installationID: InstallationID,
     installation: Installation
-  ): Promise<IResponseErrorFatal | IResponseSuccessJson<string>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
@@ -111,9 +111,9 @@ export default class NotificationService {
   private buildResponse(
     error: Error | null,
     _: Response
-  ): IResponseErrorFatal | IResponseSuccessJson<string> {
+  ): IResponseErrorInternal | IResponseSuccessJson<string> {
     if (error !== null) {
-      return ResponseErrorFatal(error.message, "");
+      return ResponseErrorInternal(error.message);
     }
 
     return ResponseSuccessJson("ok");

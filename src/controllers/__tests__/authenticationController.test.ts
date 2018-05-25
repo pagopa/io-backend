@@ -136,6 +136,7 @@ const invalidUserPayload = {
 const anErrorResponse = {
   detail: undefined,
   status: 500,
+  title: "Internal server error",
   type: undefined
 };
 
@@ -235,7 +236,7 @@ describe("AuthenticationController#acs", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
     expect(mockSet).not.toHaveBeenCalled();
   });
@@ -251,7 +252,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Error creating the user session"
+      detail: "Error creating the user session"
     });
   });
 
@@ -266,7 +267,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Redis error"
+      detail: "Redis error"
     });
   });
 });
@@ -326,7 +327,7 @@ describe("AuthenticationController#logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
   });
 
@@ -351,7 +352,7 @@ describe("AuthenticationController#logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Error message"
+      detail: "Error message"
     });
   });
 
@@ -368,7 +369,7 @@ describe("AuthenticationController#logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Error creating the user session"
+      detail: "Error creating the user session"
     });
   });
 
@@ -385,7 +386,7 @@ describe("AuthenticationController#logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Redis error"
+      detail: "Redis error"
     });
   });
 });
@@ -469,7 +470,7 @@ describe("AuthenticationController#getSessionState", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "No token in the request"
+      detail: "No token in the request"
     });
   });
 
@@ -487,7 +488,7 @@ describe("AuthenticationController#getSessionState", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "No token in the request"
+      detail: "No token in the request"
     });
   });
 
@@ -505,7 +506,7 @@ describe("AuthenticationController#getSessionState", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "No token in the request"
+      detail: "No token in the request"
     });
   });
 
@@ -532,7 +533,7 @@ describe("AuthenticationController#getSessionState", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Error refreshing the token"
+      detail: "Error refreshing the token"
     });
   });
 });

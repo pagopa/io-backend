@@ -7,6 +7,16 @@
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
+import {
+  IResponseErrorInternal,
+  IResponseRedirect,
+  IResponseSuccessJson,
+  IResponseSuccessXml,
+  ResponseErrorInternal,
+  ResponseRedirect,
+  ResponseSuccessJson,
+  ResponseSuccessXml
+} from "italia-ts-commons/lib/responses";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { SpidLevel } from "../types/spidLevel";
@@ -15,16 +25,6 @@ import {
   toAppUser,
   validateSpidUser
 } from "../types/user";
-import {
-  IResponseErrorFatal,
-  IResponseRedirect,
-  IResponseSuccessJson,
-  IResponseSuccessXml,
-  ResponseErrorFatal,
-  ResponseRedirect,
-  ResponseSuccessJson,
-  ResponseSuccessXml
-} from "../utils/response";
 
 export interface IPublicSession {
   readonly expired: boolean;
@@ -48,12 +48,12 @@ export default class AuthenticationController {
   public async acs(
     // tslint:disable-next-line:no-any
     userPayload: any
-  ): Promise<IResponseErrorFatal | IResponseRedirect> {
+  ): Promise<IResponseErrorInternal | IResponseRedirect> {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message);
+      return ResponseErrorInternal(error.message);
     }
 
     const spidUser = errorOrUser.value;
@@ -68,12 +68,12 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return ResponseErrorFatal(error.message);
+      return ResponseErrorInternal(error.message);
     }
     const response = errorOrResponse.value;
 
     if (!response) {
-      return ResponseErrorFatal("Error creating the user session");
+      return ResponseErrorInternal("Error creating the user session");
     }
     const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
 
@@ -85,12 +85,12 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<IResponseErrorFatal | IResponseRedirect> {
+  ): Promise<IResponseErrorInternal | IResponseRedirect> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message);
+      return ResponseErrorInternal(error.message);
     }
 
     const user = errorOrUser.value;
@@ -99,13 +99,13 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return ResponseErrorFatal(error.message);
+      return ResponseErrorInternal(error.message);
     }
 
     const response = errorOrResponse.value;
 
     if (!response) {
-      return ResponseErrorFatal("Error creating the user session");
+      return ResponseErrorInternal("Error creating the user session");
     }
 
     // Logout from SPID.
@@ -124,10 +124,10 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<IResponseErrorFatal | IResponseSuccessJson<IPublicSession>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<IPublicSession>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
-      return ResponseErrorFatal("No token in the request");
+      return ResponseErrorInternal("No token in the request");
     }
 
     const token = maybeToken.value;
@@ -139,7 +139,7 @@ export default class AuthenticationController {
       if (isLeft(errorOrSessionState)) {
         // Unable to refresh token or session not found.
         const error = errorOrSessionState.value;
-        return ResponseErrorFatal(error.message);
+        return ResponseErrorInternal(error.message);
       }
 
       // Return the new session information.
@@ -186,13 +186,13 @@ export default class AuthenticationController {
    */
   private spidLogout(
     req: express.Request
-  ): Promise<IResponseErrorFatal | IResponseRedirect> {
+  ): Promise<IResponseErrorInternal | IResponseRedirect> {
     return new Promise(resolve => {
       this.spidStrategy.logout(req, (err, logoutUrl) => {
         if (!err) {
           return resolve(ResponseRedirect(logoutUrl));
         } else {
-          return resolve(ResponseErrorFatal(err.message));
+          return resolve(ResponseErrorInternal(err.message));
         }
       });
     });

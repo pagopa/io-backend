@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -8,7 +9,6 @@ import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
-import { ResponseSuccessJson } from "../../utils/response";
 import MessagesController from "../messagesController";
 
 const aTimestamp = 1518010929530;
@@ -58,6 +58,7 @@ const mockedUser: User = {
 const anErrorResponse = {
   detail: undefined,
   status: 500,
+  title: "Internal server error",
   type: undefined
 };
 
@@ -120,7 +121,7 @@ describe("MessagesController#getMessagesByUser", () => {
     expect(mockGetMessagesByUser).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
   });
 });
@@ -175,7 +176,7 @@ describe("MessagesController#getMessage", () => {
     expect(mockGetMessage).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
   });
 });

@@ -147,7 +147,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseErrorFatal"
+      kind: "IResponseErrorInternal"
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       anAppleInstallation,
@@ -197,7 +197,7 @@ describe("NotificationService#notify", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseErrorFatal"
+      kind: "IResponseErrorInternal"
     });
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,

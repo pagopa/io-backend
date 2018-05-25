@@ -5,11 +5,11 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
+import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
 import MessagesService, { messagesResponse } from "../services/messagesService";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { extractUserFromRequest } from "../types/user";
-import { ResponseErrorFatal } from "../utils/response";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -26,7 +26,7 @@ export default class MessagesController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message);
+      return ResponseErrorInternal(error.message);
     }
 
     const user = errorOrUser.value;
@@ -44,7 +44,7 @@ export default class MessagesController {
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      return ResponseErrorFatal(error.message);
+      return ResponseErrorInternal(error.message);
     }
 
     // TODO: validate req.params.id

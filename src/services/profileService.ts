@@ -5,6 +5,12 @@
 
 import { isLeft } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import {
+  IResponseErrorInternal,
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
@@ -18,19 +24,15 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
-import {
-  IResponseErrorFatal,
-  IResponseSuccessJson,
-  ResponseErrorFatal,
-  ResponseSuccessJson
-} from "../utils/response";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const profileErrorOnUnknownResponse = "Unknown response.";
 const profileErrorOnApiError = "Api error.";
 
-export type profileResponse<T> = IResponseErrorFatal | IResponseSuccessJson<T>;
+export type profileResponse<T> =
+  | IResponseErrorInternal
+  | IResponseSuccessJson<T>;
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -56,7 +58,7 @@ export default class ProfileService {
           "Unknown response from getProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(profileErrorOnUnknownResponse);
+        return ResponseErrorInternal(profileErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
@@ -65,7 +67,7 @@ export default class ProfileService {
         // retrieved from SPID.
         return ResponseSuccessJson(toAppProfileWithoutEmail(user));
       } else {
-        return ResponseErrorFatal(profileErrorOnApiError);
+        return ResponseErrorInternal(profileErrorOnApiError);
       }
     }
 
@@ -77,7 +79,7 @@ export default class ProfileService {
         "Unknown response from getProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      return ResponseErrorFatal(profileErrorOnUnknownResponse);
+      return ResponseErrorInternal(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;
@@ -109,9 +111,9 @@ export default class ProfileService {
           "Unknown response from upsertProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(profileErrorOnUnknownResponse);
+        return ResponseErrorInternal(profileErrorOnUnknownResponse);
       } else {
-        return ResponseErrorFatal(profileErrorOnApiError);
+        return ResponseErrorInternal(profileErrorOnApiError);
       }
     }
 
@@ -123,7 +125,7 @@ export default class ProfileService {
         "Unknown response from upsertProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      return ResponseErrorFatal(profileErrorOnUnknownResponse);
+      return ResponseErrorInternal(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;

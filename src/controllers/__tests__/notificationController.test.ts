@@ -1,3 +1,4 @@
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
@@ -7,7 +8,6 @@ import { InstallationID } from "../../types/api/InstallationID";
 import { PlatformEnum } from "../../types/api/Platform";
 import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
-import { ResponseSuccessJson } from "../../utils/response";
 import NotificationController from "../notificationController";
 
 const aTimestamp = 1518010929530;
@@ -84,9 +84,9 @@ const anInvalidNotification = {
 const anErrorResponse = {
   detail: undefined,
   status: 500,
+  title: "Internal server error",
   type: undefined
 };
-
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
@@ -145,7 +145,7 @@ describe("NotificationController#notify", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to parse the notification body"
+      detail: "Unable to parse the notification body"
     });
   });
 });
@@ -192,7 +192,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
   });
 
@@ -213,7 +213,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to parse the installation ID"
+      detail: "Unable to parse the installation ID"
     });
   });
 
@@ -234,7 +234,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to parse the installation data"
+      detail: "Unable to parse the installation data"
     });
   });
 });

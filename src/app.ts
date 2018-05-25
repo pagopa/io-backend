@@ -30,10 +30,10 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
+import { IResponse } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import checkIP from "./utils/middleware/checkIP";
-import { IResponse } from "./utils/response";
 
 /**
  * Catch SPID authentication errors and redirect the client to

@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -15,7 +16,6 @@ import {
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
 import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
-import { ResponseSuccessJson } from "../../utils/response";
 import ProfileController from "../profileController";
 
 const aTimestamp = 1518010929530;
@@ -74,6 +74,7 @@ const mockedUpsertUser: ExtendedProfile = {
 const anErrorResponse = {
   detail: undefined,
   status: 500,
+  title: "Internal server error",
   type: undefined
 };
 
@@ -137,7 +138,7 @@ describe("ProfileController#getProfile", () => {
     expect(mockGetProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
   });
 });
@@ -195,7 +196,7 @@ describe("ProfileController#upsertProfile", () => {
     expect(mockUpsertProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      title: "Unable to decode the user"
+      detail: "Unable to decode the user"
     });
   });
 
@@ -220,8 +221,9 @@ describe("ProfileController#upsertProfile", () => {
     expect(mockUpsertProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
+      detail: "Unable to extract the upsert profile",
       status: 400,
-      title: "Unable to extract the upsert profile"
+      title: "Bad request"
     });
   });
 });

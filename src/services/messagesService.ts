@@ -4,6 +4,14 @@
 
 import { isLeft } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
@@ -18,14 +26,6 @@ import {
 } from "../types/message";
 import { toAppService } from "../types/service";
 import { User } from "../types/user";
-import {
-  IResponseErrorFatal,
-  IResponseErrorNotFound,
-  IResponseSuccessJson,
-  ResponseErrorFatal,
-  ResponseErrorNotFound,
-  ResponseSuccessJson
-} from "../utils/response";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -34,7 +34,7 @@ const messageErrorOnApiError = "Api error.";
 const messageNotFound = "Not found.";
 
 export type messagesResponse<T> =
-  | IResponseErrorFatal
+  | IResponseErrorInternal
   | IResponseErrorNotFound
   | IResponseSuccessJson<T>;
 
@@ -62,14 +62,14 @@ export default class MessagesService {
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(messageErrorOnUnknownResponse);
+        return ResponseErrorInternal(messageErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound);
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
         winston.error("Api error: %s", simpleResponse.parsedBody());
-        return ResponseErrorFatal(messageErrorOnApiError);
+        return ResponseErrorInternal(messageErrorOnApiError);
       }
     }
 
@@ -81,7 +81,7 @@ export default class MessagesService {
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
-      return ResponseErrorFatal(messageErrorOnUnknownResponse);
+      return ResponseErrorInternal(messageErrorOnUnknownResponse);
     }
 
     const apiMessages = errorOrApiMessages.value;
@@ -115,14 +115,14 @@ export default class MessagesService {
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(messageErrorOnUnknownResponse);
+        return ResponseErrorInternal(messageErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound);
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
         winston.error("Api error: %s", simpleResponse.parsedBody());
-        return ResponseErrorFatal(messageErrorOnApiError);
+        return ResponseErrorInternal(messageErrorOnApiError);
       }
     }
 
@@ -134,7 +134,7 @@ export default class MessagesService {
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
-      return ResponseErrorFatal(messageErrorOnUnknownResponse);
+      return ResponseErrorInternal(messageErrorOnUnknownResponse);
     }
 
     const apiMessage = errorOrApiMessage.value;
@@ -163,13 +163,13 @@ export default class MessagesService {
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorFatal(messageErrorOnUnknownResponse);
+        return ResponseErrorInternal(messageErrorOnUnknownResponse);
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound);
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
-        return ResponseErrorFatal(messageErrorOnApiError);
+        return ResponseErrorInternal(messageErrorOnApiError);
       }
     }
 
@@ -181,7 +181,7 @@ export default class MessagesService {
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );
-      return ResponseErrorFatal(messageErrorOnUnknownResponse);
+      return ResponseErrorInternal(messageErrorOnUnknownResponse);
     }
 
     const apiService = errorOrApiService.value;
