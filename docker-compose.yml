@@ -9,7 +9,7 @@ services:
     expose:
       - "80"
     ports:
-      - "81:80"
+      - "80:80"
     image: node:8.9.4-alpine
     volumes:
       - ".:/usr/src/app:delegated"
@@ -41,6 +41,6 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     image: italia/spid-testenv-backoffice:latest
     ports:
-      - "8081:8080"
+      - "8080:8080"
     volumes:
       - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js:delegated"

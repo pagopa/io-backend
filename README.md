@@ -49,7 +49,7 @@ The `italia-app` application will authenticate to the backend in two steps:
      that identifies the user and, on success, triggers the creation of a new
      authentication session (associated to a session token)
   2. subsequent requests to the backend will be authenticated via a bearer session token
-  
+
 ![authentication_process](doc/images/authentication_process.svg)
 
 ### User authentication
@@ -70,11 +70,11 @@ The code that manage this flow are in the `spid-passport` package (more info
 
 ### Token authentication
 
-All API requests sent by the client to the backend must have an `Authorization: Bearer` header with the value of the 
+All API requests sent by the client to the backend must have an `Authorization: Bearer` header with the value of the
 token obtained from the SPID authentication process. The token is used to retrieve the User object from the
 `SessionStorage` service.
 
-The code that manage this flow are in the `src/strategies/bearerTokenStrategy.js` file. 
+The code that manage this flow are in the `src/strategies/bearerTokenStrategy.js` file.
 
 ## How to run the application
 
@@ -94,10 +94,11 @@ A Linux/macOS environment is required at the moment.
 2. go to the project's folder
 3. run `scripts/build-tools.sh` to build the `tools` Docker image
 4. run `scripts/yarn.sh` to install backend dependencies
-5. run `scripts/generate-api-client.sh` to generate the Autorest API Client
-6. run `scripts/build.sh` to compile the Typescript files
-7. run `docker-compose up -d` to start the containers
-8. edit your `/etc/hosts` file by adding:
+5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api.yml
+6. run `scripts/generate-api-client.sh` to generate the Autorest API Client
+7. run `scripts/build.sh` to compile the Typescript files
+8. run `docker-compose up -d` to start the containers
+9. edit your `/etc/hosts` file by adding:
 
 ```
 localhost    spid-testenv-identityserver
@@ -161,14 +162,13 @@ navigate to: *service provider > Servizi registrati* and click on *Utenti*.
 
 * [nodenv](https://github.com/nodenv/nodenv)
 * [YARN](https://yarnpkg.com/)
-* [flow](https://flow.org) and [flow-typed](https://github.com/flowtype/flow-typed/blob/master/README.md)
+* [Docker](https://www.docker.com/community-edition) (optional)
 
 A Linux/macOS environment is required at the moment.
 
 ### Starting steps
 
 * use `nodenv` to run the correct version of Nodejs as specified in `app/.node-version`
-* configure your IDE to use flow and ESLint
 * run Jest tests directly or with `scripts/test.sh`
 
 In general follow the [Node Best Practices](https://devcenter.heroku.com/articles/node-best-practices).
@@ -178,12 +178,22 @@ In general follow the [Node Best Practices](https://devcenter.heroku.com/article
 The API client is generated with the [AutoRest](https://github.com/Azure/autorest) tool, in case of API change you need
 to regenerate the client code:
 
-* run the command `yarn generate-api-client`
+* run the command `yarn generate:api-client`
+
+### Generate SAML (SPID) certs
+
+The backend implements a SAML Service Provider - for authenticating the clients
+it needs a certificate that you can generate with the following command
+(you need to have `openssl` available in your path):
+
+```
+$ yarn generate:test-certs
+```
 
 ### Architecture decision records
 
 In a world of evolutionary architecture, it's important to record certain design decisions for the benefit of future
-team members as well as for external oversight. Architecture Decision Records is a technique for capturing important 
+team members as well as for external oversight. Architecture Decision Records is a technique for capturing important
 architectural decisions along with their context and consequences. We store these details in source control, along with
 code, as then they can provide a record that remains in sync with the code itself.
 

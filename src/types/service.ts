@@ -3,27 +3,8 @@
  * validate and convert type to and from it.
  */
 
-import * as t from "io-ts";
-import { string } from "io-ts";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { ServicePublic } from "./api_client/servicePublic";
-
-// required attributes
-export const ServiceR = t.interface({
-  departmentName: string,
-  organizationName: string,
-  serviceId: string,
-  serviceName: string
-});
-
-// optional attributes
-const ServiceO = t.partial({
-  version: NonNegativeNumber
-});
-
-export const Service = t.intersection([ServiceR, ServiceO]);
-
-export type Service = t.TypeOf<typeof Service>;
+import { ServicePublic as proxyServicePublic } from "./api/ServicePublic";
+import { ServicePublic as apiServicePublic } from "./api_client/servicePublic";
 
 /**
  * Converts an API ServicePublic to a Proxy service.
@@ -32,12 +13,12 @@ export type Service = t.TypeOf<typeof Service>;
  * call. Here we map all properties of ServicePublic to the proxy's Service
  * model that will ensure type validation in the rest of the proxy code.
  */
-export function toAppService(from: ServicePublic): Service {
+export function toAppService(from: apiServicePublic): proxyServicePublic {
   return {
-    departmentName: from.departmentName,
-    organizationName: from.organizationName,
-    serviceId: from.serviceId,
-    serviceName: from.serviceName,
+    department_name: from.departmentName,
+    organization_name: from.organizationName,
+    service_id: from.serviceId,
+    service_name: from.serviceName,
     version: from.version
   };
 }

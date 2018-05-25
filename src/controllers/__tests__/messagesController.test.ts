@@ -28,9 +28,10 @@ const proxyMessagesResponse = {
       sender_service_id: "5a563817fcc896087002ea46c49a"
     }
   ],
-  pageSize: 2
+  page_size: 2
 };
 const proxyMessageResponse = {
+  created_at: new Date(),
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",
   markdown:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",

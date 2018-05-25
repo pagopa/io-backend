@@ -4,7 +4,7 @@
  */
 
 import * as t from "io-ts";
-import { NotificationStatus } from "../api/NotificationStatus";
+import { MessageResponseNotificationStatus } from "../api/MessageResponseNotificationStatus";
 import { CreatedMessageWithContent } from "./createdMessageWithContent";
 
 // required attributes
@@ -14,7 +14,7 @@ const MessageResponseWithContentR = t.interface({
 
 // optional attributes
 const MessageResponseWithContentO = t.partial({
-  notification: NotificationStatus
+  notification: MessageResponseNotificationStatus
 });
 
 export const MessageResponseWithContent = t.intersection([

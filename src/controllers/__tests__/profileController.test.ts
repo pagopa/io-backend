@@ -8,7 +8,10 @@ import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
-import { PreferredLanguage } from "../../types/api/PreferredLanguages";
+import {
+  PreferredLanguage,
+  PreferredLanguageEnum
+} from "../../types/api/PreferredLanguage";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
 import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
@@ -20,7 +23,9 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
-const aPreferredLanguage = "it_IT" as PreferredLanguage;
+const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
+  PreferredLanguageEnum.it_IT
+];
 const aValidSpidLevel = SpidLevelEnum.SPID_L2;
 
 const proxyUserResponse = {
@@ -33,7 +38,7 @@ const proxyUserResponse = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferredLanguages: aPreferredLanguage,
+  preferredLanguages: aPreferredLanguages,
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
@@ -61,7 +66,7 @@ const mockedUpsertUser: ExtendedProfile = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebookEnabled,
-  preferredLanguages: aPreferredLanguage,
+  preferredLanguages: aPreferredLanguages,
   version: 1 as number
 };
 

@@ -10,12 +10,12 @@ import { FiscalCode } from "../api/FiscalCode";
 // required attributes
 const CreatedMessageWithoutContentR = t.interface({
   fiscalCode: FiscalCode,
+  id: string,
   senderServiceId: string
 });
 
 // optional attributes
 const CreatedMessageWithoutContentO = t.partial({
-  id: string,
   timeToLive: number
 });
 

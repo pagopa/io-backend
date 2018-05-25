@@ -29,8 +29,11 @@ jobs:
       # Install required libraries
       - run: sudo apt-get install libunwind8
 
+      # Generate the proxy API models
+      - run: yarn generate:proxy-api-models
+
       # Generate API client
-      - run: yarn generate-api-client
+      - run: yarn generate:api-client
 
       # Run tests
       - run: yarn lint
@@ -46,4 +49,4 @@ jobs:
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
       # Run DangerJS
-      - run: yarn danger ci
+      - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'

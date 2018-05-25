@@ -7,7 +7,7 @@ import { number } from "io-ts";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
-import { PreferredLanguage } from "../api/PreferredLanguages";
+import { PreferredLanguages } from "../api/PreferredLanguages";
 
 // required attributes
 const ExtendedProfileR = t.interface({});
@@ -17,7 +17,7 @@ const ExtendedProfileO = t.partial({
   email: EmailAddress,
   isInboxEnabled: IsInboxEnabled,
   isWebhookEnabled: IsWebhookEnabled,
-  preferredLanguages: PreferredLanguage,
+  preferredLanguages: PreferredLanguages,
   version: number
 });
 

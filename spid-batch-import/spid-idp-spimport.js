@@ -62,8 +62,13 @@ function importSp(user, callback) {
     return;
   }
 
-  let applicationDescription = data.Organization.DisplayName + ' (' + data.Organization.Url + ')'
+  let applicationDescription = data.Organization.DisplayName + ' (' + data.Organization.Url + ')';
   let certificateAlias = entityId.substring(8).replace(/\s+/g, '').toLowerCase() + ".crt";
+  let certificateFile = fs.readFileSync("/certs/cert.pem", "utf-8");
+
+  certificateFile = certificateFile.replace(/-+BEGIN CERTIFICATE-+\r?\n?/, '');
+  certificateFile = certificateFile.replace(/-+END CERTIFICATE-+\r?\n?/, '');
+  certificateFile = certificateFile.replace(/\r\n/g, '\n');
 
   createApplication({
 
@@ -75,7 +80,7 @@ function importSp(user, callback) {
       importCertToStore({
 
         "fileName": certificateAlias,
-        "fileData": data.Certificate
+        "fileData": certificateFile
 
       }, () => {
 

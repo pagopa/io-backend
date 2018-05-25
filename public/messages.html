@@ -52,7 +52,7 @@
           // Examine the text in the response
           response.json().then(function(data) {
             console.log(data);
-            for (let i = 0; i < data.pageSize; i++) {
+            for (let i = 0; i < data.page_size; i++) {
               $('#messages').append('<tr><td><a href="message.html?id=' + data.items[i].id + '">' + data.items[i].id + '</a><td>' + data.items[i].sender_service_id + '</td></tr>');
             }
           });

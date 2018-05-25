@@ -26,6 +26,9 @@
   <div><strong>Markdown:</strong></div>
   <div id="markdown"></div>
   <br/>
+  <div><strong>Created at:</strong></div>
+  <div id="created_at"></div>
+  <br/>
   <div><strong>Service name:</strong></div>
   <div id="sender_service_name"></div>
   <br/>
@@ -76,9 +79,9 @@
                     return;
                   }
                   response.json().then(function(data) {
-                    $('#sender_service_name').append(data.serviceName);
-                    $('#sender_organization_name').append(data.organizationName);
-                    $('#sender_department_name').append(data.departmentName);
+                    $('#sender_service_name').append(data.service_name);
+                    $('#sender_organization_name').append(data.organization_name);
+                    $('#sender_department_name').append(data.department_name);
                   });
                 }
               ).catch(function(err) {
@@ -87,6 +90,7 @@
 
             $('#subject').append(data.subject);
             $('#markdown').append(data.markdown);
+            $('#created_at').append(data.created_at);
             $('#sender_service_id').append(data.sender_service_id);
           });
         }
