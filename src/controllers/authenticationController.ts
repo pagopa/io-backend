@@ -9,14 +9,15 @@ import { isLeft } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
-  IResponseRedirect,
+  IResponsePermanentRedirect,
   IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
-  ResponseRedirect,
+  ResponsePermanentRedirect,
   ResponseSuccessJson,
   ResponseSuccessXml
 } from "italia-ts-commons/lib/responses";
+import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { SpidLevel } from "../types/spidLevel";
@@ -39,7 +40,9 @@ export default class AuthenticationController {
     private readonly samlCert: string,
     private readonly spidStrategy: SpidStrategy,
     private readonly tokenService: TokenService,
-    private readonly getClientProfileRedirectionUrl: (token: string) => string
+    private readonly getClientProfileRedirectionUrl: (
+      token: string
+    ) => UrlFromString
   ) {}
 
   /**
@@ -48,7 +51,7 @@ export default class AuthenticationController {
   public async acs(
     // tslint:disable-next-line:no-any
     userPayload: any
-  ): Promise<IResponseErrorInternal | IResponseRedirect> {
+  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
@@ -77,7 +80,7 @@ export default class AuthenticationController {
     }
     const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
 
-    return ResponseRedirect(urlWithToken);
+    return ResponsePermanentRedirect(urlWithToken);
   }
 
   /**
@@ -85,7 +88,7 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseRedirect> {
+  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -166,8 +169,12 @@ export default class AuthenticationController {
   /**
    * The Single logout service.
    */
-  public async slo(): Promise<IResponseRedirect> {
-    return ResponseRedirect("/");
+  public async slo(): Promise<IResponsePermanentRedirect> {
+    const url: UrlFromString = {
+      href: "/"
+    };
+
+    return ResponsePermanentRedirect(url);
   }
 
   /**
@@ -186,11 +193,15 @@ export default class AuthenticationController {
    */
   private spidLogout(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseRedirect> {
+  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
     return new Promise(resolve => {
       this.spidStrategy.logout(req, (err, logoutUrl) => {
         if (!err) {
-          return resolve(ResponseRedirect(logoutUrl));
+          const url: UrlFromString = {
+            href: logoutUrl
+          };
+
+          return resolve(ResponsePermanentRedirect(url));
         } else {
           return resolve(ResponseErrorInternal(err.message));
         }

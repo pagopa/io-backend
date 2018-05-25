@@ -4,6 +4,7 @@
 /* tslint:disable:no-identical-functions */
 
 import { left, right } from "fp-ts/lib/Either";
+import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
 import mockReq from "../../__mocks__/request";
@@ -183,8 +184,12 @@ const spidStrategyInstance = spidStrategy(
 );
 spidStrategyInstance.logout = jest.fn();
 
-const getClientProfileRedirectionUrl = (token: string): string => {
-  return "/profile.html?token={token}".replace("{token}", token);
+const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
+  const url = "/profile.html?token={token}".replace("{token}", token);
+
+  return {
+    href: url
+  };
 };
 
 const controller = new AuthenticationController(
