@@ -34,7 +34,9 @@ paths:
               service_id: 2b3e728c1a5d1efa035c
               service_name: service
               version: 1
-        '404':
+        "401":
+          description: Bearer token null or expired.
+        "404":
           description: No service found for the provided ID.
           schema:
             $ref: "#/definitions/ProblemJson"
@@ -64,6 +66,8 @@ paths:
                   sender_service_id: "5a25abf4fcc89605c082f042c49a"
               page_size: 2
               next: https://example.com/next
+        "401":
+          description: Bearer token null or expired.
         "404":
           description: No message found.
           schema:
@@ -101,6 +105,8 @@ paths:
                 laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
               sender_service_id: "5a25abf4fcc89605c082f042c49a"
               created_at: "2018-05-21T12:45:41.105Z"
+        "401":
+          description: Bearer token null or expired.
         "404":
           description: No message found for the provided ID.
           schema:
@@ -134,6 +140,8 @@ paths:
               preferred_email: "preferred@example.com"
               version: 1
               email: "email@example.com"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: There was an error in retrieving the user profile.
           schema:
@@ -172,6 +180,8 @@ paths:
           description: Invalid payload.
           schema:
             $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         '500':
           description: Profile cannot be updated.
           schema:
@@ -201,6 +211,8 @@ paths:
       responses:
         "201":
           description: Success.
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: There was an error in registering the device to the Notification Hub.
           schema:

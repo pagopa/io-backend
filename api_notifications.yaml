@@ -43,6 +43,8 @@ paths:
       responses:
         "200":
           description: Success.
+        "401":
+          description: Token null or invalid.
         "500":
           description: There was an error in forwarding the notification to the Notification Hub.
 definitions:
