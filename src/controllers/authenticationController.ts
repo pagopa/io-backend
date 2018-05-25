@@ -5,9 +5,19 @@
  */
 
 import * as express from "express";
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { isLeft } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
-import { IResponse } from "../app";
+import {
+  IResponseErrorInternal,
+  IResponsePermanentRedirect,
+  IResponseSuccessJson,
+  IResponseSuccessXml,
+  ResponseErrorInternal,
+  ResponsePermanentRedirect,
+  ResponseSuccessJson,
+  ResponseSuccessXml
+} from "italia-ts-commons/lib/responses";
+import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { SpidLevel } from "../types/spidLevel";
@@ -24,17 +34,15 @@ export interface IPublicSession {
   readonly spidLevel: SpidLevel;
 }
 
-export interface ILogoutRedirect {
-  readonly logoutUrl: string;
-}
-
 export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
     private readonly samlCert: string,
     private readonly spidStrategy: SpidStrategy,
     private readonly tokenService: TokenService,
-    private readonly getClientProfileRedirectionUrl: (token: string) => string
+    private readonly getClientProfileRedirectionUrl: (
+      token: string
+    ) => UrlFromString
   ) {}
 
   /**
@@ -43,12 +51,12 @@ export default class AuthenticationController {
   public async acs(
     // tslint:disable-next-line:no-any
     userPayload: any
-  ): Promise<Either<Error, IResponse<string>>> {
+  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return left(error);
+      return ResponseErrorInternal(error.message);
     }
 
     const spidUser = errorOrUser.value;
@@ -63,19 +71,16 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return left(error);
+      return ResponseErrorInternal(error.message);
     }
     const response = errorOrResponse.value;
 
     if (!response) {
-      return left(new Error("Error creating the user session"));
+      return ResponseErrorInternal("Error creating the user session");
     }
     const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
 
-    return right({
-      body: urlWithToken,
-      status: 301
-    });
+    return ResponsePermanentRedirect(urlWithToken);
   }
 
   /**
@@ -83,12 +88,12 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<Either<Error, IResponse<ILogoutRedirect>>> {
+  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      return left(error);
+      return ResponseErrorInternal(error.message);
     }
 
     const user = errorOrUser.value;
@@ -97,13 +102,13 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
-      return left(error);
+      return ResponseErrorInternal(error.message);
     }
 
     const response = errorOrResponse.value;
 
     if (!response) {
-      return left(new Error("Error creating the user session"));
+      return ResponseErrorInternal("Error creating the user session");
     }
 
     // Logout from SPID.
@@ -114,7 +119,7 @@ export default class AuthenticationController {
     req.query = {};
     req.query.entityID = user.spid_idp;
 
-    return await this.spidLogout(req);
+    return this.spidLogout(req);
   }
 
   /**
@@ -122,10 +127,10 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<Either<Error, IResponse<IPublicSession>>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<IPublicSession>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
-      return left(new Error("No token in the request"));
+      return ResponseErrorInternal("No token in the request");
     }
 
     const token = maybeToken.value;
@@ -137,18 +142,15 @@ export default class AuthenticationController {
       if (isLeft(errorOrSessionState)) {
         // Unable to refresh token or session not found.
         const error = errorOrSessionState.value;
-        return left(error);
+        return ResponseErrorInternal(error.message);
       }
 
       // Return the new session information.
       const sessionState = errorOrSessionState.value;
-      return right({
-        body: {
-          expired: sessionState.expired,
-          newToken: sessionState.newToken,
-          spidLevel: sessionState.user.spid_level
-        },
-        status: 200
+      return ResponseSuccessJson({
+        expired: sessionState.expired,
+        newToken: sessionState.newToken,
+        spidLevel: sessionState.user.spid_level
       });
     }
 
@@ -161,34 +163,29 @@ export default class AuthenticationController {
     };
 
     // Return the actual session information.
-    return right({
-      body: publicSession,
-      status: 200
-    });
+    return ResponseSuccessJson(publicSession);
   }
 
   /**
    * The Single logout service.
    */
-  public slo(): Either<Error, IResponse<string>> {
-    return right({
-      body: "/",
-      status: 301
-    });
+  public async slo(): Promise<IResponsePermanentRedirect> {
+    const url: UrlFromString = {
+      href: "/"
+    };
+
+    return ResponsePermanentRedirect(url);
   }
 
   /**
    * The metadata for this Service Provider.
    */
-  public metadata(res: express.Response): void {
+  public async metadata(): Promise<IResponseSuccessXml<string>> {
     const metadata = this.spidStrategy.generateServiceProviderMetadata(
       this.samlCert
     );
 
-    res
-      .status(200)
-      .set("Content-Type", "application/xml")
-      .send(metadata);
+    return ResponseSuccessXml(metadata);
   }
 
   /**
@@ -196,20 +193,17 @@ export default class AuthenticationController {
    */
   private spidLogout(
     req: express.Request
-  ): Promise<Either<Error, IResponse<ILogoutRedirect>>> {
+  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
     return new Promise(resolve => {
       this.spidStrategy.logout(req, (err, logoutUrl) => {
         if (!err) {
-          return resolve(
-            right<Error, IResponse<ILogoutRedirect>>({
-              body: {
-                logoutUrl
-              },
-              status: 200
-            })
-          );
+          const url: UrlFromString = {
+            href: logoutUrl
+          };
+
+          return resolve(ResponsePermanentRedirect(url));
         } else {
-          return resolve(left<Error, IResponse<ILogoutRedirect>>(err));
+          return resolve(ResponseErrorInternal(err.message));
         }
       });
     });

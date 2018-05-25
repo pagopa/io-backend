@@ -7,6 +7,8 @@ host: localhost
 basePath: /api/v1
 schemes:
   - https
+security:
+  - Bearer: []
 paths:
   "/services/{service_id}":
     x-swagger-router-controller: ServicesController
@@ -32,8 +34,12 @@ paths:
               service_id: 2b3e728c1a5d1efa035c
               service_name: service
               version: 1
-        '404':
+        "401":
+          description: Bearer token null or expired.
+        "404":
           description: No service found for the provided ID.
+          schema:
+            $ref: "#/definitions/ProblemJson"
       parameters: []
   "/messages":
     x-swagger-router-controller: MessagesController
@@ -60,10 +66,16 @@ paths:
                   sender_service_id: "5a25abf4fcc89605c082f042c49a"
               page_size: 2
               next: https://example.com/next
+        "401":
+          description: Bearer token null or expired.
         "404":
           description: No message found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the messages.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/messages/{id}":
     x-swagger-router-controller: MessagesController
     parameters:
@@ -93,10 +105,16 @@ paths:
                 laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
               sender_service_id: "5a25abf4fcc89605c082f042c49a"
               created_at: "2018-05-21T12:45:41.105Z"
+        "401":
+          description: Bearer token null or expired.
         "404":
           description: No message found for the provided ID.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the message.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/profile":
     x-swagger-router-controller: ProfileController
     get:
@@ -122,8 +140,12 @@ paths:
               preferred_email: "preferred@example.com"
               version: 1
               email: "email@example.com"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: There was an error in retrieving the user profile.
+          schema:
+            $ref: "#/definitions/ProblemJson"
     post:
       operationId: upsertProfile
       summary: Set User's profile
@@ -154,47 +176,16 @@ paths:
               is_inbox_enabled: true
               is_webhook_enabled: false
               version: 1
-        "404":
-          description: No user found for the provided fiscal code.
         '400':
           description: Invalid payload.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         '500':
           description: Profile cannot be updated.
-  "/notify":
-    x-swagger-router-controller: NotificationController
-    post:
-      operationId: notify
-      summary: Notify a user
-      description: |-
-        Post the notification to the user using a push notification.
-      parameters:
-        - in: body
-          name: body
           schema:
-            $ref: "#/definitions/Notification"
-          x-examples:
-            application/json:
-              message:
-                content:
-                    subject: message subject, aliquip sint nulla in estinut
-                    markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-                created_at: "2018-05-03T16:21:38.167Z"
-                fiscal_code: "TMMEXQ60A10Y526X"
-                id: "01CCKCY7QQ7WCHWTH8NB504386"
-                sender_service_id: "5a25abf4fcc89605c082f042c49a"
-              senderMetadata:
-                department_name: "Department name"
-                organization_name: "Organization name"
-                service_name: "Service name"
-      responses:
-        "200":
-          description: Success.
-        "500":
-          description: There was an error in forwarding the notification to the Notification Hub.
+            $ref: "#/definitions/ProblemJson"
   "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
@@ -220,71 +211,77 @@ paths:
       responses:
         "200":
           description: Success.
+          schema:
+            type: string
+          examples:
+            application/json:
+              "ok"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: There was an error in registering the device to the Notification Hub.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
-  MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageContent"
-  MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageSubject"
-  MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageBodyMarkdown"
-  FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/FiscalCode"
-  EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/EmailAddress"
-  ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ExtendedProfile"
-  LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/LimitedProfile"
-  PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguages"
-  PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PreferredLanguage"
-  IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsInboxEnabled"
-  IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/IsWebhookEnabled"
-  PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/PaginationResponse"
-  CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/CreatedMessageWithContent"
-  ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServicePublic"
-  SenderMetadata:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/SenderMetadata"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/DepartmentName"
-  OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/OrganizationName"
-  ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/DepartmentName"
+  EmailAddress:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/EmailAddress"
+  ExtendedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ExtendedProfile"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/FiscalCode"
+  IsInboxEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/IsInboxEnabled"
+  IsWebhookEnabled:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/IsWebhookEnabled"
+  LimitedProfile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/LimitedProfile"
+  MessageBodyMarkdown:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageBodyMarkdown"
+  MessageContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageResponseNotificationStatus"
+  MessageSubject:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageSubject"
+  OrganizationName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/OrganizationName"
+  PaginationResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PaginationResponse"
+  PreferredLanguage:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PreferredLanguage"
+  PreferredLanguages:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ProblemJson"
+  ServicePublic:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ServicePublic"
+  ServiceName:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ServiceName"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.39.0/api/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/Timestamp"
   MessageWithContent:
-    title: Message with content
     type: object
+    title: Message with content
     properties:
+      created_at:
+        $ref: "#/definitions/Timestamp"
       id:
         type: string
-      subject:
-        $ref: "#/definitions/MessageSubject"
       markdown:
         $ref: "#/definitions/MessageBodyMarkdown"
       sender_service_id:
         type: string
-      created_at:
-        $ref: "#/definitions/Timestamp"
+      subject:
+        $ref: "#/definitions/MessageSubject"
     required:
+      - created_at
       - id
-      - content
+      - sender_service_id
   MessageWithoutContent:
-    title: Message without content
     type: object
+    title: Message without content
     properties:
       id:
         type: string
@@ -294,24 +291,24 @@ definitions:
       - id
       - sender_service_id
   Messages:
-    title: A list of messages
     type: object
+    title: A list of messages
     properties:
       items:
         type: array
         items:
           $ref: "#/definitions/MessageWithoutContent"
-      page_size:
-        $ref: '#/definitions/PageSize'
       next:
         type: string
+      page_size:
+        $ref: '#/definitions/PageSize'
     required:
       - items
       - page_size
   Installation:
+    type: object
     title: Installation
     description: Describes an app installation.
-    type: object
     properties:
       platform:
         $ref: '#/definitions/Platform'
@@ -320,22 +317,10 @@ definitions:
     required:
       - platform
       - pushChannel
-  Notification:
-    title: Notification
-    description: A received Notification.
-    type: object
-    properties:
-      message:
-        $ref: '#/definitions/CreatedMessageWithContent'
-      senderMetadata:
-        $ref: '#/definitions/SenderMetadata'
-    required:
-      - message
-      - senderMetadata
   ProfileWithEmail:
+    type: object
     title: Profile with wmail
     description: Describes the user's profile.
-    type: object
     properties:
       email:
         $ref: '#/definitions/EmailAddress'
@@ -372,9 +357,9 @@ definitions:
       - preferred_email
       - version
   ProfileWithoutEmail:
+    type: object
     title: Profile without email
     description: Describes the user's profile.
-    type: object
     properties:
       family_name:
         type: string
@@ -433,25 +418,30 @@ definitions:
     minimum: 0
     description: Number of items returned for each page.
   Platform:
-    description: The platform type where the installation happened.
     type: string
+    description: The platform type where the installation happened.
     x-extensible-enum:
       - apns
       - gcm
   PushChannel:
+    type: string
     description: |-
       The Push Notification Service handle for this Installation.
       See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
-    type: string
 responses: {}
 parameters:
   PaginationRequest:
+    type: string
     name: cursor
     in: query
-    type: string
     minimum: 1
     description: An opaque identifier that points to the next item in the collection.
 consumes:
   - application/json
 produces:
   - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

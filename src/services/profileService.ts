@@ -5,6 +5,12 @@
 
 import { isLeft } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import {
+  IResponseErrorInternal,
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
@@ -24,6 +30,10 @@ import { IApiClientFactoryInterface } from "./IApiClientFactory";
 const profileErrorOnUnknownResponse = "Unknown response.";
 const profileErrorOnApiError = "Api error.";
 
+export type profileResponse<T> =
+  | IResponseErrorInternal
+  | IResponseSuccessJson<T>;
+
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
@@ -32,7 +42,7 @@ export default class ProfileService {
    */
   public async getProfile(
     user: User
-  ): Promise<ProfileWithoutEmail | ProfileWithEmail> {
+  ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getProfileWithHttpOperationResponse();
@@ -48,16 +58,16 @@ export default class ProfileService {
           "Unknown response from getProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(profileErrorOnUnknownResponse);
+        return ResponseErrorInternal(profileErrorOnUnknownResponse);
       }
 
-      if (!simpleResponse.isNotFound()) {
-        throw new Error(profileErrorOnApiError);
-      } else {
+      if (simpleResponse.isNotFound()) {
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
         // retrieved from SPID.
-        return toAppProfileWithoutEmail(user);
+        return ResponseSuccessJson(toAppProfileWithoutEmail(user));
+      } else {
+        return ResponseErrorInternal(profileErrorOnApiError);
       }
     }
 
@@ -69,11 +79,11 @@ export default class ProfileService {
         "Unknown response from getProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      throw new Error(profileErrorOnUnknownResponse);
+      return ResponseErrorInternal(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;
-    return toAppProfileWithEmail(apiProfile, user);
+    return ResponseSuccessJson(toAppProfileWithEmail(apiProfile, user));
   }
 
   /**
@@ -82,7 +92,7 @@ export default class ProfileService {
   public async upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
-  ): Promise<ProfileWithEmail> {
+  ): Promise<profileResponse<ProfileWithEmail>> {
     const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
@@ -101,9 +111,9 @@ export default class ProfileService {
           "Unknown response from upsertProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(profileErrorOnUnknownResponse);
+        return ResponseErrorInternal(profileErrorOnUnknownResponse);
       } else {
-        throw new Error(profileErrorOnApiError);
+        return ResponseErrorInternal(profileErrorOnApiError);
       }
     }
 
@@ -115,10 +125,10 @@ export default class ProfileService {
         "Unknown response from upsertProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      throw new Error(profileErrorOnUnknownResponse);
+      return ResponseErrorInternal(profileErrorOnUnknownResponse);
     }
 
     const apiProfile = errorOrApiProfile.value;
-    return toAppProfileWithEmail(apiProfile, user);
+    return ResponseSuccessJson(toAppProfileWithEmail(apiProfile, user));
   }
 }

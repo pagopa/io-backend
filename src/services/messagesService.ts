@@ -3,8 +3,15 @@
  */
 
 import { isLeft } from "fp-ts/lib/Either";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
@@ -24,6 +31,12 @@ import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
+const messageNotFound = "Not found.";
+
+export type MessagesResponse<T> =
+  | IResponseErrorInternal
+  | IResponseErrorNotFound
+  | IResponseSuccessJson<T>;
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -31,7 +44,9 @@ export default class MessagesService {
   /**
    * Retrieves all messages for a specific user.
    */
-  public async getMessagesByUser(user: User): Promise<Messages> {
+  public async getMessagesByUser(
+    user: User
+  ): Promise<MessagesResponse<Messages>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessagesByUserWithHttpOperationResponse();
@@ -47,17 +62,15 @@ export default class MessagesService {
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(messageErrorOnUnknownResponse);
+        return ResponseErrorInternal(messageErrorOnUnknownResponse);
       }
 
-      if (!simpleResponse.isNotFound()) {
-        throw new Error(messageErrorOnApiError);
+      if (simpleResponse.isNotFound()) {
+        return ResponseErrorNotFound(messageNotFound, "");
+      } else {
+        winston.error("Api error: %s", simpleResponse.parsedBody());
+        return ResponseErrorInternal(messageErrorOnApiError);
       }
-
-      return {
-        items: [],
-        page_size: 0 as NonNegativeNumber
-      };
     }
 
     const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
@@ -68,16 +81,16 @@ export default class MessagesService {
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
-      throw new Error(messageErrorOnUnknownResponse);
+      return ResponseErrorInternal(messageErrorOnUnknownResponse);
     }
 
     const apiMessages = errorOrApiMessages.value;
 
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-    return {
+    return ResponseSuccessJson({
       items: appMessages,
       page_size: apiMessages.pageSize
-    };
+    });
   }
 
   /**
@@ -86,7 +99,7 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<MessageWithContent> {
+  ): Promise<MessagesResponse<MessageWithContent>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
@@ -102,9 +115,14 @@ export default class MessagesService {
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(messageErrorOnUnknownResponse);
+        return ResponseErrorInternal(messageErrorOnUnknownResponse);
+      }
+
+      if (simpleResponse.isNotFound()) {
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
-        throw new Error(messageErrorOnApiError);
+        winston.error("Api error: %s", simpleResponse.parsedBody());
+        return ResponseErrorInternal(messageErrorOnApiError);
       }
     }
 
@@ -116,11 +134,11 @@ export default class MessagesService {
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
-      throw new Error(messageErrorOnUnknownResponse);
+      return ResponseErrorInternal(messageErrorOnUnknownResponse);
     }
 
     const apiMessage = errorOrApiMessage.value;
-    return toAppMessageWithContent(apiMessage);
+    return ResponseSuccessJson(toAppMessageWithContent(apiMessage));
   }
 
   /**
@@ -129,7 +147,7 @@ export default class MessagesService {
   public async getService(
     user: User,
     serviceId: string
-  ): Promise<ProxyServicePublic> {
+  ): Promise<MessagesResponse<ProxyServicePublic>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -145,9 +163,13 @@ export default class MessagesService {
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        throw new Error(messageErrorOnUnknownResponse);
+        return ResponseErrorInternal(messageErrorOnUnknownResponse);
+      }
+
+      if (simpleResponse.isNotFound()) {
+        return ResponseErrorNotFound(messageNotFound, "");
       } else {
-        throw new Error(messageErrorOnApiError);
+        return ResponseErrorInternal(messageErrorOnApiError);
       }
     }
 
@@ -159,10 +181,10 @@ export default class MessagesService {
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );
-      throw new Error(messageErrorOnUnknownResponse);
+      return ResponseErrorInternal(messageErrorOnUnknownResponse);
     }
 
     const apiService = errorOrApiService.value;
-    return toAppService(apiService);
+    return ResponseSuccessJson(toAppService(apiService));
   }
 }

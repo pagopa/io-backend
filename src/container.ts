@@ -14,6 +14,7 @@ import {
 } from "italia-ts-commons/lib/environment";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import { CIDR } from "italia-ts-commons/lib/strings";
+import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
 import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
@@ -112,9 +113,15 @@ container.register({
   clientLoginRedirectionUrl: awilix.asValue(
     process.env.CLIENT_REDIRECTION_URL || "/login"
   ),
-  getClientProfileRedirectionUrl: awilix.asValue((token: string) => {
-    return clientProfileRedirectionUrl.replace("{token}", token);
-  })
+  getClientProfileRedirectionUrl: awilix.asValue(
+    (token: string): UrlFromString => {
+      const url = clientProfileRedirectionUrl.replace("{token}", token);
+
+      return {
+        href: url
+      };
+    }
+  )
 });
 
 // Redis server settings.

@@ -12,10 +12,6 @@ import container, {
   SPID_STRATEGY,
   URL_TOKEN_STRATEGY
 } from "./container";
-import AuthenticationController, {
-  ILogoutRedirect,
-  IPublicSession
-} from "./controllers/authenticationController";
 import ProfileController from "./controllers/profileController";
 
 import * as bodyParser from "body-parser";
@@ -30,34 +26,14 @@ import ServicesController from "./controllers/servicesController";
 
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
-import { Either } from "fp-ts/lib/Either";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
+import { IResponse } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
+import AuthenticationController from "./controllers/authenticationController";
 import checkIP from "./utils/middleware/checkIP";
-
-/**
- * Return a response to the client.
- */
-function respond(
-  response: Either<Error, IResponse<string | IPublicSession | ILogoutRedirect>>,
-  res: express.Response
-): void {
-  response.fold(
-    err => {
-      res.status(500).json({ message: err.message });
-    },
-    data => {
-      if (data.status === 301 && typeof data.body === "string") {
-        res.redirect(data.body);
-      } else {
-        res.json(data.body);
-      }
-    }
-  );
-}
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -85,15 +61,19 @@ function withSpidAuth(
       if (!user) {
         return res.redirect(clientLoginRedirectionUrl);
       }
-      const maybeResponse = await controller.acs(user);
-      respond(maybeResponse, res);
+      const response = await controller.acs(user);
+      response.apply(res);
     })(req, res, next);
   };
 }
 
-export interface IResponse<T> {
-  readonly body: T;
-  readonly status: number;
+function toExpressHandler<T>(
+  handler: (req: express.Request) => Promise<IResponse<T>>
+): <P>(object: P, req: express.Request, res: express.Response) => void {
+  return async (object, req, res) => {
+    const response = await handler.call(object, req);
+    response.apply(res);
+  };
 }
 
 export function newApp(
@@ -164,20 +144,17 @@ export function newApp(
   app.post(
     "/logout",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await acsController.logout(req);
-      respond(maybeResponse, res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(acsController.logout)(acsController, req, res);
     }
   );
 
-  app.post("/slo", (_, res: express.Response) => {
-    const maybeResponse = acsController.slo();
-    respond(maybeResponse, res);
+  app.post("/slo", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.slo)(acsController, req, res);
   });
 
-  app.get("/session", async (req: express.Request, res: express.Response) => {
-    const maybeResponse = await acsController.getSessionState(req);
-    respond(maybeResponse, res);
+  app.get("/session", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.getSessionState)(acsController, req, res);
   });
 
   app.post(
@@ -189,8 +166,8 @@ export function newApp(
     )
   );
 
-  app.get("/metadata", (_, res: express.Response) => {
-    acsController.metadata(res);
+  app.get("/metadata", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.metadata)(acsController, req, res);
   });
 
   // Liveness probe for Kubernetes.
@@ -204,7 +181,11 @@ export function newApp(
     "/api/v1/profile",
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      profileController.getProfile(req, res);
+      toExpressHandler(profileController.getProfile)(
+        profileController,
+        req,
+        res
+      );
     }
   );
 
@@ -212,7 +193,11 @@ export function newApp(
     "/api/v1/profile",
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      profileController.upsertProfile(req, res);
+      toExpressHandler(profileController.upsertProfile)(
+        profileController,
+        req,
+        res
+      );
     }
   );
 
@@ -220,7 +205,11 @@ export function newApp(
     "/api/v1/messages",
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      messagesController.getMessagesByUser(req, res);
+      toExpressHandler(messagesController.getMessagesByUser)(
+        messagesController,
+        req,
+        res
+      );
     }
   );
 
@@ -228,7 +217,11 @@ export function newApp(
     "/api/v1/messages/:id",
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      messagesController.getMessage(req, res);
+      toExpressHandler(messagesController.getMessage)(
+        messagesController,
+        req,
+        res
+      );
     }
   );
 
@@ -236,7 +229,11 @@ export function newApp(
     "/api/v1/services/:id",
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      servicesController.getService(req, res);
+      toExpressHandler(servicesController.getService)(
+        servicesController,
+        req,
+        res
+      );
     }
   );
 
@@ -244,20 +241,24 @@ export function newApp(
     "/api/v1/notify",
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await notificationController.notify(req);
-      respond(maybeResponse, res);
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(notificationController.notify)(
+        notificationController,
+        req,
+        res
+      );
     }
   );
 
   app.put(
     "/api/v1/installations/:id",
     bearerTokenAuth,
-    async (req: express.Request, res: express.Response) => {
-      const maybeResponse = await notificationController.createOrUpdateInstallation(
-        req
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(notificationController.createOrUpdateInstallation)(
+        notificationController,
+        req,
+        res
       );
-      respond(maybeResponse, res);
     }
   );
 

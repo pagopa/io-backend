@@ -5,7 +5,10 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import MessagesService from "../services/messagesService";
+import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
+import MessagesService, { MessagesResponse } from "../services/messagesService";
+import { Messages } from "../types/api/Messages";
+import { MessageWithContent } from "../types/api/MessageWithContent";
 import { extractUserFromRequest } from "../types/user";
 
 export default class MessagesController {
@@ -15,57 +18,37 @@ export default class MessagesController {
    * Returns the messages for the user identified by the provided fiscal
    * code.
    */
-  public getMessagesByUser(req: express.Request, res: express.Response): void {
+  public async getMessagesByUser(
+    req: express.Request
+  ): Promise<MessagesResponse<Messages>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
-      });
-      return;
+      return ResponseErrorInternal(error.message);
     }
 
     const user = errorOrUser.value;
-    this.messagesService
-      .getMessagesByUser(user)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.messagesService.getMessagesByUser(user);
   }
 
   /**
    * Returns the message identified by the message id.
    */
-  public getMessage(req: express.Request, res: express.Response): void {
+  public async getMessage(
+    req: express.Request
+  ): Promise<MessagesResponse<MessageWithContent>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
       // Unable to extract the user from the request.
       const error = errorOrUser.value;
-      res.status(500).json({
-        message: error.message
-      });
-      return;
+      return ResponseErrorInternal(error.message);
     }
 
     // TODO: validate req.params.id
     const user = errorOrUser.value;
-    this.messagesService
-      .getMessage(user, req.params.id)
-      .then(data => {
-        res.json(data);
-      })
-      .catch(err =>
-        res.status(500).json({
-          message: err.message
-        })
-      );
+    return this.messagesService.getMessage(user, req.params.id);
   }
 }
