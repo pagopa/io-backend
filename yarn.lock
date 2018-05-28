@@ -461,9 +461,9 @@ autorest@^2.0.4262:
   version "2.0.4262"
   resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4262.tgz#2e9a3740896d8ee2e22b0597e96525a258d7e66c"
 
-awilix@^3.0.5:
-  version "3.0.7"
-  resolved "https://registry.yarnpkg.com/awilix/-/awilix-3.0.7.tgz#8cb458c6d9cf1c0aed056b6aefc3d726f1d254c6"
+awilix@^3.0.8:
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/awilix/-/awilix-3.0.8.tgz#76f22a001b2f9d5755028fcb4c980b80c4416a66"
   dependencies:
     camel-case "^3.0.0"
     glob "^7.1.2"
