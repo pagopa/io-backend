@@ -83,7 +83,7 @@
     "autorest": "^2.0.4262",
     "danger": "^3.7.14",
     "danger-plugin-digitalcitizenship": "^0.2.0",
-    "fp-ts": "^1.0.0",
+    "fp-ts": "^1.6.0",
     "italia-utils": "^3.6.1",
     "jest": "^22.4.3",
     "lolex": "2.6.0",
