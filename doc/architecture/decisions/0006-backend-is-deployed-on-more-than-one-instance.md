@@ -1,10 +1,10 @@
 # 6. Backend is deployed on more than one instance
 
-Date: 2018-05-18
+Date: 2018-05-29
 
 ## Status
 
-Draft
+Accepted
 
 ## Context
 
@@ -21,7 +21,11 @@ We decided to use the Premium version that provides us the following features:
 * Scale out to multiple cache units
 * Azure Virtual Network
 
+From the external the cluster appears as a single connection so there is no need to use a Redis client that supports
+clustering. When the cluster is scaled up Azure will create more nodes, it then copies a number of keys from the
+existing nodes to the new ones, removing that keys from the existing nodes only if the operation completes successfully.
+
 ## Consequences
 
-Connections to the Redis cluster will be managed by the `redis-clustr`
-[package](https://github.com/gosquared/redis-clustr).
+We remove the Docker container used to test Redis and we add a new set of environment variables to store the data
+needed to connect to Azure.

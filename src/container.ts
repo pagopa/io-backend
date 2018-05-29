@@ -183,7 +183,28 @@ container.register({
 container.register(
   "redisClient",
   awilix.asFunction(() => {
-    return redis.createClient(process.env.REDIS_URL || "redis://redis");
+    const DEFAULT_REDIS_PORT = "6379";
+
+    const redisUrl = process.env.REDIS_URL;
+    const redisPassword = process.env.REDIS_PASSWORD;
+    const redisPort: number = parseInt(
+      process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
+      10
+    );
+
+    if (!redisUrl || !redisPassword || !redisPort) {
+      winston.error(
+        "Missing require environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD, REDIS_PORT)"
+      );
+      process.exit(1);
+    }
+
+    return redis.createClient(redisPort, redisUrl, {
+      auth_pass: redisPassword,
+      tls: {
+        servername: redisUrl
+      }
+    });
   })
 );
 export const SESSION_STORAGE = "sessionStorage";
