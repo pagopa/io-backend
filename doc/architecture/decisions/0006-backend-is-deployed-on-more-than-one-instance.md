@@ -27,5 +27,8 @@ existing nodes to the new ones, removing that keys from the existing nodes only 
 
 ## Consequences
 
-We remove the Docker container used to test Redis and we add a new set of environment variables to store the data
-needed to connect to Azure.
+* add the `redis-clustr` package to add a thin wrapper around the node
+[redis_client](https://github.com/mranney/node_redis) to enable use of
+[Redis Cluster](http://redis.io/topics/cluster-spec).
+* remove the Docker container used to test Redis and add a new set of environment variables to store the data needed
+to connect to Azure.
