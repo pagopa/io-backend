@@ -194,7 +194,7 @@ container.register(
 
     if (!redisUrl || !redisPassword || !redisPort) {
       winston.error(
-        "Missing require environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD, REDIS_PORT)"
+        "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD, REDIS_PORT)"
       );
       process.exit(1);
     }
