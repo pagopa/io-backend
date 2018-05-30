@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
-    "awilix": "^3.0.5",
+    "awilix": "^3.0.8",
     "azure-sb": "^0.10.6",
     "body-parser": "^1.18.3",
     "dotenv": "^5.0.1",
