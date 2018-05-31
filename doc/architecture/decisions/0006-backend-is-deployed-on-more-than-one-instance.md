@@ -21,14 +21,16 @@ We decided to use the Premium version that provides us the following features:
 * Scale out to multiple cache units
 * Azure Virtual Network
 
-From the external the cluster appears as a single connection so there is no need to use a Redis client that supports
-clustering. When the cluster is scaled up Azure will create more nodes, it then copies a number of keys from the
+When the cluster is scaled up Azure will create more nodes, it then copies a number of keys from the
 existing nodes to the new ones, removing that keys from the existing nodes only if the operation completes successfully.
 
 ## Consequences
 
+To connect to the cluster we need a client library that supports clustering.
+
 * add the `redis-clustr` package to add a thin wrapper around the node
 [redis_client](https://github.com/mranney/node_redis) to enable use of
 [Redis Cluster](http://redis.io/topics/cluster-spec).
+* only use the Redis database 0 (Azure does't allow us to use the SELECT command to switch to database other than 0) 
 * remove the Docker container used to test Redis and add a new set of environment variables to store the data needed
 to connect to Azure.
