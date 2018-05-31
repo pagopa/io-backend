@@ -20,19 +20,12 @@ import {
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
-import { SpidLevel } from "../types/spidLevel";
+import { PublicSession } from "../types/api/PublicSession";
 import {
   extractUserFromRequest,
   toAppUser,
   validateSpidUser
 } from "../types/user";
-
-export interface IPublicSession {
-  readonly expired: boolean;
-  readonly expireAt?: number;
-  readonly newToken?: string;
-  readonly spidLevel: SpidLevel;
-}
 
 export default class AuthenticationController {
   constructor(
@@ -127,7 +120,7 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<IPublicSession>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<PublicSession>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
       return ResponseErrorInternal("No token in the request");
