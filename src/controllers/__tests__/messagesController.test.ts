@@ -44,7 +44,6 @@ const proxyMessageResponse = {
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -52,6 +51,7 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "123hexToken"
 };
 

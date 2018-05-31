@@ -26,7 +26,6 @@ export function toAppProfileWithEmail(
   return {
     email: from.email,
     family_name: user.family_name,
-    tax_code: user.tax_code,
     has_profile: true,
     is_email_set: !!from.email,
     is_inbox_enabled: from.isInboxEnabled,
@@ -34,6 +33,7 @@ export function toAppProfileWithEmail(
     name: user.name,
     preferred_email: user.preferred_email,
     preferred_languages: from.preferredLanguages,
+    tax_code: user.tax_code,
     version: from.version
   };
 }
@@ -46,13 +46,13 @@ export function toAppProfileWithEmail(
 export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
   return {
     family_name: user.family_name,
-    tax_code: user.tax_code,
     has_profile: false,
     is_email_set: false,
     is_inbox_enabled: false,
     is_webhook_enabled: false,
     name: user.name,
     preferred_email: user.preferred_email,
+    tax_code: user.tax_code,
     version: 0 as NonNegativeNumber
   };
 }

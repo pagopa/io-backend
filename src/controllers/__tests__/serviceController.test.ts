@@ -8,11 +8,11 @@ import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import { DepartmentName } from "../../types/api/DepartmentName";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { TaxCode } from "../../types/api/TaxCode";
 import { OrganizationName } from "../../types/api/OrganizationName";
 import { ServiceName } from "../../types/api/ServiceName";
 import { ServicePublic } from "../../types/api/ServicePublic";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { User } from "../../types/user";
 import ServicesController from "../servicesController";
 
@@ -35,7 +35,6 @@ const proxyService: ServicePublic = {
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -43,6 +42,7 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "123hexToken"
 };
 

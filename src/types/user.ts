@@ -18,7 +18,6 @@ import { TaxCode } from "./api/TaxCode";
 export const User = t.interface({
   created_at: number,
   family_name: string,
-  tax_code: TaxCode,
   name: string,
   nameID: string,
   nameIDFormat: string,
@@ -26,6 +25,7 @@ export const User = t.interface({
   sessionIndex: string,
   spid_idp: string,
   spid_level: SpidLevel,
+  tax_code: TaxCode,
   token: string
 });
 
@@ -55,7 +55,6 @@ export function toAppUser(from: SpidUser, token: string): User {
   return {
     created_at: new Date().getTime(),
     family_name: from.familyName,
-    tax_code: from.fiscalNumber,
     name: from.name,
     nameID: from.nameID, // The used nameID is needed for logout.
     nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
@@ -63,6 +62,7 @@ export function toAppUser(from: SpidUser, token: string): User {
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
+    tax_code: from.fiscalNumber,
     token
   };
 }

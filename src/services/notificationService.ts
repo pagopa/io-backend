@@ -10,12 +10,12 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { TaxCode } from "../types/api/TaxCode";
 import { Installation } from "../types/api/Installation";
 import Response = Azure.ServiceBus.Response;
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
 import { PlatformEnum } from "../types/api/Platform";
+import { TaxCode } from "../types/api/TaxCode";
 import {
   IInstallation,
   INotificationTemplate,

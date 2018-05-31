@@ -23,14 +23,14 @@ const validApiMessagesResponse = {
   parsedBody: {
     items: [
       {
-        taxCode: "XUZTCT88A51Y311X",
         id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
+        senderServiceId: "5a563817fcc896087002ea46c49a",
+        taxCode: "XUZTCT88A51Y311X"
       },
       {
-        taxCode: "XUZTCT88A51Y311X",
         id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
+        senderServiceId: "5a563817fcc896087002ea46c49a",
+        taxCode: "XUZTCT88A51Y311X"
       }
     ],
     pageSize: 2
@@ -53,8 +53,8 @@ const invalidApiMessagesResponse = {
         senderServiceId: "5a563817fcc896087002ea46c49a"
       },
       {
-        taxCode: "XUZTCT88A51Y311X",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
+        senderServiceId: "5a563817fcc896087002ea46c49a",
+        taxCode: "XUZTCT88A51Y311X"
       }
     ],
     pageSize: 2
@@ -85,9 +85,9 @@ const validApiMessageResponse = {
         subject: aValidSubject
       },
       createdAt: new Date(aTimestamp),
-      taxCode: "XUZTCT88A51Y311X",
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
+      senderServiceId: "5a563817fcc896087002ea46c49a",
+      taxCode: "XUZTCT88A51Y311X"
     },
     notification: {
       email: "SENT"
@@ -166,7 +166,6 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  tax_code: aValidTaxCode,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -174,6 +173,7 @@ const mockedUser: User = {
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aValidTaxCode,
   token: "HexToKen"
 };
 

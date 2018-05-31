@@ -1,11 +1,11 @@
 /* tslint:disable:no-null-keyword */
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { TaxCode } from "../../types/api/TaxCode";
 import { InstallationID } from "../../types/api/InstallationID";
 import { MessageBodyMarkdown } from "../../types/api/MessageBodyMarkdown";
 import { MessageSubject } from "../../types/api/MessageSubject";
 import { PlatformEnum } from "../../types/api/Platform";
+import { TaxCode } from "../../types/api/TaxCode";
 import NotificationService from "../notificationService";
 
 const aTaxCode = "GRBGPP87L04L741X" as TaxCode;
@@ -53,9 +53,9 @@ const aValidNotification = {
       subject: "this is a message" as MessageSubject
     },
     created_at: new Date(),
-    tax_code: aTaxCode,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567"
+    sender_service_id: "234567",
+    tax_code: aTaxCode
   },
   senderMetadata: {
     department_name: "test department" as NonEmptyString,

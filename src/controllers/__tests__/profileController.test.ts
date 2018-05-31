@@ -6,7 +6,6 @@ import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { TaxCode } from "../../types/api/TaxCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
 import {
@@ -14,6 +13,7 @@ import {
   PreferredLanguageEnum
 } from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
@@ -33,7 +33,6 @@ const proxyUserResponse = {
   created_at: aTimestamp,
   email: anEmailAddress,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebookEnabled,
   name: "Giuseppe Maria",
@@ -43,6 +42,7 @@ const proxyUserResponse = {
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
+  tax_code: aFiscalNumber,
   token: "123hexToken",
   version: 1 as number
 };
@@ -51,7 +51,6 @@ const proxyUserResponse = {
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -59,6 +58,7 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "123hexToken"
 };
 

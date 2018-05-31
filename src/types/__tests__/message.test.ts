@@ -1,10 +1,10 @@
-import { TaxCode } from "../api/TaxCode";
 import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
 import { MessageContent } from "../api/MessageContent";
 import { MessageResponseNotificationStatus } from "../api/MessageResponseNotificationStatus";
 import { MessageSubject } from "../api/MessageSubject";
 import { MessageWithContent } from "../api/MessageWithContent";
 import { MessageWithoutContent } from "../api/MessageWithoutContent";
+import { TaxCode } from "../api/TaxCode";
 import { CreatedMessageWithContent } from "../api_client/createdMessageWithContent";
 import { CreatedMessageWithoutContent } from "../api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "../api_client/messageResponseWithContent";
@@ -17,9 +17,9 @@ const aTaxCode = "GRBGPP87L04L741X" as TaxCode;
 
 // mock for a valid CreatedMessageWithoutContent
 const mockedCreatedMessageWithoutContent: CreatedMessageWithoutContent = {
-  taxCode: aTaxCode,
   id: "string" as string,
   senderServiceId: "string" as string,
+  taxCode: aTaxCode,
   timeToLive: 123456 as number
 };
 
@@ -30,9 +30,9 @@ const aMessage: CreatedMessageWithContent = {
     subject: "subject" as MessageSubject
   } as MessageContent,
   createdAt: new Date(),
-  taxCode: aTaxCode,
   id: "string",
   senderServiceId: "string",
+  taxCode: aTaxCode,
   timeToLive: 12345
 };
 // mock for a valid NotificationStatus

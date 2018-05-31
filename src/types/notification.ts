@@ -6,9 +6,9 @@ import * as crypto from "crypto";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { tag } from "italia-ts-commons/lib/types";
-import { TaxCode } from "./api/TaxCode";
 import { InstallationID } from "./api/InstallationID";
 import { Platform } from "./api/Platform";
+import { TaxCode } from "./api/TaxCode";
 
 /**
  * An hashed tax code.

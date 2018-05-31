@@ -95,7 +95,6 @@ const aRefreshedToken =
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
@@ -103,6 +102,7 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: mockToken
 };
 

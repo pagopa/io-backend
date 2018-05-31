@@ -9,9 +9,9 @@ import { TaxCode } from "../api/TaxCode";
 
 // required attributes
 const CreatedMessageWithoutContentR = t.interface({
-  taxCode: TaxCode,
   id: string,
-  senderServiceId: string
+  senderServiceId: string,
+  taxCode: TaxCode
 });
 
 // optional attributes

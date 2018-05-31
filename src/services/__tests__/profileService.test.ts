@@ -25,7 +25,6 @@ const validApiProfileResponse = {
 const proxyProfileWithEmailResponse = {
   email: aValidAPIEmail,
   family_name: "Lusso",
-  tax_code: "XUZTCT88A51Y311X",
   has_profile: true,
   is_email_set: true,
   is_inbox_enabled: true,
@@ -33,17 +32,18 @@ const proxyProfileWithEmailResponse = {
   name: "Luca",
   preferred_email: aValidSPIDEmail,
   preferred_languages: ["it_IT"],
+  tax_code: "XUZTCT88A51Y311X",
   version: 42
 };
 const proxyProfileWithoutEmailResponse = {
   family_name: "Lusso",
-  tax_code: aValidTaxCode,
   has_profile: false,
   is_email_set: false,
   is_inbox_enabled: false,
   is_webhook_enabled: false,
   name: "Luca",
   preferred_email: aValidSPIDEmail,
+  tax_code: aValidTaxCode,
   version: 0
 };
 const proxyUpsertRequest = {
@@ -81,7 +81,6 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Lusso",
-  tax_code: aValidTaxCode,
   name: "Luca",
   nameID: "lussoluca",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -89,6 +88,7 @@ const mockedUser: User = {
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aValidTaxCode,
   token: "HexToKen"
 };
 

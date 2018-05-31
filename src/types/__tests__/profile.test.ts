@@ -5,7 +5,6 @@ import mockReq from "../../__mocks__/request";
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
-import { TaxCode } from "../api/TaxCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import {
@@ -13,6 +12,7 @@ import {
   PreferredLanguageEnum
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
+import { TaxCode } from "../api/TaxCode";
 import { ExtendedProfile } from "../api_client/extendedProfile";
 import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
@@ -45,7 +45,6 @@ const mockedGetProfileOKResponse: GetProfileOKResponse = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -53,6 +52,7 @@ const mockedUser: User = {
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "HexToKen"
 };
 

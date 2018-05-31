@@ -3,10 +3,10 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { TaxCode } from "../../types/api/TaxCode";
 import { InstallationID } from "../../types/api/InstallationID";
 import { PlatformEnum } from "../../types/api/Platform";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
@@ -21,7 +21,6 @@ const anInvalidInstallationID = "invalid" as InstallationID;
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -29,13 +28,13 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "123hexToken"
 };
 
 const mockedInvalidUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  tax_code: anInvalidFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -43,6 +42,7 @@ const mockedInvalidUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: anInvalidFiscalNumber,
   token: "123hexToken"
 };
 
@@ -53,9 +53,9 @@ const aValidNotification = {
       subject: "this is a message"
     },
     created_at: new Date(),
-    tax_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567"
+    sender_service_id: "234567",
+    tax_code: aFiscalNumber
   },
   senderMetadata: {
     department_name: "test department",
@@ -71,8 +71,8 @@ const anInvalidNotification = {
       subject: "this is a message"
     },
     created_at: new Date(),
-    tax_code: anInvalidFiscalNumber,
-    sender_service_id: "234567"
+    sender_service_id: "234567",
+    tax_code: anInvalidFiscalNumber
   },
   senderMetadata: {
     department_name: "test department",
