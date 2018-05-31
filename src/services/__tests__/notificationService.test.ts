@@ -1,15 +1,15 @@
 /* tslint:disable:no-null-keyword */
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { FiscalCode } from "../../types/api/FiscalCode";
+import { TaxCode } from "../../types/api/TaxCode";
 import { InstallationID } from "../../types/api/InstallationID";
 import { MessageBodyMarkdown } from "../../types/api/MessageBodyMarkdown";
 import { MessageSubject } from "../../types/api/MessageSubject";
 import { PlatformEnum } from "../../types/api/Platform";
 import NotificationService from "../notificationService";
 
-const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
-const aFiscalCodeHash =
+const aTaxCode = "GRBGPP87L04L741X" as TaxCode;
+const aTaxCodeHash =
   "d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52";
 const anInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationID;
 const aPushChannel =
@@ -22,7 +22,7 @@ const anAppleInstallation = {
   installationId: anInstallationID,
   platform: PlatformEnum.apns,
   pushChannel: aPushChannel,
-  tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
+  tags: [aTaxCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
   templates: {
     template: {
       body:
@@ -38,7 +38,7 @@ const aGoogleInstallation = {
   installationId: anInstallationID,
   platform: PlatformEnum.gcm,
   pushChannel: aPushChannel,
-  tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
+  tags: [aTaxCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
   templates: {
     template: {
       body:
@@ -53,7 +53,7 @@ const aValidNotification = {
       subject: "this is a message" as MessageSubject
     },
     created_at: new Date(),
-    fiscal_code: aFiscalCode,
+    tax_code: aTaxCode,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
@@ -92,7 +92,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     const service = new NotificationService("", "");
 
     const res = await service.createOrUpdateInstallation(
-      aFiscalCode,
+      aTaxCode,
       anInstallationID,
       anAppleDevice
     );
@@ -116,7 +116,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     const service = new NotificationService("", "");
 
     const res = await service.createOrUpdateInstallation(
-      aFiscalCode,
+      aTaxCode,
       anInstallationID,
       aGoogleDevice
     );
@@ -140,7 +140,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     const service = new NotificationService("", "");
 
     const res = await service.createOrUpdateInstallation(
-      aFiscalCode,
+      aTaxCode,
       anInstallationID,
       anAppleDevice
     );
@@ -176,7 +176,7 @@ describe("NotificationService#notify", () => {
       value: "ok"
     });
     expect(mockSend).toBeCalledWith(
-      aFiscalCodeHash,
+      aTaxCodeHash,
       {
         message: aValidNotification.message.content.markdown,
         message_id: aValidNotification.message.id,
@@ -200,7 +200,7 @@ describe("NotificationService#notify", () => {
       kind: "IResponseErrorInternal"
     });
     expect(mockSend).toBeCalledWith(
-      aFiscalCodeHash,
+      aTaxCodeHash,
       {
         message: aValidNotification.message.content.markdown,
         message_id: aValidNotification.message.id,

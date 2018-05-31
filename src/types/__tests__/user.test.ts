@@ -4,9 +4,9 @@ import { Either, isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
 import { EmailAddress } from "../api/EmailAddress";
-import { FiscalCode } from "../api/FiscalCode";
-import { SpidLevelEnum } from "../api/SpidLevel";
 import { Issuer } from "../issuer";
+import { TaxCode } from "../api/TaxCode";
+import { SpidLevelEnum } from "../api/SpidLevel";
 import {
   extractUserFromJson,
   extractUserFromRequest,
@@ -15,7 +15,7 @@ import {
   validateSpidUser
 } from "../user";
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
 const anEmailAddress = "x@example.com" as EmailAddress;
 const anIssuer = { _: "onelogin_saml" } as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -44,7 +44,7 @@ const mockedInvalidSpidUser: any = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
+  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -65,7 +65,7 @@ describe("user type", () => {
     const userData = toAppUser(mockedSpidUser, mockToken);
 
     expect(userData.token).toHaveLength(SESSION_TOKEN_LENGTH_STRING);
-    expect(userData.fiscal_code).toBe(mockedSpidUser.fiscalNumber);
+    expect(userData.tax_code).toBe(mockedSpidUser.fiscalNumber);
     expect(userData.created_at).toBeDefined();
   });
 
@@ -118,7 +118,7 @@ describe("user type", () => {
       expect(userDataOK._tag).toBe("Right");
 
       expect(userDataOK.value.token).toBe(mockedUser.token);
-      expect(userDataOK.value.fiscal_code).toBe(mockedUser.fiscal_code);
+      expect(userDataOK.value.tax_code).toBe(mockedUser.tax_code);
       expect(userDataOK.value).toEqual(mockedUser);
 
       expect(userDataOK.value.created_at).toBeDefined();

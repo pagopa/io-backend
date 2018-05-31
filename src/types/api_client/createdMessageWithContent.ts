@@ -5,7 +5,7 @@
 
 import * as t from "io-ts";
 import { number, string } from "io-ts";
-import { FiscalCode } from "../api/FiscalCode";
+import { TaxCode } from "../api/TaxCode";
 import { MessageContent } from "../api/MessageContent";
 import { Timestamp } from "../api/Timestamp";
 
@@ -13,7 +13,7 @@ import { Timestamp } from "../api/Timestamp";
 const CreatedMessageWithContentR = t.interface({
   content: MessageContent,
   createdAt: Timestamp,
-  fiscalCode: FiscalCode,
+  taxCode: TaxCode,
   id: string,
   senderServiceId: string
 });

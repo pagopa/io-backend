@@ -1,11 +1,11 @@
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
+const aValidTaxCode = "XUZTCT88A51Y311X" as TaxCode;
 const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
@@ -25,7 +25,7 @@ const validApiProfileResponse = {
 const proxyProfileWithEmailResponse = {
   email: aValidAPIEmail,
   family_name: "Lusso",
-  fiscal_code: "XUZTCT88A51Y311X",
+  tax_code: "XUZTCT88A51Y311X",
   has_profile: true,
   is_email_set: true,
   is_inbox_enabled: true,
@@ -37,7 +37,7 @@ const proxyProfileWithEmailResponse = {
 };
 const proxyProfileWithoutEmailResponse = {
   family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
+  tax_code: aValidTaxCode,
   has_profile: false,
   is_email_set: false,
   is_inbox_enabled: false,
@@ -81,7 +81,7 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
+  tax_code: aValidTaxCode,
   name: "Luca",
   nameID: "lussoluca",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -124,7 +124,7 @@ describe("ProfileService#getProfile", () => {
 
     const res = await service.getProfile(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.tax_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -142,7 +142,7 @@ describe("ProfileService#getProfile", () => {
 
     const res = await service.getProfile(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.tax_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -161,7 +161,7 @@ describe("ProfileService#getProfile", () => {
     try {
       await service.getProfile(mockedUser);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
+      expect(mockGetClient).toHaveBeenCalledWith(mockedUser.tax_code);
       expect(mockGetProfile).toHaveBeenCalledWith();
       expect(e).toEqual(new Error("Api error."));
     }
@@ -182,7 +182,7 @@ describe("ProfileService#upsertProfile", () => {
 
     const res = await service.upsertProfile(mockedUser, proxyUpsertRequest);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.tax_code);
     expect(mockUpsertProfile).toHaveBeenCalledWith(ApiProfileUpsertRequest);
     expect(res).toEqual({
       apply: expect.any(Function),

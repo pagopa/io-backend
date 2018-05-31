@@ -1,11 +1,11 @@
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
+const aValidTaxCode = "XUZTCT88A51Y311X" as TaxCode;
 const aValidEmail = "test@example.com" as EmailAddress;
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
@@ -23,12 +23,12 @@ const validApiMessagesResponse = {
   parsedBody: {
     items: [
       {
-        fiscalCode: "XUZTCT88A51Y311X",
+        taxCode: "XUZTCT88A51Y311X",
         id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
         senderServiceId: "5a563817fcc896087002ea46c49a"
       },
       {
-        fiscalCode: "XUZTCT88A51Y311X",
+        taxCode: "XUZTCT88A51Y311X",
         id: "01C3XE80E6X8PHY0NM8S8SDS1E",
         senderServiceId: "5a563817fcc896087002ea46c49a"
       }
@@ -53,7 +53,7 @@ const invalidApiMessagesResponse = {
         senderServiceId: "5a563817fcc896087002ea46c49a"
       },
       {
-        fiscalCode: "XUZTCT88A51Y311X",
+        taxCode: "XUZTCT88A51Y311X",
         senderServiceId: "5a563817fcc896087002ea46c49a"
       }
     ],
@@ -85,7 +85,7 @@ const validApiMessageResponse = {
         subject: aValidSubject
       },
       createdAt: new Date(aTimestamp),
-      fiscalCode: "XUZTCT88A51Y311X",
+      taxCode: "XUZTCT88A51Y311X",
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
       senderServiceId: "5a563817fcc896087002ea46c49a"
     },
@@ -166,7 +166,7 @@ const problemJson = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aValidFiscalCode,
+  tax_code: aValidTaxCode,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -211,7 +211,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -229,7 +229,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -247,7 +247,7 @@ describe("MessageService#getMessagesByUser", () => {
     try {
       await service.getMessagesByUser(mockedUser);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
       expect(mockGetMessagesByUser).toHaveBeenCalledWith();
       expect(e).toEqual(new Error(messageErrorOnApiError));
     }
@@ -263,7 +263,7 @@ describe("MessageService#getMessagesByUser", () => {
     try {
       await service.getMessagesByUser(mockedUser);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
       expect(mockGetMessagesByUser).toHaveBeenCalledWith();
       expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }
@@ -284,7 +284,7 @@ describe("MessageService#getMessage", () => {
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
     expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -303,7 +303,7 @@ describe("MessageService#getMessage", () => {
     try {
       await service.getMessage(mockedUser, aValidMessageId);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
       expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
       expect(e).toEqual(new Error(messageErrorOnApiError));
     }
@@ -319,7 +319,7 @@ describe("MessageService#getMessage", () => {
     try {
       await service.getMessage(mockedUser, aValidMessageId);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
       expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
       expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }
@@ -340,7 +340,7 @@ describe("MessageService#getService", () => {
 
     const res = await service.getService(mockedUser, aValidServiceID);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+    expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -359,7 +359,7 @@ describe("MessageService#getService", () => {
     try {
       await service.getService(mockedUser, aValidServiceID);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
       expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
       expect(e).toEqual(new Error(messageErrorOnApiError));
     }
@@ -375,7 +375,7 @@ describe("MessageService#getService", () => {
     try {
       await service.getService(mockedUser, aValidServiceID);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetClient).toHaveBeenCalledWith(aValidTaxCode);
       expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
       expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }

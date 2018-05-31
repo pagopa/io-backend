@@ -5,11 +5,11 @@
 
 import * as t from "io-ts";
 import { number, string } from "io-ts";
-import { FiscalCode } from "../api/FiscalCode";
+import { TaxCode } from "../api/TaxCode";
 
 // required attributes
 const CreatedMessageWithoutContentR = t.interface({
-  fiscalCode: FiscalCode,
+  taxCode: TaxCode,
   id: string,
   senderServiceId: string
 });

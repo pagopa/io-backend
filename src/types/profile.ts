@@ -26,7 +26,7 @@ export function toAppProfileWithEmail(
   return {
     email: from.email,
     family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
+    tax_code: user.tax_code,
     has_profile: true,
     is_email_set: !!from.email,
     is_inbox_enabled: from.isInboxEnabled,
@@ -46,7 +46,7 @@ export function toAppProfileWithEmail(
 export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
   return {
     family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
+    tax_code: user.tax_code,
     has_profile: false,
     is_email_set: false,
     is_inbox_enabled: false,

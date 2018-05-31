@@ -33,7 +33,7 @@ paths:
                       fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
                       laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
                 created_at: "2018-05-03T16:21:38.167Z"
-                fiscal_code: "TMMEXQ60A10Y526X"
+                tax_code: "TMMEXQ60A10Y526X"
                 id: "01CCKCY7QQ7WCHWTH8NB504386"
                 sender_service_id: "5a25abf4fcc89605c082f042c49a"
               senderMetadata:
@@ -59,8 +59,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/SenderMetadata"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/Timestamp"
-  FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/FiscalCode"
+  TaxCode:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/TaxCode"
   MessageContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageContent"
   MessageSubject:

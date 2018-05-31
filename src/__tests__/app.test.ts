@@ -24,7 +24,7 @@ const aValidNotification = {
       markdown: "test".repeat(80),
       subject: "this is a message"
     },
-    fiscal_code: "FRMTTR76M06B715E",
+    tax_code: "FRMTTR76M06B715E",
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },

@@ -5,7 +5,7 @@ import mockReq from "../../__mocks__/request";
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
-import { FiscalCode } from "../api/FiscalCode";
+import { TaxCode } from "../api/TaxCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import {
@@ -22,7 +22,7 @@ import {
 } from "../profile";
 import { User } from "../user";
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aNonNegativeNumber = 1 as NonNegativeNumber;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
@@ -45,7 +45,7 @@ const mockedGetProfileOKResponse: GetProfileOKResponse = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
+  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -76,7 +76,7 @@ describe("profile type", () => {
 
     expect(userData.email).toBe(mockedGetProfileOKResponse.email);
     expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
+    expect(userData.tax_code).toBe(mockedUser.tax_code);
     expect(userData.has_profile).toBeTruthy();
     expect(userData.is_email_set).toBeTruthy();
     expect(userData.is_inbox_enabled).toBe(
@@ -101,7 +101,7 @@ describe("profile type", () => {
     );
 
     expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
+    expect(userData.tax_code).toBe(mockedUser.tax_code);
     expect(userData.has_profile).toBeFalsy();
     expect(userData.is_email_set).toBeFalsy();
 

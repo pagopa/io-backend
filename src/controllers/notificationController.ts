@@ -74,7 +74,7 @@ export default class NotificationController {
     const installationID = errorOrInstallationID.value;
 
     return this.notificationService.createOrUpdateInstallation(
-      user.fiscal_code,
+      user.tax_code,
       installationID,
       installation
     );

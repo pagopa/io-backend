@@ -3,7 +3,7 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
+import { TaxCode } from "../../types/api/TaxCode";
 import { InstallationID } from "../../types/api/InstallationID";
 import { PlatformEnum } from "../../types/api/Platform";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
@@ -11,8 +11,8 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 const aTimestamp = 1518010929530;
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anInvalidFiscalNumber = "xxx" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
+const anInvalidFiscalNumber = "xxx" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationID;
@@ -21,7 +21,7 @@ const anInvalidInstallationID = "invalid" as InstallationID;
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
+  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -35,7 +35,7 @@ const mockedUser: User = {
 const mockedInvalidUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  fiscal_code: anInvalidFiscalNumber,
+  tax_code: anInvalidFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -53,7 +53,7 @@ const aValidNotification = {
       subject: "this is a message"
     },
     created_at: new Date(),
-    fiscal_code: aFiscalNumber,
+    tax_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
@@ -71,7 +71,7 @@ const anInvalidNotification = {
       subject: "this is a message"
     },
     created_at: new Date(),
-    fiscal_code: anInvalidFiscalNumber,
+    tax_code: anInvalidFiscalNumber,
     sender_service_id: "234567"
   },
   senderMetadata: {

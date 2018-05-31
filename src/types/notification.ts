@@ -6,23 +6,23 @@ import * as crypto from "crypto";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { tag } from "italia-ts-commons/lib/types";
-import { FiscalCode } from "./api/FiscalCode";
+import { TaxCode } from "./api/TaxCode";
 import { InstallationID } from "./api/InstallationID";
 import { Platform } from "./api/Platform";
 
 /**
- * An hashed fiscal code.
+ * An hashed tax code.
  *
- * The fiscal code is used as a tag in the Notification Hub installation, to avoid expose the fiscal code to a third
+ * The tax code is used as a tag in the Notification Hub installation, to avoid expose the tax code to a third
  * party system we use an hash instead.
  */
-interface IFiscalCodeHashTag {
-  readonly kind: "IFiscalCodeHashTag";
+interface ITaxCodeHashTag {
+  readonly kind: "ITaxCodeHashTag";
 }
 
-export const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
+export const TaxCodeHash = tag<ITaxCodeHashTag>()(NonEmptyString);
 
-export type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
+export type TaxCodeHash = t.TypeOf<typeof TaxCodeHash>;
 
 /**
  * Notification template.
@@ -51,16 +51,16 @@ export interface IInstallation {
   readonly installationId: InstallationID;
   readonly platform: Platform;
   readonly pushChannel: string;
-  readonly tags: [FiscalCodeHash];
+  readonly tags: [TaxCodeHash];
   readonly templates: INotificationTemplates;
 }
 
 /**
  * Compute the sha256 hash of a string.
  */
-export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
+export const toTaxCodeHash = (taxCode: TaxCode): TaxCodeHash => {
   const hash = crypto.createHash("sha256");
-  hash.update(fiscalCode);
+  hash.update(taxCode);
 
-  return hash.digest("hex") as FiscalCodeHash;
+  return hash.digest("hex") as TaxCodeHash;
 };

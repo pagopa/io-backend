@@ -6,7 +6,7 @@ import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
+import { TaxCode } from "../../types/api/TaxCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
 import {
@@ -20,7 +20,7 @@ import ProfileController from "../profileController";
 
 const aTimestamp = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
@@ -33,7 +33,7 @@ const proxyUserResponse = {
   created_at: aTimestamp,
   email: anEmailAddress,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
+  tax_code: aFiscalNumber,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebookEnabled,
   name: "Giuseppe Maria",
@@ -51,7 +51,7 @@ const proxyUserResponse = {
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
+  tax_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",

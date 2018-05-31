@@ -1,4 +1,4 @@
-import { FiscalCode } from "../api/FiscalCode";
+import { TaxCode } from "../api/TaxCode";
 import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
 import { MessageContent } from "../api/MessageContent";
 import { MessageResponseNotificationStatus } from "../api/MessageResponseNotificationStatus";
@@ -13,11 +13,11 @@ import {
   toAppMessageWithoutContent
 } from "../message";
 
-const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
+const aTaxCode = "GRBGPP87L04L741X" as TaxCode;
 
 // mock for a valid CreatedMessageWithoutContent
 const mockedCreatedMessageWithoutContent: CreatedMessageWithoutContent = {
-  fiscalCode: aFiscalCode,
+  taxCode: aTaxCode,
   id: "string" as string,
   senderServiceId: "string" as string,
   timeToLive: 123456 as number
@@ -30,7 +30,7 @@ const aMessage: CreatedMessageWithContent = {
     subject: "subject" as MessageSubject
   } as MessageContent,
   createdAt: new Date(),
-  fiscalCode: aFiscalCode,
+  taxCode: aTaxCode,
   id: "string",
   senderServiceId: "string",
   timeToLive: 12345

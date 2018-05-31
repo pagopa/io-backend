@@ -15,8 +15,8 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
   /**
    * {@inheritDoc}
    */
-  public getClient(fiscalCode: string): DigitalCitizenshipAPI {
+  public getClient(taxCode: string): DigitalCitizenshipAPI {
     const apiCredentials = new APICredentials(this.apiKey);
-    return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, this.apiUrl);
+    return new DigitalCitizenshipAPI(taxCode, apiCredentials, this.apiUrl);
   }
 }
