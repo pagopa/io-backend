@@ -193,8 +193,7 @@ paths:
         in: path
         required: true
         description: The ID of the message.
-        schema:
-          $ref: "#/definitions/InstallationID"
+        type: string
     put:
       operationId: createOrUpdateInstallation
       summary: Create or update an Installation
@@ -232,7 +231,7 @@ paths:
         "200":
           description: Found.
           schema:
-            - $ref: "#/definitions/PublicSession"
+            $ref: "#/definitions/PublicSession"
           examples:
             application/json:
               expired: true
