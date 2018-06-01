@@ -10,9 +10,9 @@ import { number, string } from "io-ts";
 import * as winston from "winston";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
-import { SpidLevelEnum } from "./api/SpidLevel";
+import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
 import { Issuer } from "./issuer";
-import { isSpidL, SpidLevel } from "./spidLevel";
+import { isSpidL } from "./spidLevel";
 
 // required attributes
 export const User = t.interface({

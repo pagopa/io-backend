@@ -4,15 +4,12 @@
  * @see http://www.agid.gov.it/agenda-digitale/infrastrutture-architetture/spid/percorso-attuazione
  */
 
-import { enumType } from "italia-ts-commons/lib/types";
 import { SpidLevelEnum } from "./api/SpidLevel";
 
 export type SpidLevel1 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL1"];
 export type SpidLevel2 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 export type SpidLevel3 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL3"];
 export type SpidLevel = SpidLevel1 | SpidLevel2 | SpidLevel3;
-
-export const SpidLevel = enumType<SpidLevelEnum>(SpidLevelEnum, "SpidLevel");
 
 export function isSpidL1(uri: string): uri is SpidLevel1 {
   return uri === SpidLevelEnum["https://www.spid.gov.it/SpidL1"];
