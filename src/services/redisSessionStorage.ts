@@ -59,14 +59,14 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     // Check if the token has expired. We don't remove expired token
     // because a client can later refresh the session.
-    const expire =
+    const expireAtEpochMs =
       (session.timestampEpochMillis as number) + this.tokenDurationSecs * 1000;
-    if (expire < Date.now()) {
+    if (expireAtEpochMs < Date.now()) {
       return left<Error, ISessionState>(new Error("Token has expired"));
     }
 
     return right<Error, ISessionState>({
-      expireAt: new Date(expire),
+      expireAt: new Date(expireAtEpochMs),
       user
     });
   }
@@ -107,10 +107,10 @@ export default class RedisSessionStorage implements ISessionStorage {
       );
     }
 
-    const expire = timestamp + this.tokenDurationSecs * 1000;
+    const expireAtEpochMs = timestamp + this.tokenDurationSecs * 1000;
 
     return right<Error, ISessionState>({
-      expireAt: new Date(expire),
+      expireAt: new Date(expireAtEpochMs),
       newToken,
       user
     });
