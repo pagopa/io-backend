@@ -197,8 +197,9 @@ describe("RedisSessionStorage#get", () => {
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
     expect(response).toEqual(
       right({
-        expireAt: theCurrentTimestampMillis + aTokenDurationSecs * 1000,
-        expired: false,
+        expireAt: new Date(
+          theCurrentTimestampMillis + aTokenDurationSecs * 1000
+        ),
         user: aValidUser
       })
     );
@@ -263,7 +264,9 @@ describe("RedisSessionStorage#refresh", () => {
     expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
     expect(response).toEqual(
       right({
-        expired: true,
+        expireAt: new Date(
+          theCurrentTimestampMillis + aTokenDurationSecs * 1000
+        ),
         newToken: "123456",
         user: aValidUser
       })

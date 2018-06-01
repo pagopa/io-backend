@@ -421,16 +421,14 @@ definitions:
     title: User session data
     description: Describe the current session of an authenticated user.
     properties:
-      expired:
-        type: boolean
       expireAt:
-        type: number
+        $ref: '#/definitions/Timestamp'
       newToken:
         type: string
       spidLevel:
          $ref: '#/definitions/SpidLevel'
     required:
-      - expired
+      - expireAt
       - spidLevel
   InstallationID:
     type: string

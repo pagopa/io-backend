@@ -141,22 +141,18 @@ export default class AuthenticationController {
       // Return the new session information.
       const sessionState = errorOrSessionState.value;
       return ResponseSuccessJson({
-        expired: sessionState.expired,
+        expireAt: new Date(sessionState.expireAt),
         newToken: sessionState.newToken,
         spidLevel: sessionState.user.spid_level
       });
     }
 
-    // The session contains the user, remove it before return.
-    const session = errorOrSession.value;
-    const publicSession = {
-      expireAt: session.expireAt,
-      expired: session.expired,
-      spidLevel: session.user.spid_level
-    };
-
     // Return the actual session information.
-    return ResponseSuccessJson(publicSession);
+    const session = errorOrSession.value;
+    return ResponseSuccessJson({
+      expireAt: new Date(session.expireAt),
+      spidLevel: session.user.spid_level
+    });
   }
 
   /**

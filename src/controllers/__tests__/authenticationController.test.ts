@@ -410,7 +410,7 @@ describe("AuthenticationController#getSessionState", () => {
     mockRefresh.mockReturnValue(
       Promise.resolve(
         right({
-          expired: true,
+          expireAt: new Date(aTimestamp),
           newToken: aRefreshedToken,
           user: { spid_level: aValidSpidLevel }
         })
@@ -425,7 +425,7 @@ describe("AuthenticationController#getSessionState", () => {
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      expired: true,
+      expireAt: new Date(aTimestamp),
       newToken: aRefreshedToken,
       spidLevel: aValidSpidLevel
     });
@@ -442,8 +442,7 @@ describe("AuthenticationController#getSessionState", () => {
     mockGet.mockReturnValue(
       Promise.resolve(
         right({
-          expireAt: 123,
-          expired: false,
+          expireAt: new Date(aTimestamp),
           user: mockedUser
         })
       )
@@ -458,8 +457,7 @@ describe("AuthenticationController#getSessionState", () => {
     expect(mockRefresh).toHaveBeenCalledWith(mockToken);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      expireAt: 123,
-      expired: false,
+      expireAt: new Date(aTimestamp),
       spidLevel: "https://www.spid.gov.it/SpidL2"
     });
   });

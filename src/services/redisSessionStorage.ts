@@ -66,8 +66,7 @@ export default class RedisSessionStorage implements ISessionStorage {
     }
 
     return right<Error, ISessionState>({
-      expireAt: expire,
-      expired: false,
+      expireAt: new Date(expire),
       user
     });
   }
@@ -108,8 +107,10 @@ export default class RedisSessionStorage implements ISessionStorage {
       );
     }
 
+    const expire = timestamp + this.tokenDurationSecs * 1000;
+
     return right<Error, ISessionState>({
-      expired: true,
+      expireAt: new Date(expire),
       newToken,
       user
     });
