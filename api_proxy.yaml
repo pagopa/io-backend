@@ -222,6 +222,29 @@ paths:
           description: There was an error in registering the device to the Notification Hub.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/session":
+    x-swagger-router-controller: AuthenticationController
+    get:
+      operationId: getSessionState
+      summary: Get the user current session
+      description: Return the session state for the current authenticated user.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            - $ref: "#/definitions/PublicSession"
+          examples:
+            application/json:
+              expired: true
+              expireAt: 1527773522522
+              newToken: 08b2f7253af847d970caf247411444ff0657a27bd1f671137fb2930b99fca9fb594c98a05c68650927f4afda4e99ef17
+              spidLevel: "https://www.spid.gov.it/SpidL2"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: There was an error in retrieving the user session data.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
   DepartmentName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/DepartmentName"
@@ -393,6 +416,20 @@ definitions:
       - name
       - preferred_email
       - version
+  PublicSession:
+    type: object
+    title: User session data
+    description: Describe the current session of an authenticated user.
+    properties:
+      expireAt:
+        $ref: '#/definitions/Timestamp'
+      newToken:
+        type: string
+      spidLevel:
+         $ref: '#/definitions/SpidLevel'
+    required:
+      - expireAt
+      - spidLevel
   InstallationID:
     type: string
     description: |-
@@ -428,6 +465,13 @@ definitions:
     description: |-
       The Push Notification Service handle for this Installation.
       See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+  SpidLevel:
+    type: string
+    description: A SPID level.
+    x-extensible-enum:
+      - https://www.spid.gov.it/SpidL1
+      - https://www.spid.gov.it/SpidL2
+      - https://www.spid.gov.it/SpidL3
 responses: {}
 parameters:
   PaginationRequest:

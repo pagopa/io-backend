@@ -153,10 +153,6 @@ export function newApp(
     toExpressHandler(acsController.slo)(acsController, req, res);
   });
 
-  app.get("/session", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.getSessionState)(acsController, req, res);
-  });
-
   app.post(
     "/assertionConsumerService",
     withSpidAuth(
@@ -261,6 +257,10 @@ export function newApp(
       );
     }
   );
+
+  app.get("/api/v1/session", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.getSessionState)(acsController, req, res);
+  });
 
   return app;
 }

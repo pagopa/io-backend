@@ -12,7 +12,7 @@ import { FiscalCode } from "../../types/api/FiscalCode";
 import { OrganizationName } from "../../types/api/OrganizationName";
 import { ServiceName } from "../../types/api/ServiceName";
 import { ServicePublic } from "../../types/api/ServicePublic";
-import { SpidLevelEnum } from "../../types/spidLevel";
+import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import ServicesController from "../servicesController";
 
@@ -21,7 +21,7 @@ const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aServiceId: string = "service-id";
-const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyService: ServicePublic = {
   department_name: "Department name" as DepartmentName,

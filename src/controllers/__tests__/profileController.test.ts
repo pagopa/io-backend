@@ -13,8 +13,8 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../../types/api/PreferredLanguage";
+import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
-import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
 
@@ -27,7 +27,7 @@ const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
-const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyUserResponse = {
   created_at: aTimestamp,
