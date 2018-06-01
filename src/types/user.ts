@@ -10,8 +10,9 @@ import { number, string } from "io-ts";
 import * as winston from "winston";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
+import { SpidLevelEnum } from "./api/SpidLevel";
 import { Issuer } from "./issuer";
-import { isSpidL, SpidLevel, SpidLevelEnum } from "./spidLevel";
+import { isSpidL, SpidLevel } from "./spidLevel";
 
 // required attributes
 export const User = t.interface({
@@ -94,7 +95,7 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
     ...valueWithoutPrefix,
     authnContextClassRef: isSpidL(valueWithoutPrefix.authnContextClassRef)
       ? valueWithoutPrefix.authnContextClassRef
-      : SpidLevelEnum.SPID_L2
+      : SpidLevelEnum["https://www.spid.gov.it/SpidL2"]
   };
 
   // Log the invalid SPID level to audit IDP responses.

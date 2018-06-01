@@ -14,7 +14,7 @@ import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/spidLevel";
+import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
 
@@ -83,7 +83,7 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
 const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
-const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // authentication constant
 const mockToken =

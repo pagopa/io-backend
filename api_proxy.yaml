@@ -428,7 +428,7 @@ definitions:
       newToken:
         type: string
       spidLevel:
-         type: string
+         $ref: '#/definitions/SpidLevel'
     required:
       - expired
       - spidLevel
@@ -467,6 +467,13 @@ definitions:
     description: |-
       The Push Notification Service handle for this Installation.
       See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+  SpidLevel:
+    type: string
+    description: A SPID level.
+    x-extensible-enum:
+      - https://www.spid.gov.it/SpidL1
+      - https://www.spid.gov.it/SpidL2
+      - https://www.spid.gov.it/SpidL3
 responses: {}
 parameters:
   PaginationRequest:

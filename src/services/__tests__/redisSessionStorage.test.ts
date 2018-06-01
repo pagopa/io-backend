@@ -8,7 +8,7 @@ import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/spidLevel";
+import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";
 import TokenService from "../tokenService";
@@ -19,7 +19,7 @@ const theCurrentTimestampMillis = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User
 const aValidUser: User = {
