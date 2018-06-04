@@ -20,19 +20,12 @@ import {
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
-import { SpidLevel } from "../types/spidLevel";
+import { PublicSession } from "../types/api/PublicSession";
 import {
   extractUserFromRequest,
   toAppUser,
   validateSpidUser
 } from "../types/user";
-
-export interface IPublicSession {
-  readonly expired: boolean;
-  readonly expireAt?: number;
-  readonly newToken?: string;
-  readonly spidLevel: SpidLevel;
-}
 
 export default class AuthenticationController {
   constructor(
@@ -127,7 +120,7 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<IPublicSession>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<PublicSession>> {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
       return ResponseErrorInternal("No token in the request");
@@ -148,22 +141,18 @@ export default class AuthenticationController {
       // Return the new session information.
       const sessionState = errorOrSessionState.value;
       return ResponseSuccessJson({
-        expired: sessionState.expired,
+        expireAt: new Date(sessionState.expireAt),
         newToken: sessionState.newToken,
         spidLevel: sessionState.user.spid_level
       });
     }
 
-    // The session contains the user, remove it before return.
-    const session = errorOrSession.value;
-    const publicSession = {
-      expireAt: session.expireAt,
-      expired: session.expired,
-      spidLevel: session.user.spid_level
-    };
-
     // Return the actual session information.
-    return ResponseSuccessJson(publicSession);
+    const session = errorOrSession.value;
+    return ResponseSuccessJson({
+      expireAt: new Date(session.expireAt),
+      spidLevel: session.user.spid_level
+    });
   }
 
   /**

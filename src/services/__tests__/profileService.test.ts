@@ -1,6 +1,6 @@
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/spidLevel";
+import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
@@ -8,7 +8,7 @@ import ProfileService from "../profileService";
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
-const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const validApiProfileResponse = {
   parsedBody: {

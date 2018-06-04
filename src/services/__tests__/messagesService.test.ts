@@ -1,6 +1,6 @@
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/spidLevel";
+import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
@@ -13,7 +13,7 @@ const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
-const aValidSpidLevel = SpidLevelEnum.SPID_L2;
+const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aTimestamp = 1518010929530;
 
 const messageErrorOnUnknownResponse = "Unknown response.";
