@@ -81,7 +81,7 @@
     "@types/winston": "^2.3.8",
     "@types/xml2js": "^0.4.2",
     "autorest": "^2.0.4262",
-    "danger": "^3.7.14",
+    "danger": "^3.7.15",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "fp-ts": "^1.6.1",
     "italia-utils": "^3.6.1",
