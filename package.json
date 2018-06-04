@@ -35,7 +35,7 @@
     "awilix": "^3.0.8",
     "azure-sb": "^0.10.6",
     "body-parser": "^1.18.3",
-    "dotenv": "^5.0.1",
+    "dotenv": "^6.0.0",
     "express": "^4.16.2",
     "express-enforces-ssl": "1.1.0",
     "helmet": "3.12.1",
