@@ -8,7 +8,8 @@ import { isLeft } from "fp-ts/lib/Either";
 import {
   IResponseErrorValidation,
   ResponseErrorInternal,
-  ResponseErrorValidation
+  ResponseErrorValidation,
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
@@ -39,7 +40,15 @@ export default class ProfileController {
     }
 
     const user = errorOrUser.value;
-    return this.profileService.getProfile(user);
+    const errorOrProfile = await this.profileService.getProfile(user);
+
+    if (isLeft(errorOrProfile)) {
+      const error = errorOrProfile.value;
+      return error.toHTTPError();
+    }
+
+    const profile = errorOrProfile.value;
+    return ResponseSuccessJson(profile);
   }
 
   /**

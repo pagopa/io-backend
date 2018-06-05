@@ -1,5 +1,6 @@
 /* tslint:disable:no-any */
 
+import { right } from "fp-ts/lib/Either";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -82,7 +83,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const req = mockReq();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+      Promise.resolve(right(proxyMessagesResponse))
     );
 
     req.user = mockedUser;

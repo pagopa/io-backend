@@ -5,7 +5,10 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
+import {
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
@@ -30,7 +33,15 @@ export default class MessagesController {
     }
 
     const user = errorOrUser.value;
-    return this.messagesService.getMessagesByUser(user);
+    const errorOrMessages = await this.messagesService.getMessagesByUser(user);
+
+    if (isLeft(errorOrMessages)) {
+      const error = errorOrMessages.value;
+      return error.toHTTPError();
+    }
+
+    const profile = errorOrMessages.value;
+    return ResponseSuccessJson(profile);
   }
 
   /**

@@ -1,3 +1,4 @@
+import { left, right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
@@ -213,11 +214,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessagesResponse
-    });
+    expect(res).toEqual(right(proxyMessagesResponse));
   });
 
   it("returns an empty list if the of messages from the API is empty", async () => {
@@ -231,10 +228,13 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorNotFound"
-    });
+    expect(res).toEqual(
+      left({
+        message: "Not found.",
+        name: "Not found",
+        toHTTPError: expect.any(Function)
+      })
+    );
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {

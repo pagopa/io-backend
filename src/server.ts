@@ -14,8 +14,11 @@ const env = container.resolve<NodeEnvironmentEnum>("env");
 const allowNotifyIPSourceRange = container.resolve<CIDR>(
   "allowNotifyIPSourceRange"
 );
+const allowPagoPAIPSourceRange = container.resolve<CIDR>(
+  "allowPagoPAIPSourceRange"
+);
 
-const app = newApp(env, allowNotifyIPSourceRange);
+const app = newApp(env, allowNotifyIPSourceRange, allowPagoPAIPSourceRange);
 
 const server = http.createServer(app).listen(port, () => {
   winston.info("Listening on port %d", server.address().port);

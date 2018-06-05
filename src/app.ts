@@ -7,6 +7,7 @@ import container, {
   BEARER_TOKEN_STRATEGY,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
+  PAGOPA_CONTROLLER,
   PROFILE_CONTROLLER,
   SERVICES_CONTROLLER,
   SPID_STRATEGY,
@@ -33,6 +34,7 @@ import {
 import { IResponse } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
+import PagoPAController from "./controllers/pagoPAController";
 import checkIP from "./utils/middleware/checkIP";
 
 /**
@@ -78,7 +80,8 @@ function toExpressHandler<T>(
 
 export function newApp(
   env: NodeEnvironment,
-  allowNotifyIPSourceRange: CIDR
+  allowNotifyIPSourceRange: CIDR,
+  allowPagoPAIPSourceRange: CIDR
 ): Express {
   // Setup Passport.
 
@@ -113,6 +116,10 @@ export function newApp(
 
   const notificationController: NotificationController = container.resolve(
     NOTIFICATION_CONTROLLER
+  );
+
+  const pagopaController: PagoPAController = container.resolve(
+    PAGOPA_CONTROLLER
   );
 
   // Create and setup the Express app.
@@ -261,6 +268,15 @@ export function newApp(
   app.get("/api/v1/session", (req: express.Request, res: express.Response) => {
     toExpressHandler(acsController.getSessionState)(acsController, req, res);
   });
+
+  app.get(
+    "/api/v1/user",
+    checkIP(allowPagoPAIPSourceRange),
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(pagopaController.getUser)(pagopaController, req, res);
+    }
+  );
 
   return app;
 }

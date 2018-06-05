@@ -35,7 +35,7 @@ const aValidNotification = {
   }
 };
 
-const app = newApp(NodeEnvironmentEnum.PRODUCTION, aValidCIDR);
+const app = newApp(NodeEnvironmentEnum.PRODUCTION, aValidCIDR, aValidCIDR);
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 describe("Test redirect to HTTPS", () => {

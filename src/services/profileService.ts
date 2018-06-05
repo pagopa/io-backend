@@ -3,7 +3,7 @@
  * an API client.
  */
 
-import { isLeft } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
@@ -19,6 +19,7 @@ import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
 import { UpsertProfileOKResponse } from "../types/api_client/upsertProfileOKResponse";
+import { APIError, internalError } from "../types/error";
 import {
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
@@ -42,7 +43,7 @@ export default class ProfileService {
    */
   public async getProfile(
     user: User
-  ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
+  ): Promise<Either<APIError, ProfileWithoutEmail | ProfileWithEmail>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getProfileWithHttpOperationResponse();
@@ -58,16 +59,16 @@ export default class ProfileService {
           "Unknown response from getProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorInternal(profileErrorOnUnknownResponse);
+        return left(internalError(profileErrorOnUnknownResponse));
       }
 
       if (simpleResponse.isNotFound()) {
         // If the profile doesn't exists on the API we still
         // return 200 to the App with the information we have
         // retrieved from SPID.
-        return ResponseSuccessJson(toAppProfileWithoutEmail(user));
+        return right(toAppProfileWithoutEmail(user));
       } else {
-        return ResponseErrorInternal(profileErrorOnApiError);
+        return left(internalError(profileErrorOnApiError));
       }
     }
 
@@ -79,11 +80,11 @@ export default class ProfileService {
         "Unknown response from getProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      return ResponseErrorInternal(profileErrorOnUnknownResponse);
+      return left(internalError(profileErrorOnUnknownResponse));
     }
 
     const apiProfile = errorOrApiProfile.value;
-    return ResponseSuccessJson(toAppProfileWithEmail(apiProfile, user));
+    return right(toAppProfileWithEmail(apiProfile, user));
   }
 
   /**

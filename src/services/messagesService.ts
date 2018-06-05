@@ -2,7 +2,7 @@
  * This service retrieves messages from the API system using an API client.
  */
 
-import { isLeft } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
@@ -20,6 +20,7 @@ import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic"
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
+import { APIError, internalError, notFoundError } from "../types/error";
 import {
   toAppMessageWithContent,
   toAppMessageWithoutContent
@@ -46,7 +47,7 @@ export default class MessagesService {
    */
   public async getMessagesByUser(
     user: User
-  ): Promise<MessagesResponse<Messages>> {
+  ): Promise<Either<APIError, Messages>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessagesByUserWithHttpOperationResponse();
@@ -62,14 +63,14 @@ export default class MessagesService {
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorInternal(messageErrorOnUnknownResponse);
+        return left(internalError(messageErrorOnUnknownResponse));
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound, "");
+        return left(notFoundError(messageNotFound));
       } else {
         winston.error("Api error: %s", simpleResponse.parsedBody());
-        return ResponseErrorInternal(messageErrorOnApiError);
+        return left(internalError(messageErrorOnApiError));
       }
     }
 
@@ -81,13 +82,13 @@ export default class MessagesService {
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
-      return ResponseErrorInternal(messageErrorOnUnknownResponse);
+      return left(internalError(messageErrorOnUnknownResponse));
     }
 
     const apiMessages = errorOrApiMessages.value;
 
     const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-    return ResponseSuccessJson({
+    return right({
       items: appMessages,
       page_size: apiMessages.pageSize
     });
