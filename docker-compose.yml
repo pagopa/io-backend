@@ -16,14 +16,6 @@ services:
       - "./certs:/usr/src/app/certs:delegated"
     working_dir: "/usr/src/app"
 
-  redis:
-    container_name: redis
-    environment:
-      REDIS_TIMEOUT: 300
-      REDIS_TCP_KEEPALIVE: 60
-      REDIS_MAXMEMORY: 182m
-    image: wodby/redis:4.0-2.1.5
-
   spid-testenv-identityserver:
     container_name: spid-testenv-identityserver
     image: italia/spid-testenv-identityserver:docker-compose
