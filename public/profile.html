@@ -21,7 +21,7 @@
   <br/><br/>
 
   <div id="name"></div>
-  <div id="fiscal_code"></div>
+  <div id="tax_code"></div>
   <div id="has_profile"></div>
   <div id="is_email_set"></div>
   <div id="email"></div>
@@ -85,7 +85,7 @@
           // Examine the text in the response
           response.json().then(function(data) {
             $("#name").append("Name: " + data.name + " " + data.family_name);
-            $("#fiscal_code").append("CF: "+ data.fiscal_code);
+            $("#tax_code").append("CF: "+ data.tax_code);
             $("#has_profile").append("Has profile? "+ data.has_profile);
             $("#is_email_set").append("Is email set? "+ data.is_email_set);
             $("#version").append("Version "+ data.version);

@@ -22,7 +22,7 @@
 
   <form id="notification">
     <div class="form-group">
-      <label for="to">To (Fiscal code):</label>
+      <label for="to">To (Tax code):</label>
       <input type="text" id="to" value="FRMTTR76M06B715E" class="form-control" required/>
     </div>
     <div class="form-group">
@@ -67,7 +67,7 @@
           "markdown": $("#markdown").val(),
           "subject": $("#subject").val()
         },
-        "fiscal_code": $("#to").val(),
+        "tax_code": $("#to").val(),
         "id": $("#id").val(),
         "sender_service_id": $("#sender_service_id").val(),
       },

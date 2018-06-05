@@ -59,7 +59,7 @@ IDP entityID as parameter in the query string. The backend will then builds an a
 to the chosen IDP. The authentication process will continue to the IDP website. If the authentication process ends with
 success the IDP will redirect the client to an HTML page with a form that will auto-post itself to the
 `/assertionConsumerService` endpoint with a SAMLResponse as an hidden field. The backend will parse and validate the
-SAMLResponse to extract all the user attributes (fiscal code, first name, last name, email), then it will generates an
+SAMLResponse to extract all the user attributes (tax code, first name, last name, email), then it will generates an
 unique alphanumeric string as token and saves an User object to the `SessionStorage` service using the token as key.
 Finally the backend will redirect the client to the value of the environment variable `CLIENT_REDIRECTION_URL` with the
 token in the query string. The client must saves the token and use it in all API request.

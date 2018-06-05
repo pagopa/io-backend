@@ -6,14 +6,14 @@ import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { User } from "../../types/user";
 import MessagesController from "../messagesController";
 
 const aTimestamp = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anId: string = "string-id";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
@@ -44,7 +44,6 @@ const proxyMessageResponse = {
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -52,6 +51,7 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "123hexToken"
 };
 

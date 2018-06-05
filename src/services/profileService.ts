@@ -44,7 +44,7 @@ export default class ProfileService {
     user: User
   ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
     const response = await this.apiClient
-      .getClient(user.fiscal_code)
+      .getClient(user.tax_code)
       .getProfileWithHttpOperationResponse();
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
@@ -97,7 +97,7 @@ export default class ProfileService {
       body: upsertProfile
     };
     const response = await this.apiClient
-      .getClient(user.fiscal_code)
+      .getClient(user.tax_code)
       .upsertProfileWithHttpOperationResponse(upsertOptions);
 
     const simpleResponse = new SimpleHttpOperationResponse(response);

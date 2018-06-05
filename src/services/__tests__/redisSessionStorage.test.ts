@@ -7,8 +7,8 @@ import { left, right } from "fp-ts/lib/Either";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
 import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";
 import TokenService from "../tokenService";
@@ -16,8 +16,8 @@ import TokenService from "../tokenService";
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
+const anInvalidFiscalNumber = "INVALID-FC" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
@@ -25,7 +25,6 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -33,13 +32,14 @@ const aValidUser: User = {
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "HexToKen"
 };
 
 // mock for a invalid User
 const anInvalidUser: User = {
   ...aValidUser,
-  fiscal_code: anInvalidFiscalNumber
+  tax_code: anInvalidFiscalNumber
 };
 
 // authentication constant

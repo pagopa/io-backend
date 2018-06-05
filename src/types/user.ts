@@ -9,16 +9,15 @@ import * as t from "io-ts";
 import { number, string } from "io-ts";
 import * as winston from "winston";
 import { EmailAddress } from "./api/EmailAddress";
-import { FiscalCode } from "./api/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
+import { TaxCode } from "./api/TaxCode";
 
 // required attributes
 export const User = t.interface({
   created_at: number,
   family_name: string,
-  fiscal_code: FiscalCode,
   name: string,
   nameID: string,
   nameIDFormat: string,
@@ -26,6 +25,7 @@ export const User = t.interface({
   sessionIndex: string,
   spid_idp: string,
   spid_level: SpidLevel,
+  tax_code: TaxCode,
   token: string
 });
 
@@ -36,7 +36,7 @@ export const SpidUser = t.interface({
   authnContextClassRef: SpidLevel,
   email: EmailAddress,
   familyName: string,
-  fiscalNumber: FiscalCode,
+  fiscalNumber: TaxCode,
   issuer: Issuer,
   name: string,
   nameID: string,
@@ -55,7 +55,6 @@ export function toAppUser(from: SpidUser, token: string): User {
   return {
     created_at: new Date().getTime(),
     family_name: from.familyName,
-    fiscal_code: from.fiscalNumber,
     name: from.name,
     nameID: from.nameID, // The used nameID is needed for logout.
     nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
@@ -63,6 +62,7 @@ export function toAppUser(from: SpidUser, token: string): User {
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
+    tax_code: from.fiscalNumber,
     token
   };
 }
@@ -76,10 +76,11 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
     return left(new Error(messageErrorOnDecodeUser));
   }
 
+  // For the TIN prefix, see https://ec.europa.eu/taxation_customs/business/tax-cooperation-control/administrative-cooperation/tax-identification-numbers-tin_en
   // Remove the international prefix from fiscal number.
-  const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
+  const TAX_IDENTIFICATION_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
   const fiscalNumberWithoutPrefix = value.fiscalNumber.replace(
-    FISCAL_NUMBER_INTERNATIONAL_PREFIX,
+    TAX_IDENTIFICATION_NUMBER_INTERNATIONAL_PREFIX,
     ""
   );
   const valueWithoutPrefix = {

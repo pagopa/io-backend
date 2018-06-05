@@ -44,7 +44,7 @@ export default class ProfileController {
 
   /**
    * Create or update the preferences for the user identified by the provided
-   * fiscal code.
+   * tax code.
    */
   public async upsertProfile(
     req: express.Request

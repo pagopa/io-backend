@@ -10,16 +10,16 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "../types/api/FiscalCode";
 import { Installation } from "../types/api/Installation";
 import Response = Azure.ServiceBus.Response;
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
 import { PlatformEnum } from "../types/api/Platform";
+import { TaxCode } from "../types/api/TaxCode";
 import {
   IInstallation,
   INotificationTemplate,
-  toFiscalCodeHash
+  toTaxCodeHash
 } from "../types/notification";
 
 /**
@@ -63,7 +63,7 @@ export default class NotificationService {
         title: notification.message.content.subject
       };
       notificationHubService.send(
-        toFiscalCodeHash(notification.message.fiscal_code),
+        toTaxCodeHash(notification.message.tax_code),
         payload,
         (error, response) => {
           return resolve(this.buildResponse(error, response));
@@ -73,7 +73,7 @@ export default class NotificationService {
   }
 
   public createOrUpdateInstallation(
-    fiscalCode: FiscalCode,
+    taxCode: TaxCode,
     installationID: InstallationID,
     installation: Installation
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
@@ -86,7 +86,7 @@ export default class NotificationService {
       installationId: installationID,
       platform: installation.platform,
       pushChannel: installation.pushChannel,
-      tags: [toFiscalCodeHash(fiscalCode)],
+      tags: [toTaxCodeHash(taxCode)],
       templates: {
         template:
           installation.platform === PlatformEnum.apns

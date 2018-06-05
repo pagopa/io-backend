@@ -5,7 +5,6 @@ import mockReq from "../../__mocks__/request";
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
-import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import {
@@ -13,6 +12,7 @@ import {
   PreferredLanguageEnum
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
+import { TaxCode } from "../api/TaxCode";
 import { ExtendedProfile } from "../api_client/extendedProfile";
 import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
@@ -22,7 +22,7 @@ import {
 } from "../profile";
 import { User } from "../user";
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aNonNegativeNumber = 1 as NonNegativeNumber;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
@@ -45,7 +45,6 @@ const mockedGetProfileOKResponse: GetProfileOKResponse = {
 const mockedUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -53,6 +52,7 @@ const mockedUser: User = {
   sessionIndex: "sessionIndex",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: "HexToKen"
 };
 
@@ -76,7 +76,7 @@ describe("profile type", () => {
 
     expect(userData.email).toBe(mockedGetProfileOKResponse.email);
     expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
+    expect(userData.tax_code).toBe(mockedUser.tax_code);
     expect(userData.has_profile).toBeTruthy();
     expect(userData.is_email_set).toBeTruthy();
     expect(userData.is_inbox_enabled).toBe(
@@ -101,7 +101,7 @@ describe("profile type", () => {
     );
 
     expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
+    expect(userData.tax_code).toBe(mockedUser.tax_code);
     expect(userData.has_profile).toBeFalsy();
     expect(userData.is_email_set).toBeFalsy();
 

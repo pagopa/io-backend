@@ -5,17 +5,17 @@
 
 import * as t from "io-ts";
 import { number, string } from "io-ts";
-import { FiscalCode } from "../api/FiscalCode";
 import { MessageContent } from "../api/MessageContent";
+import { TaxCode } from "../api/TaxCode";
 import { Timestamp } from "../api/Timestamp";
 
 // required attributes
 const CreatedMessageWithContentR = t.interface({
   content: MessageContent,
   createdAt: Timestamp,
-  fiscalCode: FiscalCode,
   id: string,
-  senderServiceId: string
+  senderServiceId: string,
+  taxCode: TaxCode
 });
 
 // optional attributes

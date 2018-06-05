@@ -48,7 +48,7 @@ export default class MessagesService {
     user: User
   ): Promise<MessagesResponse<Messages>> {
     const response = await this.apiClient
-      .getClient(user.fiscal_code)
+      .getClient(user.tax_code)
       .getMessagesByUserWithHttpOperationResponse();
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
@@ -101,7 +101,7 @@ export default class MessagesService {
     messageId: string
   ): Promise<MessagesResponse<MessageWithContent>> {
     const response = await this.apiClient
-      .getClient(user.fiscal_code)
+      .getClient(user.tax_code)
       .getMessageWithHttpOperationResponse(messageId);
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
@@ -149,7 +149,7 @@ export default class MessagesService {
     serviceId: string
   ): Promise<MessagesResponse<ProxyServicePublic>> {
     const response = await this.apiClient
-      .getClient(user.fiscal_code)
+      .getClient(user.tax_code)
       .getServiceWithHttpOperationResponse(serviceId);
 
     const simpleResponse = new SimpleHttpOperationResponse(response);

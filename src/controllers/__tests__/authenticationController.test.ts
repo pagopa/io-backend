@@ -13,8 +13,8 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
 import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { TaxCode } from "../../types/api/TaxCode";
+import { SpidLevelEnum } from "../../types/spidLevel";
 import { User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
 
@@ -79,7 +79,7 @@ const samlAttributeConsumingServiceIndex = 0;
 // user constant
 const aTimestamp = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+const aFiscalNumber = "GRBGPP87L04L741X" as TaxCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
 const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
@@ -95,7 +95,6 @@ const aRefreshedToken =
 const mockedUser: User = {
   created_at: aTimestamp,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
@@ -103,6 +102,7 @@ const mockedUser: User = {
   sessionIndex: "123sessionIndex",
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
+  tax_code: aFiscalNumber,
   token: mockToken
 };
 

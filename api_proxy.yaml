@@ -49,7 +49,7 @@ paths:
       operationId: getUserMessages
       summary: Get user's messages
       description: |-
-        Returns the messages for the user identified by the provided fiscal code.
+        Returns the messages for the user identified by the provided tax code.
         Messages will be returned in inverse acceptance order (from last to first).
         The "next" field, when present, contains an URL pointing to the next page of results.
       responses:
@@ -120,7 +120,7 @@ paths:
     get:
       operationId: getUserProfile
       summary: Get user's profile
-      description: Returns the profile for the user identified by the provided fiscal code.
+      description: Returns the profile for the user identified by the provided tax code.
       responses:
         "200":
           description: Found.
@@ -131,7 +131,7 @@ paths:
           examples:
             application/json:
               family_name: "Rossi"
-              fiscal_code: "TMMEXQ60A10Y526X"
+              tax_code: "TMMEXQ60A10Y526X"
               has_profile: true
               is_email_set: false
               is_inbox_enabled: true
@@ -149,7 +149,7 @@ paths:
     post:
       operationId: upsertProfile
       summary: Set User's profile
-      description: Create or update the profile for the user identified by the provided fiscal code.
+      description: Create or update the profile for the user identified by the provided tax code.
       parameters:
         - in: body
           name: body
@@ -246,43 +246,43 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/DepartmentName"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ExtendedProfile"
-  FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/ExtendedProfile"
+  TaxCode:
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/TaxCode"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/LimitedProfile"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/MessageResponseNotificationStatus"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/MessageSubject"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/OrganizationName"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/PaginationResponse"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/ProblemJson"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/ServicePublic"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/ServiceName"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/ioggstream/digital-citizenship-functions/244-use-tax_code/api/definitions.yaml#/Timestamp"
   MessageWithContent:
     type: object
     title: Message with content
@@ -348,8 +348,8 @@ definitions:
         $ref: '#/definitions/EmailAddress'
       family_name:
         type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
+      tax_code:
+        $ref: '#/definitions/TaxCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
       is_email_set:
@@ -370,7 +370,7 @@ definitions:
         $ref: '#/definitions/Version'
     required:
       - family_name
-      - fiscal_code
+      - tax_code
       - has_profile
       - is_email_set
       - is_inbox_enabled
@@ -385,8 +385,8 @@ definitions:
     properties:
       family_name:
         type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
+      tax_code:
+        $ref: '#/definitions/TaxCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
       is_email_set:
@@ -407,7 +407,7 @@ definitions:
         $ref: '#/definitions/Version'
     required:
       - family_name
-      - fiscal_code
+      - tax_code
       - has_profile
       - is_email_set
       - is_inbox_enabled
