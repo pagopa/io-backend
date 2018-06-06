@@ -18,16 +18,17 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public set(
-    token: string,
+  public async set(
+    sessionToken: string,
+    walletToken: string,
     user: User,
     timestampEpochMillis: number
   ): Promise<Either<Error, boolean>> {
-    return new Promise(resolve => {
+    const insert = new Promise(resolve => {
       // Set a key to hold the fields value.
       // @see https://redis.io/commands/hmset
       this.redisClient.hmset(
-        token,
+        sessionToken,
         {
           timestampEpochMillis,
           user: JSON.stringify(user)
@@ -41,6 +42,28 @@ export default class RedisSessionStorage implements ISessionStorage {
         }
       );
     });
+
+    const mapping = new Promise(resolve => {
+      // Set a key to hold the mapping between session and wallet tokens.
+      // @see https://redis.io/commands/hmset
+      this.redisClient.hmset(
+        "mapping_session_wallet_tokens",
+        "session",
+        sessionToken,
+        "wallet",
+        walletToken,
+        (err, response) => {
+          if (err) {
+            return resolve(left<Error, boolean>(err));
+          }
+
+          resolve(right<Error, boolean>(response));
+        }
+      );
+    });
+
+    // return Promise.all<Either<Error, boolean>>([insert, mapping]);
+    const [setResult, delResult] = await Promise.all<Either<Error, boolean>>([insert, mapping]);
   }
 
   /**
@@ -67,7 +90,8 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     return right<Error, ISessionState>({
       expireAt: new Date(expireAtEpochMs),
-      user
+      user,
+      walletToken: ""
     });
   }
 
@@ -86,12 +110,13 @@ export default class RedisSessionStorage implements ISessionStorage {
     const user = session.user;
 
     // Compute a new token.
-    const newToken = this.tokenService.getNewToken();
+    const newSessionToken = this.tokenService.getNewToken();
+    const newWalletToken = this.tokenService.getNewToken();
 
     // Set a session with the new token, delete the old one.
     const timestamp = Date.now();
     const [setResult, delResult] = await Promise.all([
-      this.set(newToken, user, timestamp),
+      this.set(newSessionToken, newWalletToken, user, timestamp),
       this.del(token)
     ]);
 
@@ -111,8 +136,9 @@ export default class RedisSessionStorage implements ISessionStorage {
 
     return right<Error, ISessionState>({
       expireAt: new Date(expireAtEpochMs),
-      newToken,
-      user
+      newToken: newSessionToken,
+      user,
+      walletToken: newWalletToken
     });
   }
 

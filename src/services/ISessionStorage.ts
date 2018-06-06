@@ -17,6 +17,7 @@ export type Session = t.TypeOf<typeof Session>;
 export interface ISessionState {
   readonly expireAt: Timestamp;
   readonly newToken?: string;
+  readonly walletToken: string;
   readonly user: User;
 }
 
@@ -25,7 +26,8 @@ export interface ISessionStorage {
    * Stores a value to the cache.
    */
   set(
-    token: string,
+    sessionToken: string,
+    walletToken: string,
     user: User,
     timestamp: number
   ): Promise<Either<Error, boolean>>;

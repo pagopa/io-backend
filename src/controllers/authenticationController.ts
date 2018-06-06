@@ -143,7 +143,8 @@ export default class AuthenticationController {
       return ResponseSuccessJson({
         expireAt: new Date(sessionState.expireAt),
         newToken: sessionState.newToken,
-        spidLevel: sessionState.user.spid_level
+        spidLevel: sessionState.user.spid_level,
+        walletToken: sessionState.walletToken
       });
     }
 
@@ -151,7 +152,8 @@ export default class AuthenticationController {
     const session = errorOrSession.value;
     return ResponseSuccessJson({
       expireAt: new Date(session.expireAt),
-      spidLevel: session.user.spid_level
+      spidLevel: session.user.spid_level,
+      walletToken: session.walletToken
     });
   }
 
