@@ -159,12 +159,10 @@ if (isLeft(errorOrNotifyCIDR)) {
 }
 
 // Range IP allowed for PagoPA proxy.
-const errorOrPagoPACIDR = CIDR.decode(
-  process.env.ALLOW_PAGO_PA_IP_SOURCE_RANGE
-);
+const errorOrPagoPACIDR = CIDR.decode(process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE);
 if (isLeft(errorOrPagoPACIDR)) {
   winston.error(
-    "Missing or invalid ALLOW_PAGO_PA_IP_SOURCE_RANGE environment variable: %s",
+    "Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: %s",
     ReadableReporter.report(errorOrPagoPACIDR)
   );
   process.exit(1);

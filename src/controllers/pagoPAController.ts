@@ -10,9 +10,9 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
+import { PagoPAUser } from "../types/api/PagoPAUser";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
-import { UserForPagoPA } from "../types/api/UserForPagoPA";
 import { extractUserFromRequest } from "../types/user";
 
 export default class PagoPAController {
@@ -24,7 +24,7 @@ export default class PagoPAController {
    */
   public async getUser(
     req: express.Request
-  ): Promise<profileResponse<UserForPagoPA>> {
+  ): Promise<profileResponse<PagoPAUser>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

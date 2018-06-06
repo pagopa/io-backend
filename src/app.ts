@@ -270,7 +270,7 @@ export function newApp(
   });
 
   app.get(
-    "/api/v1/user",
+    "/pagopa/api/v1/user",
     checkIP(allowPagoPAIPSourceRange),
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {

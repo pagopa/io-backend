@@ -4,7 +4,7 @@ info:
   title: Proxy API
   description: Mobile and web proxy API gateway.
 host: localhost
-basePath: /api/v1
+basePath: /pagopa/api/v1
 schemes:
   - https
 security:
@@ -15,12 +15,12 @@ paths:
     get:
       operationId: getUser
       summary: Get user's data
-      description: Returns the user data needed by PagaPA proxy.
+      description: Returns the user data needed by PagaPA Wallet backend.
       responses:
         "200":
           description: Found.
           schema:
-            - $ref: "#/definitions/UserForPagoPA"
+            - $ref: "#/definitions/PagoPAUser"
           examples:
             application/json:
               email: "email@example.com"
@@ -35,8 +35,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/EmailAddress"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.40.0/api/definitions.yaml#/ProblemJson"
-  UserForPagoPA:
-    title: UserForPagoPA
+  PagoPAUser:
+    title: PagoPA user
     description: User data needed by PagaPA proxy.
     type: object
     properties:

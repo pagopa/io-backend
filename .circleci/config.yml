@@ -47,7 +47,7 @@ jobs:
           environment:
             PRE_SHARED_KEY: "12345"
             ALLOW_NOTIFY_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
-            ALLOW_PAGO_PA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
+            ALLOW_PAGOPA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             AZURE_NH_HUB_NAME: ""
             AZURE_NH_ENDPOINT: ""
       - run: 'bash <(curl -s https://codecov.io/bash)'
