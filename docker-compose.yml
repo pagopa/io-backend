@@ -33,6 +33,6 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     image: italia/spid-testenv-backoffice:latest
     ports:
-      - "8081:8080"
+      - "8080:8080"
     volumes:
       - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js:delegated"
