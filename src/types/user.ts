@@ -24,9 +24,10 @@ export const User = t.interface({
   nameIDFormat: string,
   preferred_email: EmailAddress,
   sessionIndex: string,
+  session_token: string,
   spid_idp: string,
   spid_level: SpidLevel,
-  token: string
+  wallet_token: string
 });
 
 export type User = t.TypeOf<typeof User>;
@@ -51,7 +52,11 @@ const messageErrorOnDecodeUser = "Unable to decode the user";
 /**
  * Converts a SPID User to a Proxy User.
  */
-export function toAppUser(from: SpidUser, token: string): User {
+export function toAppUser(
+  from: SpidUser,
+  sessionToken: string,
+  walletToken: string
+): User {
   return {
     created_at: new Date().getTime(),
     family_name: from.familyName,
@@ -61,9 +66,10 @@ export function toAppUser(from: SpidUser, token: string): User {
     nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
     preferred_email: from.email,
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
+    session_token: sessionToken,
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
-    token
+    wallet_token: walletToken
   };
 }
 

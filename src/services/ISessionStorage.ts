@@ -17,7 +17,6 @@ export type Session = t.TypeOf<typeof Session>;
 export interface ISessionState {
   readonly expireAt: Timestamp;
   readonly newToken?: string;
-  readonly walletToken: string;
   readonly user: User;
 }
 
@@ -25,12 +24,7 @@ export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    */
-  set(
-    sessionToken: string,
-    walletToken: string,
-    user: User,
-    timestamp: number
-  ): Promise<Either<Error, boolean>>;
+  set(user: User, timestamp: number): Promise<Either<Error, boolean>>;
 
   /**
    * Retrieves a value from the cache.
@@ -40,10 +34,18 @@ export interface ISessionStorage {
   /**
    * Refresh an existing token.
    */
-  refresh(token: string): Promise<Either<Error, ISessionState>>;
+  refresh(
+    sessionToken: string,
+    walletToken: string,
+    newSessionToken: string,
+    newWalletToken: string
+  ): Promise<Either<Error, ISessionState>>;
 
   /**
    * Removes a value from the cache.
    */
-  del(token: string): Promise<Either<Error, boolean>>;
+  del(
+    sessionToken: string,
+    walletToken: string
+  ): Promise<Either<Error, boolean>>;
 }

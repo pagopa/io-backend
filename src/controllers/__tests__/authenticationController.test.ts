@@ -86,10 +86,12 @@ const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // authentication constant
-const mockToken =
+const mockSessionToken =
   "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
-const aRefreshedToken =
+const mockRefreshedSessionToken =
   "ac83a77d6e4c19a02b50b8abf1223b8d858f6aaf23ba286898ad5fe5e24e8893b2b96c3a4c575bff285dac2481580737";
+const mockWalletToken =
+  "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -101,9 +103,10 @@ const mockedUser: User = {
   nameIDFormat: aValidIDFormat,
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  session_token: mockSessionToken,
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
-  token: mockToken
+  wallet_token: mockWalletToken
 };
 
 // validUser has all every field correctly set.
@@ -160,7 +163,7 @@ jest.mock("../../services/tokenService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getNewToken: jest.fn(() => {
-        return mockToken;
+        return mockSessionToken;
       })
     }))
   };
@@ -172,8 +175,7 @@ const tokenService = new TokenService();
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs,
-  tokenService
+  tokenDurationSecs
 );
 
 const spidStrategyInstance = spidStrategy(
@@ -224,10 +226,10 @@ describe("AuthenticationController#acs", () => {
 
     expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
-      "/profile.html?token=" + mockToken,
+      "/profile.html?token=" + mockSessionToken,
       301
     );
-    expect(mockSet).toHaveBeenCalledWith(mockToken, mockedUser, aTimestamp);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, aTimestamp);
   });
 
   it("should fail if userPayload is invalid", async () => {
@@ -314,7 +316,7 @@ describe("AuthenticationController#logout", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockDel).toHaveBeenCalledWith(mockToken);
+    expect(mockDel).toHaveBeenCalledWith(mockSessionToken, mockWalletToken);
     expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
     expect(res.redirect).toHaveBeenCalledWith("http://www.example.com", 301);
   });
@@ -353,7 +355,7 @@ describe("AuthenticationController#logout", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockDel).toHaveBeenCalledWith(mockToken);
+    expect(mockDel).toHaveBeenCalledWith(mockSessionToken, mockWalletToken);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -402,16 +404,22 @@ describe("AuthenticationController#getSessionState", () => {
     const req = mockReq();
 
     req.headers = {};
-    req.headers.authorization = "Bearer " + mockToken;
+    req.headers.authorization = "Bearer " + mockSessionToken;
 
     mockGet.mockReturnValue(
-      Promise.resolve(left(new Error("Token has expired")))
+      Promise.resolve(
+        right({
+          expireAt: new Date(aTimestamp - 1000),
+          newToken: mockSessionToken,
+          user: { spid_level: aValidSpidLevel }
+        })
+      )
     );
     mockRefresh.mockReturnValue(
       Promise.resolve(
         right({
           expireAt: new Date(aTimestamp),
-          newToken: aRefreshedToken,
+          newToken: mockRefreshedSessionToken,
           user: { spid_level: aValidSpidLevel }
         })
       )
@@ -421,12 +429,12 @@ describe("AuthenticationController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockToken);
-    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockSessionToken, "", "", "");
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       expireAt: new Date(aTimestamp),
-      newToken: aRefreshedToken,
+      newToken: mockRefreshedSessionToken,
       spidLevel: aValidSpidLevel
     });
   });
@@ -436,9 +444,8 @@ describe("AuthenticationController#getSessionState", () => {
     const req = mockReq();
 
     req.headers = {};
-    req.headers.authorization = "Bearer " + mockToken;
+    req.headers.authorization = "Bearer " + mockSessionToken;
 
-    const aSessionState = { expired: true, newToken: aRefreshedToken };
     mockGet.mockReturnValue(
       Promise.resolve(
         right({
@@ -447,14 +454,22 @@ describe("AuthenticationController#getSessionState", () => {
         })
       )
     );
-    mockRefresh.mockReturnValue(Promise.resolve(right(aSessionState)));
+    mockRefresh.mockReturnValue(
+      Promise.resolve(
+        right({
+          expireAt: "",
+          newToken: mockRefreshedSessionToken,
+          user: ""
+        })
+      )
+    );
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockToken);
-    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockSessionToken, "", "", "");
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       expireAt: new Date(aTimestamp),
@@ -518,7 +533,7 @@ describe("AuthenticationController#getSessionState", () => {
     const req = mockReq();
 
     req.headers = {};
-    req.headers.authorization = "Bearer " + mockToken;
+    req.headers.authorization = "Bearer " + mockSessionToken;
 
     mockGet.mockReturnValue(
       Promise.resolve(left(new Error("Token has expired")))
@@ -531,8 +546,8 @@ describe("AuthenticationController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockToken);
-    expect(mockRefresh).toHaveBeenCalledWith(mockToken);
+    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
+    expect(mockRefresh).toHaveBeenCalledWith(mockSessionToken, "", "", "");
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,

@@ -6,29 +6,25 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import * as redis from "redis";
 import { User } from "../types/user";
 import { ISessionState, ISessionStorage, Session } from "./ISessionStorage";
-import TokenService from "./tokenService";
 
 export default class RedisSessionStorage implements ISessionStorage {
   constructor(
     private readonly redisClient: redis.RedisClient,
-    private readonly tokenDurationSecs: number,
-    private readonly tokenService: TokenService
+    private readonly tokenDurationSecs: number
   ) {}
 
   /**
    * {@inheritDoc}
    */
   public async set(
-    sessionToken: string,
-    walletToken: string,
     user: User,
     timestampEpochMillis: number
   ): Promise<Either<Error, boolean>> {
-    const insert = new Promise(resolve => {
+    const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Set a key to hold the fields value.
       // @see https://redis.io/commands/hmset
       this.redisClient.hmset(
-        sessionToken,
+        user.session_token,
         {
           timestampEpochMillis,
           user: JSON.stringify(user)
@@ -43,27 +39,37 @@ export default class RedisSessionStorage implements ISessionStorage {
       );
     });
 
-    const mapping = new Promise(resolve => {
+    const setWalletToken = new Promise<Either<Error, boolean>>(resolve => {
       // Set a key to hold the mapping between session and wallet tokens.
       // @see https://redis.io/commands/hmset
-      this.redisClient.hmset(
+      this.redisClient.hset(
         "mapping_session_wallet_tokens",
-        "session",
-        sessionToken,
-        "wallet",
-        walletToken,
+        user.wallet_token,
+        user.session_token,
         (err, response) => {
           if (err) {
             return resolve(left<Error, boolean>(err));
           }
 
-          resolve(right<Error, boolean>(response));
+          resolve(right<Error, boolean>(response === 1));
         }
       );
     });
 
-    // return Promise.all<Either<Error, boolean>>([insert, mapping]);
-    const [setResult, delResult] = await Promise.all<Either<Error, boolean>>([insert, mapping]);
+    const [setSessionTokenResult, setWalletTokenResult] = await Promise.all([
+      setSessionToken,
+      setWalletToken
+    ]);
+
+    if (isLeft(setSessionTokenResult) || isLeft(setWalletTokenResult)) {
+      return left<Error, boolean>(new Error("Error setting the token"));
+    }
+
+    if (!setSessionTokenResult.value || !setWalletTokenResult.value) {
+      return left<Error, boolean>(new Error("Error setting the token"));
+    }
+
+    return right<Error, boolean>(true);
   }
 
   /**
@@ -84,22 +90,23 @@ export default class RedisSessionStorage implements ISessionStorage {
     // because a client can later refresh the session.
     const expireAtEpochMs =
       (session.timestampEpochMillis as number) + this.tokenDurationSecs * 1000;
-    if (expireAtEpochMs < Date.now()) {
-      return left<Error, ISessionState>(new Error("Token has expired"));
-    }
 
     return right<Error, ISessionState>({
       expireAt: new Date(expireAtEpochMs),
-      user,
-      walletToken: ""
+      user
     });
   }
 
   /**
    * {@inheritDoc}
    */
-  public async refresh(token: string): Promise<Either<Error, ISessionState>> {
-    const errorOrSession = await this.getSession(token);
+  public async refresh(
+    sessionToken: string,
+    walletToken: string,
+    newSessionToken: string,
+    newWalletToken: string
+  ): Promise<Either<Error, ISessionState>> {
+    const errorOrSession = await this.getSession(sessionToken);
 
     if (isLeft(errorOrSession)) {
       const error = errorOrSession.value;
@@ -109,15 +116,18 @@ export default class RedisSessionStorage implements ISessionStorage {
     const session = errorOrSession.value;
     const user = session.user;
 
-    // Compute a new token.
-    const newSessionToken = this.tokenService.getNewToken();
-    const newWalletToken = this.tokenService.getNewToken();
+    // Update tokens in the user object.
+    const newUser = {
+      ...user,
+      session_token: newSessionToken,
+      wallet_token: newWalletToken
+    };
 
     // Set a session with the new token, delete the old one.
     const timestamp = Date.now();
     const [setResult, delResult] = await Promise.all([
-      this.set(newSessionToken, newWalletToken, user, timestamp),
-      this.del(token)
+      this.set(newUser, timestamp),
+      this.del(sessionToken, walletToken)
     ]);
 
     if (isLeft(setResult) || isLeft(delResult)) {
@@ -137,19 +147,22 @@ export default class RedisSessionStorage implements ISessionStorage {
     return right<Error, ISessionState>({
       expireAt: new Date(expireAtEpochMs),
       newToken: newSessionToken,
-      user,
-      walletToken: newWalletToken
+      user: newUser
     });
   }
 
   /**
    * {@inheritDoc}
    */
-  public del(token: string): Promise<Either<Error, boolean>> {
-    return new Promise(resolve => {
+  public async del(
+    sessionToken: string,
+    walletToken: string
+  ): Promise<Either<Error, boolean>> {
+    const deleteSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
-      // @see https://redis.io/commands/hdel
-      this.redisClient.del(token, (err, response) => {
+      // @see https://redis.io/commands/del
+      // tslint:disable-next-line:no-identical-functions
+      this.redisClient.del(sessionToken, (err, response) => {
         if (err) {
           return resolve(left<Error, boolean>(err));
         }
@@ -158,6 +171,40 @@ export default class RedisSessionStorage implements ISessionStorage {
         resolve(right<Error, boolean>(response === 1));
       });
     });
+
+    const deleteWalletToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Removes the specified fields from the hash stored at key. Specified fields that do not exist within this hash
+      // are ignored.
+      // @see https://redis.io/commands/hdel
+      this.redisClient.hdel(
+        "mapping_session_wallet_tokens",
+        walletToken,
+        (err, response) => {
+          if (err) {
+            return resolve(left<Error, boolean>(err));
+          }
+
+          // del return the number of fields that were removed from the hash, not including specified but non existing
+          // fields.
+          resolve(right<Error, boolean>(response >= 1));
+        }
+      );
+    });
+
+    const [
+      deleteSessionTokenResult,
+      deleteWalletTokenResult
+    ] = await Promise.all([deleteSessionToken, deleteWalletToken]);
+
+    if (isLeft(deleteSessionTokenResult) || isLeft(deleteWalletTokenResult)) {
+      return left<Error, boolean>(new Error("Error deleting the token"));
+    }
+
+    if (!deleteSessionTokenResult.value || !deleteWalletTokenResult.value) {
+      return left<Error, boolean>(new Error("Error deleting the token"));
+    }
+
+    return right<Error, boolean>(true);
   }
 
   /**
@@ -176,7 +223,8 @@ export default class RedisSessionStorage implements ISessionStorage {
 
           const errorOrSession = Session.decode({
             timestampEpochMillis: value.timestampEpochMillis,
-            user: errorOrDeserializedUser
+            user: errorOrDeserializedUser,
+            walletToken: value.walletToken
           });
 
           if (isLeft(errorOrSession)) {

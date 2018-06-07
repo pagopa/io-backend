@@ -11,7 +11,6 @@ import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";
-import TokenService from "../tokenService";
 
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
@@ -31,9 +30,10 @@ const aValidUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
+  session_token: "HexToKen",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "HexToKen"
+  wallet_token: "HexToKen"
 };
 
 // mock for a invalid User
@@ -63,7 +63,6 @@ jest.mock("../../services/tokenService", () => {
     }))
   };
 });
-const tokenService = new TokenService();
 
 const mockHmset = jest.fn();
 const mockHgetall = jest.fn();
@@ -75,8 +74,7 @@ mockRedisClient.del = mockDel;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
-  aTokenDurationSecs,
-  tokenService
+  aTokenDurationSecs
 );
 
 let clock: any;
@@ -97,13 +95,12 @@ describe("RedisSessionStorage#set", () => {
     });
 
     const response = await sessionStorage.set(
-      aValidUser.token,
       aValidUser,
       theCurrentTimestampMillis
     );
 
     expect(mockHmset).toHaveBeenCalledTimes(1);
-    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(mockHmset.mock.calls[0][1]).toEqual({
       timestampEpochMillis: theCurrentTimestampMillis,
       user: JSON.stringify(aValidUser)
@@ -117,18 +114,17 @@ describe("RedisSessionStorage#set", () => {
     });
 
     const response = await sessionStorage.set(
-      aValidUser.token,
       aValidUser,
       theCurrentTimestampMillis
     );
 
     expect(mockHmset).toHaveBeenCalledTimes(1);
-    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHmset.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(mockHmset.mock.calls[0][1]).toEqual({
       timestampEpochMillis: theCurrentTimestampMillis,
       user: JSON.stringify(aValidUser)
     });
-    expect(response).toEqual(left(new Error("hmset error")));
+    expect(response).toEqual(left(new Error("Error setting the token")));
   });
 });
 
@@ -155,16 +151,16 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(aValidUser.token);
+    const response = await sessionStorage.get(aValidUser.session_token);
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(
       left(new Error("Session not found or unable to decode the user"))
     );
   });
 
-  it("should fail getting an expired session", async () => {
+  it("should get a session even if it's expired", async () => {
     const aTokenDurationMillis = aTokenDurationSecs * 1000;
     const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
     const anExpiredTimestamp =
@@ -176,11 +172,16 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(aValidUser.token);
+    const response = await sessionStorage.get(aValidUser.session_token);
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
-    expect(response).toEqual(left(new Error("Token has expired")));
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
+    expect(response).toEqual(
+      right({
+        expireAt: new Date(anExpiredTimestamp + aTokenDurationSecs * 1000),
+        user: aValidUser
+      })
+    );
   });
 
   it("should get a session with valid values", async () => {
@@ -191,10 +192,10 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(aValidUser.token);
+    const response = await sessionStorage.get(aValidUser.session_token);
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(
       right({
         expireAt: new Date(
@@ -213,23 +214,29 @@ describe("RedisSessionStorage#del", () => {
       callback(undefined, successfullyDelete);
     });
 
-    const response = await sessionStorage.del(aValidUser.token);
+    const response = await sessionStorage.del(
+      aValidUser.session_token,
+      aValidUser.wallet_token
+    );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(right(true));
   });
 
   it("should fail if Redis client returns an error", async () => {
     mockDel.mockImplementation((_, callback) => {
-      callback(new Error("del error"), undefined);
+      callback(new Error("Error deleting the token"), undefined);
     });
 
-    const response = await sessionStorage.del(aValidUser.token);
+    const response = await sessionStorage.del(
+      aValidUser.session_token,
+      aValidUser.wallet_token
+    );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
-    expect(response).toEqual(left(new Error("del error")));
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.session_token);
+    expect(response).toEqual(left(new Error("Error deleting the token")));
   });
 });
 
@@ -248,12 +255,16 @@ describe("RedisSessionStorage#refresh", () => {
     mockDel.mockImplementation((_, callback) => {
       callback(undefined, successfullyDelete);
     });
-    mockGetNewToken.mockReturnValue("123456");
 
-    const response = await sessionStorage.refresh(aValidUser.token);
+    const response = await sessionStorage.refresh(
+      aValidUser.session_token,
+      aValidUser.wallet_token,
+      "123456",
+      "123456"
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(mockHmset).toHaveBeenCalledTimes(1);
     expect(mockHmset.mock.calls[0][0]).toBe("123456");
     expect(mockHmset.mock.calls[0][1]).toEqual({
@@ -261,7 +272,7 @@ describe("RedisSessionStorage#refresh", () => {
       user: JSON.stringify(aValidUser)
     });
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockDel.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(
       right({
         expireAt: new Date(
@@ -281,10 +292,15 @@ describe("RedisSessionStorage#refresh", () => {
       );
     });
 
-    const response = await sessionStorage.refresh(aValidUser.token);
+    const response = await sessionStorage.refresh(
+      aValidUser.session_token,
+      aValidUser.wallet_token,
+      "",
+      ""
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(
       left(new Error("Session not found or unable to decode the user"))
     );
@@ -305,10 +321,15 @@ describe("RedisSessionStorage#refresh", () => {
     });
     mockGetNewToken.mockReturnValue("123456");
 
-    const response = await sessionStorage.refresh(aValidUser.token);
+    const response = await sessionStorage.refresh(
+      aValidUser.session_token,
+      aValidUser.wallet_token,
+      "",
+      ""
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 
@@ -328,10 +349,15 @@ describe("RedisSessionStorage#refresh", () => {
     });
     mockGetNewToken.mockReturnValue("123456");
 
-    const response = await sessionStorage.refresh(aValidUser.token);
+    const response = await sessionStorage.refresh(
+      aValidUser.session_token,
+      aValidUser.wallet_token,
+      "",
+      ""
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 
@@ -351,10 +377,15 @@ describe("RedisSessionStorage#refresh", () => {
     });
     mockGetNewToken.mockReturnValue("123456");
 
-    const response = await sessionStorage.refresh(aValidUser.token);
+    const response = await sessionStorage.refresh(
+      aValidUser.session_token,
+      aValidUser.wallet_token,
+      "",
+      ""
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 
@@ -374,10 +405,15 @@ describe("RedisSessionStorage#refresh", () => {
     });
     mockGetNewToken.mockReturnValue("123456");
 
-    const response = await sessionStorage.refresh(aValidUser.token);
+    const response = await sessionStorage.refresh(
+      aValidUser.session_token,
+      aValidUser.wallet_token,
+      "",
+      ""
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
-    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.token);
+    expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
     expect(response).toEqual(left(new Error("Error refreshing the token")));
   });
 });

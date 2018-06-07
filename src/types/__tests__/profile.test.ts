@@ -51,9 +51,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
+  session_token: "HexToKen",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "HexToKen"
+  wallet_token: "HexToKen"
 };
 
 // mock for a valid ExtendedProfile profile

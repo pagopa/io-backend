@@ -15,7 +15,14 @@ const bearerTokenStrategy = () => {
       (errorOrSessionState: Either<Error, ISessionState>) => {
         errorOrSessionState.fold(
           () => done(undefined, false),
-          sessionState => done(undefined, sessionState.user)
+          sessionState => {
+            // Check if the session is expired.
+            if (sessionState.expireAt.getTime() < Date.now()) {
+              done(undefined, false);
+            } else {
+              done(undefined, sessionState.user);
+            }
+          }
         );
       },
       () => {

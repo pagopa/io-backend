@@ -9,10 +9,12 @@ import { isLeft } from "fp-ts/lib/Either";
 import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponsePermanentRedirect,
   ResponseSuccessJson,
   ResponseSuccessXml
@@ -53,14 +55,12 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
-    const user = toAppUser(spidUser, this.tokenService.getNewToken());
-
+    const sessionToken = this.tokenService.getNewToken();
+    const walletToken = this.tokenService.getNewToken();
+    const user = toAppUser(spidUser, sessionToken, walletToken);
     const timestamp = Date.now();
-    const errorOrResponse = await this.sessionStorage.set(
-      user.token,
-      user,
-      timestamp
-    );
+
+    const errorOrResponse = await this.sessionStorage.set(user, timestamp);
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
@@ -71,7 +71,9 @@ export default class AuthenticationController {
     if (!response) {
       return ResponseErrorInternal("Error creating the user session");
     }
-    const urlWithToken = this.getClientProfileRedirectionUrl(user.token);
+    const urlWithToken = this.getClientProfileRedirectionUrl(
+      user.session_token
+    );
 
     return ResponsePermanentRedirect(urlWithToken);
   }
@@ -91,7 +93,10 @@ export default class AuthenticationController {
 
     const user = errorOrUser.value;
 
-    const errorOrResponse = await this.sessionStorage.del(user.token);
+    const errorOrResponse = await this.sessionStorage.del(
+      user.session_token,
+      user.wallet_token
+    );
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
@@ -120,40 +125,57 @@ export default class AuthenticationController {
    */
   public async getSessionState(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<PublicSession>> {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PublicSession>
+  > {
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
       return ResponseErrorInternal("No token in the request");
     }
 
-    const token = maybeToken.value;
-    const errorOrSession = await this.sessionStorage.get(token);
+    const sessionToken = maybeToken.value;
+    const errorOrSession = await this.sessionStorage.get(sessionToken);
     if (isLeft(errorOrSession)) {
-      // Previous token not found or expired, try to refresh.
-      const errorOrSessionState = await this.sessionStorage.refresh(token);
+      // Previous token not found.
+      return ResponseErrorNotFound("Session not found", "");
+    }
 
-      if (isLeft(errorOrSessionState)) {
+    const session = errorOrSession.value;
+
+    // Check if the session is expired, in that case we need to refresh the tokens.
+    if (session.expireAt.getTime() < Date.now()) {
+      const newSessionToken = this.tokenService.getNewToken();
+      const newWalletToken = this.tokenService.getNewToken();
+      const errorOrRefreshedSession = await this.sessionStorage.refresh(
+        session.user.session_token,
+        session.user.wallet_token,
+        newSessionToken,
+        newWalletToken
+      );
+
+      if (isLeft(errorOrRefreshedSession)) {
         // Unable to refresh token or session not found.
-        const error = errorOrSessionState.value;
+        const error = errorOrRefreshedSession.value;
         return ResponseErrorInternal(error.message);
       }
 
       // Return the new session information.
-      const sessionState = errorOrSessionState.value;
+      const refreshedSession = errorOrRefreshedSession.value;
       return ResponseSuccessJson({
-        expireAt: new Date(sessionState.expireAt),
-        newToken: sessionState.newToken,
-        spidLevel: sessionState.user.spid_level,
-        walletToken: sessionState.walletToken
+        expireAt: new Date(refreshedSession.expireAt),
+        newToken: refreshedSession.newToken,
+        spidLevel: refreshedSession.user.spid_level,
+        walletToken: refreshedSession.user.wallet_token
       });
     }
 
     // Return the actual session information.
-    const session = errorOrSession.value;
     return ResponseSuccessJson({
       expireAt: new Date(session.expireAt),
       spidLevel: session.user.spid_level,
-      walletToken: session.walletToken
+      walletToken: session.user.wallet_token
     });
   }
 

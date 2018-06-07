@@ -27,9 +27,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  session_token: "123hexToken",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "123hexToken"
+  wallet_token: "123hexToken"
 };
 
 const mockedInvalidUser: User = {
@@ -41,9 +42,10 @@ const mockedInvalidUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  session_token: "123hexToken",
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "123hexToken"
+  wallet_token: "123hexToken"
 };
 
 const aValidNotification = {
