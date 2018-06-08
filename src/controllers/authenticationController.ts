@@ -130,11 +130,13 @@ export default class AuthenticationController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PublicSession>
   > {
+    // This controller doesn't have a Passport middleware that checks the Bearer token, we need to check it here.
     const maybeToken = await this.extractTokenFromRequest(req);
     if (isNone(maybeToken)) {
       return ResponseErrorInternal("No token in the request");
     }
 
+    // The token is present, look for a session.
     const sessionToken = maybeToken.value;
     const errorOrSession = await this.sessionStorage.get(sessionToken);
     if (isLeft(errorOrSession)) {
