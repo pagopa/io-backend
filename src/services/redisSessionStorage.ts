@@ -3,9 +3,19 @@
  */
 
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
+import * as winston from "winston";
 import { User } from "../types/user";
-import { ISessionState, ISessionStorage, Session } from "./ISessionStorage";
+import {
+  ISessionState,
+  ISessionStorage,
+  Session,
+  SessionToken,
+  WalletToken
+} from "./ISessionStorage";
+
+const sessionMappingKey = "mapping_session_wallet_tokens";
 
 export default class RedisSessionStorage implements ISessionStorage {
   constructor(
@@ -43,7 +53,7 @@ export default class RedisSessionStorage implements ISessionStorage {
       // Set a key to hold the mapping between session and wallet tokens.
       // @see https://redis.io/commands/hmset
       this.redisClient.hset(
-        "mapping_session_wallet_tokens",
+        sessionMappingKey,
         user.wallet_token,
         user.session_token,
         (err, response) => {
@@ -75,7 +85,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public async get(token: string): Promise<Either<Error, ISessionState>> {
+  public async get(token: SessionToken): Promise<Either<Error, ISessionState>> {
     const errorOrSession = await this.getSession(token);
 
     if (isLeft(errorOrSession)) {
@@ -101,10 +111,10 @@ export default class RedisSessionStorage implements ISessionStorage {
    * {@inheritDoc}
    */
   public async refresh(
-    sessionToken: string,
-    walletToken: string,
-    newSessionToken: string,
-    newWalletToken: string
+    sessionToken: SessionToken,
+    walletToken: WalletToken,
+    newSessionToken: SessionToken,
+    newWalletToken: WalletToken
   ): Promise<Either<Error, ISessionState>> {
     const errorOrSession = await this.getSession(sessionToken);
 
@@ -155,8 +165,8 @@ export default class RedisSessionStorage implements ISessionStorage {
    * {@inheritDoc}
    */
   public async del(
-    sessionToken: string,
-    walletToken: string
+    sessionToken: SessionToken,
+    walletToken: WalletToken
   ): Promise<Either<Error, boolean>> {
     const deleteSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
@@ -176,19 +186,15 @@ export default class RedisSessionStorage implements ISessionStorage {
       // Removes the specified fields from the hash stored at key. Specified fields that do not exist within this hash
       // are ignored.
       // @see https://redis.io/commands/hdel
-      this.redisClient.hdel(
-        "mapping_session_wallet_tokens",
-        walletToken,
-        (err, response) => {
-          if (err) {
-            return resolve(left<Error, boolean>(err));
-          }
-
-          // del return the number of fields that were removed from the hash, not including specified but non existing
-          // fields.
-          resolve(right<Error, boolean>(response >= 1));
+      this.redisClient.hdel(sessionMappingKey, walletToken, (err, response) => {
+        if (err) {
+          return resolve(left<Error, boolean>(err));
         }
-      );
+
+        // del return the number of fields that were removed from the hash, not including specified but non existing
+        // fields.
+        resolve(right<Error, boolean>(response >= 1));
+      });
     });
 
     const [
@@ -210,7 +216,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * Return a Session for this token.
    */
-  private getSession(token: string): Promise<Either<Error, Session>> {
+  private getSession(token: SessionToken): Promise<Either<Error, Session>> {
     return new Promise(resolve => {
       this.redisClient.hgetall(token, (err, value) => {
         if (err) {
@@ -223,11 +229,13 @@ export default class RedisSessionStorage implements ISessionStorage {
 
           const errorOrSession = Session.decode({
             timestampEpochMillis: value.timestampEpochMillis,
-            user: errorOrDeserializedUser,
-            walletToken: value.walletToken
+            user: errorOrDeserializedUser
           });
-
           if (isLeft(errorOrSession)) {
+            winston.error(
+              "Session not found or unable to decode the user: %s",
+              ReadableReporter.report(errorOrSession)
+            );
             return resolve(this.sessionNotFoundOrUnableToDecodeUser<Session>());
           }
 

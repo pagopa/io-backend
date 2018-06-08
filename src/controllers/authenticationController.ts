@@ -20,7 +20,11 @@ import {
   ResponseSuccessXml
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
-import { ISessionStorage } from "../services/ISessionStorage";
+import {
+  ISessionStorage,
+  SessionToken,
+  WalletToken
+} from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { PublicSession } from "../types/api/PublicSession";
 import {
@@ -94,8 +98,8 @@ export default class AuthenticationController {
     const user = errorOrUser.value;
 
     const errorOrResponse = await this.sessionStorage.del(
-      user.session_token,
-      user.wallet_token
+      user.session_token as SessionToken,
+      user.wallet_token as WalletToken
     );
 
     if (isLeft(errorOrResponse)) {
@@ -138,7 +142,9 @@ export default class AuthenticationController {
 
     // The token is present, look for a session.
     const sessionToken = maybeToken.value;
-    const errorOrSession = await this.sessionStorage.get(sessionToken);
+    const errorOrSession = await this.sessionStorage.get(
+      sessionToken as SessionToken
+    );
     if (isLeft(errorOrSession)) {
       // Previous token not found.
       return ResponseErrorNotFound("Session not found", "");
@@ -151,10 +157,10 @@ export default class AuthenticationController {
       const newSessionToken = this.tokenService.getNewToken();
       const newWalletToken = this.tokenService.getNewToken();
       const errorOrRefreshedSession = await this.sessionStorage.refresh(
-        session.user.session_token,
-        session.user.wallet_token,
-        newSessionToken,
-        newWalletToken
+        session.user.session_token as SessionToken,
+        session.user.wallet_token as WalletToken,
+        newSessionToken as SessionToken,
+        newWalletToken as WalletToken
       );
 
       if (isLeft(errorOrRefreshedSession)) {

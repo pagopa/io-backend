@@ -2,6 +2,7 @@
 /* tslint:disable:no-duplicate-string */
 /* tslint:disable:no-let */
 /* tslint:disable:no-identical-functions */
+/* tslint:disable:no-big-function */
 
 import { left, right } from "fp-ts/lib/Either";
 import { UrlFromString } from "italia-ts-commons/lib/url";
@@ -79,6 +80,9 @@ const samlAttributeConsumingServiceIndex = 0;
 // user constant
 const aTimestamp = 1518010929530;
 
+const aTokenDurationSecs = 3600;
+const theCurrentTimestampMillis = 1518010929530;
+
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
@@ -92,6 +96,8 @@ const mockRefreshedSessionToken =
   "ac83a77d6e4c19a02b50b8abf1223b8d858f6aaf23ba286898ad5fe5e24e8893b2b96c3a4c575bff285dac2481580737";
 const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
+const mockRefreshedWalletToken =
+  "d9658f7e21a0891c596eff2baf2e077888016bb538dc2644067065ee5a430f5b858190afb19a85067ce99a009749a878";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -159,12 +165,11 @@ jest.mock("../../services/redisSessionStorage", () => {
   };
 });
 
+const mockGetNewToken = jest.fn();
 jest.mock("../../services/tokenService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getNewToken: jest.fn(() => {
-        return mockSessionToken;
-      })
+      getNewToken: mockGetNewToken
     }))
   };
 });
@@ -202,24 +207,26 @@ const controller = new AuthenticationController(
   getClientProfileRedirectionUrl
 );
 
+let clock: any;
+beforeEach(() => {
+  // We need to mock time to test token expiration.
+  clock = lolex.install({ now: theCurrentTimestampMillis });
+
+  jest.clearAllMocks();
+});
+afterEach(() => {
+  clock = clock.uninstall();
+});
+
 describe("AuthenticationController#acs", () => {
-  // tslint:disable-next-line:no-let
-  let clock: any;
-
-  beforeEach(() => {
-    // toUser() saves the current timestamp into the User object, we need to
-    // mock time.
-    clock = lolex.install({ now: aTimestamp });
-
-    jest.clearAllMocks();
-  });
-  afterEach(() => {
-    clock = clock.uninstall();
-  });
-
   it("redirects to the correct url if userPayload is a valid User", async () => {
-    mockSet.mockReturnValue(Promise.resolve(right(true)));
     const res = mockRes();
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
 
     const response = await controller.acs(validUserPayload);
     response.apply(res);
@@ -406,12 +413,21 @@ describe("AuthenticationController#getSessionState", () => {
     req.headers = {};
     req.headers.authorization = "Bearer " + mockSessionToken;
 
+    const aTokenDurationMillis = aTokenDurationSecs * 1000;
+    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
+    const anExpiredTimestamp =
+      theCurrentTimestampMillis - aTimeLongerThanDuration;
+
+    mockGetNewToken
+      .mockReturnValueOnce(mockRefreshedSessionToken)
+      .mockReturnValueOnce(mockRefreshedWalletToken);
+
     mockGet.mockReturnValue(
       Promise.resolve(
         right({
-          expireAt: new Date(aTimestamp - 1000),
+          expireAt: new Date(anExpiredTimestamp),
           newToken: mockSessionToken,
-          user: { spid_level: aValidSpidLevel }
+          user: mockedUser
         })
       )
     );
@@ -420,7 +436,11 @@ describe("AuthenticationController#getSessionState", () => {
         right({
           expireAt: new Date(aTimestamp),
           newToken: mockRefreshedSessionToken,
-          user: { spid_level: aValidSpidLevel }
+          user: {
+            ...mockedUser,
+            session_token: mockRefreshedSessionToken,
+            wallet_token: mockRefreshedWalletToken
+          }
         })
       )
     );
@@ -430,12 +450,18 @@ describe("AuthenticationController#getSessionState", () => {
 
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
-    expect(mockRefresh).toHaveBeenCalledWith(mockSessionToken, "", "", "");
+    expect(mockRefresh).toHaveBeenCalledWith(
+      mockSessionToken,
+      mockWalletToken,
+      mockRefreshedSessionToken,
+      mockRefreshedWalletToken
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       expireAt: new Date(aTimestamp),
       newToken: mockRefreshedSessionToken,
-      spidLevel: aValidSpidLevel
+      spidLevel: aValidSpidLevel,
+      walletToken: mockRefreshedWalletToken
     });
   });
 
@@ -446,20 +472,16 @@ describe("AuthenticationController#getSessionState", () => {
     req.headers = {};
     req.headers.authorization = "Bearer " + mockSessionToken;
 
+    const aTokenDurationMillis = aTokenDurationSecs * 1000;
+    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
+    const aNotExpiredTimestamp =
+      theCurrentTimestampMillis + aTimeLongerThanDuration;
+
     mockGet.mockReturnValue(
       Promise.resolve(
         right({
-          expireAt: new Date(aTimestamp),
+          expireAt: new Date(aNotExpiredTimestamp),
           user: mockedUser
-        })
-      )
-    );
-    mockRefresh.mockReturnValue(
-      Promise.resolve(
-        right({
-          expireAt: "",
-          newToken: mockRefreshedSessionToken,
-          user: ""
         })
       )
     );
@@ -469,11 +491,13 @@ describe("AuthenticationController#getSessionState", () => {
 
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
-    expect(mockRefresh).toHaveBeenCalledWith(mockSessionToken, "", "", "");
+    expect(mockGetNewToken).not.toHaveBeenCalled();
+    expect(mockRefresh).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      expireAt: new Date(aTimestamp),
-      spidLevel: "https://www.spid.gov.it/SpidL2"
+      expireAt: new Date(aNotExpiredTimestamp),
+      spidLevel: "https://www.spid.gov.it/SpidL2",
+      walletToken: mockedUser.wallet_token
     });
   });
 
@@ -528,7 +552,7 @@ describe("AuthenticationController#getSessionState", () => {
     });
   });
 
-  it("should fail if there was error in refreshing the token", async () => {
+  it("should fail if session not found", async () => {
     const res = mockRes();
     const req = mockReq();
 
@@ -536,7 +560,46 @@ describe("AuthenticationController#getSessionState", () => {
     req.headers.authorization = "Bearer " + mockSessionToken;
 
     mockGet.mockReturnValue(
-      Promise.resolve(left(new Error("Token has expired")))
+      Promise.resolve(left(new Error("Session not found")))
+    );
+
+    const response = await controller.getSessionState(req);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "",
+      status: 404,
+      title: "Session not found"
+    });
+  });
+
+  it("should fail if there was error in refreshing the token", async () => {
+    const res = mockRes();
+    const req = mockReq();
+
+    req.headers = {};
+    req.headers.authorization = "Bearer " + mockSessionToken;
+
+    const aTokenDurationMillis = aTokenDurationSecs * 1000;
+    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
+    const anExpiredTimestamp =
+      theCurrentTimestampMillis - aTimeLongerThanDuration;
+
+    mockGetNewToken
+      .mockReturnValueOnce(mockRefreshedSessionToken)
+      .mockReturnValueOnce(mockRefreshedWalletToken);
+
+    mockGet.mockReturnValue(
+      Promise.resolve(
+        right({
+          expireAt: new Date(anExpiredTimestamp),
+          newToken: mockSessionToken,
+          user: mockedUser
+        })
+      )
     );
     mockRefresh.mockReturnValue(
       Promise.resolve(left(new Error("Error refreshing the token")))
@@ -547,7 +610,12 @@ describe("AuthenticationController#getSessionState", () => {
 
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
-    expect(mockRefresh).toHaveBeenCalledWith(mockSessionToken, "", "", "");
+    expect(mockRefresh).toHaveBeenCalledWith(
+      mockSessionToken,
+      mockWalletToken,
+      mockRefreshedSessionToken,
+      mockRefreshedWalletToken
+    );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
