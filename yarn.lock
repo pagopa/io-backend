@@ -987,6 +987,14 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.3.0:
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
+chalk@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.1.tgz#18c49ab16a037b6eb0152cc83e3471338215b66e"
+  dependencies:
+    ansi-styles "^3.2.1"
+    escape-string-regexp "^1.0.5"
+    supports-color "^5.3.0"
+
 cheerio@0.20.0:
   version "0.20.0"
   resolved "https://registry.yarnpkg.com/cheerio/-/cheerio-0.20.0.tgz#5c710f2bab95653272842ba01c6ea61b3545ec35"
@@ -5343,20 +5351,20 @@ supports-hyperlinks@^1.0.1:
     has-flag "^2.0.0"
     supports-color "^5.0.0"
 
-swagger-cli@^1.0.1:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-1.0.2.tgz#210f0361179d4406e918cd35cf9a968336cd85d1"
+swagger-cli@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.0.0.tgz#0c965ecc2748d6ec082797258b7a96c1d4074e67"
   dependencies:
-    chalk "^2.3.0"
+    chalk "^2.4.1"
     mkdirp "^0.5.1"
-    swagger-parser "^4.0.1"
+    swagger-parser "^5.0.0"
     yargs "^11.0.0"
 
 swagger-methods@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/swagger-methods/-/swagger-methods-1.0.4.tgz#2c5b844f4a22ab2f5e773f98193c28e386b1c37e"
 
-swagger-parser@^4.0.1, swagger-parser@^4.1.0:
+swagger-parser@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/swagger-parser/-/swagger-parser-4.1.0.tgz#5fb08ccc0c5abb8f9de7cba6c5e437736d8a10f5"
   dependencies:
