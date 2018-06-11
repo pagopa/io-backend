@@ -4,6 +4,7 @@ import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
+import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import ProfileService from "../../services/profileService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
@@ -57,10 +58,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
-  session_token: "123hexToken",
+  session_token: "123hexToken" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken"
+  wallet_token: "123hexToken" as WalletToken
 };
 
 // mock for upsert user (Extended Profile)

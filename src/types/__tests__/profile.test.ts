@@ -4,6 +4,7 @@ import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
@@ -51,10 +52,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
-  session_token: "HexToKen",
+  session_token: "HexToKen" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  wallet_token: "HexToKen"
+  wallet_token: "HexToKen" as WalletToken
 };
 
 // mock for a valid ExtendedProfile profile

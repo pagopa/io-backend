@@ -3,6 +3,7 @@ import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
+import { SessionToken, WalletToken } from "../ISessionStorage";
 import MessageService from "../messagesService";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
@@ -172,10 +173,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: aValidEmail,
   sessionIndex: "sessionIndex",
-  session_token: "HexToKen",
+  session_token: "HexToKen" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  wallet_token: "HexToKen"
+  wallet_token: "HexToKen" as WalletToken
 };
 
 const mockGetMessagesByUser = jest.fn();

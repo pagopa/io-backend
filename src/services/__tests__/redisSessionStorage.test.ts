@@ -31,10 +31,10 @@ const aValidUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
-  session_token: "HexToKen",
+  session_token: "HexToKen" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  wallet_token: "HexToKen"
+  wallet_token: "HexToKen" as WalletToken
 };
 
 // mock for a invalid User
@@ -240,9 +240,7 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(
-      aValidUser.session_token as SessionToken
-    );
+    const response = await sessionStorage.get(aValidUser.session_token);
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
@@ -263,9 +261,7 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(
-      aValidUser.session_token as SessionToken
-    );
+    const response = await sessionStorage.get(aValidUser.session_token);
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
@@ -285,9 +281,7 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(
-      aValidUser.session_token as SessionToken
-    );
+    const response = await sessionStorage.get(aValidUser.session_token);
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
@@ -403,8 +397,8 @@ describe("RedisSessionStorage#del", () => {
       });
 
       const response = await sessionStorage.del(
-        aValidUser.session_token as SessionToken,
-        aValidUser.wallet_token as WalletToken
+        aValidUser.session_token,
+        aValidUser.wallet_token
       );
 
       expect(mockDel).toHaveBeenCalledTimes(1);

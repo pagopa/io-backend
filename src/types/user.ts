@@ -8,6 +8,7 @@ import { Either, left } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import * as winston from "winston";
+import { SessionToken, WalletToken } from "../services/ISessionStorage";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
@@ -24,10 +25,10 @@ export const User = t.interface({
   nameIDFormat: string,
   preferred_email: EmailAddress,
   sessionIndex: string,
-  session_token: string,
+  session_token: SessionToken,
   spid_idp: string,
   spid_level: SpidLevel,
-  wallet_token: string
+  wallet_token: WalletToken
 });
 
 export type User = t.TypeOf<typeof User>;
@@ -54,8 +55,8 @@ const messageErrorOnDecodeUser = "Unable to decode the user";
  */
 export function toAppUser(
   from: SpidUser,
-  sessionToken: string,
-  walletToken: string
+  sessionToken: SessionToken,
+  walletToken: WalletToken
 ): User {
   return {
     created_at: new Date().getTime(),

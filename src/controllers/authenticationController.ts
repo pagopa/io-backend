@@ -59,8 +59,8 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
-    const sessionToken = this.tokenService.getNewToken();
-    const walletToken = this.tokenService.getNewToken();
+    const sessionToken = this.tokenService.getNewToken() as SessionToken;
+    const walletToken = this.tokenService.getNewToken() as WalletToken;
     const user = toAppUser(spidUser, sessionToken, walletToken);
     const timestamp = Date.now();
 
@@ -98,8 +98,8 @@ export default class AuthenticationController {
     const user = errorOrUser.value;
 
     const errorOrResponse = await this.sessionStorage.del(
-      user.session_token as SessionToken,
-      user.wallet_token as WalletToken
+      user.session_token,
+      user.wallet_token
     );
 
     if (isLeft(errorOrResponse)) {
@@ -142,9 +142,7 @@ export default class AuthenticationController {
 
     // The token is present, look for a session.
     const sessionToken = maybeToken.value;
-    const errorOrSession = await this.sessionStorage.get(
-      sessionToken as SessionToken
-    );
+    const errorOrSession = await this.sessionStorage.get(sessionToken);
     if (isLeft(errorOrSession)) {
       // Previous token not found.
       return ResponseErrorNotFound("Session not found", "");
@@ -154,13 +152,13 @@ export default class AuthenticationController {
 
     // Check if the session is expired, in that case we need to refresh the tokens.
     if (session.expireAt.getTime() < Date.now()) {
-      const newSessionToken = this.tokenService.getNewToken();
-      const newWalletToken = this.tokenService.getNewToken();
+      const newSessionToken = this.tokenService.getNewToken() as SessionToken;
+      const newWalletToken = this.tokenService.getNewToken() as WalletToken;
       const errorOrRefreshedSession = await this.sessionStorage.refresh(
-        session.user.session_token as SessionToken,
-        session.user.wallet_token as WalletToken,
-        newSessionToken as SessionToken,
-        newWalletToken as WalletToken
+        session.user.session_token,
+        session.user.wallet_token,
+        newSessionToken,
+        newWalletToken
       );
 
       if (isLeft(errorOrRefreshedSession)) {
@@ -235,7 +233,7 @@ export default class AuthenticationController {
    */
   private extractTokenFromRequest(
     req: express.Request
-  ): Promise<Option<string>> {
+  ): Promise<Option<SessionToken>> {
     return new Promise(resolve => {
       if (
         req.headers &&
@@ -249,7 +247,7 @@ export default class AuthenticationController {
           const token = parts[1];
 
           if (/^Bearer$/i.test(scheme)) {
-            resolve(some(token));
+            resolve(some(token as SessionToken));
           } else {
             resolve(none);
           }

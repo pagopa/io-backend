@@ -10,6 +10,7 @@ import * as lolex from "lolex";
 import * as redis from "redis";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
+import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
@@ -109,10 +110,10 @@ const mockedUser: User = {
   nameIDFormat: aValidIDFormat,
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
-  session_token: mockSessionToken,
+  session_token: mockSessionToken as SessionToken,
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
-  wallet_token: mockWalletToken
+  wallet_token: mockWalletToken as WalletToken
 };
 
 // validUser has all every field correctly set.

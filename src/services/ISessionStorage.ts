@@ -5,6 +5,7 @@
 import { Either } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { IntegerFromString } from "io-ts-types";
+import { tag } from "italia-ts-commons/lib/types";
 import { Timestamp } from "../types/api/Timestamp";
 import { User } from "../types/user";
 
@@ -20,13 +21,17 @@ export interface ISessionState {
   readonly user: User;
 }
 
-export interface ITokenTag<T> {
-  readonly kind: T;
+interface ISessionTokenTag {
+  readonly kind: "SessionToken";
 }
+export const SessionToken = tag<ISessionTokenTag>()(t.string);
+export type SessionToken = t.TypeOf<typeof SessionToken>;
 
-export type SessionToken = string & ITokenTag<"SessionToken">;
-
-export type WalletToken = string & ITokenTag<"WalletToken">;
+interface IWalletTokenTag {
+  readonly kind: "WalletToken";
+}
+export const WalletToken = tag<IWalletTokenTag>()(t.string);
+export type WalletToken = t.TypeOf<typeof WalletToken>;
 
 export interface ISessionStorage {
   /**
