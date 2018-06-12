@@ -14,6 +14,7 @@ import { OrganizationName } from "../../types/api/OrganizationName";
 import { ServiceName } from "../../types/api/ServiceName";
 import { ServicePublic } from "../../types/api/ServicePublic";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ServicesController from "../servicesController";
 
@@ -42,9 +43,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  session_token: "123hexToken" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "123hexToken"
+  wallet_token: "123hexToken" as WalletToken
 };
 
 const anErrorResponse = {

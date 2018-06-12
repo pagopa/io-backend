@@ -430,9 +430,12 @@ definitions:
         type: string
       spidLevel:
          $ref: '#/definitions/SpidLevel'
+      walletToken:
+        type: string
     required:
       - expireAt
       - spidLevel
+      - walletToken
   InstallationID:
     type: string
     description: |-
