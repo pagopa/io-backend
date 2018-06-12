@@ -209,10 +209,11 @@
   dependencies:
     "@types/node" "*"
 
-"@types/xml2js@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.2.tgz#a4b84b3879ffd4710953fd92cabfde9a8a4e8456"
+"@types/xml2js@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.3.tgz#2f41bfc74d5a4022511721f872ed395a210ad3b7"
   dependencies:
+    "@types/events" "*"
     "@types/node" "*"
 
 a-sync-waterfall@^1.0.0:
