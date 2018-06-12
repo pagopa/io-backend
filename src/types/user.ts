@@ -13,6 +13,7 @@ import { FiscalCode } from "./api/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
+import { SessionToken, WalletToken } from "./token";
 
 // required attributes
 export const User = t.interface({
@@ -24,9 +25,10 @@ export const User = t.interface({
   nameIDFormat: string,
   preferred_email: EmailAddress,
   sessionIndex: string,
+  session_token: SessionToken,
   spid_idp: string,
   spid_level: SpidLevel,
-  token: string
+  wallet_token: WalletToken
 });
 
 export type User = t.TypeOf<typeof User>;
@@ -51,7 +53,11 @@ const messageErrorOnDecodeUser = "Unable to decode the user";
 /**
  * Converts a SPID User to a Proxy User.
  */
-export function toAppUser(from: SpidUser, token: string): User {
+export function toAppUser(
+  from: SpidUser,
+  sessionToken: SessionToken,
+  walletToken: WalletToken
+): User {
   return {
     created_at: new Date().getTime(),
     family_name: from.familyName,
@@ -61,9 +67,10 @@ export function toAppUser(from: SpidUser, token: string): User {
     nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
     preferred_email: from.email,
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
+    session_token: sessionToken,
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
-    token
+    wallet_token: walletToken
   };
 }
 

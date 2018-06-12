@@ -7,6 +7,7 @@ import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { SpidLevelEnum } from "../api/SpidLevel";
 import { Issuer } from "../issuer";
+import { SessionToken, WalletToken } from "../token";
 import {
   extractUserFromJson,
   extractUserFromRequest,
@@ -50,21 +51,26 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
+  session_token: "HexToKen" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "HexToKen"
+  wallet_token: "HexToKen" as WalletToken
 };
 
-const mockToken =
-  "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
+const mockSessionToken = "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b" as SessionToken;
+const mockWalletToken = "b1d8fbe93cc465e9dac98ff77018062d83d5f276279c0eea41960ed6e4199d4ce7ac51fcde4ea4a4755d09f621723388" as WalletToken;
 
 describe("user type", () => {
   /*test case: extract User info from Spid user*/
   it("should get a user from SpidUser with toUser", async () => {
     // extract User from Spiduser
-    const userData = toAppUser(mockedSpidUser, mockToken);
+    const userData = toAppUser(
+      mockedSpidUser,
+      mockSessionToken,
+      mockWalletToken
+    );
 
-    expect(userData.token).toHaveLength(SESSION_TOKEN_LENGTH_STRING);
+    expect(userData.session_token).toHaveLength(SESSION_TOKEN_LENGTH_STRING);
     expect(userData.fiscal_code).toBe(mockedSpidUser.fiscalNumber);
     expect(userData.created_at).toBeDefined();
   });
@@ -117,7 +123,7 @@ describe("user type", () => {
     if (isRight(userDataOK)) {
       expect(userDataOK._tag).toBe("Right");
 
-      expect(userDataOK.value.token).toBe(mockedUser.token);
+      expect(userDataOK.value.session_token).toBe(mockedUser.session_token);
       expect(userDataOK.value.fiscal_code).toBe(mockedUser.fiscal_code);
       expect(userDataOK.value).toEqual(mockedUser);
 
