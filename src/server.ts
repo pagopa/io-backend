@@ -3,6 +3,7 @@
  */
 
 import * as http from "http";
+import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as winston from "winston";
@@ -20,6 +21,17 @@ const allowPagoPAIPSourceRange = container.resolve<CIDR>(
 
 const app = newApp(env, allowNotifyIPSourceRange, allowPagoPAIPSourceRange);
 
-const server = http.createServer(app).listen(port, () => {
-  winston.info("Listening on port %d", server.address().port);
-});
+// In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
+// Kubernetes so the proxy has to run on HTTPS to behave correctly.
+if (env === NodeEnvironmentEnum.DEVELOPMENT) {
+  const samlKey = container.resolve<string>("samlKey");
+  const samlCert = container.resolve<string>("samlCert");
+  const options = { key: samlKey, cert: samlCert };
+  const server = https.createServer(options, app).listen(443, () => {
+    winston.info("Listening on port %d", server.address().port);
+  });
+} else {
+  const server = http.createServer(app).listen(port, () => {
+    winston.info("Listening on port %d", server.address().port);
+  });
+}

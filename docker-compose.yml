@@ -7,9 +7,9 @@ services:
     environment:
       - NODE_ENV=dev
     expose:
-      - "80"
+      - "443"
     ports:
-      - "80:80"
+      - "443:443"
     image: node:8.9.4-alpine
     volumes:
       - ".:/usr/src/app:delegated"

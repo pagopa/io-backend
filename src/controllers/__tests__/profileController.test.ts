@@ -16,6 +16,7 @@ import {
 } from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
 
@@ -58,9 +59,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  session_token: "123hexToken" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "123hexToken"
+  wallet_token: "123hexToken" as WalletToken
 };
 
 // mock for upsert user (Extended Profile)
