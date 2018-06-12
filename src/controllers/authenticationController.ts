@@ -20,13 +20,10 @@ import {
   ResponseSuccessXml
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
-import {
-  ISessionStorage,
-  SessionToken,
-  WalletToken
-} from "../services/ISessionStorage";
+import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { PublicSession } from "../types/api/PublicSession";
+import { SessionToken, WalletToken } from "../types/token";
 import {
   extractUserFromRequest,
   toAppUser,

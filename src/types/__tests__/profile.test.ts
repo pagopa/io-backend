@@ -4,7 +4,6 @@ import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
@@ -21,6 +20,7 @@ import {
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
 } from "../profile";
+import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;

@@ -1,9 +1,9 @@
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
-import { SessionToken, WalletToken } from "../ISessionStorage";
 import MessageService from "../messagesService";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;

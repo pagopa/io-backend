@@ -1,13 +1,13 @@
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import NotificationService from "../../services/notificationService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { InstallationID } from "../../types/api/InstallationID";
 import { PlatformEnum } from "../../types/api/Platform";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 

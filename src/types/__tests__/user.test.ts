@@ -3,11 +3,11 @@
 import { Either, isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { SpidLevelEnum } from "../api/SpidLevel";
 import { Issuer } from "../issuer";
+import { SessionToken, WalletToken } from "../token";
 import {
   extractUserFromJson,
   extractUserFromRequest,

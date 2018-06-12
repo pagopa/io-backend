@@ -8,12 +8,12 @@ import { Either, left } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import * as winston from "winston";
-import { SessionToken, WalletToken } from "../services/ISessionStorage";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
+import { SessionToken, WalletToken } from "./token";
 
 // required attributes
 export const User = t.interface({

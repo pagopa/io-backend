@@ -6,14 +6,9 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
 import * as winston from "winston";
+import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
-import {
-  ISessionState,
-  ISessionStorage,
-  Session,
-  SessionToken,
-  WalletToken
-} from "./ISessionStorage";
+import { ISessionState, ISessionStorage, Session } from "./ISessionStorage";
 
 const sessionMappingKey = "mapping_session_wallet_tokens";
 

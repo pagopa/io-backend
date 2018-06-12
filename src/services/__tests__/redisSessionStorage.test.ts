@@ -9,8 +9,8 @@ import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
-import { SessionToken, WalletToken } from "../ISessionStorage";
 import RedisSessionStorage from "../redisSessionStorage";
 
 const aTokenDurationSecs = 3600;

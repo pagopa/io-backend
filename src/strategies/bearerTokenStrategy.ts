@@ -5,11 +5,8 @@
 import { Either } from "fp-ts/lib/Either";
 import * as passport from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
-import {
-  ISessionState,
-  ISessionStorage,
-  SessionToken
-} from "../services/ISessionStorage";
+import { ISessionState, ISessionStorage } from "../services/ISessionStorage";
+import { SessionToken } from "../types/token";
 
 const bearerTokenStrategy = () => {
   return new passport.Strategy((token, done) => {

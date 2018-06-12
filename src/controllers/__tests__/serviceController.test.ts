@@ -5,7 +5,6 @@ import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
-import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import MessagesService from "../../services/messagesService";
 import { DepartmentName } from "../../types/api/DepartmentName";
 import { EmailAddress } from "../../types/api/EmailAddress";
@@ -14,6 +13,7 @@ import { OrganizationName } from "../../types/api/OrganizationName";
 import { ServiceName } from "../../types/api/ServiceName";
 import { ServicePublic } from "../../types/api/ServicePublic";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ServicesController from "../servicesController";
 

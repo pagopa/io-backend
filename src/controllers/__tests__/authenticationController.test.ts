@@ -10,13 +10,13 @@ import * as lolex from "lolex";
 import * as redis from "redis";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
 

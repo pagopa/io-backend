@@ -4,7 +4,6 @@ import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
-import { SessionToken, WalletToken } from "../../services/ISessionStorage";
 import ProfileService from "../../services/profileService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
@@ -16,6 +15,7 @@ import {
 } from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { ExtendedProfile } from "../../types/api_client/extendedProfile";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
 
