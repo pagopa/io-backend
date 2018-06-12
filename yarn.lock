@@ -2023,9 +2023,9 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
-fp-ts@^1.0.0, fp-ts@^1.6.0, fp-ts@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.6.1.tgz#83526f1d173387e5f686c57652f5b5fc580e6d1e"
+fp-ts@^1.0.0, fp-ts@^1.6.0, fp-ts@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.6.2.tgz#21f3675262d35b507b6e854f68965979e125ff77"
 
 fragment-cache@^0.2.1:
   version "0.2.1"
