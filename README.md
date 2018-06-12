@@ -74,7 +74,7 @@ All API requests sent by the client to the backend must have an `Authorization: 
 token obtained from the SPID authentication process. The token is used to retrieve the User object from the
 `SessionStorage` service.
 
-The code that manage this flow are in the `src/strategies/bearerTokenStrategy.js` file.
+The code that manage this flow are in the `src/strategies/bearerSessionTokenStrategy.js` file.
 
 ## How to run the application
 

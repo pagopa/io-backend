@@ -12,7 +12,7 @@ const bearerTokenStrategy = () => {
   return new passport.Strategy((token, done) => {
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
-    sessionStorage.get(token as SessionToken).then(
+    sessionStorage.getBySessionToken(token as SessionToken).then(
       (errorOrSessionState: Either<Error, ISessionState>) => {
         errorOrSessionState.fold(
           () => done(undefined, false),

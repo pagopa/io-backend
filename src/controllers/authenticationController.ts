@@ -139,7 +139,9 @@ export default class AuthenticationController {
 
     // The token is present, look for a session.
     const sessionToken = maybeToken.value;
-    const errorOrSession = await this.sessionStorage.get(sessionToken);
+    const errorOrSession = await this.sessionStorage.getBySessionToken(
+      sessionToken
+    );
     if (isLeft(errorOrSession)) {
       // Previous token not found.
       return ResponseErrorNotFound("Session not found", "");

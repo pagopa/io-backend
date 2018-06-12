@@ -221,7 +221,7 @@ describe("RedisSessionStorage#get", () => {
       callback(undefined, undefined);
     });
 
-    const response = await sessionStorage.get(
+    const response = await sessionStorage.getBySessionToken(
       "inexistent token" as SessionToken
     );
 
@@ -240,7 +240,9 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(aValidUser.session_token);
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
@@ -261,7 +263,9 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(aValidUser.session_token);
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);
@@ -281,7 +285,9 @@ describe("RedisSessionStorage#get", () => {
       });
     });
 
-    const response = await sessionStorage.get(aValidUser.session_token);
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
 
     expect(mockHgetall).toHaveBeenCalledTimes(1);
     expect(mockHgetall.mock.calls[0][0]).toBe(aValidUser.session_token);

@@ -31,9 +31,14 @@ export interface ISessionStorage {
   set(user: User, timestamp: number): Promise<Either<Error, boolean>>;
 
   /**
-   * Retrieves a value from the cache.
+   * Retrieves a value from the cache using the session token.
    */
-  get(token: SessionToken): Promise<Either<Error, ISessionState>>;
+  getBySessionToken(token: SessionToken): Promise<Either<Error, ISessionState>>;
+
+  /**
+   * Retrieves a value from the cache using the wallet token.
+   */
+  getByWalletToken(token: WalletToken): Promise<Either<Error, ISessionState>>;
 
   /**
    * Refresh an existing token.

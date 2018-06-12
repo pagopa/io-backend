@@ -152,14 +152,16 @@ const anErrorResponse = {
 };
 
 const mockSet = jest.fn();
-const mockGet = jest.fn();
+const mockGetBySessionToken = jest.fn();
+const mockGetByWalletToken = jest.fn();
 const mockDel = jest.fn();
 const mockRefresh = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
-      get: mockGet,
+      getBySessionToken: mockGetBySessionToken,
+      getByWalletToken: mockGetByWalletToken,
       refresh: mockRefresh,
       set: mockSet
     }))
@@ -423,7 +425,7 @@ describe("AuthenticationController#getSessionState", () => {
       .mockReturnValueOnce(mockRefreshedSessionToken)
       .mockReturnValueOnce(mockRefreshedWalletToken);
 
-    mockGet.mockReturnValue(
+    mockGetBySessionToken.mockReturnValue(
       Promise.resolve(
         right({
           expireAt: new Date(anExpiredTimestamp),
@@ -450,7 +452,7 @@ describe("AuthenticationController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
+    expect(mockGetBySessionToken).toHaveBeenCalledWith(mockSessionToken);
     expect(mockRefresh).toHaveBeenCalledWith(
       mockSessionToken,
       mockWalletToken,
@@ -478,7 +480,7 @@ describe("AuthenticationController#getSessionState", () => {
     const aNotExpiredTimestamp =
       theCurrentTimestampMillis + aTimeLongerThanDuration;
 
-    mockGet.mockReturnValue(
+    mockGetBySessionToken.mockReturnValue(
       Promise.resolve(
         right({
           expireAt: new Date(aNotExpiredTimestamp),
@@ -491,7 +493,7 @@ describe("AuthenticationController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
+    expect(mockGetBySessionToken).toHaveBeenCalledWith(mockSessionToken);
     expect(mockGetNewToken).not.toHaveBeenCalled();
     expect(mockRefresh).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
@@ -560,7 +562,7 @@ describe("AuthenticationController#getSessionState", () => {
     req.headers = {};
     req.headers.authorization = "Bearer " + mockSessionToken;
 
-    mockGet.mockReturnValue(
+    mockGetBySessionToken.mockReturnValue(
       Promise.resolve(left(new Error("Session not found")))
     );
 
@@ -593,7 +595,7 @@ describe("AuthenticationController#getSessionState", () => {
       .mockReturnValueOnce(mockRefreshedSessionToken)
       .mockReturnValueOnce(mockRefreshedWalletToken);
 
-    mockGet.mockReturnValue(
+    mockGetBySessionToken.mockReturnValue(
       Promise.resolve(
         right({
           expireAt: new Date(anExpiredTimestamp),
@@ -610,7 +612,7 @@ describe("AuthenticationController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
+    expect(mockGetBySessionToken).toHaveBeenCalledWith(mockSessionToken);
     expect(mockRefresh).toHaveBeenCalledWith(
       mockSessionToken,
       mockWalletToken,

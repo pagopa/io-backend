@@ -80,8 +80,37 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public async get(token: SessionToken): Promise<Either<Error, ISessionState>> {
-    const errorOrSession = await this.getSession(token);
+  public async getBySessionToken(
+    token: SessionToken
+  ): Promise<Either<Error, ISessionState>> {
+    const errorOrSession = await this.loadSessionBySessionToken(token);
+
+    if (isLeft(errorOrSession)) {
+      const error = errorOrSession.value;
+      return left(error);
+    }
+
+    const session = errorOrSession.value;
+    const user = session.user;
+
+    // Check if the token has expired. We don't remove expired token
+    // because a client can later refresh the session.
+    const expireAtEpochMs =
+      (session.timestampEpochMillis as number) + this.tokenDurationSecs * 1000;
+
+    return right<Error, ISessionState>({
+      expireAt: new Date(expireAtEpochMs),
+      user
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getByWalletToken(
+    token: WalletToken
+  ): Promise<Either<Error, ISessionState>> {
+    const errorOrSession = await this.loadSessionByWalletToken(token);
 
     if (isLeft(errorOrSession)) {
       const error = errorOrSession.value;
@@ -111,7 +140,7 @@ export default class RedisSessionStorage implements ISessionStorage {
     newSessionToken: SessionToken,
     newWalletToken: WalletToken
   ): Promise<Either<Error, ISessionState>> {
-    const errorOrSession = await this.getSession(sessionToken);
+    const errorOrSession = await this.loadSessionBySessionToken(sessionToken);
 
     if (isLeft(errorOrSession)) {
       const error = errorOrSession.value;
@@ -211,7 +240,9 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * Return a Session for this token.
    */
-  private getSession(token: SessionToken): Promise<Either<Error, Session>> {
+  private loadSessionBySessionToken(
+    token: SessionToken
+  ): Promise<Either<Error, Session>> {
     return new Promise(resolve => {
       this.redisClient.hgetall(token, (err, value) => {
         if (err) {
@@ -239,6 +270,24 @@ export default class RedisSessionStorage implements ISessionStorage {
         } catch (error) {
           return resolve(this.sessionNotFoundOrUnableToDecodeUser<Session>());
         }
+      });
+    });
+  }
+
+  /**
+   * Return a Session for this token.
+   */
+  private loadSessionByWalletToken(
+    token: WalletToken
+  ): Promise<Either<Error, Session>> {
+    return new Promise(resolve => {
+      this.redisClient.hget(sessionMappingKey, token, (err, value) => {
+        if (err) {
+          // Client returns an error.
+          return resolve(left<Error, Session>(err));
+        }
+
+        return this.loadSessionBySessionToken(value as SessionToken);
       });
     });
   }
