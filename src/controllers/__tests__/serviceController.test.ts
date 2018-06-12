@@ -2,6 +2,7 @@
 
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -26,7 +27,7 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const proxyService: ServicePublic = {
   department_name: "Department name" as DepartmentName,
   organization_name: "Organization name" as OrganizationName,
-  service_id: "5a563817fcc896087002ea46c49a",
+  service_id: "5a563817fcc896087002ea46c49a" as NonEmptyString,
   service_name: "Service name" as ServiceName,
   version: 42 as NonNegativeNumber
 };
