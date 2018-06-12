@@ -8,6 +8,7 @@ import MessagesService from "../../services/messagesService";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import MessagesController from "../messagesController";
 
@@ -50,9 +51,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  session_token: "123hexToken" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "123hexToken"
+  wallet_token: "123hexToken" as WalletToken
 };
 
 const anErrorResponse = {

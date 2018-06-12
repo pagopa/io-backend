@@ -6,16 +6,24 @@ import { Either } from "fp-ts/lib/Either";
 import * as passport from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
 import { ISessionState, ISessionStorage } from "../services/ISessionStorage";
+import { SessionToken } from "../types/token";
 
 const bearerTokenStrategy = () => {
   return new passport.Strategy((token, done) => {
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
-    sessionStorage.get(token).then(
+    sessionStorage.get(token as SessionToken).then(
       (errorOrSessionState: Either<Error, ISessionState>) => {
         errorOrSessionState.fold(
           () => done(undefined, false),
-          sessionState => done(undefined, sessionState.user)
+          sessionState => {
+            // Check if the session is expired.
+            if (sessionState.expireAt.getTime() < Date.now()) {
+              done(undefined, false);
+            } else {
+              done(undefined, sessionState.user);
+            }
+          }
         );
       },
       () => {
