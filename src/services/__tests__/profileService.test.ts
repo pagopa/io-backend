@@ -1,6 +1,7 @@
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
@@ -87,9 +88,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: aValidSPIDEmail,
   sessionIndex: "sessionIndex",
+  session_token: "HexToKen" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "HexToKen"
+  wallet_token: "HexToKen" as WalletToken
 };
 
 const mockGetProfile = jest.fn();

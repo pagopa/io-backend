@@ -20,6 +20,7 @@ import {
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
 } from "../profile";
+import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -51,9 +52,10 @@ const mockedUser: User = {
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
+  session_token: "HexToKen" as SessionToken,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
-  token: "HexToKen"
+  wallet_token: "HexToKen" as WalletToken
 };
 
 // mock for a valid ExtendedProfile profile
