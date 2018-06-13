@@ -6,6 +6,7 @@ import { InstallationID } from "../../types/api/InstallationID";
 import { MessageBodyMarkdown } from "../../types/api/MessageBodyMarkdown";
 import { MessageSubject } from "../../types/api/MessageSubject";
 import { PlatformEnum } from "../../types/api/Platform";
+import { SuccessResponse } from "../../types/notification";
 import NotificationService from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -100,7 +101,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" } as SuccessResponse
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       anAppleInstallation,
@@ -124,7 +125,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" } as SuccessResponse
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       aGoogleInstallation,
@@ -173,7 +174,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" } as SuccessResponse
     });
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,

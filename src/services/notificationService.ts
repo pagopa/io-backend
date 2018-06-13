@@ -19,6 +19,7 @@ import { PlatformEnum } from "../types/api/Platform";
 import {
   IInstallation,
   INotificationTemplate,
+  SuccessResponse,
   toFiscalCodeHash
 } from "../types/notification";
 
@@ -50,7 +51,7 @@ export default class NotificationService {
 
   public notify(
     notification: Notification
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<Object>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
@@ -76,7 +77,7 @@ export default class NotificationService {
     fiscalCode: FiscalCode,
     installationID: InstallationID,
     installation: Installation
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<Object>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
@@ -111,7 +112,7 @@ export default class NotificationService {
   private buildResponse(
     error: Error | null,
     _: Response
-  ): IResponseErrorInternal | IResponseSuccessJson<Object> {
+  ): IResponseErrorInternal | IResponseSuccessJson<SuccessResponse> {
     if (error !== null) {
       return ResponseErrorInternal(error.message);
     }
