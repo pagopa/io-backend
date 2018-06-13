@@ -50,7 +50,7 @@ export default class NotificationService {
 
   public notify(
     notification: Notification
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<Object>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
@@ -76,7 +76,7 @@ export default class NotificationService {
     fiscalCode: FiscalCode,
     installationID: InstallationID,
     installation: Installation
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<Object>> {
     const notificationHubService = azure.createNotificationHubService(
       this.hubName,
       this.endpointOrConnectionString
@@ -111,11 +111,11 @@ export default class NotificationService {
   private buildResponse(
     error: Error | null,
     _: Response
-  ): IResponseErrorInternal | IResponseSuccessJson<string> {
+  ): IResponseErrorInternal | IResponseSuccessJson<Object> {
     if (error !== null) {
       return ResponseErrorInternal(error.message);
     }
 
-    return ResponseSuccessJson("ok");
+    return ResponseSuccessJson({ message: "ok" });
   }
 }
