@@ -3,6 +3,7 @@
  * validate and convert type to and from it.
  */
 
+import { ServiceId } from "./api/ServiceId";
 import { ServicePublic as proxyServicePublic } from "./api/ServicePublic";
 import { ServicePublic as apiServicePublic } from "./api_client/servicePublic";
 
@@ -17,7 +18,8 @@ export function toAppService(from: apiServicePublic): proxyServicePublic {
   return {
     department_name: from.departmentName,
     organization_name: from.organizationName,
-    service_id: from.serviceId,
+    // tslint:disable-next-line:no-useless-cast
+    service_id: from.serviceId as ServiceId,
     service_name: from.serviceName,
     version: from.version
   };
