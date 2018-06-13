@@ -28,7 +28,7 @@ importUser(users, (result) => {
     process.stdout.write("\b\b" + ("00" + (+i + 1)).slice(-2) + "\n");
   } else {
     process.stdout.write("Error\n");
-    process.stdout.write(result + "\n");
+    process.stdout.write(JSON.stringify(result) + "\n");
   }
 });
 

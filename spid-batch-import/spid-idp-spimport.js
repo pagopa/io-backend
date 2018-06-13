@@ -27,7 +27,7 @@ importSp(data, (result) => {
     process.stdout.write("Service Provider successfully imported\n");
   } else {
     process.stdout.write("Error\n");
-    process.stdout.write(result + "\n");
+    process.stdout.write(JSON.stringify(result) + "\n");
   }
 });
 
