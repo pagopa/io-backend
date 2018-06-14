@@ -1,7 +1,10 @@
 import { FiscalCode } from "../api/FiscalCode";
 import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
 import { MessageContent } from "../api/MessageContent";
-import { MessageResponseNotificationStatus } from "../api/MessageResponseNotificationStatus";
+import {
+  emailEnum,
+  MessageResponseNotificationStatus
+} from "../api/MessageResponseNotificationStatus";
 import { MessageSubject } from "../api/MessageSubject";
 import { MessageWithContent } from "../api/MessageWithContent";
 import { MessageWithoutContent } from "../api/MessageWithoutContent";
@@ -37,7 +40,7 @@ const aMessage: CreatedMessageWithContent = {
 };
 // mock for a valid NotificationStatus
 const aNotification: MessageResponseNotificationStatus = {
-  email: "QUEUED"
+  email: "QUEUED" as emailEnum
 };
 // mock for a valid MessageResponseWithContent
 const mockedMessageResponseWithContent: MessageResponseWithContent = {
