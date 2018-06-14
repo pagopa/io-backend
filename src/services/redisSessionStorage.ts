@@ -287,7 +287,19 @@ export default class RedisSessionStorage implements ISessionStorage {
           return resolve(left<Error, Session>(err));
         }
 
-        return this.loadSessionBySessionToken(value as SessionToken);
+        this.loadSessionBySessionToken(value as SessionToken).then(
+          (errorOrSession: Either<Error, Session>) => {
+            errorOrSession.fold(
+              error => resolve(left<Error, Session>(error)),
+              session => {
+                resolve(right<Error, Session>(session));
+              }
+            );
+          },
+          error => {
+            resolve(left<Error, Session>(error));
+          }
+        );
       });
     });
   }
