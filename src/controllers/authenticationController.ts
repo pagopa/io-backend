@@ -59,9 +59,8 @@ export default class AuthenticationController {
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
     const walletToken = this.tokenService.getNewToken() as WalletToken;
     const user = toAppUser(spidUser, sessionToken, walletToken);
-    const timestamp = Date.now();
 
-    const errorOrResponse = await this.sessionStorage.set(user, timestamp);
+    const errorOrResponse = await this.sessionStorage.set(user);
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
@@ -141,44 +140,16 @@ export default class AuthenticationController {
     const sessionToken = maybeToken.value;
     const errorOrSession = await this.sessionStorage.get(sessionToken);
     if (isLeft(errorOrSession)) {
-      // Previous token not found.
+      // Token not found.
       return ResponseErrorNotFound("Session not found", "");
     }
 
-    const session = errorOrSession.value;
-
-    // Check if the session is expired, in that case we need to refresh the tokens.
-    if (session.expireAt.getTime() < Date.now()) {
-      const newSessionToken = this.tokenService.getNewToken() as SessionToken;
-      const newWalletToken = this.tokenService.getNewToken() as WalletToken;
-      const errorOrRefreshedSession = await this.sessionStorage.refresh(
-        session.user.session_token,
-        session.user.wallet_token,
-        newSessionToken,
-        newWalletToken
-      );
-
-      if (isLeft(errorOrRefreshedSession)) {
-        // Unable to refresh token or session not found.
-        const error = errorOrRefreshedSession.value;
-        return ResponseErrorInternal(error.message);
-      }
-
-      // Return the new session information.
-      const refreshedSession = errorOrRefreshedSession.value;
-      return ResponseSuccessJson({
-        expireAt: new Date(refreshedSession.expireAt),
-        newToken: refreshedSession.newToken,
-        spidLevel: refreshedSession.user.spid_level,
-        walletToken: refreshedSession.user.wallet_token
-      });
-    }
+    const user = errorOrSession.value;
 
     // Return the actual session information.
     return ResponseSuccessJson({
-      expireAt: new Date(session.expireAt),
-      spidLevel: session.user.spid_level,
-      walletToken: session.user.wallet_token
+      spidLevel: user.spid_level,
+      walletToken: user.wallet_token
     });
   }
 

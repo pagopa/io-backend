@@ -5,12 +5,14 @@
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
+import { isNumber } from "util";
 import * as winston from "winston";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
-import { ISessionState, ISessionStorage, Session } from "./ISessionStorage";
+import { ISessionStorage } from "./ISessionStorage";
 
-const sessionMappingKey = "mapping_session_wallet_tokens";
+const sessionKeyPrefix = "SESSION-";
+const walletKeyPrefix = "WALLET-";
 
 export default class RedisSessionStorage implements ISessionStorage {
   constructor(
@@ -21,43 +23,31 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public async set(
-    user: User,
-    timestampEpochMillis: number
-  ): Promise<Either<Error, boolean>> {
-    const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
-      // Set a key to hold the fields value.
-      // @see https://redis.io/commands/hmset
-      this.redisClient.hmset(
-        user.session_token,
-        {
-          timestampEpochMillis,
-          user: JSON.stringify(user)
-        },
-        (err, response) => {
-          if (err) {
-            return resolve(left<Error, boolean>(err));
-          }
+  public async set(user: User): Promise<Either<Error, boolean>> {
+    const timestamp = Date.now();
+    const expireTimestampInMillis = timestamp + this.tokenDurationSecs * 1000;
 
-          resolve(right<Error, boolean>(response));
-        }
+    const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
+      this.redisClient.set(
+        `${sessionKeyPrefix}${user.session_token}`,
+        JSON.stringify(user),
+        "EX",
+        expireTimestampInMillis,
+        (err, response) => resolve(this.singleStringReply(err, response))
       );
     });
 
     const setWalletToken = new Promise<Either<Error, boolean>>(resolve => {
-      // Set a key to hold the mapping between session and wallet tokens.
-      // @see https://redis.io/commands/hmset
-      this.redisClient.hset(
-        sessionMappingKey,
-        user.wallet_token,
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
+      this.redisClient.set(
+        `${walletKeyPrefix}${user.wallet_token}`,
         user.session_token,
-        (err, response) => {
-          if (err) {
-            return resolve(left<Error, boolean>(err));
-          }
-
-          resolve(right<Error, boolean>(response === 1));
-        }
+        "EX",
+        expireTimestampInMillis,
+        (err, response) => resolve(this.singleStringReply(err, response))
       );
     });
 
@@ -80,7 +70,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public async get(token: SessionToken): Promise<Either<Error, ISessionState>> {
+  public async get(token: SessionToken): Promise<Either<Error, User>> {
     const errorOrSession = await this.getSession(token);
 
     if (isLeft(errorOrSession)) {
@@ -88,72 +78,9 @@ export default class RedisSessionStorage implements ISessionStorage {
       return left(error);
     }
 
-    const session = errorOrSession.value;
-    const user = session.user;
+    const user = errorOrSession.value;
 
-    // Check if the token has expired. We don't remove expired token
-    // because a client can later refresh the session.
-    const expireAtEpochMs =
-      (session.timestampEpochMillis as number) + this.tokenDurationSecs * 1000;
-
-    return right<Error, ISessionState>({
-      expireAt: new Date(expireAtEpochMs),
-      user
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async refresh(
-    sessionToken: SessionToken,
-    walletToken: WalletToken,
-    newSessionToken: SessionToken,
-    newWalletToken: WalletToken
-  ): Promise<Either<Error, ISessionState>> {
-    const errorOrSession = await this.getSession(sessionToken);
-
-    if (isLeft(errorOrSession)) {
-      const error = errorOrSession.value;
-      return left(error);
-    }
-
-    const session = errorOrSession.value;
-    const user = session.user;
-
-    // Update tokens in the user object.
-    const newUser = {
-      ...user,
-      session_token: newSessionToken,
-      wallet_token: newWalletToken
-    };
-
-    // Set a session with the new token, delete the old one.
-    const timestamp = Date.now();
-    const [setResult, delResult] = await Promise.all([
-      this.set(newUser, timestamp),
-      this.del(sessionToken, walletToken)
-    ]);
-
-    if (isLeft(setResult) || isLeft(delResult)) {
-      return left<Error, ISessionState>(
-        new Error("Error refreshing the token")
-      );
-    }
-
-    if (!setResult.value || !delResult.value) {
-      return left<Error, ISessionState>(
-        new Error("Error refreshing the token")
-      );
-    }
-
-    const expireAtEpochMs = timestamp + this.tokenDurationSecs * 1000;
-
-    return right<Error, ISessionState>({
-      expireAt: new Date(expireAtEpochMs),
-      newToken: newSessionToken,
-      user: newUser
-    });
+    return right(user);
   }
 
   /**
@@ -166,30 +93,19 @@ export default class RedisSessionStorage implements ISessionStorage {
     const deleteSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
-      // tslint:disable-next-line:no-identical-functions
-      this.redisClient.del(sessionToken, (err, response) => {
-        if (err) {
-          return resolve(left<Error, boolean>(err));
-        }
-
-        // del return 1 on success, 0 otherwise.
-        resolve(right<Error, boolean>(response === 1));
-      });
+      this.redisClient.del(
+        `${sessionKeyPrefix}${sessionToken}`,
+        (err, response) => resolve(this.integerReply(err, response))
+      );
     });
 
     const deleteWalletToken = new Promise<Either<Error, boolean>>(resolve => {
-      // Removes the specified fields from the hash stored at key. Specified fields that do not exist within this hash
-      // are ignored.
-      // @see https://redis.io/commands/hdel
-      this.redisClient.hdel(sessionMappingKey, walletToken, (err, response) => {
-        if (err) {
-          return resolve(left<Error, boolean>(err));
-        }
-
-        // del return the number of fields that were removed from the hash, not including specified but non existing
-        // fields.
-        resolve(right<Error, boolean>(response >= 1));
-      });
+      // Remove the specified key. A key is ignored if it does not exist.
+      // @see https://redis.io/commands/del
+      this.redisClient.del(
+        `${walletKeyPrefix}${walletToken}`,
+        (err, response) => resolve(this.integerReply(err, response))
+      );
     });
 
     const [
@@ -211,44 +127,71 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * Return a Session for this token.
    */
-  private getSession(token: SessionToken): Promise<Either<Error, Session>> {
+  private getSession(token: SessionToken): Promise<Either<Error, User>> {
     return new Promise(resolve => {
-      this.redisClient.hgetall(token, (err, value) => {
+      this.redisClient.get(`${sessionKeyPrefix}${token}`, (err, value) => {
         if (err) {
           // Client returns an error.
-          return resolve(left<Error, Session>(err));
+          return resolve(left<Error, User>(err));
         }
 
-        try {
-          const errorOrDeserializedUser = JSON.parse(value.user);
+        if (value === undefined) {
+          return resolve(left<Error, User>(new Error("Session not found")));
+        }
 
-          const errorOrSession = Session.decode({
-            timestampEpochMillis: value.timestampEpochMillis,
-            user: errorOrDeserializedUser
-          });
-          if (isLeft(errorOrSession)) {
+        // Try-catch is needed because parse() may throw an exception.
+        try {
+          const userPayload = JSON.parse(value);
+          const errorOrDeserializedUser = User.decode(userPayload);
+
+          if (isLeft(errorOrDeserializedUser)) {
             winston.error(
-              "Session not found or unable to decode the user: %s",
-              ReadableReporter.report(errorOrSession)
+              "Unable to decode the user: %s",
+              ReadableReporter.report(errorOrDeserializedUser)
             );
-            return resolve(this.sessionNotFoundOrUnableToDecodeUser<Session>());
+            return resolve(
+              left<Error, User>(new Error("Unable to decode the user"))
+            );
           }
 
-          const session = errorOrSession.value;
-          return resolve(right<Error, Session>(session));
-        } catch (error) {
-          return resolve(this.sessionNotFoundOrUnableToDecodeUser<Session>());
+          const user = errorOrDeserializedUser.value;
+          return resolve(right<Error, User>(user));
+        } catch (err) {
+          return resolve(
+            left<Error, User>(new Error("Unable to parse the user json"))
+          );
         }
       });
     });
   }
 
   /**
-   * Return a Session not found error.
+   * Parse the a Redis single string reply.
+   *
+   * @see https://redis.io/topics/protocol#simple-string-reply.
    */
-  private sessionNotFoundOrUnableToDecodeUser<T>(): Either<Error, T> {
-    return left<Error, T>(
-      new Error("Session not found or unable to decode the user")
-    );
+  private singleStringReply(
+    err: Error | null,
+    reply: "OK" | undefined
+  ): Either<Error, boolean> {
+    if (err) {
+      return left<Error, boolean>(err);
+    }
+
+    return right<Error, boolean>(reply === "OK");
+  }
+
+  /**
+   * Parse the a Redis integer reply.
+   *
+   * @see https://redis.io/topics/protocol#integer-reply
+   */
+  // tslint:disable-next-line:no-any
+  private integerReply(err: Error | null, reply: any): Either<Error, boolean> {
+    if (err) {
+      return left<Error, boolean>(err);
+    }
+
+    return right<Error, boolean>(isNumber(reply));
   }
 }

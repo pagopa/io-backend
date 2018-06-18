@@ -424,16 +424,11 @@ definitions:
     title: User session data
     description: Describe the current session of an authenticated user.
     properties:
-      expireAt:
-        $ref: '#/definitions/Timestamp'
-      newToken:
-        type: string
       spidLevel:
          $ref: '#/definitions/SpidLevel'
       walletToken:
         type: string
     required:
-      - expireAt
       - spidLevel
       - walletToken
   InstallationID:

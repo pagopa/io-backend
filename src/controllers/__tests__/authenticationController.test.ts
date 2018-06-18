@@ -81,7 +81,6 @@ const samlAttributeConsumingServiceIndex = 0;
 // user constant
 const aTimestamp = 1518010929530;
 
-const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -93,12 +92,8 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 // authentication constant
 const mockSessionToken =
   "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
-const mockRefreshedSessionToken =
-  "ac83a77d6e4c19a02b50b8abf1223b8d858f6aaf23ba286898ad5fe5e24e8893b2b96c3a4c575bff285dac2481580737";
 const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
-const mockRefreshedWalletToken =
-  "d9658f7e21a0891c596eff2baf2e077888016bb538dc2644067065ee5a430f5b858190afb19a85067ce99a009749a878";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -154,13 +149,11 @@ const anErrorResponse = {
 const mockSet = jest.fn();
 const mockGet = jest.fn();
 const mockDel = jest.fn();
-const mockRefresh = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
       get: mockGet,
-      refresh: mockRefresh,
       set: mockSet
     }))
   };
@@ -237,7 +230,7 @@ describe("AuthenticationController#acs", () => {
       "/profile.html?token=" + mockSessionToken,
       301
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser, aTimestamp);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser);
   });
 
   it("should fail if userPayload is invalid", async () => {
@@ -407,65 +400,6 @@ describe("AuthenticationController#logout", () => {
 });
 
 describe("AuthenticationController#getSessionState", () => {
-  it("returns correct session state for expired session", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.headers = {};
-    req.headers.authorization = "Bearer " + mockSessionToken;
-
-    const aTokenDurationMillis = aTokenDurationSecs * 1000;
-    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
-    const anExpiredTimestamp =
-      theCurrentTimestampMillis - aTimeLongerThanDuration;
-
-    mockGetNewToken
-      .mockReturnValueOnce(mockRefreshedSessionToken)
-      .mockReturnValueOnce(mockRefreshedWalletToken);
-
-    mockGet.mockReturnValue(
-      Promise.resolve(
-        right({
-          expireAt: new Date(anExpiredTimestamp),
-          newToken: mockSessionToken,
-          user: mockedUser
-        })
-      )
-    );
-    mockRefresh.mockReturnValue(
-      Promise.resolve(
-        right({
-          expireAt: new Date(aTimestamp),
-          newToken: mockRefreshedSessionToken,
-          user: {
-            ...mockedUser,
-            session_token: mockRefreshedSessionToken,
-            wallet_token: mockRefreshedWalletToken
-          }
-        })
-      )
-    );
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
-    expect(mockRefresh).toHaveBeenCalledWith(
-      mockSessionToken,
-      mockWalletToken,
-      mockRefreshedSessionToken,
-      mockRefreshedWalletToken
-    );
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      expireAt: new Date(aTimestamp),
-      newToken: mockRefreshedSessionToken,
-      spidLevel: aValidSpidLevel,
-      walletToken: mockRefreshedWalletToken
-    });
-  });
-
   it("returns correct session state for valid session", async () => {
     const res = mockRes();
     const req = mockReq();
@@ -473,19 +407,7 @@ describe("AuthenticationController#getSessionState", () => {
     req.headers = {};
     req.headers.authorization = "Bearer " + mockSessionToken;
 
-    const aTokenDurationMillis = aTokenDurationSecs * 1000;
-    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
-    const aNotExpiredTimestamp =
-      theCurrentTimestampMillis + aTimeLongerThanDuration;
-
-    mockGet.mockReturnValue(
-      Promise.resolve(
-        right({
-          expireAt: new Date(aNotExpiredTimestamp),
-          user: mockedUser
-        })
-      )
-    );
+    mockGet.mockReturnValue(Promise.resolve(right(mockedUser)));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -493,10 +415,8 @@ describe("AuthenticationController#getSessionState", () => {
     expect(controller).toBeTruthy();
     expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
     expect(mockGetNewToken).not.toHaveBeenCalled();
-    expect(mockRefresh).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      expireAt: new Date(aNotExpiredTimestamp),
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token
     });
@@ -574,53 +494,6 @@ describe("AuthenticationController#getSessionState", () => {
       detail: "",
       status: 404,
       title: "Session not found"
-    });
-  });
-
-  it("should fail if there was error in refreshing the token", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.headers = {};
-    req.headers.authorization = "Bearer " + mockSessionToken;
-
-    const aTokenDurationMillis = aTokenDurationSecs * 1000;
-    const aTimeLongerThanDuration = aTokenDurationMillis + 2000;
-    const anExpiredTimestamp =
-      theCurrentTimestampMillis - aTimeLongerThanDuration;
-
-    mockGetNewToken
-      .mockReturnValueOnce(mockRefreshedSessionToken)
-      .mockReturnValueOnce(mockRefreshedWalletToken);
-
-    mockGet.mockReturnValue(
-      Promise.resolve(
-        right({
-          expireAt: new Date(anExpiredTimestamp),
-          newToken: mockSessionToken,
-          user: mockedUser
-        })
-      )
-    );
-    mockRefresh.mockReturnValue(
-      Promise.resolve(left(new Error("Error refreshing the token")))
-    );
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
-    expect(mockRefresh).toHaveBeenCalledWith(
-      mockSessionToken,
-      mockWalletToken,
-      mockRefreshedSessionToken,
-      mockRefreshedWalletToken
-    );
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "Error refreshing the token"
     });
   });
 });
