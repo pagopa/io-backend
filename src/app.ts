@@ -133,7 +133,10 @@ export function newApp(
   return app;
 }
 
-function registerPagoPARoutes(app: Express, allowPagoPAIPSourceRange: CIDR): void {
+function registerPagoPARoutes(
+  app: Express,
+  allowPagoPAIPSourceRange: CIDR
+): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
   const pagopaController: PagoPAController = container.resolve(
