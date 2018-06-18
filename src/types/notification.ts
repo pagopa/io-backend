@@ -4,7 +4,6 @@
 
 import * as crypto from "crypto";
 import * as t from "io-ts";
-import { string } from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { tag } from "italia-ts-commons/lib/types";
 import { FiscalCode } from "./api/FiscalCode";
@@ -70,7 +69,7 @@ export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
  * Common response message type.
  */
 export const SuccessResponse = t.interface({
-  message: string
+  message: t.string
 });
 
 export type SuccessResponse = t.TypeOf<typeof SuccessResponse>;
