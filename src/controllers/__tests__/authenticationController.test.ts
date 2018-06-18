@@ -404,96 +404,16 @@ describe("AuthenticationController#getSessionState", () => {
     const res = mockRes();
     const req = mockReq();
 
-    req.headers = {};
-    req.headers.authorization = "Bearer " + mockSessionToken;
-
-    mockGet.mockReturnValue(Promise.resolve(right(mockedUser)));
+    req.user = mockedUser;
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGet).toHaveBeenCalledWith(mockSessionToken);
-    expect(mockGetNewToken).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token
-    });
-  });
-
-  it("should fail if no token found in the request", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "No token in the request"
-    });
-  });
-
-  it("should fail if invalid token found in the request, no Bearer string", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.headers = {};
-    req.headers.authorization = "Invalid token";
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "No token in the request"
-    });
-  });
-
-  it("should fail if invalid token found in the request, too much arguments", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.headers = {};
-    req.headers.authorization = "Bearer 123 456";
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "No token in the request"
-    });
-  });
-
-  it("should fail if session not found", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.headers = {};
-    req.headers.authorization = "Bearer " + mockSessionToken;
-
-    mockGet.mockReturnValue(
-      Promise.resolve(left(new Error("Session not found")))
-    );
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "",
-      status: 404,
-      title: "Session not found"
     });
   });
 });

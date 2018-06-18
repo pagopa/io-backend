@@ -6,7 +6,6 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -14,7 +13,6 @@ import {
   IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponsePermanentRedirect,
   ResponseSuccessJson,
   ResponseSuccessXml
@@ -130,21 +128,14 @@ export default class AuthenticationController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PublicSession>
   > {
-    // This controller doesn't have a Passport middleware that checks the Bearer token, we need to check it here.
-    const maybeToken = await this.extractTokenFromRequest(req);
-    if (isNone(maybeToken)) {
-      return ResponseErrorInternal("No token in the request");
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      const error = errorOrUser.value;
+      return ResponseErrorInternal(error.message);
     }
 
-    // The token is present, look for a session.
-    const sessionToken = maybeToken.value;
-    const errorOrSession = await this.sessionStorage.get(sessionToken);
-    if (isLeft(errorOrSession)) {
-      // Token not found.
-      return ResponseErrorNotFound("Session not found", "");
-    }
-
-    const user = errorOrSession.value;
+    const user = errorOrUser.value;
 
     // Return the actual session information.
     return ResponseSuccessJson({
@@ -193,35 +184,6 @@ export default class AuthenticationController {
           return resolve(ResponseErrorInternal(err.message));
         }
       });
-    });
-  }
-
-  /**
-   * Extracts the Bearer token from the authorization header in the request.
-   */
-  private extractTokenFromRequest(
-    req: express.Request
-  ): Promise<Option<SessionToken>> {
-    return new Promise(resolve => {
-      if (
-        req.headers &&
-        req.headers.authorization &&
-        typeof req.headers.authorization === "string"
-      ) {
-        const authorization = req.headers.authorization;
-        const parts = authorization.split(" ");
-        if (parts.length === 2) {
-          const scheme = parts[0];
-          const token = parts[1];
-
-          if (/^Bearer$/i.test(scheme)) {
-            resolve(some(token as SessionToken));
-          } else {
-            resolve(none);
-          }
-        }
-      }
-      resolve(none);
     });
   }
 }

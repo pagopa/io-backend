@@ -2,6 +2,7 @@
 /* tslint:disable:no-duplicate-string */
 /* tslint:disable:no-let */
 /* tslint:disable:no-identical-functions */
+/* tslint:disable:no-null-keyword */
 
 import { left, right } from "fp-ts/lib/Either";
 import * as lolex from "lolex";
@@ -203,7 +204,7 @@ describe("RedisSessionStorage#set", () => {
 describe("RedisSessionStorage#get", () => {
   it("should fail getting a session for an inexistent token", async () => {
     mockGet.mockImplementation((_, callback) => {
-      callback(undefined, undefined);
+      callback(undefined, null);
     });
 
     const response = await sessionStorage.get(
@@ -231,7 +232,7 @@ describe("RedisSessionStorage#get", () => {
 
   it("should return error if the session is expired", async () => {
     mockGet.mockImplementation((_, callback) => {
-      callback(undefined, undefined);
+      callback(undefined, null);
     });
 
     const response = await sessionStorage.get(aValidUser.session_token);

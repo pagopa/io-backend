@@ -24,9 +24,6 @@ export default class RedisSessionStorage implements ISessionStorage {
    * {@inheritDoc}
    */
   public async set(user: User): Promise<Either<Error, boolean>> {
-    const timestamp = Date.now();
-    const expireTimestampInMillis = timestamp + this.tokenDurationSecs * 1000;
-
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
       // @see https://redis.io/commands/set
@@ -34,7 +31,7 @@ export default class RedisSessionStorage implements ISessionStorage {
         `${sessionKeyPrefix}${user.session_token}`,
         JSON.stringify(user),
         "EX",
-        expireTimestampInMillis,
+        this.tokenDurationSecs,
         (err, response) => resolve(this.singleStringReply(err, response))
       );
     });
@@ -46,7 +43,7 @@ export default class RedisSessionStorage implements ISessionStorage {
         `${walletKeyPrefix}${user.wallet_token}`,
         user.session_token,
         "EX",
-        expireTimestampInMillis,
+        this.tokenDurationSecs,
         (err, response) => resolve(this.singleStringReply(err, response))
       );
     });
@@ -135,7 +132,7 @@ export default class RedisSessionStorage implements ISessionStorage {
           return resolve(left<Error, User>(err));
         }
 
-        if (value === undefined) {
+        if (value === null) {
           return resolve(left<Error, User>(new Error("Session not found")));
         }
 
