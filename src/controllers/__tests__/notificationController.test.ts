@@ -60,7 +60,7 @@ const aValidNotification = {
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
     service_name: "test service"
@@ -77,7 +77,7 @@ const anInvalidNotification = {
     fiscal_code: anInvalidFiscalNumber,
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
     service_name: "test service"

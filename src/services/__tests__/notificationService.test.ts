@@ -57,7 +57,7 @@ const aValidNotification = {
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department" as NonEmptyString,
     organization_name: "test organization" as NonEmptyString,
     service_name: "test service" as NonEmptyString
