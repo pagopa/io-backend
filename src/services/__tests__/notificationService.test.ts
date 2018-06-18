@@ -100,7 +100,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       anAppleInstallation,
@@ -124,7 +124,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       aGoogleInstallation,
@@ -173,7 +173,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
