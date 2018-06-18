@@ -28,7 +28,7 @@ const aValidNotification = {
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
     service_name: "test service"
@@ -66,7 +66,9 @@ describe("Test redirect to HTTPS", () => {
 
 describe("Test the checkIP middleware", () => {
   it("should allow in-range IP", () => {
-    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
 
     return request(app)
       .post("/api/v1/notify?token=12345")
