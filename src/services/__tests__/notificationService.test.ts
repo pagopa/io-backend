@@ -57,7 +57,7 @@ const aValidNotification = {
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department" as NonEmptyString,
     organization_name: "test organization" as NonEmptyString,
     service_name: "test service" as NonEmptyString
@@ -100,7 +100,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       anAppleInstallation,
@@ -124,7 +124,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
       aGoogleInstallation,
@@ -173,7 +173,7 @@ describe("NotificationService#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
