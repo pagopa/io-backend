@@ -2571,12 +2571,6 @@ io-ts@^1.1.4:
   dependencies:
     fp-ts "^1.0.0"
 
-io-ts@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.1.4.tgz#8d8b448fa7d9899e1e4fe32afa8374ee6774fa92"
-  dependencies:
-    fp-ts "^1.0.0"
-
 ip6@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/ip6/-/ip6-0.0.4.tgz#44c5a9db79e39d405201b4d78d13b3870e48db31"
@@ -3352,6 +3346,13 @@ js-tokens@^3.0.0, js-tokens@^3.0.2:
 js-yaml@^3.11.0, js-yaml@^3.7.0:
   version "3.11.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.11.0.tgz#597c1a8bd57152f26d622ce4117851a51f5ebaef"
+  dependencies:
+    argparse "^1.0.7"
+    esprima "^4.0.0"
+
+js-yaml@^3.12.0:
+  version "3.12.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.12.0.tgz#eaed656ec8344f10f527c6bfa1b6e2244de167d1"
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
@@ -5358,11 +5359,12 @@ supports-hyperlinks@^1.0.1:
     has-flag "^2.0.0"
     supports-color "^5.0.0"
 
-swagger-cli@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.0.0.tgz#0c965ecc2748d6ec082797258b7a96c1d4074e67"
+swagger-cli@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.1.0.tgz#6470e13a53c02e8b4a76d285d55de1bd01c46251"
   dependencies:
     chalk "^2.4.1"
+    js-yaml "^3.12.0"
     mkdirp "^0.5.1"
     swagger-parser "^5.0.0"
     yargs "^11.0.0"
