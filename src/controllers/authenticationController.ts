@@ -6,7 +6,6 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { isNone, none, Option, some } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -14,7 +13,6 @@ import {
   IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponsePermanentRedirect,
   ResponseSuccessJson,
   ResponseSuccessXml
@@ -59,9 +57,8 @@ export default class AuthenticationController {
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
     const walletToken = this.tokenService.getNewToken() as WalletToken;
     const user = toAppUser(spidUser, sessionToken, walletToken);
-    const timestamp = Date.now();
 
-    const errorOrResponse = await this.sessionStorage.set(user, timestamp);
+    const errorOrResponse = await this.sessionStorage.set(user);
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
@@ -131,54 +128,19 @@ export default class AuthenticationController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PublicSession>
   > {
-    // This controller doesn't have a Passport middleware that checks the Bearer token, we need to check it here.
-    const maybeToken = await this.extractTokenFromRequest(req);
-    if (isNone(maybeToken)) {
-      return ResponseErrorInternal("No token in the request");
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      const error = errorOrUser.value;
+      return ResponseErrorInternal(error.message);
     }
 
-    // The token is present, look for a session.
-    const sessionToken = maybeToken.value;
-    const errorOrSession = await this.sessionStorage.get(sessionToken);
-    if (isLeft(errorOrSession)) {
-      // Previous token not found.
-      return ResponseErrorNotFound("Session not found", "");
-    }
-
-    const session = errorOrSession.value;
-
-    // Check if the session is expired, in that case we need to refresh the tokens.
-    if (session.expireAt.getTime() < Date.now()) {
-      const newSessionToken = this.tokenService.getNewToken() as SessionToken;
-      const newWalletToken = this.tokenService.getNewToken() as WalletToken;
-      const errorOrRefreshedSession = await this.sessionStorage.refresh(
-        session.user.session_token,
-        session.user.wallet_token,
-        newSessionToken,
-        newWalletToken
-      );
-
-      if (isLeft(errorOrRefreshedSession)) {
-        // Unable to refresh token or session not found.
-        const error = errorOrRefreshedSession.value;
-        return ResponseErrorInternal(error.message);
-      }
-
-      // Return the new session information.
-      const refreshedSession = errorOrRefreshedSession.value;
-      return ResponseSuccessJson({
-        expireAt: new Date(refreshedSession.expireAt),
-        newToken: refreshedSession.newToken,
-        spidLevel: refreshedSession.user.spid_level,
-        walletToken: refreshedSession.user.wallet_token
-      });
-    }
+    const user = errorOrUser.value;
 
     // Return the actual session information.
     return ResponseSuccessJson({
-      expireAt: new Date(session.expireAt),
-      spidLevel: session.user.spid_level,
-      walletToken: session.user.wallet_token
+      spidLevel: user.spid_level,
+      walletToken: user.wallet_token
     });
   }
 
@@ -222,35 +184,6 @@ export default class AuthenticationController {
           return resolve(ResponseErrorInternal(err.message));
         }
       });
-    });
-  }
-
-  /**
-   * Extracts the Bearer token from the authorization header in the request.
-   */
-  private extractTokenFromRequest(
-    req: express.Request
-  ): Promise<Option<SessionToken>> {
-    return new Promise(resolve => {
-      if (
-        req.headers &&
-        req.headers.authorization &&
-        typeof req.headers.authorization === "string"
-      ) {
-        const authorization = req.headers.authorization;
-        const parts = authorization.split(" ");
-        if (parts.length === 2) {
-          const scheme = parts[0];
-          const token = parts[1];
-
-          if (/^Bearer$/i.test(scheme)) {
-            resolve(some(token as SessionToken));
-          } else {
-            resolve(none);
-          }
-        }
-      }
-      resolve(none);
     });
   }
 }

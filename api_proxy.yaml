@@ -234,10 +234,8 @@ paths:
             $ref: "#/definitions/PublicSession"
           examples:
             application/json:
-              expired: true
-              expireAt: 1527773522522
-              newToken: 08b2f7253af847d970caf247411444ff0657a27bd1f671137fb2930b99fca9fb594c98a05c68650927f4afda4e99ef17
               spidLevel: "https://www.spid.gov.it/SpidL2"
+              walletToken: "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b"
         "401":
           description: Bearer token null or expired.
         "500":
@@ -424,16 +422,11 @@ definitions:
     title: User session data
     description: Describe the current session of an authenticated user.
     properties:
-      expireAt:
-        $ref: '#/definitions/Timestamp'
-      newToken:
-        type: string
       spidLevel:
          $ref: '#/definitions/SpidLevel'
       walletToken:
         type: string
     required:
-      - expireAt
       - spidLevel
       - walletToken
   InstallationID:
