@@ -122,7 +122,9 @@ describe("NotificationController#notify", () => {
   it("should return success if data is correct", async () => {
     const req = mockReq();
 
-    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
 
     req.body = aValidNotification;
 
@@ -131,7 +133,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
   });
 
@@ -139,7 +141,9 @@ describe("NotificationController#notify", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
 
     req.body = anInvalidNotification;
 
@@ -162,7 +166,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const req = mockReq();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedUser;
@@ -174,7 +178,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
   });
 
@@ -183,7 +187,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedInvalidUser;
@@ -204,7 +208,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedUser;
@@ -225,7 +229,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedUser;
