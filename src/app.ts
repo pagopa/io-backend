@@ -265,11 +265,13 @@ export function newApp(
     }
   );
 
-  // Session endpoint doesn't use the bearerTokenAuth because the request need to reach the controller even if the
-  // sessionToken is expired. The existence and the validity of the token will be checked later.
-  app.get("/api/v1/session", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.getSessionState)(acsController, req, res);
-  });
+  app.get(
+    "/api/v1/session",
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(acsController.getSessionState)(acsController, req, res);
+    }
+  );
 
   app.get(
     "/pagopa/api/v1/user",
