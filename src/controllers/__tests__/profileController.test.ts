@@ -42,8 +42,8 @@ const proxyUserResponse = {
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferredLanguages: aPreferredLanguages,
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   token: "123hexToken",
   version: 1 as number
@@ -57,9 +57,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: "123hexToken" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "123hexToken" as WalletToken

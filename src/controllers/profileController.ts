@@ -14,6 +14,7 @@ import {
 import ProfileService, { profileResponse } from "../services/profileService";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
+import { toHttpError } from "../types/error";
 import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
 
@@ -44,7 +45,7 @@ export default class ProfileController {
 
     if (isLeft(errorOrProfile)) {
       const error = errorOrProfile.value;
-      return error.toHTTPError();
+      return toHttpError(error);
     }
 
     const profile = errorOrProfile.value;
@@ -76,6 +77,17 @@ export default class ProfileController {
 
     const user = errorOrUser.value;
     const upsertProfile = errorOrUpsertProfile.value;
-    return this.profileService.upsertProfile(user, upsertProfile);
+    const errororUpsertProfile = await this.profileService.upsertProfile(
+      user,
+      upsertProfile
+    );
+
+    if (isLeft(errororUpsertProfile)) {
+      const error = errororUpsertProfile.value;
+      return toHttpError(error);
+    }
+
+    const profile = errororUpsertProfile.value;
+    return ResponseSuccessJson(profile);
   }
 }

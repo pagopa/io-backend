@@ -12,6 +12,7 @@ import {
 import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
+import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
 export default class MessagesController {
@@ -37,11 +38,11 @@ export default class MessagesController {
 
     if (isLeft(errorOrMessages)) {
       const error = errorOrMessages.value;
-      return error.toHTTPError();
+      return toHttpError(error);
     }
 
-    const profile = errorOrMessages.value;
-    return ResponseSuccessJson(profile);
+    const messages = errorOrMessages.value;
+    return ResponseSuccessJson(messages);
   }
 
   /**
@@ -60,6 +61,17 @@ export default class MessagesController {
 
     // TODO: validate req.params.id
     const user = errorOrUser.value;
-    return this.messagesService.getMessage(user, req.params.id);
+    const errorOrMessage = await this.messagesService.getMessage(
+      user,
+      req.params.id
+    );
+
+    if (isLeft(errorOrMessage)) {
+      const error = errorOrMessage.value;
+      return toHttpError(error);
+    }
+
+    const message = errorOrMessage.value;
+    return ResponseSuccessJson(message);
   }
 }

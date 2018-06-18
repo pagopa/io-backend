@@ -77,15 +77,9 @@ export default class RedisSessionStorage implements ISessionStorage {
       return left(error);
     }
 
-    const session = errorOrSession.value;
-    const user = session.user;
+    const user = errorOrSession.value;
 
-    // Check if the token has expired. We don't remove expired token
-    // because a client can later refresh the session.
-    const expireAtEpochMs =
-      (session.timestampEpochMillis as number) + this.tokenDurationSecs * 1000;
-
-    return right<Error, User>(user);
+    return right(user);
   }
 
   /**
@@ -152,7 +146,7 @@ export default class RedisSessionStorage implements ISessionStorage {
    */
   private loadSessionBySessionToken(
     token: SessionToken
-  ): Promise<Either<Error, Session>> {
+  ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
       this.redisClient.get(`${sessionKeyPrefix}${token}`, (err, value) => {
         if (err) {
@@ -195,25 +189,25 @@ export default class RedisSessionStorage implements ISessionStorage {
    */
   private loadSessionByWalletToken(
     token: WalletToken
-  ): Promise<Either<Error, Session>> {
+  ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
-      this.redisClient.hget(sessionMappingKey, token, (err, value) => {
+      this.redisClient.get(`${walletKeyPrefix}${token}`, (err, value) => {
         if (err) {
           // Client returns an error.
-          return resolve(left<Error, Session>(err));
+          return resolve(left<Error, User>(err));
         }
 
         this.loadSessionBySessionToken(value as SessionToken).then(
-          (errorOrSession: Either<Error, Session>) => {
+          (errorOrSession: Either<Error, User>) => {
             errorOrSession.fold(
-              error => resolve(left<Error, Session>(error)),
+              error => resolve(left<Error, User>(error)),
               session => {
-                resolve(right<Error, Session>(session));
+                resolve(right<Error, User>(session));
               }
             );
           },
           error => {
-            resolve(left<Error, Session>(error));
+            resolve(left<Error, User>(error));
           }
         );
       });

@@ -12,6 +12,7 @@ import {
 import ProfileService, { profileResponse } from "../services/profileService";
 import { PagoPAUser } from "../types/api/PagoPAUser";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
+import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
 export default class PagoPAController {
@@ -37,15 +38,15 @@ export default class PagoPAController {
 
     if (isLeft(errorOrProfile)) {
       const error = errorOrProfile.value;
-      return error.toHTTPError();
+      return toHttpError(error);
     }
 
     const profile = errorOrProfile.value;
-    const email = ProfileWithEmail.is(profile)
-      ? profile.email !== undefined
-        ? profile.email
-        : profile.preferred_email
-      : profile.preferred_email;
+    const maybeCustomEmail = ProfileWithEmail.is(profile)
+      ? profile.email
+      : undefined;
+    const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
+
     return ResponseSuccessJson({
       email
     });

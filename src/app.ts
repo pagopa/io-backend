@@ -92,35 +92,7 @@ export function newApp(
   // Add the strategy to authenticate the proxy to SPID.
   passport.use(container.resolve(SPID_STRATEGY));
 
-  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
-  const urlTokenAuth = passport.authenticate("authtoken", { session: false });
   const spidAuth = passport.authenticate("spid", { session: false });
-
-  // Setup controllers.
-
-  const acsController: AuthenticationController = container.resolve(
-    AUTHENTICATION_CONTROLLER
-  );
-
-  const profileController: ProfileController = container.resolve(
-    PROFILE_CONTROLLER
-  );
-
-  const messagesController: MessagesController = container.resolve(
-    MESSAGES_CONTROLLER
-  );
-
-  const servicesController: ServicesController = container.resolve(
-    SERVICES_CONTROLLER
-  );
-
-  const notificationController: NotificationController = container.resolve(
-    NOTIFICATION_CONTROLLER
-  );
-
-  const pagopaController: PagoPAController = container.resolve(
-    PAGOPA_CONTROLLER
-  );
 
   // Create and setup the Express app.
   const app = express();
@@ -145,33 +117,7 @@ export function newApp(
   app.use(passport.initialize());
 
   // Setup routing.
-
   app.get("/login", spidAuth);
-
-  app.post(
-    "/logout",
-    bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.logout)(acsController, req, res);
-    }
-  );
-
-  app.post("/slo", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.slo)(acsController, req, res);
-  });
-
-  app.post(
-    "/assertionConsumerService",
-    withSpidAuth(
-      acsController,
-      container.resolve("clientErrorRedirectionUrl"),
-      container.resolve("clientLoginRedirectionUrl")
-    )
-  );
-
-  app.get("/metadata", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.metadata)(acsController, req, res);
-  });
 
   // Liveness probe for Kubernetes.
   // @see
@@ -179,6 +125,50 @@ export function newApp(
   app.get("/ping", (_, res: express.Response) => {
     res.status(200).send("ok");
   });
+
+  registerPagoPARoutes(app, allowPagoPAIPSourceRange);
+  registerAPIRoutes(app, allowNotifyIPSourceRange);
+  registerAuthenticationRoutes(app);
+
+  return app;
+}
+
+function registerPagoPARoutes(app: Express, allowPagoPAIPSourceRange: CIDR): void {
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+
+  const pagopaController: PagoPAController = container.resolve(
+    PAGOPA_CONTROLLER
+  );
+
+  app.get(
+    "/pagopa/api/v1/user",
+    checkIP(allowPagoPAIPSourceRange),
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(pagopaController.getUser)(pagopaController, req, res);
+    }
+  );
+}
+
+function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+  const urlTokenAuth = passport.authenticate("authtoken", { session: false });
+
+  const profileController: ProfileController = container.resolve(
+    PROFILE_CONTROLLER
+  );
+
+  const messagesController: MessagesController = container.resolve(
+    MESSAGES_CONTROLLER
+  );
+
+  const servicesController: ServicesController = container.resolve(
+    SERVICES_CONTROLLER
+  );
+
+  const notificationController: NotificationController = container.resolve(
+    NOTIFICATION_CONTROLLER
+  );
 
   app.get(
     "/api/v1/profile",
@@ -240,19 +230,6 @@ export function newApp(
     }
   );
 
-  app.post(
-    "/api/v1/notify",
-    checkIP(allowNotifyIPSourceRange),
-    urlTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(notificationController.notify)(
-        notificationController,
-        req,
-        res
-      );
-    }
-  );
-
   app.put(
     "/api/v1/installations/:id",
     bearerTokenAuth,
@@ -265,6 +242,52 @@ export function newApp(
     }
   );
 
+  app.post(
+    "/api/v1/notify",
+    checkIP(allowNotifyIPSourceRange),
+    urlTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(notificationController.notify)(
+        notificationController,
+        req,
+        res
+      );
+    }
+  );
+}
+
+function registerAuthenticationRoutes(app: Express): void {
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+
+  const acsController: AuthenticationController = container.resolve(
+    AUTHENTICATION_CONTROLLER
+  );
+
+  app.post(
+    "/logout",
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(acsController.logout)(acsController, req, res);
+    }
+  );
+
+  app.post("/slo", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.slo)(acsController, req, res);
+  });
+
+  app.post(
+    "/assertionConsumerService",
+    withSpidAuth(
+      acsController,
+      container.resolve("clientErrorRedirectionUrl"),
+      container.resolve("clientLoginRedirectionUrl")
+    )
+  );
+
+  app.get("/metadata", (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.metadata)(acsController, req, res);
+  });
+
   app.get(
     "/api/v1/session",
     bearerTokenAuth,
@@ -272,15 +295,4 @@ export function newApp(
       toExpressHandler(acsController.getSessionState)(acsController, req, res);
     }
   );
-
-  app.get(
-    "/pagopa/api/v1/user",
-    checkIP(allowPagoPAIPSourceRange),
-    bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagopaController.getUser)(pagopaController, req, res);
-    }
-  );
-
-  return app;
 }

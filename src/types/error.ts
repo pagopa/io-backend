@@ -1,31 +1,38 @@
 /**
  * This file extend the base Error with a statusCode field.
  */
-
 import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
   ResponseErrorInternal,
   ResponseErrorNotFound
 } from "italia-ts-commons/lib/responses";
 
-interface IAPIError {
-  // tslint:disable-next-line:no-any
-  readonly toHTTPError: () => any;
+export interface IErrorTag<T> {
+  readonly kind: T;
 }
 
-export type APIError = IAPIError & Error;
+export type ServiceInternalError = string & IErrorTag<"ServiceInternalError">;
 
-export function internalError(message: string): APIError {
-  return {
-    message,
-    name: "Internal server error",
-    toHTTPError: () => ResponseErrorInternal(message)
-  };
+export type ServiceNotFoundError = string & IErrorTag<"ServiceNotFoundError">;
+
+export type ServiceError = ServiceInternalError | ServiceNotFoundError;
+
+export function internalError(message: string): ServiceInternalError {
+  return message as ServiceInternalError;
 }
 
-export function notFoundError(message: string): APIError {
-  return {
-    message,
-    name: "Not found",
-    toHTTPError: () => ResponseErrorNotFound(message, "")
-  };
+export function notFoundError(message: string): ServiceNotFoundError {
+  return message as ServiceNotFoundError;
+}
+
+export function toHttpError(
+  err: ServiceError
+): IResponseErrorNotFound | IResponseErrorInternal {
+  switch (err.kind) {
+    case "ServiceInternalError":
+      return ResponseErrorInternal(err);
+    case "ServiceNotFoundError":
+      return ResponseErrorNotFound("Not found", err);
+  }
 }

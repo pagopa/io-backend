@@ -7,9 +7,7 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
-  IResponseSuccessJson,
-  ResponseErrorInternal,
-  ResponseSuccessJson
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
@@ -19,7 +17,7 @@ import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { ExtendedProfile } from "../types/api_client/extendedProfile";
 import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
 import { UpsertProfileOKResponse } from "../types/api_client/upsertProfileOKResponse";
-import { APIError, internalError } from "../types/error";
+import { internalError, ServiceError } from "../types/error";
 import {
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
@@ -43,7 +41,7 @@ export default class ProfileService {
    */
   public async getProfile(
     user: User
-  ): Promise<Either<APIError, ProfileWithoutEmail | ProfileWithEmail>> {
+  ): Promise<Either<ServiceError, ProfileWithoutEmail | ProfileWithEmail>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getProfileWithHttpOperationResponse();
@@ -93,7 +91,7 @@ export default class ProfileService {
   public async upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
-  ): Promise<profileResponse<ProfileWithEmail>> {
+  ): Promise<Either<ServiceError, ProfileWithEmail>> {
     const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
       body: upsertProfile
     };
@@ -112,9 +110,9 @@ export default class ProfileService {
           "Unknown response from upsertProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorInternal(profileErrorOnUnknownResponse);
+        return left(internalError(profileErrorOnUnknownResponse));
       } else {
-        return ResponseErrorInternal(profileErrorOnApiError);
+        return left(internalError(profileErrorOnApiError));
       }
     }
 
@@ -126,10 +124,10 @@ export default class ProfileService {
         "Unknown response from upsertProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
-      return ResponseErrorInternal(profileErrorOnUnknownResponse);
+      return left(internalError(profileErrorOnUnknownResponse));
     }
 
     const apiProfile = errorOrApiProfile.value;
-    return ResponseSuccessJson(toAppProfileWithEmail(apiProfile, user));
+    return right(toAppProfileWithEmail(apiProfile, user));
   }
 }

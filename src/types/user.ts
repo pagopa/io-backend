@@ -23,9 +23,9 @@ export const User = t.interface({
   name: string,
   nameID: string,
   nameIDFormat: string,
-  preferred_email: EmailAddress,
   sessionIndex: string,
   session_token: SessionToken,
+  spid_email: EmailAddress,
   spid_idp: string,
   spid_level: SpidLevel,
   wallet_token: WalletToken
@@ -65,9 +65,9 @@ export function toAppUser(
     name: from.name,
     nameID: from.nameID, // The used nameID is needed for logout.
     nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
-    preferred_email: from.email,
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     session_token: sessionToken,
+    spid_email: from.email,
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
     wallet_token: walletToken

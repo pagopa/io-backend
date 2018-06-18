@@ -33,8 +33,8 @@ const proxyProfileWithEmailResponse = {
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   name: "Luca",
-  preferred_email: aValidSPIDEmail,
   preferred_languages: ["it_IT"],
+  spid_email: aValidSPIDEmail,
   version: 42
 };
 const proxyProfileWithoutEmailResponse = {
@@ -45,7 +45,7 @@ const proxyProfileWithoutEmailResponse = {
   is_inbox_enabled: false,
   is_webhook_enabled: false,
   name: "Luca",
-  preferred_email: aValidSPIDEmail,
+  spid_email: aValidSPIDEmail,
   version: 0
 };
 const proxyUpsertRequest = {
@@ -87,9 +87,9 @@ const mockedUser: User = {
   name: "Luca",
   nameID: "lussoluca",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: aValidSPIDEmail,
   sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
+  spid_email: aValidSPIDEmail,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "HexToKen" as WalletToken

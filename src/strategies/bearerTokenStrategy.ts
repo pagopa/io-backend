@@ -9,6 +9,7 @@ import { IVerifyOptions } from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken, WalletToken } from "../types/token";
+import { User } from "../types/user";
 
 const bearerTokenStrategy = () => {
   const options = {
@@ -27,8 +28,8 @@ const bearerTokenStrategy = () => {
 
     if (path.startsWith("/api")) {
       sessionStorage.getBySessionToken(token as SessionToken).then(
-        (errorOrSessionState: Either<Error, ISessionState>) => {
-          fulfill(errorOrSessionState, done);
+        (errorOrUser: Either<Error, User>) => {
+          fulfill(errorOrUser, done);
         },
         () => {
           done(undefined, false);
@@ -36,8 +37,8 @@ const bearerTokenStrategy = () => {
       );
     } else if (path.startsWith("/pagopa/api")) {
       sessionStorage.getByWalletToken(token as WalletToken).then(
-        (errorOrSessionState: Either<Error, ISessionState>) => {
-          fulfill(errorOrSessionState, done);
+        (errorOrUser: Either<Error, User>) => {
+          fulfill(errorOrUser, done);
         },
         () => {
           done(undefined, false);
@@ -50,21 +51,11 @@ const bearerTokenStrategy = () => {
 };
 
 function fulfill(
-  errorOrSessionState: Either<Error, ISessionState>,
+  errorOrUser: Either<Error, User>,
   // tslint:disable-next-line:no-any
   done: (error: any, user?: any, options?: IVerifyOptions | string) => void
 ): void {
-  errorOrSessionState.fold(
-    () => done(undefined, false),
-    sessionState => {
-      // Check if the session is expired.
-      if (sessionState.expireAt.getTime() < Date.now()) {
-        done(undefined, false);
-      } else {
-        done(undefined, sessionState.user);
-      }
-    }
-  );
+  errorOrUser.fold(() => done(undefined, false), user => done(undefined, user));
 }
 
 export default bearerTokenStrategy;

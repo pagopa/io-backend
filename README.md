@@ -65,8 +65,8 @@ Finally the backend will redirect the client to the value of the environment var
 token in the query string. The client must saves the token and use it in all API request.
 
 The code that manage this flow are in the `spid-passport` package (more info
-[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.js` and
-`src/controllers/authenticationController.js` files.
+[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.ts` and
+`src/controllers/authenticationController.ts` files.
 
 ### Token authentication
 

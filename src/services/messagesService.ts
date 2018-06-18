@@ -7,10 +7,7 @@ import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
-  IResponseSuccessJson,
-  ResponseErrorInternal,
-  ResponseErrorNotFound,
-  ResponseSuccessJson
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
 import { Messages } from "../types/api/Messages";
@@ -20,7 +17,7 @@ import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic"
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
-import { APIError, internalError, notFoundError } from "../types/error";
+import { internalError, notFoundError, ServiceError } from "../types/error";
 import {
   toAppMessageWithContent,
   toAppMessageWithoutContent
@@ -47,7 +44,7 @@ export default class MessagesService {
    */
   public async getMessagesByUser(
     user: User
-  ): Promise<Either<APIError, Messages>> {
+  ): Promise<Either<ServiceError, Messages>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessagesByUserWithHttpOperationResponse();
@@ -100,7 +97,7 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<MessagesResponse<MessageWithContent>> {
+  ): Promise<Either<ServiceError, MessageWithContent>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getMessageWithHttpOperationResponse(messageId);
@@ -116,14 +113,14 @@ export default class MessagesService {
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorInternal(messageErrorOnUnknownResponse);
+        return left(internalError(messageErrorOnUnknownResponse));
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound, "");
+        return left(notFoundError(messageNotFound));
       } else {
         winston.error("Api error: %s", simpleResponse.parsedBody());
-        return ResponseErrorInternal(messageErrorOnApiError);
+        return left(internalError(messageErrorOnApiError));
       }
     }
 
@@ -135,11 +132,11 @@ export default class MessagesService {
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
-      return ResponseErrorInternal(messageErrorOnUnknownResponse);
+      return left(internalError(messageErrorOnUnknownResponse));
     }
 
     const apiMessage = errorOrApiMessage.value;
-    return ResponseSuccessJson(toAppMessageWithContent(apiMessage));
+    return right(toAppMessageWithContent(apiMessage));
   }
 
   /**
@@ -148,7 +145,7 @@ export default class MessagesService {
   public async getService(
     user: User,
     serviceId: string
-  ): Promise<MessagesResponse<ProxyServicePublic>> {
+  ): Promise<Either<ServiceError, ProxyServicePublic>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServiceWithHttpOperationResponse(serviceId);
@@ -164,13 +161,13 @@ export default class MessagesService {
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
-        return ResponseErrorInternal(messageErrorOnUnknownResponse);
+        return left(internalError(messageErrorOnUnknownResponse));
       }
 
       if (simpleResponse.isNotFound()) {
-        return ResponseErrorNotFound(messageNotFound, "");
+        return left(notFoundError(messageNotFound));
       } else {
-        return ResponseErrorInternal(messageErrorOnApiError);
+        return left(internalError(messageErrorOnApiError));
       }
     }
 
@@ -182,10 +179,10 @@ export default class MessagesService {
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );
-      return ResponseErrorInternal(messageErrorOnUnknownResponse);
+      return left(internalError(messageErrorOnUnknownResponse));
     }
 
     const apiService = errorOrApiService.value;
-    return ResponseSuccessJson(toAppService(apiService));
+    return right(toAppService(apiService));
   }
 }

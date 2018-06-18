@@ -362,7 +362,7 @@ definitions:
         $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
-      preferred_email:
+      spid_email:
         $ref: '#/definitions/EmailAddress'
       preferred_languages:
         type: array
@@ -378,7 +378,7 @@ definitions:
       - is_inbox_enabled
       - is_webhook_enabled
       - name
-      - preferred_email
+      - spid_email
       - version
   ProfileWithoutEmail:
     type: object
@@ -399,7 +399,7 @@ definitions:
         $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
-      preferred_email:
+      spid_email:
         $ref: '#/definitions/EmailAddress'
       preferred_languages:
         type: array
@@ -415,7 +415,7 @@ definitions:
       - is_inbox_enabled
       - is_webhook_enabled
       - name
-      - preferred_email
+      - spid_email
       - version
   PublicSession:
     type: object
