@@ -7,8 +7,10 @@ import container, {
   BEARER_TOKEN_STRATEGY,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
+  PAGOPA_CONTROLLER,
   PROFILE_CONTROLLER,
   SERVICES_CONTROLLER,
+  SESSION_CONTROLLER,
   SPID_STRATEGY,
   URL_TOKEN_STRATEGY
 } from "./container";
@@ -33,6 +35,8 @@ import {
 import { IResponse } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
+import PagoPAController from "./controllers/pagoPAController";
+import SessionController from "./controllers/sessionController";
 import checkIP from "./utils/middleware/checkIP";
 
 /**
@@ -78,7 +82,11 @@ function toExpressHandler<T>(
 
 export function newApp(
   env: NodeEnvironment,
-  allowNotifyIPSourceRange: CIDR
+  allowNotifyIPSourceRange: CIDR,
+  allowPagoPAIPSourceRange: CIDR,
+  authenticationBasePath: string,
+  APIBasePath: string,
+  PagoPABasePath: string
 ): Express {
   // Setup Passport.
 
@@ -89,31 +97,7 @@ export function newApp(
   // Add the strategy to authenticate the proxy to SPID.
   passport.use(container.resolve(SPID_STRATEGY));
 
-  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
-  const urlTokenAuth = passport.authenticate("authtoken", { session: false });
   const spidAuth = passport.authenticate("spid", { session: false });
-
-  // Setup controllers.
-
-  const acsController: AuthenticationController = container.resolve(
-    AUTHENTICATION_CONTROLLER
-  );
-
-  const profileController: ProfileController = container.resolve(
-    PROFILE_CONTROLLER
-  );
-
-  const messagesController: MessagesController = container.resolve(
-    MESSAGES_CONTROLLER
-  );
-
-  const servicesController: ServicesController = container.resolve(
-    SERVICES_CONTROLLER
-  );
-
-  const notificationController: NotificationController = container.resolve(
-    NOTIFICATION_CONTROLLER
-  );
 
   // Create and setup the Express app.
   const app = express();
@@ -138,33 +122,7 @@ export function newApp(
   app.use(passport.initialize());
 
   // Setup routing.
-
   app.get("/login", spidAuth);
-
-  app.post(
-    "/logout",
-    bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.logout)(acsController, req, res);
-    }
-  );
-
-  app.post("/slo", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.slo)(acsController, req, res);
-  });
-
-  app.post(
-    "/assertionConsumerService",
-    withSpidAuth(
-      acsController,
-      container.resolve("clientErrorRedirectionUrl"),
-      container.resolve("clientLoginRedirectionUrl")
-    )
-  );
-
-  app.get("/metadata", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.metadata)(acsController, req, res);
-  });
 
   // Liveness probe for Kubernetes.
   // @see
@@ -173,8 +131,64 @@ export function newApp(
     res.status(200).send("ok");
   });
 
+  registerAuthenticationRoutes(app, authenticationBasePath);
+  registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
+  registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
+
+  return app;
+}
+
+function registerPagoPARoutes(
+  app: Express,
+  basePath: string,
+  allowPagoPAIPSourceRange: CIDR
+): void {
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+
+  const pagopaController: PagoPAController = container.resolve(
+    PAGOPA_CONTROLLER
+  );
+
   app.get(
-    "/api/v1/profile",
+    `${basePath}/user`,
+    checkIP(allowPagoPAIPSourceRange),
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(pagopaController.getUser)(pagopaController, req, res);
+    }
+  );
+}
+
+function registerAPIRoutes(
+  app: Express,
+  basePath: string,
+  allowNotifyIPSourceRange: CIDR
+): void {
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+  const urlTokenAuth = passport.authenticate("authtoken", { session: false });
+
+  const profileController: ProfileController = container.resolve(
+    PROFILE_CONTROLLER
+  );
+
+  const messagesController: MessagesController = container.resolve(
+    MESSAGES_CONTROLLER
+  );
+
+  const servicesController: ServicesController = container.resolve(
+    SERVICES_CONTROLLER
+  );
+
+  const notificationController: NotificationController = container.resolve(
+    NOTIFICATION_CONTROLLER
+  );
+
+  const sessionController: SessionController = container.resolve(
+    SESSION_CONTROLLER
+  );
+
+  app.get(
+    `${basePath}/profile`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(profileController.getProfile)(
@@ -186,7 +200,7 @@ export function newApp(
   );
 
   app.post(
-    "/api/v1/profile",
+    `${basePath}/profile`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(profileController.upsertProfile)(
@@ -198,7 +212,7 @@ export function newApp(
   );
 
   app.get(
-    "/api/v1/messages",
+    `${basePath}/messages`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(messagesController.getMessagesByUser)(
@@ -210,7 +224,7 @@ export function newApp(
   );
 
   app.get(
-    "/api/v1/messages/:id",
+    `${basePath}/messages/:id`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(messagesController.getMessage)(
@@ -222,7 +236,7 @@ export function newApp(
   );
 
   app.get(
-    "/api/v1/services/:id",
+    `${basePath}/services/:id`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(servicesController.getService)(
@@ -233,8 +247,20 @@ export function newApp(
     }
   );
 
+  app.put(
+    `${basePath}/installations/:id`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(notificationController.createOrUpdateInstallation)(
+        notificationController,
+        req,
+        res
+      );
+    }
+  );
+
   app.post(
-    "/api/v1/notify",
+    `${basePath}/notify`,
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
     (req: express.Request, res: express.Response) => {
@@ -246,25 +272,51 @@ export function newApp(
     }
   );
 
-  app.put(
-    "/api/v1/installations/:id",
+  app.get(
+    `${basePath}/session`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      toExpressHandler(notificationController.createOrUpdateInstallation)(
-        notificationController,
+      toExpressHandler(sessionController.getSessionState)(
+        sessionController,
         req,
         res
       );
     }
   );
+}
 
-  app.get(
-    "/api/v1/session",
+function registerAuthenticationRoutes(app: Express, basePath: string): void {
+  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+
+  const acsController: AuthenticationController = container.resolve(
+    AUTHENTICATION_CONTROLLER
+  );
+
+  app.post(
+    `${basePath}/assertionConsumerService`,
+    withSpidAuth(
+      acsController,
+      container.resolve("clientErrorRedirectionUrl"),
+      container.resolve("clientLoginRedirectionUrl")
+    )
+  );
+
+  app.post(
+    `${basePath}/logout`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.getSessionState)(acsController, req, res);
+      toExpressHandler(acsController.logout)(acsController, req, res);
     }
   );
 
-  return app;
+  app.post(`${basePath}/slo`, (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.slo)(acsController, req, res);
+  });
+
+  app.get(
+    `${basePath}/metadata`,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(acsController.metadata)(acsController, req, res);
+    }
+  );
 }

@@ -103,9 +103,9 @@ const mockedUser: User = {
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: mockSessionToken as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
   wallet_token: mockWalletToken as WalletToken
@@ -147,13 +147,15 @@ const anErrorResponse = {
 };
 
 const mockSet = jest.fn();
-const mockGet = jest.fn();
+const mockGetBySessionToken = jest.fn();
+const mockGetByWalletToken = jest.fn();
 const mockDel = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
-      get: mockGet,
+      getBySessionToken: mockGetBySessionToken,
+      getByWalletToken: mockGetByWalletToken,
       set: mockSet
     }))
   };
@@ -395,25 +397,6 @@ describe("AuthenticationController#logout", () => {
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
       detail: "Redis error"
-    });
-  });
-});
-
-describe("AuthenticationController#getSessionState", () => {
-  it("returns correct session state for valid session", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.user = mockedUser;
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      spidLevel: "https://www.spid.gov.it/SpidL2",
-      walletToken: mockedUser.wallet_token
     });
   });
 });

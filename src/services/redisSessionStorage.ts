@@ -67,8 +67,28 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * {@inheritDoc}
    */
-  public async get(token: SessionToken): Promise<Either<Error, User>> {
-    const errorOrSession = await this.getSession(token);
+  public async getBySessionToken(
+    token: SessionToken
+  ): Promise<Either<Error, User>> {
+    const errorOrSession = await this.loadSessionBySessionToken(token);
+
+    if (isLeft(errorOrSession)) {
+      const error = errorOrSession.value;
+      return left(error);
+    }
+
+    const user = errorOrSession.value;
+
+    return right(user);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getByWalletToken(
+    token: WalletToken
+  ): Promise<Either<Error, User>> {
+    const errorOrSession = await this.loadSessionByWalletToken(token);
 
     if (isLeft(errorOrSession)) {
       const error = errorOrSession.value;
@@ -124,7 +144,9 @@ export default class RedisSessionStorage implements ISessionStorage {
   /**
    * Return a Session for this token.
    */
-  private getSession(token: SessionToken): Promise<Either<Error, User>> {
+  private loadSessionBySessionToken(
+    token: SessionToken
+  ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
       this.redisClient.get(`${sessionKeyPrefix}${token}`, (err, value) => {
         if (err) {
@@ -158,6 +180,36 @@ export default class RedisSessionStorage implements ISessionStorage {
             left<Error, User>(new Error("Unable to parse the user json"))
           );
         }
+      });
+    });
+  }
+
+  /**
+   * Return a Session for this token.
+   */
+  private loadSessionByWalletToken(
+    token: WalletToken
+  ): Promise<Either<Error, User>> {
+    return new Promise(resolve => {
+      this.redisClient.get(`${walletKeyPrefix}${token}`, (err, value) => {
+        if (err) {
+          // Client returns an error.
+          return resolve(left<Error, User>(err));
+        }
+
+        this.loadSessionBySessionToken(value as SessionToken).then(
+          (errorOrSession: Either<Error, User>) => {
+            errorOrSession.fold(
+              error => resolve(left<Error, User>(error)),
+              session => {
+                resolve(right<Error, User>(session));
+              }
+            );
+          },
+          error => {
+            resolve(left<Error, User>(error));
+          }
+        );
       });
     });
   }

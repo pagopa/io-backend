@@ -30,9 +30,9 @@ const aValidUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "HexToKen" as WalletToken
@@ -207,7 +207,7 @@ describe("RedisSessionStorage#get", () => {
       callback(undefined, null);
     });
 
-    const response = await sessionStorage.get(
+    const response = await sessionStorage.getBySessionToken(
       "inexistent token" as SessionToken
     );
 
@@ -221,7 +221,9 @@ describe("RedisSessionStorage#get", () => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
 
-    const response = await sessionStorage.get(aValidUser.session_token);
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet.mock.calls[0][0]).toBe(
@@ -235,7 +237,9 @@ describe("RedisSessionStorage#get", () => {
       callback(undefined, null);
     });
 
-    const response = await sessionStorage.get(aValidUser.session_token);
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet.mock.calls[0][0]).toBe(
@@ -249,7 +253,9 @@ describe("RedisSessionStorage#get", () => {
       callback(undefined, JSON.stringify(aValidUser));
     });
 
-    const response = await sessionStorage.get(aValidUser.session_token);
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet.mock.calls[0][0]).toBe(

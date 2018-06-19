@@ -8,11 +8,13 @@ import { isLeft } from "fp-ts/lib/Either";
 import {
   IResponseErrorValidation,
   ResponseErrorInternal,
-  ResponseErrorValidation
+  ResponseErrorValidation,
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
+import { toHttpError } from "../types/error";
 import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
 
@@ -39,7 +41,15 @@ export default class ProfileController {
     }
 
     const user = errorOrUser.value;
-    return this.profileService.getProfile(user);
+    const errorOrProfile = await this.profileService.getProfile(user);
+
+    if (isLeft(errorOrProfile)) {
+      const error = errorOrProfile.value;
+      return toHttpError(error);
+    }
+
+    const profile = errorOrProfile.value;
+    return ResponseSuccessJson(profile);
   }
 
   /**
@@ -67,6 +77,17 @@ export default class ProfileController {
 
     const user = errorOrUser.value;
     const upsertProfile = errorOrUpsertProfile.value;
-    return this.profileService.upsertProfile(user, upsertProfile);
+    const errorUpsertProfile = await this.profileService.upsertProfile(
+      user,
+      upsertProfile
+    );
+
+    if (isLeft(errorUpsertProfile)) {
+      const error = errorUpsertProfile.value;
+      return toHttpError(error);
+    }
+
+    const profile = errorUpsertProfile.value;
+    return ResponseSuccessJson(profile);
   }
 }

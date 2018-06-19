@@ -65,8 +65,8 @@ Finally the backend will redirect the client to the value of the environment var
 token in the query string. The client must saves the token and use it in all API request.
 
 The code that manage this flow are in the `spid-passport` package (more info
-[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.js` and
-`src/controllers/authenticationController.js` files.
+[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.ts` and
+`src/controllers/authenticationController.ts` files.
 
 ### Token authentication
 
@@ -74,7 +74,7 @@ All API requests sent by the client to the backend must have an `Authorization: 
 token obtained from the SPID authentication process. The token is used to retrieve the User object from the
 `SessionStorage` service.
 
-The code that manage this flow are in the `src/strategies/bearerTokenStrategy.js` file.
+The code that manage this flow are in the `src/strategies/bearerSessionTokenStrategy.ts` file.
 
 ## How to run the application
 

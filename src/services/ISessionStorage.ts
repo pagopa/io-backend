@@ -13,9 +13,14 @@ export interface ISessionStorage {
   set(user: User): Promise<Either<Error, boolean>>;
 
   /**
-   * Retrieves a value from the cache.
+   * Retrieves a value from the cache using the session token.
    */
-  get(token: SessionToken): Promise<Either<Error, User>>;
+  getBySessionToken(token: SessionToken): Promise<Either<Error, User>>;
+
+  /**
+   * Retrieves a value from the cache using the wallet token.
+   */
+  getByWalletToken(token: WalletToken): Promise<Either<Error, User>>;
 
   /**
    * Removes a value from the cache.
