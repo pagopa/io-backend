@@ -230,9 +230,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual(
-      left("Not found.")
-    );
+    expect(res).toEqual(left("Not found."));
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
