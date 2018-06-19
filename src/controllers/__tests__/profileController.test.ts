@@ -1,7 +1,6 @@
 /* tslint:disable:no-any */
 
 import { right } from "fp-ts/lib/Either";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -123,7 +122,7 @@ describe("ProfileController#getProfile", () => {
     const res = mockRes();
 
     mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
     );
 
     req.user = "";
@@ -153,7 +152,7 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
     );
 
     req.user = mockedUser;
@@ -181,7 +180,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
     );
 
     req.user = "";
@@ -206,7 +205,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
     );
 
     req.user = mockedUser;

@@ -179,11 +179,7 @@ describe("ProfileService#upsertProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockUpsertProfile).toHaveBeenCalledWith(ApiProfileUpsertRequest);
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyProfileWithEmailResponse
-    });
+    expect(res).toEqual(right(proxyProfileWithEmailResponse));
   });
 
   it("fails to create a new user profile to the API", async () => {

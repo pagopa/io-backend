@@ -231,11 +231,7 @@ describe("MessageService#getMessagesByUser", () => {
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
     expect(res).toEqual(
-      left({
-        message: "Not found.",
-        name: "Not found",
-        toHTTPError: expect.any(Function)
-      })
+      left("Not found.")
     );
   });
 
@@ -288,11 +284,7 @@ describe("MessageService#getMessage", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
+    expect(res).toEqual(right(proxyMessageResponse));
   });
 
   it("returns an error if the getMessage API returns an error", async () => {
@@ -344,11 +336,7 @@ describe("MessageService#getService", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyServiceResponse
-    });
+    expect(res).toEqual(right(proxyServiceResponse));
   });
 
   it("returns an error if the API returns an error", async () => {

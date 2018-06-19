@@ -77,17 +77,17 @@ export default class ProfileController {
 
     const user = errorOrUser.value;
     const upsertProfile = errorOrUpsertProfile.value;
-    const errororUpsertProfile = await this.profileService.upsertProfile(
+    const errorUpsertProfile = await this.profileService.upsertProfile(
       user,
       upsertProfile
     );
 
-    if (isLeft(errororUpsertProfile)) {
-      const error = errororUpsertProfile.value;
+    if (isLeft(errorUpsertProfile)) {
+      const error = errorUpsertProfile.value;
       return toHttpError(error);
     }
 
-    const profile = errororUpsertProfile.value;
+    const profile = errorUpsertProfile.value;
     return ResponseSuccessJson(profile);
   }
 }

@@ -7,6 +7,7 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import * as winston from "winston";
@@ -31,6 +32,7 @@ const profileErrorOnApiError = "Api error.";
 
 export type profileResponse<T> =
   | IResponseErrorInternal
+  | IResponseErrorNotFound
   | IResponseSuccessJson<T>;
 
 export default class ProfileService {

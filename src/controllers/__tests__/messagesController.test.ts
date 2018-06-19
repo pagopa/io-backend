@@ -1,7 +1,6 @@
 /* tslint:disable:no-any */
 
 import { right } from "fp-ts/lib/Either";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -109,7 +108,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+      Promise.resolve(Promise.resolve(right(proxyMessagesResponse)))
     );
 
     req.user = "";
@@ -138,7 +137,7 @@ describe("MessagesController#getMessage", () => {
     const req = mockReq();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+      Promise.resolve(Promise.resolve(right(proxyMessageResponse)))
     );
 
     req.user = mockedUser;
@@ -163,7 +162,7 @@ describe("MessagesController#getMessage", () => {
     const res = mockRes();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+      Promise.resolve(Promise.resolve(right(proxyMessageResponse)))
     );
 
     req.user = "";

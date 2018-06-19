@@ -12,27 +12,27 @@ export interface IErrorTag<T> {
   readonly kind: T;
 }
 
-export type ServiceInternalError = string & IErrorTag<"ServiceInternalError">;
+export type ServiceErrorInternal = string & IErrorTag<"ServiceErrorInternal">;
 
-export type ServiceNotFoundError = string & IErrorTag<"ServiceNotFoundError">;
+export type ServiceErrorNotFound = string & IErrorTag<"ServiceErrorNotFound">;
 
-export type ServiceError = ServiceInternalError | ServiceNotFoundError;
+export type ServiceError = ServiceErrorInternal | ServiceErrorNotFound;
 
-export function internalError(message: string): ServiceInternalError {
-  return message as ServiceInternalError;
+export function internalError(message: string): ServiceErrorInternal {
+  return message as ServiceErrorInternal;
 }
 
-export function notFoundError(message: string): ServiceNotFoundError {
-  return message as ServiceNotFoundError;
+export function notFoundError(message: string): ServiceErrorNotFound {
+  return message as ServiceErrorNotFound;
 }
 
 export function toHttpError(
   err: ServiceError
 ): IResponseErrorNotFound | IResponseErrorInternal {
   switch (err.kind) {
-    case "ServiceInternalError":
+    case "ServiceErrorInternal":
       return ResponseErrorInternal(err);
-    case "ServiceNotFoundError":
+    case "ServiceErrorNotFound":
       return ResponseErrorNotFound("Not found", err);
   }
 }

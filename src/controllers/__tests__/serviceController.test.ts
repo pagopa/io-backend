@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
+import { right } from "fp-ts/lib/Either";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -74,7 +74,7 @@ describe("serviceController#getService", () => {
     const req = mockReq();
 
     mockGetService.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyService))
+      Promise.resolve(Promise.resolve(right(proxyService)))
     );
 
     req.user = mockedUser;
@@ -99,7 +99,7 @@ describe("serviceController#getService", () => {
     const res = mockRes();
 
     mockGetService.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyService))
+      Promise.resolve(Promise.resolve(right(proxyService)))
     );
 
     req.user = "";
