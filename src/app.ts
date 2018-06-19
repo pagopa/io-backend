@@ -10,6 +10,7 @@ import container, {
   PAGOPA_CONTROLLER,
   PROFILE_CONTROLLER,
   SERVICES_CONTROLLER,
+  SESSION_CONTROLLER,
   SPID_STRATEGY,
   URL_TOKEN_STRATEGY
 } from "./container";
@@ -35,6 +36,7 @@ import { IResponse } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
+import SessionController from "./controllers/sessionController";
 import checkIP from "./utils/middleware/checkIP";
 
 /**
@@ -81,7 +83,10 @@ function toExpressHandler<T>(
 export function newApp(
   env: NodeEnvironment,
   allowNotifyIPSourceRange: CIDR,
-  allowPagoPAIPSourceRange: CIDR
+  allowPagoPAIPSourceRange: CIDR,
+  authenticationBasePath: string,
+  APIBasePath: string,
+  PagoPABasePath: string
 ): Express {
   // Setup Passport.
 
@@ -126,15 +131,16 @@ export function newApp(
     res.status(200).send("ok");
   });
 
-  registerPagoPARoutes(app, allowPagoPAIPSourceRange);
-  registerAPIRoutes(app, allowNotifyIPSourceRange);
-  registerAuthenticationRoutes(app);
+  registerAuthenticationRoutes(app, authenticationBasePath);
+  registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
+  registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
   return app;
 }
 
 function registerPagoPARoutes(
   app: Express,
+  basePath: string,
   allowPagoPAIPSourceRange: CIDR
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
@@ -144,7 +150,7 @@ function registerPagoPARoutes(
   );
 
   app.get(
-    "/pagopa/api/v1/user",
+    `${basePath}/user`,
     checkIP(allowPagoPAIPSourceRange),
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
@@ -153,7 +159,11 @@ function registerPagoPARoutes(
   );
 }
 
-function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
+function registerAPIRoutes(
+  app: Express,
+  basePath: string,
+  allowNotifyIPSourceRange: CIDR
+): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
   const urlTokenAuth = passport.authenticate("authtoken", { session: false });
 
@@ -173,8 +183,12 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
     NOTIFICATION_CONTROLLER
   );
 
+  const sessionController: SessionController = container.resolve(
+    SESSION_CONTROLLER
+  );
+
   app.get(
-    "/api/v1/profile",
+    `${basePath}/profile`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(profileController.getProfile)(
@@ -186,7 +200,7 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
   );
 
   app.post(
-    "/api/v1/profile",
+    `${basePath}/profile`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(profileController.upsertProfile)(
@@ -198,7 +212,7 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
   );
 
   app.get(
-    "/api/v1/messages",
+    `${basePath}/messages`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(messagesController.getMessagesByUser)(
@@ -210,7 +224,7 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
   );
 
   app.get(
-    "/api/v1/messages/:id",
+    `${basePath}/messages/:id`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(messagesController.getMessage)(
@@ -222,7 +236,7 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
   );
 
   app.get(
-    "/api/v1/services/:id",
+    `${basePath}/services/:id`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(servicesController.getService)(
@@ -234,7 +248,7 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
   );
 
   app.put(
-    "/api/v1/installations/:id",
+    `${basePath}/installations/:id`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(notificationController.createOrUpdateInstallation)(
@@ -246,7 +260,7 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
   );
 
   app.post(
-    "/api/v1/notify",
+    `${basePath}/notify`,
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
     (req: express.Request, res: express.Response) => {
@@ -257,9 +271,21 @@ function registerAPIRoutes(app: Express, allowNotifyIPSourceRange: CIDR): void {
       );
     }
   );
+
+  app.get(
+    `${basePath}/session`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(sessionController.getSessionState)(
+        sessionController,
+        req,
+        res
+      );
+    }
+  );
 }
 
-function registerAuthenticationRoutes(app: Express): void {
+function registerAuthenticationRoutes(app: Express, basePath: string): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
   const acsController: AuthenticationController = container.resolve(
@@ -267,19 +293,7 @@ function registerAuthenticationRoutes(app: Express): void {
   );
 
   app.post(
-    "/logout",
-    bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.logout)(acsController, req, res);
-    }
-  );
-
-  app.post("/slo", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.slo)(acsController, req, res);
-  });
-
-  app.post(
-    "/assertionConsumerService",
+    `${basePath}/assertionConsumerService`,
     withSpidAuth(
       acsController,
       container.resolve("clientErrorRedirectionUrl"),
@@ -287,15 +301,22 @@ function registerAuthenticationRoutes(app: Express): void {
     )
   );
 
-  app.get("/metadata", (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.metadata)(acsController, req, res);
+  app.post(
+    `${basePath}/logout`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(acsController.logout)(acsController, req, res);
+    }
+  );
+
+  app.post(`${basePath}/slo`, (req: express.Request, res: express.Response) => {
+    toExpressHandler(acsController.slo)(acsController, req, res);
   });
 
   app.get(
-    "/api/v1/session",
-    bearerTokenAuth,
+    `${basePath}/metadata`,
     (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.getSessionState)(acsController, req, res);
+      toExpressHandler(acsController.metadata)(acsController, req, res);
     }
   );
 }

@@ -11,7 +11,7 @@ import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 
-const bearerTokenStrategy = () => {
+const bearerTokenStrategy = (APIBasePath: string, PagoPABasePath: string) => {
   const options = {
     passReqToCallback: true,
     realm: "Proxy API",
@@ -26,7 +26,7 @@ const bearerTokenStrategy = () => {
     const path = req.route.path;
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
-    if (path.startsWith("/api")) {
+    if (path.startsWith(APIBasePath)) {
       sessionStorage.getBySessionToken(token as SessionToken).then(
         (errorOrUser: Either<Error, User>) => {
           fulfill(errorOrUser, done);
@@ -35,7 +35,7 @@ const bearerTokenStrategy = () => {
           done(undefined, false);
         }
       );
-    } else if (path.startsWith("/pagopa/api")) {
+    } else if (path.startsWith(PagoPABasePath)) {
       sessionStorage.getByWalletToken(token as WalletToken).then(
         (errorOrUser: Either<Error, User>) => {
           fulfill(errorOrUser, done);

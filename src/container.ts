@@ -23,6 +23,7 @@ import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
+import SessionController from "./controllers/sessionController";
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
@@ -176,6 +177,11 @@ if (isLeft(errorOrPagoPACIDR)) {
 registerRequiredValue("AZURE_NH_HUB_NAME", "hubName");
 registerRequiredValue("AZURE_NH_ENDPOINT", "endpointOrConnectionString");
 
+// API endpoint mount.
+registerRequiredValue("AUTHENTICATION_BASE_PATH", "authenticationBasePath");
+registerRequiredValue("API_BASE_PATH", "APIBasePath");
+registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
+
 // Register the spidStrategy.
 export const SPID_STRATEGY = "spidStrategy";
 container.register({
@@ -295,6 +301,12 @@ container.register({
 export const NOTIFICATION_CONTROLLER = "notificationController";
 container.register({
   [NOTIFICATION_CONTROLLER]: awilix.asClass(NotificationController)
+});
+
+// Register the session controller as a service.
+export const SESSION_CONTROLLER = "sessionController";
+container.register({
+  [SESSION_CONTROLLER]: awilix.asClass(SessionController)
 });
 
 // Register the PagoPA controller as a service.

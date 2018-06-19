@@ -35,7 +35,14 @@ const aValidNotification = {
   }
 };
 
-const app = newApp(NodeEnvironmentEnum.PRODUCTION, aValidCIDR, aValidCIDR);
+const app = newApp(
+  NodeEnvironmentEnum.PRODUCTION,
+  aValidCIDR,
+  aValidCIDR,
+  "",
+  "/api/v1",
+  "/pagopa/api/v1"
+);
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 describe("Test redirect to HTTPS", () => {

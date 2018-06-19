@@ -401,25 +401,6 @@ describe("AuthenticationController#logout", () => {
   });
 });
 
-describe("AuthenticationController#getSessionState", () => {
-  it("returns correct session state for valid session", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
-    req.user = mockedUser;
-
-    const response = await controller.getSessionState(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      spidLevel: "https://www.spid.gov.it/SpidL2",
-      walletToken: mockedUser.wallet_token
-    });
-  });
-});
-
 describe("AuthenticationController#metadata", () => {
   beforeEach(() => {
     jest.clearAllMocks();

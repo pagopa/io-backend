@@ -8,19 +8,15 @@ import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
   IResponsePermanentRedirect,
-  IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
   ResponsePermanentRedirect,
-  ResponseSuccessJson,
   ResponseSuccessXml
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
-import { PublicSession } from "../types/api/PublicSession";
 import { SessionToken, WalletToken } from "../types/token";
 import {
   extractUserFromRequest,
@@ -116,32 +112,6 @@ export default class AuthenticationController {
     req.query.entityID = user.spid_idp;
 
     return this.spidLogout(req);
-  }
-
-  /**
-   * Returns data about the current user session.
-   */
-  public async getSessionState(
-    req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<PublicSession>
-  > {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    const user = errorOrUser.value;
-
-    // Return the actual session information.
-    return ResponseSuccessJson({
-      spidLevel: user.spid_level,
-      walletToken: user.wallet_token
-    });
   }
 
   /**
