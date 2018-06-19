@@ -108,7 +108,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyMessagesResponse)))
+      Promise.resolve(right(proxyMessagesResponse))
     );
 
     req.user = "";
@@ -137,7 +137,7 @@ describe("MessagesController#getMessage", () => {
     const req = mockReq();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyMessageResponse)))
+      Promise.resolve(right(proxyMessageResponse))
     );
 
     req.user = mockedUser;
@@ -162,7 +162,7 @@ describe("MessagesController#getMessage", () => {
     const res = mockRes();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyMessageResponse)))
+      Promise.resolve(right(proxyMessageResponse))
     );
 
     req.user = "";

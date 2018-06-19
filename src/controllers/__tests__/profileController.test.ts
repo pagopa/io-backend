@@ -121,9 +121,7 @@ describe("ProfileController#getProfile", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
-    );
+    mockGetProfile.mockReturnValue(Promise.resolve(right(proxyUserResponse)));
 
     req.user = "";
 
@@ -152,7 +150,7 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
+      Promise.resolve(right(proxyUserResponse))
     );
 
     req.user = mockedUser;
@@ -180,7 +178,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
+      Promise.resolve(right(proxyUserResponse))
     );
 
     req.user = "";
@@ -205,7 +203,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyUserResponse)))
+      Promise.resolve(right(proxyUserResponse))
     );
 
     req.user = mockedUser;

@@ -73,9 +73,7 @@ describe("serviceController#getService", () => {
   it("calls the getService on the serviceController with valid values", async () => {
     const req = mockReq();
 
-    mockGetService.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyService)))
-    );
+    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
 
     req.user = mockedUser;
     req.params = { id: aServiceId };
@@ -98,9 +96,7 @@ describe("serviceController#getService", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetService.mockReturnValue(
-      Promise.resolve(Promise.resolve(right(proxyService)))
-    );
+    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
 
     req.user = "";
     req.params = { id: aServiceId };
