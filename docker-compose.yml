@@ -36,3 +36,11 @@ services:
       - "8080:8080"
     volumes:
       - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js:delegated"
+
+  redis:
+    container_name: redis
+    image: wodby/redis:3.2-2.1.5
+    environment:
+      REDIS_TIMEOUT: 300
+      REDIS_TCP_KEEPALIVE: 60
+      REDIS_MAXMEMORY: 182m

@@ -206,12 +206,14 @@ This repository is configured for Nat Pryce's [_adr-tools_](https://github.com/n
 
 Here's the decisions we taken so far:
 
-| ADR | Title                                                                                                                            | PR (discussion)    |
-| --- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| 1   | [Record architecture decisions](doc/architecture/decisions/0001-record-architecture-decisions.md)                                |                    |
-| 2   | [Backend runs on Docker on local environments](doc/architecture/decisions/0002-backend-runs-on-docker-on-local-environments.md)  |                    |
-| 3   | [Use OpenAPI to defined the API specs](doc/architecture/decisions/0003-use-openapi-to-defined-the-api-specs.md)                  |                    |
-| 4   | [Use a dependency injection container](doc/architecture/decisions/0004-use-a-dependency-injection-container.md)                  |                    |
+| ADR | Title                                                                                                                             | PR (discussion)    |
+| --- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| 1   | [Record architecture decisions](doc/architecture/decisions/0001-record-architecture-decisions.md)                                 |                    |
+| 2   | [Backend runs on Docker on local environments](doc/architecture/decisions/0002-backend-runs-on-docker-on-local-environments.md)   |                    |
+| 3   | [Use OpenAPI to defined the API specs](doc/architecture/decisions/0003-use-openapi-to-defined-the-api-specs.md)                   |                    |
+| 4   | [Use a dependency injection container](doc/architecture/decisions/0004-use-a-dependency-injection-container.md)                   |                    |
+| 5   | [Use a GUID as Installation ID](doc/architecture/decisions/0005-use-a-guid-as-installation-id.md)                                 |                    |
+| 6   | [Backend is deployed on more than one instance](doc/architecture/decisions/0006-backend-is-deployed-on-more-than-one-instance.md) |                    |
 ---
 
 ## Troubleshooting

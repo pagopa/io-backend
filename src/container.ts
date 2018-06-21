@@ -15,6 +15,7 @@ import {
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
+import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
 import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
@@ -204,37 +205,43 @@ container.register({
 container.register(
   "redisClient",
   awilix.asFunction(() => {
-    const DEFAULT_REDIS_PORT = "6379";
+    // Use the Docker Redis instance when developing because the Azure Redis cluster isn't accessible outside the Azure
+    // VNet.
+    if (env === NodeEnvironmentEnum.DEVELOPMENT) {
+      return redis.createClient(process.env.REDIS_URL || "redis://redis");
+    } else {
+      const DEFAULT_REDIS_PORT = "6379";
 
-    const redisUrl = process.env.REDIS_URL;
-    const redisPassword = process.env.REDIS_PASSWORD;
-    const redisPort: number = parseInt(
-      process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
-      10
-    );
-
-    if (redisUrl === undefined || redisPassword === undefined) {
-      winston.error(
-        "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD)"
+      const redisUrl = process.env.REDIS_URL;
+      const redisPassword = process.env.REDIS_PASSWORD;
+      const redisPort: number = parseInt(
+        process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
+        10
       );
-      process.exit(1);
-      return;
-    }
 
-    return new RedisClustr({
-      redisOptions: {
-        auth_pass: redisPassword,
-        tls: {
-          servername: redisUrl
-        }
-      },
-      servers: [
-        {
-          host: redisUrl,
-          port: redisPort
-        }
-      ]
-    });
+      if (redisUrl === undefined || redisPassword === undefined) {
+        winston.error(
+          "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD)."
+        );
+        process.exit(1);
+        return;
+      }
+
+      return new RedisClustr({
+        redisOptions: {
+          auth_pass: redisPassword,
+          tls: {
+            servername: redisUrl
+          }
+        },
+        servers: [
+          {
+            host: redisUrl,
+            port: redisPort
+          }
+        ]
+      });
+    }
   })
 );
 
