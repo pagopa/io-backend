@@ -1,6 +1,6 @@
 /* tslint:disable:no-any */
 
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { right } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -41,8 +41,8 @@ const proxyUserResponse = {
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferredLanguages: aPreferredLanguages,
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   token: "123hexToken",
   version: 1 as number
@@ -56,9 +56,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: "123hexToken" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "123hexToken" as WalletToken
@@ -99,9 +99,7 @@ describe("ProfileController#getProfile", () => {
   it("calls the getProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
 
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
-    );
+    mockGetProfile.mockReturnValue(Promise.resolve(right(proxyUserResponse)));
 
     req.user = mockedUser;
 
@@ -123,9 +121,7 @@ describe("ProfileController#getProfile", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
-    );
+    mockGetProfile.mockReturnValue(Promise.resolve(right(proxyUserResponse)));
 
     req.user = "";
 
@@ -154,7 +150,7 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(right(proxyUserResponse))
     );
 
     req.user = mockedUser;
@@ -182,7 +178,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(right(proxyUserResponse))
     );
 
     req.user = "";
@@ -207,7 +203,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+      Promise.resolve(right(proxyUserResponse))
     );
 
     req.user = mockedUser;

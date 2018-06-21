@@ -64,3 +64,12 @@ export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {
 
   return hash.digest("hex") as FiscalCodeHash;
 };
+
+/**
+ * Common response message type.
+ */
+export const SuccessResponse = t.interface({
+  message: t.string
+});
+
+export type SuccessResponse = t.TypeOf<typeof SuccessResponse>;

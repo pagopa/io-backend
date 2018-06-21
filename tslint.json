@@ -6,7 +6,8 @@
     "tslint-sonarts",
     "tslint-immutable",
     "tslint-plugin-prettier",
-    "tslint-config-prettier"
+    "tslint-config-prettier",
+    "italia-tslint-rules"
   ],
   "jsRules": {},
   "rules": {
@@ -31,7 +32,10 @@
     // "no-class": true,
     "no-mixed-interface": false,
     "no-import-side-effect": true,
-    "prettier": true
+    "prettier": true,
+
+    // custom rules
+    "no-tslint-disable-all": true
   },
   "rulesDirectory": [],
   "linterOptions": {
