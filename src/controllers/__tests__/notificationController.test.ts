@@ -26,9 +26,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: "123hexToken" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "123hexToken" as WalletToken
@@ -41,9 +41,9 @@ const mockedInvalidUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: "123hexToken" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "123hexToken" as WalletToken
@@ -60,7 +60,7 @@ const aValidNotification = {
     id: "01CCKCY7QQ7WCHWTH8NB504386",
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
     service_name: "test service"
@@ -77,7 +77,7 @@ const anInvalidNotification = {
     fiscal_code: anInvalidFiscalNumber,
     sender_service_id: "234567"
   },
-  senderMetadata: {
+  sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
     service_name: "test service"
@@ -122,7 +122,9 @@ describe("NotificationController#notify", () => {
   it("should return success if data is correct", async () => {
     const req = mockReq();
 
-    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
 
     req.body = aValidNotification;
 
@@ -131,7 +133,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
   });
 
@@ -139,7 +141,9 @@ describe("NotificationController#notify", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockNotify.mockReturnValue(Promise.resolve(ResponseSuccessJson("ok")));
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
 
     req.body = anInvalidNotification;
 
@@ -162,7 +166,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const req = mockReq();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedUser;
@@ -174,7 +178,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: "ok"
+      value: { message: "ok" }
     });
   });
 
@@ -183,7 +187,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedInvalidUser;
@@ -204,7 +208,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedUser;
@@ -225,7 +229,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson("ok"))
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedUser;

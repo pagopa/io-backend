@@ -65,8 +65,8 @@ Finally the backend will redirect the client to the value of the environment var
 token in the query string. The client must saves the token and use it in all API request.
 
 The code that manage this flow are in the `spid-passport` package (more info
-[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.js` and
-`src/controllers/authenticationController.js` files.
+[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.ts` and
+`src/controllers/authenticationController.ts` files.
 
 ### Token authentication
 
@@ -74,7 +74,7 @@ All API requests sent by the client to the backend must have an `Authorization: 
 token obtained from the SPID authentication process. The token is used to retrieve the User object from the
 `SessionStorage` service.
 
-The code that manage this flow are in the `src/strategies/bearerTokenStrategy.js` file.
+The code that manage this flow are in the `src/strategies/bearerSessionTokenStrategy.ts` file.
 
 ## How to run the application
 
@@ -97,18 +97,19 @@ A Linux/macOS environment is required at the moment.
 5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
 6. run `scripts/generate-api-client.sh` to generate the Autorest API Client
 7. run `scripts/build.sh` to compile the Typescript files
-8. run `docker-compose up -d` to start the containers
-9. edit your `/etc/hosts` file by adding:
+8. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
+9. run `docker-compose up -d` to start the containers
+10. edit your `/etc/hosts` file by adding:
 
-```
-localhost    spid-testenv-identityserver
-localhost    italia-backend
-```
+    ```
+    localhost    spid-testenv-identityserver
+    localhost    italia-backend
+    ```
 
-7. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
-8. run `scripts/import-spid-data.sh` to configure the local IDP
-9. copy `app/.env.example` to `app/.env` and fill the variables with your values
-10. point your browser to [https://italia-backend](https://italia-backend)
+11. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
+12. run `scripts/import-spid-data.sh` to configure the local IDP
+13. copy `app/.env.example` to `app/.env` and fill the variables with your values
+14. point your browser to [https://italia-backend](https://italia-backend)
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).

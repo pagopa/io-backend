@@ -50,9 +50,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "HexToKen" as WalletToken
@@ -88,7 +88,7 @@ describe("profile type", () => {
       mockedGetProfileOKResponse.isWebhookEnabled
     );
     expect(userData.name).toBe(mockedUser.name);
-    expect(userData.preferred_email).toBe(mockedUser.preferred_email);
+    expect(userData.spid_email).toBe(mockedUser.spid_email);
     expect(userData.preferred_languages).toBe(
       mockedGetProfileOKResponse.preferredLanguages
     );
@@ -107,7 +107,7 @@ describe("profile type", () => {
     expect(userData.has_profile).toBeFalsy();
     expect(userData.is_email_set).toBeFalsy();
 
-    expect(userData.preferred_email).toBe(mockedUser.preferred_email);
+    expect(userData.spid_email).toBe(mockedUser.spid_email);
     expect(userData.version).toBe(0);
   });
 

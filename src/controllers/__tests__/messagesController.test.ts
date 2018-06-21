@@ -1,6 +1,6 @@
 /* tslint:disable:no-any */
 
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { right } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -49,9 +49,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: "123hexToken" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "123hexToken" as WalletToken
@@ -84,7 +84,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const req = mockReq();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+      Promise.resolve(right(proxyMessagesResponse))
     );
 
     req.user = mockedUser;
@@ -108,7 +108,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+      Promise.resolve(right(proxyMessagesResponse))
     );
 
     req.user = "";
@@ -137,7 +137,7 @@ describe("MessagesController#getMessage", () => {
     const req = mockReq();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+      Promise.resolve(right(proxyMessageResponse))
     );
 
     req.user = mockedUser;
@@ -162,7 +162,7 @@ describe("MessagesController#getMessage", () => {
     const res = mockRes();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+      Promise.resolve(right(proxyMessageResponse))
     );
 
     req.user = "";

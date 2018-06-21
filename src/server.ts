@@ -15,8 +15,24 @@ const env = container.resolve<NodeEnvironmentEnum>("env");
 const allowNotifyIPSourceRange = container.resolve<CIDR>(
   "allowNotifyIPSourceRange"
 );
+const allowPagoPAIPSourceRange = container.resolve<CIDR>(
+  "allowPagoPAIPSourceRange"
+);
 
-const app = newApp(env, allowNotifyIPSourceRange);
+export const authenticationBasePath = container.resolve<string>(
+  "authenticationBasePath"
+);
+export const APIBasePath = container.resolve<string>("APIBasePath");
+export const PagoPABasePath = container.resolve<string>("PagoPABasePath");
+
+const app = newApp(
+  env,
+  allowNotifyIPSourceRange,
+  allowPagoPAIPSourceRange,
+  authenticationBasePath,
+  APIBasePath,
+  PagoPABasePath
+);
 
 // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
 // Kubernetes so the proxy has to run on HTTPS to behave correctly.

@@ -5,9 +5,13 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
+import {
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
+import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
 export default class ServicesController {
@@ -30,6 +34,17 @@ export default class ServicesController {
 
     // TODO: validate req.params.id
     const user = errorOrUser.value;
-    return this.messagesService.getService(user, req.params.id);
+    const errorOrService = await this.messagesService.getService(
+      user,
+      req.params.id
+    );
+
+    if (isLeft(errorOrService)) {
+      const error = errorOrService.value;
+      return toHttpError(error);
+    }
+
+    const service = errorOrService.value;
+    return ResponseSuccessJson(service);
   }
 }
