@@ -1,6 +1,6 @@
 {
   "name": "italia-backend",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "Italia app and web backend",
   "main": "index.js",
   "engines": {
@@ -85,6 +85,7 @@
     "danger": "^3.7.18",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "fp-ts": "^1.6.2",
+    "italia-tslint-rules": "^0.1.1",
     "italia-utils": "^3.8.1",
     "jest": "^23.1.0",
     "lolex": "2.7.0",
