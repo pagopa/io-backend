@@ -1,3 +1,4 @@
+import { left, right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
@@ -171,9 +172,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: aValidEmail,
   sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
+  spid_email: aValidEmail,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "HexToKen" as WalletToken
@@ -215,11 +216,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessagesResponse
-    });
+    expect(res).toEqual(right(proxyMessagesResponse));
   });
 
   it("returns an empty list if the of messages from the API is empty", async () => {
@@ -233,10 +230,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorNotFound"
-    });
+    expect(res).toEqual(left("Not found."));
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
@@ -288,11 +282,7 @@ describe("MessageService#getMessage", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
+    expect(res).toEqual(right(proxyMessageResponse));
   });
 
   it("returns an error if the getMessage API returns an error", async () => {
@@ -344,11 +334,7 @@ describe("MessageService#getService", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyServiceResponse
-    });
+    expect(res).toEqual(right(proxyServiceResponse));
   });
 
   it("returns an error if the API returns an error", async () => {

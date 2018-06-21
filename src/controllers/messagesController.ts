@@ -5,10 +5,14 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
+import {
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
+import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
 export default class MessagesController {
@@ -30,7 +34,15 @@ export default class MessagesController {
     }
 
     const user = errorOrUser.value;
-    return this.messagesService.getMessagesByUser(user);
+    const errorOrMessages = await this.messagesService.getMessagesByUser(user);
+
+    if (isLeft(errorOrMessages)) {
+      const error = errorOrMessages.value;
+      return toHttpError(error);
+    }
+
+    const messages = errorOrMessages.value;
+    return ResponseSuccessJson(messages);
   }
 
   /**
@@ -49,6 +61,17 @@ export default class MessagesController {
 
     // TODO: validate req.params.id
     const user = errorOrUser.value;
-    return this.messagesService.getMessage(user, req.params.id);
+    const errorOrMessage = await this.messagesService.getMessage(
+      user,
+      req.params.id
+    );
+
+    if (isLeft(errorOrMessage)) {
+      const error = errorOrMessage.value;
+      return toHttpError(error);
+    }
+
+    const message = errorOrMessage.value;
+    return ResponseSuccessJson(message);
   }
 }

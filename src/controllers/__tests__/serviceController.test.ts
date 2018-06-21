@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
+import { right } from "fp-ts/lib/Either";
 import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -41,9 +41,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "123sessionIndex",
   session_token: "123hexToken" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "123hexToken" as WalletToken
@@ -73,9 +73,7 @@ describe("serviceController#getService", () => {
   it("calls the getService on the serviceController with valid values", async () => {
     const req = mockReq();
 
-    mockGetService.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyService))
-    );
+    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
 
     req.user = mockedUser;
     req.params = { id: aServiceId };
@@ -98,9 +96,7 @@ describe("serviceController#getService", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetService.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyService))
-    );
+    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
 
     req.user = "";
     req.params = { id: aServiceId };

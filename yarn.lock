@@ -2915,6 +2915,10 @@ italia-ts-commons@^2.1.0:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
+italia-tslint-rules@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/italia-tslint-rules/-/italia-tslint-rules-0.1.1.tgz#b150373925a268ff892a545229708484ac0533ba"
+
 italia-utils@^3.8.1:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-3.8.1.tgz#e4cfdb58d2dc8849841234972dfd2ac6bd4ba1f7"
@@ -3340,6 +3344,13 @@ js-tokens@^3.0.0, js-tokens@^3.0.2:
 js-yaml@^3.11.0, js-yaml@^3.7.0:
   version "3.11.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.11.0.tgz#597c1a8bd57152f26d622ce4117851a51f5ebaef"
+  dependencies:
+    argparse "^1.0.7"
+    esprima "^4.0.0"
+
+js-yaml@^3.12.0:
+  version "3.12.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.12.0.tgz#eaed656ec8344f10f527c6bfa1b6e2244de167d1"
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
@@ -5346,11 +5357,12 @@ supports-hyperlinks@^1.0.1:
     has-flag "^2.0.0"
     supports-color "^5.0.0"
 
-swagger-cli@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.0.0.tgz#0c965ecc2748d6ec082797258b7a96c1d4074e67"
+swagger-cli@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.1.0.tgz#6470e13a53c02e8b4a76d285d55de1bd01c46251"
   dependencies:
     chalk "^2.4.1"
+    js-yaml "^3.12.0"
     mkdirp "^0.5.1"
     swagger-parser "^5.0.0"
     yargs "^11.0.0"

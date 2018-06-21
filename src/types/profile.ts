@@ -32,8 +32,8 @@ export function toAppProfileWithEmail(
     is_inbox_enabled: from.isInboxEnabled,
     is_webhook_enabled: from.isWebhookEnabled,
     name: user.name,
-    preferred_email: user.preferred_email,
     preferred_languages: from.preferredLanguages,
+    spid_email: user.spid_email,
     version: from.version
   };
 }
@@ -52,7 +52,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     is_inbox_enabled: false,
     is_webhook_enabled: false,
     name: user.name,
-    preferred_email: user.preferred_email,
+    spid_email: user.spid_email,
     version: 0 as NonNegativeNumber
   };
 }
