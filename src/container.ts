@@ -20,8 +20,10 @@ import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
+import PagoPAController from "./controllers/pagoPAController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
+import SessionController from "./controllers/sessionController";
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
@@ -144,22 +146,41 @@ container.register({
 registerRequiredValue("PRE_SHARED_KEY", "preSharedKey");
 
 // Range IP allowed for notification.
-const errorOrCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
-if (isLeft(errorOrCIDR)) {
+const errorOrNotifyCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
+if (isLeft(errorOrNotifyCIDR)) {
   winston.error(
     "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
-    ReadableReporter.report(errorOrCIDR)
+    ReadableReporter.report(errorOrNotifyCIDR)
   );
   process.exit(1);
 } else {
   container.register({
-    allowNotifyIPSourceRange: awilix.asValue(errorOrCIDR.value)
+    allowNotifyIPSourceRange: awilix.asValue(errorOrNotifyCIDR.value)
+  });
+}
+
+// Range IP allowed for PagoPA proxy.
+const errorOrPagoPACIDR = CIDR.decode(process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE);
+if (isLeft(errorOrPagoPACIDR)) {
+  winston.error(
+    "Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: %s",
+    ReadableReporter.report(errorOrPagoPACIDR)
+  );
+  process.exit(1);
+} else {
+  container.register({
+    allowPagoPAIPSourceRange: awilix.asValue(errorOrPagoPACIDR.value)
   });
 }
 
 // Azure Notification Hub credentials.
 registerRequiredValue("AZURE_NH_HUB_NAME", "hubName");
 registerRequiredValue("AZURE_NH_ENDPOINT", "endpointOrConnectionString");
+
+// API endpoint mount.
+registerRequiredValue("AUTHENTICATION_BASE_PATH", "authenticationBasePath");
+registerRequiredValue("API_BASE_PATH", "APIBasePath");
+registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
 
 // Register the spidStrategy.
 export const SPID_STRATEGY = "spidStrategy";
@@ -276,10 +297,22 @@ container.register({
   [SERVICES_CONTROLLER]: awilix.asClass(ServicesController)
 });
 
-// Register the services controller as a service.
+// Register the notification controller as a service.
 export const NOTIFICATION_CONTROLLER = "notificationController";
 container.register({
   [NOTIFICATION_CONTROLLER]: awilix.asClass(NotificationController)
+});
+
+// Register the session controller as a service.
+export const SESSION_CONTROLLER = "sessionController";
+container.register({
+  [SESSION_CONTROLLER]: awilix.asClass(SessionController)
+});
+
+// Register the PagoPA controller as a service.
+export const PAGOPA_CONTROLLER = "pagopaController";
+container.register({
+  [PAGOPA_CONTROLLER]: awilix.asClass(PagoPAController)
 });
 
 export default container;

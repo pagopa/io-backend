@@ -15,6 +15,7 @@ import NotificationService from "../services/notificationService";
 import { Installation } from "../types/api/Installation";
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
+import { SuccessResponse } from "../types/notification";
 import { extractUserFromRequest } from "../types/user";
 
 export default class NotificationController {
@@ -22,7 +23,7 @@ export default class NotificationController {
 
   public async notify(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
     const errorOrNotification = Notification.decode(req.body);
 
     if (isLeft(errorOrNotification)) {
@@ -40,7 +41,7 @@ export default class NotificationController {
 
   public async createOrUpdateInstallation(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<string>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

@@ -47,8 +47,12 @@ jobs:
           environment:
             PRE_SHARED_KEY: "12345"
             ALLOW_NOTIFY_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
+            ALLOW_PAGOPA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             AZURE_NH_HUB_NAME: ""
             AZURE_NH_ENDPOINT: ""
+            AUTHENTICATION_BASE_PATH: ""
+            API_BASE_PATH: "/api/v1"
+            PAGOPA_BASE_PATH: "/pagopa/api/v1"
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
       # Run DangerJS

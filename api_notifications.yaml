@@ -36,7 +36,7 @@ paths:
                 fiscal_code: "TMMEXQ60A10Y526X"
                 id: "01CCKCY7QQ7WCHWTH8NB504386"
                 sender_service_id: "5a25abf4fcc89605c082f042c49a"
-              senderMetadata:
+              sender_metadata:
                 department_name: "Department name"
                 organization_name: "Organization name"
                 service_name: "Service name"
@@ -74,11 +74,11 @@ definitions:
     properties:
       message:
         $ref: '#/definitions/CreatedMessageWithContent'
-      senderMetadata:
+      sender_metadata:
         $ref: '#/definitions/SenderMetadata'
     required:
       - message
-      - senderMetadata
+      - sender_metadata
 responses: {}
 parameters: {}
 consumes:

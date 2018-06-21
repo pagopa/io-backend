@@ -49,9 +49,9 @@ const mockedUser: User = {
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  preferred_email: anEmailAddress,
   sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
+  spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   wallet_token: "HexToKen" as WalletToken
