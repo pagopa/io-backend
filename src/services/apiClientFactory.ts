@@ -2,10 +2,10 @@
  * This service builds API client by wrapping the DigitalCitizenshipAPI client
  * built by the AutoRest tool.
  *
- * @see ../api/digitalCitizenshipAPI
+ * @see ../clients/api/digitalCitizenshipAPI
  */
 
-import { DigitalCitizenshipAPI } from "../api/digitalCitizenshipAPI";
+import { DigitalCitizenshipAPI } from "../clients/api/digitalCitizenshipAPI";
 import { APICredentials } from "../utils/APICredential";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 

@@ -64,7 +64,7 @@ const mockedExtendedProfile: ExtendedProfile = {
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
-  version: 1 as number
+  version: 1 as NonNegativeInteger
 };
 
 describe("profile type", () => {

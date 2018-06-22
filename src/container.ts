@@ -21,12 +21,15 @@ import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
+import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import SessionController from "./controllers/sessionController";
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
+import PagoPAClientFactory from "./services/pagoPAClientFactory";
+import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import TokenService from "./services/tokenService";
@@ -270,6 +273,12 @@ container.register({
   [API_CLIENT]: awilix.asClass(ApiClientFactory)
 });
 
+// Register a factory service to create PagoPA client.
+export const PAGOPA_CLIENT = "pagoPAClient";
+container.register({
+  [PAGOPA_CLIENT]: awilix.asClass(PagoPAClientFactory)
+});
+
 // Register the profile service.
 export const PROFILE_SERVICE = "profileService";
 container.register({
@@ -286,6 +295,12 @@ container.register({
 export const NOTIFICATION_SERVICE = "notificationService";
 container.register({
   [NOTIFICATION_SERVICE]: awilix.asClass(NotificationService)
+});
+
+// Register the PagoPA proxy service.
+export const PAGOPA_PROXY_SERVICE = "pagoPAProxyService";
+container.register({
+  [PAGOPA_PROXY_SERVICE]: awilix.asClass(PagoPAProxyService)
 });
 
 // Register the authentication controller as a service.
@@ -325,9 +340,15 @@ container.register({
 });
 
 // Register the PagoPA controller as a service.
-export const PAGOPA_CONTROLLER = "pagopaController";
+export const PAGOPA_CONTROLLER = "pagoPAController";
 container.register({
   [PAGOPA_CONTROLLER]: awilix.asClass(PagoPAController)
+});
+
+// Register the PagoPAProxy controller as a service.
+export const PAGOPA_PROXY_CONTROLLER = "pagoPAProxyController";
+container.register({
+  [PAGOPA_PROXY_CONTROLLER]: awilix.asClass(PagoPAProxyController)
 });
 
 export default container;
