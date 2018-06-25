@@ -21,4 +21,8 @@ export default class SimpleResponse {
   public isNotFound(): boolean {
     return this.httpOperationResponse.response.status === 404;
   }
+
+  public isInternalError(): boolean {
+    return this.httpOperationResponse.response.status === 500;
+  }
 }

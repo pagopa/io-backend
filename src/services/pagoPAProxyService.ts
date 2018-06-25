@@ -10,9 +10,12 @@ import {
   PaymentRequestsGetResponse,
   ProxyPagoPAActivatePaymentOptionalParams
 } from "../clients/pagopa/models";
-import { internalError, ServiceError } from "../types/error";
+import { internalError, notFoundError, ServiceError } from "../types/error";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
+
+const notFoundErrorMessage = "Payment info not found.";
+const internalErrorMessage = "Internal error.";
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
@@ -29,8 +32,12 @@ export default class PagoPAProxyService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (!simpleResponse.isOk()) {
-      return left(internalError(""));
+    if (simpleResponse.isNotFound()) {
+      return left(notFoundError(notFoundErrorMessage));
+    }
+
+    if (simpleResponse.isInternalError()) {
+      return left(internalError(internalErrorMessage));
     }
 
     return right(simpleResponse.parsedBody());
@@ -51,8 +58,12 @@ export default class PagoPAProxyService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (!simpleResponse.isOk()) {
-      return left(internalError(""));
+    if (simpleResponse.isNotFound()) {
+      return left(notFoundError(notFoundErrorMessage));
+    }
+
+    if (simpleResponse.isInternalError()) {
+      return left(internalError(internalErrorMessage));
     }
 
     return right(simpleResponse.parsedBody());
@@ -70,8 +81,12 @@ export default class PagoPAProxyService {
 
     const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (!simpleResponse.isOk()) {
-      return left(internalError(""));
+    if (simpleResponse.isNotFound()) {
+      return left(notFoundError(notFoundErrorMessage));
+    }
+
+    if (simpleResponse.isInternalError()) {
+      return left(internalError(internalErrorMessage));
     }
 
     return right(simpleResponse.parsedBody());
