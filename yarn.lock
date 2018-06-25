@@ -171,9 +171,9 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@types/superagent@*", "@types/superagent@^3.8.0":
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/@types/superagent/-/superagent-3.8.0.tgz#e7f81d93a54eaad60a64f9b3c4911990721ca536"
+"@types/superagent@*", "@types/superagent@^3.8.1":
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/@types/superagent/-/superagent-3.8.1.tgz#2dcb111c1a1c565dfceb2c34f1f440b3ff68c781"
   dependencies:
     "@types/node" "*"
 
