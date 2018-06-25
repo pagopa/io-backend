@@ -2954,14 +2954,15 @@ istanbul-reports@^1.3.0:
   dependencies:
     handlebars "^4.0.3"
 
-italia-ts-commons@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-2.1.0.tgz#440d3ec47e97de8965a07963835311712b4c17dc"
+italia-ts-commons@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-2.5.0.tgz#bf49b82ec043041805776c7ee784a425ccd25e3b"
   dependencies:
     fp-ts "^1.6.0"
     io-ts "^1.1.4"
     json-set-map "^1.0.2"
     validator "^10.1.0"
+    winston "^3.0.0"
 
 italia-tslint-rules@^0.1.1:
   version "0.1.1"
