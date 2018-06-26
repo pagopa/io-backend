@@ -5,6 +5,7 @@ RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-3.2
 WORKDIR /usr/src/app
 
 COPY /src /usr/src/app/src
+COPY /patches /usr/src/app/patches
 COPY /package.json /usr/src/app/package.json
 COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
