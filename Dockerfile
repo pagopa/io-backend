@@ -11,6 +11,7 @@ COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
 COPY /api_notifications.yaml /usr/src/app/api_notifications.yaml
 COPY /api_proxy.yaml /usr/src/app/api_proxy.yaml
+COPY /api_pagopa.yaml /usr/src/app/api_pagopa.yaml
 
 RUN sudo chmod -R 777 /usr/src/app \
   && yarn install \
