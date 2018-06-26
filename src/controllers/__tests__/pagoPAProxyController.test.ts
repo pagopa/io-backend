@@ -6,9 +6,7 @@ import { internalError } from "../../types/error";
 import PagoPAProxyController from "../pagoPAProxyController";
 
 const aRptId = "123456";
-const acodiceContestoPagamento = "ABC123";
 
-const notFoundErrorMessage = "Payment info not found.";
 const internalErrorMessage = "Internal error.";
 
 const proxyPaymentInfoResponse = {
@@ -75,7 +73,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
     expect(response).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorInternal"
     });
   });
 });
