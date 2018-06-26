@@ -6,9 +6,9 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
 import { isNumber } from "util";
-import * as winston from "winston";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
+import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 
 const sessionKeyPrefix = "SESSION-";
@@ -164,7 +164,7 @@ export default class RedisSessionStorage implements ISessionStorage {
           const errorOrDeserializedUser = User.decode(userPayload);
 
           if (isLeft(errorOrDeserializedUser)) {
-            winston.error(
+            log.error(
               "Unable to decode the user: %s",
               ReadableReporter.report(errorOrDeserializedUser)
             );

@@ -7,7 +7,7 @@ import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
-import * as winston from "winston";
+import { log } from "../utils/logger";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
@@ -107,7 +107,7 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
 
   // Log the invalid SPID level to audit IDP responses.
   if (!isSpidL(valueWithoutPrefix.authnContextClassRef)) {
-    winston.warn(
+    log.warn(
       "Response from IDP: %s doesn't contain a valid SPID level: %s",
       value.issuer._,
       value.authnContextClassRef

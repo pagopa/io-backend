@@ -17,7 +17,6 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
-import * as winston from "winston";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -34,6 +33,7 @@ import TokenService from "./services/tokenService";
 import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
+import { log } from "./utils/logger";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -107,7 +107,7 @@ const clientProfileRedirectionUrl =
   process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
 
 if (!clientProfileRedirectionUrl.includes("{token}")) {
-  winston.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
+  log.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
 }
 container.register({
   clientErrorRedirectionUrl: awilix.asValue(
@@ -133,7 +133,8 @@ const tokenDurationSecs: number = parseInt(
   process.env.TOKEN_DURATION_IN_SECONDS || DEFAULT_TOKEN_DURATION_IN_SECONDS,
   10
 );
-winston.info("Session token duration set to %s seconds", tokenDurationSecs);
+log.info("Session token duration set to %s seconds", tokenDurationSecs);
+
 container.register({
   tokenDurationSecs: awilix.asValue(tokenDurationSecs)
 });
@@ -149,7 +150,7 @@ registerRequiredValue("PRE_SHARED_KEY", "preSharedKey");
 // Range IP allowed for notification.
 const errorOrNotifyCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
 if (isLeft(errorOrNotifyCIDR)) {
-  winston.error(
+  log.error(
     "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
     ReadableReporter.report(errorOrNotifyCIDR)
   );
@@ -163,7 +164,7 @@ if (isLeft(errorOrNotifyCIDR)) {
 // Range IP allowed for PagoPA proxy.
 const errorOrPagoPACIDR = CIDR.decode(process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE);
 if (isLeft(errorOrPagoPACIDR)) {
-  winston.error(
+  log.error(
     "Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: %s",
     ReadableReporter.report(errorOrPagoPACIDR)
   );
@@ -220,7 +221,7 @@ container.register(
       );
 
       if (redisUrl === undefined || redisPassword === undefined) {
-        winston.error(
+        log.error(
           "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD)."
         );
         process.exit(1);
@@ -332,7 +333,7 @@ export default container;
  * @returns {string}
  */
 function readFile(path: string, type: string): string {
-  winston.info("Reading %s file from %s", type, path);
+  log.info("Reading %s file from %s", type, path);
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   return fs.readFileSync(path, "utf-8");
 }
@@ -345,7 +346,7 @@ function readFile(path: string, type: string): string {
  */
 function registerRequiredValue(envName: string, valueName: string): void {
   if (process.env[envName] === undefined) {
-    winston.error("Missing %s environment variable", envName);
+    log.error("Missing %s environment variable", envName);
     process.exit(1);
   } else {
     container.register({
