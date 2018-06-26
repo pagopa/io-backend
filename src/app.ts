@@ -111,7 +111,9 @@ export function newApp(
   // Add security to http headers.
   app.use(helmet());
   // Add a request logger.
-  app.use(morgan("combined"));
+  const loggerFormat =
+    ":date[iso] [info]: :method :url :status - :response-time ms";
+  app.use(morgan(loggerFormat));
   // Parse the incoming request body. This is needed by Passport spid strategy.
   app.use(bodyParser.json());
   // Parse an urlencoded body.

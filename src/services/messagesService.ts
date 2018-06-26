@@ -9,7 +9,6 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import * as winston from "winston";
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
@@ -24,6 +23,7 @@ import {
 } from "../types/message";
 import { toAppService } from "../types/service";
 import { User } from "../types/user";
+import { log } from "../utils/logger";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -56,7 +56,7 @@ export default class MessagesService {
         simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
-        winston.error(
+        log.error(
           "Unknown response from getMessagesByUser API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
@@ -66,7 +66,7 @@ export default class MessagesService {
       if (simpleResponse.isNotFound()) {
         return left(notFoundError(messageNotFound));
       } else {
-        winston.error("Api error: %s", simpleResponse.parsedBody());
+        log.error("Api error: %s", simpleResponse.parsedBody());
         return left(internalError(messageErrorOnApiError));
       }
     }
@@ -75,7 +75,7 @@ export default class MessagesService {
       simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiMessages)) {
-      winston.error(
+      log.error(
         "Unknown response from getMessagesByUser API: %s",
         ReadableReporter.report(errorOrApiMessages)
       );
@@ -109,7 +109,7 @@ export default class MessagesService {
         simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
-        winston.error(
+        log.error(
           "Unknown response from getMessage API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
@@ -119,7 +119,7 @@ export default class MessagesService {
       if (simpleResponse.isNotFound()) {
         return left(notFoundError(messageNotFound));
       } else {
-        winston.error("Api error: %s", simpleResponse.parsedBody());
+        log.error("Api error: %s", simpleResponse.parsedBody());
         return left(internalError(messageErrorOnApiError));
       }
     }
@@ -128,7 +128,7 @@ export default class MessagesService {
       simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiMessage)) {
-      winston.error(
+      log.error(
         "Unknown response from getMessage API: %s",
         ReadableReporter.report(errorOrApiMessage)
       );
@@ -157,7 +157,7 @@ export default class MessagesService {
         simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
-        winston.error(
+        log.error(
           "Unknown response from getService API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
@@ -175,7 +175,7 @@ export default class MessagesService {
       simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiService)) {
-      winston.error(
+      log.error(
         "Unknown response from getService API: %s",
         ReadableReporter.report(errorOrApiService)
       );

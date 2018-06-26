@@ -10,13 +10,13 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
-import * as winston from "winston";
 import NotificationService from "../services/notificationService";
 import { Installation } from "../types/api/Installation";
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
 import { SuccessResponse } from "../types/notification";
 import { extractUserFromRequest } from "../types/user";
+import { log } from "../utils/logger";
 
 export default class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
@@ -27,7 +27,7 @@ export default class NotificationController {
     const errorOrNotification = Notification.decode(req.body);
 
     if (isLeft(errorOrNotification)) {
-      winston.error(
+      log.error(
         "Unable to parse the notification body: %s",
         ReadableReporter.report(errorOrNotification)
       );
@@ -53,7 +53,7 @@ export default class NotificationController {
     const errorOrInstallationID = InstallationID.decode(req.params.id);
 
     if (isLeft(errorOrInstallationID)) {
-      winston.error(
+      log.error(
         "Unable to parse the installation ID: %s",
         ReadableReporter.report(errorOrInstallationID)
       );
@@ -63,7 +63,7 @@ export default class NotificationController {
     const errorOrInstallation = Installation.decode(req.body);
 
     if (isLeft(errorOrInstallation)) {
-      winston.error(
+      log.error(
         "Unable to parse the installation data: %s",
         ReadableReporter.report(errorOrInstallation)
       );

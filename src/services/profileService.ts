@@ -10,7 +10,6 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import * as winston from "winston";
 import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
@@ -24,6 +23,7 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
+import { log } from "../utils/logger";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -55,7 +55,7 @@ export default class ProfileService {
         simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
-        winston.error(
+        log.error(
           "Unknown response from getProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
@@ -76,7 +76,7 @@ export default class ProfileService {
       simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiProfile)) {
-      winston.error(
+      log.error(
         "Unknown response from getProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
@@ -108,7 +108,7 @@ export default class ProfileService {
         simpleResponse.parsedBody()
       );
       if (isLeft(errorOrProblemJson)) {
-        winston.error(
+        log.error(
           "Unknown response from upsertProfile API: %s",
           ReadableReporter.report(errorOrProblemJson)
         );
@@ -122,7 +122,7 @@ export default class ProfileService {
       simpleResponse.parsedBody()
     );
     if (isLeft(errorOrApiProfile)) {
-      winston.error(
+      log.error(
         "Unknown response from upsertProfile API: %s",
         ReadableReporter.report(errorOrApiProfile)
       );
