@@ -283,7 +283,7 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/payment-requests/{rptId}`,
+    `${basePath}/payment-requests/:rptId`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(pagoPAProxyController.getPaymentInfo)(
@@ -307,7 +307,7 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/payment-activations/{codiceContestoPagamento}`,
+    `${basePath}/payment-activations/:codiceContestoPagamento`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(pagoPAProxyController.getActivationStatus)(

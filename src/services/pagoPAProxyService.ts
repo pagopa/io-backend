@@ -26,21 +26,25 @@ export default class PagoPAProxyService {
   public async getPaymentInfo(
     rptId: string
   ): Promise<Either<ServiceError, PaymentRequestsGetResponse>> {
-    const response = await this.pagoPAClient
-      .getClient("", rptId)
-      .getPaymentInfoWithHttpOperationResponse();
+    try {
+      const response = await this.pagoPAClient
+        .getClient("", rptId)
+        .getPaymentInfoWithHttpOperationResponse();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.isNotFound()) {
-      return left(notFoundError(notFoundErrorMessage));
+      if (simpleResponse.isNotFound()) {
+        return left(notFoundError(notFoundErrorMessage));
+      }
+
+      if (simpleResponse.isInternalError()) {
+        return left(internalError(internalErrorMessage));
+      }
+
+      return right(simpleResponse.parsedBody());
+    } catch (error) {
+      return left(internalError(error.message));
     }
-
-    if (simpleResponse.isInternalError()) {
-      return left(internalError(internalErrorMessage));
-    }
-
-    return right(simpleResponse.parsedBody());
   }
 
   /**
@@ -52,21 +56,26 @@ export default class PagoPAProxyService {
     const params: ProxyPagoPAActivatePaymentOptionalParams = {
       body: payload
     };
-    const response = await this.pagoPAClient
-      .getClient("", "")
-      .activatePaymentWithHttpOperationResponse(params);
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+    try {
+      const response = await this.pagoPAClient
+        .getClient("", "")
+        .activatePaymentWithHttpOperationResponse(params);
 
-    if (simpleResponse.isNotFound()) {
-      return left(notFoundError(notFoundErrorMessage));
+      const simpleResponse = new SimpleHttpOperationResponse(response);
+
+      if (simpleResponse.isNotFound()) {
+        return left(notFoundError(notFoundErrorMessage));
+      }
+
+      if (simpleResponse.isInternalError()) {
+        return left(internalError(internalErrorMessage));
+      }
+
+      return right(simpleResponse.parsedBody());
+    } catch (error) {
+      return left(internalError(error.message));
     }
-
-    if (simpleResponse.isInternalError()) {
-      return left(internalError(internalErrorMessage));
-    }
-
-    return right(simpleResponse.parsedBody());
   }
 
   /**
@@ -75,20 +84,24 @@ export default class PagoPAProxyService {
   public async getActivationStatus(
     codiceContestoPagamento: string
   ): Promise<Either<ServiceError, PaymentActivationsGetResponse>> {
-    const response = await this.pagoPAClient
-      .getClient(codiceContestoPagamento, "")
-      .getActivationStatusWithHttpOperationResponse();
+    try {
+      const response = await this.pagoPAClient
+        .getClient(codiceContestoPagamento, "")
+        .getActivationStatusWithHttpOperationResponse();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const simpleResponse = new SimpleHttpOperationResponse(response);
 
-    if (simpleResponse.isNotFound()) {
-      return left(notFoundError(notFoundErrorMessage));
+      if (simpleResponse.isNotFound()) {
+        return left(notFoundError(notFoundErrorMessage));
+      }
+
+      if (simpleResponse.isInternalError()) {
+        return left(internalError(internalErrorMessage));
+      }
+
+      return right(simpleResponse.parsedBody());
+    } catch (error) {
+      return left(internalError(error.message));
     }
-
-    if (simpleResponse.isInternalError()) {
-      return left(internalError(internalErrorMessage));
-    }
-
-    return right(simpleResponse.parsedBody());
   }
 }
