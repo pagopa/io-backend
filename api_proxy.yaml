@@ -268,7 +268,7 @@ paths:
         "500":
           description: PagoPA services are not available or request is rejected
   "/payment-activations":
-    x-swagger-drouter-controller: PagoPAProxyController
+    x-swagger-router-controller: PagoPAProxyController
     post:
       operationId: activatePayment
       summary: Activate Payment
@@ -372,7 +372,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ProblemJson"
-<<<<<<< HEAD
   RptIdFromString:
     $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/skeleton_with_soap_server/api_pagopa.yaml#/definitions/RptIdFromString"
   ServiceId:
