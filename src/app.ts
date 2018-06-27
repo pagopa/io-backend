@@ -32,7 +32,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { IResponse } from "italia-ts-commons/lib/responses";
+import { toExpressHandler } from "italia-ts-commons/lib/express";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
@@ -68,15 +68,6 @@ function withSpidAuth(
       const response = await controller.acs(user);
       response.apply(res);
     })(req, res, next);
-  };
-}
-
-function toExpressHandler<T>(
-  handler: (req: express.Request) => Promise<IResponse<T>>
-): <P>(object: P, req: express.Request, res: express.Response) => void {
-  return async (object, req, res) => {
-    const response = await handler.call(object, req);
-    response.apply(res);
   };
 }
 
@@ -156,7 +147,7 @@ function registerPagoPARoutes(
     checkIP(allowPagoPAIPSourceRange),
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagopaController.getUser)(pagopaController, req, res);
+      toExpressHandler(pagopaController.getUser)(req, res, pagopaController);
     }
   );
 }
@@ -194,9 +185,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(profileController.getProfile)(
-        profileController,
         req,
-        res
+        res,
+        profileController
       );
     }
   );
@@ -206,9 +197,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(profileController.upsertProfile)(
-        profileController,
         req,
-        res
+        res,
+        profileController
       );
     }
   );
@@ -218,9 +209,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(messagesController.getMessagesByUser)(
-        messagesController,
         req,
-        res
+        res,
+        messagesController
       );
     }
   );
@@ -230,9 +221,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(messagesController.getMessage)(
-        messagesController,
         req,
-        res
+        res,
+        messagesController
       );
     }
   );
@@ -242,9 +233,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(servicesController.getService)(
-        servicesController,
         req,
-        res
+        res,
+        servicesController
       );
     }
   );
@@ -254,9 +245,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(notificationController.createOrUpdateInstallation)(
-        notificationController,
         req,
-        res
+        res,
+        notificationController
       );
     }
   );
@@ -267,9 +258,9 @@ function registerAPIRoutes(
     urlTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(notificationController.notify)(
-        notificationController,
         req,
-        res
+        res,
+        notificationController
       );
     }
   );
@@ -279,9 +270,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(sessionController.getSessionState)(
-        sessionController,
         req,
-        res
+        res,
+        sessionController
       );
     }
   );
@@ -307,18 +298,18 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
     `${basePath}/logout`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.logout)(acsController, req, res);
+      toExpressHandler(acsController.logout)(req, res, acsController);
     }
   );
 
   app.post(`${basePath}/slo`, (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.slo)(acsController, req, res);
+    toExpressHandler(acsController.slo)(req, res, acsController);
   });
 
   app.get(
     `${basePath}/metadata`,
     (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.metadata)(acsController, req, res);
+      toExpressHandler(acsController.metadata)(req, res, acsController);
     }
   );
 }
