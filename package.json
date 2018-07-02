@@ -90,7 +90,7 @@
     "lolex": "2.7.0",
     "mock-redis-client": "^0.91.13",
     "nodemon": "^1.17.5",
-    "prettier": "^1.13.5",
+    "prettier": "^1.13.7",
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
     "swagger-cli": "^2.1.0",
