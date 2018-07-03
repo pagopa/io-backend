@@ -10,6 +10,8 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/teamdigitale/italia-backend/maintainability)
 
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend?ref=badge_shield)
+
 # Digital citizenship web and mobile backend
 
 This repository contains the code of the backend used by the [web](https://github.com/teamdigitale/italia-web) and
@@ -234,3 +236,7 @@ Docker Toolbox it works fine (and can [coexist](https://docs.docker.com/docker-f
 `# users imported: -- Error [object Object]`**
 
 Have you waited the IDP to start successfully? Wait a minute and retry.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend?ref=badge_large)
