@@ -67,6 +67,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.44.0/api/definitions.yaml#/MessageSubject"
   MessageBodyMarkdown:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.44.0/api/definitions.yaml#/MessageBodyMarkdown"
+  PaymentNoticeNumber:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.44.0/api/definitions.yaml#/PaymentNoticeNumber"
+  PaymentAmount:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.44.0/api/definitions.yaml#/PaymentAmount"
+  PaymentData:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.44.0/api/definitions.yaml#/PaymentData"
   Notification:
     title: Notification
     description: A received Notification.
