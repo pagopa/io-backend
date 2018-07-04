@@ -37,6 +37,7 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
 import SessionController from "./controllers/sessionController";
+import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
 /**
@@ -59,10 +60,12 @@ function withSpidAuth(
   ) => {
     passport.authenticate("spid", async (err, user) => {
       if (err) {
+        log.error("Error in SPID authentication: %s", err);
         res.redirect(clientErrorRedirectionUrl);
         return;
       }
       if (!user) {
+        log.error("Error in SPID authentication: no user found");
         return res.redirect(clientLoginRedirectionUrl);
       }
       const response = await controller.acs(user);
