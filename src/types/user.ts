@@ -39,6 +39,7 @@ export const SpidUser = t.interface({
   email: EmailAddress,
   familyName: string,
   fiscalNumber: FiscalCode,
+  getAssertionXml: t.Function,
   issuer: Issuer,
   name: string,
   nameID: string,
