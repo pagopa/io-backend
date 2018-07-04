@@ -29,6 +29,7 @@ const mockedSpidUser: any = {
   email: anEmailAddress,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
+  getAssertionXml: () => "",
   issuer: anIssuer,
   name: "Giuseppe Maria",
   nameID: "garibaldi",

@@ -5,6 +5,7 @@
 
 import * as SpidStrategy from "spid-passport";
 import { SpidUser } from "../types/user";
+import { log } from "../utils/logger";
 
 const spidStrategy = (
   samlKey: string,
@@ -90,6 +91,7 @@ const spidStrategy = (
       profile: SpidUser,
       done: (err: Error | undefined, info: SpidUser) => void
     ) => {
+      log.info(profile.getAssertionXml());
       done(undefined, profile);
     }
   );
