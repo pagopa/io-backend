@@ -3,7 +3,7 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
@@ -25,7 +25,7 @@ import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aNonNegativeNumber = 1 as NonNegativeNumber;
+const aNonNegativeInteger = 1 as NonNegativeInteger;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
@@ -39,7 +39,7 @@ const mockedGetProfileOKResponse: GetProfileOKResponse = {
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebhookEnabled,
   preferredLanguages: aPreferredLanguages,
-  version: aNonNegativeNumber
+  version: aNonNegativeInteger
 };
 
 // mock for a valid User extracted from SPID

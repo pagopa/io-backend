@@ -4,7 +4,7 @@
  */
 
 import * as t from "io-ts";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
@@ -14,7 +14,7 @@ import { PreferredLanguages } from "../api/PreferredLanguages";
 const UpsertProfileOKResponseR = t.interface({
   isInboxEnabled: IsInboxEnabled,
   isWebhookEnabled: IsWebhookEnabled,
-  version: NonNegativeNumber
+  version: NonNegativeInteger
 });
 
 // optional attributes
