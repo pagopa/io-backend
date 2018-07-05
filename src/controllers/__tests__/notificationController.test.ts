@@ -187,14 +187,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const res = mockRes();
 
     mockCreateOrUpdateInstallation.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          detail: "Unable to decode the user",
-          status: 500,
-          title: "Internal server error",
-          type: undefined
-        })
-      )
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
 
     req.user = mockedInvalidUser;
