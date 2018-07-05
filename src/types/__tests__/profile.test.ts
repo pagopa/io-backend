@@ -5,6 +5,7 @@ import mockReq from "../../__mocks__/request";
 
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../api/EmailAddress";
+import { ExtendedProfile } from "../api/ExtendedProfile";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
@@ -13,7 +14,6 @@ import {
   PreferredLanguageEnum
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
-import { ExtendedProfile } from "../api_client/extendedProfile";
 import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
   extractUpsertProfileFromRequest,
@@ -61,9 +61,9 @@ const mockedUser: User = {
 // mock for a valid ExtendedProfile profile
 const mockedExtendedProfile: ExtendedProfile = {
   email: anEmailAddress,
-  isInboxEnabled: anIsInboxEnabled,
-  isWebhookEnabled: anIsWebhookEnabled,
-  preferredLanguages: aPreferredLanguages,
+  is_inbox_enabled: anIsInboxEnabled,
+  is_webhook_enabled: anIsWebhookEnabled,
+  preferred_languages: aPreferredLanguages,
   version: 1 as number
 };
 

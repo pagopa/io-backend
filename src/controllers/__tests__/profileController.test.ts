@@ -6,6 +6,7 @@ import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import { EmailAddress } from "../../types/api/EmailAddress";
+import { ExtendedProfile } from "../../types/api/ExtendedProfile";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
@@ -14,7 +15,6 @@ import {
   PreferredLanguageEnum
 } from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
-import { ExtendedProfile } from "../../types/api_client/extendedProfile";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
@@ -67,9 +67,9 @@ const mockedUser: User = {
 // mock for upsert user (Extended Profile)
 const mockedUpsertUser: ExtendedProfile = {
   email: anEmailAddress,
-  isInboxEnabled: anIsInboxEnabled,
-  isWebhookEnabled: anIsWebookEnabled,
-  preferredLanguages: aPreferredLanguages,
+  is_inbox_enabled: anIsInboxEnabled,
+  is_webhook_enabled: anIsWebookEnabled,
+  preferred_languages: aPreferredLanguages,
   version: 1 as number
 };
 

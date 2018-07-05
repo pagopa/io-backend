@@ -1,6 +1,12 @@
 import { right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
+import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
+import {
+  PreferredLanguage,
+  PreferredLanguageEnum
+} from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
@@ -11,6 +17,11 @@ const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidAPIEmail = "from_api@example.com" as EmailAddress;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
+const anIsInboxEnabled = true as IsInboxEnabled;
+const anIsWebookEnabled = true as IsWebhookEnabled;
+const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
+  PreferredLanguageEnum.it_IT
+];
 
 const validApiProfileResponse = {
   parsedBody: {
@@ -50,9 +61,9 @@ const proxyProfileWithoutEmailResponse = {
 };
 const proxyUpsertRequest = {
   email: aValidAPIEmail,
-  is_inbox_enabled: true,
-  is_webhook_enabled: true,
-  preferred_languages: ["it_IT"],
+  is_inbox_enabled: anIsInboxEnabled,
+  is_webhook_enabled: anIsWebookEnabled,
+  preferred_languages: aPreferredLanguages,
   version: 42
 };
 const ApiProfileUpsertRequest = {
