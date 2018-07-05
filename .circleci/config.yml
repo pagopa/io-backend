@@ -30,7 +30,7 @@ jobs:
       - run: sudo apt-get install libunwind8
 
       # Generate the proxy API models
-      - run: yarn generate:proxy-api-models
+      - run: yarn generate:proxy-models
 
       # Generate API client
       - run: yarn generate:api-client
