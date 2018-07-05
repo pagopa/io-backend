@@ -117,6 +117,7 @@ const validUserPayload = {
   email: anEmailAddress,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
+  getAssertionXml: () => "",
   issuer: {
     _: "xxx"
   },
