@@ -8,6 +8,7 @@ import { User } from "./user";
 
 import * as express from "express";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { ExtendedProfile } from "./api/ExtendedProfile";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
