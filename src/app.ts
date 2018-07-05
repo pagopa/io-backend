@@ -19,6 +19,7 @@ import ProfileController from "./controllers/profileController";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as helmet from "helmet";
+import * as t from "io-ts";
 import * as morgan from "morgan";
 import * as passport from "passport";
 
@@ -37,6 +38,7 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
 import SessionController from "./controllers/sessionController";
+import { ServerInfo } from "./types/api/ServerInfo";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
@@ -120,13 +122,7 @@ export function newApp(
   // Setup routing.
   app.get("/login", spidAuth);
 
-  // Liveness probe for Kubernetes.
-  // @see
-  // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
-  app.get("/ping", (_, res: express.Response) => {
-    res.status(200).send("ok");
-  });
-
+  registerPublicRoutes(app);
   registerAuthenticationRoutes(app, authenticationBasePath);
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
   registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
@@ -315,4 +311,22 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
       toExpressHandler(acsController.metadata)(req, res, acsController);
     }
   );
+}
+
+export function registerPublicRoutes(app: Express): void {
+  const packageJson = require("../package.json");
+  const version = t.string.decode(packageJson.version).getOrElse("UNKNOWN");
+
+  app.get("/info", (_, res) => {
+    const serverInfo: ServerInfo = {
+      uptime_seconds: process.uptime(),
+      version
+    };
+    res.status(200).json(serverInfo);
+  });
+
+  // Liveness probe for Kubernetes.
+  // @see
+  // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
+  app.get("/ping", (_, res) => res.status(200).send("ok"));
 }
