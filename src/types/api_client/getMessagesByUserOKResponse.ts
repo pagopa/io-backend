@@ -5,13 +5,13 @@
 
 import * as t from "io-ts";
 import { readonlyArray, string } from "io-ts";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { CreatedMessageWithoutContent } from "./createdMessageWithoutContent";
 
 // required attributes
 const GetMessagesByUserOKResponseR = t.interface({
   items: readonlyArray(CreatedMessageWithoutContent),
-  pageSize: NonNegativeNumber
+  pageSize: NonNegativeInteger
 });
 
 // optional attributes
