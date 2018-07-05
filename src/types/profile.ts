@@ -7,8 +7,7 @@ import { Either } from "fp-ts/lib/Either";
 import { User } from "./user";
 
 import * as express from "express";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
-import { ExtendedProfile } from "./api/ExtendedProfile";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
@@ -53,7 +52,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     is_webhook_enabled: false,
     name: user.name,
     spid_email: user.spid_email,
-    version: 0 as NonNegativeNumber
+    version: 0 as NonNegativeInteger
   };
 }
 

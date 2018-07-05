@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
 import { right } from "fp-ts/lib/Either";
-import { NonNegativeNumber } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -30,7 +30,7 @@ const proxyService: ServicePublic = {
   organization_name: "Organization name" as OrganizationName,
   service_id: "5a563817fcc896087002ea46c49a" as NonEmptyString,
   service_name: "Service name" as ServiceName,
-  version: 42 as NonNegativeNumber
+  version: 42 as NonNegativeInteger
 };
 
 // mock for a valid User

@@ -18,6 +18,7 @@ export function toAppMessageWithContent(
     created_at: from.message.createdAt,
     id: from.message.id,
     markdown: from.message.content.markdown,
+    payment_data: from.message.content.payment_data,
     sender_service_id: from.message.senderServiceId,
     subject: from.message.content.subject
   };
