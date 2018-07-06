@@ -12,10 +12,11 @@ COPY /yarn.lock /usr/src/app/yarn.lock
 COPY /api_notifications.yaml /usr/src/app/api_notifications.yaml
 COPY /api_proxy.yaml /usr/src/app/api_proxy.yaml
 COPY /api_pagopa.yaml /usr/src/app/api_pagopa.yaml
+COPY /api_public.yaml /usr/src/app/api_public.yaml
 
 RUN sudo chmod -R 777 /usr/src/app \
   && yarn install \
-  && yarn generate:proxy-api-models \
+  && yarn generate:proxy-models \
   && yarn generate:api-client \
   && yarn build
 
