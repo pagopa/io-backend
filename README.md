@@ -183,7 +183,7 @@ to regenerate the client code:
 
 * run the command `yarn generate:api-client`
 
-### Generate SAML (SPID) certs
+### Generate SAML (SPID) certs (development)
 
 The backend implements a SAML Service Provider - for authenticating the clients
 it needs a certificate that you can generate with the following command
@@ -191,6 +191,22 @@ it needs a certificate that you can generate with the following command
 
 ```
 $ yarn generate:test-certs
+```
+
+### Generate SAML (SPID) certs (production)
+
+For production, the SPID certificate must be generated with
+the following command:
+
+```
+$ openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:4096 -keyout key.pem -out cert.pem
+```
+
+Then, the key and the certificate must be stored in the
+Kubernetes secrets:
+
+```
+$ kubectl create secret generic spid-cert --from-file=./cert.pem --from-file=./key.pem
 ```
 
 ### Architecture decision records
