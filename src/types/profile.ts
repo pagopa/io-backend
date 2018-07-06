@@ -8,9 +8,10 @@ import { User } from "./user";
 
 import * as express from "express";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { ExtendedProfile } from "./api/ExtendedProfile";
+import { ExtendedProfile as proxyExtendedProfile } from "./api/ExtendedProfile";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
+import { ExtendedProfile as apiExtendedProfile } from "./api_client/extendedProfile";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
 /**
@@ -58,12 +59,30 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
 }
 
 /**
+ * Converts the profile received from the App in the format required by the Autorest client.
+ *
+ * @param {ExtendedProfile} profile The user profile data from the App.
+ */
+export function toApiClientExtendedProfile(
+  profile: proxyExtendedProfile
+): apiExtendedProfile {
+  return {
+    blockedInboxOrChannels: profile.blocked_inbox_or_channels,
+    email: profile.email,
+    isInboxEnabled: profile.is_inbox_enabled,
+    isWebhookEnabled: profile.is_webhook_enabled,
+    preferredLanguages: profile.preferred_languages,
+    version: profile.version
+  };
+}
+
+/**
  * Extracts a user profile from the body of a request.
  */
 export function extractUpsertProfileFromRequest(
   from: express.Request
-): Either<Error, ExtendedProfile> {
-  const result = ExtendedProfile.decode(from.body);
+): Either<Error, proxyExtendedProfile> {
+  const result = proxyExtendedProfile.decode(from.body);
 
   return result.mapLeft(() => {
     return new Error("Unable to extract the upsert profile");

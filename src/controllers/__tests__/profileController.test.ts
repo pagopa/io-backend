@@ -15,6 +15,7 @@ import {
   PreferredLanguageEnum
 } from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
+import { toApiClientExtendedProfile } from "../../types/profile";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
@@ -65,7 +66,7 @@ const mockedUser: User = {
 };
 
 // mock for upsert user (Extended Profile)
-const mockedUpsertUser: ExtendedProfile = {
+const mockedUpsertProfile: ExtendedProfile = {
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
@@ -154,7 +155,7 @@ describe("ProfileController#upsertProfile", () => {
     );
 
     req.user = mockedUser;
-    req.body = mockedUpsertUser;
+    req.body = mockedUpsertProfile;
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
@@ -164,7 +165,7 @@ describe("ProfileController#upsertProfile", () => {
 
     expect(mockUpsertProfile).toHaveBeenCalledWith(
       mockedUser,
-      mockedUpsertUser
+      toApiClientExtendedProfile(mockedUpsertProfile)
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -182,7 +183,7 @@ describe("ProfileController#upsertProfile", () => {
     );
 
     req.user = "";
-    req.body = mockedUpsertUser;
+    req.body = mockedUpsertProfile;
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
