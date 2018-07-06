@@ -88,7 +88,7 @@ export default class ProfileService {
   }
 
   /**
-   * Upsert the profile of a specific user..
+   * Upsert the profile of a specific user.
    */
   public async upsertProfile(
     user: User,
