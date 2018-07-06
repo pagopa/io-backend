@@ -59,11 +59,11 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
 }
 
 /**
- * Converts an empty API profile to a Proxy profile.
+ * Converts the profile received from the App in the format required by the Autorest client.
  *
  * @param {ExtendedProfile} profile The user profile data from the App.
  */
-export function toApiExtendedProfile(
+export function toApiClientExtendedProfile(
   profile: proxyExtendedProfile
 ): apiExtendedProfile {
   return {
