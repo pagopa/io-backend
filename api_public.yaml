@@ -31,8 +31,6 @@ definitions:
     properties:
       version:
         type: string
-      uptime_seconds:
-        type: integer
     required:
       - version
 consumes:

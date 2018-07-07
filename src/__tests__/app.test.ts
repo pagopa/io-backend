@@ -50,7 +50,6 @@ describe("Test redirect to HTTPS", () => {
   it("should 200 and ok if pinged", () => {
     return request(app)
       .get("/ping")
-      .set(X_FORWARDED_PROTO_HEADER, "https")
       .expect(200, "ok");
   });
 
