@@ -102,7 +102,7 @@ export function newApp(
   if (env !== NodeEnvironmentEnum.DEVELOPMENT) {
     // Trust proxy uses proxy X-Forwarded-Proto for ssl.
     app.enable("trust proxy");
-    app.use(expressEnforcesSsl());
+    app.use(/\/((?!ping).)*/, expressEnforcesSsl());
   }
   // Add security to http headers.
   app.use(helmet());
@@ -319,7 +319,6 @@ export function registerPublicRoutes(app: Express): void {
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
-      uptime_seconds: process.uptime(),
       version
     };
     res.status(200).json(serverInfo);
