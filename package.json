@@ -77,7 +77,7 @@
     "@types/morgan": "^1.7.35",
     "@types/passport": "^0.4.5",
     "@types/passport-http-bearer": "^1.0.33",
-    "@types/passport-strategy": "^0.2.33",
+    "@types/passport-strategy": "^0.2.34",
     "@types/redis": "^2.8.5",
     "@types/request-ip": "^0.0.33",
     "@types/superagent": "^3.8.1",
