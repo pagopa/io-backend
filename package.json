@@ -91,7 +91,7 @@
     "fp-ts": "^1.6.2",
     "italia-tslint-rules": "^0.1.1",
     "italia-utils": "^3.11.1",
-    "jest": "^23.2.0",
+    "jest": "^23.3.0",
     "lolex": "2.7.0",
     "mock-redis-client": "^0.91.13",
     "nodemon": "^1.17.5",
