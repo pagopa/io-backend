@@ -80,7 +80,7 @@
     "@types/passport-strategy": "^0.2.33",
     "@types/redis": "^2.8.5",
     "@types/request-ip": "^0.0.33",
-    "@types/superagent": "^3.8.1",
+    "@types/superagent": "^3.8.2",
     "@types/supertest": "^2.0.4",
     "@types/swagger-parser": "^4.0.2",
     "@types/validator": "^9.4.1",
