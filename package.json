@@ -72,7 +72,7 @@
     "@types/express-enforces-ssl": "^1.1.1",
     "@types/glob": "^5.0.35",
     "@types/helmet": "^0.0.38",
-    "@types/jest": "^23.1.0",
+    "@types/jest": "^23.1.4",
     "@types/lolex": "2.1.2",
     "@types/morgan": "^1.7.35",
     "@types/passport": "^0.4.5",
