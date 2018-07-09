@@ -60,7 +60,7 @@
     "redis-clustr": "^1.6.0",
     "request-ip": "^2.0.2",
     "spid-passport": "git://github.com/lussoluca/spid-passport.git#e14ead5",
-    "typescript": "^2.7.0",
+    "typescript": "^2.9.2",
     "ulid": "^2.2.2",
     "validator": "^10.4.0",
     "winston": "^3.0.0"
