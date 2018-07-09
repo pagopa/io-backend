@@ -142,9 +142,9 @@
     "@types/express" "*"
     "@types/passport" "*"
 
-"@types/passport-strategy@^0.2.33":
-  version "0.2.33"
-  resolved "https://registry.yarnpkg.com/@types/passport-strategy/-/passport-strategy-0.2.33.tgz#a523c6526262f96d9e4063d9285721551d87889b"
+"@types/passport-strategy@^0.2.34":
+  version "0.2.34"
+  resolved "https://registry.yarnpkg.com/@types/passport-strategy/-/passport-strategy-0.2.34.tgz#dbdcfc15071827c61e4463015b7cd9dddecb5f20"
   dependencies:
     "@types/express" "*"
     "@types/passport" "*"
