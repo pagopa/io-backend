@@ -180,7 +180,7 @@ registerRequiredValue("AZURE_NH_HUB_NAME", "hubName");
 registerRequiredValue("AZURE_NH_ENDPOINT", "endpointOrConnectionString");
 
 // API endpoint mount.
-registerRequiredValue("AUTHENTICATION_BASE_PATH", "authenticationBasePath");
+registerRequiredValue("AUTHENTICATION_BASE_PATH", "AuthenticationBasePath");
 registerRequiredValue("API_BASE_PATH", "APIBasePath");
 registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
 
