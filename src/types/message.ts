@@ -3,10 +3,10 @@
  * validate and convert type to and from them.
  */
 
-import { MessageWithContent } from "./api/MessageWithContent";
 import { MessageWithoutContent } from "./api/MessageWithoutContent";
 import { CreatedMessageWithoutContent } from "./api_client/createdMessageWithoutContent";
 import { MessageResponseWithContent } from "./api_client/messageResponseWithContent";
+import { MessageWithContent } from "./api_client/messageWithContent";
 
 /**
  * Converts an API MessageResponse to a Proxy message.
@@ -14,14 +14,28 @@ import { MessageResponseWithContent } from "./api_client/messageResponseWithCont
 export function toAppMessageWithContent(
   from: MessageResponseWithContent
 ): MessageWithContent {
-  return {
-    created_at: from.message.createdAt,
-    id: from.message.id,
-    markdown: from.message.content.markdown,
-    payment_data: from.message.content.payment_data,
-    sender_service_id: from.message.senderServiceId,
-    subject: from.message.content.subject
-  };
+  const paymentData = from.message.content.paymentData;
+  if (paymentData) {
+    return {
+      created_at: from.message.createdAt,
+      id: from.message.id,
+      markdown: from.message.content.markdown,
+      payment_data: {
+        amount: paymentData.amount,
+        notice_number: paymentData.noticeNumber
+      },
+      sender_service_id: from.message.senderServiceId,
+      subject: from.message.content.subject
+    };
+  } else {
+    return {
+      created_at: from.message.createdAt,
+      id: from.message.id,
+      markdown: from.message.content.markdown,
+      sender_service_id: from.message.senderServiceId,
+      subject: from.message.content.subject
+    };
+  }
 }
 
 /**

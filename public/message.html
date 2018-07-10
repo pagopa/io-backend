@@ -37,6 +37,12 @@
   <br/>
   <div><strong>Department name:</strong></div>
   <div id="sender_department_name"></div>
+  <br/>
+  <div><strong>Amount (PaymentData):</strong></div>
+  <div id="amount"></div>
+  <br/>
+  <div><strong>Notice number (PaymentData):</strong></div>
+  <div id="notice_number"></div>
 </div>
 
 <script>
@@ -92,6 +98,14 @@
             $('#markdown').append(data.markdown);
             $('#created_at').append(data.created_at);
             $('#sender_service_id').append(data.sender_service_id);
+
+            if(data.payment_data) {
+              $('#amount').append(data.payment_data.amount);
+              $('#notice_number').append(data.payment_data.notice_number);
+            } else {
+              $('#amount').append("-");
+              $('#notice_number').append("-");
+            }
           });
         }
       )

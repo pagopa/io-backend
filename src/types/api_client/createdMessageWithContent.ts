@@ -6,8 +6,8 @@
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import { FiscalCode } from "../api/FiscalCode";
-import { MessageContent } from "../api/MessageContent";
 import { Timestamp } from "../api/Timestamp";
+import { MessageContent } from "./messageContent";
 
 // required attributes
 const CreatedMessageWithContentR = t.interface({
