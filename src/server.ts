@@ -20,7 +20,7 @@ const allowPagoPAIPSourceRange = container.resolve<CIDR>(
 );
 
 export const authenticationBasePath = container.resolve<string>(
-  "authenticationBasePath"
+  "AuthenticationBasePath"
 );
 export const APIBasePath = container.resolve<string>("APIBasePath");
 export const PagoPABasePath = container.resolve<string>("PagoPABasePath");

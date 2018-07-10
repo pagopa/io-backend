@@ -11,7 +11,11 @@ import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 
-const bearerTokenStrategy = (APIBasePath: string, PagoPABasePath: string) => {
+const bearerTokenStrategy = (
+  AuthenticationBasePath: string,
+  APIBasePath: string,
+  PagoPABasePath: string
+) => {
   const options = {
     passReqToCallback: true,
     realm: "Proxy API",
@@ -26,7 +30,10 @@ const bearerTokenStrategy = (APIBasePath: string, PagoPABasePath: string) => {
     const path = req.route.path;
     const sessionStorage: ISessionStorage = container.resolve(SESSION_STORAGE);
 
-    if (path.startsWith(APIBasePath)) {
+    if (
+      path === `${AuthenticationBasePath}/logout` || // We need to use this strategy with the SessionToken also for `/logout` path
+      path.startsWith(APIBasePath)
+    ) {
       sessionStorage.getBySessionToken(token as SessionToken).then(
         (errorOrUser: Either<Error, User>) => {
           fulfill(errorOrUser, done);
