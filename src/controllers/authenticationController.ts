@@ -9,9 +9,11 @@ import { isLeft } from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
   IResponsePermanentRedirect,
+  IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
   ResponsePermanentRedirect,
+  ResponseSuccessJson,
   ResponseSuccessXml
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
@@ -77,7 +79,7 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<{}>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -103,15 +105,7 @@ export default class AuthenticationController {
       return ResponseErrorInternal("Error creating the user session");
     }
 
-    // Logout from SPID.
-    // The logout function in spid-passport expects an entityID attribute
-    // passed in the query string. Here we recover the IDP chosen for the
-    // login (and stored in the User object) to forge a request suitable
-    // for the login function.
-    req.query = {};
-    req.query.entityID = user.spid_idp;
-
-    return this.spidLogout(req);
+    return ResponseSuccessJson({});
   }
 
   /**
@@ -134,26 +128,5 @@ export default class AuthenticationController {
     );
 
     return ResponseSuccessXml(metadata);
-  }
-
-  /**
-   * Wrap the spidStrategy.logout function in a new Promise.
-   */
-  private spidLogout(
-    req: express.Request
-  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
-    return new Promise(resolve => {
-      this.spidStrategy.logout(req, (err, logoutUrl) => {
-        if (!err) {
-          const url: UrlFromString = {
-            href: logoutUrl
-          };
-
-          return resolve(ResponsePermanentRedirect(url));
-        } else {
-          return resolve(ResponseErrorInternal(err.message));
-        }
-      });
-    });
   }
 }
