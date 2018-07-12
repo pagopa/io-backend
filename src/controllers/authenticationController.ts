@@ -19,6 +19,7 @@ import {
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
+import { SuccessResponse } from "../types/commons";
 import { SessionToken, WalletToken } from "../types/token";
 import {
   extractUserFromRequest,
@@ -79,7 +80,7 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<{}>> {
+  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -102,10 +103,10 @@ export default class AuthenticationController {
     const response = errorOrResponse.value;
 
     if (!response) {
-      return ResponseErrorInternal("Error creating the user session");
+      return ResponseErrorInternal("Error destroying the user session");
     }
 
-    return ResponseSuccessJson({});
+    return ResponseSuccessJson({ message: "ok" });
   }
 
   /**

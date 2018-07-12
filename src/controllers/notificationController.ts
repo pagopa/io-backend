@@ -14,7 +14,7 @@ import NotificationService from "../services/notificationService";
 import { Installation } from "../types/api/Installation";
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
-import { SuccessResponse } from "../types/notification";
+import { SuccessResponse } from "../types/commons";
 import { extractUserFromRequest } from "../types/user";
 import { log } from "../utils/logger";
 
