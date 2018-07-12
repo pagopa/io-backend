@@ -305,14 +305,10 @@ describe("AuthenticationController#logout", () => {
     jest.resetAllMocks();
   });
 
-  it("extracts the logout url", async () => {
+  it("shoud return success after deleting the session token", async () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
-
-    spidStrategyInstance.logout.mockImplementation((_: any, callback: any) => {
-      callback(undefined, "http://www.example.com");
-    });
 
     mockDel.mockReturnValue(Promise.resolve(right(true)));
 
@@ -321,8 +317,11 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockSessionToken, mockWalletToken);
-    expect(spidStrategyInstance.logout.mock.calls[0][0]).toBe(req);
-    expect(res.redirect).toHaveBeenCalledWith("http://www.example.com", 301);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
   });
 
   it("should fail if the generation user data is invalid", async () => {
@@ -342,32 +341,7 @@ describe("AuthenticationController#logout", () => {
     });
   });
 
-  it("should fail if the generation of logout fails", async () => {
-    const res = mockRes();
-    const req = mockReq();
-    req.user = mockedUser;
-
-    spidStrategyInstance.logout.mockImplementation(
-      (_: any, callback: (error: Error) => void) => {
-        callback(new Error("Error message"));
-      }
-    );
-
-    mockDel.mockReturnValue(Promise.resolve(right(true)));
-
-    const response = await controller.logout(req);
-    response.apply(res);
-
-    expect(controller).toBeTruthy();
-    expect(mockDel).toHaveBeenCalledWith(mockSessionToken, mockWalletToken);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "Error message"
-    });
-  });
-
-  it("should fail if the session can not be saved", async () => {
+  it("should fail if the session can not be destroyed", async () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
@@ -380,7 +354,7 @@ describe("AuthenticationController#logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error creating the user session"
+      detail: "Error destroying the user session"
     });
   });
 
