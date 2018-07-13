@@ -14,28 +14,28 @@ import { MessageWithContent } from "./api_client/messageWithContent";
 export function toAppMessageWithContent(
   from: MessageResponseWithContent
 ): MessageWithContent {
-  const paymentData = from.message.content.paymentData;
+  const { dueDate, paymentData } = from.message.content;
+
+  const messageWithContent: MessageWithContent = {
+    created_at: from.message.createdAt,
+    id: from.message.id,
+    markdown: from.message.content.markdown,
+    sender_service_id: from.message.senderServiceId,
+    subject: from.message.content.subject
+  };
+
+  if (dueDate) {
+    messageWithContent.due_date = dueDate;
+  }
+
   if (paymentData) {
-    return {
-      created_at: from.message.createdAt,
-      id: from.message.id,
-      markdown: from.message.content.markdown,
-      payment_data: {
-        amount: paymentData.amount,
-        notice_number: paymentData.noticeNumber
-      },
-      sender_service_id: from.message.senderServiceId,
-      subject: from.message.content.subject
-    };
-  } else {
-    return {
-      created_at: from.message.createdAt,
-      id: from.message.id,
-      markdown: from.message.content.markdown,
-      sender_service_id: from.message.senderServiceId,
-      subject: from.message.content.subject
+    messageWithContent.payment_data = {
+      amount: paymentData.amount,
+      notice_number: paymentData.noticeNumber
     };
   }
+
+  return messageWithContent;
 }
 
 /**

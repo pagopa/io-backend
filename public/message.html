@@ -43,6 +43,9 @@
   <br/>
   <div><strong>Notice number (PaymentData):</strong></div>
   <div id="notice_number"></div>
+  <br/>
+  <div><strong>Due date:</strong></div>
+  <div id="due_date"></div>
 </div>
 
 <script>
@@ -105,6 +108,12 @@
             } else {
               $('#amount').append("-");
               $('#notice_number').append("-");
+            }
+
+            if(data.due_date) {
+              $('#due_date').append(data.due_date);
+            } else {
+              $('#due_date').append("-");
             }
           });
         }

@@ -19,6 +19,8 @@ const MessageWithContentR = t.interface({
 
 // optional attributes
 const MessageWithContentO = t.partial({
+  due_date: Timestamp,
+
   markdown: MessageBodyMarkdown,
 
   payment_data: PaymentData,

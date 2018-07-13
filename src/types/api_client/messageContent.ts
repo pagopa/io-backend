@@ -5,6 +5,7 @@
 import * as t from "io-ts";
 import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
 import { MessageSubject } from "../api/MessageSubject";
+import { Timestamp } from "../api/Timestamp";
 import { PaymentData } from "./paymentData";
 
 // required attributes
@@ -16,6 +17,7 @@ const MessageContentR = t.interface({
 
 // optional attributes
 const MessageContentO = t.partial({
+  dueDate: Timestamp,
   paymentData: PaymentData
 });
 
