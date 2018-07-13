@@ -84,7 +84,8 @@ const spidStrategy = (
           displayName: "Digital citizenship proxy",
           name: "Digital citizenship proxy"
         },
-        privateCert: samlKey
+        privateCert: samlKey,
+        signatureAlgorithm: "sha256"
       }
     },
     (
