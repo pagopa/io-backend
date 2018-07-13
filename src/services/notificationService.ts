@@ -30,7 +30,7 @@ import {
  */
 const APNSTemplate: INotificationTemplate = {
   body:
-    '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "$(deep_link)"}'
+    '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "italiaapp://$(deep_link)"}'
 };
 
 /**
@@ -40,7 +40,7 @@ const APNSTemplate: INotificationTemplate = {
  */
 const GCMTemplate: INotificationTemplate = {
   body:
-    '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "$(deep_link)"}}'
+    '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "italiaapp://italiaapp/$(deep_link)"}}'
 };
 
 export default class NotificationService {
@@ -59,7 +59,7 @@ export default class NotificationService {
 
     return new Promise(resolve => {
       const payload = {
-        deep_link: "/messages/" + notification.message.id,
+        deep_link: "MESSAGE_DETAILS/" + notification.message.id,
         message: notification.message.content.markdown,
         message_id: notification.message.id,
         title: notification.message.content.subject

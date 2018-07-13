@@ -26,7 +26,7 @@ const anAppleInstallation = {
   templates: {
     template: {
       body:
-        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "$(deep_link)"}'
+        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "italiaapp://$(deep_link)"}'
     }
   }
 };
@@ -42,7 +42,7 @@ const aGoogleInstallation = {
   templates: {
     template: {
       body:
-        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "$(deep_link)"}}'
+        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "italiaapp://italiaapp/$(deep_link)"}}'
     }
   }
 };
@@ -178,7 +178,7 @@ describe("NotificationService#notify", () => {
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
-        deep_link: "/messages/" + aValidNotification.message.id,
+        deep_link: "MESSAGE_DETAILS/" + aValidNotification.message.id,
         message: aValidNotification.message.content.markdown,
         message_id: aValidNotification.message.id,
         title: aValidNotification.message.content.subject
@@ -203,7 +203,7 @@ describe("NotificationService#notify", () => {
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
-        deep_link: "/messages/" + aValidNotification.message.id,
+        deep_link: "MESSAGE_DETAILS/" + aValidNotification.message.id,
         message: aValidNotification.message.content.markdown,
         message_id: aValidNotification.message.id,
         title: aValidNotification.message.content.subject
