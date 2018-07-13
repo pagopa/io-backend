@@ -59,7 +59,7 @@ export default class NotificationService {
 
     return new Promise(resolve => {
       const payload = {
-        deep_link: "MESSAGE_DETAILS/" + notification.message.id,
+        deep_link: `MESSAGE_DETAILS/${notification.message.id}`,
         message: notification.message.content.markdown,
         message_id: notification.message.id,
         title: notification.message.content.subject
