@@ -4815,9 +4815,9 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-request-ip@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/request-ip/-/request-ip-2.0.2.tgz#deeae6d4af21768497db8cd05fa37143f8f1257e"
+request-ip@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/request-ip/-/request-ip-2.1.1.tgz#99be3b1595c574d7a3fe1eb4eb83a6b59a76edae"
   dependencies:
     is_js "^0.9.0"
 

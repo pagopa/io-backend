@@ -58,7 +58,7 @@
     "range_check": "^1.4.0",
     "redis": "^2.8.0",
     "redis-clustr": "^1.6.0",
-    "request-ip": "^2.0.2",
+    "request-ip": "^2.1.1",
     "spid-passport": "git://github.com/lussoluca/spid-passport.git#e14ead5",
     "typescript": "^2.9.2",
     "ulid": "^2.2.2",
