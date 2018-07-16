@@ -2604,9 +2604,9 @@ io-ts-types@^0.3.6:
     monocle-ts "^1.0.0"
     newtype-ts "^0.2.0"
 
-io-ts@^1.1.4, io-ts@^1.1.5:
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.1.5.tgz#5a943eeb063eebf27517a559359fd121ba04eaaa"
+io-ts@^1.1.4, io-ts@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.2.1.tgz#0f3cc43dff08d1656f2c1ad7462650dab4a6bae7"
   dependencies:
     fp-ts "^1.0.0"
 
