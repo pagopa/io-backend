@@ -94,7 +94,14 @@ const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX: number = parseInt(
     DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
   10
 );
+const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
+const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
+  process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
+    DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
+  10
+);
 container.register({
+  samlAcceptedClockSkewMs: awilix.asValue(SAML_ACCEPTED_CLOCK_SKEW_MS),
   samlAttributeConsumingServiceIndex: awilix.asValue(
     SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX
   ),

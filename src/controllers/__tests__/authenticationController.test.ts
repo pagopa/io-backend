@@ -76,6 +76,7 @@ nCnxP/vK5rgVHU3nQfq+e/B6FVWZ
 `;
 const samlCallbackUrl = "http://italia-backend/assertionConsumerService";
 const samlIssuer = "http://italia-backend";
+const samlAcceptedClockSkewMs = -1;
 const samlAttributeConsumingServiceIndex = 0;
 
 // user constant
@@ -184,6 +185,7 @@ const spidStrategyInstance = spidStrategy(
   samlKey,
   samlCallbackUrl,
   samlIssuer,
+  samlAcceptedClockSkewMs,
   samlAttributeConsumingServiceIndex
 );
 spidStrategyInstance.logout = jest.fn();
