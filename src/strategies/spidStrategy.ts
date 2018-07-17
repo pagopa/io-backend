@@ -11,6 +11,7 @@ const spidStrategy = (
   samlKey: string,
   samlCallbackUrl: string,
   samlIssuer: string,
+  samlAcceptedClockSkewMs: number,
   samlAttributeConsumingServiceIndex: number
 ) => {
   return new SpidStrategy(
@@ -70,6 +71,7 @@ const spidStrategy = (
         }
       },
       sp: {
+        acceptedClockSkewMs: samlAcceptedClockSkewMs,
         attributeConsumingServiceIndex: samlAttributeConsumingServiceIndex,
         attributes: {
           attributes: ["fiscalNumber", "name", "familyName", "email"],
