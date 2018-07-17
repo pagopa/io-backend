@@ -287,9 +287,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(pagoPAProxyController.getPaymentInfo)(
-        pagoPAProxyController,
         req,
-        res
+        res,
+        pagoPAProxyController
       );
     }
   );
@@ -299,9 +299,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(pagoPAProxyController.activatePayment)(
-        pagoPAProxyController,
         req,
-        res
+        res,
+        pagoPAProxyController
       );
     }
   );
@@ -311,9 +311,9 @@ function registerAPIRoutes(
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(pagoPAProxyController.getActivationStatus)(
-        pagoPAProxyController,
         req,
-        res
+        res,
+        pagoPAProxyController
       );
     }
   );
