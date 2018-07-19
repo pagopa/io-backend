@@ -1,6 +1,5 @@
 /**
- * This controller handles reading the user profile from the
- * app by forwarding the call to the API system.
+ * This controller handles requests made from the PagoPA backend.
  */
 
 import * as express from "express";

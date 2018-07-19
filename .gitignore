@@ -24,7 +24,7 @@ npm-debug.log
 *.js.map
 
 # Excluded auto-generated API client.
-/src/api/
+/src/clients/
 
 # Excluded auto-generated API types.
 /src/types/api/*.ts

@@ -242,17 +242,104 @@ paths:
           description: There was an error in retrieving the user session data.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/payment-requests/{rptId}":
+    x-swagger-router-controller: PagoPAProxyController
+    parameters:
+      - name: rptId
+        in: path
+        required: true
+        description: Unique identifier for payments.
+        type: string
+    get:
+      operationId: getPaymentInfo
+      summary: Get Payment Info
+      description: Retrieve information about a payment
+      responses:
+        '200':
+          description: Payment information retrieved
+          schema:
+            "$ref": "#/definitions/PaymentRequestsGetResponse"
+          examples:
+            application/json:
+              importoSingoloVersamento: 200,
+              codiceContestoPagamento: "ABC123"
+        "400":
+          description: Invalid input or PagoPA response
+        "500":
+          description: PagoPA services are not available or request is rejected
+  "/payment-activations":
+    x-swagger-router-controller: PagoPAProxyController
+    post:
+      operationId: activatePayment
+      summary: Activate Payment
+      description: Require a lock (activation) for a payment
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/PaymentActivationsPostRequest"
+          x-examples:
+            application/json:
+              rptId: "12345678901012123456789012345"
+              importoSingoloVersamento: 200
+              codiceContestoPagamento: "ABC123"
+      responses:
+        '200':
+          description: Payment activation process started
+          schema:
+            "$ref": "#/definitions/PaymentActivationsPostResponse"
+          examples:
+            application/json:
+              importoSingoloVersamento: 200
+        "400":
+          description: Invalid input or PagoPA response
+        "500":
+          description: PagoPA services are not available or request is rejected
+  "/payment-activations/{codiceContestoPagamento}":
+    x-swagger-router-controller: PagoPAProxyController
+    parameters:
+      - name: codiceContestoPagamento
+        in: path
+        required: true
+        description: Transaction Id used to identify the communication flow.
+        type: string
+    get:
+      operationId: getActivationStatus
+      summary: Get Activation status
+      description: Check the activation status to retrieve the paymentId
+      responses:
+        '200':
+          description: Payment information
+          schema:
+            $ref: "#/definitions/PaymentActivationsGetResponse"
+          examples:
+            application/json:
+              idPagamento: "123455"
+        "400":
+          description: Invalid input
+        "404":
+          description: Activation status not found
+        "500":
+          description: Unavailable service
 definitions:
   BlockedInboxOrChannels:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/BlockedInboxOrChannels"
+  CodiceContestoPagamento:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
   DepartmentName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/DepartmentName"
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/EmailAddress"
+  EnteBeneficiario:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/EnteBeneficiario"
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ExtendedProfile"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/FiscalCode"
+  Iban:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/Iban"
+  ImportoEuroCents:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/ImportoEuroCents"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
@@ -271,18 +358,34 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/OrganizationName"
   PaginationResponse:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/PaginationResponse"
+  PaymentActivationsGetResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+  PaymentActivationsPostRequest:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+  PaymentActivationsPostResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+  PaymentRequestsGetResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
   PreferredLanguage:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ProblemJson"
+  RptIdFromString:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/RptIdFromString"
   ServiceId:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ServiceId"
-  ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ServicePublic"
   ServiceName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ServiceName"
+  ServicePublic:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/ServicePublic"
+  SpezzoneStrutturatoCausaleVersamento:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+  SpezzoniCausaleVersamento:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+  SpezzoniCausaleVersamentoItem:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.47.1/api/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
