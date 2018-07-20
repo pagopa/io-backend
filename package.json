@@ -92,7 +92,7 @@
     "fp-ts": "^1.7.0",
     "italia-tslint-rules": "^0.1.1",
     "italia-utils": "^3.12.0",
-    "jest": "^23.3.0",
+    "jest": "^23.4.1",
     "lolex": "2.7.1",
     "mock-redis-client": "^0.91.13",
     "nodemon": "^1.18.2",
