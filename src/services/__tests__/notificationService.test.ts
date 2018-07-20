@@ -26,7 +26,7 @@ const anAppleInstallation = {
   templates: {
     template: {
       body:
-        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "italiaapp://$(deep_link)"}'
+        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "ioit://$(deep_link)"}'
     }
   }
 };
@@ -42,7 +42,7 @@ const aGoogleInstallation = {
   templates: {
     template: {
       body:
-        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "italiaapp://italiaapp/$(deep_link)"}}'
+        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "ioit://ioit/$(deep_link)"}}'
     }
   }
 };
@@ -179,9 +179,11 @@ describe("NotificationService#notify", () => {
       aFiscalCodeHash,
       {
         deep_link: "MESSAGE_DETAILS/" + aValidNotification.message.id,
-        message: aValidNotification.message.content.markdown,
+        message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
-        title: aValidNotification.message.content.subject
+        title: `${aValidNotification.sender_metadata.service_name} - ${
+          aValidNotification.sender_metadata.organization_name
+        }`
       },
       expect.any(Function)
     );
@@ -204,9 +206,11 @@ describe("NotificationService#notify", () => {
       aFiscalCodeHash,
       {
         deep_link: "MESSAGE_DETAILS/" + aValidNotification.message.id,
-        message: aValidNotification.message.content.markdown,
+        message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
-        title: aValidNotification.message.content.subject
+        title: `${aValidNotification.sender_metadata.service_name} - ${
+          aValidNotification.sender_metadata.organization_name
+        }`
       },
       expect.any(Function)
     );

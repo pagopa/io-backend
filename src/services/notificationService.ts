@@ -30,7 +30,7 @@ import {
  */
 const APNSTemplate: INotificationTemplate = {
   body:
-    '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "italiaapp://$(deep_link)"}'
+    '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "ioit://$(deep_link)"}'
 };
 
 /**
@@ -40,7 +40,7 @@ const APNSTemplate: INotificationTemplate = {
  */
 const GCMTemplate: INotificationTemplate = {
   body:
-    '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "italiaapp://italiaapp/$(deep_link)"}}'
+    '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "ioit://ioit/$(deep_link)"}}'
 };
 
 export default class NotificationService {
@@ -60,9 +60,11 @@ export default class NotificationService {
     return new Promise(resolve => {
       const payload = {
         deep_link: `MESSAGE_DETAILS/${notification.message.id}`,
-        message: notification.message.content.markdown,
+        message: notification.message.content.subject,
         message_id: notification.message.id,
-        title: notification.message.content.subject
+        title: `${notification.sender_metadata.service_name} - ${
+          notification.sender_metadata.organization_name
+        }`
       };
       notificationHubService.send(
         toFiscalCodeHash(notification.message.fiscal_code),
