@@ -26,7 +26,7 @@ const anAppleInstallation = {
   templates: {
     template: {
       body:
-        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)", "deep_link": "ioit://$(deep_link)"}'
+        '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)"}'
     }
   }
 };
@@ -42,7 +42,7 @@ const aGoogleInstallation = {
   templates: {
     template: {
       body:
-        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)", "deep_link": "ioit://ioit/$(deep_link)"}}'
+        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)"}}'
     }
   }
 };
@@ -178,7 +178,6 @@ describe("NotificationService#notify", () => {
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
-        deep_link: "MESSAGE_DETAILS/" + aValidNotification.message.id,
         message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
         title: `${aValidNotification.sender_metadata.service_name} - ${
@@ -205,7 +204,6 @@ describe("NotificationService#notify", () => {
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
-        deep_link: "MESSAGE_DETAILS/" + aValidNotification.message.id,
         message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
         title: `${aValidNotification.sender_metadata.service_name} - ${
