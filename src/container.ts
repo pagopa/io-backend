@@ -138,11 +138,12 @@ container.register({
 });
 
 // Redis server settings.
-const DEFAULT_TOKEN_DURATION_IN_SECONDS = "3600";
-const tokenDurationSecs: number = parseInt(
-  process.env.TOKEN_DURATION_IN_SECONDS || DEFAULT_TOKEN_DURATION_IN_SECONDS,
-  10
-);
+
+// Set default session duration to 30 days
+const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
+const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
+  ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
+  : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
 container.register({
