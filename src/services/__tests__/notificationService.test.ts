@@ -178,9 +178,11 @@ describe("NotificationService#notify", () => {
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
-        message: aValidNotification.message.content.markdown,
+        message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
-        title: aValidNotification.message.content.subject
+        title: `${aValidNotification.sender_metadata.service_name} - ${
+          aValidNotification.sender_metadata.organization_name
+        }`
       },
       expect.any(Function)
     );
@@ -202,9 +204,11 @@ describe("NotificationService#notify", () => {
     expect(mockSend).toBeCalledWith(
       aFiscalCodeHash,
       {
-        message: aValidNotification.message.content.markdown,
+        message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
-        title: aValidNotification.message.content.subject
+        title: `${aValidNotification.sender_metadata.service_name} - ${
+          aValidNotification.sender_metadata.organization_name
+        }`
       },
       expect.any(Function)
     );

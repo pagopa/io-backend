@@ -10,7 +10,7 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../api/models";
+import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../clients/api/models";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";

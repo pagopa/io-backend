@@ -59,9 +59,11 @@ export default class NotificationService {
 
     return new Promise(resolve => {
       const payload = {
-        message: notification.message.content.markdown,
+        message: notification.message.content.subject,
         message_id: notification.message.id,
-        title: notification.message.content.subject
+        title: `${notification.sender_metadata.service_name} - ${
+          notification.sender_metadata.organization_name
+        }`
       };
       notificationHubService.send(
         toFiscalCodeHash(notification.message.fiscal_code),
