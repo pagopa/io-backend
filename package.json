@@ -1,6 +1,6 @@
 {
   "name": "italia-backend",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "description": "Italia app and web backend",
   "main": "index.js",
   "engines": {
@@ -60,7 +60,7 @@
     "redis": "^2.8.0",
     "redis-clustr": "^1.6.0",
     "request-ip": "^2.1.1",
-    "spid-passport": "git://github.com/gunzip/spid-passport.git#6395dd9e5fdf1ecd48af5f02745a37a7aec9b9d0",
+    "spid-passport": "git://github.com/gunzip/spid-passport.git#5cd9f353",
     "typescript": "^2.9.2",
     "ulid": "^2.2.2",
     "validator": "^10.4.0",
