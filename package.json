@@ -64,7 +64,8 @@
     "typescript": "^2.9.2",
     "ulid": "^2.2.2",
     "validator": "^10.4.0",
-    "winston": "^3.0.0"
+    "winston": "^3.0.0",
+    "xmldom": "^0.1.27"
   },
   "devDependencies": {
     "@types/azure-sb": "^0.0.32",
@@ -86,6 +87,7 @@
     "@types/swagger-parser": "^4.0.2",
     "@types/validator": "^9.4.1",
     "@types/xml2js": "^0.4.3",
+    "@types/xmldom": "^0.1.29",
     "autorest": "^2.0.4280",
     "danger": "^3.7.20",
     "danger-plugin-digitalcitizenship": "^0.3.1",
