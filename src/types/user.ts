@@ -5,7 +5,7 @@
 
 import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
-import { none, Option, some, tryCatch } from "fp-ts/lib/Option";
+import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import { DOMParser } from "xmldom";
@@ -169,15 +169,17 @@ export function extractUserFromJson(from: string): Either<Error, User> {
  * returns "https://www.spid.gov.it/SpidL2"
  */
 function getAuthnContextFromResponse(xml: string): Option<string> {
-  const maybeXmlResponse = tryCatch(() => new DOMParser().parseFromString(xml));
-  return maybeXmlResponse.chain(xmlResponse => {
-    const responseAuthLevelEl = xmlResponse.getElementsByTagName(
-      "saml:AuthnContextClassRef"
+  return fromNullable(xml)
+    .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
+    .map(xmlResponse =>
+      xmlResponse.getElementsByTagName("saml:AuthnContextClassRef")
+    )
+    .chain(
+      responseAuthLevelEl =>
+        responseAuthLevelEl &&
+        responseAuthLevelEl[0] &&
+        responseAuthLevelEl[0].textContent
+          ? some(responseAuthLevelEl[0].textContent!.trim())
+          : none
     );
-    return responseAuthLevelEl &&
-      responseAuthLevelEl[0] &&
-      responseAuthLevelEl[0].textContent
-      ? some(responseAuthLevelEl[0].textContent!.trim())
-      : none;
-  });
 }
