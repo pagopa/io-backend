@@ -103,9 +103,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/jest@^23.1.0":
-  version "23.1.0"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.1.0.tgz#8054dd838ba23dc331794d26456b86c7e50bf0f6"
+"@types/jest@^23.3.0":
+  version "23.3.0"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.0.tgz#5dd70033b616a6228042244ebd992f6426808810"
 
 "@types/lolex@2.1.3":
   version "2.1.3"
@@ -4377,9 +4377,9 @@ passport-http-bearer@^1.0.1:
   dependencies:
     passport-strategy "1.x.x"
 
-passport-saml@^0.31.0:
-  version "0.31.0"
-  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-0.31.0.tgz#e4d654cab30f018bfd39056efe7bcfa770aab463"
+passport-saml@^0.33.0:
+  version "0.33.0"
+  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-0.33.0.tgz#51b99f19dced56d246ee4e2887e32f06321fbecf"
   dependencies:
     passport-strategy "*"
     q "^1.5.0"
@@ -4605,7 +4605,7 @@ punycode@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.0.tgz#5f863edc89b96db09074bad7947bf09056ca4e7d"
 
-q@^1.5.0:
+q@^1.5.0, q@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
 
@@ -5197,13 +5197,18 @@ spdx-license-ids@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.0.tgz#7a7cd28470cc6d3a1cfe6d66886f6bc430d3ac87"
 
-"spid-passport@git://github.com/lussoluca/spid-passport.git#e14ead5":
+"spid-passport@git://github.com/gunzip/spid-passport.git#6395dd9e5fdf1ecd48af5f02745a37a7aec9b9d0":
   version "1.0.0"
-  resolved "git://github.com/lussoluca/spid-passport.git#e14ead5cd8bbcd608d113745986aed057f51fdd3"
+  resolved "git://github.com/gunzip/spid-passport.git#6395dd9e5fdf1ecd48af5f02745a37a7aec9b9d0"
   dependencies:
     passport "^0.4.0"
-    passport-saml "^0.31.0"
+    passport-saml "^0.33.0"
     passport-strategy "^1.0.0"
+    q "^1.5.1"
+    winston "^3.0.0"
+    xml-crypto "^0.10.1"
+    xmlbuilder "^10.0.0"
+    xmldom "^0.1.27"
 
 split-string@^3.0.1, split-string@^3.0.2:
   version "3.1.0"
@@ -6068,6 +6073,10 @@ xml2js@0.4.x, xml2js@^0.4.19:
 xmlbuilder@0.4.3:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-0.4.3.tgz#c4614ba74e0ad196e609c9272cd9e1ddb28a8a58"
+
+xmlbuilder@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-10.0.0.tgz#c64e52f8ae097fe5fd46d1c38adaade071ee1b55"
 
 xmlbuilder@^9.0.4, xmlbuilder@~9.0.1:
   version "9.0.7"
