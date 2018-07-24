@@ -171,8 +171,11 @@ export function extractUserFromJson(from: string): Either<Error, User> {
 function getAuthnContextFromResponse(xml: string): Option<string> {
   return fromNullable(xml)
     .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
-    .map(xmlResponse =>
-      xmlResponse.getElementsByTagName("saml:AuthnContextClassRef")
+    .chain(
+      xmlResponse =>
+        xmlResponse
+          ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
+          : none
     )
     .chain(
       responseAuthLevelEl =>
