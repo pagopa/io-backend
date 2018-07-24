@@ -5,8 +5,10 @@
 
 import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
+import { none, Option, some } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { number, string } from "io-ts";
+import { DOMParser } from "xmldom";
 import { log } from "../utils/logger";
 import { EmailAddress } from "./api/EmailAddress";
 import { FiscalCode } from "./api/FiscalCode";
@@ -90,20 +92,32 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
     FISCAL_NUMBER_INTERNATIONAL_PREFIX,
     ""
   );
-  const valueWithoutPrefix = {
-    ...value,
-    fiscalNumber: fiscalNumberWithoutPrefix
-  };
+
+  const maybeAuthnContextClassRef = getAuthnContextFromResponse(
+    value.getAssertionXml()
+  );
 
   // Set SPID level to a default (SPID_L2) if the expected value is not available
   // in the SAML assertion.
   // Actually the value returned by the test idp is invalid
   // @see https://github.com/italia/spid-testenv/issues/26
+  const authnContextClassRef = maybeAuthnContextClassRef
+    .filter(isSpidL)
+    .getOrElse(SpidLevelEnum["https://www.spid.gov.it/SpidL2"]);
+
+  log.info(
+    "Response from IDP (authnContextClassRef): %s",
+    authnContextClassRef
+  );
+
+  const valueWithoutPrefix = {
+    ...value,
+    fiscalNumber: fiscalNumberWithoutPrefix
+  };
+
   const valueWithDefaultSPIDLevel = {
     ...valueWithoutPrefix,
-    authnContextClassRef: isSpidL(valueWithoutPrefix.authnContextClassRef)
-      ? valueWithoutPrefix.authnContextClassRef
-      : SpidLevelEnum["https://www.spid.gov.it/SpidL2"]
+    authnContextClassRef
   };
 
   // Log the invalid SPID level to audit IDP responses.
@@ -146,4 +160,25 @@ export function extractUserFromJson(from: string): Either<Error, User> {
   return result.mapLeft(() => {
     return new Error(messageErrorOnDecodeUser);
   });
+}
+
+/**
+ * Extract AuthnContextClassRef from SAML response
+ *
+ * ie. for <saml2:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml2:AuthnContextClassRef>
+ * returns "https://www.spid.gov.it/SpidL2"
+ */
+function getAuthnContextFromResponse(xml: string): Option<string> {
+  const xmlResponse = new DOMParser().parseFromString(xml);
+  const responseAuthLevelEl = xmlResponse.getElementsByTagName(
+    "saml:AuthnContextClassRef"
+  );
+  if (
+    responseAuthLevelEl &&
+    responseAuthLevelEl[0] &&
+    responseAuthLevelEl[0].textContent
+  ) {
+    return some(responseAuthLevelEl[0].textContent!.trim());
+  }
+  return none;
 }
