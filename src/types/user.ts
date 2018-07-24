@@ -121,7 +121,7 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
   };
 
   // Log the invalid SPID level to audit IDP responses.
-  if (!isSpidL(valueWithoutPrefix.authnContextClassRef)) {
+  if (!isSpidL(valueWithDefaultSPIDLevel.authnContextClassRef)) {
     log.warn(
       "Response from IDP: %s doesn't contain a valid SPID level: %s",
       value.issuer._,

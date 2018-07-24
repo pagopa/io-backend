@@ -36,3 +36,6 @@ npm-debug.log
 
 # Exclude certificates
 *.pem
+
+# Exclude local files
+local.*
