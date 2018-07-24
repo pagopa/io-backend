@@ -62,13 +62,6 @@ function withSpidAuth(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    if (req.body && req.body.SAMLResponse) {
-      const samlXMLResponse = new Buffer(
-        req.body.SAMLResponse,
-        "base64"
-      ).toString("utf8");
-      log.info("SAML XML response: %s", samlXMLResponse);
-    }
     passport.authenticate("spid", async (err, user) => {
       if (err) {
         log.error("Error in SPID authentication: %s", err);
