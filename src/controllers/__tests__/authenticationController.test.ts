@@ -132,7 +132,7 @@ const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
-  getAssertionXml: () => ({}),
+  getAssertionXml: () => "",
   issuer: {
     _: "xxx"
   },
