@@ -74,9 +74,9 @@ export function toAppUser(
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     session_token: sessionToken,
     spid_email: from.email,
-    spid_mobile_phone: from.mobilePhone,
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
+    spid_mobile_phone: from.mobilePhone,
     wallet_token: walletToken
   };
 }
