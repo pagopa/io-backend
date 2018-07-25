@@ -138,7 +138,7 @@ describe("ProfileController#getProfile", () => {
     expect(mockGetProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining("Cannot extract the user from request")
     });
   });
 });
@@ -196,7 +196,7 @@ describe("ProfileController#upsertProfile", () => {
     expect(mockUpsertProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining("Cannot extract the user from request")
     });
   });
 

@@ -5,16 +5,10 @@
 
 import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
-import {
-  fromNullable,
-  isNone,
-  none,
-  Option,
-  some,
-  tryCatch
-} from "fp-ts/lib/Option";
-import * as t from "io-ts";
+import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import { number, string } from "io-ts";
+import * as t from "io-ts";
+import { JSONFromString } from "io-ts-types";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { DOMParser } from "xmldom";
 import { log } from "../utils/logger";
@@ -164,16 +158,15 @@ export function extractUserFromRequest(
  * Extracts a user from a json string.
  */
 export function extractUserFromJson(from: string): Either<Error, User> {
-  const maybeJson = tryCatch(() => JSON.parse(from));
-
-  if (isNone(maybeJson)) {
-    return left(new Error("Cannot parse the user JSON"));
-  }
-  const json = maybeJson.value;
-
-  return User.decode(json).mapLeft(err => {
-    return new Error("Cannot decode the user JSON: " + readableReport(err));
-  });
+  return JSONFromString.decode(from)
+    .mapLeft(
+      err => new Error("Cannot parse the user JSON:" + readableReport(err))
+    )
+    .chain(json =>
+      User.decode(json).mapLeft(
+        err => new Error("Cannot decode the user JSON: " + readableReport(err))
+      )
+    );
 }
 
 /**

@@ -250,7 +250,9 @@ describe("AuthenticationController#acs", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining(
+        "value.email is not a string that represents an email address"
+      )
     });
     expect(mockSet).not.toHaveBeenCalled();
   });
@@ -340,7 +342,7 @@ describe("AuthenticationController#logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining("value.family_name is not a string")
     });
   });
 
