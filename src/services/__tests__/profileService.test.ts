@@ -47,6 +47,7 @@ const proxyProfileWithEmailResponse = {
   name: "Luca",
   preferred_languages: ["it_IT"],
   spid_email: aValidSPIDEmail,
+  spid_mobile_phone: "3222222222222",
   version: 42
 };
 const proxyProfileWithoutEmailResponse = {
@@ -58,6 +59,7 @@ const proxyProfileWithoutEmailResponse = {
   is_webhook_enabled: false,
   name: "Luca",
   spid_email: aValidSPIDEmail,
+  spid_mobile_phone: "3222222222222",
   version: 0
 };
 const proxyUpsertRequest = {

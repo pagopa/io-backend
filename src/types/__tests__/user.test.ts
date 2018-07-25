@@ -32,6 +32,7 @@ const mockedSpidUser: any = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: anIssuer,
+  mobilePhone: "3222222222222",
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
