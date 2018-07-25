@@ -270,7 +270,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error creating the user session"
+      detail: expect.stringContaining("Cannot validate SPID user object")
     });
   });
 
@@ -285,7 +285,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: expect.stringContaining("Cannot validate SPID user object")
     });
   });
 });
@@ -430,6 +430,7 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
       <RequestedAttribute Name="name" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Nome"/>
       <RequestedAttribute Name="familyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Cognome"/>
       <RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Email"/>
+      <RequestedAttribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Numero di telefono"/>
     </AttributeConsumingService>
   </SPSSODescriptor>
   <Organization>
