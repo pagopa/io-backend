@@ -124,6 +124,7 @@ const validUserPayload = {
   issuer: {
     _: "xxx"
   },
+  mobilePhone: "3222222222222",
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
@@ -138,6 +139,7 @@ const invalidUserPayload = {
   issuer: {
     _: "xxx"
   },
+  mobilePhone: "3222222222222",
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
