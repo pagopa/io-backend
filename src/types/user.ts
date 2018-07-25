@@ -6,8 +6,10 @@
 import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
-import * as t from "io-ts";
 import { number, string } from "io-ts";
+import * as t from "io-ts";
+import { JSONFromString } from "io-ts-types";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import { DOMParser } from "xmldom";
 import { log } from "../utils/logger";
 import { EmailAddress } from "./api/EmailAddress";
@@ -51,8 +53,6 @@ export const SpidUser = t.interface({
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
 
-const messageErrorOnDecodeUser = "Unable to decode the user";
-
 /**
  * Converts a SPID User to a Proxy User.
  */
@@ -83,7 +83,7 @@ export function toAppUser(
 // tslint:disable-next-line:no-any
 export function validateSpidUser(value: any): Either<Error, SpidUser> {
   if (!value.hasOwnProperty("fiscalNumber")) {
-    return left(new Error(messageErrorOnDecodeUser));
+    return left(new Error("Cannot decode a user without a fiscalNumber"));
   }
 
   // Remove the international prefix from fiscal number.
@@ -131,8 +131,10 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
 
   const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 
-  return result.mapLeft(() => {
-    return new Error(messageErrorOnDecodeUser);
+  return result.mapLeft(err => {
+    return new Error(
+      "Cannot validate SPID user object: " + readableReport(err)
+    );
   });
 }
 
@@ -144,8 +146,11 @@ export function extractUserFromRequest(
 ): Either<Error, User> {
   const result = User.decode(from.user);
 
-  return result.mapLeft(() => {
-    return new Error(messageErrorOnDecodeUser);
+  // tslint:disable-next-line:no-identical-functions
+  return result.mapLeft(err => {
+    return new Error(
+      "Cannot extract the user from request: " + readableReport(err)
+    );
   });
 }
 
@@ -153,13 +158,15 @@ export function extractUserFromRequest(
  * Extracts a user from a json string.
  */
 export function extractUserFromJson(from: string): Either<Error, User> {
-  const json = JSON.parse(from);
-
-  const result = User.decode(json);
-
-  return result.mapLeft(() => {
-    return new Error(messageErrorOnDecodeUser);
-  });
+  return JSONFromString.decode(from)
+    .mapLeft(
+      err => new Error("Cannot parse the user JSON:" + readableReport(err))
+    )
+    .chain(json =>
+      User.decode(json).mapLeft(
+        err => new Error("Cannot decode the user JSON: " + readableReport(err))
+      )
+    );
 }
 
 /**

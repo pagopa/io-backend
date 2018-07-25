@@ -199,7 +199,9 @@ describe("NotificationController#createOrUpdateInstallation", () => {
 
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining(
+        "value.fiscal_code is not a string that matches the pattern"
+      )
     });
   });
 

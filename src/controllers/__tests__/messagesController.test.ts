@@ -123,7 +123,7 @@ describe("MessagesController#getMessagesByUser", () => {
     expect(mockGetMessagesByUser).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining("Cannot extract the user from request")
     });
   });
 });
@@ -178,7 +178,7 @@ describe("MessagesController#getMessage", () => {
     expect(mockGetMessage).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining("Cannot extract the user from request")
     });
   });
 });
