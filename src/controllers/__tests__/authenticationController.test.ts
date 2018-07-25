@@ -5,6 +5,7 @@
 /* tslint:disable:no-big-function */
 
 import { left, right } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
@@ -109,6 +110,7 @@ const mockedUser: User = {
   spid_email: anEmailAddress,
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
 

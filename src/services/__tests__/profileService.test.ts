@@ -1,4 +1,5 @@
 import { right } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../../types/api/EmailAddress";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
@@ -103,6 +104,7 @@ const mockedUser: User = {
   spid_email: aValidSPIDEmail,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
 };
 
