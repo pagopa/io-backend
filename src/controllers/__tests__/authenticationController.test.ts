@@ -272,7 +272,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: expect.stringContaining("Cannot validate SPID user object")
+      detail: "Error creating the user session"
     });
   });
 
@@ -287,7 +287,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: expect.stringContaining("Cannot validate SPID user object")
+      detail: "Redis error"
     });
   });
 });
