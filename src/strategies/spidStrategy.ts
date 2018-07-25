@@ -88,7 +88,13 @@ const spidStrategy = (
         acceptedClockSkewMs: samlAcceptedClockSkewMs,
         attributeConsumingServiceIndex: samlAttributeConsumingServiceIndex,
         attributes: {
-          attributes: ["fiscalNumber", "name", "familyName", "email"],
+          attributes: [
+            "fiscalNumber",
+            "name",
+            "familyName",
+            "email",
+            "mobilePhone"
+          ],
           name: "Required attributes"
         },
         callbackUrl: samlCallbackUrl,

@@ -477,6 +477,8 @@ definitions:
         type: string
       spid_email:
         $ref: '#/definitions/EmailAddress'
+      spid_mobile_phone:
+        $ref: '#/definitions/PhoneNumber'
       preferred_languages:
         type: array
         items:
@@ -492,6 +494,7 @@ definitions:
       - is_webhook_enabled
       - name
       - spid_email
+      - spid_mobile_phone
       - version
   ProfileWithoutEmail:
     type: object
@@ -514,6 +517,8 @@ definitions:
         type: string
       spid_email:
         $ref: '#/definitions/EmailAddress'
+      spid_mobile_phone:
+        $ref: '#/definitions/PhoneNumber'
       preferred_languages:
         type: array
         items:
@@ -529,6 +534,7 @@ definitions:
       - is_webhook_enabled
       - name
       - spid_email
+      - spid_mobile_phone
       - version
   PublicSession:
     type: object

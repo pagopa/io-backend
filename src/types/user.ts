@@ -10,6 +10,7 @@ import { number, string } from "io-ts";
 import * as t from "io-ts";
 import { JSONFromString } from "io-ts-types";
 import { readableReport } from "italia-ts-commons/lib/reporters";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 import { log } from "../utils/logger";
 import { EmailAddress } from "./api/EmailAddress";
@@ -32,6 +33,7 @@ export const User = t.interface({
   spid_email: EmailAddress,
   spid_idp: string,
   spid_level: SpidLevel,
+  spid_mobile_phone: NonEmptyString,
   wallet_token: WalletToken
 });
 
@@ -45,6 +47,7 @@ export const SpidUser = t.interface({
   fiscalNumber: FiscalCode,
   getAssertionXml: t.Function,
   issuer: Issuer,
+  mobilePhone: NonEmptyString,
   name: string,
   nameID: string,
   nameIDFormat: string,
@@ -71,6 +74,7 @@ export function toAppUser(
     sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     session_token: sessionToken,
     spid_email: from.email,
+    spid_mobile_phone: from.mobilePhone,
     spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
     wallet_token: walletToken
