@@ -478,7 +478,8 @@ definitions:
       spid_email:
         $ref: '#/definitions/EmailAddress'
       spid_mobile_phone:
-        $ref: '#/definitions/PhoneNumber'
+        type: string
+        minLength: 1
       preferred_languages:
         type: array
         items:
@@ -518,7 +519,8 @@ definitions:
       spid_email:
         $ref: '#/definitions/EmailAddress'
       spid_mobile_phone:
-        $ref: '#/definitions/PhoneNumber'
+        type: string
+        minLength: 1
       preferred_languages:
         type: array
         items:
