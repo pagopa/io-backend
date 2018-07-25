@@ -462,8 +462,8 @@ OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
 IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
 </X509Certificate></X509Data></KeyInfo></Signature></EntityDescriptor>`;
 
-    const matadata = await controller.metadata();
-    matadata.apply(res);
+    const metadata = await controller.metadata();
+    metadata.apply(res);
 
     expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(200);
