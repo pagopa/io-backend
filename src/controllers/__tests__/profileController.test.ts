@@ -2,6 +2,7 @@
 
 import { right } from "fp-ts/lib/Either";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -63,6 +64,7 @@ const mockedUser: User = {
   spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
 };
 

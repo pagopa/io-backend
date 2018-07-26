@@ -5,6 +5,7 @@
 /* tslint:disable:no-null-keyword */
 
 import { left, right } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";
@@ -35,6 +36,7 @@ const aValidUser: User = {
   spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
 };
 

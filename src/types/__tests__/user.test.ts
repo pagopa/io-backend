@@ -3,6 +3,7 @@
 import { Either, isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../api/EmailAddress";
 import { FiscalCode } from "../api/FiscalCode";
 import { SpidLevelEnum } from "../api/SpidLevel";
@@ -31,6 +32,7 @@ const mockedSpidUser: any = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: anIssuer,
+  mobilePhone: "3222222222222",
   name: "Giuseppe Maria",
   nameID: "garibaldi",
   nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -55,6 +57,7 @@ const mockedUser: User = {
   spid_email: anEmailAddress,
   spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
 };
 

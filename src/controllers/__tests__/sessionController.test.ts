@@ -4,6 +4,7 @@
 /* tslint:disable:no-identical-functions */
 /* tslint:disable:no-big-function */
 
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { EmailAddress } from "../../types/api/EmailAddress";
@@ -41,6 +42,7 @@ const mockedUser: User = {
   spid_email: anEmailAddress,
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
 

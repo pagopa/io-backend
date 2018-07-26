@@ -35,6 +35,7 @@ export function toAppProfileWithEmail(
     name: user.name,
     preferred_languages: from.preferredLanguages,
     spid_email: user.spid_email,
+    spid_mobile_phone: user.spid_mobile_phone,
     version: from.version
   };
 }
@@ -54,6 +55,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     is_webhook_enabled: false,
     name: user.name,
     spid_email: user.spid_email,
+    spid_mobile_phone: user.spid_mobile_phone,
     version: 0 as NonNegativeInteger
   };
 }

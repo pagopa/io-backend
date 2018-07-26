@@ -5,6 +5,7 @@
 /* tslint:disable:no-big-function */
 
 import { left, right } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
@@ -109,6 +110,7 @@ const mockedUser: User = {
   spid_email: anEmailAddress,
   spid_idp: "xxx",
   spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
 
@@ -122,6 +124,7 @@ const validUserPayload = {
   issuer: {
     _: "xxx"
   },
+  mobilePhone: "3222222222222",
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
@@ -136,6 +139,7 @@ const invalidUserPayload = {
   issuer: {
     _: "xxx"
   },
+  mobilePhone: "3222222222222",
   name: aValidname,
   nameID: "garibaldi",
   nameIDFormat: aValidIDFormat,
@@ -428,6 +432,7 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
       <RequestedAttribute Name="name" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Nome"/>
       <RequestedAttribute Name="familyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Cognome"/>
       <RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Email"/>
+      <RequestedAttribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Numero di telefono"/>
     </AttributeConsumingService>
   </SPSSODescriptor>
   <Organization>
@@ -435,7 +440,7 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
     <OrganizationDisplayName>Digital citizenship proxy</OrganizationDisplayName>
     <OrganizationURL>https://github.com/teamdigitale/italia-backend</OrganizationURL>
   </Organization>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#http___italia_backend"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Mh1V7fJl+pMthhcJAAhEBuY58dWxqd3NI2ha/JyPpeI=</DigestValue></Reference></SignedInfo><SignatureValue>SIzSS+ZwK00YtvsXR8odCkrkBapatSdy8n4ifLl0/zoRQM7UCPrSKbUWihMBJCe7HdoT4VXOhhhgo9+IdE1qunrxQ1a3ydQbySRAidtaGbOQf5JxfzH0zYcKCQJLRPMXtLBNL3qlt+np0Bf740ZpzaKHRktaRn/0yKEHEtE9khf8d2xuzIm/fw75L2/i7wSggNFSUBzwSGd8EN3XRFWgwUuIwP6NK8GAjZa7pO0sZ0Z2zqCL1Q75/FZqaRBqvkrGDmlVu7wRJDTY6WSlzQ7PdhrLyGb4pxjWER0SfnKJBskS9SVjPP9ypb/AoQB6zoFX/58NtDUaluBr3jgxvWLH5R4=</SignatureValue><KeyInfo><X509Data><X509Certificate>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#http___italia_backend"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Bf2Cp9GHtyquphvca26konsKBCC5ZWZE/Jg/ouPscmg=</DigestValue></Reference></SignedInfo><SignatureValue>Xy6T5fn1q2IS0GCXkfOccJv4rF+QrUshbV4hcn/XCfeGSX+C9Kunxx2+BuVMOpuTjtYGUxgCEdMAGOGbaOtCM8pE0XlrCDrAibvSYMvREYSWIWg6ljpUpnPTkM8YNlkot7Gl5Vs7sR3+5vA00SvudJqElttDo3/jrMLGSp4QmX5pcoycmvxummZ4rVktxhQuVdUyODD3Hl+DYJMzkUIBrxz+wR/ysPpi+aBAfNFY+WwTFB/JmVmDHmyoCo02QTaLZqSDRE9JfYU3bmTApqDOwRUAX3MKGx13i/wIw2iqPAakqRM7lHfJBzFS3cTXziCqHB72++pGc/ys9HFoddw+3Is=</SignatureValue><KeyInfo><X509Data><X509Certificate>
 MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
 MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
 dHBzOi8vaXRhbGlhLWJhY2tlbmQwHhcNMTcxMDI2MTAzNTQwWhcNMTgxMDI2MTAz
@@ -457,8 +462,8 @@ OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
 IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
 </X509Certificate></X509Data></KeyInfo></Signature></EntityDescriptor>`;
 
-    const matadata = await controller.metadata();
-    matadata.apply(res);
+    const metadata = await controller.metadata();
+    metadata.apply(res);
 
     expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(200);
