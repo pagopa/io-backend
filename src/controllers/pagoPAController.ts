@@ -47,7 +47,10 @@ export default class PagoPAController {
     const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
 
     return ResponseSuccessJson({
-      email
+      email,
+      family_name: user.family_name,
+      mobile_phone: user.spid_mobile_phone,
+      name: user.name
     });
   }
 }
