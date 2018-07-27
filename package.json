@@ -44,7 +44,7 @@
     "dotenv": "^6.0.0",
     "express": "^4.16.2",
     "express-enforces-ssl": "1.1.0",
-    "helmet": "3.12.1",
+    "helmet": "3.13.0",
     "io-ts": "^1.2.1",
     "io-ts-types": "^0.3.6",
     "italia-ts-commons": "^2.9.0",
