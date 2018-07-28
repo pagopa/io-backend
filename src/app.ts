@@ -245,6 +245,30 @@ function registerAPIRoutes(
     }
   );
 
+  app.get(
+    `${basePath}/services`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(servicesController.getVisibleServices)(
+        req,
+        res,
+        servicesController
+      );
+    }
+  );
+
+  app.get(
+    `${basePath}/services/by-recipient`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(servicesController.getServicesByRecipient)(
+        req,
+        res,
+        servicesController
+      );
+    }
+  );
+
   app.put(
     `${basePath}/installations/:id`,
     bearerTokenAuth,

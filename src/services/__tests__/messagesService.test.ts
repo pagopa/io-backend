@@ -42,6 +42,15 @@ const validApiMessagesResponse = {
     status: 200
   }
 };
+const validApiServicesResponse = {
+  parsedBody: {
+    items: ["5a563817fcc896087002ea46c49a", "5a563817fcc896087002ea46c49b"],
+    page_size: 2
+  },
+  response: {
+    status: 200
+  }
+};
 const emptyApiMessagesResponse = {
   parsedBody: {},
   response: {
@@ -66,6 +75,22 @@ const invalidApiMessagesResponse = {
     status: 200
   }
 };
+const invalidApiServicesResponse = {
+  parsedBody: {
+    items: [
+      {
+        id: "5a563817fcc896087002ea46c49a",
+        senderServiceId: "5a563817fcc896087002ea46c49a"
+      },
+      9,
+      ["a", "r", "r", "a", "y"]
+    ],
+    page_size: 3
+  },
+  response: {
+    status: 200
+  }
+};
 const proxyMessagesResponse = {
   items: [
     {
@@ -77,6 +102,10 @@ const proxyMessagesResponse = {
       sender_service_id: "5a563817fcc896087002ea46c49a"
     }
   ],
+  page_size: 2
+};
+const proxyServicesResponse = {
+  items: ["5a563817fcc896087002ea46c49a", "5a563817fcc896087002ea46c49b"],
   page_size: 2
 };
 const validApiMessageResponse = {
@@ -183,13 +212,15 @@ const mockedUser: User = {
 };
 
 const mockGetMessagesByUser = jest.fn();
+const mockGetServicesByUser = jest.fn();
 const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
     getMessageWithHttpOperationResponse: mockGetMessage,
     getMessagesByUserWithHttpOperationResponse: mockGetMessagesByUser,
-    getServiceWithHttpOperationResponse: mockGetService
+    getServiceWithHttpOperationResponse: mockGetService,
+    getServicesWithHttpOperationResponse: mockGetServicesByUser
   };
 });
 jest.mock("../../services/apiClientFactory", () => {
@@ -270,6 +301,56 @@ describe("MessageService#getMessagesByUser", () => {
       expect(mockGetMessagesByUser).toHaveBeenCalledWith();
       expect(e).toEqual(new Error(messageErrorOnUnknownResponse));
     }
+  });
+});
+
+describe("MessageService#getServicesByUser", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns a list of services from the API", async () => {
+    mockGetServicesByUser.mockImplementation(() => {
+      return validApiServicesResponse;
+    });
+
+    const service = new MessageService(api);
+
+    const res = await service.getServicesByRecipient(mockedUser);
+
+    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockGetServicesByUser).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(res).toEqual(right(proxyServicesResponse));
+  });
+
+  it("returns an error if the getServicesByUser API returns an error", () => {
+    mockGetServicesByUser.mockImplementation(() => {
+      return problemJson;
+    });
+
+    const service = new MessageService(api);
+
+    expect.assertions(3);
+    return service.getServicesByRecipient(mockedUser).then(e => {
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetServicesByUser).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(e).toEqual(left(messageErrorOnApiError));
+    });
+  });
+
+  it("returns unknown response if the response from the getServicesByUser API returns something wrong", async () => {
+    mockGetServicesByUser.mockImplementation(() => {
+      return invalidApiServicesResponse;
+    });
+
+    const service = new MessageService(api);
+
+    expect.assertions(3);
+    return service.getServicesByRecipient(mockedUser).then(e => {
+      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetServicesByUser).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(e).toEqual(left(messageErrorOnUnknownResponse));
+    });
   });
 });
 

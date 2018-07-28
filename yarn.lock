@@ -149,7 +149,13 @@
     "@types/express" "*"
     "@types/passport" "*"
 
-"@types/passport@*", "@types/passport@^0.4.6":
+"@types/passport@*":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@types/passport/-/passport-0.4.5.tgz#a6dd5bd2f96f2f15d350a688c3f59aa16d101c7a"
+  dependencies:
+    "@types/express" "*"
+
+"@types/passport@^0.4.6":
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/@types/passport/-/passport-0.4.6.tgz#1c6a1a3fd105e9354816e179c5c9cd13852864d1"
   dependencies:
@@ -175,7 +181,14 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@types/superagent@*", "@types/superagent@^3.8.3":
+"@types/superagent@*":
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/@types/superagent/-/superagent-3.8.2.tgz#ffdda92843f8966fb4c5f482755ee641ffc53aa7"
+  dependencies:
+    "@types/cookiejar" "*"
+    "@types/node" "*"
+
+"@types/superagent@^3.8.3":
   version "3.8.3"
   resolved "https://registry.yarnpkg.com/@types/superagent/-/superagent-3.8.3.tgz#51aa6040c21b66df00f46e10bb08fb51c541acfc"
   dependencies:
@@ -2064,7 +2077,11 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
-fp-ts@^1.0.0, fp-ts@^1.6.0, fp-ts@^1.7.1:
+fp-ts@^1.0.0, fp-ts@^1.6.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.7.0.tgz#3d6a7ab2a541125e7089c2228acaa600b271a68f"
+
+fp-ts@^1.7.1:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.7.1.tgz#b1ff2a39f345a7aa31bb53f26edab1ac3fc70b75"
 
@@ -5674,8 +5691,8 @@ tsutils@^2.12.1:
     tslib "^1.8.1"
 
 tsutils@^2.27.2:
-  version "2.28.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.28.0.tgz#6bd71e160828f9d019b6f4e844742228f85169a1"
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.29.0.tgz#32b488501467acbedd4b85498673a0812aca0b99"
   dependencies:
     tslib "^1.8.1"
 

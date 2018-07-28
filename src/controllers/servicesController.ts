@@ -11,6 +11,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
+import { Services } from "../types/api/Services";
+import { VisibleServices } from "../types/api/VisibleServices";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
@@ -46,5 +48,54 @@ export default class ServicesController {
 
     const service = errorOrService.value;
     return ResponseSuccessJson(service);
+  }
+
+  public async getServicesByRecipient(
+    req: express.Request
+  ): Promise<MessagesResponse<Services>> {
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      // Unable to extract the user from the request.
+      const error = errorOrUser.value;
+      return ResponseErrorInternal(error.message);
+    }
+
+    // TODO: validate req.params.id
+    const user = errorOrUser.value;
+    const errorOrServices = await this.messagesService.getServicesByRecipient(
+      user
+    );
+
+    if (isLeft(errorOrServices)) {
+      const error = errorOrServices.value;
+      return toHttpError(error);
+    }
+
+    const services = errorOrServices.value;
+    return ResponseSuccessJson(services);
+  }
+
+  public async getVisibleServices(
+    req: express.Request
+  ): Promise<MessagesResponse<VisibleServices>> {
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      // Unable to extract the user from the request.
+      const error = errorOrUser.value;
+      return ResponseErrorInternal(error.message);
+    }
+
+    const user = errorOrUser.value;
+    const errorOrServices = await this.messagesService.getVisibleServices(user);
+
+    if (isLeft(errorOrServices)) {
+      const error = errorOrServices.value;
+      return toHttpError(error);
+    }
+
+    const services = errorOrServices.value;
+    return ResponseSuccessJson(services);
   }
 }
