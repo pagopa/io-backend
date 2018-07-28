@@ -13,6 +13,7 @@ import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
+import { Services } from "../types/api/Services";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
@@ -29,6 +30,7 @@ import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
+const logErrorOnApiError = "Api error: %s";
 const messageNotFound = "Not found.";
 
 export type MessagesResponse<T> =
@@ -66,7 +68,7 @@ export default class MessagesService {
       if (simpleResponse.isNotFound()) {
         return left(notFoundError(messageNotFound));
       } else {
-        log.error("Api error: %s", simpleResponse.parsedBody());
+        log.error(logErrorOnApiError, simpleResponse.parsedBody());
         return left(internalError(messageErrorOnApiError));
       }
     }
@@ -119,7 +121,7 @@ export default class MessagesService {
       if (simpleResponse.isNotFound()) {
         return left(notFoundError(messageNotFound));
       } else {
-        log.error("Api error: %s", simpleResponse.parsedBody());
+        log.error(logErrorOnApiError, simpleResponse.parsedBody());
         return left(internalError(messageErrorOnApiError));
       }
     }
@@ -167,6 +169,7 @@ export default class MessagesService {
       if (simpleResponse.isNotFound()) {
         return left(notFoundError(messageNotFound));
       } else {
+        log.error(logErrorOnApiError, simpleResponse.parsedBody());
         return left(internalError(messageErrorOnApiError));
       }
     }
@@ -184,5 +187,86 @@ export default class MessagesService {
 
     const apiService = errorOrApiService.value;
     return right(toAppService(apiService));
+  }
+
+  public async getServicesByRecipient(
+    user: User
+  ): Promise<Either<ServiceError, Services>> {
+    const response = await this.apiClient
+      .getClient(user.fiscal_code)
+      .getServicesByRecipientWithHttpOperationResponse(user.fiscal_code);
+
+    const simpleResponse = new SimpleHttpOperationResponse(response);
+
+    if (!simpleResponse.isOk()) {
+      const errorOrProblemJson = ProblemJson.decode(
+        simpleResponse.parsedBody()
+      );
+      if (isLeft(errorOrProblemJson)) {
+        log.error(
+          "Unknown response from getServicesByRecipient API: %s",
+          ReadableReporter.report(errorOrProblemJson)
+        );
+        return left(internalError(messageErrorOnUnknownResponse));
+      }
+
+      log.error(logErrorOnApiError, simpleResponse.parsedBody());
+      return left(internalError(messageErrorOnApiError));
+    }
+
+    const errorOrServices = Services.decode(simpleResponse.parsedBody());
+    if (isLeft(errorOrServices)) {
+      log.error(
+        "Unknown response from getServicesByRecipient API: %s",
+        ReadableReporter.report(errorOrServices)
+      );
+      return left(internalError(messageErrorOnUnknownResponse));
+    }
+
+    const apiServices = errorOrServices.value;
+
+    const appServices = apiServices.items;
+    return right({
+      items: appServices,
+      page_size: apiServices.page_size
+    });
+  }
+
+  public async getVisibleServices(
+    user: User
+  ): Promise<Either<ServiceError, VisibleServices>> {
+    const response = await this.apiClient
+      .getClient(user.fiscal_code)
+      .getVisibleServicesWithHttpOperationResponse();
+
+    const simpleResponse = new SimpleHttpOperationResponse(response);
+
+    if (!simpleResponse.isOk()) {
+      const errorOrProblemJson = ProblemJson.decode(
+        simpleResponse.parsedBody()
+      );
+      if (isLeft(errorOrProblemJson)) {
+        log.error(
+          "Unknown response from getVisibleServices API: %s",
+          ReadableReporter.report(errorOrProblemJson)
+        );
+        return left(internalError(messageErrorOnUnknownResponse));
+      }
+
+      log.error(logErrorOnApiError, simpleResponse.parsedBody());
+      return left(internalError(messageErrorOnApiError));
+    }
+
+    const errorOrServices = Services.decode(simpleResponse.parsedBody());
+    if (isLeft(errorOrServices)) {
+      log.error(
+        "Unknown response from getVisibleServices API: %s",
+        ReadableReporter.report(errorOrServices)
+      );
+      return left(internalError(messageErrorOnUnknownResponse));
+    }
+
+    const apiServices = errorOrServices.value;
+    return right(apiServices);
   }
 }
