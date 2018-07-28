@@ -14,6 +14,7 @@ import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { Services } from "../types/api/Services";
+import { VisibleServices } from "../types/api/VisibleServices";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
@@ -27,7 +28,6 @@ import { User } from "../types/user";
 import { log } from "../utils/logger";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-import { VisibleServices } from "../types/api/VisibleServices";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
@@ -258,7 +258,7 @@ export default class MessagesService {
       return left(internalError(messageErrorOnApiError));
     }
 
-    const errorOrServices = Services.decode(simpleResponse.parsedBody());
+    const errorOrServices = VisibleServices.decode(simpleResponse.parsedBody());
     if (isLeft(errorOrServices)) {
       log.error(
         "Unknown response from getVisibleServices API: %s",

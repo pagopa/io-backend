@@ -125,7 +125,7 @@ describe("ServicesController#getServicesByRecipient", () => {
     expect(mockGetServicesByRecipient).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Unable to decode the user"
+      detail: expect.stringContaining("Cannot extract the user from request")
     });
   });
 });
