@@ -27,6 +27,7 @@ import { User } from "../types/user";
 import { log } from "../utils/logger";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
+import { VisibleServices } from "../types/api/VisibleServices";
 
 const messageErrorOnUnknownResponse = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
