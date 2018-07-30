@@ -2603,14 +2603,14 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
-io-ts-types@^0.3.6:
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.6.tgz#44c7656aeb833da2ff87b6763ae2143a234e59f8"
+io-ts-types@^0.3.8:
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.8.tgz#7b3a7a0487a43ddbae6eb6e4401c7a7263c9b088"
   dependencies:
     fp-ts "^1.0.0"
     io-ts "^1.1.4"
     monocle-ts "^1.0.0"
-    newtype-ts "^0.2.0"
+    newtype-ts "^0.2.1"
 
 io-ts@^1.1.4, io-ts@^1.2.1:
   version "1.2.1"
@@ -3963,9 +3963,9 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-newtype-ts@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/newtype-ts/-/newtype-ts-0.2.0.tgz#8306c9bdf73d54bf92c2fda6cb59e31d259a43e1"
+newtype-ts@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/newtype-ts/-/newtype-ts-0.2.1.tgz#9a88a721b2bf3bb4f2ab34db733be359190a634d"
   dependencies:
     fp-ts "^1.0.0"
     monocle-ts "^1.0.0"
