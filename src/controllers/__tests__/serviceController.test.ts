@@ -2,7 +2,10 @@
 
 import { right } from "fp-ts/lib/Either";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -27,10 +30,16 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyService: ServicePublic = {
   department_name: "Department name" as DepartmentName,
+  organization_fiscal_code: "12431435345" as OrganizationFiscalCode,
   organization_name: "Organization name" as OrganizationName,
   service_id: "5a563817fcc896087002ea46c49a" as NonEmptyString,
   service_name: "Service name" as ServiceName,
   version: 42 as NonNegativeInteger
+};
+
+const proxyServicesResponse = {
+  items: ["5a563817fcc896087002ea46c49a", "5a563817fcc896087002ea46c49b"],
+  page_size: 2
 };
 
 // mock for a valid User
@@ -58,12 +67,67 @@ const anErrorResponse = {
 };
 
 const mockGetService = jest.fn();
+const mockGetServicesByRecipient = jest.fn();
 jest.mock("../../services/messagesService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getService: mockGetService
+      getService: mockGetService,
+      getServicesByRecipient: mockGetServicesByRecipient
     }))
   };
+});
+
+describe("ServicesController#getServicesByRecipient", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the getServicesByRecipient on the ServicesController with valid values", async () => {
+    const req = mockReq();
+
+    mockGetServicesByRecipient.mockReturnValue(
+      Promise.resolve(right(proxyServicesResponse))
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(apiClient);
+    const controller = new ServicesController(messageService);
+
+    const response = await controller.getServicesByRecipient(req);
+
+    expect(mockGetServicesByRecipient).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyServicesResponse
+    });
+  });
+
+  it("calls the getServicesByRecipient on the ServicesController with empty user", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetServicesByRecipient.mockReturnValue(
+      Promise.resolve(right(proxyServicesResponse))
+    );
+
+    req.user = "";
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(apiClient);
+    const controller = new ServicesController(messageService);
+
+    const response = await controller.getServicesByRecipient(req);
+    response.apply(res);
+
+    expect(mockGetServicesByRecipient).not.toBeCalled();
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: expect.stringContaining("Cannot extract the user from request")
+    });
+  });
 });
 
 describe("serviceController#getService", () => {

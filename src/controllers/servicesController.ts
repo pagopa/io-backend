@@ -10,6 +10,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
+import { ServiceList } from "../types/api/ServiceList";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
@@ -46,5 +47,54 @@ export default class ServicesController {
 
     const service = errorOrService.value;
     return ResponseSuccessJson(service);
+  }
+
+  public async getServicesByRecipient(
+    req: express.Request
+  ): Promise<MessagesResponse<ServiceList>> {
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      // Unable to extract the user from the request.
+      const error = errorOrUser.value;
+      return ResponseErrorInternal(error.message);
+    }
+
+    // TODO: validate req.params.id
+    const user = errorOrUser.value;
+    const errorOrServices = await this.messagesService.getServicesByRecipient(
+      user
+    );
+
+    if (isLeft(errorOrServices)) {
+      const error = errorOrServices.value;
+      return toHttpError(error);
+    }
+
+    const services = errorOrServices.value;
+    return ResponseSuccessJson(services);
+  }
+
+  public async getVisibleServices(
+    req: express.Request
+  ): Promise<MessagesResponse<ServiceList>> {
+    const errorOrUser = extractUserFromRequest(req);
+
+    if (isLeft(errorOrUser)) {
+      // Unable to extract the user from the request.
+      const error = errorOrUser.value;
+      return ResponseErrorInternal(error.message);
+    }
+
+    const user = errorOrUser.value;
+    const errorOrServices = await this.messagesService.getVisibleServices(user);
+
+    if (isLeft(errorOrServices)) {
+      const error = errorOrServices.value;
+      return toHttpError(error);
+    }
+
+    const services = errorOrServices.value;
+    return ResponseSuccessJson(services);
   }
 }

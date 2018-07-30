@@ -40,11 +40,11 @@ if (env === NodeEnvironmentEnum.DEVELOPMENT) {
   const samlKey = container.resolve<string>("samlKey");
   const samlCert = container.resolve<string>("samlCert");
   const options = { key: samlKey, cert: samlCert };
-  const server = https.createServer(options, app).listen(443, () => {
-    log.info("Listening on port %d", server.address().port);
+  https.createServer(options, app).listen(443, () => {
+    log.info("Listening on port 443");
   });
 } else {
-  const server = http.createServer(app).listen(port, () => {
-    log.info("Listening on port %d", server.address().port);
+  http.createServer(app).listen(port, () => {
+    log.info("Listening on port %d", port);
   });
 }
