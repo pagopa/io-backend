@@ -258,7 +258,7 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/services/by-recipient`,
+    `${basePath}/profile/sender-services`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {
       toExpressHandler(servicesController.getServicesByRecipient)(

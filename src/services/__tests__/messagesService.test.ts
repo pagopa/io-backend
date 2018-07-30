@@ -50,7 +50,10 @@ const validApiMessagesResponse = {
 };
 const validApiServicesResponse = {
   parsedBody: {
-    items: ["5a563817fcc896087002ea46c49a", "5a563817fcc896087002ea46c49b"],
+    items: [
+      { service_id: "5a563817fcc896087002ea46c49a", version: 1 },
+      { service_id: "5a563817fcc896087002ea46c49b", version: 1 }
+    ],
     page_size: 2
   },
   response: {
@@ -111,7 +114,7 @@ const proxyMessagesResponse = {
   page_size: 2
 };
 const proxyServicesResponse = {
-  items: ["5a563817fcc896087002ea46c49a", "5a563817fcc896087002ea46c49b"],
+  items: validApiServicesResponse.parsedBody.items,
   page_size: 2
 };
 const validApiMessageResponse = {

@@ -10,9 +10,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
+import { ServiceList } from "../types/api/ServiceList";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
-import { Services } from "../types/api/Services";
-import { VisibleServices } from "../types/api/VisibleServices";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
@@ -52,7 +51,7 @@ export default class ServicesController {
 
   public async getServicesByRecipient(
     req: express.Request
-  ): Promise<MessagesResponse<Services>> {
+  ): Promise<MessagesResponse<ServiceList>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -78,7 +77,7 @@ export default class ServicesController {
 
   public async getVisibleServices(
     req: express.Request
-  ): Promise<MessagesResponse<VisibleServices>> {
+  ): Promise<MessagesResponse<ServiceList>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

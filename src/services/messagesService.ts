@@ -12,9 +12,8 @@ import {
 import { Messages } from "../types/api/Messages";
 import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
+import { ServiceList } from "../types/api/ServiceList";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
-import { Services } from "../types/api/Services";
-import { VisibleServices } from "../types/api/VisibleServices";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
@@ -192,7 +191,7 @@ export default class MessagesService {
 
   public async getServicesByRecipient(
     user: User
-  ): Promise<Either<ServiceError, Services>> {
+  ): Promise<Either<ServiceError, ServiceList>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getServicesByRecipientWithHttpOperationResponse(user.fiscal_code);
@@ -215,7 +214,7 @@ export default class MessagesService {
       return left(internalError(messageErrorOnApiError));
     }
 
-    const errorOrServices = Services.decode(simpleResponse.parsedBody());
+    const errorOrServices = ServiceList.decode(simpleResponse.parsedBody());
     if (isLeft(errorOrServices)) {
       log.error(
         "Unknown response from getServicesByRecipient API: %s",
@@ -235,7 +234,7 @@ export default class MessagesService {
 
   public async getVisibleServices(
     user: User
-  ): Promise<Either<ServiceError, VisibleServices>> {
+  ): Promise<Either<ServiceError, ServiceList>> {
     const response = await this.apiClient
       .getClient(user.fiscal_code)
       .getVisibleServicesWithHttpOperationResponse();
@@ -258,7 +257,7 @@ export default class MessagesService {
       return left(internalError(messageErrorOnApiError));
     }
 
-    const errorOrServices = VisibleServices.decode(simpleResponse.parsedBody());
+    const errorOrServices = ServiceList.decode(simpleResponse.parsedBody());
     if (isLeft(errorOrServices)) {
       log.error(
         "Unknown response from getVisibleServices API: %s",
