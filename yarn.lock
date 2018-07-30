@@ -3373,6 +3373,15 @@ json-schema-ref-parser@^5.0.3:
     js-yaml "^3.11.0"
     ono "^4.0.3"
 
+json-schema-ref-parser@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/json-schema-ref-parser/-/json-schema-ref-parser-5.1.1.tgz#adfc84bbcd3ec41536ec9df5364734884afcf1c1"
+  dependencies:
+    call-me-maybe "^1.0.1"
+    debug "^3.1.0"
+    js-yaml "^3.12.0"
+    ono "^4.0.5"
+
 json-schema-traverse@^0.3.0:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.3.1.tgz#349a6d44c53a51de89b40805c5d5e59b417d3340"
@@ -5417,15 +5426,15 @@ supports-hyperlinks@^1.0.1:
     has-flag "^2.0.0"
     supports-color "^5.0.0"
 
-swagger-cli@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.1.0.tgz#6470e13a53c02e8b4a76d285d55de1bd01c46251"
+swagger-cli@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/swagger-cli/-/swagger-cli-2.1.1.tgz#f91748e9dabbd659091228af6bb86529d6d12d2a"
   dependencies:
     chalk "^2.4.1"
     js-yaml "^3.12.0"
     mkdirp "^0.5.1"
-    swagger-parser "^5.0.0"
-    yargs "^11.0.0"
+    swagger-parser "^5.0.1"
+    yargs "^12.0.1"
 
 swagger-methods@^1.0.4:
   version "1.0.4"
@@ -5450,6 +5459,19 @@ swagger-parser@^5.0.0:
     call-me-maybe "^1.0.1"
     debug "^3.1.0"
     json-schema-ref-parser "^5.0.3"
+    ono "^4.0.5"
+    openapi-schema-validation "^0.4.1"
+    swagger-methods "^1.0.4"
+    swagger-schema-official "2.0.0-bab6bed"
+    z-schema "^3.19.1"
+
+swagger-parser@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/swagger-parser/-/swagger-parser-5.0.1.tgz#a9f043aeae3eb526ac99aa55b3a8aca53a8dbf3f"
+  dependencies:
+    call-me-maybe "^1.0.1"
+    debug "^3.1.0"
+    json-schema-ref-parser "^5.1.1"
     ono "^4.0.5"
     openapi-schema-validation "^0.4.1"
     swagger-methods "^1.0.4"
