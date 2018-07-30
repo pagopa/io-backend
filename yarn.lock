@@ -463,9 +463,9 @@ atob@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.0.tgz#ab2b150e51d7b122b9efc8d7340c06b6c41076bc"
 
-autorest@^2.0.4280:
-  version "2.0.4280"
-  resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4280.tgz#148975df27d7b62dead8acac9f0167df2baf5224"
+autorest@^2.0.4283:
+  version "2.0.4283"
+  resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4283.tgz#e23bd2ba7909f6094060b334f4393720e55db022"
 
 awilix@^3.0.8:
   version "3.0.8"
