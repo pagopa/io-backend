@@ -25,6 +25,7 @@ export function toAppProfileWithEmail(
   user: User
 ): ProfileWithEmail {
   return {
+    blocked_inbox_or_channels: from.blockedInboxOrChannels,
     email: from.email,
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
