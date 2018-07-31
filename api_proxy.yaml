@@ -522,6 +522,8 @@ definitions:
     title: Profile with wmail
     description: Describes the user's profile.
     properties:
+      blocked_inbox_or_channels:
+        $ref: "#/definitions/BlockedInboxOrChannels"
       email:
         $ref: '#/definitions/EmailAddress'
       family_name:
