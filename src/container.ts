@@ -152,7 +152,8 @@ container.register({
 
 container.register({
   apiKey: awilix.asValue(process.env.API_KEY),
-  apiUrl: awilix.asValue(process.env.API_URL)
+  apiUrl: awilix.asValue(process.env.API_URL),
+  pagoPAApiUrl: awilix.asValue(process.env.PAGOPA_API_URL)
 });
 
 // Notification URL pre shared key.

@@ -10,6 +10,7 @@ import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
 
 export default class PagoPAClientFactory
   implements IPagoPAClientFactoryInterface {
+  constructor(public readonly pagoPAApiUrl?: string) {}
   /**
    * {@inheritDoc}
    */
@@ -17,6 +18,10 @@ export default class PagoPAClientFactory
     codiceContestoPagamento: string,
     rptIdFromString: string
   ): ProxyPagoPA {
-    return new ProxyPagoPA(codiceContestoPagamento, rptIdFromString);
+    return new ProxyPagoPA(
+      codiceContestoPagamento,
+      rptIdFromString,
+      this.pagoPAApiUrl
+    );
   }
 }
