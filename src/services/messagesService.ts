@@ -5,6 +5,7 @@
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
+  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
@@ -34,6 +35,7 @@ const logErrorOnApiError = "Api error: %s";
 const messageNotFound = "Not found.";
 
 export type MessagesResponse<T> =
+  | IResponseErrorGeneric
   | IResponseErrorInternal
   | IResponseErrorNotFound
   | IResponseSuccessJson<T>;
