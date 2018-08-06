@@ -10,7 +10,12 @@ import {
   PaymentRequestsGetResponse,
   ProxyPagoPAActivatePaymentOptionalParams
 } from "../clients/pagopa/models";
-import { internalError, notFoundError, ServiceError } from "../types/error";
+import {
+  forbiddenError,
+  internalError,
+  notFoundError,
+  ServiceError
+} from "../types/error";
 import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
 
@@ -39,6 +44,10 @@ export default class PagoPAProxyService {
 
       if (simpleResponse.isInternalError()) {
         return left(internalError(internalErrorMessage));
+      }
+
+      if (simpleResponse.isForbidden()) {
+        return left(forbiddenError(simpleResponse.parsedBody()));
       }
 
       return right(simpleResponse.parsedBody());
@@ -72,6 +81,10 @@ export default class PagoPAProxyService {
         return left(internalError(internalErrorMessage));
       }
 
+      if (simpleResponse.isForbidden()) {
+        return left(forbiddenError(simpleResponse.parsedBody()));
+      }
+
       return right(simpleResponse.parsedBody());
     } catch (error) {
       return left(internalError(error.message));
@@ -97,6 +110,10 @@ export default class PagoPAProxyService {
 
       if (simpleResponse.isInternalError()) {
         return left(internalError(internalErrorMessage));
+      }
+
+      if (simpleResponse.isForbidden()) {
+        return left(forbiddenError(simpleResponse.parsedBody()));
       }
 
       return right(simpleResponse.parsedBody());

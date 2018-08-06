@@ -1,6 +1,7 @@
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
+  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson,
@@ -24,9 +25,10 @@ export default class PagoPAProxyController {
   public async getPaymentInfo(
     req: express.Request
   ): Promise<
+    | IResponseErrorGeneric
     | IResponseErrorInternal
     | IResponseErrorNotFound
-    | IResponseSuccessJson<PaymentRequestsGetResponse>
+    | IResponseSuccessJson<PaymentRequestsGetResponse> // tslint:disable-line:max-union-size
   > {
     const rptId = req.params.rptId;
     const errorOrPaymentInfo = await this.pagoPAProxyService.getPaymentInfo(
@@ -47,7 +49,8 @@ export default class PagoPAProxyController {
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
-    | IResponseSuccessJson<PaymentActivationsPostResponse>
+    | IResponseErrorGeneric
+    | IResponseSuccessJson<PaymentActivationsPostResponse> // tslint:disable-line:max-union-size
   > {
     const payload = req.body;
     const errorOrPaymentInfo = await this.pagoPAProxyService.activatePayment(
@@ -66,9 +69,10 @@ export default class PagoPAProxyController {
   public async getActivationStatus(
     req: express.Request
   ): Promise<
+    | IResponseErrorGeneric
     | IResponseErrorInternal
     | IResponseErrorNotFound
-    | IResponseSuccessJson<PaymentActivationsGetResponse>
+    | IResponseSuccessJson<PaymentActivationsGetResponse> // tslint:disable-line:max-union-size
   > {
     const codiceContestoPagamento = req.params.codiceContestoPagamento;
     const errorOrPaymentInfo = await this.pagoPAProxyService.getActivationStatus(

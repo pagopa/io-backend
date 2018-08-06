@@ -22,6 +22,10 @@ export default class SimpleResponse {
     return this.httpOperationResponse.response.status === 404;
   }
 
+  public isForbidden(): boolean {
+    return this.httpOperationResponse.response.status === 403;
+  }
+
   public isInternalError(): boolean {
     return this.httpOperationResponse.response.status === 500;
   }

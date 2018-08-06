@@ -6,6 +6,7 @@
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
+  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
@@ -31,6 +32,7 @@ const profileErrorOnUnknownResponse = "Unknown response.";
 const profileErrorOnApiError = "Api error.";
 
 export type profileResponse<T> =
+  | IResponseErrorGeneric
   | IResponseErrorInternal
   | IResponseErrorNotFound
   | IResponseSuccessJson<T>;

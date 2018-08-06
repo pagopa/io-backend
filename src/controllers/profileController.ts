@@ -6,6 +6,7 @@
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
+  IResponseErrorGeneric,
   IResponseErrorValidation,
   ResponseErrorInternal,
   ResponseErrorValidation,
@@ -23,6 +24,7 @@ import { extractUserFromRequest } from "../types/user";
 
 export type profileResponseWithValidationError<T> =
   | profileResponse<T>
+  | IResponseErrorGeneric
   | IResponseErrorValidation;
 
 export default class ProfileController {
