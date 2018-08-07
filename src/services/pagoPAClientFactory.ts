@@ -7,6 +7,7 @@
 
 import { ProxyPagoPA } from "../clients/pagopa/proxyPagoPA";
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
+import { ServiceClientOptions } from "../../node_modules/ms-rest-js";
 
 export default class PagoPAClientFactory
   implements IPagoPAClientFactoryInterface {
@@ -18,10 +19,15 @@ export default class PagoPAClientFactory
     codiceContestoPagamento: string,
     rptIdFromString: string
   ): ProxyPagoPA {
+    // Avoid to retry to send the request if proxy reply with a 500 HTTP code
+    const serviceClientOptions = {
+      noRetryPolicy: true
+    } as ServiceClientOptions;
     return new ProxyPagoPA(
       codiceContestoPagamento,
       rptIdFromString,
-      this.pagoPAApiUrl
+      this.pagoPAApiUrl,
+      serviceClientOptions
     );
   }
 }

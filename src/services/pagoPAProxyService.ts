@@ -2,7 +2,9 @@
  * TODO
  */
 
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, isRight, left, right } from "fp-ts/lib/Either";
+import * as t from "io-ts";
+import { HttpOperationResponse } from "../../node_modules/ms-rest-js";
 import {
   PaymentActivationsGetResponse,
   PaymentActivationsPostRequest,
@@ -16,6 +18,19 @@ import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
 
 const notFoundErrorMessage = "Payment info not found.";
 const internalErrorMessage = "Internal error.";
+
+/**
+ * WhiteList for Error Messages retrieved from PagoPaProxy to forward to CdApp
+ * A complete list of error mapping is available at:
+ * https://docs.google.com/document/d/1Qqe6mSfon-blHzc-ldeEHmzIkVaElKY5LtDnKiLbk80
+ */
+const pagoPaErrorWhiteList: ReadonlyArray<string> = [
+  "PAYMENT_UNAVAILABLE",
+  "INVALID_AMOUNT",
+  "PAYMENT_COMPLETED",
+  "PAYMENT_ONGOING",
+  "PAYMENT_EXPIRED"
+];
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
@@ -38,7 +53,8 @@ export default class PagoPAProxyService {
       }
 
       if (simpleResponse.isInternalError()) {
-        return left(internalError(internalErrorMessage));
+        const errorMessage = getErrorMessageForApp(response);
+        return left(internalError(errorMessage));
       }
 
       return right(simpleResponse.parsedBody());
@@ -104,4 +120,36 @@ export default class PagoPAProxyService {
       return left(internalError(error.message));
     }
   }
+}
+
+/**
+ * Interface used to check if an http response has a custom title
+ */
+const ErrorBodyWithTitle = t.interface({
+  parsedBody: t.interface({
+    title: t.string
+  })
+});
+type ErrorBodyWithTitle = t.TypeOf<typeof ErrorBodyWithTitle>;
+
+/**
+ * Determine the error message to send to CDApp using a whitelist or a generic internal message
+ * Check Error Mapping documentation at:
+ * https://docs.google.com/document/d/1Qqe6mSfon-blHzc-ldeEHmzIkVaElKY5LtDnKiLbk80/edit#
+ */
+export function getErrorMessageForApp(
+  httpOperationResponse: HttpOperationResponse | undefined
+): string {
+  const errorBodyWithTitleOrError = ErrorBodyWithTitle.decode(
+    httpOperationResponse
+  );
+  if (isRight(errorBodyWithTitleOrError)) {
+    const bodyWithTitleOrError = errorBodyWithTitleOrError.value;
+    if (
+      pagoPaErrorWhiteList.indexOf(bodyWithTitleOrError.parsedBody.title) !== -1
+    ) {
+      return errorBodyWithTitleOrError.value.parsedBody.title;
+    }
+  }
+  return internalErrorMessage;
 }
