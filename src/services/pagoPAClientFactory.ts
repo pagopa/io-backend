@@ -5,9 +5,9 @@
  * @see ../clients/pagopa/PagoPAClientFactory
  */
 
+import { ServiceClientOptions } from "../../node_modules/ms-rest-js";
 import { ProxyPagoPA } from "../clients/pagopa/proxyPagoPA";
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
-import { ServiceClientOptions } from "../../node_modules/ms-rest-js";
 
 export default class PagoPAClientFactory
   implements IPagoPAClientFactoryInterface {
