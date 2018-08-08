@@ -1895,8 +1895,9 @@ fetch-cookie@~0.6.0:
     es6-denodeify "^0.1.1"
     tough-cookie "^2.3.1"
 
-"fetch-ponyfill@github:amarzavery/fetch-ponyfill#master":
+fetch-ponyfill@amarzavery/fetch-ponyfill#master:
   version "4.1.0"
+  uid "136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   resolved "https://codeload.github.com/amarzavery/fetch-ponyfill/tar.gz/136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   dependencies:
     fetch-cookie "~0.6.0"
@@ -2480,9 +2481,9 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
 
-io-ts-types@^0.3.6:
-  version "0.3.8"
-  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.8.tgz#7b3a7a0487a43ddbae6eb6e4401c7a7263c9b088"
+io-ts-types@^0.3.9:
+  version "0.3.9"
+  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.3.9.tgz#f005021a5da5fd1aea9ce15f256c45c487809eda"
   dependencies:
     fp-ts "^1.0.0"
     io-ts "^1.1.4"
