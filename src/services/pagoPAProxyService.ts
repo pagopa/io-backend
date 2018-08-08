@@ -2,9 +2,10 @@
  * TODO
  */
 
-import { Either, isRight, left, right } from "fp-ts/lib/Either";
+import { Either, left, right } from "fp-ts/lib/Either";
+import { fromEither } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { HttpOperationResponse } from "../../node_modules/ms-rest-js";
+import { HttpOperationResponse } from "ms-rest-js";
 import {
   PaymentActivationsGetResponse,
   PaymentActivationsPostRequest,
@@ -140,16 +141,8 @@ type ErrorBodyWithTitle = t.TypeOf<typeof ErrorBodyWithTitle>;
 export function getErrorMessageForApp(
   httpOperationResponse: HttpOperationResponse | undefined
 ): string {
-  const errorBodyWithTitleOrError = ErrorBodyWithTitle.decode(
-    httpOperationResponse
-  );
-  if (isRight(errorBodyWithTitleOrError)) {
-    const bodyWithTitleOrError = errorBodyWithTitleOrError.value;
-    if (
-      pagoPaErrorWhiteList.indexOf(bodyWithTitleOrError.parsedBody.title) !== -1
-    ) {
-      return errorBodyWithTitleOrError.value.parsedBody.title;
-    }
-  }
-  return internalErrorMessage;
+  return fromEither(ErrorBodyWithTitle.decode(httpOperationResponse))
+    .map(_ => _.parsedBody.title)
+    .filter(_ => pagoPaErrorWhiteList.indexOf(_) !== -1)
+    .getOrElse(internalErrorMessage);
 }

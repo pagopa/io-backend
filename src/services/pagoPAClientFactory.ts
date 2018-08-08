@@ -19,10 +19,9 @@ export default class PagoPAClientFactory
     codiceContestoPagamento: string,
     rptIdFromString: string
   ): ProxyPagoPA {
-    // Avoid to retry to send the request if proxy reply with a 500 HTTP code
-    const serviceClientOptions = {
-      noRetryPolicy: true
-    } as ServiceClientOptions;
+    const serviceClientOptions: ServiceClientOptions = {
+      noRetryPolicy: true // If set to true, turn off the default retry policy
+    };
     return new ProxyPagoPA(
       codiceContestoPagamento,
       rptIdFromString,
