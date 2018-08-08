@@ -47,7 +47,7 @@
     "helmet": "3.13.0",
     "io-ts": "^1.2.1",
     "io-ts-types": "^0.3.6",
-    "italia-ts-commons": "^2.9.0",
+    "italia-ts-commons": "^2.12.3",
     "json-set-map": "^1.0.2",
     "morgan": "^1.8.1",
     "ms-rest-js": "^0.3.1",
