@@ -84,9 +84,8 @@ The code that manage this flow are in the `src/strategies/bearerSessionTokenStra
 
 * [Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose)
 
-To fully simulate the SPID authentication process we use the images provided by
-[spid-testenv-backoffice](https://github.com/italia/spid-testenv-backoffice) and
-[spid-testenv-identityserver](https://github.com/italia/spid-testenv-identityserver) projects.
+To fully simulate the SPID authentication process we use the images provided by the 
+[spid-testenv2](https://github.com/italia/spid-testenv2) project.
 
 A Linux/macOS environment is required at the moment.
 
@@ -105,14 +104,12 @@ A Linux/macOS environment is required at the moment.
 11. edit your `/etc/hosts` file by adding:
 
     ```
-    localhost    spid-testenv-identityserver
+    localhost    spid-testenv2
     localhost    italia-backend
     ```
 
-12. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
-13. run `scripts/import-spid-data.sh` to configure the local IDP
-14. copy `app/.env.example` to `app/.env` and fill the variables with your values
-15. point your browser to [https://italia-backend](https://italia-backend)
+12. copy `app/.env.example` to `app/.env` and fill the variables with your values
+13. point your browser to [https://italia-backend](https://italia-backend)
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
@@ -120,12 +117,10 @@ If you are using Docker with a Docker Machine replace `localhost` with the IP of
 ### Container description
 
 * `backend`: the backend Node application that serves the web and mobile applications
-* `spid-testenv-identityserver`: the test IDP server
-* `spid-testenv-backoffice`: simple configuration interface to manage the test IDP server
+* `spid-testenv2`: the test IDP server
 
 Nginx is reachable at [https://italia-backend:80]() \
-IDP is reachable at [https://spid-testenv-identityserver:9443]() (user: `admin`, password: `admin`) \
-IDP simple backoffice is reachable at [https://spid-testenv-identityserver:8080]()
+IDP is reachable at [https://spid-testenv2:8088]() \
 
 ### Environment variables
 
@@ -147,6 +142,11 @@ Those are all Environment variables needed by the application:
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
 | AZURE_NH_HUB_NAME                      | The hub name configured in the Azure Notification HUB                             | string |
 | AZURE_NH_ENDPOINT                      | The endpoint URL configured in the Azure Notification HUB                         | string |
+| ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
+| AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
+| API_BASE_PATH                          | The root path for the api endpoints                                               | string |
+| PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string | 
+| SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 
 ### Logs
 
@@ -155,8 +155,8 @@ Application logs are saved into the logs folder.
 ### SPID user management
 
 The setup procedure adds some test users to the test IDP server, the full list could be retrieved in
-`spid-batch-import/spid-users.json`. To add more users connect to [https://spid-testenv-identityserver:8080]() and
-navigate to: *service provider > Servizi registrati* and click on *Utenti*.
+`testenv2/conf/users.json`. To add more users simply add more items to this file and restart the `spid-testenv2`
+container.
 
 ---
 
@@ -248,12 +248,6 @@ localhost.
 This problem seems to be dependent on how Docker for Mac (doesn't) manage well the /etc/hosts file. If you install
 Docker Toolbox it works fine (and can [coexist](https://docs.docker.com/docker-for-mac/docker-toolbox/#setting-up-to-run-docker-for-mac))
 (Read more at [https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448](https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448))
-
-**When i run the scripts/import-spid-data.sh file, after the first entries the script display a lot of errors like
-`# users imported: -- Error [object Object]`**
-
-Have you waited the IDP to start successfully? Wait a minute and retry.
-
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend?ref=badge_large)

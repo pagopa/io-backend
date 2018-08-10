@@ -1,0 +1,14 @@
+{
+    "lussoluca": {
+        "pwd": "111111",
+        "attrs": {
+            "email": "lussoluca@gmail.com",
+            "familyName": "Lusso",
+            "fiscalNumber": "LSSLCU79B24L219P",
+            "gender": "male",
+            "mobilePhone": "1234567890",
+            "name": "Luca"
+        },
+        "sp": "http://italiabackend.it"
+    }
+}

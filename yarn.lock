@@ -1895,7 +1895,7 @@ fetch-cookie@~0.6.0:
     es6-denodeify "^0.1.1"
     tough-cookie "^2.3.1"
 
-"fetch-ponyfill@github:amarzavery/fetch-ponyfill#master":
+fetch-ponyfill@amarzavery/fetch-ponyfill#master:
   version "4.1.0"
   resolved "https://codeload.github.com/amarzavery/fetch-ponyfill/tar.gz/136e6f8192bdb2aa0b7983f0b3b4361c357be9db"
   dependencies:

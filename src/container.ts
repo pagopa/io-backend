@@ -90,7 +90,7 @@ container.register({
 const SAML_CALLBACK_URL =
   process.env.SAML_CALLBACK_URL ||
   "http://italia-backend/assertionConsumerService";
-const SAML_ISSUER = process.env.SAML_ISSUER || "http://italia-backend";
+const SAML_ISSUER = process.env.SAML_ISSUER || "http://italiabackend.it";
 const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
 const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX: number = parseInt(
   process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
@@ -103,13 +103,16 @@ const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
     DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
   10
 );
+const DEFAULT_SPID_AUTOLOGIN = "";
+const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
 container.register({
   samlAcceptedClockSkewMs: awilix.asValue(SAML_ACCEPTED_CLOCK_SKEW_MS),
   samlAttributeConsumingServiceIndex: awilix.asValue(
     SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX
   ),
   samlCallbackUrl: awilix.asValue(SAML_CALLBACK_URL),
-  samlIssuer: awilix.asValue(SAML_ISSUER)
+  samlIssuer: awilix.asValue(SAML_ISSUER),
+  spidAutologin: awilix.asValue(SPID_AUTOLOGIN)
 });
 
 // Redirection urls
@@ -221,7 +224,7 @@ container.register({
 function createSimpleRedisClient(): redis.RedisClient {
   const redisUrl = process.env.REDIS_URL || "redis://redis";
   log.info("Creating SIMPLE redis client", { url: redisUrl });
-  return redis.createClient();
+  return redis.createClient(redisUrl);
 }
 
 function createClusterRedisClient():

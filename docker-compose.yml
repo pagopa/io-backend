@@ -16,26 +16,13 @@ services:
       - "./certs:/usr/src/app/certs:delegated"
     working_dir: "/usr/src/app"
 
-  spid-testenv-identityserver:
-    container_name: spid-testenv-identityserver
-    image: italia/spid-testenv-identityserver:docker-compose
+  spid-testenv2:
+    container_name: spid-testenv2
+    image: italia/spid-testenv2:latest
     ports:
-      - "9443:9443"
+      - "8088:8088"
     volumes:
-      - "./logs/idp:/spid-testenvironment/is/identity-server/repository/logs:delegated"
-
-  spid-testenv-backoffice:
-    container_name: spid-testenv-backoffice
-    depends_on:
-      - spid-testenv-identityserver
-    environment:
-      - NODE_ENV=development
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
-    image: italia/spid-testenv-backoffice:latest
-    ports:
-      - "8080:8080"
-    volumes:
-      - "./docker/spid/config.js:/spid-testenvironment/bo/backoffice/server/wso2/config.js:delegated"
+      - "./testenv2/conf:/app/conf"
 
   redis:
     container_name: redis

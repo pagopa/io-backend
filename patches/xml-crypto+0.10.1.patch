@@ -1,0 +1,13 @@
+patch-package
+--- a/node_modules/xml-crypto/lib/signed-xml.js
++++ b/node_modules/xml-crypto/lib/signed-xml.js
+@@ -345,7 +345,8 @@ SignedXml.prototype.validateReferences = function(doc) {
+     var hash = this.findHashAlgorithm(ref.digestAlgorithm)
+     var digest = hash.getHash(canonXml)
+ 
+-    if (digest!=ref.digestValue) {
++    var digestValueWithoutLineBreaks = ref.digestValue.replace(/\r\n|\r|\n/g, '')
++    if (digest!=digestValueWithoutLineBreaks) {
+       this.validationErrors.push("invalid signature: for uri " + ref.uri +
+                                 " calculated digest is "  + digest +
+                                 " but the xml to validate supplies digest " + ref.digestValue)
