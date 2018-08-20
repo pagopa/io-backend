@@ -15,6 +15,8 @@ import { ProblemJson } from "../types/api/ProblemJson";
 import { ServiceList } from "../types/api/ServiceList";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
 import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
+import { GetServicesByRecipientOKResponse } from "../types/api_client/getServicesByRecipientOKResponse";
+import { GetVisibleServicesOKResponse } from "../types/api_client/getVisibleServicesOKResponse";
 import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
 import { internalError, notFoundError, ServiceError } from "../types/error";
@@ -214,7 +216,9 @@ export default class MessagesService {
       return left(internalError(messageErrorOnApiError));
     }
 
-    const errorOrServices = ServiceList.decode(simpleResponse.parsedBody());
+    const errorOrServices = GetServicesByRecipientOKResponse.decode(
+      simpleResponse.parsedBody()
+    );
     if (isLeft(errorOrServices)) {
       log.error(
         "Unknown response from getServicesByRecipient API: %s",
@@ -225,10 +229,10 @@ export default class MessagesService {
 
     const apiServices = errorOrServices.value;
 
-    const appServices = apiServices.items;
     return right({
-      items: appServices,
-      page_size: apiServices.page_size
+      items: apiServices.items,
+      next: apiServices.next,
+      page_size: apiServices.pageSize
     });
   }
 
@@ -257,7 +261,9 @@ export default class MessagesService {
       return left(internalError(messageErrorOnApiError));
     }
 
-    const errorOrServices = ServiceList.decode(simpleResponse.parsedBody());
+    const errorOrServices = GetVisibleServicesOKResponse.decode(
+      simpleResponse.parsedBody()
+    );
     if (isLeft(errorOrServices)) {
       log.error(
         "Unknown response from getVisibleServices API: %s",
@@ -267,6 +273,11 @@ export default class MessagesService {
     }
 
     const apiServices = errorOrServices.value;
-    return right(apiServices);
+
+    return right({
+      items: apiServices.items,
+      next: apiServices.next,
+      page_size: apiServices.pageSize
+    });
   }
 }

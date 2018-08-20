@@ -60,7 +60,6 @@ export default class ServicesController {
       return ResponseErrorInternal(error.message);
     }
 
-    // TODO: validate req.params.id
     const user = errorOrUser.value;
     const errorOrServices = await this.messagesService.getServicesByRecipient(
       user

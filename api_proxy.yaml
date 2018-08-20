@@ -41,32 +41,6 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
       parameters: []
-  "/profile/sender-services":
-    x-swagger-router-controller: ServicesController
-    get:
-      operationId: getServicesByRecipient
-      summary: Get Services by recipient
-      description:  |-
-        Returns the service IDs of all the services that have contacted the recipient,
-        identified by the provided fiscal code, at least once.
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/ServiceList"
-          examples:
-            application/json:
-              page_size: 1
-              items:
-                - service_id: 2b3e728c1a5d1efa035c
-        "401":
-          description: Bearer token null or expired.
-        "500":
-          description: There was an error in retrieving the services.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-      parameters:
-        - $ref: "#/parameters/PaginationRequest"
   "/services":
     x-swagger-router-controller: ServicesController
     get:
@@ -232,6 +206,32 @@ paths:
           description: Profile cannot be updated.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/profile/sender-services":
+    x-swagger-router-controller: ServicesController
+    get:
+      operationId: getServicesByRecipient
+      summary: Get Services by recipient
+      description:  |-
+        Returns the service IDs of all the services that have contacted the recipient,
+        identified by the provided fiscal code, at least once.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/ServiceList"
+          examples:
+            application/json:
+              page_size: 1
+              items:
+                - service_id: 2b3e728c1a5d1efa035c
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: There was an error in retrieving the services.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+      parameters:
+        - $ref: "#/parameters/PaginationRequest"
   "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
