@@ -105,7 +105,7 @@
     "swagger-cli": "^2.1.0",
     "swagger-parser": "^5.0.0",
     "ts-jest": "^23.0.1",
-    "ts-node": "^7.0.0",
+    "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.13.0",
     "tslint-immutable": "^4.6.0",
