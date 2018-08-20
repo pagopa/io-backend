@@ -5,6 +5,7 @@
 
 import * as t from "io-ts";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { BlockedInboxOrChannels } from "../api/BlockedInboxOrChannels";
 import { EmailAddress } from "../api/EmailAddress";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
@@ -19,6 +20,7 @@ const UpsertProfileOKResponseR = t.interface({
 
 // optional attributes
 const UpsertProfileOKResponseO = t.partial({
+  blockedInboxOrChannels: BlockedInboxOrChannels,
   email: EmailAddress,
   preferredLanguages: PreferredLanguages
 });

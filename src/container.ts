@@ -152,7 +152,8 @@ container.register({
 
 container.register({
   apiKey: awilix.asValue(process.env.API_KEY),
-  apiUrl: awilix.asValue(process.env.API_URL)
+  apiUrl: awilix.asValue(process.env.API_URL),
+  pagoPAApiUrl: awilix.asValue(process.env.PAGOPA_API_URL)
 });
 
 // Notification URL pre shared key.
@@ -213,48 +214,65 @@ container.register({
   [URL_TOKEN_STRATEGY]: awilix.asFunction(urlTokenStrategy).singleton()
 });
 
+//
 // Register a session storage service backed by Redis.
+//
+
+function createSimpleRedisClient(): redis.RedisClient {
+  const redisUrl = process.env.REDIS_URL || "redis://redis";
+  log.info("Creating SIMPLE redis client", { url: redisUrl });
+  return redis.createClient();
+}
+
+function createClusterRedisClient():
+  | redis.RedisClient
+  | RedisClustr
+  | undefined {
+  const DEFAULT_REDIS_PORT = "6379";
+
+  const redisUrl = process.env.REDIS_URL;
+  const redisPassword = process.env.REDIS_PASSWORD;
+  const redisPort: number = parseInt(
+    process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
+    10
+  );
+
+  if (redisUrl === undefined || redisPassword === undefined) {
+    log.error(
+      "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD)."
+    );
+    process.exit(1);
+    return;
+  }
+
+  log.info("Creating CLUSTER redis client", { url: redisUrl });
+  return new RedisClustr({
+    redisOptions: {
+      auth_pass: redisPassword,
+      tls: {
+        servername: redisUrl
+      }
+    },
+    servers: [
+      {
+        host: redisUrl,
+        port: redisPort
+      }
+    ]
+  });
+}
+
 container.register(
   "redisClient",
-  awilix.asFunction(() => {
-    // Use the Docker Redis instance when developing because the Azure Redis cluster isn't accessible outside the Azure
-    // VNet.
-    if (env === NodeEnvironmentEnum.DEVELOPMENT) {
-      return redis.createClient(process.env.REDIS_URL || "redis://redis");
-    } else {
-      const DEFAULT_REDIS_PORT = "6379";
-
-      const redisUrl = process.env.REDIS_URL;
-      const redisPassword = process.env.REDIS_PASSWORD;
-      const redisPort: number = parseInt(
-        process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
-        10
-      );
-
-      if (redisUrl === undefined || redisPassword === undefined) {
-        log.error(
-          "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD)."
-        );
-        process.exit(1);
-        return;
-      }
-
-      return new RedisClustr({
-        redisOptions: {
-          auth_pass: redisPassword,
-          tls: {
-            servername: redisUrl
-          }
-        },
-        servers: [
-          {
-            host: redisUrl,
-            port: redisPort
-          }
-        ]
-      });
-    }
-  })
+  awilix
+    .asFunction(() => {
+      // Use the Docker Redis instance when developing because the Azure Redis
+      // cluster isn't accessible outside the Azure VNet.
+      return env === NodeEnvironmentEnum.DEVELOPMENT
+        ? createSimpleRedisClient()
+        : createClusterRedisClient();
+    })
+    .singleton() // create only one instance of the redis client
 );
 
 export const SESSION_STORAGE = "sessionStorage";

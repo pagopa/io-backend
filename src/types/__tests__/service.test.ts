@@ -1,4 +1,5 @@
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { OrganizationFiscalCode } from "italia-ts-commons/lib/strings";
 import { DepartmentName } from "../api/DepartmentName";
 import { OrganizationName } from "../api/OrganizationName";
 import { ServiceName } from "../api/ServiceName";
@@ -10,6 +11,7 @@ const aNonNegativeInteger = 1 as NonNegativeInteger;
 // mock for a valid ServicePublic
 const mockedServicePublic: ServicePublic = {
   departmentName: "department-name" as DepartmentName,
+  organizationFiscalCode: "12312312134" as OrganizationFiscalCode,
   organizationName: "organization-name" as OrganizationName,
   serviceId: "service-id",
   serviceName: "service-name" as ServiceName,
