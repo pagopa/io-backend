@@ -14,18 +14,18 @@ const MessageWithContentR = t.interface({
 
   id: t.string,
 
-  sender_service_id: t.string
+  markdown: MessageBodyMarkdown,
+
+  sender_service_id: t.string,
+
+  subject: MessageSubject
 });
 
 // optional attributes
 const MessageWithContentO = t.partial({
   due_date: Timestamp,
 
-  markdown: MessageBodyMarkdown,
-
-  payment_data: PaymentData,
-
-  subject: MessageSubject
+  payment_data: PaymentData
 });
 
 export const MessageWithContent = t.intersection(

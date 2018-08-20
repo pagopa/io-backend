@@ -463,7 +463,9 @@ definitions:
     required:
       - created_at
       - id
+      - markdown
       - sender_service_id
+      - subject
   MessageWithoutContent:
     type: object
     title: Message without content
