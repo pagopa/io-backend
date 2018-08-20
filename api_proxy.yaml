@@ -633,7 +633,6 @@ definitions:
     description:  True if the user has presonalized the email.
   Version:
     type: integer
-    minimum: 0
     description: The entity version.
   PageSize:
     type: integer

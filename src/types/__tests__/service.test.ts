@@ -1,12 +1,12 @@
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { OrganizationFiscalCode } from "italia-ts-commons/lib/strings";
 import { DepartmentName } from "../api/DepartmentName";
 import { OrganizationName } from "../api/OrganizationName";
 import { ServiceName } from "../api/ServiceName";
+import { Version } from "../api/Version";
 import { ServicePublic } from "../api_client/servicePublic";
 import { toAppService } from "../service";
 
-const aNonNegativeInteger = 1 as NonNegativeInteger;
+const aVersion = 1 as Version;
 
 // mock for a valid ServicePublic
 const mockedServicePublic: ServicePublic = {
@@ -15,7 +15,7 @@ const mockedServicePublic: ServicePublic = {
   organizationName: "organization-name" as OrganizationName,
   serviceId: "service-id",
   serviceName: "service-name" as ServiceName,
-  version: aNonNegativeInteger
+  version: aVersion
 };
 
 describe("service type", () => {
@@ -30,6 +30,6 @@ describe("service type", () => {
       mockedServicePublic.organizationName
     );
     expect(appService.department_name).toBe(mockedServicePublic.departmentName);
-    expect(appService.version).toBe(aNonNegativeInteger);
+    expect(appService.version).toBe(aVersion);
   });
 });
