@@ -17,6 +17,7 @@ import { ServicePublic as apiServicePublic } from "./api_client/servicePublic";
 export function toAppService(from: apiServicePublic): proxyServicePublic {
   return {
     department_name: from.departmentName,
+    organization_fiscal_code: from.organizationFiscalCode,
     organization_name: from.organizationName,
     // tslint:disable-next-line:no-useless-cast
     service_id: from.serviceId as ServiceId,
