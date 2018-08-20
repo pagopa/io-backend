@@ -212,8 +212,7 @@ paths:
         '200':
           description: Profile updated.
           schema:
-            allOf:
-              - $ref: "#/definitions/ProfileWithEmail"
+            $ref: "#/definitions/ProfileWithEmail"
           examples:
             application/json:
               email: foobar@example.com
