@@ -462,7 +462,7 @@ autorest@^2.0.4280:
   version "2.0.4283"
   resolved "https://registry.yarnpkg.com/autorest/-/autorest-2.0.4283.tgz#e23bd2ba7909f6094060b334f4393720e55db022"
 
-awilix@^3.0.8:
+awilix@^3.0.9:
   version "3.0.9"
   resolved "https://registry.yarnpkg.com/awilix/-/awilix-3.0.9.tgz#3bd5cdf1d95b02888a8dc937fdb4d31e790b6380"
   dependencies:
