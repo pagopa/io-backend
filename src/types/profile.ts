@@ -7,10 +7,10 @@ import { Either } from "fp-ts/lib/Either";
 import { User } from "./user";
 
 import * as express from "express";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { ExtendedProfile as proxyExtendedProfile } from "./api/ExtendedProfile";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
+import { Version } from "./api/Version";
 import { ExtendedProfile as apiExtendedProfile } from "./api_client/extendedProfile";
 import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
@@ -57,7 +57,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     name: user.name,
     spid_email: user.spid_email,
     spid_mobile_phone: user.spid_mobile_phone,
-    version: 0 as NonNegativeInteger
+    version: 0 as Version
   };
 }
 
