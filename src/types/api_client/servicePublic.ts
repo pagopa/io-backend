@@ -3,11 +3,11 @@
  */
 import * as t from "io-ts";
 import { string } from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { OrganizationFiscalCode } from "italia-ts-commons/lib/strings";
 import { DepartmentName } from "../api/DepartmentName";
 import { OrganizationName } from "../api/OrganizationName";
 import { ServiceName } from "../api/ServiceName";
+import { Version } from "../api/Version";
 
 // required attributes
 const ServicePublicR = t.interface({
@@ -20,7 +20,7 @@ const ServicePublicR = t.interface({
 
 // optional attributes
 const ServicePublicO = t.partial({
-  version: NonNegativeInteger
+  version: Version
 });
 
 export const ServicePublic = t.intersection([ServicePublicR, ServicePublicO]);
