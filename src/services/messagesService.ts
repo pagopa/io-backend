@@ -9,19 +9,13 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
 import { Messages } from "../types/api/Messages";
-import { MessageWithContent } from "../types/api/MessageWithContent";
 import { ProblemJson } from "../types/api/ProblemJson";
 import { ServiceList } from "../types/api/ServiceList";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
-import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
-import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
 import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
 import { internalError, notFoundError, ServiceError } from "../types/error";
-import {
-  toAppMessageWithContent,
-  toAppMessageWithoutContent
-} from "../types/message";
 import { toAppService } from "../types/service";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
@@ -47,50 +41,22 @@ export default class MessagesService {
   public async getMessagesByUser(
     user: User
   ): Promise<Either<ServiceError, Messages>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getMessagesByUserWithHttpOperationResponse();
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getMessages({
+        fiscalCode: user.fiscal_code
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getMessagesByUser API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
+      // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
+      if (!res || res.status !== 200) {
         return left(internalError(messageErrorOnUnknownResponse));
-      }
-
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(messageNotFound));
       } else {
-        log.error(logErrorOnApiError, simpleResponse.parsedBody());
-        return left(internalError(messageErrorOnApiError));
+        return right(res.value);
       }
-    }
-
-    const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiMessages)) {
-      log.error(
-        "Unknown response from getMessagesByUser API: %s",
-        ReadableReporter.report(errorOrApiMessages)
-      );
+    } catch (e) {
       return left(internalError(messageErrorOnUnknownResponse));
     }
-
-    const apiMessages = errorOrApiMessages.value;
-
-    const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-    return right({
-      items: appMessages,
-      page_size: apiMessages.pageSize
-    });
   }
 
   /**
@@ -99,46 +65,24 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<Either<ServiceError, MessageWithContent>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getMessageWithHttpOperationResponse(messageId);
+  ): Promise<Either<ServiceError, CreatedMessageWithContent>> {
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getMessage({
+        fiscalCode: user.fiscal_code,
+        id: messageId
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getMessage API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
+      // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
+      if (!res || res.status !== 200) {
         return left(internalError(messageErrorOnUnknownResponse));
-      }
-
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(messageNotFound));
       } else {
-        log.error(logErrorOnApiError, simpleResponse.parsedBody());
-        return left(internalError(messageErrorOnApiError));
+        return right(res.value);
       }
-    }
-
-    const errorOrApiMessage = MessageResponseWithContent.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiMessage)) {
-      log.error(
-        "Unknown response from getMessage API: %s",
-        ReadableReporter.report(errorOrApiMessage)
-      );
+    } catch (e) {
       return left(internalError(messageErrorOnUnknownResponse));
     }
-
-    const apiMessage = errorOrApiMessage.value;
-    return right(toAppMessageWithContent(apiMessage));
   }
 
   /**

@@ -221,7 +221,7 @@ container.register({
 function createSimpleRedisClient(): redis.RedisClient {
   const redisUrl = process.env.REDIS_URL || "redis://redis";
   log.info("Creating SIMPLE redis client", { url: redisUrl });
-  return redis.createClient();
+  return redis.createClient(redisUrl);
 }
 
 function createClusterRedisClient():
@@ -289,7 +289,7 @@ container.register({
 // Register a factory service to create API client.
 export const API_CLIENT = "apiClient";
 container.register({
-  [API_CLIENT]: awilix.asClass(ApiClientFactory)
+  [API_CLIENT]: awilix.asClass(ApiClientFactory).singleton()
 });
 
 // Register a factory service to create PagoPA client.

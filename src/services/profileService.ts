@@ -3,28 +3,21 @@
  * an API client.
  */
 
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { Either, left, right } from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { DigitalCitizenshipAPIUpsertProfileOptionalParams } from "../clients/api/models";
-import { ProblemJson } from "../types/api/ProblemJson";
+import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
-import { ExtendedProfile } from "../types/api_client/extendedProfile";
-import { GetProfileOKResponse } from "../types/api_client/getProfileOKResponse";
-import { UpsertProfileOKResponse } from "../types/api_client/upsertProfileOKResponse";
 import { internalError, ServiceError } from "../types/error";
 import {
   toAppProfileWithEmail,
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
-import { log } from "../utils/logger";
-import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const profileErrorOnUnknownResponse = "Unknown response.";
@@ -44,47 +37,34 @@ export default class ProfileService {
   public async getProfile(
     user: User
   ): Promise<Either<ServiceError, ProfileWithoutEmail | ProfileWithEmail>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getProfileWithHttpOperationResponse();
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getProfile({
+        fiscalCode: user.fiscal_code
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getProfile API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
+      // The response is undefined (can't be decoded).
+      if (!res) {
         return left(internalError(profileErrorOnUnknownResponse));
       }
 
-      if (simpleResponse.isNotFound()) {
-        // If the profile doesn't exists on the API we still
-        // return 200 to the App with the information we have
-        // retrieved from SPID.
+      // The response is correct.
+      if (res.status === 200) {
+        return right(toAppProfileWithEmail(res.value, user));
+      }
+
+      // If the profile doesn't exists on the API we still
+      // return 200 to the App with the information we have
+      // retrieved from SPID.
+      if (res.status === 404) {
         return right(toAppProfileWithoutEmail(user));
       } else {
         return left(internalError(profileErrorOnApiError));
       }
-    }
-
-    const errorOrApiProfile = GetProfileOKResponse.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiProfile)) {
-      log.error(
-        "Unknown response from getProfile API: %s",
-        ReadableReporter.report(errorOrApiProfile)
-      );
+    } catch (e) {
       return left(internalError(profileErrorOnUnknownResponse));
     }
-
-    const apiProfile = errorOrApiProfile.value;
-    return right(toAppProfileWithEmail(apiProfile, user));
   }
 
   /**
@@ -94,42 +74,22 @@ export default class ProfileService {
     user: User,
     upsertProfile: ExtendedProfile
   ): Promise<Either<ServiceError, ProfileWithEmail>> {
-    const upsertOptions: DigitalCitizenshipAPIUpsertProfileOptionalParams = {
-      body: upsertProfile
-    };
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .upsertProfileWithHttpOperationResponse(upsertOptions);
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.createOrUpdateProfile({
+        fiscalCode: user.fiscal_code,
+        newProfile: upsertProfile
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from upsertProfile API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
-        return left(internalError(profileErrorOnUnknownResponse));
+      // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
+      if (!res || res.status !== 200) {
+        return right(toAppProfileWithEmail(res.value, user));
       } else {
-        return left(internalError(profileErrorOnApiError));
+        return left(internalError(profileErrorOnUnknownResponse));
       }
-    }
-
-    const errorOrApiProfile = UpsertProfileOKResponse.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiProfile)) {
-      log.error(
-        "Unknown response from upsertProfile API: %s",
-        ReadableReporter.report(errorOrApiProfile)
-      );
+    } catch (e) {
       return left(internalError(profileErrorOnUnknownResponse));
     }
-
-    const apiProfile = errorOrApiProfile.value;
-    return right(toAppProfileWithEmail(apiProfile, user));
   }
 }

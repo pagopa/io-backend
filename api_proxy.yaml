@@ -139,7 +139,7 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/MessageWithContent"
+            $ref: "#/definitions/CreatedMessageWithContent"
           examples:
             application/json:
               id: 01BX9NSMKAAAS5PSP2FATZM6BQ
@@ -372,6 +372,10 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/BlockedInboxOrChannels"
   CodiceContestoPagamento:
     $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
+  CreatedMessageWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/CreatedMessageWithContent"
+  CreatedMessageWithoutContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/CreatedMessageWithoutContent"
   DepartmentName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/DepartmentName"
   EmailAddress:
@@ -398,6 +402,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/MessageResponseNotificationStatus"
+  MessageResponseWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/MessageResponseWithContent"
   MessageSubject:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/MessageSubject"
   OrganizationName:
@@ -436,45 +442,14 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/Timestamp"
+  TimeToLiveSeconds:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/TimeToLiveSeconds"
   PaymentNoticeNumber:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/PaymentNoticeNumber"
   PaymentAmount:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/PaymentAmount"
   PaymentData:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.49.0/api/definitions.yaml#/PaymentData"
-  MessageWithContent:
-    type: object
-    title: Message with content
-    properties:
-      created_at:
-        $ref: "#/definitions/Timestamp"
-      due_date:
-        $ref: "#/definitions/Timestamp"
-      id:
-        type: string
-      markdown:
-        $ref: "#/definitions/MessageBodyMarkdown"
-      payment_data:
-        $ref: "#/definitions/PaymentData"
-      sender_service_id:
-        type: string
-      subject:
-        $ref: "#/definitions/MessageSubject"
-    required:
-      - created_at
-      - id
-      - sender_service_id
-  MessageWithoutContent:
-    type: object
-    title: Message without content
-    properties:
-      id:
-        type: string
-      sender_service_id:
-        type: string
-    required:
-      - id
-      - sender_service_id
   ServiceList:
     type: object
     title: List of services.
@@ -497,7 +472,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: "#/definitions/MessageWithoutContent"
+          $ref: "#/definitions/CreatedMessageWithoutContent"
       next:
         type: string
       page_size:

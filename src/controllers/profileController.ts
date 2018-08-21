@@ -15,10 +15,7 @@ import ProfileService, { profileResponse } from "../services/profileService";
 import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { toHttpError } from "../types/error";
-import {
-  extractUpsertProfileFromRequest,
-  toApiClientExtendedProfile
-} from "../types/profile";
+import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
 
 export type profileResponseWithValidationError<T> =
@@ -82,7 +79,7 @@ export default class ProfileController {
     const upsertProfile = errorOrUpsertProfile.value;
     const errorUpsertProfile = await this.profileService.upsertProfile(
       user,
-      toApiClientExtendedProfile(upsertProfile)
+      upsertProfile
     );
 
     if (isLeft(errorUpsertProfile)) {

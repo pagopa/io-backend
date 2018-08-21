@@ -75,7 +75,7 @@
           response.json().then(function(data) {
             console.log(data);
 
-            fetch('./api/v1/services/' + data.sender_service_id, {
+            fetch('./api/v1/services/' + data.message.sender_service_id, {
               headers: {
                 'Authorization': 'Bearer ' + token
               },
@@ -97,10 +97,10 @@
               console.log('Fetch Error :-S', err);
             });
 
-            $('#subject').append(data.subject);
-            $('#markdown').append(data.markdown);
-            $('#created_at').append(data.created_at);
-            $('#sender_service_id').append(data.sender_service_id);
+            $('#subject').append(data.message.content.subject);
+            $('#markdown').append(data.message.content.markdown);
+            $('#created_at').append(data.message.created_at);
+            $('#sender_service_id').append(data.message.sender_service_id);
 
             if(data.payment_data) {
               $('#amount').append(data.payment_data.amount);

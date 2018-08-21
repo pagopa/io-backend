@@ -8,11 +8,10 @@ import { User } from "./user";
 
 import * as express from "express";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { ProfileLimitedOrExtended } from "../api/api";
 import { ExtendedProfile as proxyExtendedProfile } from "./api/ExtendedProfile";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
-import { ExtendedProfile as apiExtendedProfile } from "./api_client/extendedProfile";
-import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
 
 /**
  * Converts an existing API profile to a Proxy profile.
@@ -21,20 +20,20 @@ import { GetProfileOKResponse } from "./api_client/getProfileOKResponse";
  * @param {User} user The user data extracted from SPID.
  */
 export function toAppProfileWithEmail(
-  from: GetProfileOKResponse,
+  from: ProfileLimitedOrExtended,
   user: User
 ): ProfileWithEmail {
   return {
-    blocked_inbox_or_channels: from.blockedInboxOrChannels,
+    blocked_inbox_or_channels: from.blocked_inbox_or_channels,
     email: from.email,
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
     has_profile: true,
     is_email_set: !!from.email,
-    is_inbox_enabled: from.isInboxEnabled,
-    is_webhook_enabled: from.isWebhookEnabled,
+    is_inbox_enabled: from.is_inbox_enabled,
+    is_webhook_enabled: from.is_webhook_enabled,
     name: user.name,
-    preferred_languages: from.preferredLanguages,
+    preferred_languages: from.preferred_languages,
     spid_email: user.spid_email,
     spid_mobile_phone: user.spid_mobile_phone,
     version: from.version
@@ -58,24 +57,6 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     spid_email: user.spid_email,
     spid_mobile_phone: user.spid_mobile_phone,
     version: 0 as NonNegativeInteger
-  };
-}
-
-/**
- * Converts the profile received from the App in the format required by the Autorest client.
- *
- * @param {ExtendedProfile} profile The user profile data from the App.
- */
-export function toApiClientExtendedProfile(
-  profile: proxyExtendedProfile
-): apiExtendedProfile {
-  return {
-    blockedInboxOrChannels: profile.blocked_inbox_or_channels,
-    email: profile.email,
-    isInboxEnabled: profile.is_inbox_enabled,
-    isWebhookEnabled: profile.is_webhook_enabled,
-    preferredLanguages: profile.preferred_languages,
-    version: profile.version
   };
 }
 
