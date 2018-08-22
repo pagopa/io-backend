@@ -15,7 +15,7 @@ import {
   RequestHeaderProducer,
   ResponseDecoder
 } from "italia-ts-commons/lib/requests";
-import fetch from "node-fetch";
+import nodeFetch from "node-fetch";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { LimitedProfile } from "../types/api/LimitedProfile";
 import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
@@ -121,7 +121,8 @@ export type GetServiceT = IGetApiRequestType<
 export function APIClient(
   baseUrl: string,
   token: string,
-  fetchApi: typeof fetch = fetch
+  // tslint:disable-next-line:no-any
+  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
   readonly createOrUpdateProfile: (
     params: {
