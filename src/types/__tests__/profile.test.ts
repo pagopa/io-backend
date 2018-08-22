@@ -15,7 +15,6 @@ import {
   PreferredLanguageEnum
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
-import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
   extractUpsertProfileFromRequest,
   toAppProfileWithEmail,
@@ -35,7 +34,7 @@ const anIsInboxEnabled = true as IsInboxEnabled;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for the profile retrieved from the Digital Citizenship API
-const mockedGetProfileOKResponse: GetProfileOKResponse = {
+const mockedGetProfileOKResponse = {
   email: anEmailAddress,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebhookEnabled,

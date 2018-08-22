@@ -2,7 +2,7 @@
  * Interface for the API client factories.
  */
 
-import { APIClient } from "../api/api";
+import { APIClient } from "../clients/api";
 
 export interface IApiClientFactoryInterface {
   /**

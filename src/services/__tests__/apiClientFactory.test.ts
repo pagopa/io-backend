@@ -1,8 +1,5 @@
-import { DigitalCitizenshipAPI } from "../../clients/api/digitalCitizenshipAPI";
-import { FiscalCode } from "../../types/api/FiscalCode";
+import { APIClient } from "../../clients/api";
 import ApiClient from "../apiClientFactory";
-
-const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 
 /**
  * Wait for all promises to finish.
@@ -17,12 +14,12 @@ describe("apiClient", () => {
   /*test case: mockedApiClient with correct values */
   it("should get a user profile", async () => {
     // generate new DigitalCitizen from client in order to test it
-    const client = new ApiClient(aFiscalCode, "");
+    const client = new ApiClient("", "");
     const spyGetClient = jest.spyOn(client, "getClient");
-    const getClient = client.getClient(aFiscalCode);
+    const getClient = client.getClient();
 
     // check if getClient return the correct type
-    const getClientInstance = getClient instanceof DigitalCitizenshipAPI;
+    const getClientInstance = getClient instanceof APIClient;
     expect(getClientInstance).toBeTruthy();
 
     // check "getClient" is called

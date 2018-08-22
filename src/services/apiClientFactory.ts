@@ -5,7 +5,7 @@
  * @see ../clients/api/digitalCitizenshipAPI
  */
 
-import { APIClient } from "../api/api";
+import { APIClient } from "../clients/api";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ApiClientFactory implements IApiClientFactoryInterface {

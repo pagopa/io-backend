@@ -410,7 +410,7 @@ describe("MessageService#getService", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getService(mockedUser, aValidServiceID);
+    const res = await service.getService(aValidServiceID);
 
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
@@ -423,7 +423,7 @@ describe("MessageService#getService", () => {
     });
 
     const service = new MessageService(api);
-    const res = await service.getService(mockedUser, aValidServiceID);
+    const res = await service.getService(aValidServiceID);
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
     expect(res).toEqual(left(messageErrorOnApiError));
@@ -436,7 +436,7 @@ describe("MessageService#getService", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getService(mockedUser, aValidServiceID);
+    const res = await service.getService(aValidServiceID);
     expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
     expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
     expect(res).toEqual(left(messageErrorOnUnknownResponse));

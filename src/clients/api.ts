@@ -16,12 +16,12 @@ import {
   ResponseDecoder
 } from "italia-ts-commons/lib/requests";
 import fetch from "node-fetch";
-import { ExtendedProfile } from "../types/api/extendedProfile";
+import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { LimitedProfile } from "../types/api/LimitedProfile";
-import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
-import {Messages} from "../types/api/Messages";
-import {CreatedMessageWithContent} from "../types/api/CreatedMessageWithContent";
-import {MessageResponseWithContent} from "../types/api/MessageResponseWithContent";
+import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
+import { Messages } from "../types/api/Messages";
+import { ServicePublic } from "../types/api/ServicePublic";
+import { Services } from "../types/api/Services";
 
 const OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
 type OcpApimSubscriptionKey = t.TypeOf<typeof OcpApimSubscriptionKey>;
@@ -61,7 +61,7 @@ export type GetProfileT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<ProfileLimitedOrExtended>
+  BasicResponseTypeWith401<ExtendedProfile>
 >;
 
 export type CreateOrUpdateProfileT = IPostApiRequestType<
@@ -71,7 +71,16 @@ export type CreateOrUpdateProfileT = IPostApiRequestType<
   },
   OcpApimSubscriptionKey | "Content-Type",
   never,
-  BasicResponseTypeWith401<ProfileWithEmail>
+  BasicResponseTypeWith401<ExtendedProfile>
+>;
+
+export type GetServicesByRecipientT = IGetApiRequestType<
+  {
+    readonly fiscalCode: string;
+  },
+  OcpApimSubscriptionKey | "Content-Type",
+  never,
+  BasicResponseTypeWith401<Services>
 >;
 
 export type GetMessagesT = IGetApiRequestType<
@@ -93,11 +102,54 @@ export type GetMessageT = IGetApiRequestType<
   BasicResponseTypeWith401<MessageResponseWithContent>
 >;
 
+export type GetServicesT = IGetApiRequestType<
+  {},
+  OcpApimSubscriptionKey,
+  never,
+  BasicResponseTypeWith401<Services>
+>;
+
+export type GetServiceT = IGetApiRequestType<
+  {
+    readonly id: string;
+  },
+  OcpApimSubscriptionKey,
+  never,
+  BasicResponseTypeWith401<ServicePublic>
+>;
+
 export function APIClient(
   baseUrl: string,
   token: string,
   fetchApi: typeof fetch = fetch
-) {
+): {
+  readonly createOrUpdateProfile: (
+    params: {
+      readonly fiscalCode: string;
+      readonly newProfile: ExtendedProfile;
+    }
+  ) => Promise<BasicResponseTypeWith401<ExtendedProfile> | undefined>;
+  readonly getMessage: (
+    params: { readonly fiscalCode: string; readonly id: string }
+  ) => Promise<
+    BasicResponseTypeWith401<MessageResponseWithContent> | undefined
+  >;
+  readonly getMessages: (
+    params: { readonly fiscalCode: string }
+  ) => Promise<BasicResponseTypeWith401<Messages> | undefined>;
+  readonly getProfile: (
+    params: { readonly fiscalCode: string }
+  ) => Promise<BasicResponseTypeWith401<ProfileLimitedOrExtended> | undefined>;
+  readonly getService: (
+    params: { readonly id: string }
+  ) => Promise<BasicResponseTypeWith401<ServicePublic> | undefined>;
+  readonly getServices: (
+    params: {}
+  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
+  readonly getServicesByRecipient: (
+    params: { readonly fiscalCode: string }
+  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
+} {
   const options = {
     baseUrl,
     fetchApi
@@ -109,7 +161,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ProfileLimitedOrExtended),
+    response_decoder: basicResponseDecoderWith401(ExtendedProfile),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
@@ -118,8 +170,16 @@ export function APIClient(
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ProfileWithEmail),
+    response_decoder: basicResponseDecoderWith401(ExtendedProfile),
     url: params => `/profiles/${params.fiscalCode}`
+  };
+
+  const getServicesByRecipientT: GetServicesByRecipientT = {
+    headers: tokenHeaderProducer,
+    method: "get",
+    query: _ => ({}),
+    response_decoder: basicResponseDecoderWith401(Services),
+    url: params => `/profiles/${params.fiscalCode}/sender-services`
   };
 
   const getMessagesT: GetMessagesT = {
@@ -138,6 +198,22 @@ export function APIClient(
     url: params => `/messages/${params.fiscalCode}/${params.id}`
   };
 
+  const getServicesT: GetServicesT = {
+    headers: tokenHeaderProducer,
+    method: "get",
+    query: _ => ({}),
+    response_decoder: basicResponseDecoderWith401(Services),
+    url: () => `/services`
+  };
+
+  const getServiceT: GetServiceT = {
+    headers: tokenHeaderProducer,
+    method: "get",
+    query: _ => ({}),
+    response_decoder: basicResponseDecoderWith401(ServicePublic),
+    url: params => `/services/${params.id}`
+  };
+
   return {
     createOrUpdateProfile: createFetchRequestForApi(
       createOrUpdateProfileT,
@@ -145,7 +221,13 @@ export function APIClient(
     ),
     getMessage: createFetchRequestForApi(getMessageT, options),
     getMessages: createFetchRequestForApi(getMessagesT, options),
-    getProfile: createFetchRequestForApi(getProfileT, options)
+    getProfile: createFetchRequestForApi(getProfileT, options),
+    getService: createFetchRequestForApi(getServiceT, options),
+    getServices: createFetchRequestForApi(getServicesT, options),
+    getServicesByRecipient: createFetchRequestForApi(
+      getServicesByRecipientT,
+      options
+    )
   };
 }
 

@@ -17,7 +17,6 @@ import {
   PreferredLanguageEnum
 } from "../../types/api/PreferredLanguage";
 import { SpidLevelEnum } from "../../types/api/SpidLevel";
-import { toApiClientExtendedProfile } from "../../types/profile";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
@@ -168,7 +167,7 @@ describe("ProfileController#upsertProfile", () => {
 
     expect(mockUpsertProfile).toHaveBeenCalledWith(
       mockedUser,
-      toApiClientExtendedProfile(mockedUpsertProfile)
+      mockedUpsertProfile
     );
     expect(response).toEqual({
       apply: expect.any(Function),

@@ -18,10 +18,14 @@ import {
   toAppProfileWithoutEmail
 } from "../types/profile";
 import { User } from "../types/user";
+import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-const profileErrorOnUnknownResponse = "Unknown response.";
+const profileErrorOnUnknownError = "Unknown response.";
 const profileErrorOnApiError = "Api error.";
+const logErrorOnStatusNotOK = "Status is not 200 or 404: %s";
+const logErrorOnDecodeError = "Response can't be decoded: %O";
+const logErrorOnUnknownError = "Unknown error: %s";
 
 export type profileResponse<T> =
   | IResponseErrorInternal
@@ -46,7 +50,8 @@ export default class ProfileService {
 
       // The response is undefined (can't be decoded).
       if (!res) {
-        return left(internalError(profileErrorOnUnknownResponse));
+        log.error(logErrorOnDecodeError, res);
+        return left(internalError(profileErrorOnUnknownError));
       }
 
       // The response is correct.
@@ -59,11 +64,14 @@ export default class ProfileService {
       // retrieved from SPID.
       if (res.status === 404) {
         return right(toAppProfileWithoutEmail(user));
-      } else {
-        return left(internalError(profileErrorOnApiError));
       }
+
+      // The API is returning an error.
+      log.error(logErrorOnStatusNotOK, res.status);
+      return left(internalError(profileErrorOnApiError));
     } catch (e) {
-      return left(internalError(profileErrorOnUnknownResponse));
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(profileErrorOnUnknownError));
     }
   }
 
@@ -83,13 +91,18 @@ export default class ProfileService {
       });
 
       // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
-      if (!res || res.status !== 200) {
-        return right(toAppProfileWithEmail(res.value, user));
+      if (!res) {
+        log.error(logErrorOnDecodeError, res);
+        return left(internalError(profileErrorOnApiError));
+      } else if (res.status !== 200) {
+        log.error(logErrorOnStatusNotOK, res.status);
+        return left(internalError(profileErrorOnApiError));
       } else {
-        return left(internalError(profileErrorOnUnknownResponse));
+        return right(toAppProfileWithEmail(res.value, user));
       }
     } catch (e) {
-      return left(internalError(profileErrorOnUnknownResponse));
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(profileErrorOnUnknownError));
     }
   }
 }

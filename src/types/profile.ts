@@ -8,19 +8,18 @@ import { User } from "./user";
 
 import * as express from "express";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { ProfileLimitedOrExtended } from "../api/api";
-import { ExtendedProfile as proxyExtendedProfile } from "./api/ExtendedProfile";
+import { ExtendedProfile } from "./api/ExtendedProfile";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
 
 /**
  * Converts an existing API profile to a Proxy profile.
  *
- * @param {GetProfileOKResponse} from The profile retrieved from the Digital Citizenship API.
+ * @param {ProfileLimitedOrExtended} from The profile retrieved from the Digital Citizenship API.
  * @param {User} user The user data extracted from SPID.
  */
 export function toAppProfileWithEmail(
-  from: ProfileLimitedOrExtended,
+  from: ExtendedProfile,
   user: User
 ): ProfileWithEmail {
   return {
@@ -65,8 +64,8 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
  */
 export function extractUpsertProfileFromRequest(
   from: express.Request
-): Either<Error, proxyExtendedProfile> {
-  const result = proxyExtendedProfile.decode(from.body);
+): Either<Error, ExtendedProfile> {
+  const result = ExtendedProfile.decode(from.body);
 
   return result.mapLeft(() => {
     return new Error("Unable to extract the upsert profile");
