@@ -3,7 +3,6 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../api/EmailAddress";
 import { ExtendedProfile } from "../api/ExtendedProfile";
@@ -15,6 +14,7 @@ import {
   PreferredLanguageEnum
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
+import { Version } from "../api/Version";
 import {
   extractUpsertProfileFromRequest,
   toAppProfileWithEmail,
@@ -25,7 +25,7 @@ import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aNonNegativeInteger = 1 as NonNegativeInteger;
+const aVersion = 1 as Version;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
@@ -39,7 +39,7 @@ const mockedGetProfileOKResponse = {
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebhookEnabled,
   preferredLanguages: aPreferredLanguages,
-  version: aNonNegativeInteger
+  version: aVersion
 };
 
 // mock for a valid User extracted from SPID
@@ -65,7 +65,7 @@ const mockedExtendedProfile: ExtendedProfile = {
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
-  version: 1 as NonNegativeInteger
+  version: 1 as Version
 };
 
 describe("profile type", () => {

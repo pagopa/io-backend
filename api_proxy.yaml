@@ -212,9 +212,7 @@ paths:
         '200':
           description: Profile updated.
           schema:
-            allOf:
-              - $ref: "#/definitions/LimitedProfile"
-              - $ref: "#/definitions/ExtendedProfile"
+            $ref: "#/definitions/ProfileWithEmail"
           examples:
             application/json:
               email: foobar@example.com
@@ -603,7 +601,6 @@ definitions:
     description:  True if the user has presonalized the email.
   Version:
     type: integer
-    minimum: 0
     description: The entity version.
   PageSize:
     type: integer

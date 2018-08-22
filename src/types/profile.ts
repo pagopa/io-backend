@@ -3,14 +3,13 @@
  * some functions to validate and convert type to and from them.
  */
 
-import { Either } from "fp-ts/lib/Either";
-import { User } from "./user";
-
 import * as express from "express";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { Either } from "fp-ts/lib/Either";
 import { ExtendedProfile } from "./api/ExtendedProfile";
 import { ProfileWithEmail } from "./api/ProfileWithEmail";
 import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
+import { Version } from "./api/Version";
+import { User } from "./user";
 
 /**
  * Converts an existing API profile to a Proxy profile.
@@ -55,7 +54,7 @@ export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
     name: user.name,
     spid_email: user.spid_email,
     spid_mobile_phone: user.spid_mobile_phone,
-    version: 0 as NonNegativeInteger
+    version: 0 as Version
   };
 }
 
