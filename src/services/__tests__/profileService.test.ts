@@ -25,15 +25,13 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 ];
 
 const validApiProfileResponse = {
-  parsedBody: {
+  status: 200,
+  value: {
     email: aValidAPIEmail,
-    isInboxEnabled: true,
-    isWebhookEnabled: true,
-    preferredLanguages: ["it_IT"],
+    is_inbox_enabled: true,
+    is_webhook_enabled: true,
+    preferred_languages: ["it_IT"],
     version: 42
-  },
-  response: {
-    status: 200
   }
 };
 const proxyProfileWithEmailResponse = {
@@ -62,35 +60,18 @@ const proxyProfileWithoutEmailResponse = {
   spid_mobile_phone: "3222222222222",
   version: 0
 };
-const proxyUpsertRequest = {
+const upsertRequest = {
   email: aValidAPIEmail,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 42
 };
-const ApiProfileUpsertRequest = {
-  body: {
-    email: aValidAPIEmail,
-    is_inbox_enabled: true,
-    is_webhook_enabled: true,
-    preferred_languages: ["it_IT"],
-    version: 42
-  }
-};
 const emptyApiProfileResponse = {
-  parsedBody: {},
-  response: {
-    status: 404
-  }
+  status: 404
 };
-const problemJson = {
-  parsedBody: {
-    detail: "Error."
-  },
-  response: {
-    status: 500
-  }
+const APIError = {
+  status: 500
 };
 
 // mock for a valid User
@@ -111,11 +92,11 @@ const mockedUser: User = {
 };
 
 const mockGetProfile = jest.fn();
-const mockUpsertProfile = jest.fn();
+const mockCreateOrUpdateProfile = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
-    getProfileWithHttpOperationResponse: mockGetProfile,
-    upsertProfileWithHttpOperationResponse: mockUpsertProfile
+    createOrUpdateProfile: mockCreateOrUpdateProfile,
+    getProfile: mockGetProfile
   };
 });
 jest.mock("../../services/apiClientFactory", () => {
@@ -142,8 +123,9 @@ describe("ProfileService#getProfile", () => {
 
     const res = await service.getProfile(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
-    expect(mockGetProfile).toHaveBeenCalledWith();
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
     expect(res).toEqual(right(proxyProfileWithEmailResponse));
   });
 
@@ -156,14 +138,15 @@ describe("ProfileService#getProfile", () => {
 
     const res = await service.getProfile(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
-    expect(mockGetProfile).toHaveBeenCalledWith();
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
     expect(res).toEqual(right(proxyProfileWithoutEmailResponse));
   });
 
   it("returns an error if the API returns an error", async () => {
     mockGetProfile.mockImplementation(() => {
-      return problemJson;
+      return APIError;
     });
 
     const service = new ProfileService(api);
@@ -171,8 +154,9 @@ describe("ProfileService#getProfile", () => {
     try {
       await service.getProfile(mockedUser);
     } catch (e) {
-      expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
-      expect(mockGetProfile).toHaveBeenCalledWith();
+      expect(mockGetProfile).toHaveBeenCalledWith({
+        fiscalCode: mockedUser.fiscal_code
+      });
       expect(e).toEqual(new Error("Api error."));
     }
   });
@@ -184,30 +168,31 @@ describe("ProfileService#upsertProfile", () => {
   });
 
   it("create a new user profile to the API", async () => {
-    mockUpsertProfile.mockImplementation(() => {
+    mockCreateOrUpdateProfile.mockImplementation(() => {
       return validApiProfileResponse;
     });
 
     const service = new ProfileService(api);
 
-    const res = await service.upsertProfile(mockedUser, proxyUpsertRequest);
+    const res = await service.upsertProfile(mockedUser, upsertRequest);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
-    expect(mockUpsertProfile).toHaveBeenCalledWith(ApiProfileUpsertRequest);
+    expect(mockCreateOrUpdateProfile).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code,
+      newProfile: upsertRequest
+    });
     expect(res).toEqual(right(proxyProfileWithEmailResponse));
   });
 
   it("fails to create a new user profile to the API", async () => {
-    mockUpsertProfile.mockImplementation(() => {
+    mockCreateOrUpdateProfile.mockImplementation(() => {
       return emptyApiProfileResponse;
     });
 
     const service = new ProfileService(api);
 
     try {
-      await service.upsertProfile(mockedUser, proxyUpsertRequest);
+      await service.upsertProfile(mockedUser, upsertRequest);
     } catch (e) {
-      expect(mockGetClient).toBeCalledWith("XUZTCT88A51Y311X");
       expect(e).toEqual(new Error("Api error."));
     }
   });

@@ -61,7 +61,7 @@ export type GetProfileT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<ExtendedProfile>
+  BasicResponseTypeWith401<ProfileLimitedOrExtended>
 >;
 
 export type CreateOrUpdateProfileT = IPostApiRequestType<
@@ -162,7 +162,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ExtendedProfile),
+    response_decoder: basicResponseDecoderWith401(ProfileLimitedOrExtended),
     url: params => `/profiles/${params.fiscalCode}`
   };
 

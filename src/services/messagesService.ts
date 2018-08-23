@@ -13,16 +13,18 @@ import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithConten
 import { Messages } from "../types/api/Messages";
 import { ServicePublic } from "../types/api/ServicePublic";
 import { Services } from "../types/api/Services";
-import { internalError, ServiceError } from "../types/error";
+import { internalError, notFoundError, ServiceError } from "../types/error";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 const messageErrorOnUnknownError = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
+const messageErrorOnNotFound = "Not found.";
 const logErrorOnStatusNotOK = "Status is not 200: %s";
 const logErrorOnDecodeError = "Response can't be decoded: %O";
 const logErrorOnUnknownError = "Unknown error: %s";
+const logErrorOnNotFound = "Not found";
 
 export type MessagesResponse<T> =
   | IResponseErrorInternal
@@ -131,11 +133,16 @@ export default class MessagesService {
     if (!res) {
       log.error(logErrorOnDecodeError, res);
       return left<ServiceError, T>(internalError(messageErrorOnApiError));
-    } else if (res.status !== 200) {
+    }
+
+    if (res.status === 200) {
+      return right<ServiceError, T>(res.value);
+    } else if (res.status === 404) {
+      log.error(logErrorOnNotFound, res.status);
+      return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
+    } else {
       log.error(logErrorOnStatusNotOK, res.status);
       return left<ServiceError, T>(internalError(messageErrorOnApiError));
-    } else {
-      return right<ServiceError, T>(res.value);
     }
   }
 }

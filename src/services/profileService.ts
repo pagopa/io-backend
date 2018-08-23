@@ -94,11 +94,15 @@ export default class ProfileService {
       if (!res) {
         log.error(logErrorOnDecodeError, res);
         return left(internalError(profileErrorOnApiError));
-      } else if (res.status !== 200) {
+      }
+
+      if (res.status === 200) {
+        return right(toAppProfileWithEmail(res.value, user));
+      } else if (res.status === 404) {
+        return right(toAppProfileWithoutEmail(user));
+      } else {
         log.error(logErrorOnStatusNotOK, res.status);
         return left(internalError(profileErrorOnApiError));
-      } else {
-        return right(toAppProfileWithEmail(res.value, user));
       }
     } catch (e) {
       log.error(logErrorOnUnknownError, e);

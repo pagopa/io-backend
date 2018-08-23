@@ -149,34 +149,11 @@ describe("serviceController#getService", () => {
 
     const response = await controller.getService(req);
 
-    expect(mockGetService).toHaveBeenCalledWith(mockedUser, aServiceId);
+    expect(mockGetService).toHaveBeenCalledWith(aServiceId);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: proxyService
-    });
-  });
-
-  it("calls the getService on the serviceController with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
-
-    req.user = "";
-    req.params = { id: aServiceId };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new ServicesController(messageService);
-
-    const response = await controller.getService(req);
-    response.apply(res);
-
-    expect(mockGetService).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("Cannot extract the user from request")
     });
   });
 });
