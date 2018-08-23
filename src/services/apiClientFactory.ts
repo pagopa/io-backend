@@ -1,8 +1,5 @@
 /**
- * This service builds API client by wrapping the DigitalCitizenshipAPI client
- * built by the AutoRest tool.
- *
- * @see ../clients/api/digitalCitizenshipAPI
+ * This service builds API clients.
  */
 
 import { APIClient } from "../clients/api";
