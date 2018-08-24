@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
+    "applicationinsights": "^1.0.3",
     "awilix": "^3.0.9",
     "azure-sb": "^0.10.6",
     "body-parser": "^1.18.3",
@@ -62,7 +63,7 @@
     "request-ip": "^2.1.1",
     "spid-passport": "git://github.com/gunzip/spid-passport.git#5900adf9",
     "typescript": "^2.9.2",
-    "ulid": "^2.2.2",
+    "ulid": "^2.3.0",
     "validator": "^10.4.0",
     "winston": "^3.0.0",
     "xmldom": "^0.1.27"
