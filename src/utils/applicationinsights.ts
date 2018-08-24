@@ -18,7 +18,7 @@
  *   TelemetryClient()
  * )();
  *
- * log.add(new ApplicationInsightsWinstonTransport(telemetryClient);
+ * log.add(new ApplicationInsightsWinstonTransport(telemetryClient));
  *
  */
 import * as ApplicationInsights from "applicationinsights";
