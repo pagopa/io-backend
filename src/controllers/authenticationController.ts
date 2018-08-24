@@ -26,6 +26,7 @@ import {
   toAppUser,
   validateSpidUser
 } from "../types/user";
+import { log } from "../utils/logger";
 
 export default class AuthenticationController {
   constructor(
@@ -49,6 +50,7 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
+      log.error("Error validating the SPID user: %s", error.message);
       return ResponseErrorInternal(error.message);
     }
 
@@ -61,11 +63,13 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrResponse)) {
       const error = errorOrResponse.value;
+      log.error("Error storing the user in the session: %s", error.message);
       return ResponseErrorInternal(error.message);
     }
     const response = errorOrResponse.value;
 
     if (!response) {
+      log.error("Error storing the user in the session");
       return ResponseErrorInternal("Error creating the user session");
     }
     const urlWithToken = this.getClientProfileRedirectionUrl(
