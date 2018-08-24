@@ -1,6 +1,7 @@
 /**
  * Interface for the PagoPA client factories.
  */
+import { PagoPAClient } from "../clients/pagopa";
 
 export interface IPagoPAClientFactoryInterface {
   /**

@@ -97,22 +97,20 @@ A Linux/macOS environment is required at the moment.
 3. run `scripts/build-tools.sh` to build the `tools` Docker image
 4. run `scripts/yarn.sh` to install backend dependencies
 5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
-6. run `scripts/generate-api-client.sh` to generate the Autorest API Client
-7. run `scripts/generate-pagopa-client.sh` to generate the Autorest PagoPA Client
-8. run `scripts/build.sh` to compile the Typescript files
-9. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
-10. run `docker-compose up -d` to start the containers
-11. edit your `/etc/hosts` file by adding:
+6. run `scripts/build.sh` to compile the Typescript files
+7. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
+8. run `docker-compose up -d` to start the containers
+9. edit your `/etc/hosts` file by adding:
 
     ```
     localhost    spid-testenv-identityserver
     localhost    italia-backend
     ```
 
-12. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
-13. run `scripts/import-spid-data.sh` to configure the local IDP
-14. copy `app/.env.example` to `app/.env` and fill the variables with your values
-15. point your browser to [https://italia-backend](https://italia-backend)
+10. wait a couple of minutes to let the IDP start (or monitor the process with `$ tail -f logs/idp/wso2carbon.log`)
+11. run `scripts/import-spid-data.sh` to configure the local IDP
+12. copy `app/.env.example` to `app/.env` and fill the variables with your values
+13. point your browser to [https://italia-backend](https://italia-backend)
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
@@ -176,13 +174,6 @@ A Linux/macOS environment is required at the moment.
 * run Jest tests directly or with `scripts/test.sh`
 
 In general follow the [Node Best Practices](https://devcenter.heroku.com/articles/node-best-practices).
-
-### Generate the API client
-
-The API client is generated with the [AutoRest](https://github.com/Azure/autorest) tool, in case of API change you need
-to regenerate the client code:
-
-* run the command `yarn generate:api-client`
 
 ### Generate SAML (SPID) certs (development)
 

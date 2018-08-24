@@ -78,7 +78,7 @@ export type GetServicesByRecipientT = IGetApiRequestType<
   {
     readonly fiscalCode: string;
   },
-  OcpApimSubscriptionKey | "Content-Type",
+  OcpApimSubscriptionKey,
   never,
   BasicResponseTypeWith401<Services>
 >;

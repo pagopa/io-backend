@@ -32,9 +32,6 @@ jobs:
       # Generate the proxy API models
       - run: yarn generate:proxy-models
 
-      # Generate PagoPA client
-      - run: yarn generate:pagopa-client
-
       # Generate certificates
       - run: yarn generate:test-certs
 

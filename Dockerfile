@@ -17,8 +17,6 @@ COPY /api_public.yaml /usr/src/app/api_public.yaml
 RUN sudo chmod -R 777 /usr/src/app \
   && yarn install \
   && yarn generate:proxy-models \
-  && yarn generate:api-client \
-  && yarn generate:pagopa-client \
   && yarn build
 
 FROM node:8.9.4-alpine

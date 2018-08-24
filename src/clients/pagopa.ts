@@ -1,5 +1,7 @@
 import * as t from "io-ts";
 import {
+  ApiHeaderJson,
+  composeHeaderProducers,
   createFetchRequestForApi,
   IGetApiRequestType,
   IPostApiRequestType,
@@ -7,6 +9,7 @@ import {
 } from "italia-ts-commons/lib/requests";
 import nodeFetch from "node-fetch";
 import { PaymentActivationsGetResponse } from "../types/api/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "../types/api/PaymentActivationsPostRequest";
 import { PaymentActivationsPostResponse } from "../types/api/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../types/api/PaymentRequestsGetResponse";
 import { Services } from "../types/api/Services";
@@ -21,8 +24,10 @@ export function PagoPAKeyHeaderProducer<P>(
 }
 
 export type ActivatePaymentT = IPostApiRequestType<
-  {},
-  "Authorization",
+  {
+    readonly activationsRequest: PaymentActivationsPostRequest;
+  },
+  "Authorization" | "Content-Type",
   never,
   BasicResponseTypeWith401<PaymentActivationsPostResponse>
 >;
@@ -47,23 +52,30 @@ export type GetPaymentInfoT = IGetApiRequestType<
 
 export function PagoPAClient(
   baseUrl: string,
-  token: string,
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
   readonly activatePayment: (
-    params: {}
-  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
+    params: {
+      readonly activationsRequest: PaymentActivationsPostRequest;
+    }
+  ) => Promise<
+    BasicResponseTypeWith401<PaymentActivationsPostResponse> | undefined
+  >;
   readonly getActivationStatus: (
     params: {
       readonly codiceContestoPagamento: string;
     }
-  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
+  ) => Promise<
+    BasicResponseTypeWith401<PaymentActivationsGetResponse> | undefined
+  >;
   readonly getPaymentInfo: (
     params: {
       readonly rptId: string;
     }
-  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
+  ) => Promise<
+    BasicResponseTypeWith401<PaymentRequestsGetResponse> | undefined
+  >;
 } {
   const options = {
     baseUrl,
@@ -73,7 +85,8 @@ export function PagoPAClient(
   const tokenHeaderProducer = PagoPAKeyHeaderProducer(token);
 
   const activatePaymentT: ActivatePaymentT = {
-    headers: tokenHeaderProducer,
+    body: params => JSON.stringify(params.activationsRequest),
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
     response_decoder: basicResponseDecoderWith401(
