@@ -10,7 +10,9 @@ export const enum IWinstonTransportLevel {
   "info" = "info",
   "error" = "error",
   "warn" = "warn",
-  "debug" = "debug"
+  "debug" = "debug",
+  "verbose" = "verbose",
+  "silly" = "silly"
 }
 
 export interface IWinstonTransportInfo {

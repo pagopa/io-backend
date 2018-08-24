@@ -121,6 +121,8 @@ export class ApplicationInsightsWinstonTransport extends WinstonTransport {
     setImmediate(() => this.emit("logged", info));
 
     switch (info.level) {
+      case IWinstonTransportLevel.verbose:
+      case IWinstonTransportLevel.silly:
       case IWinstonTransportLevel.debug:
         if (this.level === IWinstonTransportLevel.debug) {
           this.applicationInsightsClient.trackTrace({
