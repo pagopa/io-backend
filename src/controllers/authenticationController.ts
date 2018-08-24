@@ -50,7 +50,11 @@ export default class AuthenticationController {
 
     if (isLeft(errorOrUser)) {
       const error = errorOrUser.value;
-      log.error("Error validating the SPID user: %s", error.message);
+      log.error(
+        "Error validating the SPID user %O: %s",
+        userPayload,
+        error.message
+      );
       return ResponseErrorInternal(error.message);
     }
 
