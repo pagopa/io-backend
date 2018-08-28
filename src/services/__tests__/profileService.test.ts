@@ -99,12 +99,8 @@ const mockedUser: User = {
   family_name: "Lusso",
   fiscal_code: aValidFiscalCode,
   name: "Luca",
-  nameID: "lussoluca",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
   spid_email: aValidSPIDEmail,
-  spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
