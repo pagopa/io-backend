@@ -6,9 +6,9 @@ import PagoPAProxyService from "../pagoPAProxyService";
 const aRptId = "123456";
 const acodiceContestoPagamento = "ABC123";
 
-const notFoundErrorMessage = "Payment info not found.";
-const internalErrorMessage = "Internal error.";
-const clientErrorMessage = "Client error.";
+const notFoundErrorMessage = "Not found.";
+const internalErrorMessage = "Api error.";
+const unknownErrorMessage = "Unknown response.";
 
 const validPaymentInfoResponse = {
   parsedBody: {
@@ -166,7 +166,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
   it("get payment info fails if if PagoPA proxy throws an error", async () => {
     mockGetPaymentInfo.mockImplementation(() => {
-      throw new Error(clientErrorMessage);
+      throw new Error(unknownErrorMessage);
     });
 
     const service = new PagoPAProxyService(pagoPAProxy);
@@ -175,7 +175,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith("", aRptId);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith();
-    expect(res).toEqual(left(internalError(clientErrorMessage)));
+    expect(res).toEqual(left(internalError(unknownErrorMessage)));
   });
 });
 
@@ -228,7 +228,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
   it("activate payment fails if if PagoPA proxy throws an error", async () => {
     mockActivatePayment.mockImplementation(() => {
-      throw new Error(clientErrorMessage);
+      throw new Error(unknownErrorMessage);
     });
 
     const service = new PagoPAProxyService(pagoPAProxy);
@@ -237,7 +237,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith("", "");
     expect(mockActivatePayment).toHaveBeenCalledWith(activatePaymentPayload);
-    expect(res).toEqual(left(internalError(clientErrorMessage)));
+    expect(res).toEqual(left(internalError(unknownErrorMessage)));
   });
 });
 
@@ -290,7 +290,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
   it("get activation info fails if if PagoPA proxy throws an error", async () => {
     mockGetActivationStatus.mockImplementation(() => {
-      throw new Error(clientErrorMessage);
+      throw new Error(unknownErrorMessage);
     });
 
     const service = new PagoPAProxyService(pagoPAProxy);
@@ -299,6 +299,6 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(acodiceContestoPagamento, "");
     expect(mockGetActivationStatus).toHaveBeenCalledWith();
-    expect(res).toEqual(left(internalError(clientErrorMessage)));
+    expect(res).toEqual(left(internalError(unknownErrorMessage)));
   });
 });
