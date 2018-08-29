@@ -27,7 +27,7 @@ export type ActivatePaymentT = IPostApiRequestType<
   {
     readonly activationsRequest: PaymentActivationsPostRequest;
   },
-  "Authorization" | "Content-Type",
+  "Content-Type",
   never,
   BasicResponseTypeWith401<PaymentActivationsPostResponse>
 >;
@@ -36,7 +36,7 @@ export type GetActivationStatusT = IGetApiRequestType<
   {
     readonly codiceContestoPagamento: string;
   },
-  "Authorization",
+  never,
   never,
   BasicResponseTypeWith401<PaymentActivationsGetResponse>
 >;
@@ -45,13 +45,13 @@ export type GetPaymentInfoT = IGetApiRequestType<
   {
     readonly rptId: string;
   },
-  "Authorization",
+  never,
   never,
   BasicResponseTypeWith401<PaymentRequestsGetResponse>
 >;
 
 export function PagoPAClient(
-  baseUrl: string,
+  baseUrl?: string,
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
@@ -82,11 +82,9 @@ export function PagoPAClient(
     fetchApi
   };
 
-  const tokenHeaderProducer = PagoPAKeyHeaderProducer(token);
-
   const activatePaymentT: ActivatePaymentT = {
     body: params => JSON.stringify(params.activationsRequest),
-    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    headers: ApiHeaderJson,
     method: "post",
     query: _ => ({}),
     response_decoder: basicResponseDecoderWith401(
@@ -96,7 +94,7 @@ export function PagoPAClient(
   };
 
   const getActivationStatusT: GetActivationStatusT = {
-    headers: tokenHeaderProducer,
+    headers: () => ({}),
     method: "get",
     query: _ => ({}),
     response_decoder: basicResponseDecoderWith401(
@@ -106,7 +104,7 @@ export function PagoPAClient(
   };
 
   const getPaymentInfoT: GetPaymentInfoT = {
-    headers: tokenHeaderProducer,
+    headers: () => ({}),
     method: "get",
     query: _ => ({}),
     response_decoder: basicResponseDecoderWith401(PaymentRequestsGetResponse),

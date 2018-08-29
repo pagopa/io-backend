@@ -12,6 +12,6 @@ export default class PagoPAClientFactory
    * {@inheritDoc}
    */
   public getClient(): PagoPAClient {
-    return new PagoPAClient(this.pagoPAApiUrl);
+    return PagoPAClient(this.pagoPAApiUrl);
   }
 }
