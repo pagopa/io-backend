@@ -3,7 +3,8 @@
  */
 
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
-import {PagoPAClient} from "../clients/pagopa";
+
+import { PagoPAClient } from "../clients/pagopa";
 
 export default class PagoPAClientFactory
   implements IPagoPAClientFactoryInterface {

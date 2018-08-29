@@ -1,27 +1,16 @@
 import * as t from "io-ts";
 import {
   ApiHeaderJson,
-  composeHeaderProducers,
   createFetchRequestForApi,
   IGetApiRequestType,
-  IPostApiRequestType,
-  RequestHeaderProducer
+  IPostApiRequestType
 } from "italia-ts-commons/lib/requests";
 import nodeFetch from "node-fetch";
 import { PaymentActivationsGetResponse } from "../types/api/PaymentActivationsGetResponse";
 import { PaymentActivationsPostRequest } from "../types/api/PaymentActivationsPostRequest";
 import { PaymentActivationsPostResponse } from "../types/api/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../types/api/PaymentRequestsGetResponse";
-import { Services } from "../types/api/Services";
 import { basicResponseDecoderWith401, BasicResponseTypeWith401 } from "./api";
-
-export function PagoPAKeyHeaderProducer<P>(
-  token: string
-): RequestHeaderProducer<P, "Authorization"> {
-  return () => ({
-    Authorization: token
-  });
-}
 
 export type ActivatePaymentT = IPostApiRequestType<
   {
