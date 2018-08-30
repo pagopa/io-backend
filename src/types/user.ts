@@ -36,19 +36,21 @@ export const User = t.interface({
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
-export const SpidUser = t.interface({
-  authnContextClassRef: SpidLevel,
-  email: EmailAddress,
-  familyName: string,
-  fiscalNumber: FiscalCode,
-  getAssertionXml: t.Function,
-  issuer: Issuer,
-  mobilePhone: NonEmptyString,
-  name: string,
-  nameID: string,
-  nameIDFormat: string,
-  sessionIndex: string
-});
+export const SpidUser = t.intersection([
+  t.interface({
+    authnContextClassRef: SpidLevel,
+    email: EmailAddress,
+    familyName: string,
+    fiscalNumber: FiscalCode,
+    getAssertionXml: t.Function,
+    issuer: Issuer,
+    mobilePhone: NonEmptyString,
+    name: string,
+    nameID: string,
+    nameIDFormat: string
+  }),
+  t.partial({ sessionIndex: string })
+]);
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
 
