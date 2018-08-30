@@ -21,31 +21,46 @@ import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";
 
 // required attributes
-export const User = t.interface({
-  created_at: number,
-  family_name: string,
-  fiscal_code: FiscalCode,
-  name: string,
-  session_token: SessionToken,
-  spid_email: EmailAddress,
-  spid_level: SpidLevel,
-  spid_mobile_phone: NonEmptyString,
-  wallet_token: WalletToken
-});
+export const User = t.intersection([
+  t.interface({
+    created_at: number,
+    family_name: string,
+    fiscal_code: FiscalCode,
+    name: string,
+    session_token: SessionToken,
+    spid_email: EmailAddress,
+    spid_level: SpidLevel,
+    spid_mobile_phone: NonEmptyString,
+    wallet_token: WalletToken
+  }),
+  t.partial({
+    nameID: string,
+    nameIDFormat: string,
+    sessionIndex: string,
+    spid_idp: string
+  })
+]);
 
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
-export const SpidUser = t.interface({
-  authnContextClassRef: SpidLevel,
-  email: EmailAddress,
-  familyName: string,
-  fiscalNumber: FiscalCode,
-  getAssertionXml: t.Function,
-  issuer: Issuer,
-  mobilePhone: NonEmptyString,
-  name: string
-});
+export const SpidUser = t.intersection([
+  t.interface({
+    authnContextClassRef: SpidLevel,
+    email: EmailAddress,
+    familyName: string,
+    fiscalNumber: FiscalCode,
+    getAssertionXml: t.Function,
+    issuer: Issuer,
+    mobilePhone: NonEmptyString,
+    name: string
+  }),
+  t.partial({
+    nameID: string,
+    nameIDFormat: string,
+    sessionIndex: string
+  })
+]);
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
 
