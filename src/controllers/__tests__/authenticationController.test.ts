@@ -88,7 +88,6 @@ const theCurrentTimestampMillis = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
-const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // authentication constant
@@ -121,10 +120,7 @@ const validUserPayload = {
     _: "xxx"
   },
   mobilePhone: "3222222222222",
-  name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex"
+  name: aValidname
 };
 // invalidUser lacks the required email field.
 const invalidUserPayload = {
@@ -136,10 +132,7 @@ const invalidUserPayload = {
     _: "xxx"
   },
   mobilePhone: "3222222222222",
-  name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex"
+  name: aValidname
 };
 
 const anErrorResponse = {

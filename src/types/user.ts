@@ -44,10 +44,7 @@ export const SpidUser = t.interface({
   getAssertionXml: t.Function,
   issuer: Issuer,
   mobilePhone: NonEmptyString,
-  name: string,
-  nameID: string,
-  nameIDFormat: string,
-  sessionIndex: string
+  name: string
 });
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
