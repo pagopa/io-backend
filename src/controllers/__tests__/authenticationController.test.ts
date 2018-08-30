@@ -103,12 +103,8 @@ const mockedUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex",
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
-  spid_idp: "xxx",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
