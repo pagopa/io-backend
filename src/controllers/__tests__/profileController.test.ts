@@ -41,12 +41,8 @@ const proxyUserResponse = {
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebookEnabled,
   name: "Giuseppe Maria",
-  nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   preferredLanguages: aPreferredLanguages,
-  sessionIndex: "123sessionIndex",
   spid_email: anEmailAddress,
-  spid_idp: "spid_idp_name",
   token: "123hexToken",
   version: 1 as NonNegativeInteger
 };

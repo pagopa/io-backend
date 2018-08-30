@@ -6,7 +6,6 @@
 import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
-import { number, string } from "io-ts";
 import * as t from "io-ts";
 import { JSONFromString } from "io-ts-types";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -21,17 +20,25 @@ import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";
 
 // required attributes
-export const User = t.interface({
-  created_at: number,
-  family_name: string,
-  fiscal_code: FiscalCode,
-  name: string,
-  session_token: SessionToken,
-  spid_email: EmailAddress,
-  spid_level: SpidLevel,
-  spid_mobile_phone: NonEmptyString,
-  wallet_token: WalletToken
-});
+export const User = t.intersection([
+  t.interface({
+    created_at: t.number,
+    family_name: t.string,
+    fiscal_code: FiscalCode,
+    name: t.string,
+    session_token: SessionToken,
+    spid_email: EmailAddress,
+    spid_level: SpidLevel,
+    spid_mobile_phone: NonEmptyString,
+    wallet_token: WalletToken
+  }),
+  t.partial({
+    nameID: t.string,
+    nameIDFormat: t.string,
+    sessionIndex: t.string,
+    spid_idp: t.string
+  })
+]);
 
 export type User = t.TypeOf<typeof User>;
 
@@ -40,16 +47,18 @@ export const SpidUser = t.intersection([
   t.interface({
     authnContextClassRef: SpidLevel,
     email: EmailAddress,
-    familyName: string,
+    familyName: t.string,
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
     issuer: Issuer,
     mobilePhone: NonEmptyString,
-    name: string,
-    nameID: string,
-    nameIDFormat: string
+    name: t.string
   }),
-  t.partial({ sessionIndex: string })
+  t.partial({
+    nameID: t.string,
+    nameIDFormat: t.string,
+    sessionIndex: t.string
+  })
 ]);
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
