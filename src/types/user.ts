@@ -26,12 +26,8 @@ export const User = t.interface({
   family_name: string,
   fiscal_code: FiscalCode,
   name: string,
-  nameID: string,
-  nameIDFormat: string,
-  sessionIndex: string,
   session_token: SessionToken,
   spid_email: EmailAddress,
-  spid_idp: string,
   spid_level: SpidLevel,
   spid_mobile_phone: NonEmptyString,
   wallet_token: WalletToken
@@ -40,19 +36,21 @@ export const User = t.interface({
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
-export const SpidUser = t.interface({
-  authnContextClassRef: SpidLevel,
-  email: EmailAddress,
-  familyName: string,
-  fiscalNumber: FiscalCode,
-  getAssertionXml: t.Function,
-  issuer: Issuer,
-  mobilePhone: NonEmptyString,
-  name: string,
-  nameID: string,
-  nameIDFormat: string,
-  sessionIndex: string
-});
+export const SpidUser = t.intersection([
+  t.interface({
+    authnContextClassRef: SpidLevel,
+    email: EmailAddress,
+    familyName: string,
+    fiscalNumber: FiscalCode,
+    getAssertionXml: t.Function,
+    issuer: Issuer,
+    mobilePhone: NonEmptyString,
+    name: string,
+    nameID: string,
+    nameIDFormat: string
+  }),
+  t.partial({ sessionIndex: string })
+]);
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
 
@@ -69,12 +67,8 @@ export function toAppUser(
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,
-    nameID: from.nameID, // The used nameID is needed for logout.
-    nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
-    sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     session_token: sessionToken,
     spid_email: from.email,
-    spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
     spid_mobile_phone: from.mobilePhone,
     wallet_token: walletToken
