@@ -63,7 +63,7 @@
     "spid-passport": "git://github.com/gunzip/spid-passport.git#5900adf9",
     "typescript": "^2.9.2",
     "ulid": "^2.2.2",
-    "validator": "^10.7.0",
+    "validator": "^10.7.1",
     "winston": "^3.0.0",
     "xmldom": "^0.1.27"
   },
