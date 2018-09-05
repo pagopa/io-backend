@@ -440,30 +440,25 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentAmount"
   PaymentData:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentData"
+  MessageContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageContent"
   MessageWithContent:
     type: object
     title: Message with content
     properties:
       created_at:
         $ref: "#/definitions/Timestamp"
-      due_date:
-        $ref: "#/definitions/Timestamp"
       id:
         type: string
-      markdown:
-        $ref: "#/definitions/MessageBodyMarkdown"
-      payment_data:
-        $ref: "#/definitions/PaymentData"
       sender_service_id:
         type: string
-      subject:
-        $ref: "#/definitions/MessageSubject"
+      content:
+        $ref: "#/MessageContent"
     required:
       - created_at
       - id
-      - markdown
       - sender_service_id
-      - subject
+      - content
   MessageWithoutContent:
     type: object
     title: Message without content
