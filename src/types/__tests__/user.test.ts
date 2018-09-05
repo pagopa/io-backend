@@ -33,10 +33,7 @@ const mockedSpidUser: any = {
   getAssertionXml: () => "",
   issuer: anIssuer,
   mobilePhone: "3222222222222",
-  name: "Giuseppe Maria",
-  nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  sessionIndex: "sessionIndex"
+  name: "Giuseppe Maria"
 };
 
 // mock for a invalid SpidUser
@@ -50,12 +47,8 @@ const mockedUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   name: "Giuseppe Maria",
-  nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
   spid_email: anEmailAddress,
-  spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken

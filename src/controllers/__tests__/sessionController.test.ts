@@ -20,7 +20,6 @@ const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
-const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // authentication constant
@@ -35,12 +34,8 @@ const mockedUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex",
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
-  spid_idp: "xxx",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
