@@ -440,6 +440,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentAmount"
   PaymentData:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentData"
+  TimeToLiveSeconds:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/TimeToLiveSeconds"
   MessageWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithContent"
   MessageWithoutContent:
