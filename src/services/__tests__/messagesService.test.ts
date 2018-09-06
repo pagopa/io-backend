@@ -105,10 +105,14 @@ const invalidApiServicesResponse = {
 const proxyMessagesResponse = {
   items: [
     {
+      created_at: new Date(aTimestamp),
+      fiscal_code: "XUZTCT88A51Y311X",
       id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
       sender_service_id: "5a563817fcc896087002ea46c49a"
     },
     {
+      created_at: new Date(aTimestamp),
+      fiscal_code: "XUZTCT88A51Y311X",
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
       sender_service_id: "5a563817fcc896087002ea46c49a"
     }
@@ -166,7 +170,7 @@ const proxyMessageResponse = {
     subject: aValidSubject
   },
   created_at: new Date(aTimestamp),
-  fiscalCode: "XUZTCT88A51Y311X",
+  fiscal_code: "XUZTCT88A51Y311X",
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",
   sender_service_id: "5a563817fcc896087002ea46c49a"
 };
