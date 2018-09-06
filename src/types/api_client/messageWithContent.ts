@@ -3,8 +3,8 @@
  * validation.
  */
 import * as t from "io-ts";
-import { MessageBodyMarkdown } from "../api/MessageBodyMarkdown";
-import { MessageSubject } from "../api/MessageSubject";
+import { FiscalCode } from "../api/FiscalCode";
+import { MessageContent } from "../api/MessageContent";
 import { PaymentData } from "../api/PaymentData";
 import { Timestamp } from "../api/Timestamp";
 
@@ -12,7 +12,11 @@ import { Timestamp } from "../api/Timestamp";
 const MessageWithContentR = t.interface({
   created_at: Timestamp,
 
+  fiscal_code: FiscalCode,
+
   id: t.string,
+
+  content: MessageContent,
 
   sender_service_id: t.string
 });
@@ -21,11 +25,7 @@ const MessageWithContentR = t.interface({
 const MessageWithContentO = t.partial({
   due_date: Timestamp,
 
-  markdown: MessageBodyMarkdown,
-
-  payment_data: PaymentData,
-
-  subject: MessageSubject
+  payment_data: PaymentData
 });
 
 export const MessageWithContent = t.intersection(

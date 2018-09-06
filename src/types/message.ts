@@ -17,19 +17,22 @@ export function toAppMessageWithContent(
   const { dueDate, paymentData } = from.message.content;
 
   const messageWithContent: MessageWithContent = {
+    content: {
+      markdown: from.message.content.markdown,
+      subject: from.message.content.subject
+    },
     created_at: from.message.createdAt,
+    fiscal_code: from.message.fiscalCode,
     id: from.message.id,
-    markdown: from.message.content.markdown,
-    sender_service_id: from.message.senderServiceId,
-    subject: from.message.content.subject
+    sender_service_id: from.message.senderServiceId
   };
 
   if (dueDate) {
-    messageWithContent.due_date = dueDate;
+    messageWithContent.content.due_date = dueDate;
   }
 
   if (paymentData) {
-    messageWithContent.payment_data = {
+    messageWithContent.content.payment_data = {
       amount: paymentData.amount,
       notice_number: paymentData.noticeNumber
     };
@@ -45,6 +48,8 @@ export function toAppMessageWithoutContent(
   from: CreatedMessageWithoutContent
 ): MessageWithoutContent {
   return {
+    created_at: from.createdAt,
+    fiscal_code: from.fiscalCode,
     id: from.id,
     sender_service_id: from.senderServiceId
   };

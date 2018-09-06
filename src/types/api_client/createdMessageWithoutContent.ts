@@ -6,9 +6,11 @@
 import * as t from "io-ts";
 import { number, string } from "io-ts";
 import { FiscalCode } from "../api/FiscalCode";
+import { Timestamp } from "../api/Timestamp";
 
 // required attributes
 const CreatedMessageWithoutContentR = t.interface({
+  createdAt: Timestamp,
   fiscalCode: FiscalCode,
   id: string,
   senderServiceId: string
