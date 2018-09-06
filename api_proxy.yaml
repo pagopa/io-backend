@@ -369,21 +369,21 @@ definitions:
   BlockedInboxOrChannels:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/BlockedInboxOrChannels"
   CodiceContestoPagamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
   DepartmentName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/DepartmentName"
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/EmailAddress"
   EnteBeneficiario:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/EnteBeneficiario"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/EnteBeneficiario"
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ExtendedProfile"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/FiscalCode"
   Iban:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/Iban"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/Iban"
   ImportoEuroCents:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/ImportoEuroCents"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/ImportoEuroCents"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
@@ -403,13 +403,13 @@ definitions:
   PaginationResponse:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaginationResponse"
   PaymentActivationsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
   PaymentActivationsPostRequest:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
   PaymentActivationsPostResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
   PaymentRequestsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
   PreferredLanguage:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
@@ -417,7 +417,7 @@ definitions:
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ProblemJson"
   RptIdFromString:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/RptIdFromString"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/RptIdFromString"
   ServiceId:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceId"
   ServiceName:
@@ -427,11 +427,11 @@ definitions:
   ServiceTuple:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceTuple"
   SpezzoneStrutturatoCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
   SpezzoniCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
