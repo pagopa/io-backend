@@ -1,16 +1,16 @@
 /**
  * This controller handles requests made from the PagoPA backend.
  */
-
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+
 import ProfileService, { profileResponse } from "../services/profileService";
 import { PagoPAUser } from "../types/api/PagoPAUser";
-import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
+import { Profile } from "../types/api/Profile";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
@@ -41,10 +41,13 @@ export default class PagoPAController {
     }
 
     const profile = errorOrProfile.value;
-    const maybeCustomEmail = ProfileWithEmail.is(profile)
-      ? profile.email
-      : undefined;
-    const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
+    const maybeCustomEmail =
+      Profile.is(profile) && profile.cd_data
+        ? profile.cd_data.email
+        : undefined;
+    const email = maybeCustomEmail
+      ? maybeCustomEmail
+      : profile.spid_data.spid_email;
 
     return ResponseSuccessJson({
       email,
