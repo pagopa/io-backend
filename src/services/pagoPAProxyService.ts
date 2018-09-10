@@ -28,14 +28,12 @@ export default class PagoPAProxyService {
   public async getPaymentInfo(
     rptId: string
   ): Promise<Either<ServiceError, PaymentRequestsGetResponse>> {
-
     try {
       const client = this.pagoPAClient.getClient();
 
-      const res = await client.getPaymentInfo({ params: rptId });
+      const res = await client.getPaymentInfo({ rptId });
 
       return this.parseResponse<PaymentRequestsGetResponse>(res);
-
     } catch (e) {
       log.error(logErrorOnUnknownError, e);
       return left(internalError(messageErrorOnUnknownError));
@@ -49,15 +47,11 @@ export default class PagoPAProxyService {
     payload: PaymentActivationsPostRequest
   ): Promise<Either<ServiceError, PaymentActivationsPostResponse>> {
     try {
-
       const client = this.pagoPAClient.getClient();
 
-      const res = await client.activatePayment({
-        params: payload
-      });
+      const res = await client.activatePayment({ payload });
 
       return this.parseResponse<PaymentActivationsPostResponse>(res);
-
     } catch (e) {
       log.error(logErrorOnUnknownError, e);
       return left(internalError(messageErrorOnUnknownError));
@@ -71,15 +65,11 @@ export default class PagoPAProxyService {
     codiceContestoPagamento: string
   ): Promise<Either<ServiceError, PaymentActivationsGetResponse>> {
     try {
-
       const client = this.pagoPAClient.getClient();
 
-      const res = await client.getActivationStatus({
-        params: { codiceContestoPagamento }
-      });
+      const res = await client.getActivationStatus({ codiceContestoPagamento });
 
       return this.parseResponse<PaymentActivationsGetResponse>(res);
-
     } catch (e) {
       log.error(logErrorOnUnknownError, e);
       return left(internalError(messageErrorOnUnknownError));
@@ -90,13 +80,14 @@ export default class PagoPAProxyService {
     res: IResponseType<number, T>
   ): Either<ServiceError, T> {
     // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
+    console.log(res);
     if (!res) {
       log.error(logErrorOnDecodeError, res);
       return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
 
     if (res.status === 200) {
-      return right<ServiceError, T>(res.value);
+      return right<ServiceError, T>(res);
     } else if (res.status === 404) {
       log.error(logErrorOnNotFound, res.status);
       return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
