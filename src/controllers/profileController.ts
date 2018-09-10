@@ -12,8 +12,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
-import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
-import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
+import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
+import { InitializedProfile } from "../types/api/InitializedProfile";
 import { toHttpError } from "../types/error";
 import {
   extractUpsertProfileFromRequest,
@@ -34,7 +34,7 @@ export default class ProfileController {
    */
   public async getProfile(
     req: express.Request
-  ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
+  ): Promise<profileResponse<AuthenticatedProfile | InitializedProfile>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -61,7 +61,7 @@ export default class ProfileController {
    */
   public async upsertProfile(
     req: express.Request
-  ): Promise<profileResponseWithValidationError<ProfileWithEmail>> {
+  ): Promise<profileResponseWithValidationError<InitializedProfile>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

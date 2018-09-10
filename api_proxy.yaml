@@ -172,8 +172,8 @@ paths:
           description: Found.
           schema:
             allOf:
-              - $ref: "#/definitions/ProfileWithEmail"
-              - $ref: "#/definitions/ProfileWithoutEmail"
+              - $ref: "#/definitions/InitializedProfile"
+              - $ref: "#/definitions/AuthenticatedProfile"
           examples:
             application/json:
               family_name: "Rossi"
@@ -212,7 +212,7 @@ paths:
         '200':
           description: Profile updated.
           schema:
-            $ref: "#/definitions/ProfileWithEmail"
+            $ref: "#/definitions/InitializedProfile"
           examples:
             application/json:
               email: foobar@example.com
@@ -488,13 +488,11 @@ definitions:
     required:
       - platform
       - pushChannel
-  ProfileWithEmail:
+  InitializedProfile:
     type: object
-    title: Profile with wmail
-    description: Describes the user's profile.
+    title: Initialized profile
+    description: Describes the user's profile after it has been stored in the Profile API.
     properties:
-      blocked_inbox_or_channels:
-        $ref: "#/definitions/BlockedInboxOrChannels"
       email:
         $ref: '#/definitions/EmailAddress'
       family_name:
@@ -503,8 +501,6 @@ definitions:
         $ref: '#/definitions/FiscalCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
-      is_email_set:
-        $ref: "#/definitions/IsEmailSet"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
       is_webhook_enabled:
@@ -520,23 +516,24 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/PreferredLanguage'
+      blocked_inbox_or_channels:
+        $ref: "#/definitions/BlockedInboxOrChannels"
       version:
         $ref: '#/definitions/Version'
     required:
       - family_name
       - fiscal_code
       - has_profile
-      - is_email_set
       - is_inbox_enabled
       - is_webhook_enabled
       - name
       - spid_email
       - spid_mobile_phone
       - version
-  ProfileWithoutEmail:
+  AuthenticatedProfile:
     type: object
-    title: Profile without email
-    description: Describes the user's profile.
+    title: Temporary SPID profile
+    description: Describes the user's profile while it's authenticated but not yet stored in the Profile API.
     properties:
       family_name:
         type: string
@@ -544,12 +541,6 @@ definitions:
         $ref: '#/definitions/FiscalCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
-      is_email_set:
-        $ref: "#/definitions/IsEmailSet"
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
-      is_webhook_enabled:
-        $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
       spid_email:
@@ -557,23 +548,13 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
-      preferred_languages:
-        type: array
-        items:
-          $ref: '#/definitions/PreferredLanguage'
-      version:
-        $ref: '#/definitions/Version'
     required:
       - family_name
       - fiscal_code
       - has_profile
-      - is_email_set
-      - is_inbox_enabled
-      - is_webhook_enabled
       - name
       - spid_email
       - spid_mobile_phone
-      - version
   PublicSession:
     type: object
     title: User session data
