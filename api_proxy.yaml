@@ -171,9 +171,7 @@ paths:
         "200":
           description: Found.
           schema:
-            allOf:
-              - $ref: "#/definitions/ProfileWithEmail"
-              - $ref: "#/definitions/ProfileWithoutEmail"
+              $ref: "#/definitions/Profile"
           examples:
             application/json:
               family_name: "Rossi"
@@ -212,7 +210,7 @@ paths:
         '200':
           description: Profile updated.
           schema:
-            $ref: "#/definitions/ProfileWithEmail"
+            $ref: "#/definitions/Profile"
           examples:
             application/json:
               email: foobar@example.com
@@ -488,27 +486,27 @@ definitions:
     required:
       - platform
       - pushChannel
-  ProfileWithEmail:
+
+  Profile:
     type: object
-    title: Profile with wmail
-    description: Describes the user's profile.
+    title: Profile
+    description: Profile
     properties:
-      blocked_inbox_or_channels:
-        $ref: "#/definitions/BlockedInboxOrChannels"
-      email:
-        $ref: '#/definitions/EmailAddress'
+      spid_data:
+        $ref: "#/definitions/ProfileSpidData"
+      cd_data:
+        $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ExtendedProfile"
+    required:
+      - spid_data
+  ProfileSpidData:
+    type: object
+    title: Profile SPID data
+    description: Describes the user's profile SPID data.
+    properties:
       family_name:
         type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
-      has_profile:
-        $ref: "#/definitions/HasProfile"
-      is_email_set:
-        $ref: "#/definitions/IsEmailSet"
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
-      is_webhook_enabled:
-        $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
       spid_email:
@@ -516,64 +514,12 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
-      preferred_languages:
-        type: array
-        items:
-          $ref: '#/definitions/PreferredLanguage'
-      version:
-        $ref: '#/definitions/Version'
     required:
       - family_name
       - fiscal_code
-      - has_profile
-      - is_email_set
-      - is_inbox_enabled
-      - is_webhook_enabled
       - name
       - spid_email
       - spid_mobile_phone
-      - version
-  ProfileWithoutEmail:
-    type: object
-    title: Profile without email
-    description: Describes the user's profile.
-    properties:
-      family_name:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      has_profile:
-        $ref: "#/definitions/HasProfile"
-      is_email_set:
-        $ref: "#/definitions/IsEmailSet"
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
-      is_webhook_enabled:
-        $ref: "#/definitions/IsWebhookEnabled"
-      name:
-        type: string
-      spid_email:
-        $ref: '#/definitions/EmailAddress'
-      spid_mobile_phone:
-        type: string
-        minLength: 1
-      preferred_languages:
-        type: array
-        items:
-          $ref: '#/definitions/PreferredLanguage'
-      version:
-        $ref: '#/definitions/Version'
-    required:
-      - family_name
-      - fiscal_code
-      - has_profile
-      - is_email_set
-      - is_inbox_enabled
-      - is_webhook_enabled
-      - name
-      - spid_email
-      - spid_mobile_phone
-      - version
   PublicSession:
     type: object
     title: User session data

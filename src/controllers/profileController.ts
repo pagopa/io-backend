@@ -2,7 +2,6 @@
  * This controller handles reading the user profile from the
  * app by forwarding the call to the API system.
  */
-
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
@@ -11,9 +10,9 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+
 import ProfileService, { profileResponse } from "../services/profileService";
-import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
-import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
+import { Profile } from "../types/api/Profile";
 import { toHttpError } from "../types/error";
 import {
   extractUpsertProfileFromRequest,
@@ -34,7 +33,7 @@ export default class ProfileController {
    */
   public async getProfile(
     req: express.Request
-  ): Promise<profileResponse<ProfileWithoutEmail | ProfileWithEmail>> {
+  ): Promise<profileResponse<Profile>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -61,7 +60,7 @@ export default class ProfileController {
    */
   public async upsertProfile(
     req: express.Request
-  ): Promise<profileResponseWithValidationError<ProfileWithEmail>> {
+  ): Promise<profileResponseWithValidationError<Profile>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

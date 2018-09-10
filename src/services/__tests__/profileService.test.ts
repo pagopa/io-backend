@@ -37,31 +37,32 @@ const validApiProfileResponse = {
   }
 };
 const proxyProfileWithEmailResponse = {
-  email: aValidAPIEmail,
-  family_name: "Lusso",
-  fiscal_code: "XUZTCT88A51Y311X",
-  has_profile: true,
-  is_email_set: true,
-  is_inbox_enabled: true,
-  is_webhook_enabled: true,
-  name: "Luca",
-  preferred_languages: ["it_IT"],
-  spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222",
-  version: 42
+  cd_data: {
+    email: aValidAPIEmail,
+    is_inbox_enabled: true,
+    is_webhook_enabled: true,
+    preferred_languages: ["it_IT"],
+    version: 42
+  },
+  spid_data: {
+    family_name: "Lusso",
+    fiscal_code: "XUZTCT88A51Y311X",
+    name: "Luca",
+    spid_email: aValidSPIDEmail,
+    spid_mobile_phone: "3222222222222"
+  }
 };
+
 const proxyProfileWithoutEmailResponse = {
-  family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
-  has_profile: false,
-  is_email_set: false,
-  is_inbox_enabled: false,
-  is_webhook_enabled: false,
-  name: "Luca",
-  spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222",
-  version: 0
+  spid_data: {
+    family_name: "Lusso",
+    fiscal_code: "XUZTCT88A51Y311X",
+    name: "Luca",
+    spid_email: aValidSPIDEmail,
+    spid_mobile_phone: "3222222222222"
+  }
 };
+
 const proxyUpsertRequest = {
   email: aValidAPIEmail,
   is_inbox_enabled: anIsInboxEnabled,

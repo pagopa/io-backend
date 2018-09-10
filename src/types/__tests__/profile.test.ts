@@ -18,8 +18,8 @@ import { Version } from "../api/Version";
 import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
   extractUpsertProfileFromRequest,
-  toAppProfileWithEmail,
-  toAppProfileWithoutEmail
+  toAppProfileWithCDData,
+  toProfileWithoutCDData
 } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
@@ -66,47 +66,44 @@ const mockedExtendedProfile: ExtendedProfile = {
 };
 
 describe("profile type", () => {
+  /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
+  it("should get an app Proxy profile without email from user data extracted from SPID", async () => {
+    // validate SpidUser. Return right.
+    const userData = toProfileWithoutCDData(
+      mockedUser // user
+    );
+
+    expect(userData).toEqual({
+      spid_data: {
+        family_name: mockedUser.family_name,
+        fiscal_code: mockedUser.fiscal_code,
+        name: mockedUser.name,
+        spid_email: mockedUser.spid_email,
+        spid_mobile_phone: mockedUser.spid_mobile_phone
+      }
+    });
+  });
+
   /*test case: Converts an existing API profile to a Proxy profile using user profile with email from Digital Citzen API and SPID*/
   it("should get an app Proxy profile user profile with email from Digital Citzen API and SPID", async () => {
     // return app Proxy Profile.
-    const userData = toAppProfileWithEmail(
+    const userData = toAppProfileWithCDData(
       mockedGetProfileOKResponse, // from
       mockedUser // user
     );
 
-    expect(userData.email).toBe(mockedGetProfileOKResponse.email);
-    expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.has_profile).toBeTruthy();
-    expect(userData.is_email_set).toBeTruthy();
-    expect(userData.is_inbox_enabled).toBe(
-      mockedGetProfileOKResponse.isInboxEnabled
-    );
-    expect(userData.is_webhook_enabled).toBe(
-      mockedGetProfileOKResponse.isWebhookEnabled
-    );
-    expect(userData.name).toBe(mockedUser.name);
-    expect(userData.spid_email).toBe(mockedUser.spid_email);
-    expect(userData.preferred_languages).toBe(
-      mockedGetProfileOKResponse.preferredLanguages
-    );
-    expect(userData.version).toBe(mockedGetProfileOKResponse.version);
-  });
-
-  /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
-  it("should get an app Proxy profile without email from user data extracted from SPID", async () => {
-    // validate SpidUser. Return right.
-    const userData = toAppProfileWithoutEmail(
-      mockedUser // user
-    );
-
-    expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.has_profile).toBeFalsy();
-    expect(userData.is_email_set).toBeFalsy();
-
-    expect(userData.spid_email).toBe(mockedUser.spid_email);
-    expect(userData.version).toBe(0);
+    expect(userData).toEqual({
+      ...toProfileWithoutCDData(mockedUser),
+      cd_data: {
+        blocked_inbox_or_channels:
+          mockedGetProfileOKResponse.blockedInboxOrChannels,
+        email: mockedGetProfileOKResponse.email,
+        is_inbox_enabled: mockedGetProfileOKResponse.isInboxEnabled,
+        is_webhook_enabled: mockedGetProfileOKResponse.isWebhookEnabled,
+        preferred_languages: mockedGetProfileOKResponse.preferredLanguages,
+        version: mockedGetProfileOKResponse.version
+      }
+    });
   });
 
   /*test case: Extracts a user profile from the body of a request.*/
