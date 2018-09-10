@@ -493,8 +493,6 @@ definitions:
     title: Profile with wmail
     description: Describes the user's profile.
     properties:
-      blocked_inbox_or_channels:
-        $ref: "#/definitions/BlockedInboxOrChannels"
       email:
         $ref: '#/definitions/EmailAddress'
       family_name:
@@ -520,6 +518,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/PreferredLanguage'
+      blocked_inbox_or_channels:
+        $ref: "#/definitions/BlockedInboxOrChannels"
       version:
         $ref: '#/definitions/Version'
     required:
@@ -561,6 +561,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/PreferredLanguage'
+      blocked_inbox_or_channels:
+        $ref: "#/definitions/BlockedInboxOrChannels"
       version:
         $ref: '#/definitions/Version'
     required:
