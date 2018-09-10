@@ -9,8 +9,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
+import { InitializedProfile } from "../types/api/InitializedProfile";
 import { PagoPAUser } from "../types/api/PagoPAUser";
-import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
@@ -41,7 +41,7 @@ export default class PagoPAController {
     }
 
     const profile = errorOrProfile.value;
-    const maybeCustomEmail = ProfileWithEmail.is(profile)
+    const maybeCustomEmail = InitializedProfile.is(profile)
       ? profile.email
       : undefined;
     const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
