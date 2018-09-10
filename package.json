@@ -93,7 +93,7 @@
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "fp-ts": "^1.8.0",
     "italia-tslint-rules": "^0.1.1",
-    "italia-utils": "^3.12.0",
+    "italia-utils": "^3.13.0",
     "jest": "^23.5.0",
     "lolex": "2.7.1",
     "mock-redis-client": "^0.91.13",
