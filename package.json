@@ -89,7 +89,7 @@
     "@types/xml2js": "^0.4.3",
     "@types/xmldom": "^0.1.29",
     "autorest": "^2.0.4280",
-    "danger": "^3.8.9",
+    "danger": "^3.9.0",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "fp-ts": "^1.8.0",
     "italia-tslint-rules": "^0.1.1",
