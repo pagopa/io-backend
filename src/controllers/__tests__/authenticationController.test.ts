@@ -80,6 +80,7 @@ const samlIssuer = "http://italiabackend.it";
 const samlAcceptedClockSkewMs = -1;
 const samlAttributeConsumingServiceIndex = 0;
 const spidAutologin = "";
+const spidTestEnvUrl = "https://localhost:8088";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -182,7 +183,8 @@ const spidStrategyInstance = spidStrategy(
   samlIssuer,
   samlAcceptedClockSkewMs,
   samlAttributeConsumingServiceIndex,
-  spidAutologin
+  spidAutologin,
+  spidTestEnvUrl
 );
 spidStrategyInstance.logout = jest.fn();
 
