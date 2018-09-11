@@ -38,12 +38,12 @@ host: 0.0.0.0
 port: 8088
 
 # Abilita (true) o disabilita (false) la modalità HTTPS per l'IdP
-https: false
+https: true
 
 # Se si abilita HTTPS è necessario specificare chiave e certificato
 # (indipendenti da chiave e certificato SAML)
-#https_key_file: "path/to/key"
-#https_cert_file: "path/to/cert"
+https_key_file: "./conf/idp.key"
+https_cert_file: "./conf/idp.crt"
 
 # Endpoint del server IdP (path relativi)
 endpoints:
