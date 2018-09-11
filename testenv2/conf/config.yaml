@@ -4,7 +4,7 @@
 # Hostname da usare per generare l'entityID dell'IdP e gli URL degli endpoint
 # SAML indicati nel metadata dell'IdP
 hostname: "localhost"
-base_url: "http://localhost:8088"
+base_url: "https://spid-testenv2:8088"
 
 # Chiave e certificato necessari per la firma dei messaggi SAML
 key_file: "conf/idp.key"

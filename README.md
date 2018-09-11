@@ -104,6 +104,7 @@ A Linux/macOS environment is required at the moment.
 11. edit your `/etc/hosts` file by adding:
 
     ```
+    localhost    spid-testenv2
     localhost    italia-backend
     ```
 
