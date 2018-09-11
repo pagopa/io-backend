@@ -1,15 +1,20 @@
 import { Either, left, right } from "fp-ts/lib/Either";
-import {
-  PaymentActivationsGetResponse,
-  PaymentActivationsPostRequest,
-  PaymentActivationsPostResponse,
-  PaymentRequestsGetResponse
-} from "../clients/pagopa/models";
 import { internalError, notFoundError, ServiceError } from "../types/error";
 import { log } from "../utils/logger";
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
 
 import { IResponseType } from "italia-ts-commons/lib/requests";
+import { PaymentRequestsGetResponse } from "../types/api/PaymentRequestsGetResponse";
+
+import { PaymentActivationsGetResponse } from "../types/api/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "../types/api/PaymentActivationsPostRequest";
+import { PaymentActivationsPostResponse } from "../types/api/PaymentActivationsPostResponse";
+
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 
 const messageErrorOnUnknownError = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
@@ -18,6 +23,11 @@ const logErrorOnStatusNotOK = "Status is not 200: %s";
 const logErrorOnDecodeError = "Response can't be decoded: %O";
 const logErrorOnUnknownError = "Unknown error: %s";
 const logErrorOnNotFound = "Not found";
+
+export type PagoPAProxyResponse<T> =
+  | IResponseErrorInternal
+  | IResponseErrorNotFound
+  | IResponseSuccessJson<T>;
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
@@ -80,14 +90,13 @@ export default class PagoPAProxyService {
     res: IResponseType<number, T>
   ): Either<ServiceError, T> {
     // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
-    console.log(res);
     if (!res) {
       log.error(logErrorOnDecodeError, res);
       return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
 
     if (res.status === 200) {
-      return right<ServiceError, T>(res);
+      return right<ServiceError, T>(res.value);
     } else if (res.status === 404) {
       log.error(logErrorOnNotFound, res.status);
       return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));

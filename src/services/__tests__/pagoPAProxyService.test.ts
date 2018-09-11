@@ -3,6 +3,8 @@ import { internalError, notFoundError } from "../../types/error";
 import PagoPAClientFactory from "../pagoPAClientFactory";
 import PagoPAProxyService from "../pagoPAProxyService";
 
+import { PaymentActivationsPostRequest } from "../../types/api/PaymentActivationsPostRequest";
+
 const aRptId = "123456";
 const acodiceContestoPagamento = "ABC123";
 
@@ -11,9 +13,11 @@ const internalErrorMessage = "Api error.";
 const unknownErrorMessage = "Unknown response.";
 
 const validPaymentInfoResponse = {
-  codiceContestoPagamento: "ABC123",
-  importoSingoloVersamento: 200,
-  status: 200
+  status: 200,
+  value: {
+    codiceContestoPagamento: acodiceContestoPagamento,
+    importoSingoloVersamento: 200
+  }
 };
 const notFoundPaymentInfoResponse = {
   status: 404
@@ -22,18 +26,28 @@ const errorPaymentInfoResponse = {
   status: 500
 };
 const proxyPaymentInfoResponse = {
-  codiceContestoPagamento: "ABC123",
-  importoSingoloVersamento: 200
+  status: 200,
+  value: {
+    codiceContestoPagamento: acodiceContestoPagamento,
+    importoSingoloVersamento: 200
+  }
 };
 
-const validPaymentActivation = {
-  codiceContestoPagamento: "ABC123",
-  importoSingoloVersamento: 200,
-  rptId: "12345678901012123456789012345"
-};
+const validPaymentActivation: PaymentActivationsPostRequest = PaymentActivationsPostRequest.decode(
+  {
+    codiceContestoPagamento: acodiceContestoPagamento,
+    importoSingoloVersamento: 200,
+    rptId: "12345678901012123456789012312"
+  }
+).getOrElseL(errors => {
+  throw Error(`Invalid RptId to decode: ${errors}`);
+});
+
 const validActivatePaymentResponse = {
-  importoSingoloVersamento: 200,
-  status: 200
+  status: 200,
+  value: {
+    importoSingoloVersamento: 200
+  }
 };
 const notFoundActivatePaymentResponse = {
   status: 404
@@ -42,12 +56,15 @@ const errorActivatePaymentResponse = {
   status: 500
 };
 const proxyActivatePaymentResponse = {
-  importoSingoloVersamento: 200
+  importoSingoloVersamento:
+    validActivatePaymentResponse.value.importoSingoloVersamento
 };
 
 const validActivationStatusResponse = {
-  idPagamento: "123455",
-  status: 200
+  status: 200,
+  value: {
+    idPagamento: "123455"
+  }
 };
 const notFoundActivationStatusResponse = {
   status: 404
@@ -56,7 +73,7 @@ const errorActivationStatusResponse = {
   status: 500
 };
 const proxyActivationStatusResponse = {
-  idPagamento: "123455"
+  idPagamento: validActivationStatusResponse.value.idPagamento
 };
 
 const mockActivatePayment = jest.fn();
@@ -95,7 +112,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
-    expect(res).toEqual(right(proxyPaymentInfoResponse));
+    expect(res).toEqual(right(proxyPaymentInfoResponse.value));
   });
 
   it("get payment info fails with error 404 if PagoPA proxy fails with error 404", async () => {
@@ -156,7 +173,9 @@ describe("PagoPAProxyService#activatePayment", () => {
     const res = await service.activatePayment(validPaymentActivation);
 
     expect(mockGetClient).toHaveBeenCalledWith();
-    expect(mockActivatePayment).toHaveBeenCalledWith({ payload: validPaymentActivation});
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      payload: validPaymentActivation
+    });
     expect(res).toEqual(right(proxyActivatePaymentResponse));
   });
 
@@ -170,7 +189,9 @@ describe("PagoPAProxyService#activatePayment", () => {
     const res = await service.activatePayment(validPaymentActivation);
 
     expect(mockGetClient).toHaveBeenCalledWith();
-    expect(mockActivatePayment).toHaveBeenCalledWith({ payload: validPaymentActivation});
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      payload: validPaymentActivation
+    });
     expect(res).toEqual(left(notFoundError(notFoundErrorMessage)));
   });
 
@@ -184,7 +205,9 @@ describe("PagoPAProxyService#activatePayment", () => {
     const res = await service.activatePayment(validPaymentActivation);
 
     expect(mockGetClient).toHaveBeenCalledWith();
-    expect(mockActivatePayment).toHaveBeenCalledWith({ payload: validPaymentActivation});
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      payload: validPaymentActivation
+    });
     expect(res).toEqual(left(internalError(internalErrorMessage)));
   });
 
@@ -198,7 +221,9 @@ describe("PagoPAProxyService#activatePayment", () => {
     const res = await service.activatePayment(validPaymentActivation);
 
     expect(mockGetClient).toHaveBeenCalledWith();
-    expect(mockActivatePayment).toHaveBeenCalledWith({ payload: validPaymentActivation});
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      payload: validPaymentActivation
+    });
     expect(res).toEqual(left(internalError(unknownErrorMessage)));
   });
 });
