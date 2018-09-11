@@ -76,7 +76,7 @@ nCnxP/vK5rgVHU3nQfq+e/B6FVWZ
 -----END PRIVATE KEY-----
 `;
 const samlCallbackUrl = "http://italia-backend/assertionConsumerService";
-const samlIssuer = "http://italiabackend.it";
+const samlIssuer = "https://spid.agid.gov.it/cd";
 const samlAcceptedClockSkewMs = -1;
 const samlAttributeConsumingServiceIndex = 0;
 const spidAutologin = "";
@@ -385,7 +385,7 @@ describe("AuthenticationController#metadata", () => {
 
   it("renders the correct metadata", async () => {
     const res = mockRes();
-    const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://italiabackend.it" ID="http___italiabackend_it">
+    const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://spid.agid.gov.it/cd" ID="https___spid_agid_gov_it_cd">
   <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
     <KeyDescriptor>
       <ds:KeyInfo>
@@ -433,7 +433,7 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
     <OrganizationDisplayName>Digital citizenship proxy</OrganizationDisplayName>
     <OrganizationURL>https://github.com/teamdigitale/italia-backend</OrganizationURL>
   </Organization>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#http___italiabackend_it"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>6qF1S58q11hbXDJp75CnSktmXYlwXGF7nHbXGRnnvpg=</DigestValue></Reference></SignedInfo><SignatureValue>dxOJqaw4apjhxRKuHaLdMcwZWSz0spSbpVtQl5msMbnNHHmSukQBHam66ISr4hTtA1+dgiAfa6OVGYOeYBpkPm0MN5Nm6uds5JTFxg/Py5BHtlqVSfUT5R3T6qQDOmbd1g0oHVa+FIjlUQQ8XanvVpCwLPGfvCcd2VgY5hjIAxif6AbK5ubGd2WEspc+Z934kMAb5GTGaFcE/7FIIycEdsno8TBSaQyTK8RnknO8FOq6zRVCD6V7Q6vxyqXfBPP3XzsPDVyXyFN/xiFtwS36eMCfccNBIc/+hptIMMZts57mNSLpgHSekisyheQfcMGxFUrhZcxkxEQPYh8femL/Ur8=</SignatureValue><KeyInfo><X509Data><X509Certificate>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#https___spid_agid_gov_it_cd"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>/kp1MJ01wT1K0jbuXvAbAWuRVJlLUsW4Lrr1Ywzs+ec=</DigestValue></Reference></SignedInfo><SignatureValue>CIg2vqJRysINX5vSET+YTOY4O29NqD1nmhXPrEQgeUXr6x2h20nFb+59JmhcVwrmlScguj5po6ZGoVf3Hy2jsTPiL5h4g2h+TYY3r01AoqHk/FR0ab8KUOg/o/cG/4IDs328Mf2mXcKRyGuDn0TQTe38Sklzgln0uZcDOk2fAK8fCCTZaAtrfj+kl1k3FC9hyQBYdvl43ZAI0hXLHwbGyiqOfxknFfLmE3MZkDzvYu2IOCSCwyfupiajAl8HlQVJr9DSuGJwk0BgN55E+wgwAUxd9qJxawD5Zh0rRbV+D5W+uQNBb5rNUF7LkWloZTDNewxyo+r+2ihMu+dsUpEY6XM=</SignatureValue><KeyInfo><X509Data><X509Certificate>
 MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
 MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
 dHBzOi8vaXRhbGlhLWJhY2tlbmQwHhcNMTcxMDI2MTAzNTQwWhcNMTgxMDI2MTAz

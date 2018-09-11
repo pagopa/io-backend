@@ -4,7 +4,7 @@
 <md:EntityDescriptor
         xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
         xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-        entityID="http://italiabackend.it"
+        entityID="https://spid.agid.gov.it/cd"
         ID="_681a637-6cd4-434f-92c3-4fed720b2ad8">
 
     <md:SPSSODescriptor

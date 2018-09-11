@@ -90,7 +90,7 @@ container.register({
 const SAML_CALLBACK_URL =
   process.env.SAML_CALLBACK_URL ||
   "http://italia-backend/assertionConsumerService";
-const SAML_ISSUER = process.env.SAML_ISSUER || "http://italiabackend.it";
+const SAML_ISSUER = process.env.SAML_ISSUER || "https://spid.agid.gov.it/cd";
 const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
 const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX: number = parseInt(
   process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
