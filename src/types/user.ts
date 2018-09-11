@@ -6,7 +6,6 @@
 import * as express from "express";
 import { Either, left } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
-import { number, string } from "io-ts";
 import * as t from "io-ts";
 import { JSONFromString } from "io-ts-types";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -21,38 +20,46 @@ import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";
 
 // required attributes
-export const User = t.interface({
-  created_at: number,
-  family_name: string,
-  fiscal_code: FiscalCode,
-  name: string,
-  nameID: string,
-  nameIDFormat: string,
-  sessionIndex: string,
-  session_token: SessionToken,
-  spid_email: EmailAddress,
-  spid_idp: string,
-  spid_level: SpidLevel,
-  spid_mobile_phone: NonEmptyString,
-  wallet_token: WalletToken
-});
+export const User = t.intersection([
+  t.interface({
+    created_at: t.number,
+    family_name: t.string,
+    fiscal_code: FiscalCode,
+    name: t.string,
+    session_token: SessionToken,
+    spid_email: EmailAddress,
+    spid_level: SpidLevel,
+    spid_mobile_phone: NonEmptyString,
+    wallet_token: WalletToken
+  }),
+  t.partial({
+    nameID: t.string,
+    nameIDFormat: t.string,
+    sessionIndex: t.string,
+    spid_idp: t.string
+  })
+]);
 
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
-export const SpidUser = t.interface({
-  authnContextClassRef: SpidLevel,
-  email: EmailAddress,
-  familyName: string,
-  fiscalNumber: FiscalCode,
-  getAssertionXml: t.Function,
-  issuer: Issuer,
-  mobilePhone: NonEmptyString,
-  name: string,
-  nameID: string,
-  nameIDFormat: string,
-  sessionIndex: string
-});
+export const SpidUser = t.intersection([
+  t.interface({
+    authnContextClassRef: SpidLevel,
+    email: EmailAddress,
+    familyName: t.string,
+    fiscalNumber: FiscalCode,
+    getAssertionXml: t.Function,
+    issuer: Issuer,
+    mobilePhone: NonEmptyString,
+    name: t.string
+  }),
+  t.partial({
+    nameID: t.string,
+    nameIDFormat: t.string,
+    sessionIndex: t.string
+  })
+]);
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
 
@@ -69,12 +76,8 @@ export function toAppUser(
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,
-    nameID: from.nameID, // The used nameID is needed for logout.
-    nameIDFormat: from.nameIDFormat, // The used nameIDFormat is needed for logout.
-    sessionIndex: from.sessionIndex, // The sessionIndex is needed for logout.
     session_token: sessionToken,
     spid_email: from.email,
-    spid_idp: from.issuer._, // The used idp is needed for logout.
     spid_level: from.authnContextClassRef,
     spid_mobile_phone: from.mobilePhone,
     wallet_token: walletToken

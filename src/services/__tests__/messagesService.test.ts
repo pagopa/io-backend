@@ -32,11 +32,13 @@ const validApiMessagesResponse = {
   parsedBody: {
     items: [
       {
+        createdAt: new Date(aTimestamp),
         fiscalCode: "XUZTCT88A51Y311X",
         id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
         senderServiceId: "5a563817fcc896087002ea46c49a"
       },
       {
+        createdAt: new Date(aTimestamp),
         fiscalCode: "XUZTCT88A51Y311X",
         id: "01C3XE80E6X8PHY0NM8S8SDS1E",
         senderServiceId: "5a563817fcc896087002ea46c49a"
@@ -103,10 +105,14 @@ const invalidApiServicesResponse = {
 const proxyMessagesResponse = {
   items: [
     {
+      created_at: new Date(aTimestamp),
+      fiscal_code: "XUZTCT88A51Y311X",
       id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
       sender_service_id: "5a563817fcc896087002ea46c49a"
     },
     {
+      created_at: new Date(aTimestamp),
+      fiscal_code: "XUZTCT88A51Y311X",
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
       sender_service_id: "5a563817fcc896087002ea46c49a"
     }
@@ -158,12 +164,15 @@ const invalidApiMessageResponse = {
   }
 };
 const proxyMessageResponse = {
+  content: {
+    markdown:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
+    subject: aValidSubject
+  },
   created_at: new Date(aTimestamp),
+  fiscal_code: "XUZTCT88A51Y311X",
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-  markdown:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
-  sender_service_id: "5a563817fcc896087002ea46c49a",
-  subject: aValidSubject
+  sender_service_id: "5a563817fcc896087002ea46c49a"
 };
 const validApiServiceResponse = {
   parsedBody: {
@@ -211,12 +220,8 @@ const mockedUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aValidFiscalCode,
   name: "Giuseppe Maria",
-  nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
   spid_email: aValidEmail,
-  spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken

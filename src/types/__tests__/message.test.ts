@@ -17,9 +17,11 @@ import {
 } from "../message";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
+const aTimestamp = 1518010929530;
 
 // mock for a valid CreatedMessageWithoutContent
 const mockedCreatedMessageWithoutContent: CreatedMessageWithoutContent = {
+  createdAt: new Date(aTimestamp),
   fiscalCode: aFiscalCode,
   id: "string" as string,
   senderServiceId: "string" as string,
@@ -89,13 +91,13 @@ describe("message type", () => {
 
     // markdown: from.message.content !== undefined ? from.message.content.markdown : "",
     if (mockedMessageResponseWithContent.message.content === undefined) {
-      expect(messageWithContent.markdown).toBe("");
-      expect(messageWithContent.markdown).toBeDefined();
+      expect(messageWithContent.content.markdown).toBe("");
+      expect(messageWithContent.content.markdown).toBeDefined();
     } else {
-      expect(messageWithContent.markdown).toBe(
+      expect(messageWithContent.content.markdown).toBe(
         mockedMessageResponseWithContent.message.content.markdown
       );
-      expect(messageWithContent.markdown).toBeDefined();
+      expect(messageWithContent.content.markdown).toBeDefined();
     }
 
     // markdown: sender_service_id: from.message.senderServiceId,
@@ -105,13 +107,13 @@ describe("message type", () => {
 
     // subject: from.message.content !== undefined ? from.message.content.subject : ""
     if (mockedMessageResponseWithContent.message.content === undefined) {
-      expect(messageWithContent.subject).toBe("");
-      expect(messageWithContent.subject).toBeDefined();
+      expect(messageWithContent.content.subject).toBe("");
+      expect(messageWithContent.content.subject).toBeDefined();
     } else {
-      expect(messageWithContent.subject).toBe(
+      expect(messageWithContent.content.subject).toBe(
         mockedMessageResponseWithContent.message.content.subject
       );
-      expect(messageWithContent.subject).toBeDefined();
+      expect(messageWithContent.content.subject).toBeDefined();
     }
   });
 });

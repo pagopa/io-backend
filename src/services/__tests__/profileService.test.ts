@@ -36,12 +36,12 @@ const validApiProfileResponse = {
     status: 200
   }
 };
-const proxyProfileWithEmailResponse = {
+const proxyInitializedProfileResponse = {
+  blocked_inbox_or_channels: undefined,
   email: aValidAPIEmail,
   family_name: "Lusso",
   fiscal_code: "XUZTCT88A51Y311X",
   has_profile: true,
-  is_email_set: true,
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   name: "Luca",
@@ -50,17 +50,13 @@ const proxyProfileWithEmailResponse = {
   spid_mobile_phone: "3222222222222",
   version: 42
 };
-const proxyProfileWithoutEmailResponse = {
+const proxyAuthenticatedProfileResponse = {
   family_name: "Lusso",
   fiscal_code: aValidFiscalCode,
   has_profile: false,
-  is_email_set: false,
-  is_inbox_enabled: false,
-  is_webhook_enabled: false,
   name: "Luca",
   spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222",
-  version: 0
+  spid_mobile_phone: "3222222222222"
 };
 const proxyUpsertRequest = {
   email: aValidAPIEmail,
@@ -99,12 +95,8 @@ const mockedUser: User = {
   family_name: "Lusso",
   fiscal_code: aValidFiscalCode,
   name: "Luca",
-  nameID: "lussoluca",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
   spid_email: aValidSPIDEmail,
-  spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
@@ -144,7 +136,7 @@ describe("ProfileService#getProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
-    expect(res).toEqual(right(proxyProfileWithEmailResponse));
+    expect(res).toEqual(right(proxyInitializedProfileResponse));
   });
 
   it("returns a default user profile if the response from the API is not found", async () => {
@@ -158,7 +150,7 @@ describe("ProfileService#getProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockGetProfile).toHaveBeenCalledWith();
-    expect(res).toEqual(right(proxyProfileWithoutEmailResponse));
+    expect(res).toEqual(right(proxyAuthenticatedProfileResponse));
   });
 
   it("returns an error if the API returns an error", async () => {
@@ -194,7 +186,7 @@ describe("ProfileService#upsertProfile", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockUpsertProfile).toHaveBeenCalledWith(ApiProfileUpsertRequest);
-    expect(res).toEqual(right(proxyProfileWithEmailResponse));
+    expect(res).toEqual(right(proxyInitializedProfileResponse));
   });
 
   it("fails to create a new user profile to the API", async () => {
