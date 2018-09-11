@@ -228,7 +228,7 @@ container.register({
 function createSimpleRedisClient(): redis.RedisClient {
   const redisUrl = process.env.REDIS_URL || "redis://redis";
   log.info("Creating SIMPLE redis client", { url: redisUrl });
-  return redis.createClient(redisUrl);
+  return redis.createClient();
 }
 
 function createClusterRedisClient():
