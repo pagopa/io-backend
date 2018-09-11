@@ -13,7 +13,8 @@ const spidStrategy = (
   samlIssuer: string,
   samlAcceptedClockSkewMs: number,
   samlAttributeConsumingServiceIndex: number,
-  spidAutologin: string
+  spidAutologin: string,
+  spidTestEnvUrl: string
 ) => {
   const options = {
     idp: {
@@ -79,8 +80,8 @@ const spidStrategy = (
       xx_testenv2: {
         cert:
           "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",
-        entryPoint: "https://spid-testenv2:8088/sso",
-        logoutUrl: "https://spid-testenv2:8088/slo"
+        entryPoint: spidTestEnvUrl + "/sso",
+        logoutUrl: spidTestEnvUrl + "/slo"
       }
     },
     sp: {

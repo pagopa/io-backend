@@ -105,6 +105,9 @@ const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
 );
 const DEFAULT_SPID_AUTOLOGIN = "";
 const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
+const DEFAULT_SPID_TESTENV_URL = "https://localhost:8088";
+const SPID_TESTENV_URL =
+  process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
 container.register({
   samlAcceptedClockSkewMs: awilix.asValue(SAML_ACCEPTED_CLOCK_SKEW_MS),
   samlAttributeConsumingServiceIndex: awilix.asValue(
@@ -112,7 +115,8 @@ container.register({
   ),
   samlCallbackUrl: awilix.asValue(SAML_CALLBACK_URL),
   samlIssuer: awilix.asValue(SAML_ISSUER),
-  spidAutologin: awilix.asValue(SPID_AUTOLOGIN)
+  spidAutologin: awilix.asValue(SPID_AUTOLOGIN),
+  spidTestEnvUrl: awilix.asValue(SPID_TESTENV_URL)
 });
 
 // Redirection urls
