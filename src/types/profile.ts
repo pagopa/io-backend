@@ -5,10 +5,11 @@
 
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
+import { AuthenticatedProfile } from "./api/AuthenticatedProfile";
+
 import { ExtendedProfile } from "./api/ExtendedProfile";
-import { ProfileWithEmail } from "./api/ProfileWithEmail";
-import { ProfileWithoutEmail } from "./api/ProfileWithoutEmail";
-import { Version } from "./api/Version";
+import { InitializedProfile } from "./api/InitializedProfile";
+
 import { User } from "./user";
 
 /**
@@ -17,17 +18,16 @@ import { User } from "./user";
  * @param {ProfileLimitedOrExtended} from The profile retrieved from the Digital Citizenship API.
  * @param {User} user The user data extracted from SPID.
  */
-export function toAppProfileWithEmail(
+export function toInitializedProfile(
   from: ExtendedProfile,
   user: User
-): ProfileWithEmail {
+): InitializedProfile {
   return {
     blocked_inbox_or_channels: from.blocked_inbox_or_channels,
     email: from.email,
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
     has_profile: true,
-    is_email_set: !!from.email,
     is_inbox_enabled: from.is_inbox_enabled,
     is_webhook_enabled: from.is_webhook_enabled,
     name: user.name,
@@ -43,18 +43,14 @@ export function toAppProfileWithEmail(
  *
  * @param {User} user The user data extracted from SPID.
  */
-export function toAppProfileWithoutEmail(user: User): ProfileWithoutEmail {
+export function toAuthenticatedProfile(user: User): AuthenticatedProfile {
   return {
     family_name: user.family_name,
     fiscal_code: user.fiscal_code,
     has_profile: false,
-    is_email_set: false,
-    is_inbox_enabled: false,
-    is_webhook_enabled: false,
     name: user.name,
     spid_email: user.spid_email,
-    spid_mobile_phone: user.spid_mobile_phone,
-    version: 0 as Version
+    spid_mobile_phone: user.spid_mobile_phone
   };
 }
 

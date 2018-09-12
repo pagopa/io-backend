@@ -6,7 +6,7 @@ import PagoPAProxyService from "../pagoPAProxyService";
 import { PaymentActivationsPostRequest } from "../../types/api/PaymentActivationsPostRequest";
 
 const aRptId = "123456";
-const acodiceContestoPagamento = "ABC123";
+const acodiceContestoPagamento = "01234567890123456789012345678901";
 
 const notFoundErrorMessage = "Not found.";
 const internalErrorMessage = "Api error.";
@@ -40,7 +40,7 @@ const validPaymentActivation: PaymentActivationsPostRequest = PaymentActivations
     rptId: "12345678901012123456789012312"
   }
 ).getOrElseL(errors => {
-  throw Error(`Invalid RptId to decode: ${errors}`);
+  throw Error(`Invalid RptId to decode: ${JSON.stringify(errors)}`);
 });
 
 const validActivatePaymentResponse = {

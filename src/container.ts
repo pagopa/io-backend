@@ -90,7 +90,7 @@ container.register({
 const SAML_CALLBACK_URL =
   process.env.SAML_CALLBACK_URL ||
   "http://italia-backend/assertionConsumerService";
-const SAML_ISSUER = process.env.SAML_ISSUER || "http://italia-backend";
+const SAML_ISSUER = process.env.SAML_ISSUER || "https://spid.agid.gov.it/cd";
 const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
 const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX: number = parseInt(
   process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
@@ -103,13 +103,20 @@ const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
     DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
   10
 );
+const DEFAULT_SPID_AUTOLOGIN = "";
+const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
+const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
+const SPID_TESTENV_URL =
+  process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
 container.register({
   samlAcceptedClockSkewMs: awilix.asValue(SAML_ACCEPTED_CLOCK_SKEW_MS),
   samlAttributeConsumingServiceIndex: awilix.asValue(
     SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX
   ),
   samlCallbackUrl: awilix.asValue(SAML_CALLBACK_URL),
-  samlIssuer: awilix.asValue(SAML_ISSUER)
+  samlIssuer: awilix.asValue(SAML_ISSUER),
+  spidAutologin: awilix.asValue(SPID_AUTOLOGIN),
+  spidTestEnvUrl: awilix.asValue(SPID_TESTENV_URL)
 });
 
 // Redirection urls

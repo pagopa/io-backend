@@ -9,14 +9,12 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
+import { InitializedProfile } from "../types/api/InitializedProfile";
+
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
-import { ProfileWithEmail } from "../types/api/ProfileWithEmail";
-import { ProfileWithoutEmail } from "../types/api/ProfileWithoutEmail";
 import { internalError, ServiceError } from "../types/error";
-import {
-  toAppProfileWithEmail,
-  toAppProfileWithoutEmail
-} from "../types/profile";
+import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
@@ -40,7 +38,7 @@ export default class ProfileService {
    */
   public async getProfile(
     user: User
-  ): Promise<Either<ServiceError, ProfileWithoutEmail | ProfileWithEmail>> {
+  ): Promise<Either<ServiceError, AuthenticatedProfile | InitializedProfile>> {
     try {
       const client = this.apiClient.getClient();
 
@@ -56,14 +54,14 @@ export default class ProfileService {
 
       // The response is correct.
       if (res.status === 200) {
-        return right(toAppProfileWithEmail(res.value, user));
+        return right(toInitializedProfile(res.value, user));
       }
 
       // If the profile doesn't exists on the API we still
       // return 200 to the App with the information we have
       // retrieved from SPID.
       if (res.status === 404) {
-        return right(toAppProfileWithoutEmail(user));
+        return right(toAuthenticatedProfile(user));
       }
 
       // The API is returning an error.
@@ -81,7 +79,7 @@ export default class ProfileService {
   public async upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
-  ): Promise<Either<ServiceError, ProfileWithEmail>> {
+  ): Promise<Either<ServiceError, InitializedProfile | AuthenticatedProfile>> {
     try {
       const client = this.apiClient.getClient();
 
@@ -97,9 +95,9 @@ export default class ProfileService {
       }
 
       if (res.status === 200) {
-        return right(toAppProfileWithEmail(res.value, user));
+        return right(toInitializedProfile(res.value, user));
       } else if (res.status === 404) {
-        return right(toAppProfileWithoutEmail(user));
+        return right(toAuthenticatedProfile(user));
       } else {
         log.error(logErrorOnStatusNotOK, res.status);
         return left(internalError(profileErrorOnApiError));

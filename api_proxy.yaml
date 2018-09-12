@@ -154,7 +154,7 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/CreatedMessageWithContent"
+            $ref: "#/definitions/MessageWithContent"
           examples:
             application/json:
               message: {
@@ -193,8 +193,8 @@ paths:
           description: Found.
           schema:
             allOf:
-              - $ref: "#/definitions/ProfileWithEmail"
-              - $ref: "#/definitions/ProfileWithoutEmail"
+              - $ref: "#/definitions/InitializedProfile"
+              - $ref: "#/definitions/AuthenticatedProfile"
           examples:
             application/json:
               email: "email@example.com"
@@ -234,9 +234,7 @@ paths:
         '200':
           description: Profile updated.
           schema:
-            allOf:
-              - $ref: "#/definitions/ProfileWithEmail"
-              - $ref: "#/definitions/ProfileWithoutEmail"
+            $ref: "#/definitions/InitializedProfile"
           examples:
             application/json:
               email: "email@example.com"
@@ -397,87 +395,85 @@ paths:
           description: Unavailable service
 definitions:
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/BlockedInboxOrChannels"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/BlockedInboxOrChannels"
   CodiceContestoPagamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
-  CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/CreatedMessageWithContent"
-  CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/CreatedMessageWithoutContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/DepartmentName"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/EmailAddress"
   EnteBeneficiario:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/EnteBeneficiario"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/EnteBeneficiario"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ExtendedProfile"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/FiscalCode"
   Iban:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/Iban"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/Iban"
   ImportoEuroCents:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/ImportoEuroCents"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/ImportoEuroCents"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/LimitedProfile"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/MessageResponseNotificationStatus"
-  MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/MessageResponseWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageResponseNotificationStatus"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageSubject"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/OrganizationName"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaginationResponse"
   PaymentActivationsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
   PaymentActivationsPostRequest:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
   PaymentActivationsPostResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
   PaymentRequestsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ProblemJson"
   RptIdFromString:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/RptIdFromString"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/RptIdFromString"
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/ServiceId"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceId"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceName"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServicePublic"
   ServiceTuple:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/ServiceTuple"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceTuple"
   SpezzoneStrutturatoCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
   SpezzoniCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.2.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/Timestamp"
-  TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/PaymentNoticeNumber"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentNoticeNumber"
   PaymentAmount:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/PaymentAmount"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentAmount"
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.50.0/api/definitions.yaml#/PaymentData"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentData"
+  TimeToLiveSeconds:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/TimeToLiveSeconds"
+  MessageWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithContent"
+  MessageWithoutContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithoutContent"
   ServiceList:
     type: object
     title: List of services.
@@ -500,7 +496,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: "#/definitions/CreatedMessageWithoutContent"
+          $ref: "#/definitions/MessageWithoutContent"
       next:
         type: string
       page_size:
@@ -520,10 +516,10 @@ definitions:
     required:
       - platform
       - pushChannel
-  ProfileWithEmail:
+  InitializedProfile:
     type: object
-    title: Profile with wmail
-    description: Describes the user's profile.
+    title: Initialized profile
+    description: Describes the user's profile after it has been stored in the Profile API.
     properties:
       email:
         $ref: '#/definitions/EmailAddress'
@@ -535,16 +531,12 @@ definitions:
         $ref: "#/definitions/IsInboxEnabled"
       is_webhook_enabled:
         $ref: "#/definitions/IsWebhookEnabled"
-      version:
-        type: integer
       family_name:
         type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
-      is_email_set:
-        $ref: "#/definitions/IsEmailSet"
       name:
         type: string
       spid_email:
@@ -552,18 +544,22 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
+      version:
+        $ref: '#/definitions/Version'
     required:
       - family_name
       - fiscal_code
       - has_profile
-      - is_email_set
+      - is_inbox_enabled
+      - is_webhook_enabled
       - name
       - spid_email
       - spid_mobile_phone
-  ProfileWithoutEmail:
+      - version
+  AuthenticatedProfile:
     type: object
-    title: Profile without email
-    description: Describes the user's profile.
+    title: Temporary SPID profile
+    description: Describes the user's profile while it's authenticated but not yet stored in the Profile API.
     properties:
       family_name:
         type: string
@@ -571,12 +567,6 @@ definitions:
         $ref: '#/definitions/FiscalCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
-      is_email_set:
-        $ref: "#/definitions/IsEmailSet"
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
-      is_webhook_enabled:
-        $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
       spid_email:
@@ -584,23 +574,13 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
-      preferred_languages:
-        type: array
-        items:
-          $ref: '#/definitions/PreferredLanguage'
-      version:
-        type: integer
     required:
       - family_name
       - fiscal_code
       - has_profile
-      - is_email_set
-      - is_inbox_enabled
-      - is_webhook_enabled
       - name
       - spid_email
       - spid_mobile_phone
-      - version
   PublicSession:
     type: object
     title: User session data

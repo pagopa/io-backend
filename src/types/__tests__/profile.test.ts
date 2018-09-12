@@ -17,8 +17,8 @@ import { SpidLevelEnum } from "../api/SpidLevel";
 import { Version } from "../api/Version";
 import {
   extractUpsertProfileFromRequest,
-  toAppProfileWithEmail,
-  toAppProfileWithoutEmail
+  toAuthenticatedProfile,
+  toInitializedProfile
 } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
@@ -38,12 +38,8 @@ const mockedUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   name: "Giuseppe Maria",
-  nameID: "garibaldi",
-  nameIDFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-  sessionIndex: "sessionIndex",
   session_token: "HexToKen" as SessionToken,
   spid_email: anEmailAddress,
-  spid_idp: "spid_idp_name",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
@@ -62,7 +58,7 @@ describe("profile type", () => {
   /*test case: Converts an existing API profile to a Proxy profile using user profile with email from Digital Citzen API and SPID*/
   it("should get an app Proxy profile user profile with email from Digital Citzen API and SPID", async () => {
     // return app Proxy Profile.
-    const userData = toAppProfileWithEmail(
+    const userData = toInitializedProfile(
       mockedExtendedProfile, // from
       mockedUser // user
     );
@@ -71,7 +67,6 @@ describe("profile type", () => {
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
     expect(userData.has_profile).toBeTruthy();
-    expect(userData.is_email_set).toBeTruthy();
     expect(userData.is_inbox_enabled).toBe(
       mockedExtendedProfile.is_inbox_enabled
     );
@@ -89,17 +84,15 @@ describe("profile type", () => {
   /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
   it("should get an app Proxy profile without email from user data extracted from SPID", async () => {
     // validate SpidUser. Return right.
-    const userData = toAppProfileWithoutEmail(
+    const userData = toAuthenticatedProfile(
       mockedUser // user
     );
 
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
     expect(userData.has_profile).toBeFalsy();
-    expect(userData.is_email_set).toBeFalsy();
 
     expect(userData.spid_email).toBe(mockedUser.spid_email);
-    expect(userData.version).toBe(0);
   });
 
   /*test case: Extracts a user profile from the body of a request.*/

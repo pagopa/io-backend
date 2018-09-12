@@ -76,9 +76,11 @@ nCnxP/vK5rgVHU3nQfq+e/B6FVWZ
 -----END PRIVATE KEY-----
 `;
 const samlCallbackUrl = "http://italia-backend/assertionConsumerService";
-const samlIssuer = "http://italia-backend";
+const samlIssuer = "https://spid.agid.gov.it/cd";
 const samlAcceptedClockSkewMs = -1;
 const samlAttributeConsumingServiceIndex = 0;
+const spidAutologin = "";
+const spidTestEnvUrl = "https://localhost:8088";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -88,7 +90,6 @@ const theCurrentTimestampMillis = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
-const aValidIDFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // authentication constant
@@ -103,12 +104,8 @@ const mockedUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex",
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
-  spid_idp: "xxx",
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
@@ -125,10 +122,7 @@ const validUserPayload = {
     _: "xxx"
   },
   mobilePhone: "3222222222222",
-  name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex"
+  name: aValidname
 };
 // invalidUser lacks the required email field.
 const invalidUserPayload = {
@@ -140,10 +134,7 @@ const invalidUserPayload = {
     _: "xxx"
   },
   mobilePhone: "3222222222222",
-  name: aValidname,
-  nameID: "garibaldi",
-  nameIDFormat: aValidIDFormat,
-  sessionIndex: "123sessionIndex"
+  name: aValidname
 };
 
 const anErrorResponse = {
@@ -191,7 +182,9 @@ const spidStrategyInstance = spidStrategy(
   samlCallbackUrl,
   samlIssuer,
   samlAcceptedClockSkewMs,
-  samlAttributeConsumingServiceIndex
+  samlAttributeConsumingServiceIndex,
+  spidAutologin,
+  spidTestEnvUrl
 );
 spidStrategyInstance.logout = jest.fn();
 
@@ -392,7 +385,7 @@ describe("AuthenticationController#metadata", () => {
 
   it("renders the correct metadata", async () => {
     const res = mockRes();
-    const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://italia-backend" ID="http___italia_backend">
+    const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://spid.agid.gov.it/cd" ID="https___spid_agid_gov_it_cd">
   <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
     <KeyDescriptor>
       <ds:KeyInfo>
@@ -440,7 +433,7 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
     <OrganizationDisplayName>Digital citizenship proxy</OrganizationDisplayName>
     <OrganizationURL>https://github.com/teamdigitale/italia-backend</OrganizationURL>
   </Organization>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#http___italia_backend"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Bf2Cp9GHtyquphvca26konsKBCC5ZWZE/Jg/ouPscmg=</DigestValue></Reference></SignedInfo><SignatureValue>Xy6T5fn1q2IS0GCXkfOccJv4rF+QrUshbV4hcn/XCfeGSX+C9Kunxx2+BuVMOpuTjtYGUxgCEdMAGOGbaOtCM8pE0XlrCDrAibvSYMvREYSWIWg6ljpUpnPTkM8YNlkot7Gl5Vs7sR3+5vA00SvudJqElttDo3/jrMLGSp4QmX5pcoycmvxummZ4rVktxhQuVdUyODD3Hl+DYJMzkUIBrxz+wR/ysPpi+aBAfNFY+WwTFB/JmVmDHmyoCo02QTaLZqSDRE9JfYU3bmTApqDOwRUAX3MKGx13i/wIw2iqPAakqRM7lHfJBzFS3cTXziCqHB72++pGc/ys9HFoddw+3Is=</SignatureValue><KeyInfo><X509Data><X509Certificate>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#https___spid_agid_gov_it_cd"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>/kp1MJ01wT1K0jbuXvAbAWuRVJlLUsW4Lrr1Ywzs+ec=</DigestValue></Reference></SignedInfo><SignatureValue>CIg2vqJRysINX5vSET+YTOY4O29NqD1nmhXPrEQgeUXr6x2h20nFb+59JmhcVwrmlScguj5po6ZGoVf3Hy2jsTPiL5h4g2h+TYY3r01AoqHk/FR0ab8KUOg/o/cG/4IDs328Mf2mXcKRyGuDn0TQTe38Sklzgln0uZcDOk2fAK8fCCTZaAtrfj+kl1k3FC9hyQBYdvl43ZAI0hXLHwbGyiqOfxknFfLmE3MZkDzvYu2IOCSCwyfupiajAl8HlQVJr9DSuGJwk0BgN55E+wgwAUxd9qJxawD5Zh0rRbV+D5W+uQNBb5rNUF7LkWloZTDNewxyo+r+2ihMu+dsUpEY6XM=</SignatureValue><KeyInfo><X509Data><X509Certificate>
 MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
 MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
 dHBzOi8vaXRhbGlhLWJhY2tlbmQwHhcNMTcxMDI2MTAzNTQwWhcNMTgxMDI2MTAz

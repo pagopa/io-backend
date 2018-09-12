@@ -1,0 +1,15 @@
+{
+    "lussoluca": {
+        "pwd": "111111",
+        "attrs": {
+            "name": "Luca",
+            "mobilePhone": "1234567890",
+            "email": "lussoluca@gmail.com",
+            "fiscalNumber": "LSSLCU79B24L219P",
+            "gender": "male",
+            "familyName": "Lusso",
+            "spidCode": "123"
+        },
+        "sp": "https://spid.agid.gov.it/cd"
+    }
+}
