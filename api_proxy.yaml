@@ -154,7 +154,7 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/MessageWithContent"
+            $ref: "#/definitions/CreatedMessageWithContent"
           examples:
             application/json:
               message: {
@@ -470,9 +470,9 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentData"
   TimeToLiveSeconds:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/TimeToLiveSeconds"
-  MessageWithContent:
+  CreatedMessageWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithContent"
-  MessageWithoutContent:
+  CreatedMessageWithoutContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithoutContent"
   MessageResponseWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageResponseWithContent"
@@ -498,7 +498,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: "#/definitions/MessageWithoutContent"
+          $ref: "#/definitions/CreatedMessageWithoutContent"
       next:
         type: string
       page_size:
