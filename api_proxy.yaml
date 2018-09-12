@@ -474,6 +474,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithContent"
   MessageWithoutContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithoutContent"
+  MessageResponseWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageResponseWithContent"
   ServiceList:
     type: object
     title: List of services.
