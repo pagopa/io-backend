@@ -18,7 +18,7 @@ services:
 
   spid-testenv2:
     container_name: spid-testenv2
-    image: italia/spid-testenv2:latest
+    image: italia/spid-testenv2:fix-c14n-issue-169
     ports:
       - "8088:8088"
     volumes:

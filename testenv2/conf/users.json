@@ -1,15 +1,30 @@
 {
-    "lussoluca": {
-        "pwd": "111111",
-        "attrs": {
-            "name": "Luca",
-            "mobilePhone": "1234567890",
-            "email": "lussoluca@gmail.com",
-            "fiscalNumber": "LSSLCU79B24L219P",
-            "gender": "male",
-            "familyName": "Lusso",
-            "spidCode": "123"
-        },
-        "sp": "https://spid.agid.gov.it/cd"
-    }
+  "carla.rossi": {
+    "sp": "https://spid.agid.gov.it/cd",
+    "attrs": {
+      "fiscalNumber": "ISPXNB32R82Y766D",
+      "name": "Carla",
+      "gender": "F",
+      "familyName": "Rossi",
+      "dateOfBirth": "2000-12-12",
+      "email": "cittadinanzadigitale@teamdigitale.governo.it",
+      "spidCode": "7b09078d-989b-6e6d-87b9-aab53efd714f",
+      "mobilePhone": "333333333"
+    },
+    "pwd": "test"
+  },
+  "mario.rossi": {
+    "sp": null,
+    "attrs": {
+      "fiscalNumber": "GDNNWA12H81Y874F",
+      "name": "Mario",
+      "gender": "M",
+      "familyName": "Bianchi",
+      "dateOfBirth": "1991-12-12",
+      "email": "info@agid.gov.it",
+      "spidCode": "d4b9f692-a0f2-1100-7bb6-8650c02d75d5",
+      "mobilePhone": "333333334"
+    },
+    "pwd": "test"
+  }
 }
