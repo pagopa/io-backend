@@ -85,7 +85,7 @@
     "@types/superagent": "^3.8.4",
     "@types/supertest": "^2.0.6",
     "@types/swagger-parser": "^4.0.2",
-    "@types/validator": "^9.4.1",
+    "@types/validator": "^9.4.2",
     "@types/xml2js": "^0.4.3",
     "@types/xmldom": "^0.1.29",
     "autorest": "^2.0.4280",
