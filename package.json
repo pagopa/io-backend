@@ -49,7 +49,7 @@
     "io-ts-types": "^0.3.11",
     "italia-ts-commons": "^2.12.3",
     "json-set-map": "^1.0.2",
-    "morgan": "^1.8.1",
+    "morgan": "^1.9.1",
     "ms-rest-js": "^0.3.1",
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
