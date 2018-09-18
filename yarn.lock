@@ -113,9 +113,9 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/helmet@^0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@types/helmet/-/helmet-0.0.39.tgz#6ec0863556883db014f81036c3a200eda8d63bf5"
+"@types/helmet@^0.0.41":
+  version "0.0.41"
+  resolved "https://registry.yarnpkg.com/@types/helmet/-/helmet-0.0.41.tgz#c113fc815bc18cf69999adff5323daf9bd46bf0d"
   dependencies:
     "@types/express" "*"
 
