@@ -17,6 +17,7 @@ import {
 } from "italia-ts-commons/lib/requests";
 import nodeFetch from "node-fetch";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
+import { FiscalCode } from "../types/api/FiscalCode";
 import { LimitedProfile } from "../types/api/LimitedProfile";
 import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
 import { Messages } from "../types/api/Messages";
@@ -57,7 +58,7 @@ export function SubscriptionKeyHeaderProducer<P>(
 
 export type GetProfileT = IGetApiRequestType<
   {
-    readonly fiscalCode: string;
+    readonly fiscalCode: FiscalCode;
   },
   OcpApimSubscriptionKey,
   never,
@@ -66,7 +67,7 @@ export type GetProfileT = IGetApiRequestType<
 
 export type CreateOrUpdateProfileT = IPostApiRequestType<
   {
-    readonly fiscalCode: string;
+    readonly fiscalCode: FiscalCode;
     readonly newProfile: ExtendedProfile;
   },
   OcpApimSubscriptionKey | "Content-Type",
@@ -76,7 +77,7 @@ export type CreateOrUpdateProfileT = IPostApiRequestType<
 
 export type GetServicesByRecipientT = IGetApiRequestType<
   {
-    readonly fiscalCode: string;
+    readonly fiscalCode: FiscalCode;
   },
   OcpApimSubscriptionKey,
   never,
@@ -85,7 +86,7 @@ export type GetServicesByRecipientT = IGetApiRequestType<
 
 export type GetMessagesT = IGetApiRequestType<
   {
-    readonly fiscalCode: string;
+    readonly fiscalCode: FiscalCode;
   },
   OcpApimSubscriptionKey,
   never,
@@ -94,7 +95,7 @@ export type GetMessagesT = IGetApiRequestType<
 
 export type GetMessageT = IGetApiRequestType<
   {
-    readonly fiscalCode: string;
+    readonly fiscalCode: FiscalCode;
     readonly id: string;
   },
   OcpApimSubscriptionKey,
