@@ -13,7 +13,8 @@ import {
   IPostApiRequestType,
   IResponseType,
   RequestHeaderProducer,
-  ResponseDecoder
+  ResponseDecoder,
+  TypeofApiCall
 } from "italia-ts-commons/lib/requests";
 import nodeFetch from "node-fetch";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
@@ -125,32 +126,13 @@ export function APIClient(
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
-  readonly createOrUpdateProfile: (
-    params: {
-      readonly fiscalCode: string;
-      readonly newProfile: ExtendedProfile;
-    }
-  ) => Promise<BasicResponseTypeWith401<ExtendedProfile> | undefined>;
-  readonly getMessage: (
-    params: { readonly fiscalCode: string; readonly id: string }
-  ) => Promise<
-    BasicResponseTypeWith401<MessageResponseWithContent> | undefined
-  >;
-  readonly getMessages: (
-    params: { readonly fiscalCode: string }
-  ) => Promise<BasicResponseTypeWith401<Messages> | undefined>;
-  readonly getProfile: (
-    params: { readonly fiscalCode: string }
-  ) => Promise<BasicResponseTypeWith401<ProfileLimitedOrExtended> | undefined>;
-  readonly getService: (
-    params: { readonly id: string }
-  ) => Promise<BasicResponseTypeWith401<ServicePublic> | undefined>;
-  readonly getServices: (
-    params: {}
-  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
-  readonly getServicesByRecipient: (
-    params: { readonly fiscalCode: string }
-  ) => Promise<BasicResponseTypeWith401<Services> | undefined>;
+  readonly createOrUpdateProfile: TypeofApiCall<CreateOrUpdateProfileT>;
+  readonly getMessage: TypeofApiCall<GetMessageT>;
+  readonly getMessages: TypeofApiCall<GetMessagesT>;
+  readonly getProfile: TypeofApiCall<GetProfileT>;
+  readonly getService: TypeofApiCall<GetServiceT>;
+  readonly getServices: TypeofApiCall<GetServicesT>;
+  readonly getServicesByRecipient: TypeofApiCall<GetServicesByRecipientT>;
 } {
   const options = {
     baseUrl,
