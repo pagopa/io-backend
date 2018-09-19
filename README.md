@@ -84,7 +84,7 @@ The code that manage this flow are in the `src/strategies/bearerSessionTokenStra
 
 * [Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose)
 
-To fully simulate the SPID authentication process we use the images provided by the 
+To fully simulate the SPID authentication process we use the images provided by the
 [spid-testenv2](https://github.com/italia/spid-testenv2) project.
 
 A Linux/macOS environment is required at the moment.
@@ -96,12 +96,10 @@ A Linux/macOS environment is required at the moment.
 3. run `scripts/build-tools.sh` to build the `tools` Docker image
 4. run `scripts/yarn.sh` to install backend dependencies
 5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
-6. run `scripts/generate-api-client.sh` to generate the Autorest API Client
-7. run `scripts/generate-pagopa-client.sh` to generate the Autorest PagoPA Client
-8. run `scripts/build.sh` to compile the Typescript files
-9. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
-10. run `docker-compose up -d` to start the containers
-11. edit your `/etc/hosts` file by adding:
+6. run `scripts/build.sh` to compile the Typescript files
+7. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
+8. run `docker-compose up -d` to start the containers
+9. edit your `/etc/hosts` file by adding:
 
     ```
     localhost    spid-testenv2
@@ -148,7 +146,7 @@ Those are all Environment variables needed by the application:
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | API_BASE_PATH                          | The root path for the api endpoints                                               | string |
-| PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string | 
+| PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 
 ### Logs
@@ -179,13 +177,6 @@ A Linux/macOS environment is required at the moment.
 * run Jest tests directly or with `scripts/test.sh`
 
 In general follow the [Node Best Practices](https://devcenter.heroku.com/articles/node-best-practices).
-
-### Generate the API client
-
-The API client is generated with the [AutoRest](https://github.com/Azure/autorest) tool, in case of API change you need
-to regenerate the client code:
-
-* run the command `yarn generate:api-client`
 
 ### Generate SAML (SPID) certs (development)
 

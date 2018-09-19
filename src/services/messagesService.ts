@@ -2,36 +2,29 @@
  * This service retrieves messages from the API system using an API client.
  */
 
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { Either, left, right } from "fp-ts/lib/Either";
+import { IResponseType } from "italia-ts-commons/lib/requests";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
 import { Messages } from "../types/api/Messages";
-import { MessageWithContent } from "../types/api/MessageWithContent";
-import { ProblemJson } from "../types/api/ProblemJson";
-import { ServiceList } from "../types/api/ServiceList";
-import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
-import { GetMessagesByUserOKResponse } from "../types/api_client/getMessagesByUserOKResponse";
-import { MessageResponseWithContent } from "../types/api_client/messageResponseWithContent";
-import { ServicePublic as ApiServicePublic } from "../types/api_client/servicePublic";
+import { ServicePublic } from "../types/api/ServicePublic";
+import { Services } from "../types/api/Services";
 import { internalError, notFoundError, ServiceError } from "../types/error";
-import {
-  toAppMessageWithContent,
-  toAppMessageWithoutContent
-} from "../types/message";
-import { toAppService } from "../types/service";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
-import SimpleHttpOperationResponse from "../utils/simpleResponse";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-const messageErrorOnUnknownResponse = "Unknown response.";
+const messageErrorOnUnknownError = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
-const logErrorOnApiError = "Api error: %s";
-const messageNotFound = "Not found.";
+const messageErrorOnNotFound = "Not found.";
+const logErrorOnStatusNotOK = "Status is not 200: %s";
+const logErrorOnDecodeError = "Response can't be decoded: %O";
+const logErrorOnUnknownError = "Unknown error: %s";
+const logErrorOnNotFound = "Not found";
 
 export type MessagesResponse<T> =
   | IResponseErrorInternal
@@ -47,50 +40,18 @@ export default class MessagesService {
   public async getMessagesByUser(
     user: User
   ): Promise<Either<ServiceError, Messages>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getMessagesByUserWithHttpOperationResponse();
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getMessages({
+        fiscalCode: user.fiscal_code
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getMessagesByUser API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
-        return left(internalError(messageErrorOnUnknownResponse));
-      }
-
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(messageNotFound));
-      } else {
-        log.error(logErrorOnApiError, simpleResponse.parsedBody());
-        return left(internalError(messageErrorOnApiError));
-      }
+      return this.parseResponse<Messages>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
-
-    const errorOrApiMessages = GetMessagesByUserOKResponse.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiMessages)) {
-      log.error(
-        "Unknown response from getMessagesByUser API: %s",
-        ReadableReporter.report(errorOrApiMessages)
-      );
-      return left(internalError(messageErrorOnUnknownResponse));
-    }
-
-    const apiMessages = errorOrApiMessages.value;
-
-    const appMessages = apiMessages.items.map(toAppMessageWithoutContent);
-    return right({
-      items: appMessages,
-      page_size: apiMessages.pageSize
-    });
   }
 
   /**
@@ -99,174 +60,89 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<Either<ServiceError, MessageWithContent>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getMessageWithHttpOperationResponse(messageId);
+  ): Promise<Either<ServiceError, CreatedMessageWithContent>> {
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getMessage({
+        fiscalCode: user.fiscal_code,
+        id: messageId
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getMessage API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
-        return left(internalError(messageErrorOnUnknownResponse));
-      }
-
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(messageNotFound));
-      } else {
-        log.error(logErrorOnApiError, simpleResponse.parsedBody());
-        return left(internalError(messageErrorOnApiError));
-      }
+      return this.parseResponse<CreatedMessageWithContent>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
-
-    const errorOrApiMessage = MessageResponseWithContent.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiMessage)) {
-      log.error(
-        "Unknown response from getMessage API: %s",
-        ReadableReporter.report(errorOrApiMessage)
-      );
-      return left(internalError(messageErrorOnUnknownResponse));
-    }
-
-    const apiMessage = errorOrApiMessage.value;
-    return right(toAppMessageWithContent(apiMessage));
   }
 
   /**
    * Retrieve all the information about the service that has sent a message.
    */
   public async getService(
-    user: User,
     serviceId: string
-  ): Promise<Either<ServiceError, ProxyServicePublic>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getServiceWithHttpOperationResponse(serviceId);
+  ): Promise<Either<ServiceError, ServicePublic>> {
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getService({
+        id: serviceId
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getService API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
-        return left(internalError(messageErrorOnUnknownResponse));
-      }
-
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(messageNotFound));
-      } else {
-        log.error(logErrorOnApiError, simpleResponse.parsedBody());
-        return left(internalError(messageErrorOnApiError));
-      }
+      return this.parseResponse<ServicePublic>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
-
-    const errorOrApiService = ApiServicePublic.decode(
-      simpleResponse.parsedBody()
-    );
-    if (isLeft(errorOrApiService)) {
-      log.error(
-        "Unknown response from getService API: %s",
-        ReadableReporter.report(errorOrApiService)
-      );
-      return left(internalError(messageErrorOnUnknownResponse));
-    }
-
-    const apiService = errorOrApiService.value;
-    return right(toAppService(apiService));
   }
 
   public async getServicesByRecipient(
     user: User
-  ): Promise<Either<ServiceError, ServiceList>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getServicesByRecipientWithHttpOperationResponse(user.fiscal_code);
+  ): Promise<Either<ServiceError, Services>> {
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getServicesByRecipient({
+        fiscalCode: user.fiscal_code
+      });
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getServicesByRecipient API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
-        return left(internalError(messageErrorOnUnknownResponse));
-      }
-
-      log.error(logErrorOnApiError, simpleResponse.parsedBody());
-      return left(internalError(messageErrorOnApiError));
+      return this.parseResponse<Services>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
-
-    const errorOrServices = ServiceList.decode(simpleResponse.parsedBody());
-    if (isLeft(errorOrServices)) {
-      log.error(
-        "Unknown response from getServicesByRecipient API: %s",
-        ReadableReporter.report(errorOrServices)
-      );
-      return left(internalError(messageErrorOnUnknownResponse));
-    }
-
-    const apiServices = errorOrServices.value;
-
-    const appServices = apiServices.items;
-    return right({
-      items: appServices,
-      page_size: apiServices.page_size
-    });
   }
 
-  public async getVisibleServices(
-    user: User
-  ): Promise<Either<ServiceError, ServiceList>> {
-    const response = await this.apiClient
-      .getClient(user.fiscal_code)
-      .getVisibleServicesWithHttpOperationResponse();
+  public async getVisibleServices(): Promise<Either<ServiceError, Services>> {
+    try {
+      const client = this.apiClient.getClient();
 
-    const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getServices();
 
-    if (!simpleResponse.isOk()) {
-      const errorOrProblemJson = ProblemJson.decode(
-        simpleResponse.parsedBody()
-      );
-      if (isLeft(errorOrProblemJson)) {
-        log.error(
-          "Unknown response from getVisibleServices API: %s",
-          ReadableReporter.report(errorOrProblemJson)
-        );
-        return left(internalError(messageErrorOnUnknownResponse));
-      }
+      return this.parseResponse<Services>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
+    }
+  }
 
-      log.error(logErrorOnApiError, simpleResponse.parsedBody());
-      return left(internalError(messageErrorOnApiError));
+  private parseResponse<T>(
+    res: IResponseType<number, T>
+  ): Either<ServiceError, T> {
+    // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
+    if (!res) {
+      log.error(logErrorOnDecodeError, res);
+      return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
 
-    const errorOrServices = ServiceList.decode(simpleResponse.parsedBody());
-    if (isLeft(errorOrServices)) {
-      log.error(
-        "Unknown response from getVisibleServices API: %s",
-        ReadableReporter.report(errorOrServices)
-      );
-      return left(internalError(messageErrorOnUnknownResponse));
+    if (res.status === 200) {
+      return right<ServiceError, T>(res.value);
+    } else if (res.status === 404) {
+      log.error(logErrorOnNotFound, res.status);
+      return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
+    } else {
+      log.error(logErrorOnStatusNotOK, res.status);
+      return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
-
-    const apiServices = errorOrServices.value;
-    return right(apiServices);
   }
 }

@@ -1,37 +1,33 @@
-/**
- * TODO
- */
-
 import { Either, left, right } from "fp-ts/lib/Either";
-import { fromEither } from "fp-ts/lib/Option";
-import * as t from "io-ts";
-import { HttpOperationResponse } from "ms-rest-js";
-import {
-  PaymentActivationsGetResponse,
-  PaymentActivationsPostRequest,
-  PaymentActivationsPostResponse,
-  PaymentRequestsGetResponse,
-  ProxyPagoPAActivatePaymentOptionalParams
-} from "../clients/pagopa/models";
 import { internalError, notFoundError, ServiceError } from "../types/error";
-import SimpleHttpOperationResponse from "../utils/simpleResponse";
+import { log } from "../utils/logger";
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
 
-const notFoundErrorMessage = "Payment info not found.";
-const internalErrorMessage = "Internal error.";
+import { IResponseType } from "italia-ts-commons/lib/requests";
+import { PaymentRequestsGetResponse } from "../types/api/PaymentRequestsGetResponse";
 
-/**
- * WhiteList for Error Messages retrieved from PagoPaProxy to forward to CdApp
- * A complete list of error mapping is available at:
- * https://docs.google.com/document/d/1Qqe6mSfon-blHzc-ldeEHmzIkVaElKY5LtDnKiLbk80
- */
-const pagoPaErrorWhiteList: ReadonlyArray<string> = [
-  "PAYMENT_UNAVAILABLE",
-  "INVALID_AMOUNT",
-  "PAYMENT_COMPLETED",
-  "PAYMENT_ONGOING",
-  "PAYMENT_EXPIRED"
-];
+import { PaymentActivationsGetResponse } from "../types/api/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "../types/api/PaymentActivationsPostRequest";
+import { PaymentActivationsPostResponse } from "../types/api/PaymentActivationsPostResponse";
+
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
+
+const messageErrorOnUnknownError = "Unknown response.";
+const messageErrorOnApiError = "Api error.";
+const messageErrorOnNotFound = "Not found.";
+const logErrorOnStatusNotOK = "Status is not 200: %s";
+const logErrorOnDecodeError = "Response can't be decoded: %O";
+const logErrorOnUnknownError = "Unknown error: %s";
+const logErrorOnNotFound = "Not found";
+
+export type PagoPAProxyResponse<T> =
+  | IResponseErrorInternal
+  | IResponseErrorNotFound
+  | IResponseSuccessJson<T>;
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
@@ -43,24 +39,14 @@ export default class PagoPAProxyService {
     rptId: string
   ): Promise<Either<ServiceError, PaymentRequestsGetResponse>> {
     try {
-      const response = await this.pagoPAClient
-        .getClient("", rptId)
-        .getPaymentInfoWithHttpOperationResponse();
+      const client = this.pagoPAClient.getClient();
 
-      const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getPaymentInfo({ rptId });
 
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(notFoundErrorMessage));
-      }
-
-      if (simpleResponse.isInternalError()) {
-        const errorMessage = getErrorMessageForApp(response);
-        return left(internalError(errorMessage));
-      }
-
-      return right(simpleResponse.parsedBody());
-    } catch (error) {
-      return left(internalError(error.message));
+      return this.parseResponse<PaymentRequestsGetResponse>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
   }
 
@@ -70,28 +56,15 @@ export default class PagoPAProxyService {
   public async activatePayment(
     payload: PaymentActivationsPostRequest
   ): Promise<Either<ServiceError, PaymentActivationsPostResponse>> {
-    const params: ProxyPagoPAActivatePaymentOptionalParams = {
-      body: payload
-    };
-
     try {
-      const response = await this.pagoPAClient
-        .getClient("", "")
-        .activatePaymentWithHttpOperationResponse(params);
+      const client = this.pagoPAClient.getClient();
 
-      const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.activatePayment({ payload });
 
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(notFoundErrorMessage));
-      }
-
-      if (simpleResponse.isInternalError()) {
-        return left(internalError(internalErrorMessage));
-      }
-
-      return right(simpleResponse.parsedBody());
-    } catch (error) {
-      return left(internalError(error.message));
+      return this.parseResponse<PaymentActivationsPostResponse>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
   }
 
@@ -102,47 +75,34 @@ export default class PagoPAProxyService {
     codiceContestoPagamento: string
   ): Promise<Either<ServiceError, PaymentActivationsGetResponse>> {
     try {
-      const response = await this.pagoPAClient
-        .getClient(codiceContestoPagamento, "")
-        .getActivationStatusWithHttpOperationResponse();
+      const client = this.pagoPAClient.getClient();
 
-      const simpleResponse = new SimpleHttpOperationResponse(response);
+      const res = await client.getActivationStatus({ codiceContestoPagamento });
 
-      if (simpleResponse.isNotFound()) {
-        return left(notFoundError(notFoundErrorMessage));
-      }
-
-      if (simpleResponse.isInternalError()) {
-        return left(internalError(internalErrorMessage));
-      }
-
-      return right(simpleResponse.parsedBody());
-    } catch (error) {
-      return left(internalError(error.message));
+      return this.parseResponse<PaymentActivationsGetResponse>(res);
+    } catch (e) {
+      log.error(logErrorOnUnknownError, e);
+      return left(internalError(messageErrorOnUnknownError));
     }
   }
-}
 
-/**
- * Interface used to check if an http response has a custom title
- */
-const ErrorBodyWithTitle = t.interface({
-  parsedBody: t.interface({
-    title: t.string
-  })
-});
-type ErrorBodyWithTitle = t.TypeOf<typeof ErrorBodyWithTitle>;
+  private parseResponse<T>(
+    res: IResponseType<number, T>
+  ): Either<ServiceError, T> {
+    // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
+    if (!res) {
+      log.error(logErrorOnDecodeError, res);
+      return left<ServiceError, T>(internalError(messageErrorOnApiError));
+    }
 
-/**
- * Determine the error message to send to CDApp using a whitelist or a generic internal message
- * Check Error Mapping documentation at:
- * https://docs.google.com/document/d/1Qqe6mSfon-blHzc-ldeEHmzIkVaElKY5LtDnKiLbk80/edit#
- */
-export function getErrorMessageForApp(
-  httpOperationResponse: HttpOperationResponse | undefined
-): string {
-  return fromEither(ErrorBodyWithTitle.decode(httpOperationResponse))
-    .map(_ => _.parsedBody.title)
-    .filter(_ => pagoPaErrorWhiteList.indexOf(_) !== -1)
-    .getOrElse(internalErrorMessage);
+    if (res.status === 200) {
+      return right<ServiceError, T>(res.value);
+    } else if (res.status === 404) {
+      log.error(logErrorOnNotFound, res.status);
+      return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
+    } else {
+      log.error(logErrorOnStatusNotOK, res.status);
+      return left<ServiceError, T>(internalError(messageErrorOnApiError));
+    }
+  }
 }

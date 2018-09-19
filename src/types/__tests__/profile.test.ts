@@ -15,7 +15,6 @@ import {
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
 import { Version } from "../api/Version";
-import { GetProfileOKResponse } from "../api_client/getProfileOKResponse";
 import {
   extractUpsertProfileFromRequest,
   toAuthenticatedProfile,
@@ -26,22 +25,12 @@ import { User } from "../user";
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aVersion = 1 as Version;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-// mock for the profile retrieved from the Digital Citizenship API
-const mockedGetProfileOKResponse: GetProfileOKResponse = {
-  email: anEmailAddress,
-  isInboxEnabled: anIsInboxEnabled,
-  isWebhookEnabled: anIsWebhookEnabled,
-  preferredLanguages: aPreferredLanguages,
-  version: aVersion
-};
 
 // mock for a valid User extracted from SPID
 const mockedUser: User = {
@@ -70,26 +59,26 @@ describe("profile type", () => {
   it("should get an app Proxy profile user profile with email from Digital Citzen API and SPID", async () => {
     // return app Proxy Profile.
     const userData = toInitializedProfile(
-      mockedGetProfileOKResponse, // from
+      mockedExtendedProfile, // from
       mockedUser // user
     );
 
-    expect(userData.email).toBe(mockedGetProfileOKResponse.email);
+    expect(userData.email).toBe(mockedExtendedProfile.email);
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
     expect(userData.has_profile).toBeTruthy();
     expect(userData.is_inbox_enabled).toBe(
-      mockedGetProfileOKResponse.isInboxEnabled
+      mockedExtendedProfile.is_inbox_enabled
     );
     expect(userData.is_webhook_enabled).toBe(
-      mockedGetProfileOKResponse.isWebhookEnabled
+      mockedExtendedProfile.is_webhook_enabled
     );
     expect(userData.name).toBe(mockedUser.name);
     expect(userData.spid_email).toBe(mockedUser.spid_email);
     expect(userData.preferred_languages).toBe(
-      mockedGetProfileOKResponse.preferredLanguages
+      mockedExtendedProfile.preferred_languages
     );
-    expect(userData.version).toBe(mockedGetProfileOKResponse.version);
+    expect(userData.version).toBe(mockedExtendedProfile.version);
   });
 
   /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/

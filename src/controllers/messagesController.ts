@@ -10,8 +10,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
+import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
 import { Messages } from "../types/api/Messages";
-import { MessageWithContent } from "../types/api/MessageWithContent";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 
@@ -40,7 +40,6 @@ export default class MessagesController {
       const error = errorOrMessages.value;
       return toHttpError(error);
     }
-
     const messages = errorOrMessages.value;
     return ResponseSuccessJson(messages);
   }
@@ -50,7 +49,7 @@ export default class MessagesController {
    */
   public async getMessage(
     req: express.Request
-  ): Promise<MessagesResponse<MessageWithContent>> {
+  ): Promise<MessagesResponse<CreatedMessageWithContent>> {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {

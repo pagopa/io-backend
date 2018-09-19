@@ -15,10 +15,7 @@ import ProfileService, { profileResponse } from "../services/profileService";
 import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
 import { InitializedProfile } from "../types/api/InitializedProfile";
 import { toHttpError } from "../types/error";
-import {
-  extractUpsertProfileFromRequest,
-  toApiClientExtendedProfile
-} from "../types/profile";
+import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";
 
 export type profileResponseWithValidationError<T> =
@@ -61,7 +58,11 @@ export default class ProfileController {
    */
   public async upsertProfile(
     req: express.Request
-  ): Promise<profileResponseWithValidationError<InitializedProfile>> {
+  ): Promise<
+    profileResponseWithValidationError<
+      InitializedProfile | AuthenticatedProfile
+    >
+  > {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
@@ -82,7 +83,7 @@ export default class ProfileController {
     const upsertProfile = errorOrUpsertProfile.value;
     const errorUpsertProfile = await this.profileService.upsertProfile(
       user,
-      toApiClientExtendedProfile(upsertProfile)
+      upsertProfile
     );
 
     if (isLeft(errorUpsertProfile)) {

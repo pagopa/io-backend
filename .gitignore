@@ -21,7 +21,7 @@ npm-debug.log
 *.js.map
 
 # Excluded auto-generated API client.
-/src/clients/
+/src/clients/pagopa
 
 # Excluded auto-generated API types.
 /src/types/api/*.ts

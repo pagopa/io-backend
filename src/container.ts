@@ -296,7 +296,7 @@ container.register({
 // Register a factory service to create API client.
 export const API_CLIENT = "apiClient";
 container.register({
-  [API_CLIENT]: awilix.asClass(ApiClientFactory)
+  [API_CLIENT]: awilix.asClass(ApiClientFactory).singleton()
 });
 
 // Register a factory service to create PagoPA client.

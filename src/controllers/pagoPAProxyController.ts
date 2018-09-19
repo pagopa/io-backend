@@ -1,17 +1,16 @@
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import {
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseSuccessJson,
-  ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import {
-  PaymentActivationsGetResponse,
-  PaymentActivationsPostResponse,
-  PaymentRequestsGetResponse
-} from "../clients/pagopa/models";
-import PagoPAProxyService from "../services/pagoPAProxyService";
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+
+import PagoPAProxyService, {
+  PagoPAProxyResponse
+} from "../services/pagoPAProxyService";
+
+import { PaymentRequestsGetResponse } from "../types/api/PaymentRequestsGetResponse";
+
+import { PaymentActivationsGetResponse } from "../types/api/PaymentActivationsGetResponse";
+import { PaymentActivationsPostResponse } from "../types/api/PaymentActivationsPostResponse";
+
 import { toHttpError } from "../types/error";
 
 /**
@@ -23,11 +22,7 @@ export default class PagoPAProxyController {
 
   public async getPaymentInfo(
     req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<PaymentRequestsGetResponse>
-  > {
+  ): Promise<PagoPAProxyResponse<PaymentRequestsGetResponse>> {
     const rptId = req.params.rptId;
     const errorOrPaymentInfo = await this.pagoPAProxyService.getPaymentInfo(
       rptId
@@ -44,11 +39,7 @@ export default class PagoPAProxyController {
 
   public async activatePayment(
     req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<PaymentActivationsPostResponse>
-  > {
+  ): Promise<PagoPAProxyResponse<PaymentActivationsPostResponse>> {
     const payload = req.body;
     const errorOrPaymentInfo = await this.pagoPAProxyService.activatePayment(
       payload
@@ -65,11 +56,7 @@ export default class PagoPAProxyController {
 
   public async getActivationStatus(
     req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<PaymentActivationsGetResponse>
-  > {
+  ): Promise<PagoPAProxyResponse<PaymentActivationsGetResponse>> {
     const codiceContestoPagamento = req.params.codiceContestoPagamento;
     const errorOrPaymentInfo = await this.pagoPAProxyService.getActivationStatus(
       codiceContestoPagamento

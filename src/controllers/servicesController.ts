@@ -25,20 +25,8 @@ export default class ServicesController {
   public async getService(
     req: express.Request
   ): Promise<MessagesResponse<ProxyServicePublic>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
     // TODO: validate req.params.id
-    const user = errorOrUser.value;
-    const errorOrService = await this.messagesService.getService(
-      user,
-      req.params.id
-    );
+    const errorOrService = await this.messagesService.getService(req.params.id);
 
     if (isLeft(errorOrService)) {
       const error = errorOrService.value;
@@ -76,18 +64,9 @@ export default class ServicesController {
   }
 
   public async getVisibleServices(
-    req: express.Request
+    _: express.Request
   ): Promise<MessagesResponse<ServiceList>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    const user = errorOrUser.value;
-    const errorOrServices = await this.messagesService.getVisibleServices(user);
+    const errorOrServices = await this.messagesService.getVisibleServices();
 
     if (isLeft(errorOrServices)) {
       const error = errorOrServices.value;

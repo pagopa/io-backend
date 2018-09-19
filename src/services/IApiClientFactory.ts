@@ -2,11 +2,11 @@
  * Interface for the API client factories.
  */
 
-import { DigitalCitizenshipAPI } from "../clients/api/digitalCitizenshipAPI";
+import { APIClient } from "../clients/api";
 
 export interface IApiClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
    */
-  getClient(fiscalCode: string): DigitalCitizenshipAPI;
+  getClient(): APIClient;
 }

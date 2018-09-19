@@ -1,12 +1,8 @@
 /**
- * This service builds API client by wrapping the DigitalCitizenshipAPI client
- * built by the AutoRest tool.
- *
- * @see ../clients/api/digitalCitizenshipAPI
+ * This service builds API clients.
  */
 
-import { DigitalCitizenshipAPI } from "../clients/api/digitalCitizenshipAPI";
-import { APICredentials } from "../utils/APICredential";
+import { APIClient } from "../clients/api";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ApiClientFactory implements IApiClientFactoryInterface {
@@ -15,8 +11,7 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
   /**
    * {@inheritDoc}
    */
-  public getClient(fiscalCode: string): DigitalCitizenshipAPI {
-    const apiCredentials = new APICredentials(this.apiKey);
-    return new DigitalCitizenshipAPI(fiscalCode, apiCredentials, this.apiUrl);
+  public getClient(): APIClient {
+    return APIClient(this.apiUrl, this.apiKey);
   }
 }

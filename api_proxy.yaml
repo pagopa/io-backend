@@ -29,10 +29,11 @@ paths:
             "$ref": "#/definitions/ServicePublic"
           examples:
             application/json:
-              department_name: dept
-              organization_name: org
-              service_id: 2b3e728c1a5d1efa035c
-              service_name: service
+              department_name: "IO"
+              organization_fiscal_code: "00000000000"
+              organization_name: "IO"
+              service_id: "5a563817fcc896087002ea46c49a"
+              service_name: "App IO"
               version: 1
         "401":
           description: Bearer token null or expired.
@@ -56,9 +57,9 @@ paths:
             $ref: "#/definitions/ServiceList"
           examples:
             application/json:
-              page_size: 1
               items:
                 - service_id: 2b3e728c1a5d1efa035c
+              page_size: 1
         "401":
           description: Bearer token null or expired.
         "500":
@@ -79,6 +80,14 @@ paths:
           description: Found.
           schema:
             $ref: "#/definitions/ServiceList"
+          examples:
+            application/json:
+              items:
+                - service_id: "AzureDeployc49a"
+                  version: 1
+                - service_id: "5a25abf4fcc89605c082f042c49a"
+                  version: 0
+              page_size: 1
         "401":
           description: Bearer token null or expired.
         "500":
@@ -106,10 +115,16 @@ paths:
           examples:
             application/json:
               items:
-                - id: 01BX9NSMKVXXS5PSP2FATZMYYY
-                  sender_service_id: "5a25abf4fcc89605c082f042c49a"
-                - id: 01BX9NSMKVXXS5PSP2FATZM123
-                  sender_service_id: "5a25abf4fcc89605c082f042c49a"
+                - created_at: "2018-05-21T07:36:41.209Z"
+                  fiscal_code: "LSSLCU79B24L219P"
+                  id: "01CE0T1Z18T3NT9ECK5NJ09YR3"
+                  sender_service_id: "5a563817fcc896087002ea46c49a"
+                  time_to_live: 3600
+                - created_at: "2018-05-21T07:41:01.361Z"
+                  fiscal_code: "LSSLCU79B24L219P"
+                  id: "01CE0T9X1HT595GEF8FH9NRSW7"
+                  sender_service_id: "5a563817fcc896087002ea46c49a"
+                  time_to_live: 3600
               page_size: 2
               next: https://example.com/next
         "401":
@@ -139,18 +154,24 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/MessageWithContent"
+            $ref: "#/definitions/CreatedMessageWithContent"
           examples:
             application/json:
-              id: 01BX9NSMKAAAS5PSP2FATZM6BQ
-              subject: message subject, aliquip sint nulla in estinut
-              markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-              sender_service_id: "5a25abf4fcc89605c082f042c49a"
-              created_at: "2018-05-21T12:45:41.105Z"
+              message: {
+                content: {
+                  markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                  subject: "my subject ............"
+                },
+                created_at: "2018-06-06T12:22:24.523Z",
+                fiscal_code: "LSSLCU79B24L219P",
+                id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+                sender_service_id: "5a25abf4fcc89605c082f042c49a",
+                time_to_live: 3600
+              }
+              notification: {
+                email: "SENT"
+            }
+            status: "PROCESSED"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -176,16 +197,17 @@ paths:
               - $ref: "#/definitions/AuthenticatedProfile"
           examples:
             application/json:
+              email: "email@example.com"
               family_name: "Rossi"
               fiscal_code: "TMMEXQ60A10Y526X"
               has_profile: true
-              is_email_set: false
+              is_email_set: true
               is_inbox_enabled: true
-              is_webhook_enabled: false
+              is_webhook_enabled: true
               name: "Mario"
-              preferred_email: "preferred@example.com"
+              spid_email: "preferred@example.com"
+              spid_mobile_phone: "1234567890"
               version: 1
-              email: "email@example.com"
         "401":
           description: Bearer token null or expired.
         "500":
@@ -215,10 +237,16 @@ paths:
             $ref: "#/definitions/InitializedProfile"
           examples:
             application/json:
-              email: foobar@example.com
-              preferred_languages: [ it_IT ]
+              email: "email@example.com"
+              family_name: "Rossi"
+              fiscal_code: "TMMEXQ60A10Y526X"
+              has_profile: true
+              is_email_set: true
               is_inbox_enabled: true
-              is_webhook_enabled: false
+              is_webhook_enabled: true
+              name: "Mario"
+              spid_email: "preferred@example.com"
+              spid_mobile_phone: "1234567890"
               version: 1
         '400':
           description: Invalid payload.
@@ -442,10 +470,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaymentData"
   TimeToLiveSeconds:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/TimeToLiveSeconds"
-  MessageWithContent:
+  CreatedMessageWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithContent"
-  MessageWithoutContent:
+  CreatedMessageWithoutContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithoutContent"
+  MessageResponseWithContent:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageResponseWithContent"
   ServiceList:
     type: object
     title: List of services.
@@ -468,7 +498,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: "#/definitions/MessageWithoutContent"
+          $ref: "#/definitions/CreatedMessageWithoutContent"
       next:
         type: string
       page_size:
@@ -495,16 +525,20 @@ definitions:
     properties:
       email:
         $ref: '#/definitions/EmailAddress'
+      blocked_inbox_or_channels:
+        $ref: "#/definitions/BlockedInboxOrChannels"
+      preferred_languages:
+        $ref: "#/definitions/PreferredLanguages"
+      is_inbox_enabled:
+        $ref: "#/definitions/IsInboxEnabled"
+      is_webhook_enabled:
+        $ref: "#/definitions/IsWebhookEnabled"
       family_name:
         type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
       has_profile:
         $ref: "#/definitions/HasProfile"
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
-      is_webhook_enabled:
-        $ref: "#/definitions/IsWebhookEnabled"
       name:
         type: string
       spid_email:
@@ -512,12 +546,6 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
-      preferred_languages:
-        type: array
-        items:
-          $ref: '#/definitions/PreferredLanguage'
-      blocked_inbox_or_channels:
-        $ref: "#/definitions/BlockedInboxOrChannels"
       version:
         $ref: '#/definitions/Version'
     required:
@@ -601,6 +629,21 @@ definitions:
     description: |-
       The Push Notification Service handle for this Installation.
       See https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+  Services:
+    type: object
+    title: A list of services
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/ServiceTuple"
+      next:
+        type: string
+      page_size:
+        $ref: '#/definitions/PageSize'
+    required:
+      - items
+      - page_size
   SpidLevel:
     type: string
     description: A SPID level.

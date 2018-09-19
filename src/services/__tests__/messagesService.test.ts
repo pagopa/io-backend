@@ -1,3 +1,5 @@
+/* tslint:disable:no-identical-functions */
+
 import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../../types/api/EmailAddress";
@@ -12,206 +14,121 @@ const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidEmail = "test@example.com" as EmailAddress;
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
+const aValidMarkdown =
+  "# This is a markdown header\n\nto show how easily markdown can be converted to **HTML**\n\nRemember: this has to be a long text.";
 const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
+const aValidOrganizationFiscalCode = "ABZTCT88A51Y311Y" as FiscalCode;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-const aTimestamp = 1518010929530;
 
-const messageErrorOnUnknownResponse = {
-  kind: "ServiceErrorInternal",
-  message: "Unknown response."
-};
 const messageErrorOnApiError = {
   kind: "ServiceErrorInternal",
   message: "Api error."
 };
 
 const validApiMessagesResponse = {
-  parsedBody: {
+  status: 200,
+  value: {
     items: [
       {
-        createdAt: new Date(aTimestamp),
-        fiscalCode: "XUZTCT88A51Y311X",
-        id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
+        created_at: "2018-05-21T07:36:41.209Z",
+        fiscal_code: "LSSLCU79B24L219P",
+        id: "01CE0T1Z18T3NT9ECK5NJ09YR3",
+        sender_service_id: "5a563817fcc896087002ea46c49a"
       },
       {
-        createdAt: new Date(aTimestamp),
-        fiscalCode: "XUZTCT88A51Y311X",
-        id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
+        created_at: "2018-05-21T07:41:01.361Z",
+        fiscal_code: "LSSLCU79B24L219P",
+        id: "01CE0T9X1HT595GEF8FH9NRSW7",
+        sender_service_id: "5a563817fcc896087002ea46c49a"
       }
     ],
-    pageSize: 2
-  },
-  response: {
-    status: 200
+    page_size: 2
+  }
+};
+const validApiMessageResponse = {
+  status: 200,
+  value: {
+    message: {
+      content: {
+        markdown: aValidMarkdown,
+        subject: aValidSubject
+      },
+      created_at: "2018-06-12T09:45:06.771Z",
+      fiscal_code: "LSSLCU79B24L219P",
+      id: "01CFSP4XYK3Y0VZTKHW9FKS1XM",
+      sender_service_id: "5a563817fcc896087002ea46c49a"
+    },
+    notification: {
+      email: "SENT",
+      webhook: "SENT"
+    },
+    status: "PROCESSED"
   }
 };
 const validApiServicesResponse = {
-  parsedBody: {
+  status: 200,
+  value: {
     items: [
       { service_id: "5a563817fcc896087002ea46c49a", version: 1 },
       { service_id: "5a563817fcc896087002ea46c49b", version: 1 }
     ],
     page_size: 2
-  },
-  response: {
-    status: 200
   }
-};
-const emptyApiMessagesResponse = {
-  parsedBody: {},
-  response: {
-    status: 404
-  }
-};
-const invalidApiMessagesResponse = {
-  parsedBody: {
-    items: [
-      {
-        id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
-      },
-      {
-        fiscalCode: "XUZTCT88A51Y311X",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
-      }
-    ],
-    pageSize: 2
-  },
-  response: {
-    status: 200
-  }
-};
-const invalidApiServicesResponse = {
-  parsedBody: {
-    items: [
-      {
-        id: "5a563817fcc896087002ea46c49a",
-        senderServiceId: "5a563817fcc896087002ea46c49a"
-      },
-      9,
-      ["a", "r", "r", "a", "y"]
-    ],
-    page_size: 3
-  },
-  response: {
-    status: 200
-  }
-};
-const proxyMessagesResponse = {
-  items: [
-    {
-      created_at: new Date(aTimestamp),
-      fiscal_code: "XUZTCT88A51Y311X",
-      id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-      sender_service_id: "5a563817fcc896087002ea46c49a"
-    },
-    {
-      created_at: new Date(aTimestamp),
-      fiscal_code: "XUZTCT88A51Y311X",
-      id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-      sender_service_id: "5a563817fcc896087002ea46c49a"
-    }
-  ],
-  page_size: 2
-};
-const proxyServicesResponse = {
-  items: validApiServicesResponse.parsedBody.items,
-  page_size: 2
-};
-const validApiMessageResponse = {
-  parsedBody: {
-    message: {
-      content: {
-        markdown:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
-        subject: aValidSubject
-      },
-      createdAt: new Date(aTimestamp),
-      fiscalCode: "XUZTCT88A51Y311X",
-      id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
-    },
-    notification: {
-      email: "SENT"
-    }
-  },
-  response: {
-    status: 200
-  }
-};
-const invalidApiMessageResponse = {
-  parsedBody: {
-    message: {
-      content: {
-        markdown: "Lorem ipsum dolor sit amet",
-        subject: aValidSubject
-      },
-      createdAt: new Date(aTimestamp),
-      id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-      senderServiceId: "5a563817fcc896087002ea46c49a"
-    },
-    notification: {
-      email: "SENT"
-    }
-  },
-  response: {
-    status: 200
-  }
-};
-const proxyMessageResponse = {
-  content: {
-    markdown:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
-    subject: aValidSubject
-  },
-  created_at: new Date(aTimestamp),
-  fiscal_code: "XUZTCT88A51Y311X",
-  id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-  sender_service_id: "5a563817fcc896087002ea46c49a"
 };
 const validApiServiceResponse = {
-  parsedBody: {
-    departmentName: aValidDepartmentName,
-    organizationFiscalCode: "11111111111",
-    organizationName: aValidOrganizationName,
-    serviceId: aValidServiceID,
-    serviceName: aValidServiceName,
-    version: 42
-  },
-  response: {
-    status: 200
+  status: 200,
+  value: {
+    department_name: aValidDepartmentName,
+    organization_fiscal_code: aValidOrganizationFiscalCode,
+    organization_name: aValidOrganizationName,
+    service_id: aValidServiceID,
+    service_name: aValidServiceName,
+    version: 0
   }
 };
+
+const emptyApiMessagesResponse = {
+  status: 404
+};
+const invalidApiMessagesResponse = {
+  status: 500
+};
+const invalidApiMessageResponse = {
+  status: 500
+};
+const invalidApiServicesResponse = {
+  status: 500
+};
 const invalidApiServiceResponse = {
-  parsedBody: {
-    departmentName: aValidDepartmentName,
-    serviceId: aValidServiceID,
-    version: 42
-  },
-  response: {
-    status: 200
-  }
+  status: 500
+};
+const problemJson = {
+  status: 500
+};
+
+const proxyMessagesResponse = {
+  items: validApiMessagesResponse.value.items,
+  page_size: validApiMessagesResponse.value.page_size
+};
+const proxyMessageResponse = {
+  message: validApiMessageResponse.value.message,
+  notification: validApiMessageResponse.value.notification,
+  status: validApiMessageResponse.value.status
+};
+const proxyServicesResponse = {
+  items: validApiServicesResponse.value.items,
+  page_size: validApiServicesResponse.value.page_size
 };
 const proxyServiceResponse = {
   department_name: aValidDepartmentName,
-  organization_fiscal_code: "11111111111",
+  organization_fiscal_code: aValidOrganizationFiscalCode,
   organization_name: aValidOrganizationName,
   service_id: aValidServiceID,
   service_name: aValidServiceName,
-  version: 42
-};
-const problemJson = {
-  parsedBody: {
-    detail: "Error."
-  },
-  response: {
-    status: 500
-  }
+  version: 0
 };
 
 // mock for a valid User
@@ -227,18 +144,18 @@ const mockedUser: User = {
   wallet_token: "HexToKen" as WalletToken
 };
 
-const mockGetMessagesByUser = jest.fn();
+const mockGetMessages = jest.fn();
 const mockGetServicesByRecipient = jest.fn();
-const mockGetVisibleServices = jest.fn();
+const mockGetServices = jest.fn();
 const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
-    getMessageWithHttpOperationResponse: mockGetMessage,
-    getMessagesByUserWithHttpOperationResponse: mockGetMessagesByUser,
-    getServiceWithHttpOperationResponse: mockGetService,
-    getServicesByRecipientWithHttpOperationResponse: mockGetServicesByRecipient,
-    getVisibleServicesWithHttpOperationResponse: mockGetVisibleServices
+    getMessage: mockGetMessage,
+    getMessages: mockGetMessages,
+    getService: mockGetService,
+    getServices: mockGetServices,
+    getServicesByRecipient: mockGetServicesByRecipient
   };
 });
 
@@ -258,7 +175,7 @@ const api = new ApiClientFactory("", "");
 
 describe("MessageService#getMessagesByUser", () => {
   it("returns a list of messages from the API", async () => {
-    mockGetMessagesByUser.mockImplementation(() => {
+    mockGetMessages.mockImplementation(() => {
       return validApiMessagesResponse;
     });
 
@@ -266,13 +183,14 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith();
+    expect(mockGetMessages).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
     expect(res).toEqual(right(proxyMessagesResponse));
   });
 
   it("returns an empty list if the of messages from the API is empty", async () => {
-    mockGetMessagesByUser.mockImplementation(() => {
+    mockGetMessages.mockImplementation(() => {
       return emptyApiMessagesResponse;
     });
 
@@ -280,8 +198,9 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith();
+    expect(mockGetMessages).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
     expect(res).toEqual(
       left({
         kind: "ServiceErrorNotFound",
@@ -291,29 +210,31 @@ describe("MessageService#getMessagesByUser", () => {
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
-    mockGetMessagesByUser.mockImplementation(() => {
+    mockGetMessages.mockImplementation(() => {
       return problemJson;
     });
 
     const service = new MessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser);
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith();
+    expect(mockGetMessages).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
     expect(res).toEqual(left(messageErrorOnApiError));
   });
 
-  it("returns unknown response if the response from the getMessagesByUser API returns something wrong", async () => {
-    mockGetMessagesByUser.mockImplementation(() => {
+  it("returns a 500 response if the response from the getMessagesByUser API returns something wrong", async () => {
+    mockGetMessages.mockImplementation(() => {
       return invalidApiMessagesResponse;
     });
 
     const service = new MessageService(api);
 
     const res = await service.getMessagesByUser(mockedUser);
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith();
-    expect(res).toEqual(left(messageErrorOnUnknownResponse));
+    expect(mockGetMessages).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toEqual(left(messageErrorOnApiError));
   });
 });
 
@@ -327,10 +248,9 @@ describe("MessageService#getServicesByRecpient", () => {
 
     const res = await service.getServicesByRecipient(mockedUser);
 
-    expect(mockGetClient).toHaveBeenCalledWith(mockedUser.fiscal_code);
-    expect(mockGetServicesByRecipient).toHaveBeenCalledWith(
-      mockedUser.fiscal_code
-    );
+    expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
     expect(res).toEqual(right(proxyServicesResponse));
   });
 
@@ -341,10 +261,11 @@ describe("MessageService#getServicesByRecpient", () => {
 
     const service = new MessageService(api);
 
-    expect.assertions(3);
+    expect.assertions(2);
     return service.getServicesByRecipient(mockedUser).then(e => {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-      expect(mockGetServicesByRecipient).toHaveBeenCalledWith(aValidFiscalCode);
+      expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
+        fiscalCode: aValidFiscalCode
+      });
       expect(e).toEqual(left(messageErrorOnApiError));
     });
   });
@@ -356,11 +277,12 @@ describe("MessageService#getServicesByRecpient", () => {
 
     const service = new MessageService(api);
 
-    expect.assertions(3);
+    expect.assertions(2);
     return service.getServicesByRecipient(mockedUser).then(e => {
-      expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-      expect(mockGetServicesByRecipient).toHaveBeenCalledWith(aValidFiscalCode);
-      expect(e).toEqual(left(messageErrorOnUnknownResponse));
+      expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
+        fiscalCode: aValidFiscalCode
+      });
+      expect(e).toEqual(left(messageErrorOnApiError));
     });
   });
 });
@@ -375,8 +297,10 @@ describe("MessageService#getMessage", () => {
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscalCode: aValidFiscalCode,
+      id: aValidMessageId
+    });
     expect(res).toEqual(right(proxyMessageResponse));
   });
 
@@ -388,8 +312,10 @@ describe("MessageService#getMessage", () => {
     const service = new MessageService(api);
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscalCode: aValidFiscalCode,
+      id: aValidMessageId
+    });
     expect(res).toEqual(left(messageErrorOnApiError));
   });
 
@@ -401,9 +327,11 @@ describe("MessageService#getMessage", () => {
     const service = new MessageService(api);
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetMessage).toHaveBeenCalledWith(aValidMessageId);
-    expect(res).toEqual(left(messageErrorOnUnknownResponse));
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscalCode: aValidFiscalCode,
+      id: aValidMessageId
+    });
+    expect(res).toEqual(left(messageErrorOnApiError));
   });
 });
 
@@ -415,10 +343,11 @@ describe("MessageService#getService", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getService(mockedUser, aValidServiceID);
+    const res = await service.getService(aValidServiceID);
 
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
+    expect(mockGetService).toHaveBeenCalledWith({
+      id: aValidServiceID
+    });
     expect(res).toEqual(right(proxyServiceResponse));
   });
 
@@ -428,9 +357,10 @@ describe("MessageService#getService", () => {
     });
 
     const service = new MessageService(api);
-    const res = await service.getService(mockedUser, aValidServiceID);
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
+    const res = await service.getService(aValidServiceID);
+    expect(mockGetService).toHaveBeenCalledWith({
+      id: aValidServiceID
+    });
     expect(res).toEqual(left(messageErrorOnApiError));
   });
 
@@ -441,9 +371,10 @@ describe("MessageService#getService", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getService(mockedUser, aValidServiceID);
-    expect(mockGetClient).toHaveBeenCalledWith(aValidFiscalCode);
-    expect(mockGetService).toHaveBeenCalledWith(aValidServiceID);
-    expect(res).toEqual(left(messageErrorOnUnknownResponse));
+    const res = await service.getService(aValidServiceID);
+    expect(mockGetService).toHaveBeenCalledWith({
+      id: aValidServiceID
+    });
+    expect(res).toEqual(left(messageErrorOnApiError));
   });
 });
