@@ -56,7 +56,7 @@ const validApiServicesResponse = {
       { service_id: "5a563817fcc896087002ea46c49a", version: 1 },
       { service_id: "5a563817fcc896087002ea46c49b", version: 1 }
     ],
-    page_size: 2
+    pageSize: 2
   },
   response: {
     status: 200
