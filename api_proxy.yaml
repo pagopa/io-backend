@@ -602,7 +602,7 @@ definitions:
       separated by hyphens, in the form 8-4-4-4-12 for a total of 36 characters (32 alphanumeric characters and four
       hyphens).
       See https://en.wikipedia.org/wiki/Universally_unique_identifier
-    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    minLength: 1
   HasProfile:
     type: boolean
     default: false
