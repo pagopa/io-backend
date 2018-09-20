@@ -17,8 +17,8 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "xxx" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-const aValidInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationID;
-const anInvalidInstallationID = "invalid" as InstallationID;
+const aValidInstallationID = "550e8400e29b41d4a716446655440000" as InstallationID;
+const anInvalidInstallationID = "" as InstallationID;
 
 const mockedUser: User = {
   created_at: aTimestamp,
