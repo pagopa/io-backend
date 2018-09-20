@@ -23,18 +23,15 @@ export function toInitializedProfile(
   user: User
 ): InitializedProfile {
   return {
-    blocked_inbox_or_channels: from.blocked_inbox_or_channels,
-    email: from.email,
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    has_profile: true,
-    is_inbox_enabled: from.is_inbox_enabled,
-    is_webhook_enabled: from.is_webhook_enabled,
-    name: user.name,
-    preferred_languages: from.preferred_languages,
-    spid_email: user.spid_email,
-    spid_mobile_phone: user.spid_mobile_phone,
-    version: from.version
+    extended: from,
+    spid: {
+      family_name: user.family_name,
+      fiscal_code: user.fiscal_code,
+      has_profile: true,
+      name: user.name,
+      spid_email: user.spid_email,
+      spid_mobile_phone: user.spid_mobile_phone
+    }
   };
 }
 

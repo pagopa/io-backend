@@ -517,41 +517,12 @@ definitions:
     title: Initialized profile
     description: Describes the user's profile after it has been stored in the Profile API.
     properties:
-      email:
-        $ref: '#/definitions/EmailAddress'
-      blocked_inbox_or_channels:
-        $ref: "#/definitions/BlockedInboxOrChannels"
-      preferred_languages:
-        $ref: "#/definitions/PreferredLanguages"
-      is_inbox_enabled:
-        $ref: "#/definitions/IsInboxEnabled"
-      is_webhook_enabled:
-        $ref: "#/definitions/IsWebhookEnabled"
-      family_name:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      has_profile:
-        $ref: "#/definitions/HasProfile"
-      name:
-        type: string
-      spid_email:
-        $ref: '#/definitions/EmailAddress'
-      spid_mobile_phone:
-        type: string
-        minLength: 1
-      version:
-        $ref: '#/definitions/Version'
+      spid:
+        $ref: "#/definitions/AuthenticatedProfile"
+      extended:
+        $ref: "#/definitions/ExtendedProfile"
     required:
-      - family_name
-      - fiscal_code
-      - has_profile
-      - is_inbox_enabled
-      - is_webhook_enabled
-      - name
-      - spid_email
-      - spid_mobile_phone
-      - version
+      - spid
   AuthenticatedProfile:
     type: object
     title: Temporary SPID profile

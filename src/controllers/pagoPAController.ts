@@ -42,7 +42,7 @@ export default class PagoPAController {
 
     const profile = errorOrProfile.value;
     const maybeCustomEmail = InitializedProfile.is(profile)
-      ? profile.email
+      ? profile.extended.email
       : undefined;
     const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
 
