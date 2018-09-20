@@ -10,6 +10,7 @@ import {
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
+import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
 import { Messages } from "../types/api/Messages";
 import { ServicePublic } from "../types/api/ServicePublic";
 import { Services } from "../types/api/Services";
@@ -69,7 +70,9 @@ export default class MessagesService {
         id: messageId
       });
 
-      return this.parseResponse<CreatedMessageWithContent>(res);
+      return this.parseResponse<MessageResponseWithContent>(res).map(
+        _ => _.message
+      );
     } catch (e) {
       log.error(logErrorOnUnknownError, e);
       return left(internalError(messageErrorOnUnknownError));
@@ -127,7 +130,7 @@ export default class MessagesService {
   }
 
   private parseResponse<T>(
-    res: IResponseType<number, T>
+    res: IResponseType<number, T> | undefined
   ): Either<ServiceError, T> {
     // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
     if (!res) {

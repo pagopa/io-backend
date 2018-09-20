@@ -113,11 +113,7 @@ const proxyMessagesResponse = {
   items: validApiMessagesResponse.value.items,
   page_size: validApiMessagesResponse.value.page_size
 };
-const proxyMessageResponse = {
-  message: validApiMessageResponse.value.message,
-  notification: validApiMessageResponse.value.notification,
-  status: validApiMessageResponse.value.status
-};
+const proxyMessageResponse = validApiMessageResponse.value.message;
 const proxyServicesResponse = {
   items: validApiServicesResponse.value.items,
   page_size: validApiServicesResponse.value.page_size
