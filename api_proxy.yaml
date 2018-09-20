@@ -156,22 +156,16 @@ paths:
           schema:
             $ref: "#/definitions/CreatedMessageWithContent"
           examples:
-            application/json:
-              message: {
-                content: {
-                  markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
-                  subject: "my subject ............"
-                },
-                created_at: "2018-06-06T12:22:24.523Z",
-                fiscal_code: "LSSLCU79B24L219P",
-                id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
-                sender_service_id: "5a25abf4fcc89605c082f042c49a",
-                time_to_live: 3600
-              }
-              notification: {
-                email: "SENT"
-            }
-            status: "PROCESSED"
+            application/json: |
+              content: {
+                markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                subject: "my subject ............"
+              },
+              created_at: "2018-06-06T12:22:24.523Z",
+              fiscal_code: "LSSLCU79B24L219P",
+              id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+              sender_service_id: "5a25abf4fcc89605c082f042c49a",
+              time_to_live: 3600
         "401":
           description: Bearer token null or expired.
         "404":
