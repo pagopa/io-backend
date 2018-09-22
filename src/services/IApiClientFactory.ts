@@ -8,5 +8,5 @@ export interface IApiClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
    */
-  getClient(): APIClient;
+  getClient(): ReturnType<APIClient>;
 }

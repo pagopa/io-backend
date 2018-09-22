@@ -1,4 +1,3 @@
-import * as t from "io-ts";
 import {
   ApiHeaderJson,
   createFetchRequestForApi,
@@ -110,4 +109,4 @@ export function PagoPAClient(
   };
 }
 
-export type PagoPAClient = t.TypeOf<typeof PagoPAClient>;
+export type PagoPAClient = typeof PagoPAClient;

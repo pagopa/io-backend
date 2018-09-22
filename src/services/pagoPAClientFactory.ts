@@ -12,7 +12,7 @@ export default class PagoPAClientFactory
   /**
    * {@inheritDoc}
    */
-  public getClient(): PagoPAClient {
+  public getClient(): ReturnType<PagoPAClient> {
     return PagoPAClient(this.pagoPAApiUrl);
   }
 }

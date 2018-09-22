@@ -11,7 +11,7 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
   /**
    * {@inheritDoc}
    */
-  public getClient(): APIClient {
+  public getClient(): ReturnType<APIClient> {
     return APIClient(this.apiUrl, this.apiKey);
   }
 }
