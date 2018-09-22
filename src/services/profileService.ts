@@ -12,6 +12,7 @@ import {
 import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
 import { InitializedProfile } from "../types/api/InitializedProfile";
 
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { internalError, ServiceError } from "../types/error";
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
@@ -54,7 +55,10 @@ export default class ProfileService {
 
       // The response is correct.
       if (res.status === 200) {
-        return right(toInitializedProfile(res.value, user));
+        return ExtendedProfile.decode(res.value).bimap(
+          errs => internalError(readableReport(errs)),
+          profile => toInitializedProfile(profile, user)
+        );
       }
 
       // If the profile doesn't exists on the API we still

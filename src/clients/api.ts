@@ -26,7 +26,7 @@ import { ServicePublic } from "../types/api/ServicePublic";
 import { Services } from "../types/api/Services";
 
 const OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-type OcpApimSubscriptionKey = t.TypeOf<typeof OcpApimSubscriptionKey>;
+type OcpApimSubscriptionKey = typeof OcpApimSubscriptionKey;
 
 // ProfileLimitedOrExtended is oneOf [LimitedProfile, ExtendedProfile]
 const ProfileLimitedOrExtended = t.union([LimitedProfile, ExtendedProfile]);
@@ -215,4 +215,4 @@ export function APIClient(
   };
 }
 
-export type APIClient = t.TypeOf<typeof APIClient>;
+export type APIClient = typeof APIClient;

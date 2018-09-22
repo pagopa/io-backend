@@ -174,7 +174,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      payload: validPaymentActivation
+      activationsRequest: validPaymentActivation
     });
     expect(res).toEqual(right(proxyActivatePaymentResponse));
   });
@@ -190,7 +190,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      payload: validPaymentActivation
+      activationsRequest: validPaymentActivation
     });
     expect(res).toEqual(left(notFoundError(notFoundErrorMessage)));
   });
@@ -206,7 +206,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      payload: validPaymentActivation
+      activationsRequest: validPaymentActivation
     });
     expect(res).toEqual(left(internalError(internalErrorMessage)));
   });
@@ -222,7 +222,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      payload: validPaymentActivation
+      activationsRequest: validPaymentActivation
     });
     expect(res).toEqual(left(internalError(unknownErrorMessage)));
   });

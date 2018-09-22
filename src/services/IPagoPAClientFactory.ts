@@ -7,5 +7,5 @@ export interface IPagoPAClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
    */
-  getClient(): PagoPAClient;
+  getClient(): ReturnType<PagoPAClient>;
 }

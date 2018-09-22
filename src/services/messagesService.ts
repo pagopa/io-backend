@@ -120,7 +120,7 @@ export default class MessagesService {
     try {
       const client = this.apiClient.getClient();
 
-      const res = await client.getServices();
+      const res = await client.getServices({});
 
       return this.parseResponse<Services>(res);
     } catch (e) {
@@ -130,22 +130,21 @@ export default class MessagesService {
   }
 
   private parseResponse<T>(
-    res: IResponseType<number, T> | undefined
+    res: IResponseType<number, Error | T> | undefined
   ): Either<ServiceError, T> {
     // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
     if (!res) {
       log.error(logErrorOnDecodeError, res);
       return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
-
     if (res.status === 200) {
-      return right<ServiceError, T>(res.value);
-    } else if (res.status === 404) {
+      return right<ServiceError, T>(res.value as T);
+    }
+    if (res.status === 404) {
       log.error(logErrorOnNotFound, res.status);
       return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
-    } else {
-      log.error(logErrorOnStatusNotOK, res.status);
-      return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
+    log.error(logErrorOnStatusNotOK, res.status);
+    return left<ServiceError, T>(internalError(messageErrorOnApiError));
   }
 }
