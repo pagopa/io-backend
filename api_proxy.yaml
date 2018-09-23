@@ -331,8 +331,12 @@ paths:
               codiceContestoPagamento: "ABC123"
         "400":
           description: Invalid input or PagoPA response
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: PagoPA services are not available or request is rejected
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/payment-activations":
     x-swagger-router-controller: PagoPAProxyController
     post:
@@ -359,8 +363,12 @@ paths:
               importoSingoloVersamento: 200
         "400":
           description: Invalid input or PagoPA response
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: PagoPA services are not available or request is rejected
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/payment-activations/{codiceContestoPagamento}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:

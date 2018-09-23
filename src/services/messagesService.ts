@@ -5,6 +5,7 @@
 import { Either, left, right } from "fp-ts/lib/Either";
 import { IResponseType } from "italia-ts-commons/lib/requests";
 import {
+  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
@@ -30,6 +31,7 @@ const logErrorOnNotFound = "Not found";
 export type MessagesResponse<T> =
   | IResponseErrorInternal
   | IResponseErrorNotFound
+  | IResponseErrorGeneric
   | IResponseSuccessJson<T>;
 
 export default class MessagesService {
