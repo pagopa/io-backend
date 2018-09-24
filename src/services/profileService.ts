@@ -9,8 +9,7 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
-import { InitializedProfile } from "../types/api/InitializedProfile";
+import { Profile } from "../types/api/Profile";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
@@ -37,9 +36,7 @@ export default class ProfileService {
   /**
    * Retrieves the profile for a specific user.
    */
-  public async getProfile(
-    user: User
-  ): Promise<Either<ServiceError, AuthenticatedProfile | InitializedProfile>> {
+  public async getProfile(user: User): Promise<Either<ServiceError, Profile>> {
     try {
       const client = this.apiClient.getClient();
 
@@ -83,7 +80,7 @@ export default class ProfileService {
   public async upsertProfile(
     user: User,
     upsertProfile: ExtendedProfile
-  ): Promise<Either<ServiceError, InitializedProfile | AuthenticatedProfile>> {
+  ): Promise<Either<ServiceError, Profile>> {
     try {
       const client = this.apiClient.getClient();
 

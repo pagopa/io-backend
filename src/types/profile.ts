@@ -5,10 +5,9 @@
 
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
-import { AuthenticatedProfile } from "./api/AuthenticatedProfile";
 
 import { ExtendedProfile } from "./api/ExtendedProfile";
-import { InitializedProfile } from "./api/InitializedProfile";
+import { Profile } from "./api/Profile";
 
 import { User } from "./user";
 
@@ -21,7 +20,7 @@ import { User } from "./user";
 export function toInitializedProfile(
   from: ExtendedProfile,
   user: User
-): InitializedProfile {
+): Profile {
   return {
     extended: from,
     spid: {
@@ -40,14 +39,16 @@ export function toInitializedProfile(
  *
  * @param {User} user The user data extracted from SPID.
  */
-export function toAuthenticatedProfile(user: User): AuthenticatedProfile {
+export function toAuthenticatedProfile(user: User): Profile {
   return {
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    has_profile: false,
-    name: user.name,
-    spid_email: user.spid_email,
-    spid_mobile_phone: user.spid_mobile_phone
+    spid: {
+      family_name: user.family_name,
+      fiscal_code: user.fiscal_code,
+      has_profile: false,
+      name: user.name,
+      spid_email: user.spid_email,
+      spid_mobile_phone: user.spid_mobile_phone
+    }
   };
 }
 

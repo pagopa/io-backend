@@ -9,7 +9,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
-import { InitializedProfile } from "../types/api/InitializedProfile";
+import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { PagoPAUser } from "../types/api/PagoPAUser";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
@@ -41,10 +41,10 @@ export default class PagoPAController {
     }
 
     const profile = errorOrProfile.value;
-    const maybeCustomEmail = InitializedProfile.is(profile)
+    const maybeCustomEmail = ExtendedProfile.is(profile.extended)
       ? profile.extended.email
       : undefined;
-    const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
+    const email = maybeCustomEmail ? maybeCustomEmail : profile.spid.spid_email;
 
     return ResponseSuccessJson({
       email,

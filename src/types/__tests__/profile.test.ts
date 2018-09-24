@@ -64,22 +64,24 @@ describe("profile type", () => {
     );
 
     expect(userData.extended).toBeDefined();
-    expect(userData.extended.email).toBe(mockedExtendedProfile.email);
+    if (ExtendedProfile.is(userData.extended)) {
+      expect(userData.extended.email).toBe(mockedExtendedProfile.email);
+      expect(userData.extended.is_inbox_enabled).toBe(
+        mockedExtendedProfile.is_inbox_enabled
+      );
+      expect(userData.extended.is_webhook_enabled).toBe(
+        mockedExtendedProfile.is_webhook_enabled
+      );
+      expect(userData.extended.preferred_languages).toBe(
+        mockedExtendedProfile.preferred_languages
+      );
+      expect(userData.extended.version).toBe(mockedExtendedProfile.version);
+    }
     expect(userData.spid.family_name).toBe(mockedUser.family_name);
     expect(userData.spid.fiscal_code).toBe(mockedUser.fiscal_code);
     expect(userData.spid.has_profile).toBeTruthy();
-    expect(userData.extended.is_inbox_enabled).toBe(
-      mockedExtendedProfile.is_inbox_enabled
-    );
-    expect(userData.extended.is_webhook_enabled).toBe(
-      mockedExtendedProfile.is_webhook_enabled
-    );
     expect(userData.spid.name).toBe(mockedUser.name);
     expect(userData.spid.spid_email).toBe(mockedUser.spid_email);
-    expect(userData.extended.preferred_languages).toBe(
-      mockedExtendedProfile.preferred_languages
-    );
-    expect(userData.extended.version).toBe(mockedExtendedProfile.version);
   });
 
   /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
@@ -89,11 +91,11 @@ describe("profile type", () => {
       mockedUser // user
     );
 
-    expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.has_profile).toBeFalsy();
+    expect(userData.spid.family_name).toBe(mockedUser.family_name);
+    expect(userData.spid.fiscal_code).toBe(mockedUser.fiscal_code);
+    expect(userData.spid.has_profile).toBeFalsy();
 
-    expect(userData.spid_email).toBe(mockedUser.spid_email);
+    expect(userData.spid.spid_email).toBe(mockedUser.spid_email);
   });
 
   /*test case: Extracts a user profile from the body of a request.*/

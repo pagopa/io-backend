@@ -34,27 +34,33 @@ const validApiProfileResponse = {
     version: 42
   }
 };
-const proxyInitializedProfileResponse = {
-  blocked_inbox_or_channels: undefined,
-  email: aValidAPIEmail,
-  family_name: "Lusso",
-  fiscal_code: "XUZTCT88A51Y311X",
-  has_profile: true,
-  is_inbox_enabled: true,
-  is_webhook_enabled: true,
-  name: "Luca",
-  preferred_languages: ["it_IT"],
-  spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222",
-  version: 42
+const proxyProfileResponse = {
+  extended: {
+    blocked_inbox_or_channels: undefined,
+    email: aValidAPIEmail,
+    is_inbox_enabled: true,
+    is_webhook_enabled: true,
+    preferred_languages: ["it_IT"],
+    version: 42
+  },
+  spid: {
+    family_name: "Lusso",
+    fiscal_code: "XUZTCT88A51Y311X",
+    has_profile: true,
+    name: "Luca",
+    spid_email: aValidSPIDEmail,
+    spid_mobile_phone: "3222222222222"
+  }
 };
 const proxyAuthenticatedProfileResponse = {
-  family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
-  has_profile: false,
-  name: "Luca",
-  spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222"
+  spid: {
+    family_name: "Lusso",
+    fiscal_code: aValidFiscalCode,
+    has_profile: false,
+    name: "Luca",
+    spid_email: aValidSPIDEmail,
+    spid_mobile_phone: "3222222222222"
+  }
 };
 const upsertRequest = {
   email: aValidAPIEmail,
@@ -118,7 +124,7 @@ describe("ProfileService#getProfile", () => {
     expect(mockGetProfile).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(right(proxyInitializedProfileResponse));
+    expect(res).toEqual(right(proxyProfileResponse));
   });
 
   it("returns a default user profile if the response from the API is not found", async () => {
@@ -172,7 +178,7 @@ describe("ProfileService#upsertProfile", () => {
       fiscalCode: mockedUser.fiscal_code,
       newProfile: upsertRequest
     });
-    expect(res).toEqual(right(proxyInitializedProfileResponse));
+    expect(res).toEqual(right(proxyProfileResponse));
   });
 
   it("fails to create a new user profile to the API", async () => {

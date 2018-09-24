@@ -186,9 +186,7 @@ paths:
         "200":
           description: Found.
           schema:
-            allOf:
-              - $ref: "#/definitions/InitializedProfile"
-              - $ref: "#/definitions/AuthenticatedProfile"
+            - $ref: "#/definitions/Profile"
           examples:
             application/json:
               email: "email@example.com"
@@ -228,7 +226,7 @@ paths:
         '200':
           description: Profile updated.
           schema:
-            $ref: "#/definitions/InitializedProfile"
+            $ref: "#/definitions/Profile"
           examples:
             application/json:
               email: "email@example.com"
@@ -512,9 +510,9 @@ definitions:
     required:
       - platform
       - pushChannel
-  InitializedProfile:
+  Profile:
     type: object
-    title: Initialized profile
+    title: Profile
     description: Describes the user's profile after it has been stored in the Profile API.
     properties:
       spid:
