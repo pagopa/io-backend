@@ -530,8 +530,6 @@ definitions:
         type: string
       fiscal_code:
         $ref: '#/definitions/FiscalCode'
-      has_profile:
-        $ref: "#/definitions/HasProfile"
       name:
         type: string
       spid_email:

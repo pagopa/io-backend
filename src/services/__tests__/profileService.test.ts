@@ -46,7 +46,6 @@ const proxyProfileResponse = {
   spid: {
     family_name: "Lusso",
     fiscal_code: "XUZTCT88A51Y311X",
-    has_profile: true,
     name: "Luca",
     spid_email: aValidSPIDEmail,
     spid_mobile_phone: "3222222222222"
@@ -56,7 +55,6 @@ const proxyAuthenticatedProfileResponse = {
   spid: {
     family_name: "Lusso",
     fiscal_code: aValidFiscalCode,
-    has_profile: false,
     name: "Luca",
     spid_email: aValidSPIDEmail,
     spid_mobile_phone: "3222222222222"

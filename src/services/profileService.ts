@@ -14,7 +14,7 @@ import { Profile } from "../types/api/Profile";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { internalError, ServiceError } from "../types/error";
-import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
+import { toProfile } from "../types/profile";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
@@ -54,7 +54,7 @@ export default class ProfileService {
       if (res.status === 200) {
         return ExtendedProfile.decode(res.value).bimap(
           errs => internalError(readableReport(errs)),
-          profile => toInitializedProfile(profile, user)
+          profile => toProfile(user, profile)
         );
       }
 
@@ -62,7 +62,7 @@ export default class ProfileService {
       // return 200 to the App with the information we have
       // retrieved from SPID.
       if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
+        return right(toProfile(user));
       }
 
       // The API is returning an error.
@@ -96,9 +96,9 @@ export default class ProfileService {
       }
 
       if (res.status === 200) {
-        return right(toInitializedProfile(res.value, user));
+        return right(toProfile(user, res.value));
       } else if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
+        return right(toProfile(user));
       } else {
         log.error(logErrorOnStatusNotOK, res.status);
         return left(internalError(profileErrorOnApiError));

@@ -17,34 +17,12 @@ import { User } from "./user";
  * @param {ProfileLimitedOrExtended} from The profile retrieved from the Digital Citizenship API.
  * @param {User} user The user data extracted from SPID.
  */
-export function toInitializedProfile(
-  from: ExtendedProfile,
-  user: User
-): Profile {
+export function toProfile(user: User, from?: ExtendedProfile): Profile {
   return {
     extended: from,
     spid: {
       family_name: user.family_name,
       fiscal_code: user.fiscal_code,
-      has_profile: true,
-      name: user.name,
-      spid_email: user.spid_email,
-      spid_mobile_phone: user.spid_mobile_phone
-    }
-  };
-}
-
-/**
- * Converts an empty API profile to a Proxy profile.
- *
- * @param {User} user The user data extracted from SPID.
- */
-export function toAuthenticatedProfile(user: User): Profile {
-  return {
-    spid: {
-      family_name: user.family_name,
-      fiscal_code: user.fiscal_code,
-      has_profile: false,
       name: user.name,
       spid_email: user.spid_email,
       spid_mobile_phone: user.spid_mobile_phone

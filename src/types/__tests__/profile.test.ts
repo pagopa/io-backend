@@ -15,11 +15,7 @@ import {
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
 import { Version } from "../api/Version";
-import {
-  extractUpsertProfileFromRequest,
-  toAuthenticatedProfile,
-  toInitializedProfile
-} from "../profile";
+import { extractUpsertProfileFromRequest, toProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
@@ -58,9 +54,9 @@ describe("profile type", () => {
   /*test case: Converts an existing API profile to a Proxy profile using user profile with email from Digital Citzen API and SPID*/
   it("should get an app Proxy profile user profile with email from Digital Citzen API and SPID", async () => {
     // return app Proxy Profile.
-    const userData = toInitializedProfile(
-      mockedExtendedProfile, // from
-      mockedUser // user
+    const userData = toProfile(
+      mockedUser, // user,
+      mockedExtendedProfile // from
     );
 
     expect(userData.extended).toBeDefined();
@@ -79,7 +75,6 @@ describe("profile type", () => {
     }
     expect(userData.spid.family_name).toBe(mockedUser.family_name);
     expect(userData.spid.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.spid.has_profile).toBeTruthy();
     expect(userData.spid.name).toBe(mockedUser.name);
     expect(userData.spid.spid_email).toBe(mockedUser.spid_email);
   });
@@ -87,13 +82,13 @@ describe("profile type", () => {
   /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
   it("should get an app Proxy profile without email from user data extracted from SPID", async () => {
     // validate SpidUser. Return right.
-    const userData = toAuthenticatedProfile(
+    const userData = toProfile(
       mockedUser // user
     );
 
     expect(userData.spid.family_name).toBe(mockedUser.family_name);
     expect(userData.spid.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.spid.has_profile).toBeFalsy();
+    expect(userData.extended).toBeUndefined();
 
     expect(userData.spid.spid_email).toBe(mockedUser.spid_email);
   });
