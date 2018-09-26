@@ -85,7 +85,7 @@ export default class PagoPAProxyService {
       const client = this.pagoPAClient.getClient();
 
       const res = await client.getPaymentInfo({
-        rptIdFromString: params.rptId
+        rptId: params.rptId
       });
 
       return parseBaseResponse(res);

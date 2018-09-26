@@ -86,7 +86,7 @@ export function PagoPAClient(
     method: "get",
     query: _ => ({}),
     response_decoder: basePagopaResponseDecoder(PaymentRequestsGetResponse),
-    url: params => `/payment-requests/${params.rptIdFromString}`
+    url: params => `/payment-requests/${params.rptId}`
   };
 
   return {
