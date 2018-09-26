@@ -94,7 +94,7 @@
     "italia-tslint-rules": "^0.1.1",
     "italia-utils": "^3.14.3",
     "jest": "^23.6.0",
-    "lolex": "2.7.4",
+    "lolex": "2.7.5",
     "mock-redis-client": "^0.91.13",
     "nodemon": "^1.18.4",
     "npm-run-all": "^4.1.3",
