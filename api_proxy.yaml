@@ -41,6 +41,10 @@ paths:
           description: No service found for the provided ID.
           schema:
             $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error in retrieving the service.
+          schema:
+            $ref: "#/definitions/ProblemJson"
       parameters: []
   "/profile/sender-services":
     x-swagger-router-controller: ServicesController
@@ -186,9 +190,7 @@ paths:
         "200":
           description: Found.
           schema:
-            allOf:
-              - $ref: "#/definitions/InitializedProfile"
-              - $ref: "#/definitions/AuthenticatedProfile"
+            $ref: "#/definitions/UserProfile"
           examples:
             application/json:
               email: "email@example.com"
@@ -217,6 +219,7 @@ paths:
           name: body
           schema:
             $ref: "#/definitions/ExtendedProfile"
+          required: true
           x-examples:
             application/json:
               email: foobar@example.com
@@ -269,6 +272,7 @@ paths:
           in: body
           schema:
             $ref: "#/definitions/Installation"
+          required: true
           x-examples:
             application/json:
               platform: "gcm"
@@ -277,7 +281,7 @@ paths:
         "200":
           description: Success.
           schema:
-            type: string
+            $ref: "#/definitions/CreateOrUpdateInstallationResponse"
           examples:
             application/json:
               "ok"
@@ -333,6 +337,8 @@ paths:
           description: Invalid input or PagoPA response
           schema:
             $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: PagoPA services are not available or request is rejected
           schema:
@@ -348,6 +354,7 @@ paths:
           name: body
           schema:
             $ref: "#/definitions/PaymentActivationsPostRequest"
+          required: true
           x-examples:
             application/json:
               rptId: "12345678901012123456789012345"
@@ -365,6 +372,8 @@ paths:
           description: Invalid input or PagoPA response
           schema:
             $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: PagoPA services are not available or request is rejected
           schema:
@@ -391,29 +400,30 @@ paths:
               idPagamento: "123455"
         "400":
           description: Invalid input
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         "404":
           description: Activation status not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: Unavailable service
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
+  # Definitions from the digital citizenship APIs
   BlockedInboxOrChannels:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/BlockedInboxOrChannels"
-  CodiceContestoPagamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
   DepartmentName:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/DepartmentName"
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/EmailAddress"
-  EnteBeneficiario:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/EnteBeneficiario"
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ExtendedProfile"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/FiscalCode"
-  Iban:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/Iban"
-  ImportoEuroCents:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/ImportoEuroCents"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/IsInboxEnabled"
   IsWebhookEnabled:
@@ -432,22 +442,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/OrganizationName"
   PaginationResponse:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PaginationResponse"
-  PaymentActivationsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
-  PaymentActivationsPostRequest:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
-  PaymentActivationsPostResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
-  PaymentRequestsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
   PreferredLanguage:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/PreferredLanguages"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ProblemJson"
-  RptIdFromString:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/RptIdFromString"
   ServiceId:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceId"
   ServiceName:
@@ -456,12 +456,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServicePublic"
   ServiceTuple:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ServiceTuple"
-  SpezzoneStrutturatoCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
-  SpezzoniCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
-  SpezzoniCausaleVersamentoItem:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.5.12/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
@@ -478,6 +472,32 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/CreatedMessageWithoutContent"
   MessageResponseWithContent:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/MessageResponseWithContent"
+  # Definitions from pagopa-proxy
+  CodiceContestoPagamento:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
+  EnteBeneficiario:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/EnteBeneficiario"
+  Iban:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/Iban"
+  ImportoEuroCents:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/ImportoEuroCents"
+  PaymentActivationsGetResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+  PaymentActivationsPostRequest:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+  PaymentActivationsPostResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+  PaymentRequestsGetResponse:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
+  RptIdFromString:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/RptIdFromString"
+  SpezzoneStrutturatoCausaleVersamento:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+  SpezzoniCausaleVersamento:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+  SpezzoniCausaleVersamentoItem:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.7.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+  # Local definitions
   ServiceList:
     type: object
     title: List of services.
@@ -653,6 +673,12 @@ definitions:
       - https://www.spid.gov.it/SpidL1
       - https://www.spid.gov.it/SpidL2
       - https://www.spid.gov.it/SpidL3
+  UserProfile:
+    oneOf:
+      - $ref: "#/definitions/InitializedProfile"
+      - $ref: "#/definitions/AuthenticatedProfile"
+  CreateOrUpdateInstallationResponse:
+    type: string
 responses: {}
 parameters:
   PaginationRequest:
