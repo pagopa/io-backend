@@ -126,7 +126,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptIdFromString: aRptId
+      rptId: aRptId
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -146,7 +146,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptIdFromString: aRptId
+      rptId: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
@@ -162,7 +162,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptIdFromString: aRptId
+      rptId: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -178,7 +178,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptIdFromString: aRptId
+      rptId: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
