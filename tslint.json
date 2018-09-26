@@ -40,8 +40,8 @@
   "rulesDirectory": [],
   "linterOptions": {
     "exclude": [
-      "src/clients/api/**/*.ts",
-      "src/clients/pagopa/**/*.ts"
+      "node_modules/**/*",
+      "src/types/api/**/*.ts"
     ]
   }
 }

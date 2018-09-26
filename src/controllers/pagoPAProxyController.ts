@@ -1,17 +1,15 @@
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
 
-import PagoPAProxyService, {
-  PagoPAProxyResponse
-} from "../services/pagoPAProxyService";
+import PagoPAProxyService from "../services/pagoPAProxyService";
 
-import { PaymentRequestsGetResponse } from "../types/api/PaymentRequestsGetResponse";
+import {
+  ActivatePaymentT,
+  GetActivationStatusT,
+  GetPaymentInfoT
+} from "../types/api/requestTypes";
 
-import { PaymentActivationsGetResponse } from "../types/api/PaymentActivationsGetResponse";
-import { PaymentActivationsPostResponse } from "../types/api/PaymentActivationsPostResponse";
-
-import { toHttpError } from "../types/error";
+import { AsControllerResponseType } from "../utils/types";
 
 /**
  * This controller handles requests made by the APP that needs to be forwarded to the PagoPA proxy.
@@ -22,52 +20,33 @@ export default class PagoPAProxyController {
 
   public async getPaymentInfo(
     req: express.Request
-  ): Promise<PagoPAProxyResponse<PaymentRequestsGetResponse>> {
+  ): Promise<AsControllerResponseType<TypeofApiResponse<GetPaymentInfoT>>> {
+    // FIXME: implicit any
     const rptId = req.params.rptId;
-    const errorOrPaymentInfo = await this.pagoPAProxyService.getPaymentInfo(
+    return await this.pagoPAProxyService.getPaymentInfo({
       rptId
-    );
-
-    if (isLeft(errorOrPaymentInfo)) {
-      const error = errorOrPaymentInfo.value;
-      return toHttpError(error);
-    }
-
-    const paymentInfo = errorOrPaymentInfo.value;
-    return ResponseSuccessJson(paymentInfo);
+    });
   }
 
   public async activatePayment(
     req: express.Request
-  ): Promise<PagoPAProxyResponse<PaymentActivationsPostResponse>> {
-    const payload = req.body;
-    const errorOrPaymentInfo = await this.pagoPAProxyService.activatePayment(
-      payload
-    );
-
-    if (isLeft(errorOrPaymentInfo)) {
-      const error = errorOrPaymentInfo.value;
-      return toHttpError(error);
-    }
-
-    const paymentInfo = errorOrPaymentInfo.value;
-    return ResponseSuccessJson(paymentInfo);
+  ): Promise<AsControllerResponseType<TypeofApiResponse<ActivatePaymentT>>> {
+    // FIXME: implicit any
+    const paymentActivationsPostRequest = req.body;
+    return await this.pagoPAProxyService.activatePayment({
+      paymentActivationsPostRequest
+    });
   }
 
   public async getActivationStatus(
     req: express.Request
-  ): Promise<PagoPAProxyResponse<PaymentActivationsGetResponse>> {
+  ): Promise<
+    AsControllerResponseType<TypeofApiResponse<GetActivationStatusT>>
+  > {
+    // FIXME: implicit any
     const codiceContestoPagamento = req.params.codiceContestoPagamento;
-    const errorOrPaymentInfo = await this.pagoPAProxyService.getActivationStatus(
+    return await this.pagoPAProxyService.getActivationStatus({
       codiceContestoPagamento
-    );
-
-    if (isLeft(errorOrPaymentInfo)) {
-      const error = errorOrPaymentInfo.value;
-      return toHttpError(error);
-    }
-
-    const paymentInfo = errorOrPaymentInfo.value;
-    return ResponseSuccessJson(paymentInfo);
+    });
   }
 }

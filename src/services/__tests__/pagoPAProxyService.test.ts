@@ -1,11 +1,5 @@
-import { left, right } from "fp-ts/lib/Either";
 import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
 
-import {
-  badRequestError,
-  internalError,
-  notFoundError
-} from "../../types/error";
 import PagoPAClientFactory from "../pagoPAClientFactory";
 import PagoPAProxyService from "../pagoPAProxyService";
 
@@ -128,13 +122,17 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptIdFromString: aRptId
     });
-    expect(res).toEqual(right(proxyPaymentInfoResponse.value));
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyPaymentInfoResponse.value
+    });
   });
 
   it("get payment info fails with error 400 if PagoPA proxy fails with error 400", async () => {
@@ -144,13 +142,13 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptIdFromString: aRptId
     });
-    expect(res).toEqual(left(badRequestError("Request not valid")));
+    expect(res.kind).toEqual("IResponseErrorValidation");
   });
 
   it("get payment info fails with error 500 if PagoPA proxy fails with error 500", async () => {
@@ -160,13 +158,13 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptIdFromString: aRptId
     });
-    expect(res).toEqual(left(internalError("unknown")));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
   it("get payment info fails if if PagoPA proxy throws an error", async () => {
@@ -176,13 +174,13 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptIdFromString: aRptId
     });
-    expect(res).toEqual(left(internalError(unknownErrorMessage)));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
@@ -198,13 +196,19 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.activatePayment(validPaymentActivation);
+    const res = await service.activatePayment({
+      paymentActivationsPostRequest: validPaymentActivation
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
-    expect(res).toEqual(right(proxyActivatePaymentResponse));
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyActivatePaymentResponse
+    });
   });
 
   it("activate payment fails with error 400 if PagoPA proxy fails with error 400", async () => {
@@ -214,13 +218,15 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.activatePayment(validPaymentActivation);
+    const res = await service.activatePayment({
+      paymentActivationsPostRequest: validPaymentActivation
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
-    expect(res).toEqual(left(badRequestError("unknown")));
+    expect(res.kind).toEqual("IResponseErrorValidation");
   });
 
   it("activate payment fails with error 500 if PagoPA proxy fails with error 500", async () => {
@@ -230,13 +236,15 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.activatePayment(validPaymentActivation);
+    const res = await service.activatePayment({
+      paymentActivationsPostRequest: validPaymentActivation
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
-    expect(res).toEqual(left(internalError("unknown")));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
   it("activate payment fails if if PagoPA proxy throws an error", async () => {
@@ -246,13 +254,15 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.activatePayment(validPaymentActivation);
+    const res = await service.activatePayment({
+      paymentActivationsPostRequest: validPaymentActivation
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
-    expect(res).toEqual(left(internalError(unknownErrorMessage)));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
@@ -268,13 +278,19 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
-    expect(res).toEqual(right(proxyActivationStatusResponse));
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyActivationStatusResponse
+    });
   });
 
   it("get activation status fails with error 404 if PagoPA proxy fails with error 404", async () => {
@@ -284,13 +300,15 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
-    expect(res).toEqual(left(notFoundError("Not found")));
+    expect(res.kind).toEqual("IResponseErrorNotFound");
   });
 
   it("get activation status fails with error 500 if PagoPA proxy fails with error 500", async () => {
@@ -300,13 +318,15 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
-    expect(res).toEqual(left(internalError("Api error.")));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
   it("get activation info fails if if PagoPA proxy throws an error", async () => {
@@ -316,12 +336,14 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
     expect(mockGetClient).toHaveBeenCalledWith();
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
-    expect(res).toEqual(left(internalError(unknownErrorMessage)));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });

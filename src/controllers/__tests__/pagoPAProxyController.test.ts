@@ -1,8 +1,10 @@
-import { left, right } from "fp-ts/lib/Either";
+import {
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import PagoPAClientFactory from "../../services/pagoPAClientFactory";
 import PagoPAProxyService from "../../services/pagoPAProxyService";
-import { internalError } from "../../types/error";
 import PagoPAProxyController from "../pagoPAProxyController";
 
 const aRptId = "123456";
@@ -67,7 +69,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     const req = mockReq();
 
     mockGetPaymentInfo.mockReturnValue(
-      Promise.resolve(right(proxyPaymentInfoResponse))
+      Promise.resolve(ResponseSuccessJson(proxyPaymentInfoResponse))
     );
 
     req.params = { rptId: aRptId };
@@ -78,7 +80,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -90,7 +92,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     const req = mockReq();
 
     mockGetPaymentInfo.mockReturnValue(
-      Promise.resolve(left(internalError(internalErrorMessage)))
+      Promise.resolve(ResponseErrorInternal(internalErrorMessage))
     );
 
     req.params = { rptId: aRptId };
@@ -101,7 +103,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorInternal"
@@ -118,7 +120,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     const req = mockReq();
 
     mockActivatePayment.mockReturnValue(
-      Promise.resolve(right(proxyPaymentActivationsPostResponse))
+      Promise.resolve(ResponseSuccessJson(proxyPaymentActivationsPostResponse))
     );
 
     req.body = paymentActivationsPostRequest;
@@ -129,9 +131,9 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith(
+    expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest
-    );
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -143,7 +145,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     const req = mockReq();
 
     mockActivatePayment.mockReturnValue(
-      Promise.resolve(left(internalError(internalErrorMessage)))
+      Promise.resolve(ResponseErrorInternal(internalErrorMessage))
     );
 
     req.body = paymentActivationsPostRequest;
@@ -154,9 +156,9 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith(
+    expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest
-    );
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorInternal"
@@ -173,7 +175,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     const req = mockReq();
 
     mockGetActivationStatus.mockReturnValue(
-      Promise.resolve(right(proxyPaymentActivationsGetResponse))
+      Promise.resolve(ResponseSuccessJson(proxyPaymentActivationsGetResponse))
     );
 
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
@@ -184,9 +186,9 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith(
-      aCodiceContestoPagamento
-    );
+    expect(mockGetActivationStatus).toHaveBeenCalledWith({
+      codiceContestoPagamento: aCodiceContestoPagamento
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -198,7 +200,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     const req = mockReq();
 
     mockGetActivationStatus.mockReturnValue(
-      Promise.resolve(left(internalError(internalErrorMessage)))
+      Promise.resolve(ResponseErrorInternal(internalErrorMessage))
     );
 
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
@@ -209,9 +211,9 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith(
-      aCodiceContestoPagamento
-    );
+    expect(mockGetActivationStatus).toHaveBeenCalledWith({
+      codiceContestoPagamento: aCodiceContestoPagamento
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorInternal"

@@ -25,56 +25,28 @@ export type BasePagopaResponseType<R> =
   | IResponseType<400, ProblemJson>
   | IResponseType<500, ProblemJson>;
 
-function basePagopaResponseDecoder<R>(
-  type: t.Type<R, R>
+function basePagopaResponseDecoder<R, O = R>(
+  type: t.Type<R, O>
 ): ResponseDecoder<BasePagopaResponseType<R>> {
   return composeResponseDecoders(
     composeResponseDecoders(
-      ioResponseDecoder<200, R>(200, type),
+      ioResponseDecoder<200, R, O>(200, type),
       ioResponseDecoder<400, ProblemJson>(400, ProblemJson)
     ),
     ioResponseDecoder<500, ProblemJson>(500, ProblemJson)
   );
 }
 
-/**
- * A response decoder that ignores the payload and returns undefined
- */
-function undefinedResponseDecoder<S extends number, H extends string = never>(
-  status: S
-): ResponseDecoder<IResponseType<S, undefined, H>> {
-  return async response => {
-    if (response.status !== status) {
-      return undefined;
-    }
-    return {
-      // tslint:disable-next-line:no-any
-      headers: response.headers as any,
-      status,
-      value: undefined
-    };
-  };
-}
-
 export type AltPagopaResponseType<R> =
   // tslint:disable-next-line:max-union-size
-  | IResponseType<200, R>
-  | IResponseType<400, undefined>
-  | IResponseType<404, undefined>
-  | IResponseType<500, undefined>;
+  BasePagopaResponseType<R> | IResponseType<404, ProblemJson>;
 
-function altPagopaResponseDecoder<R>(
-  type: t.Type<R, R>
+function altPagopaResponseDecoder<R, O = R>(
+  type: t.Type<R, O>
 ): ResponseDecoder<AltPagopaResponseType<R>> {
   return composeResponseDecoders(
-    composeResponseDecoders(
-      composeResponseDecoders(
-        ioResponseDecoder<200, R>(200, type),
-        undefinedResponseDecoder<400>(400)
-      ),
-      undefinedResponseDecoder<404>(404)
-    ),
-    undefinedResponseDecoder<500>(500)
+    basePagopaResponseDecoder(type),
+    ioResponseDecoder<404, ProblemJson>(404, ProblemJson)
   );
 }
 
