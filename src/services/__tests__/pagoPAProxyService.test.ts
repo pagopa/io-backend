@@ -6,6 +6,7 @@ import PagoPAProxyService from "../pagoPAProxyService";
 import { CodiceContestoPagamento } from "../../types/api/pagopa-proxy/CodiceContestoPagamento";
 import { ImportoEuroCents } from "../../types/api/pagopa-proxy/ImportoEuroCents";
 import { PaymentActivationsPostRequest } from "../../types/api/pagopa-proxy/PaymentActivationsPostRequest";
+import { PaymentFaultEnum } from "../../types/api/pagopa-proxy/PaymentFault";
 import { GetPaymentInfoT } from "../../types/api/pagopa-proxy/requestTypes";
 
 const aRptId = "123456";
@@ -31,7 +32,9 @@ const badRequestPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
 const errorPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   headers: {},
   status: 500,
-  value: Error("Payment info error")
+  value: {
+    detail: PaymentFaultEnum.PAYMENT_UNAVAILABLE
+  }
 };
 
 const proxyPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {

@@ -12,6 +12,7 @@ import nodeFetch from "node-fetch";
 
 import { PaymentActivationsGetResponse } from "../types/api/pagopa-proxy/PaymentActivationsGetResponse";
 import { PaymentActivationsPostResponse } from "../types/api/pagopa-proxy/PaymentActivationsPostResponse";
+import { PaymentProblemJson } from "../types/api/pagopa-proxy/PaymentProblemJson";
 import { PaymentRequestsGetResponse } from "../types/api/pagopa-proxy/PaymentRequestsGetResponse";
 import { ProblemJson } from "../types/api/pagopa-proxy/ProblemJson";
 import {
@@ -23,7 +24,7 @@ import {
 export type BasePagopaResponseType<R> =
   | IResponseType<200, R>
   | IResponseType<400, ProblemJson>
-  | IResponseType<500, ProblemJson>;
+  | IResponseType<500, PaymentProblemJson>;
 
 function basePagopaResponseDecoder<R, O = R>(
   type: t.Type<R, O>
@@ -33,20 +34,29 @@ function basePagopaResponseDecoder<R, O = R>(
       ioResponseDecoder<200, R, O>(200, type),
       ioResponseDecoder<400, ProblemJson>(400, ProblemJson)
     ),
-    ioResponseDecoder<500, ProblemJson>(500, ProblemJson)
+    ioResponseDecoder<500, PaymentProblemJson>(500, PaymentProblemJson)
   );
 }
 
 export type AltPagopaResponseType<R> =
   // tslint:disable-next-line:max-union-size
-  BasePagopaResponseType<R> | IResponseType<404, ProblemJson>;
+  | IResponseType<200, R>
+  | IResponseType<400, ProblemJson>
+  | IResponseType<500, ProblemJson>
+  | IResponseType<404, ProblemJson>;
 
 function altPagopaResponseDecoder<R, O = R>(
   type: t.Type<R, O>
 ): ResponseDecoder<AltPagopaResponseType<R>> {
   return composeResponseDecoders(
-    basePagopaResponseDecoder(type),
-    ioResponseDecoder<404, ProblemJson>(404, ProblemJson)
+    composeResponseDecoders(
+      composeResponseDecoders(
+        ioResponseDecoder<200, R, O>(200, type),
+        ioResponseDecoder<400, ProblemJson>(400, ProblemJson)
+      ),
+      ioResponseDecoder<404, ProblemJson>(404, ProblemJson)
+    ),
+    ioResponseDecoder<500, ProblemJson>(500, ProblemJson)
   );
 }
 
