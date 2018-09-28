@@ -39,7 +39,7 @@ type BaseResponse<T> =
  * Parse 200, 400 and 500 responses
  */
 function parseBaseResponse<T>(
-  res: BasePagopaResponseType<T> | undefined
+  res: BasePagopaResponseType<T> | AltPagopaResponseType<T> | undefined
 ): BaseResponse<T> {
   if (res === undefined) {
     log.error(logErrorOnDecodeError, res);
