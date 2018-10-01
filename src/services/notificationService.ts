@@ -40,7 +40,7 @@ const APNSTemplate: INotificationTemplate = {
  */
 const GCMTemplate: INotificationTemplate = {
   body:
-    '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)"}}'
+    '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)"}}'
 };
 
 export default class NotificationService {
