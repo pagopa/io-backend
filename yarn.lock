@@ -2756,16 +2756,6 @@ italia-ts-commons@^2.14.0:
     validator "^10.1.0"
     winston "^3.0.0"
 
-italia-ts-commons@^2.14.0:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-2.14.0.tgz#2d5b258e4e39809c807c00880132374a40382986"
-  dependencies:
-    fp-ts "^1.6.0"
-    io-ts "^1.1.4"
-    json-set-map "^1.0.2"
-    validator "^10.1.0"
-    winston "^3.0.0"
-
 italia-tslint-rules@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/italia-tslint-rules/-/italia-tslint-rules-0.1.1.tgz#b150373925a268ff892a545229708484ac0533ba"
@@ -5456,9 +5446,9 @@ type-is@~1.6.15, type-is@~1.6.16:
     media-typer "0.3.0"
     mime-types "~2.1.18"
 
-typescript@^3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
+typescript@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.1.tgz#3362ba9dd1e482ebb2355b02dfe8bcd19a2c7c96"
 
 typestrict@^1.0.0:
   version "1.0.0"
