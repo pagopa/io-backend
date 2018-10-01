@@ -2756,16 +2756,6 @@ italia-ts-commons@^2.14.0:
     validator "^10.1.0"
     winston "^3.0.0"
 
-italia-ts-commons@^2.14.0:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-2.14.0.tgz#2d5b258e4e39809c807c00880132374a40382986"
-  dependencies:
-    fp-ts "^1.6.0"
-    io-ts "^1.1.4"
-    json-set-map "^1.0.2"
-    validator "^10.1.0"
-    winston "^3.0.0"
-
 italia-tslint-rules@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/italia-tslint-rules/-/italia-tslint-rules-0.1.1.tgz#b150373925a268ff892a545229708484ac0533ba"
@@ -5400,6 +5390,12 @@ tslint-sonarts@^1.7.0:
   dependencies:
     immutable "^3.8.2"
 
+tslint-sonarts@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/tslint-sonarts/-/tslint-sonarts-1.8.0.tgz#80f2e8addd418c3b8807fc0155dec33b5a81e8d1"
+  dependencies:
+    immutable "^3.8.2"
+
 tslint@^5.11.0:
   version "5.11.0"
   resolved "https://registry.yarnpkg.com/tslint/-/tslint-5.11.0.tgz#98f30c02eae3cde7006201e4c33cb08b48581eed"
@@ -5460,12 +5456,12 @@ typescript@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
 
-typestrict@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/typestrict/-/typestrict-1.0.0.tgz#8545c45a319de4d399e192353d1d87928befa964"
+typestrict@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/typestrict/-/typestrict-1.0.1.tgz#40aaf56ba7c2f3f0f413382092007877dbd20b11"
   dependencies:
     tslint-microsoft-contrib "^5.0.3"
-    tslint-sonarts "^1.7.0"
+    tslint-sonarts "^1.8.0"
 
 uglify-js@^2.6:
   version "2.8.29"
