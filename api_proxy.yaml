@@ -572,7 +572,6 @@ definitions:
     required:
       - family_name
       - fiscal_code
-      - has_profile
       - name
       - spid_email
       - spid_mobile_phone
