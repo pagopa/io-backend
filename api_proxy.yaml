@@ -596,14 +596,6 @@ definitions:
       hyphens).
       See https://en.wikipedia.org/wiki/Universally_unique_identifier
     minLength: 1
-  HasProfile:
-    type: boolean
-    default: false
-    description: True if the user has a remote profile.
-  IsEmailSet:
-    type: boolean
-    default: false
-    description:  True if the user has presonalized the email.
   Version:
     type: integer
     description: The entity version.
@@ -644,10 +636,6 @@ definitions:
       - https://www.spid.gov.it/SpidL1
       - https://www.spid.gov.it/SpidL2
       - https://www.spid.gov.it/SpidL3
-  UserProfile:
-    oneOf:
-      - $ref: "#/definitions/InitializedProfile"
-      - $ref: "#/definitions/AuthenticatedProfile"
   CreateOrUpdateInstallationResponse:
     type: string
 responses: {}
