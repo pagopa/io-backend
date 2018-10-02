@@ -42,7 +42,7 @@ const aGoogleInstallation = {
   templates: {
     template: {
       body:
-        '{"notification": {"title": "$(title)", "body": "$(message)"}, "data": {"message_id": "$(message_id)"}}'
+        '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)"}}'
     }
   }
 };
