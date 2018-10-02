@@ -190,7 +190,7 @@ paths:
         "200":
           description: Found.
           schema:
-            - $ref: "#/definitions/Profile"
+            $ref: "#/definitions/Profile"
           examples:
             application/json:
               email: "email@example.com"
