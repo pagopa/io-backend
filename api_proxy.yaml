@@ -281,10 +281,10 @@ paths:
         "200":
           description: Success.
           schema:
-            $ref: "#/definitions/CreateOrUpdateInstallationResponse"
+            $ref: "#/definitions/SuccessResponse"
           examples:
             application/json:
-              "ok"
+              "message": "ok"
         "401":
           description: Bearer token null or expired.
         "500":
@@ -679,8 +679,11 @@ definitions:
     oneOf:
       - $ref: "#/definitions/InitializedProfile"
       - $ref: "#/definitions/AuthenticatedProfile"
-  CreateOrUpdateInstallationResponse:
-    type: string
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
 responses: {}
 parameters:
   PaginationRequest:

@@ -44,10 +44,10 @@ paths:
         "200":
           description: Success.
           schema:
-            type: string
+            $ref: "#/definitions/SuccessResponse"
           examples:
             application/json:
-              "ok"
+              "message": "ok"
         "401":
           description: Token null or invalid.
         "500":
@@ -85,6 +85,11 @@ definitions:
     required:
       - message
       - sender_metadata
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
 responses: {}
 parameters: {}
 consumes:
