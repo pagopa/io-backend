@@ -16,7 +16,7 @@ import Response = Azure.ServiceBus.Response;
 import { InstallationID } from "../types/api/InstallationID";
 import { Notification } from "../types/api/Notification";
 import { PlatformEnum } from "../types/api/Platform";
-import { SuccessResponse } from "../types/commons";
+import { SuccessResponse } from "../types/api/SuccessResponse";
 import {
   IInstallation,
   INotificationTemplate,
