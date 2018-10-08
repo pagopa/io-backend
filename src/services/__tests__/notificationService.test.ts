@@ -42,7 +42,7 @@ const aGoogleInstallation = {
   templates: {
     template: {
       body:
-        '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)"}}'
+        '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)", "smallIcon": "ic_notification", "largeIcon": "ic_notification"}}'
     }
   }
 };
