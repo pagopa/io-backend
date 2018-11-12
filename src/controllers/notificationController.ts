@@ -45,8 +45,11 @@ export default class NotificationController {
     const errorOrUser = extractUserFromRequest(req);
 
     if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
       const error = errorOrUser.value;
+      log.error(
+        "Unable to extract the user from the request.: %s",
+        error.message
+      );
       return ResponseErrorInternal(error.message);
     }
 

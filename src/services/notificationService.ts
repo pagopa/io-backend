@@ -22,6 +22,7 @@ import {
   INotificationTemplate,
   toFiscalCodeHash
 } from "../types/notification";
+import { log } from "../utils/logger";
 
 /**
  * A template suitable for Apple's APNs.
@@ -105,6 +106,10 @@ export default class NotificationService {
         // tslint:disable-next-line:no-any
         (azureInstallation as any) as string,
         (error, response) => {
+          log.error(
+            "Unable to create installation: %s",
+            JSON.stringify(azureInstallation)
+          );
           return resolve(this.buildResponse(error, response));
         }
       );
