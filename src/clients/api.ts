@@ -35,17 +35,21 @@ export type ProfileLimitedOrExtended = t.TypeOf<
   typeof ProfileLimitedOrExtended
 >;
 
-export type BasicResponseTypeWith401<R> =
+export type BasicResponseTypeWith401And429<R> =
   | BasicResponseType<R>
-  | IResponseType<401, Error>;
+  | IResponseType<401, Error>
+  | IResponseType<429, Error>;
 
 // A basic response decoder that also include 401
-export function basicResponseDecoderWith401<R, O = R>(
+export function basicResponseDecoderWith401And429<R, O = R>(
   type: t.Type<R, O>
-): ResponseDecoder<BasicResponseTypeWith401<R>> {
+): ResponseDecoder<BasicResponseTypeWith401And429<R>> {
   return composeResponseDecoders(
-    basicResponseDecoder(type),
-    basicErrorResponseDecoder(401)
+    composeResponseDecoders(
+      basicResponseDecoder(type),
+      basicErrorResponseDecoder(401)
+    ),
+    basicErrorResponseDecoder(429)
   );
 }
 
@@ -63,7 +67,7 @@ export type GetProfileT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<ProfileLimitedOrExtended>
+  BasicResponseTypeWith401And429<ProfileLimitedOrExtended>
 >;
 
 export type CreateOrUpdateProfileT = IPostApiRequestType<
@@ -73,7 +77,7 @@ export type CreateOrUpdateProfileT = IPostApiRequestType<
   },
   OcpApimSubscriptionKey | "Content-Type",
   never,
-  BasicResponseTypeWith401<ExtendedProfile>
+  BasicResponseTypeWith401And429<ExtendedProfile>
 >;
 
 export type GetServicesByRecipientT = IGetApiRequestType<
@@ -82,7 +86,7 @@ export type GetServicesByRecipientT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<Services>
+  BasicResponseTypeWith401And429<Services>
 >;
 
 export type GetMessagesT = IGetApiRequestType<
@@ -91,7 +95,7 @@ export type GetMessagesT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<Messages>
+  BasicResponseTypeWith401And429<Messages>
 >;
 
 export type GetMessageT = IGetApiRequestType<
@@ -101,14 +105,14 @@ export type GetMessageT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<MessageResponseWithContent>
+  BasicResponseTypeWith401And429<MessageResponseWithContent>
 >;
 
 export type GetServicesT = IGetApiRequestType<
   {},
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<Services>
+  BasicResponseTypeWith401And429<Services>
 >;
 
 export type GetServiceT = IGetApiRequestType<
@@ -117,7 +121,7 @@ export type GetServiceT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401<ServicePublic>
+  BasicResponseTypeWith401And429<ServicePublic>
 >;
 
 export function APIClient(
@@ -145,7 +149,9 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ProfileLimitedOrExtended),
+    response_decoder: basicResponseDecoderWith401And429(
+      ProfileLimitedOrExtended
+    ),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
@@ -154,7 +160,7 @@ export function APIClient(
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ExtendedProfile),
+    response_decoder: basicResponseDecoderWith401And429(ExtendedProfile),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
@@ -162,7 +168,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(Services),
+    response_decoder: basicResponseDecoderWith401And429(Services),
     url: params => `/profiles/${params.fiscalCode}/sender-services`
   };
 
@@ -170,7 +176,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(Messages),
+    response_decoder: basicResponseDecoderWith401And429(Messages),
     url: params => `/messages/${params.fiscalCode}`
   };
 
@@ -178,7 +184,9 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(MessageResponseWithContent),
+    response_decoder: basicResponseDecoderWith401And429(
+      MessageResponseWithContent
+    ),
     url: params => `/messages/${params.fiscalCode}/${params.id}`
   };
 
@@ -186,7 +194,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(Services),
+    response_decoder: basicResponseDecoderWith401And429(Services),
     url: () => `/services`
   };
 
@@ -194,7 +202,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ServicePublic),
+    response_decoder: basicResponseDecoderWith401And429(ServicePublic),
     url: params => `/services/${params.id}`
   };
 
