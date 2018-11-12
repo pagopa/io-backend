@@ -108,8 +108,9 @@ export default class NotificationService {
         (error, response) => {
           if (error) {
             log.error(
-              "Unable to create installation: %s",
-              JSON.stringify(azureInstallation)
+              "Unable to create installation: %s (error=%s)",
+              JSON.stringify(azureInstallation),
+              error.message
             );
           }
           return resolve(this.buildResponse(error, response));
