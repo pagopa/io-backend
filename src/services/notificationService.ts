@@ -106,10 +106,12 @@ export default class NotificationService {
         // tslint:disable-next-line:no-any
         (azureInstallation as any) as string,
         (error, response) => {
-          log.error(
-            "Unable to create installation: %s",
-            JSON.stringify(azureInstallation)
-          );
+          if (error) {
+            log.error(
+              "Unable to create installation: %s",
+              JSON.stringify(azureInstallation)
+            );
+          }
           return resolve(this.buildResponse(error, response));
         }
       );
