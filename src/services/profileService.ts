@@ -15,7 +15,11 @@ import { InitializedProfile } from "../types/api/InitializedProfile";
 
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
-import { internalError, ServiceError } from "../types/error";
+import {
+  internalError,
+  requestThrottledError,
+  ServiceError
+} from "../types/error";
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
@@ -55,24 +59,25 @@ export default class ProfileService {
         return left(internalError(profileErrorOnUnknownError));
       }
 
-      // The response is correct.
-      if (res.status === 200) {
-        return ExtendedProfile.decode(res.value).bimap(
-          errs => internalError(readableReport(errs)),
-          profile => toInitializedProfile(profile, user)
-        );
+      switch (res.status) {
+        // The response is correct.
+        case 200:
+          return ExtendedProfile.decode(res.value).bimap(
+            errs => internalError(readableReport(errs)),
+            profile => toInitializedProfile(profile, user)
+          );
+        // If the profile doesn't exists on the API we still
+        // return 200 to the App with the information we have
+        // retrieved from SPID.
+        case 404:
+          return right(toAuthenticatedProfile(user));
+        case 429:
+          return left(requestThrottledError("Request throttled."));
+        default:
+          // The API is returning an error.
+          log.error(logErrorOnStatusNotOK, res.status);
+          return left(internalError(profileErrorOnApiError));
       }
-
-      // If the profile doesn't exists on the API we still
-      // return 200 to the App with the information we have
-      // retrieved from SPID.
-      if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
-      }
-
-      // The API is returning an error.
-      log.error(logErrorOnStatusNotOK, res.status);
-      return left(internalError(profileErrorOnApiError));
     } catch (e) {
       log.error(logErrorOnUnknownError, e);
       return left(internalError(profileErrorOnUnknownError));
@@ -100,13 +105,16 @@ export default class ProfileService {
         return left(internalError(profileErrorOnApiError));
       }
 
-      if (res.status === 200) {
-        return right(toInitializedProfile(res.value, user));
-      } else if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
-      } else {
-        log.error(logErrorOnStatusNotOK, res.status);
-        return left(internalError(profileErrorOnApiError));
+      switch (res.status) {
+        case 200:
+          return right(toInitializedProfile(res.value, user));
+        case 404:
+          return right(toAuthenticatedProfile(user));
+        case 429:
+          return left(requestThrottledError("Request throttled."));
+        default:
+          log.error(logErrorOnStatusNotOK, res.status);
+          return left(internalError(profileErrorOnApiError));
       }
     } catch (e) {
       log.error(logErrorOnUnknownError, e);

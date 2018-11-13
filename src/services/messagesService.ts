@@ -15,7 +15,12 @@ import { MessageResponseWithContent } from "../types/api/MessageResponseWithCont
 import { Messages } from "../types/api/Messages";
 import { ServicePublic } from "../types/api/ServicePublic";
 import { Services } from "../types/api/Services";
-import { internalError, notFoundError, ServiceError } from "../types/error";
+import {
+  internalError,
+  notFoundError,
+  requestThrottledError,
+  ServiceError
+} from "../types/error";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
@@ -27,6 +32,7 @@ const logErrorOnStatusNotOK = "Status is not 200: %s";
 const logErrorOnDecodeError = "Response can't be decoded: %O";
 const logErrorOnUnknownError = "Unknown error: %s";
 const logErrorOnNotFound = "Not found";
+const logErrorThrottled = "Request throttled";
 
 export type MessagesResponse<T> =
   | IResponseErrorInternal
@@ -139,14 +145,18 @@ export default class MessagesService {
       log.error(logErrorOnDecodeError, res);
       return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
-    if (res.status === 200) {
-      return right<ServiceError, T>(res.value as T);
+    switch (res.status) {
+      case 200:
+        return right<ServiceError, T>(res.value as T);
+      case 404:
+        log.error(logErrorOnNotFound, res.status);
+        return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
+      case 429:
+        log.debug(logErrorThrottled, res.status);
+        return left<ServiceError, T>(requestThrottledError(logErrorThrottled));
+      default:
+        log.error(logErrorOnStatusNotOK, res.status);
+        return left<ServiceError, T>(internalError(messageErrorOnApiError));
     }
-    if (res.status === 404) {
-      log.error(logErrorOnNotFound, res.status);
-      return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
-    }
-    log.error(logErrorOnStatusNotOK, res.status);
-    return left<ServiceError, T>(internalError(messageErrorOnApiError));
   }
 }
