@@ -21,16 +21,18 @@ export type ServiceErrorNotFound = IErrorTag<"ServiceErrorNotFound">;
 
 export type ServiceErrorBadRequest = IErrorTag<"ServiceErrorBadRequest">;
 
-export type RequestThrottledError = IErrorTag<"RequestThrottledError">;
+export type ServiceRequestThrottledError = IErrorTag<
+  "ServiceRequestThrottledError"
+>;
 
-export type ConflictError = IErrorTag<"ConflictError">;
+export type ServiceConflictError = IErrorTag<"ServiceConflictError">;
 
 export type ServiceError =
   | ServiceErrorInternal
   | ServiceErrorNotFound
   | ServiceErrorBadRequest
-  | RequestThrottledError
-  | ConflictError;
+  | ServiceRequestThrottledError
+  | ServiceConflictError;
 
 export function internalError(message: string): ServiceErrorInternal {
   return { message, kind: "ServiceErrorInternal" } as ServiceErrorInternal;
@@ -44,12 +46,17 @@ export function badRequestError(message: string): ServiceErrorBadRequest {
   return { message, kind: "ServiceErrorBadRequest" } as ServiceErrorBadRequest;
 }
 
-export function requestThrottledError(message: string): RequestThrottledError {
-  return { message, kind: "RequestThrottledError" } as RequestThrottledError;
+export function requestThrottledError(
+  message: string
+): ServiceRequestThrottledError {
+  return {
+    kind: "ServiceRequestThrottledError",
+    message
+  } as ServiceRequestThrottledError;
 }
 
-export function conflictError(message: string): ConflictError {
-  return { message, kind: "ConflictError" } as ConflictError;
+export function conflictError(message: string): ServiceConflictError {
+  return { message, kind: "ServiceConflictError" } as ServiceConflictError;
 }
 
 export function toHttpError(
@@ -62,9 +69,9 @@ export function toHttpError(
       return ResponseErrorNotFound("Not found", err.message);
     case "ServiceErrorBadRequest":
       return ResponseErrorGeneric(400, "Bad Request", err.message);
-    case "ConflictError":
+    case "ServiceConflictError":
       return ResponseErrorGeneric(409, "Conflict", err.message);
-    case "RequestThrottledError":
+    case "ServiceRequestThrottledError":
       return ResponseErrorGeneric(429, "Request Throttled", err.message);
   }
 }
