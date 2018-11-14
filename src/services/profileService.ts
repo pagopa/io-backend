@@ -16,6 +16,7 @@ import { InitializedProfile } from "../types/api/InitializedProfile";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import {
+  conflictError,
   internalError,
   requestThrottledError,
   ServiceError
@@ -110,6 +111,10 @@ export default class ProfileService {
           return right(toInitializedProfile(res.value, user));
         case 404:
           return right(toAuthenticatedProfile(user));
+        case 409:
+          return left(
+            conflictError("Version conflict while updating user's profile.")
+          );
         case 429:
           return left(requestThrottledError("Request throttled."));
         default:

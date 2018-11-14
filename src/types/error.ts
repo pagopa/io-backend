@@ -23,11 +23,14 @@ export type ServiceErrorBadRequest = IErrorTag<"ServiceErrorBadRequest">;
 
 export type RequestThrottledError = IErrorTag<"RequestThrottledError">;
 
+export type ConflictError = IErrorTag<"ConflictError">;
+
 export type ServiceError =
   | ServiceErrorInternal
   | ServiceErrorNotFound
   | ServiceErrorBadRequest
-  | RequestThrottledError;
+  | RequestThrottledError
+  | ConflictError;
 
 export function internalError(message: string): ServiceErrorInternal {
   return { message, kind: "ServiceErrorInternal" } as ServiceErrorInternal;
@@ -45,6 +48,10 @@ export function requestThrottledError(message: string): RequestThrottledError {
   return { message, kind: "RequestThrottledError" } as RequestThrottledError;
 }
 
+export function conflictError(message: string): ConflictError {
+  return { message, kind: "ConflictError" } as ConflictError;
+}
+
 export function toHttpError(
   err: ServiceError
 ): IResponseErrorNotFound | IResponseErrorInternal | IResponseErrorGeneric {
@@ -55,6 +62,8 @@ export function toHttpError(
       return ResponseErrorNotFound("Not found", err.message);
     case "ServiceErrorBadRequest":
       return ResponseErrorGeneric(400, "Bad Request", err.message);
+    case "ConflictError":
+      return ResponseErrorGeneric(409, "Conflict", err.message);
     case "RequestThrottledError":
       return ResponseErrorGeneric(429, "Request Throttled", err.message);
   }

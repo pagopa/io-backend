@@ -38,19 +38,26 @@ export type ProfileLimitedOrExtended = t.TypeOf<
 export type BasicResponseTypeWith401And429<R> =
   | BasicResponseType<R>
   | IResponseType<401, Error>
+  | IResponseType<409, Error>
   | IResponseType<429, Error>;
 
 // A basic response decoder that also include 401
-export function basicResponseDecoderWith401And429<R, O = R>(
+export function apiResponseDecoder<R, O = R>(
   type: t.Type<R, O>
 ): ResponseDecoder<BasicResponseTypeWith401And429<R>> {
-  return composeResponseDecoders(
-    composeResponseDecoders(
-      basicResponseDecoder(type),
-      basicErrorResponseDecoder(401)
-    ),
+  const decoder401 = composeResponseDecoders(
+    basicResponseDecoder(type),
+    basicErrorResponseDecoder(401)
+  );
+  const decoder401And429 = composeResponseDecoders(
+    decoder401,
     basicErrorResponseDecoder(429)
   );
+  const decoder401And429And409 = composeResponseDecoders(
+    decoder401And429,
+    basicErrorResponseDecoder(409)
+  );
+  return decoder401And429And409;
 }
 
 export function SubscriptionKeyHeaderProducer<P>(
@@ -149,9 +156,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(
-      ProfileLimitedOrExtended
-    ),
+    response_decoder: apiResponseDecoder(ProfileLimitedOrExtended),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
@@ -160,7 +165,7 @@ export function APIClient(
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(ExtendedProfile),
+    response_decoder: apiResponseDecoder(ExtendedProfile),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
@@ -168,7 +173,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(Services),
+    response_decoder: apiResponseDecoder(Services),
     url: params => `/profiles/${params.fiscalCode}/sender-services`
   };
 
@@ -176,7 +181,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(Messages),
+    response_decoder: apiResponseDecoder(Messages),
     url: params => `/messages/${params.fiscalCode}`
   };
 
@@ -184,9 +189,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(
-      MessageResponseWithContent
-    ),
+    response_decoder: apiResponseDecoder(MessageResponseWithContent),
     url: params => `/messages/${params.fiscalCode}/${params.id}`
   };
 
@@ -194,7 +197,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(Services),
+    response_decoder: apiResponseDecoder(Services),
     url: () => `/services`
   };
 
@@ -202,7 +205,7 @@ export function APIClient(
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401And429(ServicePublic),
+    response_decoder: apiResponseDecoder(ServicePublic),
     url: params => `/services/${params.id}`
   };
 
