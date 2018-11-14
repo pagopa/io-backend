@@ -263,6 +263,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
+        "409":
+          description: Version conflict.
         "429":
           description: Request throttled.
         '500':

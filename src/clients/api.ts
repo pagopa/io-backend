@@ -33,7 +33,7 @@ const ProfileLimitedOrExtended = t.union([LimitedProfile, ExtendedProfile]);
 
 export type ProfileLimitedOrExtended = t.TypeOf<
   typeof ProfileLimitedOrExtended
->;
+  >;
 
 export type ApiBasicResponseType<R> =
   | BasicResponseType<R>
@@ -53,11 +53,10 @@ export function apiResponseDecoder<R, O = R>(
     decoder401,
     basicErrorResponseDecoder(429)
   );
-  const decoder401And429And409 = composeResponseDecoders(
+  return composeResponseDecoders(
     decoder401And429,
     basicErrorResponseDecoder(409)
   );
-  return decoder401And429And409;
 }
 
 export function SubscriptionKeyHeaderProducer<P>(
@@ -75,7 +74,7 @@ export type GetProfileT = IGetApiRequestType<
   OcpApimSubscriptionKey,
   never,
   ApiBasicResponseType<ProfileLimitedOrExtended>
->;
+  >;
 
 export type CreateOrUpdateProfileT = IPostApiRequestType<
   {
@@ -85,7 +84,7 @@ export type CreateOrUpdateProfileT = IPostApiRequestType<
   OcpApimSubscriptionKey | "Content-Type",
   never,
   ApiBasicResponseType<ExtendedProfile>
->;
+  >;
 
 export type GetServicesByRecipientT = IGetApiRequestType<
   {
@@ -94,7 +93,7 @@ export type GetServicesByRecipientT = IGetApiRequestType<
   OcpApimSubscriptionKey,
   never,
   ApiBasicResponseType<Services>
->;
+  >;
 
 export type GetMessagesT = IGetApiRequestType<
   {
@@ -103,7 +102,7 @@ export type GetMessagesT = IGetApiRequestType<
   OcpApimSubscriptionKey,
   never,
   ApiBasicResponseType<Messages>
->;
+  >;
 
 export type GetMessageT = IGetApiRequestType<
   {
@@ -113,14 +112,14 @@ export type GetMessageT = IGetApiRequestType<
   OcpApimSubscriptionKey,
   never,
   ApiBasicResponseType<MessageResponseWithContent>
->;
+  >;
 
 export type GetServicesT = IGetApiRequestType<
   {},
   OcpApimSubscriptionKey,
   never,
   ApiBasicResponseType<Services>
->;
+  >;
 
 export type GetServiceT = IGetApiRequestType<
   {
@@ -129,7 +128,7 @@ export type GetServiceT = IGetApiRequestType<
   OcpApimSubscriptionKey,
   never,
   ApiBasicResponseType<ServicePublic>
->;
+  >;
 
 export function APIClient(
   baseUrl: string,
