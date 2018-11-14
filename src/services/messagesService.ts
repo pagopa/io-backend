@@ -28,11 +28,11 @@ import { IApiClientFactoryInterface } from "./IApiClientFactory";
 const messageErrorOnUnknownError = "Unknown response.";
 const messageErrorOnApiError = "Api error.";
 const messageErrorOnNotFound = "Not found.";
+const messageErrorOnThrottled = "Request throttled";
 const logErrorOnStatusNotOK = "Status is not 200: %s";
 const logErrorOnDecodeError = "Response can't be decoded: %O";
 const logErrorOnUnknownError = "Unknown error: %s";
 const logErrorOnNotFound = "Not found";
-const logErrorThrottled = "Request throttled";
 
 export type MessagesResponse<T> =
   | IResponseErrorInternal
@@ -152,8 +152,10 @@ export default class MessagesService {
         log.error(logErrorOnNotFound, res.status);
         return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
       case 429:
-        log.debug(logErrorThrottled, res.status);
-        return left<ServiceError, T>(requestThrottledError(logErrorThrottled));
+        log.debug(messageErrorOnThrottled, res.status);
+        return left<ServiceError, T>(
+          requestThrottledError(messageErrorOnThrottled)
+        );
       default:
         log.error(logErrorOnStatusNotOK, res.status);
         return left<ServiceError, T>(internalError(messageErrorOnApiError));
