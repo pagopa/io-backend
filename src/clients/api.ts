@@ -35,7 +35,7 @@ export type ProfileLimitedOrExtended = t.TypeOf<
   typeof ProfileLimitedOrExtended
 >;
 
-export type BasicResponseTypeWith401And429<R> =
+export type ApiBasicResponseType<R> =
   | BasicResponseType<R>
   | IResponseType<401, Error>
   | IResponseType<409, Error>
@@ -44,7 +44,7 @@ export type BasicResponseTypeWith401And429<R> =
 // A basic response decoder that also include 401
 export function apiResponseDecoder<R, O = R>(
   type: t.Type<R, O>
-): ResponseDecoder<BasicResponseTypeWith401And429<R>> {
+): ResponseDecoder<ApiBasicResponseType<R>> {
   const decoder401 = composeResponseDecoders(
     basicResponseDecoder(type),
     basicErrorResponseDecoder(401)
@@ -74,7 +74,7 @@ export type GetProfileT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401And429<ProfileLimitedOrExtended>
+  ApiBasicResponseType<ProfileLimitedOrExtended>
 >;
 
 export type CreateOrUpdateProfileT = IPostApiRequestType<
@@ -84,7 +84,7 @@ export type CreateOrUpdateProfileT = IPostApiRequestType<
   },
   OcpApimSubscriptionKey | "Content-Type",
   never,
-  BasicResponseTypeWith401And429<ExtendedProfile>
+  ApiBasicResponseType<ExtendedProfile>
 >;
 
 export type GetServicesByRecipientT = IGetApiRequestType<
@@ -93,7 +93,7 @@ export type GetServicesByRecipientT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401And429<Services>
+  ApiBasicResponseType<Services>
 >;
 
 export type GetMessagesT = IGetApiRequestType<
@@ -102,7 +102,7 @@ export type GetMessagesT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401And429<Messages>
+  ApiBasicResponseType<Messages>
 >;
 
 export type GetMessageT = IGetApiRequestType<
@@ -112,14 +112,14 @@ export type GetMessageT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401And429<MessageResponseWithContent>
+  ApiBasicResponseType<MessageResponseWithContent>
 >;
 
 export type GetServicesT = IGetApiRequestType<
   {},
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401And429<Services>
+  ApiBasicResponseType<Services>
 >;
 
 export type GetServiceT = IGetApiRequestType<
@@ -128,7 +128,7 @@ export type GetServiceT = IGetApiRequestType<
   },
   OcpApimSubscriptionKey,
   never,
-  BasicResponseTypeWith401And429<ServicePublic>
+  ApiBasicResponseType<ServicePublic>
 >;
 
 export function APIClient(
