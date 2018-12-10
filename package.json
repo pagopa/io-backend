@@ -110,7 +110,7 @@
     "tslint-immutable": "^4.7.0",
     "tslint-language-service": "^0.9.9",
     "tslint-plugin-prettier": "^2.0.0",
-    "tslint-sonarts": "^1.7.0",
+    "tslint-sonarts": "^1.8.0",
     "typestrict": "^1.0.1"
   },
   "jest": {
