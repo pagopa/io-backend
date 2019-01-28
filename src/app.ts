@@ -28,6 +28,7 @@ import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import ServicesController from "./controllers/servicesController";
 
+import { DOMParser } from "xmldom";
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import {
@@ -65,7 +66,20 @@ function withSpidAuth(
     passport.authenticate("spid", async (err, user) => {
       if (err) {
         log.error("Error in SPID authentication: %s", err);
-        res.redirect(clientErrorRedirectionUrl);
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(err.statusXml || "","text/xml");
+        let errorCode = "";
+        if (!!xmlDoc) {
+          const errorElement = xmlDoc.getElementsByTagName("StatusMessage");
+          if (errorElement.length > 0) {
+            const indexString = "ErrorCode nr";
+            const errorString = errorElement[0].textContent || "";
+            errorCode = errorString.slice(
+              errorString.indexOf(indexString) + indexString.length
+            );
+          }
+        }
+        res.redirect(clientErrorRedirectionUrl + (errorCode.length ? `?errorCode=${errorCode}` : ''));
         return;
       }
       if (!user) {
