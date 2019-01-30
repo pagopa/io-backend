@@ -29,6 +29,7 @@ import NotificationController from "./controllers/notificationController";
 import ServicesController from "./controllers/servicesController";
 
 import { DOMParser } from "xmldom";
+
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import {
@@ -67,20 +68,23 @@ function withSpidAuth(
       if (err) {
         log.error("Error in SPID authentication: %s", err);
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(err.statusXml || "","text/xml");
-        let errorCode = "";
+        const xmlDoc = parser.parseFromString(err.statusXml || "", "text/xml");
         if (!!xmlDoc) {
           const errorElement = xmlDoc.getElementsByTagName("StatusMessage");
           if (errorElement.length > 0) {
             const indexString = "ErrorCode nr";
             const errorString = errorElement[0].textContent || "";
-            errorCode = errorString.slice(
+            const errorCode = errorString.slice(
               errorString.indexOf(indexString) + indexString.length
+            );
+
+            return res.redirect(
+              clientErrorRedirectionUrl +
+                (errorCode.length ? `?errorCode=${errorCode}` : "")
             );
           }
         }
-        res.redirect(clientErrorRedirectionUrl + (errorCode.length ? `?errorCode=${errorCode}` : ''));
-        return;
+        return res.redirect(clientErrorRedirectionUrl);
       }
       if (!user) {
         log.error("Error in SPID authentication: no user found");
