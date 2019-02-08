@@ -28,8 +28,6 @@ import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import ServicesController from "./controllers/servicesController";
 
-import { DOMParser } from "xmldom";
-
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import {
@@ -45,6 +43,8 @@ import SessionController from "./controllers/sessionController";
 import { ServerInfo } from "./types/api/ServerInfo";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
+
+import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -67,24 +67,11 @@ function withSpidAuth(
     passport.authenticate("spid", async (err, user) => {
       if (err) {
         log.error("Error in SPID authentication: %s", err);
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(err.statusXml || "", "text/xml");
-        if (!!xmlDoc) {
-          const errorElement = xmlDoc.getElementsByTagName("StatusMessage");
-          if (errorElement.length > 0) {
-            const indexString = "ErrorCode nr";
-            const errorString = errorElement[0].textContent || "";
-            const errorCode = errorString.slice(
-              errorString.indexOf(indexString) + indexString.length
-            );
-
-            return res.redirect(
-              clientErrorRedirectionUrl +
-                (errorCode.length ? `?errorCode=${errorCode}` : "")
-            );
-          }
-        }
-        return res.redirect(clientErrorRedirectionUrl);
+        const errorCode = getErrorCodeFromResponse(err.statusXml);
+        return res.redirect(
+          clientErrorRedirectionUrl +
+            (errorCode ? `?errorCode=${errorCode}` : "")
+        );
       }
       if (!user) {
         log.error("Error in SPID authentication: no user found");
