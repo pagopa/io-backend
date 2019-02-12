@@ -73,7 +73,7 @@ function withSpidAuth(
           clientErrorRedirectionUrl +
             fromNullable(err.statusXml)
               .chain(statusXml => getErrorCodeFromResponse(statusXml))
-              .chain(errorCode => some(`?errorCode=${errorCode}`))
+              .map(errorCode =>`?errorCode=${errorCode}`)
               .getOrElse("")
         );
       }
