@@ -1,6 +1,8 @@
 import { DOMParser } from "xmldom";
 
-import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
+import { none, Option, some, tryCatch } from "fp-ts/lib/Option";
+
+type SpidError = string;
 
 /**
  * Extract StatusMessage from SAML response
@@ -8,9 +10,10 @@ import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
  * ie. for <StatusMessage>ErrorCode nr22</StatusMessage>
  * returns "22"
  */
-export default function getErrorCodeFromResponse(xml: string): Option<string> {
-  return fromNullable(xml)
-    .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
+export default function getErrorCodeFromResponse(
+  xml: string
+): Option<SpidError> {
+  return tryCatch(() => new DOMParser().parseFromString(xml))
     .chain(
       xmlResponse =>
         xmlResponse

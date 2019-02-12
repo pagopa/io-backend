@@ -24,6 +24,8 @@ import * as t from "io-ts";
 import * as morgan from "morgan";
 import * as passport from "passport";
 
+import { fromNullable, some } from "fp-ts/lib/Option";
+
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import ServicesController from "./controllers/servicesController";
@@ -67,10 +69,12 @@ function withSpidAuth(
     passport.authenticate("spid", async (err, user) => {
       if (err) {
         log.error("Error in SPID authentication: %s", err);
-        const errorCode = getErrorCodeFromResponse(err.statusXml);
         return res.redirect(
           clientErrorRedirectionUrl +
-            (errorCode ? `?errorCode=${errorCode}` : "")
+            fromNullable(err.statusXml)
+              .chain(statusXml => getErrorCodeFromResponse(statusXml))
+              .chain(errorCode => some(`?errorCode=${errorCode}`))
+              .getOrElse("")
         );
       }
       if (!user) {
