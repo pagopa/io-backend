@@ -9,7 +9,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import { FiscalCode } from "../types/api/FiscalCode";
 import { Installation } from "../types/api/Installation";
 import Response = Azure.ServiceBus.Response;

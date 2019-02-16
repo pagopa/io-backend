@@ -10,7 +10,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import { PublicSession } from "../types/api/PublicSession";
 import { extractUserFromRequest } from "../types/user";
 

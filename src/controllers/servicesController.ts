@@ -8,7 +8,7 @@ import { isLeft } from "fp-ts/lib/Either";
 import {
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import MessagesService, { MessagesResponse } from "../services/messagesService";
 import { ServiceList } from "../types/api/ServiceList";
 import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";

@@ -4,12 +4,12 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { ReadableReporter } from "io-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
   IResponseSuccessJson,
   ResponseErrorInternal
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import NotificationService from "../services/notificationService";
 import { Installation } from "../types/api/Installation";
 import { InstallationID } from "../types/api/InstallationID";

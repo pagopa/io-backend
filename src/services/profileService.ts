@@ -9,11 +9,11 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
 import { InitializedProfile } from "../types/api/InitializedProfile";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { readableReport } from "io-ts-commons/lib/reporters";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { internalError, ServiceError } from "../types/error";
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";

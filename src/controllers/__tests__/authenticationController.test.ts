@@ -5,8 +5,8 @@
 /* tslint:disable:no-big-function */
 
 import { left, right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+import { NonEmptyString } from "io-ts-commons/lib/strings";
+import { UrlFromString } from "io-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
 import mockReq from "../../__mocks__/request";

@@ -2,14 +2,14 @@ import {
   IResponseType,
   TypeofApiParams,
   TypeofApiResponse
-} from "italia-ts-commons/lib/requests";
+} from "io-ts-commons/lib/requests";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ProblemJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 
 export type AsControllerResponseType<T> = T extends IResponseType<200, infer R>
   ? IResponseSuccessJson<R>

@@ -10,7 +10,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
 import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
 import { InitializedProfile } from "../types/api/InitializedProfile";

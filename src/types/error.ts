@@ -8,7 +8,7 @@ import {
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorNotFound
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 
 export interface IErrorTag<T> {
   readonly message: string;

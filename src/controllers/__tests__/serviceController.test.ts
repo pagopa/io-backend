@@ -1,11 +1,11 @@
 /* tslint:disable:no-any */
 
 import { right } from "fp-ts/lib/Either";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "io-ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "io-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";

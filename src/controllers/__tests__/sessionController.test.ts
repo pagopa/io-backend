@@ -4,7 +4,7 @@
 /* tslint:disable:no-identical-functions */
 /* tslint:disable:no-big-function */
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "io-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { EmailAddress } from "../../types/api/EmailAddress";

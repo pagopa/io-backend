@@ -15,8 +15,8 @@ import {
   ResponsePermanentRedirect,
   ResponseSuccessJson,
   ResponseSuccessXml
-} from "italia-ts-commons/lib/responses";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+} from "io-ts-commons/lib/responses";
+import { UrlFromString } from "io-ts-commons/lib/url";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { SuccessResponse } from "../types/commons";

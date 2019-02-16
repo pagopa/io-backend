@@ -4,7 +4,7 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
-import { CIDR, IPString } from "italia-ts-commons/lib/strings";
+import { CIDR, IPString } from "io-ts-commons/lib/strings";
 import * as rangeCheck from "range_check";
 import * as requestIp from "request-ip";
 

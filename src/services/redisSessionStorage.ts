@@ -3,7 +3,7 @@
  */
 
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { ReadableReporter } from "io-ts-commons/lib/reporters";
 import * as redis from "redis";
 import { isNumber } from "util";
 import { SessionToken, WalletToken } from "../types/token";

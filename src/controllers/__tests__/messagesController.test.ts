@@ -1,7 +1,7 @@
 /* tslint:disable:no-any */
 
 import { right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "io-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";

@@ -1,5 +1,5 @@
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { ResponseSuccessJson } from "io-ts-commons/lib/responses";
+import { NonEmptyString } from "io-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";

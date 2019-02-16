@@ -3,7 +3,7 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "io-ts-commons/lib/strings";
 import { EmailAddress } from "../api/EmailAddress";
 import { ExtendedProfile } from "../api/ExtendedProfile";
 import { FiscalCode } from "../api/FiscalCode";

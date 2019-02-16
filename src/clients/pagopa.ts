@@ -7,7 +7,7 @@ import {
   IResponseType,
   ResponseDecoder,
   TypeofApiCall
-} from "italia-ts-commons/lib/requests";
+} from "io-ts-commons/lib/requests";
 import nodeFetch from "node-fetch";
 
 import { PaymentActivationsGetResponse } from "../types/api/pagopa-proxy/PaymentActivationsGetResponse";

@@ -33,9 +33,9 @@ import expressEnforcesSsl = require("express-enforces-ssl");
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
-import { toExpressHandler } from "italia-ts-commons/lib/express";
-import { CIDR } from "italia-ts-commons/lib/strings";
+} from "io-ts-commons/lib/environment";
+import { toExpressHandler } from "io-ts-commons/lib/express";
+import { CIDR } from "io-ts-commons/lib/strings";
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
 import PagoPAProxyController from "./controllers/pagoPAProxyController";

@@ -7,7 +7,7 @@ import { isLeft } from "fp-ts/lib/Either";
 import {
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import ProfileService, { profileResponse } from "../services/profileService";
 import { InitializedProfile } from "../types/api/InitializedProfile";
 import { PagoPAUser } from "../types/api/PagoPAUser";

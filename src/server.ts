@@ -4,8 +4,8 @@
 
 import * as http from "http";
 import * as https from "https";
-import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
+import { NodeEnvironmentEnum } from "io-ts-commons/lib/environment";
+import { CIDR } from "io-ts-commons/lib/strings";
 import { newApp } from "./app";
 import container from "./container";
 import { log } from "./utils/logger";

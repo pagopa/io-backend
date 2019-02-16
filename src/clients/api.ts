@@ -15,7 +15,7 @@ import {
   RequestHeaderProducer,
   ResponseDecoder,
   TypeofApiCall
-} from "italia-ts-commons/lib/requests";
+} from "io-ts-commons/lib/requests";
 import nodeFetch from "node-fetch";
 import { ExtendedProfile } from "../types/api/ExtendedProfile";
 import { FiscalCode } from "../types/api/FiscalCode";

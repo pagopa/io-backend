@@ -3,13 +3,13 @@
  */
 
 import { Either, left, right } from "fp-ts/lib/Either";
-import { IResponseType } from "italia-ts-commons/lib/requests";
+import { IResponseType } from "io-ts-commons/lib/requests";
 import {
   IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
 import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
 import { Messages } from "../types/api/Messages";

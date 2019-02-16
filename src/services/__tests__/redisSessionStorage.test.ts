@@ -5,7 +5,7 @@
 /* tslint:disable:no-null-keyword */
 
 import { left, right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "io-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../types/api/EmailAddress";

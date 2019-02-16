@@ -1,7 +1,7 @@
 import {
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "io-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import PagoPAClientFactory from "../../services/pagoPAClientFactory";
 import PagoPAProxyService from "../../services/pagoPAProxyService";

@@ -1,4 +1,4 @@
-import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
+import { TypeofApiResponse } from "io-ts-commons/lib/requests";
 
 import PagoPAClientFactory from "../pagoPAClientFactory";
 import PagoPAProxyService from "../pagoPAProxyService";

@@ -11,10 +11,10 @@ import * as fs from "fs";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
-import { CIDR } from "italia-ts-commons/lib/strings";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+} from "io-ts-commons/lib/environment";
+import { ReadableReporter } from "io-ts-commons/lib/reporters";
+import { CIDR } from "io-ts-commons/lib/strings";
+import { UrlFromString } from "io-ts-commons/lib/url";
 import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
 import AuthenticationController from "./controllers/authenticationController";
