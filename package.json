@@ -21,21 +21,21 @@
     "generate:proxy:notification-models": "gen-api-models --api-spec api_notifications.yaml --no-strict --out-dir src/types/api",
     "generate:proxy:pagopa-models": "gen-api-models --api-spec api_pagopa.yaml --no-strict --out-dir src/types/api",
     "generate:proxy:public-models": "gen-api-models --api-spec api_public.yaml --no-strict --out-dir src/types/api",
-    "generate:api:pagopaproxy": "rimraf src/types/api/pagopa-proxy && mkdir -p src/types/api/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/teamdigitale/italia-pagopa-proxy/v0.8.6/api_pagopa.yaml --no-strict --out-dir src/types/api/pagopa-proxy --request-types",
+    "generate:api:pagopaproxy": "rimraf src/types/api/pagopa-proxy && mkdir -p src/types/api/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml --no-strict --out-dir src/types/api/pagopa-proxy --request-types",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/teamdigitale/italia-backend.git"
+    "url": "git+https://github.com/teamdigitale/io-backend.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/teamdigitale/italia-backend/issues"
+    "url": "https://github.com/teamdigitale/io-backend/issues"
   },
-  "homepage": "https://github.com/teamdigitale/italia-backend#readme",
+  "homepage": "https://github.com/teamdigitale/io-backend#readme",
   "dependencies": {
     "awilix": "^3.0.9",
     "azure-sb": "^0.10.6",

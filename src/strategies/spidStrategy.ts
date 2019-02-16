@@ -102,7 +102,7 @@ const spidStrategy = (
       identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
       issuer: samlIssuer,
       organization: {
-        URL: "https://github.com/teamdigitale/italia-backend",
+        URL: "https://github.com/teamdigitale/io-backend",
         displayName: "Digital citizenship proxy",
         name: "Digital citizenship proxy"
       },

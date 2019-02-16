@@ -1,21 +1,21 @@
-[![CircleCI](https://circleci.com/gh/teamdigitale/italia-backend.svg?style=svg)](https://circleci.com/gh/teamdigitale/italia-backend)
+[![CircleCI](https://circleci.com/gh/teamdigitale/io-backend.svg?style=svg)](https://circleci.com/gh/teamdigitale/io-backend)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/italia-backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=teamdigitale/italia-backend&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/italia-backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=teamdigitale/io-backend&amp;utm_campaign=Badge_Grade)
 
-[![codecov](https://codecov.io/gh/teamdigitale/italia-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/teamdigitale/italia-backend)
+[![codecov](https://codecov.io/gh/teamdigitale/io-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/teamdigitale/io-backend)
 
-[![dependencies](https://david-dm.org/teamdigitale/italia-backend/status.svg)](https://david-dm.org/teamdigitale/italia-backend)
+[![dependencies](https://david-dm.org/teamdigitale/io-backend/status.svg)](https://david-dm.org/teamdigitale/io-backend)
 
-[![Docker Build Status](https://img.shields.io/docker/build/teamdigitale/italia-backend.svg)](https://hub.docker.com/r/teamdigitale/italia-backend/)
+[![Docker Build Status](https://img.shields.io/docker/build/teamdigitale/io-backend.svg)](https://hub.docker.com/r/teamdigitale/io-backend/)
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/teamdigitale/italia-backend/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/teamdigitale/io-backend/maintainability)
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend?ref=badge_shield)
 
 # Digital citizenship web and mobile backend
 
-This repository contains the code of the backend used by the [web](https://github.com/teamdigitale/italia-web) and
-[mobile](https://github.com/teamdigitale/italia-app) applications of the Digital citizenship project.
+This repository contains the code of the backend used by the [web](https://github.com/teamdigitale/io-web) and
+[mobile](https://github.com/teamdigitale/io-app) applications of the Digital citizenship project.
 
 ## Table of content
 
@@ -37,7 +37,7 @@ This repository contains the code of the backend used by the [web](https://githu
 
 ## What is this?
 
-This is the backend that supports the [italia-app](https://github.com/teamdigitale/italia-app)
+This is the backend that supports the [italia-app](https://github.com/teamdigitale/io-app)
 mobile application.
 
 This project is part of the Italian Digital Citizenship initiative, see the
