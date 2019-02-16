@@ -41,7 +41,7 @@ This is the backend that supports the [italia-app](https://github.com/teamdigita
 mobile application.
 
 This project is part of the Italian Digital Citizenship initiative, see the
-[main repository](https://github.com/teamdigitale/digital-citizenship) for further information.
+[main repository](https://github.com/teamdigitale/io) for further information.
 
 ## Authentication process
 
