@@ -4973,9 +4973,10 @@ spdx-license-ids@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.0.tgz#7a7cd28470cc6d3a1cfe6d66886f6bc430d3ac87"
 
-"spid-passport@git://github.com/gunzip/spid-passport.git#5900adf9":
+"spid-passport@git://github.com/gunzip/spid-passport.git#681554025efd2":
   version "1.0.0"
-  resolved "git://github.com/gunzip/spid-passport.git#5900adf925b99a91861b5d1f348ee8c7d499ed55"
+  uid "681554025efd2bc3eb2c57ac4858ebdfec022af7"
+  resolved "git://github.com/gunzip/spid-passport.git#681554025efd2bc3eb2c57ac4858ebdfec022af7"
   dependencies:
     passport "^0.4.0"
     passport-saml "^0.33.0"
@@ -5361,9 +5362,11 @@ tslint-config-prettier@^1.15.0:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/tslint-config-prettier/-/tslint-config-prettier-1.15.0.tgz#76b9714399004ab6831fdcf76d89b73691c812cf"
 
-tslint-immutable@^4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/tslint-immutable/-/tslint-immutable-4.7.0.tgz#086dfabfb5bc4c508128bc5f4e8e2d3fb1494f23"
+tslint-immutable@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/tslint-immutable/-/tslint-immutable-5.2.0.tgz#e5f650be98608d434e93a93301746506f812046e"
+  dependencies:
+    tsutils "^2.28.0 || ^3.0.0"
 
 tslint-language-service@^0.9.9:
   version "0.9.9"
@@ -5422,6 +5425,12 @@ tslint@^5.11.0:
 tsutils@^2.27.2:
   version "2.29.0"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.29.0.tgz#32b488501467acbedd4b85498673a0812aca0b99"
+  dependencies:
+    tslib "^1.8.1"
+
+"tsutils@^2.28.0 || ^3.0.0":
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.8.0.tgz#7a3dbadc88e465596440622b65c04edc8e187ae5"
   dependencies:
     tslib "^1.8.1"
 
