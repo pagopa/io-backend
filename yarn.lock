@@ -1927,9 +1927,9 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
-fp-ts@^1.0.0, fp-ts@^1.6.0, fp-ts@^1.8.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.8.1.tgz#46800e05a814968f79664a76a80d6c6d948c032e"
+fp-ts@^1.0.0, fp-ts@^1.13.0, fp-ts@^1.6.0:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.13.0.tgz#004803434e6c92021232746a621d3c2429c3d5cc"
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -4973,9 +4973,10 @@ spdx-license-ids@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.0.tgz#7a7cd28470cc6d3a1cfe6d66886f6bc430d3ac87"
 
-"spid-passport@git://github.com/gunzip/spid-passport.git#5900adf9":
+"spid-passport@git://github.com/gunzip/spid-passport.git#681554025efd2":
   version "1.0.0"
-  resolved "git://github.com/gunzip/spid-passport.git#5900adf925b99a91861b5d1f348ee8c7d499ed55"
+  uid "681554025efd2bc3eb2c57ac4858ebdfec022af7"
+  resolved "git://github.com/gunzip/spid-passport.git#681554025efd2bc3eb2c57ac4858ebdfec022af7"
   dependencies:
     passport "^0.4.0"
     passport-saml "^0.33.0"
