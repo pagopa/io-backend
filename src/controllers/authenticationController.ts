@@ -82,7 +82,6 @@ export default class AuthenticationController {
 
     return ResponsePermanentRedirect(urlWithToken);
   }
-
   /**
    * Retrieves the logout url from the IDP.
    */

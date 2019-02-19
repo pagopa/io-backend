@@ -24,6 +24,8 @@ import * as t from "io-ts";
 import * as morgan from "morgan";
 import * as passport from "passport";
 
+import { fromNullable } from "fp-ts/lib/Option";
+
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import ServicesController from "./controllers/servicesController";
@@ -43,6 +45,8 @@ import SessionController from "./controllers/sessionController";
 import { ServerInfo } from "./types/api/ServerInfo";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
+
+import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -65,8 +69,13 @@ function withSpidAuth(
     passport.authenticate("spid", async (err, user) => {
       if (err) {
         log.error("Error in SPID authentication: %s", err);
-        res.redirect(clientErrorRedirectionUrl);
-        return;
+        return res.redirect(
+          clientErrorRedirectionUrl +
+            fromNullable(err.statusXml)
+              .chain(statusXml => getErrorCodeFromResponse(statusXml))
+              .map(errorCode => `?errorCode=${errorCode}`)
+              .getOrElse("")
+        );
       }
       if (!user) {
         log.error("Error in SPID authentication: no user found");
