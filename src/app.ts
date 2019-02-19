@@ -24,7 +24,7 @@ import * as t from "io-ts";
 import * as morgan from "morgan";
 import * as passport from "passport";
 
-import { fromNullable, some } from "fp-ts/lib/Option";
+import { fromNullable } from "fp-ts/lib/Option";
 
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -73,7 +73,7 @@ function withSpidAuth(
           clientErrorRedirectionUrl +
             fromNullable(err.statusXml)
               .chain(statusXml => getErrorCodeFromResponse(statusXml))
-              .map(errorCode =>`?errorCode=${errorCode}`)
+              .map(errorCode => `?errorCode=${errorCode}`)
               .getOrElse("")
         );
       }
