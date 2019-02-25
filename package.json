@@ -60,7 +60,7 @@
     "redis-clustr": "^1.6.0",
     "request-ip": "^2.1.1",
     "spid-passport": "git://github.com/gunzip/spid-passport.git#681554025efd2",
-    "typescript": "^3.0.3",
+    "typescript": "^3.3.3333",
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.0.0",
