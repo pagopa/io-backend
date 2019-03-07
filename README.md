@@ -106,7 +106,7 @@ A Linux/macOS environment is required at the moment.
     localhost    italia-backend
     ```
 
-12. copy `app/.env.example` to `app/.env` and fill the variables with your values
+12. copy `.env.example` to `.env` and fill the variables with your values
 13. point your browser to [https://italia-backend/metadata](https://italia-backend/metadata) and copy the source of the
     page to a new `testenv2/conf/sp_metadata.xml` file
 15. run `docker-compose up -d` to restart the containers
