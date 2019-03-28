@@ -1,6 +1,6 @@
 {
   "name": "italia-backend",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Italia app and web backend",
   "main": "index.js",
   "engines": {
