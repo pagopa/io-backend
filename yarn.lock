@@ -4973,9 +4973,9 @@ spdx-license-ids@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.0.tgz#7a7cd28470cc6d3a1cfe6d66886f6bc430d3ac87"
 
-"spid-passport@git://github.com/gunzip/spid-passport.git#681554025efd2":
-  version "1.0.0"
-  resolved "git://github.com/gunzip/spid-passport.git#681554025efd2bc3eb2c57ac4858ebdfec022af7"
+"spid-passport@git://github.com/teamdigitale/spid-passport.git#v1.1.0":
+  version "1.1.0"
+  resolved "git://github.com/teamdigitale/spid-passport.git#acdd6647cb5dd5af9926d7e4d51a62931cd621fb"
   dependencies:
     passport "^0.4.0"
     passport-saml "^0.33.0"
