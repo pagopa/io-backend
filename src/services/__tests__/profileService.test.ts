@@ -59,6 +59,7 @@ const proxyAuthenticatedProfileResponse = {
 const upsertRequest = {
   email: aValidAPIEmail,
   is_inbox_enabled: anIsInboxEnabled,
+  is_tos_accepted: false,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 42

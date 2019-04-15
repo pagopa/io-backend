@@ -225,6 +225,7 @@ paths:
               email: foobar@example.com
               preferred_languages: [ it_IT ]
               is_inbox_enabled: true
+              is_tos_accepted: true
               is_webhook_enabled: false
               version: 1
       responses:
@@ -421,11 +422,16 @@ definitions:
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.58.0/api/definitions.yaml#/EmailAddress"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.58.0/api/definitions.yaml#/ExtendedProfile"
+    #TODO: 163190244 Update git link remove branch id add version tag
+    #$ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.58.0/api/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions/163190244-tos-implementation/api/definitions.yaml#/ExtendedProfile"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.58.0/api/definitions.yaml#/FiscalCode"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.58.0/api/definitions.yaml#/IsInboxEnabled"
+  IsTosAccepted:
+    #TODO: 163190244 Update git link remove branch id add version tag
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions/163190244-tos-implementation/api/definitions.yaml#/IsTosAccepted"
   IsWebhookEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.58.0/api/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:

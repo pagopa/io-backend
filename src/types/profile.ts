@@ -29,6 +29,7 @@ export function toInitializedProfile(
     fiscal_code: user.fiscal_code,
     has_profile: true,
     is_inbox_enabled: from.is_inbox_enabled,
+    is_tos_accepted: from.is_tos_accepted,
     is_webhook_enabled: from.is_webhook_enabled,
     name: user.name,
     preferred_languages: from.preferred_languages,

@@ -8,6 +8,7 @@ import { EmailAddress } from "../api/EmailAddress";
 import { ExtendedProfile } from "../api/ExtendedProfile";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
+import { IsTosAccepted } from "../api/IsTosAccepted";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import {
   PreferredLanguage,
@@ -30,6 +31,7 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 ];
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
+const anIsTosAccepted = true as IsTosAccepted;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User extracted from SPID
@@ -49,6 +51,7 @@ const mockedUser: User = {
 const mockedExtendedProfile: ExtendedProfile = {
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
+  is_tos_accepted: anIsTosAccepted,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 1 as Version
