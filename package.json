@@ -60,7 +60,7 @@
     "redis-clustr": "^1.6.0",
     "request-ip": "^2.1.1",
     "spid-passport": "git://github.com/teamdigitale/spid-passport.git#v1.1.1",
-    "typescript": "^3.0.3",
+    "typescript": "^3.4.3",
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.0.0",
