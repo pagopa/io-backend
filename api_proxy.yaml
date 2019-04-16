@@ -199,11 +199,11 @@ paths:
               has_profile: true
               is_email_set: true
               is_inbox_enabled: true
-              is_tos_accepted: true
               is_webhook_enabled: true
               name: "Mario"
               spid_email: "preferred@example.com"
               spid_mobile_phone: "1234567890"
+              tos_version: 1
               version: 1
         "401":
           description: Bearer token null or expired.
@@ -226,8 +226,8 @@ paths:
               email: foobar@example.com
               preferred_languages: [ it_IT ]
               is_inbox_enabled: true
-              is_tos_accepted: true
               is_webhook_enabled: false
+              tos_version: 1
               version: 1
       responses:
         '200':
@@ -242,11 +242,11 @@ paths:
               has_profile: true
               is_email_set: true
               is_inbox_enabled: true
-              is_tos_accepted: true
               is_webhook_enabled: true
               name: "Mario"
               spid_email: "preferred@example.com"
               spid_mobile_phone: "1234567890"
+              tos_version: 1
               version: 1
         '400':
           description: Invalid payload.
@@ -430,8 +430,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/FiscalCode"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/IsInboxEnabled"
-  IsTosAccepted:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/IsTosAccepted"
+  TosVersion:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/TosVersion"
   IsWebhookEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
@@ -561,8 +561,8 @@ definitions:
         $ref: "#/definitions/PreferredLanguages"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
-      is_tos_accepted:
-        $ref: "#/definitions/IsTosAccepted"
+      tos_version:
+        $ref: "#/definitions/TosVersion"
       is_webhook_enabled:
         $ref: "#/definitions/IsWebhookEnabled"
       family_name:
@@ -585,7 +585,6 @@ definitions:
       - fiscal_code
       - has_profile
       - is_inbox_enabled
-      - is_tos_accepted
       - is_webhook_enabled
       - name
       - spid_email

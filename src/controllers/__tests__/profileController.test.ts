@@ -11,7 +11,6 @@ import { EmailAddress } from "../../types/api/EmailAddress";
 import { ExtendedProfile } from "../../types/api/ExtendedProfile";
 import { FiscalCode } from "../../types/api/FiscalCode";
 import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
-import { IsTosAccepted } from "../../types/api/IsTosAccepted";
 import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
 import {
   PreferredLanguage,
@@ -27,7 +26,6 @@ const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
-const anIsTosAccepted = true as IsTosAccepted;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
@@ -40,12 +38,12 @@ const proxyUserResponse = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   isInboxEnabled: anIsInboxEnabled,
-  isTosAaccepted: anIsTosAccepted,
   isWebhookEnabled: anIsWebookEnabled,
   name: "Giuseppe Maria",
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
+  tosVersion: 1 as NonNegativeInteger,
   version: 1 as NonNegativeInteger
 };
 
@@ -66,9 +64,9 @@ const mockedUser: User = {
 const mockedUpsertProfile: ExtendedProfile = {
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
-  is_tos_accepted: anIsTosAccepted,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
+  tos_version: 2 as NonNegativeInteger,
   version: 1 as NonNegativeInteger
 };
 

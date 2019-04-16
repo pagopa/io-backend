@@ -29,9 +29,9 @@ const validApiProfileResponse = {
   value: {
     email: aValidAPIEmail,
     is_inbox_enabled: true,
-    is_tos_accepted: true,
     is_webhook_enabled: true,
     preferred_languages: ["it_IT"],
+    tos_version: 1,
     version: 42
   }
 };
@@ -42,12 +42,12 @@ const proxyInitializedProfileResponse = {
   fiscal_code: "XUZTCT88A51Y311X",
   has_profile: true,
   is_inbox_enabled: true,
-  is_tos_accepted: true,
   is_webhook_enabled: true,
   name: "Luca",
   preferred_languages: ["it_IT"],
   spid_email: aValidSPIDEmail,
   spid_mobile_phone: "3222222222222",
+  tos_version: 1,
   version: 42
 };
 const proxyAuthenticatedProfileResponse = {
@@ -61,9 +61,9 @@ const proxyAuthenticatedProfileResponse = {
 const upsertRequest = {
   email: aValidAPIEmail,
   is_inbox_enabled: anIsInboxEnabled,
-  is_tos_accepted: false,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
+  tos_version: 2,
   version: 42
 };
 const emptyApiProfileResponse = {
