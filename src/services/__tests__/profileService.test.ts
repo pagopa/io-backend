@@ -29,6 +29,7 @@ const validApiProfileResponse = {
   value: {
     email: aValidAPIEmail,
     is_inbox_enabled: true,
+    is_tos_accepted: true,
     is_webhook_enabled: true,
     preferred_languages: ["it_IT"],
     version: 42
@@ -41,6 +42,7 @@ const proxyInitializedProfileResponse = {
   fiscal_code: "XUZTCT88A51Y311X",
   has_profile: true,
   is_inbox_enabled: true,
+  is_tos_accepted: true,
   is_webhook_enabled: true,
   name: "Luca",
   preferred_languages: ["it_IT"],
