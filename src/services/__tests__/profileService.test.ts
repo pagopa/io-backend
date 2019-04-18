@@ -31,7 +31,7 @@ const validApiProfileResponse = {
     is_inbox_enabled: true,
     is_webhook_enabled: true,
     preferred_languages: ["it_IT"],
-    tos_version: 1,
+    tos_version: 2,
     version: 42
   }
 };
@@ -47,7 +47,7 @@ const proxyInitializedProfileResponse = {
   preferred_languages: ["it_IT"],
   spid_email: aValidSPIDEmail,
   spid_mobile_phone: "3222222222222",
-  tos_version: 1,
+  tos_version: 2,
   version: 42
 };
 const proxyAuthenticatedProfileResponse = {
@@ -168,6 +168,8 @@ describe("ProfileService#upsertProfile", () => {
     });
 
     const service = new ProfileService(api);
+
+    expect(upsertRequest.tos_version).toBeGreaterThan(1);
 
     const res = await service.upsertProfile(mockedUser, upsertRequest);
 
