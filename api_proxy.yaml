@@ -203,7 +203,7 @@ paths:
               name: "Mario"
               spid_email: "preferred@example.com"
               spid_mobile_phone: "1234567890"
-              tos_version: 1
+              accepted_tos_version: 1
               version: 1
         "401":
           description: Bearer token null or expired.
@@ -227,7 +227,7 @@ paths:
               preferred_languages: [ it_IT ]
               is_inbox_enabled: true
               is_webhook_enabled: false
-              tos_version: 1
+              accepted_tos_version: 1
               version: 1
       responses:
         '200':
@@ -246,7 +246,7 @@ paths:
               name: "Mario"
               spid_email: "preferred@example.com"
               spid_mobile_phone: "1234567890"
-              tos_version: 1
+              accepted_tos_version: 1
               version: 1
         '400':
           description: Invalid payload.
@@ -430,8 +430,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/FiscalCode"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/IsInboxEnabled"
-  TosVersion:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/TosVersion"
+  AcceptedTosVersion:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/AcceptedTosVersion"
   IsWebhookEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/163190244-tos-implementation/api/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
@@ -561,8 +561,8 @@ definitions:
         $ref: "#/definitions/PreferredLanguages"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
-      tos_version:
-        $ref: "#/definitions/TosVersion"
+      accepted_tos_version:
+        $ref: "#/definitions/AcceptedTosVersion"
       is_webhook_enabled:
         $ref: "#/definitions/IsWebhookEnabled"
       family_name:

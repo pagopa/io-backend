@@ -23,6 +23,7 @@ export function toInitializedProfile(
   user: User
 ): InitializedProfile {
   return {
+    accepted_tos_version: from.accepted_tos_version,
     blocked_inbox_or_channels: from.blocked_inbox_or_channels,
     email: from.email,
     family_name: user.family_name,
@@ -34,7 +35,6 @@ export function toInitializedProfile(
     preferred_languages: from.preferred_languages,
     spid_email: user.spid_email,
     spid_mobile_phone: user.spid_mobile_phone,
-    tos_version: from.tos_version,
     version: from.version
   };
 }

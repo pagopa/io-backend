@@ -33,6 +33,7 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyUserResponse = {
+  acceptedTosVersion: 1 as NonNegativeInteger,
   created_at: aTimestamp,
   email: anEmailAddress,
   family_name: "Garibaldi",
@@ -43,7 +44,6 @@ const proxyUserResponse = {
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
-  tosVersion: 1 as NonNegativeInteger,
   version: 1 as NonNegativeInteger
 };
 
@@ -62,11 +62,11 @@ const mockedUser: User = {
 
 // mock for upsert user (Extended Profile)
 const mockedUpsertProfile: ExtendedProfile = {
+  accepted_tos_version: 2 as NonNegativeInteger,
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
-  tos_version: 2 as NonNegativeInteger,
   version: 1 as NonNegativeInteger
 };
 

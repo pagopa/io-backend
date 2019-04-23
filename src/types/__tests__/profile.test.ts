@@ -9,13 +9,13 @@ import { ExtendedProfile } from "../api/ExtendedProfile";
 import { FiscalCode } from "../api/FiscalCode";
 import { IsInboxEnabled } from "../api/IsInboxEnabled";
 
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../api/PreferredLanguage";
 import { SpidLevelEnum } from "../api/SpidLevel";
-import { TosVersion } from "../api/TosVersion";
 import { Version } from "../api/Version";
 import {
   extractUpsertProfileFromRequest,
@@ -49,11 +49,11 @@ const mockedUser: User = {
 
 // mock for a valid ExtendedProfile profile
 const mockedExtendedProfile: ExtendedProfile = {
+  accepted_tos_version: 1 as NonNegativeInteger,
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
-  tos_version: 1 as TosVersion,
   version: 1 as Version
 };
 
