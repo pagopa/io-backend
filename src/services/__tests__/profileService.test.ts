@@ -27,15 +27,16 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 const validApiProfileResponse = {
   status: 200,
   value: {
+    accepted_tos_version: 2,
     email: aValidAPIEmail,
     is_inbox_enabled: true,
     is_webhook_enabled: true,
     preferred_languages: ["it_IT"],
-    tos_version: 2,
     version: 42
   }
 };
 const proxyInitializedProfileResponse = {
+  accepted_tos_version: 2,
   blocked_inbox_or_channels: undefined,
   email: aValidAPIEmail,
   family_name: "Lusso",
@@ -47,7 +48,6 @@ const proxyInitializedProfileResponse = {
   preferred_languages: ["it_IT"],
   spid_email: aValidSPIDEmail,
   spid_mobile_phone: "3222222222222",
-  tos_version: 2,
   version: 42
 };
 const proxyAuthenticatedProfileResponse = {
@@ -59,11 +59,11 @@ const proxyAuthenticatedProfileResponse = {
   spid_mobile_phone: "3222222222222"
 };
 const upsertRequest = {
+  accepted_tos_version: 2,
   email: aValidAPIEmail,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
-  tos_version: 2,
   version: 42
 };
 const emptyApiProfileResponse = {
@@ -169,7 +169,7 @@ describe("ProfileService#upsertProfile", () => {
 
     const service = new ProfileService(api);
 
-    expect(upsertRequest.tos_version).toBeGreaterThan(1);
+    expect(upsertRequest.accepted_tos_version).toBeGreaterThan(1);
 
     const res = await service.upsertProfile(mockedUser, upsertRequest);
 
