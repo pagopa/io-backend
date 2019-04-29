@@ -22,7 +22,7 @@ version: 2
 jobs:
   lint-api:
       docker:
-        - image: circleci/node:10
+        - image: circleci/node:8.9.4
       working_directory: ~/repo
       steps:
         - checkout
@@ -44,7 +44,7 @@ jobs:
       - run: yarn lint
   danger:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:8.9.4
     working_directory: ~/repo
     steps:
       - checkout
