@@ -11,9 +11,10 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import ProfileService, { profileResponse } from "../services/profileService";
-import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
-import { InitializedProfile } from "../types/api/InitializedProfile";
+
+import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
+import { InitializedProfile } from "@generated/backend/InitializedProfile";
+import ProfileService from "../services/profileService";
 import { toHttpError } from "../types/error";
 import { extractUpsertProfileFromRequest } from "../types/profile";
 import { extractUserFromRequest } from "../types/user";

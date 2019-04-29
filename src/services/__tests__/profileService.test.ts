@@ -1,14 +1,15 @@
 import { right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
+
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "../../types/api/PreferredLanguage";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
+} from "@generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";

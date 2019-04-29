@@ -11,7 +11,8 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { PublicSession } from "../types/api/PublicSession";
+
+import { PublicSession } from "@generated/backend/PublicSession";
 import { extractUserFromRequest } from "../types/user";
 
 export default class SessionController {

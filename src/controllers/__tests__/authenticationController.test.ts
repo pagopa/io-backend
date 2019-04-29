@@ -9,14 +9,16 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
+
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import AuthenticationController from "../authenticationController";

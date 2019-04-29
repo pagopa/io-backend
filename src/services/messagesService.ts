@@ -2,37 +2,20 @@
  * This service retrieves messages from the API system using an API client.
  */
 
-import { Either, left, right } from "fp-ts/lib/Either";
-import { IResponseType } from "italia-ts-commons/lib/requests";
 import {
-  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
-import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
-import { Messages } from "../types/api/Messages";
-import { ServicePublic } from "../types/api/ServicePublic";
-import { Services } from "../types/api/Services";
-import { internalError, notFoundError, ServiceError } from "../types/error";
+
+import { CreatedMessageWithContent } from "@generated/io-api/CreatedMessageWithContent";
+import { PaginatedCreatedMessageWithoutContentCollection } from "@generated/io-api/PaginatedCreatedMessageWithoutContentCollection";
+import { PaginatedServiceTupleCollection } from "@generated/io-api/PaginatedServiceTupleCollection";
+import { ServicePublic } from "@generated/io-api/ServicePublic";
+
+import { parseResponse, withCatchAsInternalError } from "src/utils/responses";
 import { User } from "../types/user";
-import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-
-const messageErrorOnUnknownError = "Unknown response.";
-const messageErrorOnApiError = "Api error.";
-const messageErrorOnNotFound = "Not found.";
-const logErrorOnStatusNotOK = "Status is not 200: %s";
-const logErrorOnDecodeError = "Response can't be decoded: %O";
-const logErrorOnUnknownError = "Unknown error: %s";
-const logErrorOnNotFound = "Not found";
-
-export type MessagesResponse<T> =
-  | IResponseErrorInternal
-  | IResponseErrorNotFound
-  | IResponseErrorGeneric
-  | IResponseSuccessJson<T>;
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -40,21 +23,23 @@ export default class MessagesService {
   /**
    * Retrieves all messages for a specific user.
    */
-  public async getMessagesByUser(
+  public getMessagesByUser(
     user: User
-  ): Promise<Either<ServiceError, Messages>> {
-    try {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
+  > {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
-
       const res = await client.getMessages({
         fiscalCode: user.fiscal_code
       });
 
-      return this.parseResponse<Messages>(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(messageErrorOnUnknownError));
-    }
+      return parseResponse<PaginatedCreatedMessageWithoutContentCollection>(
+        res
+      );
+    });
   }
 
   /**
@@ -63,8 +48,12 @@ export default class MessagesService {
   public async getMessage(
     user: User,
     messageId: string
-  ): Promise<Either<ServiceError, CreatedMessageWithContent>> {
-    try {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<CreatedMessageWithContent>
+  > {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
       const res = await client.getMessage({
@@ -72,13 +61,12 @@ export default class MessagesService {
         id: messageId
       });
 
-      return this.parseResponse<MessageResponseWithContent>(res).map(
-        _ => _.message
+      const resMessageContent = res.map(
+        _ => (_.status === 200 ? { ..._, value: _.value.message } : _)
       );
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(messageErrorOnUnknownError));
-    }
+
+      return parseResponse<CreatedMessageWithContent>(resMessageContent);
+    });
   }
 
   /**
@@ -86,67 +74,51 @@ export default class MessagesService {
    */
   public async getService(
     serviceId: string
-  ): Promise<Either<ServiceError, ServicePublic>> {
-    try {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<ServicePublic>
+  > {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
       const res = await client.getService({
-        id: serviceId
+        service_id: serviceId
       });
 
-      return this.parseResponse<ServicePublic>(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(messageErrorOnUnknownError));
-    }
+      return parseResponse<ServicePublic>(res);
+    });
   }
 
   public async getServicesByRecipient(
     user: User
-  ): Promise<Either<ServiceError, Services>> {
-    try {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaginatedServiceTupleCollection>
+  > {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
       const res = await client.getServicesByRecipient({
-        fiscalCode: user.fiscal_code
+        recipient: user.fiscal_code
       });
 
-      return this.parseResponse<Services>(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(messageErrorOnUnknownError));
-    }
+      return parseResponse<PaginatedServiceTupleCollection>(res);
+    });
   }
 
-  public async getVisibleServices(): Promise<Either<ServiceError, Services>> {
-    try {
+  public async getVisibleServices(): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaginatedServiceTupleCollection>
+  > {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
-      const res = await client.getServices({});
+      const res = await client.getVisibleServices({});
 
-      return this.parseResponse<Services>(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(messageErrorOnUnknownError));
-    }
-  }
-
-  private parseResponse<T>(
-    res: IResponseType<number, Error | T> | undefined
-  ): Either<ServiceError, T> {
-    // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
-    if (!res) {
-      log.error(logErrorOnDecodeError, res);
-      return left<ServiceError, T>(internalError(messageErrorOnApiError));
-    }
-    if (res.status === 200) {
-      return right<ServiceError, T>(res.value as T);
-    }
-    if (res.status === 404) {
-      log.error(logErrorOnNotFound, res.status);
-      return left<ServiceError, T>(notFoundError(messageErrorOnNotFound));
-    }
-    log.error(logErrorOnStatusNotOK, res.status);
-    return left<ServiceError, T>(internalError(messageErrorOnApiError));
+      return parseResponse<PaginatedServiceTupleCollection>(res);
+    });
   }
 }

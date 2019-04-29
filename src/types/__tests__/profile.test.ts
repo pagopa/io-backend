@@ -1,20 +1,20 @@
 /* tslint:disable:no-any */
 
 import { isLeft, isRight } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../api/EmailAddress";
-import { ExtendedProfile } from "../api/ExtendedProfile";
-import { FiscalCode } from "../api/FiscalCode";
-import { IsInboxEnabled } from "../api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "../api/PreferredLanguage";
-import { SpidLevelEnum } from "../api/SpidLevel";
-import { Version } from "../api/Version";
+} from "@generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { Version } from "@generated/backend/Version";
 import {
   extractUpsertProfileFromRequest,
   toAuthenticatedProfile,

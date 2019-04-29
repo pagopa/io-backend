@@ -8,9 +8,10 @@ import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
+
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";

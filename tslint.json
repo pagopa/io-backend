@@ -41,7 +41,7 @@
   "linterOptions": {
     "exclude": [
       "node_modules/**/*",
-      "src/types/api/**/*.ts"
+      "generated/**/*.ts"
     ]
   }
 }

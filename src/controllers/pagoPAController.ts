@@ -8,10 +8,10 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import ProfileService, { profileResponse } from "../services/profileService";
-import { InitializedProfile } from "../types/api/InitializedProfile";
-import { PagoPAUser } from "../types/api/PagoPAUser";
-import { toHttpError } from "../types/error";
+
+import { InitializedProfile } from "@generated/backend/InitializedProfile";
+import { PagoPAUser } from "@generated/pagopa/PagoPAUser";
+import ProfileService from "../services/profileService";
 import { extractUserFromRequest } from "../types/user";
 
 export default class PagoPAController {

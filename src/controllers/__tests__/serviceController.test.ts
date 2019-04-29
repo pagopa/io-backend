@@ -6,17 +6,18 @@ import {
   NonEmptyString,
   OrganizationFiscalCode
 } from "italia-ts-commons/lib/strings";
+
+import { DepartmentName } from "@generated/backend/DepartmentName";
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { OrganizationName } from "@generated/backend/OrganizationName";
+import { ServiceName } from "@generated/backend/ServiceName";
+import { ServicePublic } from "@generated/backend/ServicePublic";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
-import { DepartmentName } from "../../types/api/DepartmentName";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { OrganizationName } from "../../types/api/OrganizationName";
-import { ServiceName } from "../../types/api/ServiceName";
-import { ServicePublic } from "../../types/api/ServicePublic";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ServicesController from "../servicesController";

@@ -1,12 +1,12 @@
 /* tslint:disable:no-any */
 
 import { Either, isLeft, isRight } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../api/EmailAddress";
-import { FiscalCode } from "../api/FiscalCode";
-import { SpidLevelEnum } from "../api/SpidLevel";
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
 import { Issuer } from "../issuer";
 import { SessionToken, WalletToken } from "../token";
 import {

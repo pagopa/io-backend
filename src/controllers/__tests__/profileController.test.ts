@@ -3,20 +3,21 @@
 import { right } from "fp-ts/lib/Either";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
+import {
+  PreferredLanguage,
+  PreferredLanguageEnum
+} from "@generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "@generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { ExtendedProfile } from "../../types/api/ExtendedProfile";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
-import {
-  PreferredLanguage,
-  PreferredLanguageEnum
-} from "../../types/api/PreferredLanguage";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";

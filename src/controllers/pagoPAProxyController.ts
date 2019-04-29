@@ -7,7 +7,7 @@ import {
   ActivatePaymentT,
   GetActivationStatusT,
   GetPaymentInfoT
-} from "../types/api/requestTypes";
+} from "@generated/pagopa-proxy/requestTypes";
 
 import { AsControllerResponseType } from "../utils/types";
 

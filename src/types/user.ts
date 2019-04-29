@@ -4,20 +4,25 @@
  */
 
 import * as express from "express";
-import { Either, left } from "fp-ts/lib/Either";
+import { Either, left, isLeft } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { JSONFromString } from "io-ts-types";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
+
+import { EmailAddress } from "@generated/backend/EmailAddress";
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { SpidLevel, SpidLevelEnum } from "@generated/backend/SpidLevel";
 import { log } from "../utils/logger";
-import { EmailAddress } from "./api/EmailAddress";
-import { FiscalCode } from "./api/FiscalCode";
-import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";
+import {
+  IResponseErrorInternal,
+  ResponseErrorInternal
+} from "italia-ts-commons/lib/responses";
 
 // required attributes
 export const User = t.intersection([
@@ -150,28 +155,38 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
  */
 export function extractUserFromRequest(
   from: express.Request
-): Either<Error, User> {
+): Either<string, User> {
   const result = User.decode(from.user);
 
   // tslint:disable-next-line:no-identical-functions
   return result.mapLeft(err => {
-    return new Error(
-      "Cannot extract the user from request: " + readableReport(err)
-    );
+    return "Cannot extract the user from request: " + readableReport(err);
   });
+}
+
+export async function withUserFromRequest<T>(
+  req: express.Request,
+  f: (user: User) => Promise<T>
+): Promise<IResponseErrorInternal | T> {
+  const errorOrUser = extractUserFromRequest(req.user);
+
+  if (isLeft(errorOrUser)) {
+    // Unable to extract the user from the request.
+    return ResponseErrorInternal(errorOrUser.value);
+  }
+
+  return await f(errorOrUser.value);
 }
 
 /**
  * Extracts a user from a json string.
  */
-export function extractUserFromJson(from: string): Either<Error, User> {
+export function extractUserFromJson(from: string): Either<string, User> {
   return JSONFromString.decode(from)
-    .mapLeft(
-      err => new Error("Cannot parse the user JSON:" + readableReport(err))
-    )
+    .mapLeft(err => "Cannot parse the user JSON:" + readableReport(err))
     .chain(json =>
       User.decode(json).mapLeft(
-        err => new Error("Cannot decode the user JSON: " + readableReport(err))
+        err => "Cannot decode the user JSON: " + readableReport(err)
       )
     );
 }

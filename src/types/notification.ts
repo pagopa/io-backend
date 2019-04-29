@@ -6,9 +6,10 @@ import * as crypto from "crypto";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { tag } from "italia-ts-commons/lib/types";
-import { FiscalCode } from "./api/FiscalCode";
-import { InstallationID } from "./api/InstallationID";
-import { Platform } from "./api/Platform";
+
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { InstallationID } from "@generated/backend/InstallationID";
+import { Platform } from "@generated/backend/Platform";
 
 /**
  * An hashed fiscal code.

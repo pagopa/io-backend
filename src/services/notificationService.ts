@@ -10,13 +10,14 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "../types/api/FiscalCode";
-import { Installation } from "../types/api/Installation";
+
+import { FiscalCode } from "@generated/backend/FiscalCode";
+import { Installation } from "@generated/backend/Installation";
+import { InstallationID } from "@generated/backend/InstallationID";
+import { PlatformEnum } from "@generated/backend/Platform";
+import { SuccessResponse } from "@generated/backend/SuccessResponse";
+import { Notification } from "@generated/notifications/Notification";
 import Response = Azure.ServiceBus.Response;
-import { InstallationID } from "../types/api/InstallationID";
-import { Notification } from "../types/api/Notification";
-import { PlatformEnum } from "../types/api/Platform";
-import { SuccessResponse } from "../types/api/SuccessResponse";
 import {
   IInstallation,
   INotificationTemplate,

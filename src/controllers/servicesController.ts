@@ -9,9 +9,10 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import MessagesService, { MessagesResponse } from "../services/messagesService";
-import { ServiceList } from "../types/api/ServiceList";
-import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
+
+import { ServiceList } from "@generated/backend/ServiceList";
+import { ServicePublic as ProxyServicePublic } from "@generated/backend/ServicePublic";
+import MessagesService from "../services/messagesService";
 import { toHttpError } from "../types/error";
 import { extractUserFromRequest } from "../types/user";
 

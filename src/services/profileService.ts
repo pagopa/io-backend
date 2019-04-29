@@ -4,34 +4,27 @@
  */
 
 import { Either, left, right } from "fp-ts/lib/Either";
-import {
-  IResponseErrorGeneric,
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
-import { InitializedProfile } from "../types/api/InitializedProfile";
-
 import { readableReport } from "italia-ts-commons/lib/reporters";
-import { ExtendedProfile } from "../types/api/ExtendedProfile";
+
+import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
+import { InitializedProfile } from "@generated/backend/InitializedProfile";
+
+import { ExtendedProfile } from "@generated/io-api/ExtendedProfile";
+
+import {
+  unhandledResponseStatus,
+  withCatchAsInternalError
+} from "src/utils/responses";
 import { internalError, ServiceError } from "../types/error";
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
-import { log } from "../utils/logger";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-
-const profileErrorOnUnknownError = "Unknown response.";
-const profileErrorOnApiError = "Api error.";
-const logErrorOnStatusNotOK = "Status is not 200 or 404: %s";
-const logErrorOnDecodeError = "Response can't be decoded: %O";
-const logErrorOnUnknownError = "Unknown error: %s";
-
-export type profileResponse<T> =
-  | IResponseErrorInternal
-  | IResponseErrorNotFound
-  | IResponseErrorGeneric
-  | IResponseSuccessJson<T>;
+import {
+  IResponseErrorInternal,
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -41,42 +34,49 @@ export default class ProfileService {
    */
   public async getProfile(
     user: User
-  ): Promise<Either<ServiceError, AuthenticatedProfile | InitializedProfile>> {
-    try {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseSuccessJson<AuthenticatedProfile>
+    | IResponseSuccessJson<InitializedProfile>
+  > {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
       const res = await client.getProfile({
         fiscalCode: user.fiscal_code
       });
 
-      // The response is undefined (can't be decoded).
-      if (!res) {
-        log.error(logErrorOnDecodeError, res);
-        return left(internalError(profileErrorOnUnknownError));
+      // The response can't be decoded
+      if (res.isLeft()) {
+        return ResponseErrorInternal(readableReport(res.value));
       }
 
       // The response is correct.
-      if (res.status === 200) {
-        return ExtendedProfile.decode(res.value).bimap(
-          errs => internalError(readableReport(errs)),
-          profile => toInitializedProfile(profile, user)
+      if (res.value.status === 200) {
+        // since the response may be an ExtendedProfile or a LimitedProfile
+        // we must try to decode it as an ExtendedProfile
+        const extendedProfileOrErrors = ExtendedProfile.decode(res.value);
+        if (extendedProfileOrErrors.isLeft()) {
+          return ResponseErrorInternal(
+            readableReport(extendedProfileOrErrors.value)
+          );
+        }
+        const initializedProfile = toInitializedProfile(
+          extendedProfileOrErrors.value,
+          user
         );
+        return ResponseSuccessJson(initializedProfile);
       }
 
       // If the profile doesn't exists on the API we still
       // return 200 to the App with the information we have
       // retrieved from SPID.
-      if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
+      if (res.value.status === 404) {
+        return ResponseSuccessJson(toAuthenticatedProfile(user));
       }
 
-      // The API is returning an error.
-      log.error(logErrorOnStatusNotOK, res.status);
-      return left(internalError(profileErrorOnApiError));
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(profileErrorOnUnknownError));
-    }
+      return unhandledResponseStatus(res.value.status);
+    });
   }
 
   /**
@@ -86,31 +86,28 @@ export default class ProfileService {
     user: User,
     upsertProfile: ExtendedProfile
   ): Promise<Either<ServiceError, InitializedProfile | AuthenticatedProfile>> {
-    try {
+    return withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
-      const res = await client.createOrUpdateProfile({
-        fiscalCode: user.fiscal_code,
-        newProfile: upsertProfile
+      const res = await client.upsertProfile({
+        extendedProfile: upsertProfile,
+        fiscalCode: user.fiscal_code
       });
 
-      // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
-      if (!res) {
-        log.error(logErrorOnDecodeError, res);
-        return left(internalError(profileErrorOnApiError));
+      // The response can't be decoded
+      if (res.isLeft()) {
+        return left(internalError(readableReport(res.value)));
       }
 
-      if (res.status === 200) {
+      if (res.value.status === 200) {
         return right(toInitializedProfile(res.value, user));
-      } else if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
-      } else {
-        log.error(logErrorOnStatusNotOK, res.status);
-        return left(internalError(profileErrorOnApiError));
       }
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(profileErrorOnUnknownError));
-    }
+
+      if (res.value.status === 404) {
+        return right(toAuthenticatedProfile(user));
+      }
+
+      return unhandledResponseStatus(res.value.status);
+    });
   }
 }

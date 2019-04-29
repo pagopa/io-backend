@@ -5,10 +5,10 @@
 
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
-import { AuthenticatedProfile } from "./api/AuthenticatedProfile";
 
-import { ExtendedProfile } from "./api/ExtendedProfile";
-import { InitializedProfile } from "./api/InitializedProfile";
+import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
+import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
+import { InitializedProfile } from "@generated/backend/InitializedProfile";
 
 import { User } from "./user";
 

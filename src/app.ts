@@ -38,11 +38,14 @@ import {
 } from "italia-ts-commons/lib/environment";
 import { toExpressHandler } from "italia-ts-commons/lib/express";
 import { CIDR } from "italia-ts-commons/lib/strings";
+
+import { ServerInfo } from "@generated/public/ServerInfo";
+
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
 import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import SessionController from "./controllers/sessionController";
-import { ServerInfo } from "./types/api/ServerInfo";
+
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 

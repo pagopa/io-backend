@@ -11,15 +11,13 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import {
-  AltPagopaResponseType,
-  BasePagopaResponseType
-} from "../clients/pagopa";
+
 import {
   ActivatePaymentT,
   GetActivationStatusT,
   GetPaymentInfoT
-} from "../types/api/requestTypes";
+} from "@generated/pagopa-proxy/requestTypes";
+
 import { AsControllerFunction } from "../utils/types";
 
 const messageErrorOnUnknownError = "Unknown response.";

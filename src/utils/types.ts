@@ -24,3 +24,5 @@ export type AsControllerResponseType<T> = T extends IResponseType<200, infer R>
 export type AsControllerFunction<T> = (
   params: TypeofApiParams<T>
 ) => Promise<AsControllerResponseType<TypeofApiResponse<T>>>;
+
+export type PromiseType<T> = T extends Promise<infer A> ? A : never;

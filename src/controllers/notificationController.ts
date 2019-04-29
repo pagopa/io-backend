@@ -10,11 +10,12 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
+
+import { Installation } from "@generated/backend/Installation";
+import { InstallationID } from "@generated/backend/InstallationID";
+import { Notification } from "@generated/notifications/Notification";
+import { SuccessResponse } from "@generated/notifications/SuccessResponse";
 import NotificationService from "../services/notificationService";
-import { Installation } from "../types/api/Installation";
-import { InstallationID } from "../types/api/InstallationID";
-import { Notification } from "../types/api/Notification";
-import { SuccessResponse } from "../types/api/SuccessResponse";
 import { extractUserFromRequest } from "../types/user";
 import { log } from "../utils/logger";
 

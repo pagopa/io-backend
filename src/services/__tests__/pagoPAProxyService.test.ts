@@ -3,11 +3,11 @@ import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
 import PagoPAClientFactory from "../pagoPAClientFactory";
 import PagoPAProxyService from "../pagoPAProxyService";
 
-import { CodiceContestoPagamento } from "../../types/api/pagopa-proxy/CodiceContestoPagamento";
-import { ImportoEuroCents } from "../../types/api/pagopa-proxy/ImportoEuroCents";
-import { PaymentActivationsPostRequest } from "../../types/api/pagopa-proxy/PaymentActivationsPostRequest";
-import { PaymentFaultEnum } from "../../types/api/pagopa-proxy/PaymentFault";
-import { GetPaymentInfoT } from "../../types/api/pagopa-proxy/requestTypes";
+import { CodiceContestoPagamento } from "@generated/pagopa-proxy/CodiceContestoPagamento";
+import { ImportoEuroCents } from "@generated/pagopa-proxy/ImportoEuroCents";
+import { PaymentActivationsPostRequest } from "@generated/pagopa-proxy/PaymentActivationsPostRequest";
+import { PaymentFaultEnum } from "@generated/pagopa-proxy/PaymentFault";
+import { GetPaymentInfoT } from "@generated/pagopa-proxy/requestTypes";
 
 const aRptId = "123456";
 const acodiceContestoPagamento = "01234567890123456789012345678901" as CodiceContestoPagamento;
