@@ -81,6 +81,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     );
 
     req.params = { rptId: aRptId };
+    req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory();
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -88,7 +89,10 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith({
+      rptId: aRptId,
+      test: false
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -104,6 +108,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     );
 
     req.params = { rptId: aRptId };
+    req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory();
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -111,7 +116,10 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith({
+      rptId: aRptId,
+      test: false
+    });
     expect(response).toEqual(aResponseErrorInternal);
   });
 });
@@ -129,6 +137,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     );
 
     req.body = paymentActivationsPostRequest;
+    req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory();
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -136,9 +145,10 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest
-    );
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      ...paymentActivationsPostRequest,
+      test: false
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -154,6 +164,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     );
 
     req.body = paymentActivationsPostRequest;
+    req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory();
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -161,9 +172,10 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest
-    );
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      ...paymentActivationsPostRequest,
+      test: false
+    });
     expect(response).toEqual(aResponseErrorInternal);
   });
 });
@@ -181,6 +193,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     );
 
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
+    req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory();
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -188,9 +201,10 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith(
-      aCodiceContestoPagamento
-    );
+    expect(mockGetActivationStatus).toHaveBeenCalledWith({
+      aCodiceContestoPagamento,
+      test: false
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -206,6 +220,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     );
 
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
+    req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory();
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -213,9 +228,10 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith(
-      aCodiceContestoPagamento
-    );
+    expect(mockGetActivationStatus).toHaveBeenCalledWith({
+      aCodiceContestoPagamento,
+      test: false
+    });
     expect(response).toEqual(aResponseErrorInternal);
   });
 });
