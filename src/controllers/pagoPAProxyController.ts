@@ -1,5 +1,4 @@
 import * as express from "express";
-import * as t from "io-ts";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -9,8 +8,10 @@ import {
 
 import PagoPAProxyService from "../services/pagoPAProxyService";
 
+import { ActivatePaymentProxyRequest } from "../../generated/backend/ActivatePaymentProxyRequest";
+import { GetActivationStatusProxyRequest } from "../../generated/backend/GetActivationStatusProxyRequest";
+import { GetPaymentInfoProxyRequest } from "../../generated/backend/GetPaymentInfoProxyRequest";
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
-import { PaymentActivationsPostRequest } from "../../generated/backend/PaymentActivationsPostRequest";
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 
@@ -32,7 +33,10 @@ export default class PagoPAProxyController {
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
     withValidatedOrInternalError(
-      t.string.decode(req.params.rptId),
+      GetPaymentInfoProxyRequest.decode({
+        rptIf: req.params.rptIf,
+        test: String(req.query.test).toLowerCase() === "true"
+      }),
       this.pagoPAProxyService.getPaymentInfo
     );
 
@@ -46,7 +50,10 @@ export default class PagoPAProxyController {
     | IResponseSuccessJson<PaymentActivationsPostResponse>
   > =>
     withValidatedOrInternalError(
-      PaymentActivationsPostRequest.decode(req.body),
+      ActivatePaymentProxyRequest.decode({
+        ...req.body,
+        test: String(req.query.test).toLowerCase() === "true"
+      }),
       this.pagoPAProxyService.activatePayment
     );
 
@@ -60,7 +67,10 @@ export default class PagoPAProxyController {
     | IResponseSuccessJson<PaymentActivationsGetResponse>
   > =>
     withValidatedOrInternalError(
-      t.string.decode(req.params.codiceContestoPagamento),
+      GetActivationStatusProxyRequest.decode({
+        codiceContestoPagamento: req.params.codiceContestoPagamento,
+        test: String(req.query.test).toLowerCase() === "true"
+      }),
       this.pagoPAProxyService.getActivationStatus
     );
 }

@@ -344,6 +344,11 @@ paths:
         required: true
         description: Unique identifier for payments.
         type: string
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
     get:
       operationId: getPaymentInfo
       summary: Get Payment Info
@@ -384,6 +389,10 @@ paths:
               rptId: "12345678901012123456789012345"
               importoSingoloVersamento: 200
               codiceContestoPagamento: "ABC123"
+        - in: query
+          name: test
+          type: boolean
+          required: false
       responses:
         "200":
           description: Payment activation process started
@@ -410,6 +419,10 @@ paths:
         required: true
         description: Transaction Id used to identify the communication flow.
         type: string
+      - name: test
+        in: query
+        type: boolean
+        required: false
     get:
       operationId: getActivationStatus
       summary: Get Activation status
@@ -437,6 +450,46 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 definitions:
+  # Custom Definitions
+  GetPaymentInfoProxyRequest:
+    type: object
+    title: GetPaymentInfoProxyRequest
+    description: Request object for getPaymentInfo
+    properties:
+      rptId:
+        $ref: "#/definitions/RptId"
+      test:
+        type: boolean
+    required:
+      - rptId
+  ActivatePaymentProxyRequest:
+    type: object
+    title: ActivatePaymentProxyRequest
+    description: Request object for activatePayment
+    properties:
+      rptId:
+        $ref: '#/definitions/RptId'
+      importoSingoloVersamento:
+        $ref: '#/definitions/ImportoEuroCents'
+      codiceContestoPagamento:
+        $ref: '#/definitions/CodiceContestoPagamento'
+      test:
+        type: boolean
+    required:
+      - rptId
+      - importoSingoloVersamento
+      - codiceContestoPagamento
+  GetActivationStatusProxyRequest:
+    type: object
+    title: GetActivationStatusProxyRequest
+    description: Request object for getActivationStatus
+    properties:
+      codiceContestoPagamento:
+        $ref: '#/definitions/CodiceContestoPagamento'
+      test:
+        type: boolean
+    required:
+      - codiceContestoPagamento
   # Definitions from the digital citizenship APIs
   BlockedInboxOrChannels:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions/v0.61.0/api/definitions.yaml#/BlockedInboxOrChannels"
