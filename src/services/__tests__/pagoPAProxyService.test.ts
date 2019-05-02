@@ -139,6 +139,29 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
     });
   });
 
+  it("[TEST env] get payment info", async () => {
+    mockGetPaymentInfo.mockImplementation(() => {
+      return validPaymentInfoResponse;
+    });
+
+    const service = new PagoPAProxyService(pagoPAProxy);
+
+    const res = await service.getPaymentInfo({
+      rptId: aRptId,
+      test: true
+    });
+
+    expect(mockGetClient).toHaveBeenCalledWith({
+      test: true
+    });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyPaymentInfoResponse.value
+    });
+  });
+
   it("get payment info fails with error 400 if PagoPA proxy fails with error 400", async () => {
     mockGetPaymentInfo.mockImplementation(() =>
       t.success(badRequestPaymentInfoResponse)
@@ -213,6 +236,31 @@ describe("PagoPAProxyService#activatePayment", () => {
     });
   });
 
+  it("[TEST env] activate payment", async () => {
+    mockActivatePayment.mockImplementation(() => {
+      return validActivatePaymentResponse;
+    });
+
+    const service = new PagoPAProxyService(pagoPAProxy);
+
+    const res = await service.activatePayment({
+      paymentActivationsPostRequest: validPaymentActivation,
+      test: true
+    });
+
+    expect(mockGetClient).toHaveBeenCalledWith({
+      test: true
+    });
+    expect(mockActivatePayment).toHaveBeenCalledWith({
+      paymentActivationsPostRequest: validPaymentActivation
+    });
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyActivatePaymentResponse
+    });
+  });
+
   it("activate payment fails with error 400 if PagoPA proxy fails with error 400", async () => {
     mockActivatePayment.mockImplementation(() =>
       t.success(badRequestActivatePaymentResponse)
@@ -277,6 +325,31 @@ describe("PagoPAProxyService#getActivationStatus", () => {
     const res = await service.getActivationStatus(acodiceContestoPagamento);
 
     expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetActivationStatus).toHaveBeenCalledWith({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyActivationStatusResponse
+    });
+  });
+
+  it("[TEST env] get activation status", async () => {
+    mockGetActivationStatus.mockImplementation(() => {
+      return validActivationStatusResponse;
+    });
+
+    const service = new PagoPAProxyService(pagoPAProxy);
+
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento,
+      test: true
+    });
+
+    expect(mockGetClient).toHaveBeenCalledWith({
+      test: true
+    });
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
