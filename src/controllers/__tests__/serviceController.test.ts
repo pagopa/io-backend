@@ -1,7 +1,8 @@
 /* tslint:disable:no-any */
+/* tslint:disable:no-object-mutation */
 
-import { right } from "fp-ts/lib/Either";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import {
   NonEmptyString,
   OrganizationFiscalCode
@@ -56,10 +57,10 @@ const mockedUser: User = {
   wallet_token: "123hexToken" as WalletToken
 };
 
-const anErrorResponse = {
-  detail: undefined,
-  status: 500,
-  title: "Internal server error",
+const badRequestErrorResponse = {
+  detail: expect.any(String),
+  status: 400,
+  title: expect.any(String),
   type: undefined
 };
 
@@ -83,7 +84,7 @@ describe("ServicesController#getServicesByRecipient", () => {
     const req = mockReq();
 
     mockGetServicesByRecipient.mockReturnValue(
-      Promise.resolve(right(proxyServicesResponse))
+      Promise.resolve(ResponseSuccessJson(proxyServicesResponse))
     );
 
     req.user = mockedUser;
@@ -107,7 +108,7 @@ describe("ServicesController#getServicesByRecipient", () => {
     const res = mockRes();
 
     mockGetServicesByRecipient.mockReturnValue(
-      Promise.resolve(right(proxyServicesResponse))
+      Promise.resolve(ResponseSuccessJson(proxyServicesResponse))
     );
 
     req.user = "";
@@ -120,10 +121,7 @@ describe("ServicesController#getServicesByRecipient", () => {
     response.apply(res);
 
     expect(mockGetServicesByRecipient).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("Cannot extract the user from request")
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
 
@@ -135,7 +133,9 @@ describe("serviceController#getService", () => {
   it("calls the getService on the serviceController with valid values", async () => {
     const req = mockReq();
 
-    mockGetService.mockReturnValue(Promise.resolve(right(proxyService)));
+    mockGetService.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyService))
+    );
 
     req.user = mockedUser;
     req.params = { id: aServiceId };

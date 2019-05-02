@@ -5,15 +5,21 @@
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { CreatedMessageWithContent } from "@generated/io-api/CreatedMessageWithContent";
-import { PaginatedCreatedMessageWithoutContentCollection } from "@generated/io-api/PaginatedCreatedMessageWithoutContentCollection";
-import { PaginatedServiceTupleCollection } from "@generated/io-api/PaginatedServiceTupleCollection";
-import { ServicePublic } from "@generated/io-api/ServicePublic";
+import { CreatedMessageWithContent } from "@generated/backend/CreatedMessageWithContent";
+import { PaginatedCreatedMessageWithoutContentCollection } from "@generated/backend/PaginatedCreatedMessageWithoutContentCollection";
+import { PaginatedServiceTupleCollection } from "@generated/backend/PaginatedServiceTupleCollection";
+import { ServicePublic } from "@generated/backend/ServicePublic";
 
-import { parseResponse, withCatchAsInternalError } from "src/utils/responses";
+import {
+  unhandledResponseStatus,
+  withCatchAsInternalError,
+  withValidatedOrInternalError
+} from "src/utils/responses";
 import { User } from "../types/user";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -23,37 +29,42 @@ export default class MessagesService {
   /**
    * Retrieves all messages for a specific user.
    */
-  public getMessagesByUser(
+  public readonly getMessagesByUser = (
     user: User
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
-  > {
-    return withCatchAsInternalError(async () => {
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
-      const res = await client.getMessages({
+      const validated = await client.getMessages({
         fiscalCode: user.fiscal_code
       });
 
-      return parseResponse<PaginatedCreatedMessageWithoutContentCollection>(
-        res
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? ResponseSuccessJson(response.value)
+            : response.status === 404
+              ? ResponseErrorNotFound("Not found", "User not found")
+              : unhandledResponseStatus(response.status)
       );
     });
-  }
 
   /**
    * Retrieves a specific message.
    */
-  public async getMessage(
+  public readonly getMessage = (
     user: User,
     messageId: string
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseSuccessJson<CreatedMessageWithContent>
-  > {
-    return withCatchAsInternalError(async () => {
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
       const res = await client.getMessage({
@@ -65,60 +76,92 @@ export default class MessagesService {
         _ => (_.status === 200 ? { ..._, value: _.value.message } : _)
       );
 
-      return parseResponse<CreatedMessageWithContent>(resMessageContent);
+      return withValidatedOrInternalError(
+        resMessageContent,
+        response =>
+          response.status === 200
+            ? ResponseSuccessJson(response.value)
+            : response.status === 404
+              ? ResponseErrorNotFound("Not found", "Message not found")
+              : unhandledResponseStatus(response.status)
+      );
     });
-  }
 
   /**
    * Retrieve all the information about the service that has sent a message.
    */
-  public async getService(
+  public readonly getService = (
     serviceId: string
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseSuccessJson<ServicePublic>
-  > {
-    return withCatchAsInternalError(async () => {
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
-      const res = await client.getService({
+      const validated = await client.getService({
         service_id: serviceId
       });
 
-      return parseResponse<ServicePublic>(res);
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? withValidatedOrInternalError(
+                ServicePublic.decode(response.value),
+                ResponseSuccessJson
+              )
+            : response.status === 404
+              ? ResponseErrorNotFound("Not found", "Service not found")
+              : unhandledResponseStatus(response.status)
+      );
     });
-  }
 
-  public async getServicesByRecipient(
+  public readonly getServicesByRecipient = (
     user: User
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > {
-    return withCatchAsInternalError(async () => {
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
-      const res = await client.getServicesByRecipient({
+      const validated = await client.getServicesByRecipient({
         recipient: user.fiscal_code
       });
 
-      return parseResponse<PaginatedServiceTupleCollection>(res);
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? withValidatedOrInternalError(
+                PaginatedServiceTupleCollection.decode(response.value),
+                ResponseSuccessJson
+              )
+            : unhandledResponseStatus(response.status)
+      );
     });
-  }
 
-  public async getVisibleServices(): Promise<
+  public readonly getVisibleServices = (): Promise<
     | IResponseErrorInternal
-    | IResponseErrorNotFound
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > {
-    return withCatchAsInternalError(async () => {
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
 
-      const res = await client.getVisibleServices({});
+      const validated = await client.getVisibleServices({});
 
-      return parseResponse<PaginatedServiceTupleCollection>(res);
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? withValidatedOrInternalError(
+                PaginatedServiceTupleCollection.decode(response.value),
+                ResponseSuccessJson
+              )
+            : unhandledResponseStatus(response.status)
+      );
     });
-  }
 }

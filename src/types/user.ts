@@ -4,25 +4,23 @@
  */
 
 import * as express from "express";
-import { Either, left, isLeft } from "fp-ts/lib/Either";
+import { Either, left, right } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { JSONFromString } from "io-ts-types";
 import { readableReport } from "italia-ts-commons/lib/reporters";
+import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 
 import { EmailAddress } from "@generated/backend/EmailAddress";
 import { FiscalCode } from "@generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "@generated/backend/SpidLevel";
+
+import { withValidatedOrValidationError } from "src/utils/responses";
 import { log } from "../utils/logger";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";
-import {
-  IResponseErrorInternal,
-  ResponseErrorInternal
-} from "italia-ts-commons/lib/responses";
 
 // required attributes
 export const User = t.intersection([
@@ -93,9 +91,9 @@ export function toAppUser(
  * Validates a SPID User extracted from a SAML response.
  */
 // tslint:disable-next-line:no-any
-export function validateSpidUser(value: any): Either<Error, SpidUser> {
+export function validateSpidUser(value: any): Either<string, SpidUser> {
   if (!value.hasOwnProperty("fiscalNumber")) {
-    return left(new Error("Cannot decode a user without a fiscalNumber"));
+    return left("Cannot decode a user without a fiscalNumber");
   }
 
   // Remove the international prefix from fiscal number.
@@ -144,52 +142,29 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
   const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 
   return result.mapLeft(err => {
-    return new Error(
-      "Cannot validate SPID user object: " + readableReport(err)
-    );
+    return "Cannot validate SPID user object: " + readableReport(err);
   });
 }
 
-/**
- * Extracts the user added to the request by Passport.
- */
-export function extractUserFromRequest(
-  from: express.Request
-): Either<string, User> {
-  const result = User.decode(from.user);
-
-  // tslint:disable-next-line:no-identical-functions
-  return result.mapLeft(err => {
-    return "Cannot extract the user from request: " + readableReport(err);
-  });
-}
-
-export async function withUserFromRequest<T>(
+export const withUserFromRequest = async <T>(
   req: express.Request,
   f: (user: User) => Promise<T>
-): Promise<IResponseErrorInternal | T> {
-  const errorOrUser = extractUserFromRequest(req.user);
-
-  if (isLeft(errorOrUser)) {
-    // Unable to extract the user from the request.
-    return ResponseErrorInternal(errorOrUser.value);
-  }
-
-  return await f(errorOrUser.value);
-}
+): Promise<IResponseErrorValidation | T> =>
+  withValidatedOrValidationError(User.decode(req.user), f);
 
 /**
  * Extracts a user from a json string.
  */
-export function extractUserFromJson(from: string): Either<string, User> {
-  return JSONFromString.decode(from)
-    .mapLeft(err => "Cannot parse the user JSON:" + readableReport(err))
+export const extractUserFromJson = (from: string): Either<string, User> =>
+  tryCatch(() => JSON.parse(from))
+    .fold(left<string, unknown>(`Invalid JSON for User [${from}]`), _ =>
+      right<string, unknown>(_)
+    )
     .chain(json =>
       User.decode(json).mapLeft(
-        err => "Cannot decode the user JSON: " + readableReport(err)
+        err => `Cannot decode User from JSON: ${readableReport(err)}`
       )
     );
-}
 
 /**
  * Extract AuthnContextClassRef from SAML response
@@ -211,7 +186,7 @@ function getAuthnContextFromResponse(xml: string): Option<string> {
         responseAuthLevelEl &&
         responseAuthLevelEl[0] &&
         responseAuthLevelEl[0].textContent
-          ? some(responseAuthLevelEl[0].textContent!.trim())
+          ? some(responseAuthLevelEl[0].textContent.trim())
           : none
     );
 }

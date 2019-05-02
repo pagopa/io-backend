@@ -3,6 +3,7 @@
 /* tslint:disable:no-let */
 /* tslint:disable:no-identical-functions */
 /* tslint:disable:no-big-function */
+/* tslint:disable:no-object-mutation */
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 

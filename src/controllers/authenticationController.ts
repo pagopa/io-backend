@@ -8,23 +8,27 @@ import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
+  IResponseErrorValidation,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
   IResponseSuccessXml,
   ResponseErrorInternal,
+  ResponseErrorValidation,
   ResponsePermanentRedirect,
   ResponseSuccessJson,
   ResponseSuccessXml
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
+
+import { withCatchAsInternalError } from "src/utils/responses";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { SuccessResponse } from "../types/commons";
 import { SessionToken, WalletToken } from "../types/token";
 import {
-  extractUserFromRequest,
   toAppUser,
-  validateSpidUser
+  validateSpidUser,
+  withUserFromRequest
 } from "../types/user";
 import { log } from "../utils/logger";
 
@@ -44,18 +48,21 @@ export default class AuthenticationController {
    */
   public async acs(
     // tslint:disable-next-line:no-any
-    userPayload: any
-  ): Promise<IResponseErrorInternal | IResponsePermanentRedirect> {
+    userPayload: unknown
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponsePermanentRedirect
+  > {
     const errorOrUser = validateSpidUser(userPayload);
 
     if (isLeft(errorOrUser)) {
-      const error = errorOrUser.value;
       log.error(
         "Error validating the SPID user %O: %s",
         userPayload,
-        error.message
+        errorOrUser.value
       );
-      return ResponseErrorInternal(error.message);
+      return ResponseErrorValidation("Bad request", errorOrUser.value);
     }
 
     const spidUser = errorOrUser.value;
@@ -87,33 +94,32 @@ export default class AuthenticationController {
    */
   public async logout(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
-    const errorOrUser = extractUserFromRequest(req);
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<SuccessResponse>
+  > {
+    return withUserFromRequest(req, user =>
+      withCatchAsInternalError(async () => {
+        const errorOrResponse = await this.sessionStorage.del(
+          user.session_token,
+          user.wallet_token
+        );
 
-    if (isLeft(errorOrUser)) {
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
+        if (isLeft(errorOrResponse)) {
+          const error = errorOrResponse.value;
+          return ResponseErrorInternal(error.message);
+        }
 
-    const user = errorOrUser.value;
+        const response = errorOrResponse.value;
 
-    const errorOrResponse = await this.sessionStorage.del(
-      user.session_token,
-      user.wallet_token
+        if (!response) {
+          return ResponseErrorInternal("Error destroying the user session");
+        }
+
+        return ResponseSuccessJson({ message: "ok" });
+      })
     );
-
-    if (isLeft(errorOrResponse)) {
-      const error = errorOrResponse.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    const response = errorOrResponse.value;
-
-    if (!response) {
-      return ResponseErrorInternal("Error destroying the user session");
-    }
-
-    return ResponseSuccessJson({ message: "ok" });
   }
 
   /**

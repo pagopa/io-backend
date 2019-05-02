@@ -3,66 +3,42 @@
  * some functions to validate and convert type to and from them.
  */
 
-import * as express from "express";
-import { Either } from "fp-ts/lib/Either";
-
 import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
-import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
 import { InitializedProfile } from "@generated/backend/InitializedProfile";
+
+import { ExtendedProfile } from "@generated/io-api/ExtendedProfile";
 
 import { User } from "./user";
 
 /**
- * Converts an existing API profile to a Proxy profile.
- *
- * @param {ProfileLimitedOrExtended} from The profile retrieved from the Digital Citizenship API.
- * @param {User} user The user data extracted from SPID.
+ * Converts an existing ExtendedProfile to a Proxy profile.
  */
-export function toInitializedProfile(
-  from: ExtendedProfile,
+export const toInitializedProfile = (
+  profile: ExtendedProfile,
   user: User
-): InitializedProfile {
-  return {
-    blocked_inbox_or_channels: from.blocked_inbox_or_channels,
-    email: from.email,
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    has_profile: true,
-    is_inbox_enabled: from.is_inbox_enabled,
-    is_webhook_enabled: from.is_webhook_enabled,
-    name: user.name,
-    preferred_languages: from.preferred_languages,
-    spid_email: user.spid_email,
-    spid_mobile_phone: user.spid_mobile_phone,
-    version: from.version
-  };
-}
+): InitializedProfile => ({
+  blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
+  email: profile.email,
+  family_name: user.family_name,
+  fiscal_code: user.fiscal_code,
+  has_profile: true,
+  is_inbox_enabled: profile.is_inbox_enabled,
+  is_webhook_enabled: profile.is_webhook_enabled,
+  name: user.name,
+  preferred_languages: profile.preferred_languages,
+  spid_email: user.spid_email,
+  spid_mobile_phone: user.spid_mobile_phone,
+  version: profile.version
+});
 
 /**
- * Converts an empty API profile to a Proxy profile.
- *
- * @param {User} user The user data extracted from SPID.
+ * Converts an authenticated User to an AuthenticatedProfile.
  */
-export function toAuthenticatedProfile(user: User): AuthenticatedProfile {
-  return {
-    family_name: user.family_name,
-    fiscal_code: user.fiscal_code,
-    has_profile: false,
-    name: user.name,
-    spid_email: user.spid_email,
-    spid_mobile_phone: user.spid_mobile_phone
-  };
-}
-
-/**
- * Extracts a user profile from the body of a request.
- */
-export function extractUpsertProfileFromRequest(
-  from: express.Request
-): Either<Error, ExtendedProfile> {
-  const result = ExtendedProfile.decode(from.body);
-
-  return result.mapLeft(() => {
-    return new Error("Unable to extract the upsert profile");
-  });
-}
+export const toAuthenticatedProfile = (user: User): AuthenticatedProfile => ({
+  family_name: user.family_name,
+  fiscal_code: user.fiscal_code,
+  has_profile: false,
+  name: user.name,
+  spid_email: user.spid_email,
+  spid_mobile_phone: user.spid_mobile_phone
+});

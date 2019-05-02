@@ -1,6 +1,7 @@
 /* tslint:disable:no-any */
+/* tslint:disable:no-object-mutation */
 
-import { right } from "fp-ts/lib/Either";
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "@generated/backend/EmailAddress";
@@ -58,10 +59,10 @@ const mockedUser: User = {
   wallet_token: "123hexToken" as WalletToken
 };
 
-const anErrorResponse = {
-  detail: undefined,
-  status: 500,
-  title: "Internal server error",
+const badRequestErrorResponse = {
+  detail: expect.any(String),
+  status: 400,
+  title: expect.any(String),
   type: undefined
 };
 
@@ -85,7 +86,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const req = mockReq();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(right(proxyMessagesResponse))
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
     req.user = mockedUser;
@@ -109,7 +110,7 @@ describe("MessagesController#getMessagesByUser", () => {
     const res = mockRes();
 
     mockGetMessagesByUser.mockReturnValue(
-      Promise.resolve(right(proxyMessagesResponse))
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
     req.user = "";
@@ -122,10 +123,7 @@ describe("MessagesController#getMessagesByUser", () => {
     response.apply(res);
 
     expect(mockGetMessagesByUser).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("Cannot extract the user from request")
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
 
@@ -138,7 +136,7 @@ describe("MessagesController#getMessage", () => {
     const req = mockReq();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(right(proxyMessageResponse))
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
     );
 
     req.user = mockedUser;
@@ -163,7 +161,7 @@ describe("MessagesController#getMessage", () => {
     const res = mockRes();
 
     mockGetMessage.mockReturnValue(
-      Promise.resolve(right(proxyMessageResponse))
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
     );
 
     req.user = "";
@@ -177,9 +175,6 @@ describe("MessagesController#getMessage", () => {
     response.apply(res);
 
     expect(mockGetMessage).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("Cannot extract the user from request")
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });

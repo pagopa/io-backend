@@ -24,7 +24,7 @@ export default function getErrorCodeFromResponse(
       return responseStatusMessageEl &&
         responseStatusMessageEl[0] &&
         responseStatusMessageEl[0].textContent
-        ? some(responseStatusMessageEl[0].textContent!.trim())
+        ? some(responseStatusMessageEl[0].textContent.trim())
         : none;
     })
     .chain(errorString => {

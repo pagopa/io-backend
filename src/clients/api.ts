@@ -30,7 +30,7 @@ import { Omit } from "italia-ts-commons/lib/types";
 const OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
 type OcpApimSubscriptionKey = typeof OcpApimSubscriptionKey;
 
-export function SubscriptionKeyHeaderProducer<P>(
+function SubscriptionKeyHeaderProducer<P>(
   token: string
 ): RequestHeaderProducer<P, OcpApimSubscriptionKey> {
   return () => ({

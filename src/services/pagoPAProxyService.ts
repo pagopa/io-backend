@@ -1,74 +1,25 @@
-import { log } from "../utils/logger";
-import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
-
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
+
+import { PaymentActivationsGetResponse } from "@generated/backend/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "@generated/backend/PaymentActivationsPostRequest";
+import { PaymentActivationsPostResponse } from "@generated/backend/PaymentActivationsPostResponse";
+import { PaymentRequestsGetResponse } from "@generated/backend/PaymentRequestsGetResponse";
+
 import {
-  ActivatePaymentT,
-  GetActivationStatusT,
-  GetPaymentInfoT
-} from "@generated/pagopa-proxy/requestTypes";
-
-import { AsControllerFunction } from "../utils/types";
-
-const messageErrorOnUnknownError = "Unknown response.";
-const messageErrorOnApiError = "Api error.";
-const logErrorOnStatusNotOK = "Status is not 200: %s";
-const logErrorOnDecodeError = "Response can't be decoded: %O";
-const logErrorOnUnknownError = "Unknown error: %s";
-const logErrorOnNotFound = "Not found";
-const logErrorOnBadRequest = "Bad request";
-
-type BaseResponse<T> =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseSuccessJson<T>;
-
-/**
- * Parse 200, 400 and 500 responses
- */
-function parseBaseResponse<T>(
-  res: BasePagopaResponseType<T> | AltPagopaResponseType<T> | undefined
-): BaseResponse<T> {
-  if (res === undefined) {
-    log.error(logErrorOnDecodeError, res);
-    return ResponseErrorInternal(messageErrorOnApiError);
-  }
-  if (res.status === 200) {
-    return ResponseSuccessJson(res.value);
-  }
-  if (res.status === 400) {
-    log.error(logErrorOnBadRequest, res.status);
-    return ResponseErrorValidation(
-      res.value.title || "unknown",
-      res.value.detail || "unknown"
-    );
-  }
-  log.error(logErrorOnStatusNotOK, res.status);
-  return ResponseErrorInternal(res.value.detail || "unknown");
-}
-
-/**
- * Adds 404 errors to parseBaseResponse
- */
-function parseAltResponse<T>(
-  res: AltPagopaResponseType<T> | undefined
-): IResponseErrorNotFound | BaseResponse<T> {
-  if (res !== undefined && res.status === 404) {
-    log.error(logErrorOnBadRequest, res.status);
-    return ResponseErrorNotFound(logErrorOnNotFound, "");
-  }
-  return parseBaseResponse(res);
-}
+  unhandledResponseStatus,
+  withCatchAsInternalError,
+  withValidatedOrInternalError
+} from "src/utils/responses";
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
@@ -76,56 +27,99 @@ export default class PagoPAProxyService {
   /**
    * Retrieve information about a payment.
    */
-  public readonly getPaymentInfo: AsControllerFunction<
-    GetPaymentInfoT
-  > = async params => {
-    try {
+  public readonly getPaymentInfo = (
+    rptId: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<PaymentRequestsGetResponse>
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.pagoPAClient.getClient();
-
-      const res = await client.getPaymentInfo({
-        rptId: params.rptId
+      const validated = await client.getPaymentInfo({
+        rptId
       });
-
-      return parseBaseResponse(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return ResponseErrorInternal(messageErrorOnUnknownError);
-    }
-  };
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? withValidatedOrInternalError(
+                PaymentRequestsGetResponse.decode(response.value),
+                ResponseSuccessJson
+              )
+            : response.status === 400
+              ? // tslint:disable-next-line:no-duplicate-string
+                ResponseErrorValidation("Bad request", "Invalid RPTID")
+              : unhandledResponseStatus(response.status)
+      );
+    });
 
   /**
    * Require a lock (activation) for a payment.
    */
-  public readonly activatePayment: AsControllerFunction<
-    ActivatePaymentT
-  > = async params => {
-    try {
+  public readonly activatePayment = async (
+    paymentActivationsPostRequest: PaymentActivationsPostRequest
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<PaymentActivationsPostResponse>
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.pagoPAClient.getClient();
 
-      const res = await client.activatePayment(params);
+      const validated = await client.activatePayment({
+        paymentActivationsPostRequest
+      });
 
-      return parseBaseResponse(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return ResponseErrorInternal(messageErrorOnUnknownError);
-    }
-  };
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? withValidatedOrInternalError(
+                PaymentActivationsPostResponse.decode(response.value),
+                ResponseSuccessJson
+              )
+            : response.status === 400
+              ? // tslint:disable-next-line:no-duplicate-string
+                ResponseErrorValidation("Bad request", "Invalid request")
+              : unhandledResponseStatus(response.status)
+      );
+    });
 
   /**
    * Check the activation status to retrieve the paymentId.
    */
-  public readonly getActivationStatus: AsControllerFunction<
-    GetActivationStatusT
-  > = async params => {
-    try {
+  public readonly getActivationStatus = (
+    codiceContestoPagamento: string
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaymentActivationsGetResponse>
+  > =>
+    withCatchAsInternalError(async () => {
       const client = this.pagoPAClient.getClient();
-
-      const res = await client.getActivationStatus(params);
-
-      return parseAltResponse(res);
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return ResponseErrorInternal(messageErrorOnUnknownError);
-    }
-  };
+      const validated = await client.getActivationStatus({
+        codiceContestoPagamento
+      });
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? withValidatedOrInternalError(
+                PaymentActivationsGetResponse.decode(response.value),
+                ResponseSuccessJson
+              )
+            : response.status === 400
+              ? // tslint:disable-next-line:no-duplicate-string
+                ResponseErrorValidation("Bad request", "Invalid request")
+              : response.status === 404
+                ? ResponseErrorNotFound(
+                    "Not found",
+                    "Payment activation not found"
+                  )
+                : unhandledResponseStatus(response.status)
+      );
+    });
 }

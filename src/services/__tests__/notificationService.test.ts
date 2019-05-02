@@ -148,6 +148,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
+      detail: expect.anything(),
       kind: "IResponseErrorInternal"
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
@@ -200,6 +201,7 @@ describe("NotificationService#notify", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
+      detail: expect.anything(),
       kind: "IResponseErrorInternal"
     });
     expect(mockSend).toBeCalledWith(

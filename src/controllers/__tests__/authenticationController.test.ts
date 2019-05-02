@@ -3,6 +3,7 @@
 /* tslint:disable:no-let */
 /* tslint:disable:no-identical-functions */
 /* tslint:disable:no-big-function */
+/* tslint:disable:no-object-mutation */
 
 import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -146,6 +147,13 @@ const anErrorResponse = {
   type: undefined
 };
 
+const badRequestErrorResponse = {
+  detail: expect.any(String),
+  status: 400,
+  title: expect.any(String),
+  type: undefined
+};
+
 const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
 const mockGetByWalletToken = jest.fn();
@@ -245,14 +253,9 @@ describe("AuthenticationController#acs", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(400);
 
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining(
-        "value.email is not a string that represents an email address"
-      )
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
     expect(mockSet).not.toHaveBeenCalled();
   });
 
@@ -338,11 +341,8 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("value.family_name is not a string")
-    });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
   it("should fail if the session can not be destroyed", async () => {

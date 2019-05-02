@@ -1,11 +1,13 @@
 /* tslint:disable:no-any */
+/* tslint:disable:no-object-mutation */
+/* tslint:disable:no-inferred-empty-object-type */
 
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
 import { EmailAddress } from "@generated/backend/EmailAddress";
-import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
+import { ExtendedProfile as ExtendedProfileBackend } from "@generated/backend/ExtendedProfile";
 import { FiscalCode } from "@generated/backend/FiscalCode";
 import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
@@ -15,11 +17,10 @@ import {
 } from "@generated/backend/PreferredLanguage";
 import { SpidLevelEnum } from "@generated/backend/SpidLevel";
 import { Version } from "@generated/backend/Version";
-import {
-  extractUpsertProfileFromRequest,
-  toAuthenticatedProfile,
-  toInitializedProfile
-} from "../profile";
+
+import { ExtendedProfile as ExtendedProfileApi } from "@generated/io-api/ExtendedProfile";
+
+import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
@@ -46,7 +47,7 @@ const mockedUser: User = {
 };
 
 // mock for a valid ExtendedProfile profile
-const mockedExtendedProfile: ExtendedProfile = {
+const mockedExtendedProfile: ExtendedProfileApi = {
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
@@ -104,7 +105,7 @@ describe("profile type", () => {
     req.body = mockedExtendedProfile;
 
     // extract the upsert user data from Express request with correct values. Return right.
-    const userDataOK = extractUpsertProfileFromRequest(req);
+    const userDataOK = ExtendedProfileBackend.decode(req.body);
 
     expect(isRight(userDataOK)).toBeTruthy();
     if (isRight(userDataOK)) {
@@ -114,7 +115,7 @@ describe("profile type", () => {
 
     // extract the upsert user data from Express request with incorrect values. Return left.
     req.body.email = "it.is.not.an.email";
-    const userDataKO = extractUpsertProfileFromRequest(req);
+    const userDataKO = ExtendedProfileBackend.decode(req.body);
     expect(isLeft(userDataKO)).toBeTruthy();
     if (isLeft(userDataKO)) {
       expect(userDataKO._tag).toBe("Left");

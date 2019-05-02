@@ -1,15 +1,20 @@
 import * as express from "express";
-import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
+import * as t from "io-ts";
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorValidation,
+  IResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 
 import PagoPAProxyService from "../services/pagoPAProxyService";
 
-import {
-  ActivatePaymentT,
-  GetActivationStatusT,
-  GetPaymentInfoT
-} from "@generated/pagopa-proxy/requestTypes";
+import { PaymentActivationsGetResponse } from "@generated/backend/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "@generated/backend/PaymentActivationsPostRequest";
+import { PaymentActivationsPostResponse } from "@generated/backend/PaymentActivationsPostResponse";
+import { PaymentRequestsGetResponse } from "@generated/backend/PaymentRequestsGetResponse";
 
-import { AsControllerResponseType } from "../utils/types";
+import { withValidatedOrInternalError } from "src/utils/responses";
 
 /**
  * This controller handles requests made by the APP that needs to be forwarded to the PagoPA proxy.
@@ -18,35 +23,43 @@ import { AsControllerResponseType } from "../utils/types";
 export default class PagoPAProxyController {
   constructor(private readonly pagoPAProxyService: PagoPAProxyService) {}
 
-  public async getPaymentInfo(
-    req: express.Request
-  ): Promise<AsControllerResponseType<TypeofApiResponse<GetPaymentInfoT>>> {
-    // FIXME: implicit any
-    const rptId = req.params.rptId;
-    return await this.pagoPAProxyService.getPaymentInfo({
-      rptId
-    });
-  }
-
-  public async activatePayment(
-    req: express.Request
-  ): Promise<AsControllerResponseType<TypeofApiResponse<ActivatePaymentT>>> {
-    // FIXME: implicit any
-    const paymentActivationsPostRequest = req.body;
-    return await this.pagoPAProxyService.activatePayment({
-      paymentActivationsPostRequest
-    });
-  }
-
-  public async getActivationStatus(
+  public readonly getPaymentInfo = async (
     req: express.Request
   ): Promise<
-    AsControllerResponseType<TypeofApiResponse<GetActivationStatusT>>
-  > {
-    // FIXME: implicit any
-    const codiceContestoPagamento = req.params.codiceContestoPagamento;
-    return await this.pagoPAProxyService.getActivationStatus({
-      codiceContestoPagamento
-    });
-  }
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<PaymentRequestsGetResponse>
+  > =>
+    withValidatedOrInternalError(
+      t.string.decode(req.params.rptId),
+      this.pagoPAProxyService.getPaymentInfo
+    );
+
+  public readonly activatePayment = async (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<PaymentActivationsPostResponse>
+  > =>
+    withValidatedOrInternalError(
+      PaymentActivationsPostRequest.decode(req.body),
+      this.pagoPAProxyService.activatePayment
+    );
+
+  public readonly getActivationStatus = async (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaymentActivationsGetResponse>
+  > =>
+    withValidatedOrInternalError(
+      t.string.decode(req.params.codiceContestoPagamento),
+      this.pagoPAProxyService.getActivationStatus
+    );
 }

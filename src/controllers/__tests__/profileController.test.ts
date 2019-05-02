@@ -1,7 +1,8 @@
 /* tslint:disable:no-any */
+/* tslint:disable:no-object-mutation */
 
-import { right } from "fp-ts/lib/Either";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "@generated/backend/EmailAddress";
@@ -69,10 +70,10 @@ const mockedUpsertProfile: ExtendedProfile = {
   version: 1 as NonNegativeInteger
 };
 
-const anErrorResponse = {
-  detail: undefined,
-  status: 500,
-  title: "Internal server error",
+const badRequestErrorResponse = {
+  detail: expect.any(String),
+  status: 400,
+  title: expect.any(String),
   type: undefined
 };
 
@@ -95,7 +96,9 @@ describe("ProfileController#getProfile", () => {
   it("calls the getProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
 
-    mockGetProfile.mockReturnValue(Promise.resolve(right(proxyUserResponse)));
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = mockedUser;
 
@@ -117,7 +120,9 @@ describe("ProfileController#getProfile", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetProfile.mockReturnValue(Promise.resolve(right(proxyUserResponse)));
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
+    );
 
     req.user = "";
 
@@ -130,10 +135,7 @@ describe("ProfileController#getProfile", () => {
 
     // getProfile is not called
     expect(mockGetProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("Cannot extract the user from request")
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
 
@@ -146,7 +148,7 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(right(proxyUserResponse))
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
     req.user = mockedUser;
@@ -174,7 +176,7 @@ describe("ProfileController#upsertProfile", () => {
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(right(proxyUserResponse))
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
     req.user = "";
@@ -188,18 +190,15 @@ describe("ProfileController#upsertProfile", () => {
     response.apply(res);
 
     expect(mockUpsertProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("Cannot extract the user from request")
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
-  it("calls the upsertProfile on the ProfileService with valid user and empty upsert user", async () => {
+  it("calls the upsertProfile on the ProfileService with valid user and empty upsert profile", async () => {
     const req = mockReq();
     const res = mockRes();
 
     mockUpsertProfile.mockReturnValue(
-      Promise.resolve(right(proxyUserResponse))
+      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
     req.user = mockedUser;
@@ -213,11 +212,6 @@ describe("ProfileController#upsertProfile", () => {
     response.apply(res);
 
     expect(mockUpsertProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "Unable to extract the upsert profile",
-      status: 400,
-      title: "Bad request"
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });

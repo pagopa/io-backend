@@ -1,11 +1,15 @@
 /* tslint:disable:no-identical-functions */
 
-import { left, right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import * as t from "io-ts";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "@generated/backend/EmailAddress";
 import { FiscalCode } from "@generated/backend/FiscalCode";
 import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
@@ -21,13 +25,8 @@ const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
-const aValidOrganizationFiscalCode = "ABZTCT88A51Y311Y" as FiscalCode;
+const aValidOrganizationFiscalCode = "01234567891" as OrganizationFiscalCode;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-const messageErrorOnApiError = {
-  kind: "ServiceErrorInternal",
-  message: "Api error."
-};
 
 const validApiMessagesResponse = {
   status: 200,
@@ -173,7 +172,7 @@ const api = new ApiClientFactory("", "");
 describe("MessageService#getMessagesByUser", () => {
   it("returns a list of messages from the API", async () => {
     mockGetMessages.mockImplementation(() => {
-      return validApiMessagesResponse;
+      return t.success(validApiMessagesResponse);
     });
 
     const service = new MessageService(api);
@@ -183,13 +182,16 @@ describe("MessageService#getMessagesByUser", () => {
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(right(proxyMessagesResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
   });
 
   it("returns an empty list if the of messages from the API is empty", async () => {
-    mockGetMessages.mockImplementation(() => {
-      return emptyApiMessagesResponse;
-    });
+    mockGetMessages.mockImplementation(() =>
+      t.success(emptyApiMessagesResponse)
+    );
 
     const service = new MessageService(api);
 
@@ -198,18 +200,11 @@ describe("MessageService#getMessagesByUser", () => {
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(
-      left({
-        kind: "ServiceErrorNotFound",
-        message: "Not found."
-      })
-    );
+    expect(res.kind).toEqual("IResponseErrorNotFound");
   });
 
   it("returns an error if the getMessagesByUser API returns an error", async () => {
-    mockGetMessages.mockImplementation(() => {
-      return problemJson;
-    });
+    mockGetMessages.mockImplementation(() => t.success(problemJson));
 
     const service = new MessageService(api);
 
@@ -217,13 +212,13 @@ describe("MessageService#getMessagesByUser", () => {
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(left(messageErrorOnApiError));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
   it("returns a 500 response if the response from the getMessagesByUser API returns something wrong", async () => {
-    mockGetMessages.mockImplementation(() => {
-      return invalidApiMessagesResponse;
-    });
+    mockGetMessages.mockImplementation(() =>
+      t.success(invalidApiMessagesResponse)
+    );
 
     const service = new MessageService(api);
 
@@ -231,64 +226,63 @@ describe("MessageService#getMessagesByUser", () => {
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(left(messageErrorOnApiError));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
 describe("MessageService#getServicesByRecpient", () => {
   it("returns a list of services from the API", async () => {
-    mockGetServicesByRecipient.mockImplementation(() => {
-      return validApiServicesResponse;
-    });
+    mockGetServicesByRecipient.mockImplementation(() =>
+      t.success(validApiServicesResponse)
+    );
 
     const service = new MessageService(api);
 
     const res = await service.getServicesByRecipient(mockedUser);
 
     expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      recipient: mockedUser.fiscal_code
     });
-    expect(res).toEqual(right(proxyServicesResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyServicesResponse
+    });
   });
 
   it("returns an error if the getServicesByRecpient API returns an error", () => {
-    mockGetServicesByRecipient.mockImplementation(() => {
-      return problemJson;
-    });
+    mockGetServicesByRecipient.mockImplementation(() => t.success(problemJson));
 
     const service = new MessageService(api);
 
     expect.assertions(2);
     return service.getServicesByRecipient(mockedUser).then(e => {
       expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
-        fiscalCode: aValidFiscalCode
+        recipient: aValidFiscalCode
       });
-      expect(e).toEqual(left(messageErrorOnApiError));
+      expect(e.kind).toEqual("IResponseErrorInternal");
     });
   });
 
   it("returns unknown response if the response from the getServicesByRecpient API returns something wrong", async () => {
-    mockGetServicesByRecipient.mockImplementation(() => {
-      return invalidApiServicesResponse;
-    });
+    mockGetServicesByRecipient.mockImplementation(() =>
+      t.success(invalidApiServicesResponse)
+    );
 
     const service = new MessageService(api);
 
     expect.assertions(2);
     return service.getServicesByRecipient(mockedUser).then(e => {
       expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
-        fiscalCode: aValidFiscalCode
+        recipient: aValidFiscalCode
       });
-      expect(e).toEqual(left(messageErrorOnApiError));
+      expect(e.kind).toEqual("IResponseErrorInternal");
     });
   });
 });
 
 describe("MessageService#getMessage", () => {
   it("returns a message from the API", async () => {
-    mockGetMessage.mockImplementation(() => {
-      return validApiMessageResponse;
-    });
+    mockGetMessage.mockImplementation(() => t.success(validApiMessageResponse));
 
     const service = new MessageService(api);
 
@@ -298,13 +292,14 @@ describe("MessageService#getMessage", () => {
       fiscalCode: aValidFiscalCode,
       id: aValidMessageId
     });
-    expect(res).toEqual(right(proxyMessageResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
   });
 
   it("returns an error if the getMessage API returns an error", async () => {
-    mockGetMessage.mockImplementation(() => {
-      return problemJson;
-    });
+    mockGetMessage.mockImplementation(() => t.success(problemJson));
 
     const service = new MessageService(api);
 
@@ -313,13 +308,13 @@ describe("MessageService#getMessage", () => {
       fiscalCode: aValidFiscalCode,
       id: aValidMessageId
     });
-    expect(res).toEqual(left(messageErrorOnApiError));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
   it("returns unknown response if the response from the getMessage API returns something wrong", async () => {
-    mockGetMessage.mockImplementation(() => {
-      return invalidApiMessageResponse;
-    });
+    mockGetMessage.mockImplementation(() =>
+      t.success(invalidApiMessageResponse)
+    );
 
     const service = new MessageService(api);
 
@@ -328,50 +323,49 @@ describe("MessageService#getMessage", () => {
       fiscalCode: aValidFiscalCode,
       id: aValidMessageId
     });
-    expect(res).toEqual(left(messageErrorOnApiError));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
 describe("MessageService#getService", () => {
   it("returns a service from the API", async () => {
-    mockGetService.mockImplementation(() => {
-      return validApiServiceResponse;
-    });
+    mockGetService.mockImplementation(() => t.success(validApiServiceResponse));
 
     const service = new MessageService(api);
 
     const res = await service.getService(aValidServiceID);
 
     expect(mockGetService).toHaveBeenCalledWith({
-      id: aValidServiceID
+      service_id: aValidServiceID
     });
-    expect(res).toEqual(right(proxyServiceResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyServiceResponse
+    });
   });
 
   it("returns an error if the API returns an error", async () => {
-    mockGetService.mockImplementation(() => {
-      return problemJson;
-    });
+    mockGetService.mockImplementation(() => t.success(problemJson));
 
     const service = new MessageService(api);
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
-      id: aValidServiceID
+      service_id: aValidServiceID
     });
-    expect(res).toEqual(left(messageErrorOnApiError));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
   it("returns unknown response if the response from the API returns something wrong", async () => {
-    mockGetService.mockImplementation(() => {
-      return invalidApiServiceResponse;
-    });
+    mockGetService.mockImplementation(() =>
+      t.success(invalidApiServiceResponse)
+    );
 
     const service = new MessageService(api);
 
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
-      id: aValidServiceID
+      service_id: aValidServiceID
     });
-    expect(res).toEqual(left(messageErrorOnApiError));
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });

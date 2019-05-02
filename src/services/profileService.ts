@@ -3,28 +3,28 @@
  * an API client.
  */
 
-import { Either, left, right } from "fp-ts/lib/Either";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseSuccessJson,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
+
+import { ExtendedProfile as ExtendedProfileApi } from "@generated/io-api/ExtendedProfile";
 
 import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
+import { ExtendedProfile as ExtendedProfileBackend } from "@generated/backend/ExtendedProfile";
 import { InitializedProfile } from "@generated/backend/InitializedProfile";
-
-import { ExtendedProfile } from "@generated/io-api/ExtendedProfile";
 
 import {
   unhandledResponseStatus,
-  withCatchAsInternalError
+  withCatchAsInternalError,
+  withValidatedOrInternalError
 } from "src/utils/responses";
-import { internalError, ServiceError } from "../types/error";
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-import {
-  IResponseErrorInternal,
-  IResponseSuccessJson,
-  ResponseErrorInternal,
-  ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -32,82 +32,82 @@ export default class ProfileService {
   /**
    * Retrieves the profile for a specific user.
    */
-  public async getProfile(
+  public readonly getProfile = (
     user: User
   ): Promise<
     | IResponseErrorInternal
-    | IResponseSuccessJson<AuthenticatedProfile>
     | IResponseSuccessJson<InitializedProfile>
-  > {
+    | IResponseSuccessJson<AuthenticatedProfile>
+  > => {
+    const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
-      const client = this.apiClient.getClient();
-
-      const res = await client.getProfile({
+      const validated = await client.getProfile({
         fiscalCode: user.fiscal_code
       });
 
-      // The response can't be decoded
-      if (res.isLeft()) {
-        return ResponseErrorInternal(readableReport(res.value));
-      }
+      return withValidatedOrInternalError(validated, response => {
+        if (response.status === 200) {
+          // we need an ExtendedProfile (and that's what we should have got) but
+          // since the response may be an ExtendedProfile or a LimitedProfile
+          // depending on the credentials, we must decode it as an
+          // ExtendedProfile to be sure it's what we need.
+          const validatedExtendedProfile = ExtendedProfileApi.decode(
+            response.value
+          );
 
-      // The response is correct.
-      if (res.value.status === 200) {
-        // since the response may be an ExtendedProfile or a LimitedProfile
-        // we must try to decode it as an ExtendedProfile
-        const extendedProfileOrErrors = ExtendedProfile.decode(res.value);
-        if (extendedProfileOrErrors.isLeft()) {
-          return ResponseErrorInternal(
-            readableReport(extendedProfileOrErrors.value)
+          return withValidatedOrInternalError(validatedExtendedProfile, p =>
+            ResponseSuccessJson(toInitializedProfile(p, user))
           );
         }
-        const initializedProfile = toInitializedProfile(
-          extendedProfileOrErrors.value,
-          user
-        );
-        return ResponseSuccessJson(initializedProfile);
-      }
 
-      // If the profile doesn't exists on the API we still
-      // return 200 to the App with the information we have
-      // retrieved from SPID.
-      if (res.value.status === 404) {
-        return ResponseSuccessJson(toAuthenticatedProfile(user));
-      }
+        // If the profile doesn't exists on the API we still
+        // return 200 to the App with the information we have
+        // retrieved from SPID.
+        if (response.status === 404) {
+          return ResponseSuccessJson(toAuthenticatedProfile(user));
+        }
 
-      return unhandledResponseStatus(res.value.status);
+        return unhandledResponseStatus(response.status);
+      });
     });
-  }
+  };
 
   /**
    * Upsert the profile of a specific user.
    */
-  public async upsertProfile(
+  public readonly upsertProfile = async (
     user: User,
-    upsertProfile: ExtendedProfile
-  ): Promise<Either<ServiceError, InitializedProfile | AuthenticatedProfile>> {
-    return withCatchAsInternalError(async () => {
-      const client = this.apiClient.getClient();
+    extendedProfileBackend: ExtendedProfileBackend
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<InitializedProfile>
+  > => {
+    const client = this.apiClient.getClient();
+    return withValidatedOrInternalError(
+      // we need to convert the ExtendedProfile from the backend specs to the
+      // ExtendedProfile model of the API specs - this decode should always
+      // succeed as the models should be exactly the same
+      ExtendedProfileApi.decode(extendedProfileBackend),
+      async extendedProfileApi =>
+        withCatchAsInternalError(async () => {
+          const validated = await client.upsertProfile({
+            extendedProfile: extendedProfileApi,
+            fiscalCode: user.fiscal_code
+          });
 
-      const res = await client.upsertProfile({
-        extendedProfile: upsertProfile,
-        fiscalCode: user.fiscal_code
-      });
-
-      // The response can't be decoded
-      if (res.isLeft()) {
-        return left(internalError(readableReport(res.value)));
-      }
-
-      if (res.value.status === 200) {
-        return right(toInitializedProfile(res.value, user));
-      }
-
-      if (res.value.status === 404) {
-        return right(toAuthenticatedProfile(user));
-      }
-
-      return unhandledResponseStatus(res.value.status);
-    });
-  }
+          return withValidatedOrInternalError(
+            validated,
+            response =>
+              response.status === 200
+                ? ResponseSuccessJson(
+                    toInitializedProfile(response.value, user)
+                  )
+                : response.status === 404
+                  ? ResponseErrorNotFound("Not found", "User not found")
+                  : unhandledResponseStatus(response.status)
+          );
+        })
+    );
+  };
 }

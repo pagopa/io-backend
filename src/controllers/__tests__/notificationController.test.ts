@@ -1,3 +1,5 @@
+/* tslint:disable:no-object-mutation */
+
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
@@ -6,6 +8,7 @@ import { FiscalCode } from "@generated/backend/FiscalCode";
 import { InstallationID } from "@generated/backend/InstallationID";
 import { PlatformEnum } from "@generated/backend/Platform";
 import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
@@ -80,12 +83,6 @@ const anInvalidNotification = {
   }
 };
 
-const anErrorResponse = {
-  detail: undefined,
-  status: 500,
-  title: "Internal server error",
-  type: undefined
-};
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
@@ -94,6 +91,13 @@ const anAppleDevice = {
 };
 const anInvalidDevice = {
   platform: "invalid"
+};
+
+const badRequestErrorResponse = {
+  detail: expect.any(String),
+  status: 400,
+  title: expect.any(String),
+  type: undefined
 };
 
 const mockCreateOrUpdateInstallation = jest.fn();
@@ -146,10 +150,7 @@ describe("NotificationController#notify", () => {
     const response = await controller.notify(req);
     response.apply(res);
 
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "Unable to parse the notification body"
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
 
@@ -193,12 +194,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const response = await controller.createOrUpdateInstallation(req);
     response.apply(res);
 
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining(
-        "value.fiscal_code is not a string that matches the pattern"
-      )
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
   it("should fail if cannot decode the Installation ID", async () => {
@@ -216,10 +212,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const response = await controller.createOrUpdateInstallation(req);
     response.apply(res);
 
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "Unable to parse the installation ID"
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
   it("should fail if cannot decode the installation data", async () => {
@@ -237,9 +230,6 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     const response = await controller.createOrUpdateInstallation(req);
     response.apply(res);
 
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: "Unable to parse the installation data"
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });

@@ -3,6 +3,7 @@
 /* tslint:disable:no-let */
 /* tslint:disable:no-identical-functions */
 /* tslint:disable:no-null-keyword */
+/* tslint:disable:no-object-mutation */
 
 import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";

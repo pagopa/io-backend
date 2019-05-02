@@ -3,85 +3,58 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
-  IResponseSuccessJson,
-  ResponseErrorInternal
+  IResponseErrorValidation,
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
 import { Installation } from "@generated/backend/Installation";
 import { InstallationID } from "@generated/backend/InstallationID";
+
 import { Notification } from "@generated/notifications/Notification";
 import { SuccessResponse } from "@generated/notifications/SuccessResponse";
+
+import { withUserFromRequest } from "src/types/user";
+import { withValidatedOrValidationError } from "src/utils/responses";
 import NotificationService from "../services/notificationService";
-import { extractUserFromRequest } from "../types/user";
-import { log } from "../utils/logger";
 
 export default class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  public async notify(
+  public readonly notify = async (
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
-    const errorOrNotification = Notification.decode(req.body);
-
-    if (isLeft(errorOrNotification)) {
-      log.error(
-        "Unable to parse the notification body: %s",
-        ReadableReporter.report(errorOrNotification)
-      );
-      return ResponseErrorInternal("Unable to parse the notification body");
-    }
-
-    const notification = errorOrNotification.value;
-
-    return this.notificationService.notify(notification);
-  }
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<SuccessResponse>
+  > =>
+    withValidatedOrValidationError(
+      Notification.decode(req.body),
+      this.notificationService.notify
+    );
 
   public async createOrUpdateInstallation(
     req: express.Request
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      const error = errorOrUser.value;
-      log.error(
-        "Unable to extract the user from the request: %s",
-        error.message
-      );
-      return ResponseErrorInternal(error.message);
-    }
-
-    const errorOrInstallationID = InstallationID.decode(req.params.id);
-
-    if (isLeft(errorOrInstallationID)) {
-      log.error(
-        "Unable to parse the installation ID: %s",
-        ReadableReporter.report(errorOrInstallationID)
-      );
-      return ResponseErrorInternal("Unable to parse the installation ID");
-    }
-
-    const errorOrInstallation = Installation.decode(req.body);
-
-    if (isLeft(errorOrInstallation)) {
-      log.error(
-        "Unable to parse the installation data: %s",
-        ReadableReporter.report(errorOrInstallation)
-      );
-      return ResponseErrorInternal("Unable to parse the installation data");
-    }
-
-    const user = errorOrUser.value;
-    const installation = errorOrInstallation.value;
-    const installationID = errorOrInstallationID.value;
-
-    return this.notificationService.createOrUpdateInstallation(
-      user.fiscal_code,
-      installationID,
-      installation
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<SuccessResponse>
+  > {
+    return withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        InstallationID.decode(req.params.id),
+        installationID =>
+          withValidatedOrValidationError(
+            Installation.decode(req.body),
+            installation =>
+              this.notificationService.createOrUpdateInstallation(
+                user.fiscal_code,
+                installationID,
+                installation
+              )
+          )
+      )
     );
   }
 }

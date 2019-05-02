@@ -21,9 +21,9 @@ interface IFiscalCodeHashTag {
   readonly kind: "IFiscalCodeHashTag";
 }
 
-export const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
+const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
 
-export type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
+type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
 
 /**
  * Notification template.
@@ -39,7 +39,7 @@ export interface INotificationTemplate {
  *
  * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
-export interface INotificationTemplates {
+interface INotificationTemplates {
   readonly [name: string]: INotificationTemplate;
 }
 
@@ -52,7 +52,7 @@ export interface IInstallation {
   readonly installationId: InstallationID;
   readonly platform: Platform;
   readonly pushChannel: string;
-  readonly tags: [FiscalCodeHash];
+  readonly tags: ReadonlyArray<FiscalCodeHash>;
   readonly templates: INotificationTemplates;
 }
 
