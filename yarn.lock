@@ -2753,10 +2753,10 @@ italia-ts-commons@^5.0.1:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
-italia-ts-commons@^5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.0.3.tgz#fd4233af568fc15ee48196a1c1a11f9c27a1240d"
-  integrity sha512-XARHvODJiGVLOD+qii8zNLi3qX4I9pkupk8px3+2Zwm5m29edmohfpLrf+zA3+a8Z3gmAkQvmDmSrfT6/xQ1eg==
+italia-ts-commons@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.1.tgz#a4b66158286b8472ae36b685323d71841059524a"
+  integrity sha512-sTWo7U5e0VRRTjxZH7CrmTEhpsVzzCDp/FS8neiDZy/lBRohHtRAosrgqqYzhNZpUMraY5Hko8K51Ggxfb02zQ==
   dependencies:
     fp-ts "1.12.0"
     io-ts "1.8.5"

@@ -42,5 +42,8 @@ export const withValidatedOrValidationError = <T, U>(
   f: (t: T) => U
 ) =>
   response.isLeft()
-    ? ResponseErrorValidation("Bad request", readableReport(response.value))
+    ? ResponseErrorValidation(
+        "Bad request",
+        readableReport(response.value).replace(/\n/, " / ")
+      )
     : f(response.value);

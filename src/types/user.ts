@@ -142,7 +142,10 @@ export function validateSpidUser(value: any): Either<string, SpidUser> {
   const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 
   return result.mapLeft(err => {
-    return "Cannot validate SPID user object: " + readableReport(err);
+    return (
+      "Cannot validate SPID user object: " +
+      readableReport(err).replace(/\n/, " / ")
+    );
   });
 }
 
