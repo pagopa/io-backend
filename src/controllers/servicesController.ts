@@ -11,8 +11,8 @@ import {
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { PaginatedServiceTupleCollection } from "@generated/backend/PaginatedServiceTupleCollection";
-import { ServicePublic } from "@generated/backend/ServicePublic";
+import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";

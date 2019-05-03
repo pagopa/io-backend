@@ -8,13 +8,13 @@ import {
   OrganizationFiscalCode
 } from "italia-ts-commons/lib/strings";
 
-import { DepartmentName } from "@generated/backend/DepartmentName";
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { OrganizationName } from "@generated/backend/OrganizationName";
-import { ServiceName } from "@generated/backend/ServiceName";
-import { ServicePublic } from "@generated/backend/ServicePublic";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { DepartmentName } from "../../../generated/backend/DepartmentName";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { OrganizationName } from "../../../generated/backend/OrganizationName";
+import { ServiceName } from "../../../generated/backend/ServiceName";
+import { ServicePublic } from "../../../generated/backend/ServicePublic";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";

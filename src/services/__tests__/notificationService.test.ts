@@ -2,11 +2,11 @@
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { InstallationID } from "@generated/backend/InstallationID";
-import { MessageBodyMarkdown } from "@generated/backend/MessageBodyMarkdown";
-import { MessageSubject } from "@generated/backend/MessageSubject";
-import { PlatformEnum } from "@generated/backend/Platform";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { InstallationID } from "../../../generated/backend/InstallationID";
+import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
+import { MessageSubject } from "../../../generated/backend/MessageSubject";
+import { PlatformEnum } from "../../../generated/backend/Platform";
 import NotificationService from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;

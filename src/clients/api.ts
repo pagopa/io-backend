@@ -7,6 +7,7 @@ import {
   RequestParams,
   TypeofApiCall
 } from "italia-ts-commons/lib/requests";
+import { Omit } from "italia-ts-commons/lib/types";
 import nodeFetch from "node-fetch";
 
 import {
@@ -24,8 +25,7 @@ import {
   GetVisibleServicesT,
   upsertProfileDefaultDecoder,
   UpsertProfileT
-} from "@generated/io-api/requestTypes";
-import { Omit } from "italia-ts-commons/lib/types";
+} from "../../generated/io-api/requestTypes";
 
 const OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
 type OcpApimSubscriptionKey = typeof OcpApimSubscriptionKey;

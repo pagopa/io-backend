@@ -6,19 +6,19 @@ import { isLeft, isRight } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { ExtendedProfile as ExtendedProfileBackend } from "@generated/backend/ExtendedProfile";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/backend/ExtendedProfile";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "@generated/backend/PreferredLanguage";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
-import { Version } from "@generated/backend/Version";
+} from "../../../generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { Version } from "../../../generated/backend/Version";
 
-import { ExtendedProfile as ExtendedProfileApi } from "@generated/io-api/ExtendedProfile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 
 import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";

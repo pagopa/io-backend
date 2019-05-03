@@ -9,11 +9,11 @@ import {
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { Installation } from "@generated/backend/Installation";
-import { InstallationID } from "@generated/backend/InstallationID";
+import { Installation } from "../../generated/backend/Installation";
+import { InstallationID } from "../../generated/backend/InstallationID";
 
-import { Notification } from "@generated/notifications/Notification";
-import { SuccessResponse } from "@generated/notifications/SuccessResponse";
+import { Notification } from "../../generated/notifications/Notification";
+import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import NotificationService from "../services/notificationService";
 import { withUserFromRequest } from "../types/user";

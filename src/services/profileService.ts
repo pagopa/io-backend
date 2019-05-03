@@ -11,11 +11,11 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { ExtendedProfile as ExtendedProfileApi } from "@generated/io-api/ExtendedProfile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
-import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
-import { ExtendedProfile as ExtendedProfileBackend } from "@generated/backend/ExtendedProfile";
-import { InitializedProfile } from "@generated/backend/InitializedProfile";
+import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
+import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backend/ExtendedProfile";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";

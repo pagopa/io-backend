@@ -4,7 +4,7 @@
  * @see http://www.agid.gov.it/agenda-digitale/infrastrutture-architetture/spid/percorso-attuazione
  */
 
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
 type SpidLevel1 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL1"];
 type SpidLevel2 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL2"];

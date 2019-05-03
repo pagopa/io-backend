@@ -9,10 +9,10 @@ import {
 
 import PagoPAProxyService from "../services/pagoPAProxyService";
 
-import { PaymentActivationsGetResponse } from "@generated/backend/PaymentActivationsGetResponse";
-import { PaymentActivationsPostRequest } from "@generated/backend/PaymentActivationsPostRequest";
-import { PaymentActivationsPostResponse } from "@generated/backend/PaymentActivationsPostResponse";
-import { PaymentRequestsGetResponse } from "@generated/backend/PaymentRequestsGetResponse";
+import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "../../generated/backend/PaymentActivationsPostRequest";
+import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
+import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 
 import { withValidatedOrInternalError } from "../utils/responses";
 

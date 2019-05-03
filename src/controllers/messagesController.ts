@@ -14,8 +14,8 @@ import {
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
-import { CreatedMessageWithContent } from "@generated/backend/CreatedMessageWithContent";
-import { PaginatedCreatedMessageWithoutContentCollection } from "@generated/backend/PaginatedCreatedMessageWithoutContentCollection";
+import { CreatedMessageWithContent } from "../../generated/backend/CreatedMessageWithContent";
+import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}

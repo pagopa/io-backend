@@ -12,7 +12,7 @@ import {
   GetActivationStatusT,
   getPaymentInfoDefaultDecoder,
   GetPaymentInfoT
-} from "@generated/pagopa-proxy/requestTypes";
+} from "../../generated/pagopa-proxy/requestTypes";
 
 export function PagoPAClient(
   baseUrl?: string,

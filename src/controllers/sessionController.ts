@@ -9,7 +9,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { PublicSession } from "@generated/backend/PublicSession";
+import { PublicSession } from "../../generated/backend/PublicSession";
 
 import { withUserFromRequest } from "../types/user";
 

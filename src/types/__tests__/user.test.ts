@@ -6,9 +6,9 @@ import { Either, isLeft, isRight } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { Issuer } from "../issuer";
 import { SessionToken, WalletToken } from "../token";
 import {

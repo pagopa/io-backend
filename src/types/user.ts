@@ -12,9 +12,9 @@ import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { SpidLevel, SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { EmailAddress } from "../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";

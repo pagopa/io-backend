@@ -113,10 +113,6 @@
       "ts",
       "js"
     ],
-    "moduleNameMapper": {
-      "^@generated/(.*)": "<rootDir>/generated/$1",
-      "^src/(.*)": "<rootDir>/src/$1"
-    },
     "transform": {
       "^.+\\.(ts|tsx)$": "ts-jest"
     },

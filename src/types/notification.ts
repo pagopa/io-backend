@@ -7,9 +7,9 @@ import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { tag } from "italia-ts-commons/lib/types";
 
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { InstallationID } from "@generated/backend/InstallationID";
-import { Platform } from "@generated/backend/Platform";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { InstallationID } from "../../generated/backend/InstallationID";
+import { Platform } from "../../generated/backend/Platform";
 
 /**
  * An hashed fiscal code.

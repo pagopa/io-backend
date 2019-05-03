@@ -1,15 +1,15 @@
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "@generated/backend/PreferredLanguage";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+} from "../../../generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";

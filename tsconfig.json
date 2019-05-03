@@ -9,15 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@generated/io-api/*": [ "generated/io-api/*" ],
-      "@generated/notifications/*": [ "generated/notifications/*" ],
-      "@generated/pagopa/*": [ "generated/pagopa/*" ],
-      "@generated/pagopa-proxy/*": [ "generated/pagopa-proxy/*" ],
-      "@generated/public/*": [ "generated/public/*" ],
-      "@generated/backend/*": [ "generated/backend/*" ]
-    }
+    "baseUrl": "."
   },
   "include": [
     "./src/**/*"

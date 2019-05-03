@@ -10,12 +10,12 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { Installation } from "@generated/backend/Installation";
-import { InstallationID } from "@generated/backend/InstallationID";
-import { PlatformEnum } from "@generated/backend/Platform";
-import { Notification } from "@generated/notifications/Notification";
-import { SuccessResponse } from "@generated/notifications/SuccessResponse";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { Installation } from "../../generated/backend/Installation";
+import { InstallationID } from "../../generated/backend/InstallationID";
+import { PlatformEnum } from "../../generated/backend/Platform";
+import { Notification } from "../../generated/notifications/Notification";
+import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import {
   IInstallation,

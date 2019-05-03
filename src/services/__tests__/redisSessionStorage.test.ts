@@ -10,9 +10,9 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import RedisSessionStorage from "../redisSessionStorage";

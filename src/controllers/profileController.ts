@@ -11,9 +11,9 @@ import {
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
-import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
-import { InitializedProfile } from "@generated/backend/InitializedProfile";
+import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
+import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";

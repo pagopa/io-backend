@@ -3,10 +3,10 @@
  * some functions to validate and convert type to and from them.
  */
 
-import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
-import { InitializedProfile } from "@generated/backend/InitializedProfile";
+import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
-import { ExtendedProfile } from "@generated/io-api/ExtendedProfile";
+import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 
 import { User } from "./user";
 

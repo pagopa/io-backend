@@ -6,9 +6,9 @@ import {
   OrganizationFiscalCode
 } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";

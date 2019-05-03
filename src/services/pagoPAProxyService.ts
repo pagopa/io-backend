@@ -10,10 +10,10 @@ import {
 
 import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
 
-import { PaymentActivationsGetResponse } from "@generated/backend/PaymentActivationsGetResponse";
-import { PaymentActivationsPostRequest } from "@generated/backend/PaymentActivationsPostRequest";
-import { PaymentActivationsPostResponse } from "@generated/backend/PaymentActivationsPostResponse";
-import { PaymentRequestsGetResponse } from "@generated/backend/PaymentRequestsGetResponse";
+import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
+import { PaymentActivationsPostRequest } from "../../generated/backend/PaymentActivationsPostRequest";
+import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
+import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 
 import {
   unhandledResponseStatus,

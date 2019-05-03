@@ -5,16 +5,16 @@ import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { IsInboxEnabled } from "@generated/backend/IsInboxEnabled";
-import { IsWebhookEnabled } from "@generated/backend/IsWebhookEnabled";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "@generated/backend/PreferredLanguage";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+} from "../../../generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";

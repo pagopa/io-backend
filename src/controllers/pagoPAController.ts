@@ -10,8 +10,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { InitializedProfile } from "@generated/backend/InitializedProfile";
-import { PagoPAUser } from "@generated/pagopa/PagoPAUser";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
 
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";

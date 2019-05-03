@@ -7,9 +7,9 @@
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "@generated/backend/EmailAddress";
-import { FiscalCode } from "@generated/backend/FiscalCode";
-import { SpidLevelEnum } from "@generated/backend/SpidLevel";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { SessionToken, WalletToken } from "../../types/token";

@@ -10,10 +10,10 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { CreatedMessageWithContent } from "@generated/backend/CreatedMessageWithContent";
-import { PaginatedCreatedMessageWithoutContentCollection } from "@generated/backend/PaginatedCreatedMessageWithoutContentCollection";
-import { PaginatedServiceTupleCollection } from "@generated/backend/PaginatedServiceTupleCollection";
-import { ServicePublic } from "@generated/backend/ServicePublic";
+import { CreatedMessageWithContent } from "../../generated/backend/CreatedMessageWithContent";
+import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
+import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import { User } from "../types/user";
 import {
