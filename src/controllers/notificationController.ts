@@ -15,9 +15,9 @@ import { InstallationID } from "@generated/backend/InstallationID";
 import { Notification } from "@generated/notifications/Notification";
 import { SuccessResponse } from "@generated/notifications/SuccessResponse";
 
-import { withUserFromRequest } from "src/types/user";
-import { withValidatedOrValidationError } from "src/utils/responses";
 import NotificationService from "../services/notificationService";
+import { withUserFromRequest } from "../types/user";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}

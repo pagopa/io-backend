@@ -15,12 +15,12 @@ import { PaginatedCreatedMessageWithoutContentCollection } from "@generated/back
 import { PaginatedServiceTupleCollection } from "@generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "@generated/backend/ServicePublic";
 
+import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
-} from "src/utils/responses";
-import { User } from "../types/user";
+} from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class MessagesService {

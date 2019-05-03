@@ -17,13 +17,13 @@ import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
 import { ExtendedProfile as ExtendedProfileBackend } from "@generated/backend/ExtendedProfile";
 import { InitializedProfile } from "@generated/backend/InitializedProfile";
 
+import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
+import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
-} from "src/utils/responses";
-import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
-import { User } from "../types/user";
+} from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ProfileService {

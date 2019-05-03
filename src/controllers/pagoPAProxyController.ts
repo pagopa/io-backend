@@ -14,7 +14,7 @@ import { PaymentActivationsPostRequest } from "@generated/backend/PaymentActivat
 import { PaymentActivationsPostResponse } from "@generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "@generated/backend/PaymentRequestsGetResponse";
 
-import { withValidatedOrInternalError } from "src/utils/responses";
+import { withValidatedOrInternalError } from "../utils/responses";
 
 /**
  * This controller handles requests made by the APP that needs to be forwarded to the PagoPA proxy.

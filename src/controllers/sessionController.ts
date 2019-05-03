@@ -10,7 +10,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { PublicSession } from "@generated/backend/PublicSession";
-import { withUserFromRequest } from "src/types/user";
+
+import { withUserFromRequest } from "../types/user";
 
 export default class SessionController {
   public readonly getSessionState = (

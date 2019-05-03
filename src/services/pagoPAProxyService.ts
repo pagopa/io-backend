@@ -19,7 +19,7 @@ import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
-} from "src/utils/responses";
+} from "../utils/responses";
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}

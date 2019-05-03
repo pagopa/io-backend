@@ -15,9 +15,9 @@ import { AuthenticatedProfile } from "@generated/backend/AuthenticatedProfile";
 import { ExtendedProfile } from "@generated/backend/ExtendedProfile";
 import { InitializedProfile } from "@generated/backend/InitializedProfile";
 
-import { withValidatedOrValidationError } from "src/utils/responses";
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class ProfileController {
   constructor(private readonly profileService: ProfileService) {}

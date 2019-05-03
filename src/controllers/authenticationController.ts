@@ -20,7 +20,6 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
-import { withCatchAsInternalError } from "src/utils/responses";
 import { ISessionStorage } from "../services/ISessionStorage";
 import TokenService from "../services/tokenService";
 import { SuccessResponse } from "../types/commons";
@@ -31,6 +30,7 @@ import {
   withUserFromRequest
 } from "../types/user";
 import { log } from "../utils/logger";
+import { withCatchAsInternalError } from "../utils/responses";
 
 export default class AuthenticationController {
   constructor(

@@ -14,8 +14,8 @@ import {
 import { PaginatedServiceTupleCollection } from "@generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "@generated/backend/ServicePublic";
 
-import { withUserFromRequest } from "src/types/user";
 import MessagesService from "../services/messagesService";
+import { withUserFromRequest } from "../types/user";
 
 export default class ServicesController {
   constructor(private readonly messagesService: MessagesService) {}

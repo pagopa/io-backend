@@ -16,8 +16,8 @@ import { EmailAddress } from "@generated/backend/EmailAddress";
 import { FiscalCode } from "@generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "@generated/backend/SpidLevel";
 
-import { withValidatedOrValidationError } from "src/utils/responses";
 import { log } from "../utils/logger";
+import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";

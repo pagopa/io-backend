@@ -17,12 +17,12 @@ import { PlatformEnum } from "@generated/backend/Platform";
 import { Notification } from "@generated/notifications/Notification";
 import { SuccessResponse } from "@generated/notifications/SuccessResponse";
 
-import { withCatchAsInternalError } from "src/utils/responses";
 import {
   IInstallation,
   INotificationTemplate,
   toFiscalCodeHash
 } from "../types/notification";
+import { withCatchAsInternalError } from "../utils/responses";
 
 /**
  * A template suitable for Apple's APNs.
