@@ -144,7 +144,7 @@ export function validateSpidUser(value: any): Either<string, SpidUser> {
   return result.mapLeft(err => {
     return (
       "Cannot validate SPID user object: " +
-      readableReport(err).replace(/\n/, " / ")
+      readableReport(err).replace(/\n/g, " / ")
     );
   });
 }

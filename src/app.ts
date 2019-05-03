@@ -141,7 +141,7 @@ export function newApp(
   // we take only the first 6 characters of the fiscal code
   morgan.token("fiscal_code_short", (req, _) =>
     User.decode(req.user)
-      .map(user => String(user.fiscal_code).slice(6))
+      .map(user => String(user.fiscal_code).slice(0, 6))
       .getOrElse("")
   );
 
