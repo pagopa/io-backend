@@ -1,5 +1,5 @@
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import {
   ResponseErrorInternal,
   ResponseErrorValidation
@@ -30,7 +30,9 @@ export const withValidatedOrInternalError = <T, U>(
   f: (t: T) => U
 ) =>
   validated.isLeft()
-    ? ResponseErrorInternal(readableReport(validated.value))
+    ? ResponseErrorInternal(
+        errorsToReadableMessages(validated.value).join(" / ")
+      )
     : f(validated.value);
 
 /**
@@ -44,6 +46,6 @@ export const withValidatedOrValidationError = <T, U>(
   response.isLeft()
     ? ResponseErrorValidation(
         "Bad request",
-        readableReport(response.value).replace(/\n/g, " / ")
+        errorsToReadableMessages(response.value).join(" / ")
       )
     : f(response.value);

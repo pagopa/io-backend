@@ -1,8 +1,11 @@
+// tslint:disable:no-duplicate-string
+
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessJson
@@ -48,9 +51,12 @@ export default class PagoPAProxyService {
                 ResponseSuccessJson
               )
             : response.status === 400
-              ? // tslint:disable-next-line:no-duplicate-string
-                ResponseErrorValidation("Bad request", "Invalid RPTID")
-              : unhandledResponseStatus(response.status)
+              ? ResponseErrorValidation(
+                  response.value.title || "Bad request (upstream)",
+                  response.value.detail ||
+                    "Bad request response from upstream API"
+                )
+              : ResponseErrorInternal(response.value.detail)
       );
     });
 
@@ -60,8 +66,10 @@ export default class PagoPAProxyService {
   public readonly activatePayment = async (
     paymentActivationsPostRequest: PaymentActivationsPostRequest
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseSuccessJson<PaymentActivationsPostResponse>
   > =>
     withCatchAsInternalError(async () => {
@@ -80,8 +88,11 @@ export default class PagoPAProxyService {
                 ResponseSuccessJson
               )
             : response.status === 400
-              ? // tslint:disable-next-line:no-duplicate-string
-                ResponseErrorValidation("Bad request", "Invalid request")
+              ? ResponseErrorValidation(
+                  response.value.title || "Bad request (upstream)",
+                  response.value.detail ||
+                    "Bad request response from upstream API"
+                )
               : unhandledResponseStatus(response.status)
       );
     });
@@ -112,14 +123,20 @@ export default class PagoPAProxyService {
                 ResponseSuccessJson
               )
             : response.status === 400
-              ? // tslint:disable-next-line:no-duplicate-string
-                ResponseErrorValidation("Bad request", "Invalid request")
+              ? ResponseErrorValidation(
+                  response.value.title || "Bad request (upstream)",
+                  response.value.detail ||
+                    "Bad request response from upstream API"
+                )
               : response.status === 404
                 ? ResponseErrorNotFound(
-                    "Not found",
-                    "Payment activation not found"
+                    response.value.title || "Not found (upstream)",
+                    response.value.detail || "Not found response from upstream"
                   )
-                : unhandledResponseStatus(response.status)
+                : ResponseErrorInternal(
+                    response.value.detail ||
+                      "Internal server error response from upstream"
+                  )
       );
     });
 }

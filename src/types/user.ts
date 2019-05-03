@@ -7,7 +7,7 @@ import * as express from "express";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
@@ -144,7 +144,7 @@ export function validateSpidUser(value: any): Either<string, SpidUser> {
   return result.mapLeft(err => {
     return (
       "Cannot validate SPID user object: " +
-      readableReport(err).replace(/\n/g, " / ")
+      errorsToReadableMessages(err).join(" / ")
     );
   });
 }
@@ -165,7 +165,10 @@ export const extractUserFromJson = (from: string): Either<string, User> =>
     )
     .chain(json =>
       User.decode(json).mapLeft(
-        err => `Cannot decode User from JSON: ${readableReport(err)}`
+        err =>
+          `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
+            " / "
+          )}`
       )
     );
 
