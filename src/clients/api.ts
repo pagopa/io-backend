@@ -1,55 +1,36 @@
-import * as t from "io-ts";
-
-// A basic response type that also include 401
 import {
   ApiHeaderJson,
-  basicErrorResponseDecoder,
-  basicResponseDecoder,
-  BasicResponseType,
   composeHeaderProducers,
-  composeResponseDecoders,
   createFetchRequestForApi,
-  IGetApiRequestType,
-  IPostApiRequestType,
-  IResponseType,
+  ReplaceRequestParams,
   RequestHeaderProducer,
-  ResponseDecoder,
+  RequestParams,
   TypeofApiCall
 } from "italia-ts-commons/lib/requests";
+import { Omit } from "italia-ts-commons/lib/types";
 import nodeFetch from "node-fetch";
-import { ExtendedProfile } from "../types/api/ExtendedProfile";
-import { FiscalCode } from "../types/api/FiscalCode";
-import { LimitedProfile } from "../types/api/LimitedProfile";
-import { MessageResponseWithContent } from "../types/api/MessageResponseWithContent";
-import { Messages } from "../types/api/Messages";
-import { ServicePublic } from "../types/api/ServicePublic";
-import { Services } from "../types/api/Services";
+
+import {
+  getMessageDefaultDecoder,
+  getMessagesByUserDefaultDecoder,
+  GetMessagesByUserT,
+  GetMessageT,
+  getProfileDefaultDecoder,
+  GetProfileT,
+  getServiceDefaultDecoder,
+  getServicesByRecipientDefaultDecoder,
+  GetServicesByRecipientT,
+  GetServiceT,
+  getVisibleServicesDefaultDecoder,
+  GetVisibleServicesT,
+  upsertProfileDefaultDecoder,
+  UpsertProfileT
+} from "../../generated/io-api/requestTypes";
 
 const OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
 type OcpApimSubscriptionKey = typeof OcpApimSubscriptionKey;
 
-// ProfileLimitedOrExtended is oneOf [LimitedProfile, ExtendedProfile]
-const ProfileLimitedOrExtended = t.union([LimitedProfile, ExtendedProfile]);
-
-export type ProfileLimitedOrExtended = t.TypeOf<
-  typeof ProfileLimitedOrExtended
->;
-
-export type BasicResponseTypeWith401<R> =
-  | BasicResponseType<R>
-  | IResponseType<401, Error>;
-
-// A basic response decoder that also include 401
-export function basicResponseDecoderWith401<R, O = R>(
-  type: t.Type<R, O>
-): ResponseDecoder<BasicResponseTypeWith401<R>> {
-  return composeResponseDecoders(
-    basicResponseDecoder(type),
-    basicErrorResponseDecoder(401)
-  );
-}
-
-export function SubscriptionKeyHeaderProducer<P>(
+function SubscriptionKeyHeaderProducer<P>(
   token: string
 ): RequestHeaderProducer<P, OcpApimSubscriptionKey> {
   return () => ({
@@ -57,82 +38,21 @@ export function SubscriptionKeyHeaderProducer<P>(
   });
 }
 
-export type GetProfileT = IGetApiRequestType<
-  {
-    readonly fiscalCode: FiscalCode;
-  },
-  OcpApimSubscriptionKey,
-  never,
-  BasicResponseTypeWith401<ProfileLimitedOrExtended>
->;
-
-export type CreateOrUpdateProfileT = IPostApiRequestType<
-  {
-    readonly fiscalCode: FiscalCode;
-    readonly newProfile: ExtendedProfile;
-  },
-  OcpApimSubscriptionKey | "Content-Type",
-  never,
-  BasicResponseTypeWith401<ExtendedProfile>
->;
-
-export type GetServicesByRecipientT = IGetApiRequestType<
-  {
-    readonly fiscalCode: FiscalCode;
-  },
-  OcpApimSubscriptionKey,
-  never,
-  BasicResponseTypeWith401<Services>
->;
-
-export type GetMessagesT = IGetApiRequestType<
-  {
-    readonly fiscalCode: FiscalCode;
-  },
-  OcpApimSubscriptionKey,
-  never,
-  BasicResponseTypeWith401<Messages>
->;
-
-export type GetMessageT = IGetApiRequestType<
-  {
-    readonly fiscalCode: FiscalCode;
-    readonly id: string;
-  },
-  OcpApimSubscriptionKey,
-  never,
-  BasicResponseTypeWith401<MessageResponseWithContent>
->;
-
-export type GetServicesT = IGetApiRequestType<
-  {},
-  OcpApimSubscriptionKey,
-  never,
-  BasicResponseTypeWith401<Services>
->;
-
-export type GetServiceT = IGetApiRequestType<
-  {
-    readonly id: string;
-  },
-  OcpApimSubscriptionKey,
-  never,
-  BasicResponseTypeWith401<ServicePublic>
->;
-
 export function APIClient(
   baseUrl: string,
   token: string,
   // tslint:disable-next-line:no-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch // TODO: customize fetch with timeout
 ): {
-  readonly createOrUpdateProfile: TypeofApiCall<CreateOrUpdateProfileT>;
-  readonly getMessage: TypeofApiCall<GetMessageT>;
-  readonly getMessages: TypeofApiCall<GetMessagesT>;
-  readonly getProfile: TypeofApiCall<GetProfileT>;
-  readonly getService: TypeofApiCall<GetServiceT>;
-  readonly getServices: TypeofApiCall<GetServicesT>;
-  readonly getServicesByRecipient: TypeofApiCall<GetServicesByRecipientT>;
+  readonly upsertProfile: TypeofApiCall<typeof upsertProfileT>;
+  readonly getMessage: TypeofApiCall<typeof getMessageT>;
+  readonly getMessages: TypeofApiCall<typeof getMessagesT>;
+  readonly getProfile: TypeofApiCall<typeof getProfileT>;
+  readonly getService: TypeofApiCall<typeof getServiceT>;
+  readonly getVisibleServices: TypeofApiCall<typeof getVisibleServicesT>;
+  readonly getServicesByRecipient: TypeofApiCall<
+    typeof getServicesByRecipientT
+  >;
 } {
   const options = {
     baseUrl,
@@ -141,77 +61,95 @@ export function APIClient(
 
   const tokenHeaderProducer = SubscriptionKeyHeaderProducer(token);
 
-  const getProfileT: GetProfileT = {
+  const getProfileT: ReplaceRequestParams<
+    GetProfileT,
+    Omit<RequestParams<GetProfileT>, "SubscriptionKey">
+  > = {
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ProfileLimitedOrExtended),
+    response_decoder: getProfileDefaultDecoder(),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
-  const createOrUpdateProfileT: CreateOrUpdateProfileT = {
-    body: params => JSON.stringify(params.newProfile),
+  const upsertProfileT: ReplaceRequestParams<
+    UpsertProfileT,
+    Omit<RequestParams<UpsertProfileT>, "SubscriptionKey">
+  > = {
+    body: params => JSON.stringify(params.extendedProfile),
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ExtendedProfile),
+    response_decoder: upsertProfileDefaultDecoder(),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
-  const getServicesByRecipientT: GetServicesByRecipientT = {
+  const getServicesByRecipientT: ReplaceRequestParams<
+    GetServicesByRecipientT,
+    Omit<RequestParams<GetServicesByRecipientT>, "SubscriptionKey">
+  > = {
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(Services),
-    url: params => `/profiles/${params.fiscalCode}/sender-services`
+    response_decoder: getServicesByRecipientDefaultDecoder(),
+    url: params => `/profiles/${params.recipient}/sender-services`
   };
 
-  const getMessagesT: GetMessagesT = {
+  const getMessagesT: ReplaceRequestParams<
+    GetMessagesByUserT,
+    Omit<RequestParams<GetMessagesByUserT>, "SubscriptionKey">
+  > = {
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(Messages),
+    response_decoder: getMessagesByUserDefaultDecoder(),
     url: params => `/messages/${params.fiscalCode}`
   };
 
-  const getMessageT: GetMessageT = {
+  const getMessageT: ReplaceRequestParams<
+    GetMessageT,
+    Omit<RequestParams<GetMessageT>, "SubscriptionKey">
+  > = {
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(MessageResponseWithContent),
+    response_decoder: getMessageDefaultDecoder(),
     url: params => `/messages/${params.fiscalCode}/${params.id}`
   };
 
-  const getServicesT: GetServicesT = {
+  const getVisibleServicesT: ReplaceRequestParams<
+    GetVisibleServicesT,
+    Omit<RequestParams<GetVisibleServicesT>, "SubscriptionKey">
+  > = {
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(Services),
+    response_decoder: getVisibleServicesDefaultDecoder(),
     url: () => `/services`
   };
 
-  const getServiceT: GetServiceT = {
+  const getServiceT: ReplaceRequestParams<
+    GetServiceT,
+    Omit<RequestParams<GetServiceT>, "SubscriptionKey">
+  > = {
     headers: tokenHeaderProducer,
     method: "get",
     query: _ => ({}),
-    response_decoder: basicResponseDecoderWith401(ServicePublic),
-    url: params => `/services/${params.id}`
+    response_decoder: getServiceDefaultDecoder(),
+    url: params => `/services/${params.service_id}`
   };
 
   return {
-    createOrUpdateProfile: createFetchRequestForApi(
-      createOrUpdateProfileT,
-      options
-    ),
     getMessage: createFetchRequestForApi(getMessageT, options),
     getMessages: createFetchRequestForApi(getMessagesT, options),
     getProfile: createFetchRequestForApi(getProfileT, options),
     getService: createFetchRequestForApi(getServiceT, options),
-    getServices: createFetchRequestForApi(getServicesT, options),
     getServicesByRecipient: createFetchRequestForApi(
       getServicesByRecipientT,
       options
-    )
+    ),
+    getVisibleServices: createFetchRequestForApi(getVisibleServicesT, options),
+    upsertProfile: createFetchRequestForApi(upsertProfileT, options)
   };
 }
 

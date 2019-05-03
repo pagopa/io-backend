@@ -36,17 +36,22 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { toExpressHandler } from "italia-ts-commons/lib/express";
 import { CIDR } from "italia-ts-commons/lib/strings";
+
+import { ServerInfo } from "../generated/public/ServerInfo";
+
 import AuthenticationController from "./controllers/authenticationController";
 import PagoPAController from "./controllers/pagoPAController";
 import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import SessionController from "./controllers/sessionController";
-import { ServerInfo } from "./types/api/ServerInfo";
+
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
 import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
+
+import { User } from "./types/user";
+import { toExpressHandler } from "./utils/express";
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -109,28 +114,68 @@ export function newApp(
   // Create and setup the Express app.
   const app = express();
 
+  //
   // Redirect unsecure connections.
+  //
+
   if (env !== NodeEnvironmentEnum.DEVELOPMENT) {
     // Trust proxy uses proxy X-Forwarded-Proto for ssl.
     app.enable("trust proxy");
     app.use(/\/((?!ping).)*/, expressEnforcesSsl());
   }
+
+  //
   // Add security to http headers.
+  //
+
   app.use(helmet());
+
+  //
   // Add a request logger.
+  //
+
+  // Adds the detail of the response, see toExpressHandler for how it gets set
+  morgan.token("detail", (_, res) => res.locals.detail);
+
+  // Adds the user fiscal code
+  // we take only the first 6 characters of the fiscal code
+  morgan.token("fiscal_code_short", (req, _) =>
+    User.decode(req.user)
+      .map(user => String(user.fiscal_code).slice(0, 6))
+      .getOrElse("")
+  );
+
   const loggerFormat =
-    ":date[iso] [info]: :method :url :status - :response-time ms";
+    ":date[iso] - :method :url :status - :fiscal_code_short - :response-time ms - :detail";
+
   app.use(morgan(loggerFormat));
+
+  //
+  // Setup parsers
+  //
+
   // Parse the incoming request body. This is needed by Passport spid strategy.
   app.use(bodyParser.json());
+
   // Parse an urlencoded body.
   app.use(bodyParser.urlencoded({ extended: true }));
+
+  //
   // Define the folder that contains the public assets.
+  //
+
   app.use(express.static("public"));
+
+  //
   // Initializes Passport for incoming requests.
+  //
+
   app.use(passport.initialize());
 
-  // Setup routing.
+  //
+  // Setup routes
+  //
+
   app.get("/login", spidAuth);
 
   registerPublicRoutes(app);
@@ -388,7 +433,7 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
   );
 }
 
-export function registerPublicRoutes(app: Express): void {
+function registerPublicRoutes(app: Express): void {
   const packageJson = require("../package.json");
   const version = t.string.decode(packageJson.version).getOrElse("UNKNOWN");
 

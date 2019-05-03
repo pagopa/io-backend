@@ -1,3 +1,5 @@
+/* tslint:disable:no-object-mutation */
+
 import {
   ResponseErrorInternal,
   ResponseSuccessJson
@@ -9,24 +11,24 @@ import PagoPAProxyController from "../pagoPAProxyController";
 
 const aRptId = "123456";
 const anIdPagamento = "123456";
-const aCodiceContestoPagamento = "ABC123";
+const aCodiceContestoPagamento = "01234567890123456789012345678901";
 
 const internalErrorMessage = "Internal error.";
 
 const paymentActivationsPostRequest = {
-  codiceContestoPagamento: "ABC123",
+  codiceContestoPagamento: aCodiceContestoPagamento,
   importoSingoloVersamento: 200,
   rptId: "12345678901012123456789012345"
 };
 
 const proxyPaymentInfoResponse = {
-  codiceContestoPagamento: "ABC123",
+  codiceContestoPagamento: aCodiceContestoPagamento,
   importoSingoloVersamento: 200
 };
 
 const proxyPaymentActivationsPostResponse = {
   causaleVersamento: "IMU 2018",
-  codiceContestoPagamento: "5925113079f511e8ba1d4bb98b28cfc7",
+  codiceContestoPagamento: aCodiceContestoPagamento,
   enteBeneficiario: {
     capBeneficiario: "92010",
     civicoBeneficiario: "23",
@@ -45,6 +47,12 @@ const proxyPaymentActivationsPostResponse = {
 
 const proxyPaymentActivationsGetResponse = {
   idPagamento: anIdPagamento
+};
+
+const aResponseErrorInternal = {
+  apply: expect.any(Function),
+  detail: expect.any(String),
+  kind: "IResponseErrorInternal"
 };
 
 const mockActivatePayment = jest.fn();
@@ -80,7 +88,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -103,11 +111,8 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorInternal"
-    });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(response).toEqual(aResponseErrorInternal);
   });
 });
 
@@ -131,9 +136,9 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith({
+    expect(mockActivatePayment).toHaveBeenCalledWith(
       paymentActivationsPostRequest
-    });
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -156,13 +161,10 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith({
+    expect(mockActivatePayment).toHaveBeenCalledWith(
       paymentActivationsPostRequest
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorInternal"
-    });
+    );
+    expect(response).toEqual(aResponseErrorInternal);
   });
 });
 
@@ -186,9 +188,9 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: aCodiceContestoPagamento
-    });
+    expect(mockGetActivationStatus).toHaveBeenCalledWith(
+      aCodiceContestoPagamento
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -211,12 +213,9 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: aCodiceContestoPagamento
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorInternal"
-    });
+    expect(mockGetActivationStatus).toHaveBeenCalledWith(
+      aCodiceContestoPagamento
+    );
+    expect(response).toEqual(aResponseErrorInternal);
   });
 });

@@ -2,6 +2,7 @@ import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
+
 import { newApp } from "../app";
 
 jest.mock("../services/redisSessionStorage");

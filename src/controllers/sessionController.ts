@@ -3,38 +3,24 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
 import {
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
+  IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { PublicSession } from "../types/api/PublicSession";
-import { extractUserFromRequest } from "../types/user";
+
+import { PublicSession } from "../../generated/backend/PublicSession";
+
+import { withUserFromRequest } from "../types/user";
 
 export default class SessionController {
-  public async getSessionState(
+  public readonly getSessionState = (
     req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<PublicSession>
-  > {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    const user = errorOrUser.value;
-
-    // Return the actual session information.
-    return ResponseSuccessJson({
-      spidLevel: user.spid_level,
-      walletToken: user.wallet_token
-    });
-  }
+  ): Promise<IResponseErrorValidation | IResponseSuccessJson<PublicSession>> =>
+    withUserFromRequest(req, async user =>
+      ResponseSuccessJson({
+        spidLevel: user.spid_level,
+        walletToken: user.wallet_token
+      })
+    );
 }

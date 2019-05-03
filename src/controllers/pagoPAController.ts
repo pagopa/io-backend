@@ -3,16 +3,18 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
 import {
-  ResponseErrorInternal,
+  IResponseErrorInternal,
+  IResponseErrorValidation,
+  IResponseSuccessJson,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import ProfileService, { profileResponse } from "../services/profileService";
-import { InitializedProfile } from "../types/api/InitializedProfile";
-import { PagoPAUser } from "../types/api/PagoPAUser";
-import { toHttpError } from "../types/error";
-import { extractUserFromRequest } from "../types/user";
+
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
+
+import ProfileService from "../services/profileService";
+import { withUserFromRequest } from "../types/user";
 
 export default class PagoPAController {
   constructor(private readonly profileService: ProfileService) {}
@@ -21,36 +23,43 @@ export default class PagoPAController {
    * Returns the profile for the user identified by the provided fiscal
    * code.
    */
-  public async getUser(
+  public readonly getUser = (
     req: express.Request
-  ): Promise<profileResponse<PagoPAUser>> {
-    const errorOrUser = extractUserFromRequest(req);
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseSuccessJson<PagoPAUser>
+  > =>
+    withUserFromRequest(req, async user => {
+      const response = await this.profileService.getProfile(user);
+      if (response.kind !== "IResponseSuccessJson") {
+        // if getProfile returns a failure, we just return it
+        return response;
+      }
 
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
+      // getProfile may return an InitializedProfile or an AuthenticatedProfile
+      const profile = response.value;
 
-    const user = errorOrUser.value;
-    const errorOrProfile = await this.profileService.getProfile(user);
+      // a custom email may have been set in the InitializedProfile, thus we
+      // have to check if the profile it's an InitializedProfile to be able to
+      // retrieve it
+      const maybeCustomEmail = InitializedProfile.is(profile)
+        ? profile.email
+        : undefined;
 
-    if (isLeft(errorOrProfile)) {
-      const error = errorOrProfile.value;
-      return toHttpError(error);
-    }
+      // if the profile is an AuthenticatedProfile or the profile is an
+      // InitializedProfile but an email has not been set, we fall back to
+      // the email from the SPID profile
+      const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
 
-    const profile = errorOrProfile.value;
-    const maybeCustomEmail = InitializedProfile.is(profile)
-      ? profile.email
-      : undefined;
-    const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
+      const pagopaUser: PagoPAUser = {
+        email,
+        family_name: user.family_name,
+        mobile_phone: user.spid_mobile_phone,
+        name: user.name
+      };
 
-    return ResponseSuccessJson({
-      email,
-      family_name: user.family_name,
-      mobile_phone: user.spid_mobile_phone,
-      name: user.name
+      return ResponseSuccessJson(pagopaUser);
     });
-  }
 }
