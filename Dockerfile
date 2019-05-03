@@ -10,7 +10,7 @@ COPY /package.json /usr/src/app/package.json
 COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
 COPY /api_notifications.yaml /usr/src/app/api_notifications.yaml
-COPY /api_proxy.yaml /usr/src/app/api_proxy.yaml
+COPY /api_backend.yaml /usr/src/app/api_backend.yaml
 COPY /api_pagopa.yaml /usr/src/app/api_pagopa.yaml
 COPY /api_public.yaml /usr/src/app/api_public.yaml
 
