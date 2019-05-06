@@ -423,6 +423,7 @@ paths:
         type: string
       - name: test
         in: query
+        description: Use test environment of PagoPAClient
         type: boolean
         required: false
     get:

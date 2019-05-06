@@ -12,9 +12,10 @@ import { PagoPAClient } from "../clients/pagopa";
 export default class PagoPAClientFactory
   implements IPagoPAClientFactoryInterface {
   constructor(
-    public readonly pagoPAApiUrl?: string,
-    public readonly pagoPAApiUrlTest?: string
+    public readonly pagoPAApiUrl: string,
+    public readonly pagoPAApiUrlTest: string
   ) {}
+
   /**
    * {@inheritDoc}
    */

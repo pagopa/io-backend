@@ -113,7 +113,10 @@ jest.mock("../../services/pagoPAClientFactory", () => {
   };
 });
 
-const pagoPAProxy = new PagoPAClientFactory();
+const pagoPAProxy = new PagoPAClientFactory(
+  process.env.PAGOPA_API_URL as string,
+  process.env.PAGOPA_API_URL_TEST as string
+);
 
 describe("PagoPAProxyService#getPaymentInfo", () => {
   beforeEach(() => {

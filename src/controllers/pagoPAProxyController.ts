@@ -16,6 +16,9 @@ import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/Paym
 
 import { withValidatedOrInternalError } from "../utils/responses";
 
+const parsePagopaTestParam = (testParam: unknown) =>
+  String(testParam).toLowerCase() === "true";
+
 /**
  * This controller handles requests made by the APP that needs to be forwarded to the PagoPA proxy.
  */
@@ -32,8 +35,10 @@ export default class PagoPAProxyController {
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
     withValidatedOrInternalError(t.string.decode(req.params.rptId), rptId => {
-      const isTest = String(req.query.test).toLowerCase() === "true";
-      return this.pagoPAProxyService.getPaymentInfo(rptId, isTest);
+      return this.pagoPAProxyService.getPaymentInfo(
+        rptId,
+        parsePagopaTestParam(req.query.test)
+      );
     });
 
   public readonly activatePayment = async (
@@ -48,10 +53,9 @@ export default class PagoPAProxyController {
     withValidatedOrInternalError(
       PaymentActivationsPostRequest.decode(req.body),
       paymentActivationsPostRequest => {
-        const isTest = String(req.query.test).toLowerCase() === "true";
         return this.pagoPAProxyService.activatePayment(
           paymentActivationsPostRequest,
-          isTest
+          parsePagopaTestParam(req.query.test)
         );
       }
     );
@@ -68,10 +72,9 @@ export default class PagoPAProxyController {
     withValidatedOrInternalError(
       t.string.decode(req.params.codiceContestoPagamento),
       codiceContestoPagamento => {
-        const isTest = String(req.query.test).toLowerCase() === "true";
         return this.pagoPAProxyService.getActivationStatus(
           codiceContestoPagamento,
-          isTest
+          parsePagopaTestParam(req.query.test)
         );
       }
     );
