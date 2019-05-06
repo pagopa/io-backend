@@ -7,5 +7,12 @@ export interface IPagoPAClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
    */
-  readonly getClient: () => ReturnType<PagoPAClient>;
+  readonly getClient: (
+    environment: PagoPAEnvironment
+  ) => ReturnType<PagoPAClient>;
+}
+
+export enum PagoPAEnvironment {
+  PRODUCTION = "PRODUCTION",
+  TEST = "TEST"
 }

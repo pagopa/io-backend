@@ -81,14 +81,45 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     );
 
     req.params = { rptId: aRptId };
+    req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory();
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId, false);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyPaymentInfoResponse
+    });
+  });
+
+  it("[TEST env] calls the getPaymentInfo on the PagoPAProxyService with valid values", async () => {
+    const req = mockReq();
+
+    mockGetPaymentInfo.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyPaymentInfoResponse))
+    );
+
+    req.params = { rptId: aRptId };
+    req.query = { test: "true" };
+
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
+    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
+    const controller = new PagoPAProxyController(pagoPAProxyService);
+
+    const response = await controller.getPaymentInfo(req);
+
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId, true);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -104,14 +135,18 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     );
 
     req.params = { rptId: aRptId };
+    req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory();
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId);
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId, false);
     expect(response).toEqual(aResponseErrorInternal);
   });
 });
@@ -129,15 +164,51 @@ describe("PagoPAProxyController#activatePayment", () => {
     );
 
     req.body = paymentActivationsPostRequest;
+    req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory();
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.activatePayment(req);
 
     expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest
+      paymentActivationsPostRequest,
+      false
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyPaymentActivationsPostResponse
+    });
+  });
+
+  it("[TEST env] calls the activatePayment on the PagoPAProxyService with valid values", async () => {
+    const req = mockReq();
+
+    mockActivatePayment.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyPaymentActivationsPostResponse))
+    );
+
+    req.body = paymentActivationsPostRequest;
+    req.query = { test: "true" };
+
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
+    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
+    const controller = new PagoPAProxyController(pagoPAProxyService);
+
+    const response = await controller.activatePayment(req);
+
+    expect(mockActivatePayment).toHaveBeenCalledWith(
+      paymentActivationsPostRequest,
+      true
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -154,15 +225,20 @@ describe("PagoPAProxyController#activatePayment", () => {
     );
 
     req.body = paymentActivationsPostRequest;
+    req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory();
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.activatePayment(req);
 
     expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest
+      paymentActivationsPostRequest,
+      false
     );
     expect(response).toEqual(aResponseErrorInternal);
   });
@@ -181,15 +257,50 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     );
 
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
+    req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory();
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getActivationStatus(req);
 
     expect(mockGetActivationStatus).toHaveBeenCalledWith(
-      aCodiceContestoPagamento
+      aCodiceContestoPagamento,
+      false
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyPaymentActivationsGetResponse
+    });
+  });
+
+  it("[TEST env] calls the getActivationStatus on the PagoPAProxyService with valid values", async () => {
+    const req = mockReq();
+
+    mockGetActivationStatus.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyPaymentActivationsGetResponse))
+    );
+
+    req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
+    req.query = { test: "true" };
+
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
+    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
+    const controller = new PagoPAProxyController(pagoPAProxyService);
+
+    const response = await controller.getActivationStatus(req);
+
+    expect(mockGetActivationStatus).toHaveBeenCalledWith(
+      aCodiceContestoPagamento,
+      true
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -206,15 +317,20 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     );
 
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
+    req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory();
+    const pagoPAClientFactory = new PagoPAClientFactory(
+      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_TEST as string
+    );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getActivationStatus(req);
 
     expect(mockGetActivationStatus).toHaveBeenCalledWith(
-      aCodiceContestoPagamento
+      aCodiceContestoPagamento,
+      false
     );
     expect(response).toEqual(aResponseErrorInternal);
   });

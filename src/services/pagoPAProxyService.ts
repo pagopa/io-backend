@@ -11,12 +11,15 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { IPagoPAClientFactoryInterface } from "./IPagoPAClientFactory";
+import {
+  IPagoPAClientFactoryInterface,
+  PagoPAEnvironment
+} from "./IPagoPAClientFactory";
 
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
-import { PaymentActivationsPostRequest } from "../../generated/backend/PaymentActivationsPostRequest";
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
+import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 
 import {
   unhandledResponseStatus,
@@ -31,14 +34,17 @@ export default class PagoPAProxyService {
    * Retrieve information about a payment.
    */
   public readonly getPaymentInfo = (
-    rptId: string
+    rptId: string,
+    isTest: boolean
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
     withCatchAsInternalError(async () => {
-      const client = this.pagoPAClient.getClient();
+      const client = this.pagoPAClient.getClient(
+        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
+      );
       const validated = await client.getPaymentInfo({
         rptId
       });
@@ -64,7 +70,8 @@ export default class PagoPAProxyService {
    * Require a lock (activation) for a payment.
    */
   public readonly activatePayment = async (
-    paymentActivationsPostRequest: PaymentActivationsPostRequest
+    paymentActivationsPostRequest: PaymentActivationsPostRequest,
+    isTest: boolean
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
@@ -73,8 +80,9 @@ export default class PagoPAProxyService {
     | IResponseSuccessJson<PaymentActivationsPostResponse>
   > =>
     withCatchAsInternalError(async () => {
-      const client = this.pagoPAClient.getClient();
-
+      const client = this.pagoPAClient.getClient(
+        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
+      );
       const validated = await client.activatePayment({
         paymentActivationsPostRequest
       });
@@ -101,7 +109,8 @@ export default class PagoPAProxyService {
    * Check the activation status to retrieve the paymentId.
    */
   public readonly getActivationStatus = (
-    codiceContestoPagamento: string
+    codiceContestoPagamento: string,
+    isTest: boolean
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
@@ -110,7 +119,9 @@ export default class PagoPAProxyService {
     | IResponseSuccessJson<PaymentActivationsGetResponse>
   > =>
     withCatchAsInternalError(async () => {
-      const client = this.pagoPAClient.getClient();
+      const client = this.pagoPAClient.getClient(
+        isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
+      );
       const validated = await client.getActivationStatus({
         codiceContestoPagamento
       });

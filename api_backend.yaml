@@ -344,6 +344,11 @@ paths:
         required: true
         description: Unique identifier for payments.
         type: string
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
     get:
       operationId: getPaymentInfo
       summary: Get Payment Info
@@ -369,6 +374,12 @@ paths:
             $ref: "#/definitions/PaymentProblemJson"
   "/payment-activations":
     x-swagger-router-controller: PagoPAProxyController
+    parameters:
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
     post:
       operationId: activatePayment
       summary: Activate Payment
@@ -410,6 +421,11 @@ paths:
         required: true
         description: Transaction Id used to identify the communication flow.
         type: string
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
     get:
       operationId: getActivationStatus
       summary: Get Activation status

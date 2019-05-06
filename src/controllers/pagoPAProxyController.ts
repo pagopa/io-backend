@@ -10,11 +10,14 @@ import {
 import PagoPAProxyService from "../services/pagoPAProxyService";
 
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
-import { PaymentActivationsPostRequest } from "../../generated/backend/PaymentActivationsPostRequest";
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
+import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 
 import { withValidatedOrInternalError } from "../utils/responses";
+
+const parsePagopaTestParam = (testParam: unknown) =>
+  String(testParam).toLowerCase() === "true";
 
 /**
  * This controller handles requests made by the APP that needs to be forwarded to the PagoPA proxy.
@@ -31,10 +34,12 @@ export default class PagoPAProxyController {
     | IResponseErrorValidation
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
-    withValidatedOrInternalError(
-      t.string.decode(req.params.rptId),
-      this.pagoPAProxyService.getPaymentInfo
-    );
+    withValidatedOrInternalError(t.string.decode(req.params.rptId), rptId => {
+      return this.pagoPAProxyService.getPaymentInfo(
+        rptId,
+        parsePagopaTestParam(req.query.test)
+      );
+    });
 
   public readonly activatePayment = async (
     req: express.Request
@@ -47,7 +52,12 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       PaymentActivationsPostRequest.decode(req.body),
-      this.pagoPAProxyService.activatePayment
+      paymentActivationsPostRequest => {
+        return this.pagoPAProxyService.activatePayment(
+          paymentActivationsPostRequest,
+          parsePagopaTestParam(req.query.test)
+        );
+      }
     );
 
   public readonly getActivationStatus = async (
@@ -61,6 +71,11 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       t.string.decode(req.params.codiceContestoPagamento),
-      this.pagoPAProxyService.getActivationStatus
+      codiceContestoPagamento => {
+        return this.pagoPAProxyService.getActivationStatus(
+          codiceContestoPagamento,
+          parsePagopaTestParam(req.query.test)
+        );
+      }
     );
 }

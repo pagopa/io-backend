@@ -146,6 +146,8 @@ Those are all Environment variables needed by the application:
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | API_BASE_PATH                          | The root path for the api endpoints                                               | string |
+| PAGOPA_API_URL                         | The url for the PagoPA api endpoints                                              | string |
+| PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 
