@@ -9,6 +9,7 @@ import { ImportoEuroCents } from "../../../generated/pagopa-proxy/ImportoEuroCen
 import { PaymentActivationsPostRequest } from "../../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 import { PaymentFaultEnum } from "../../../generated/pagopa-proxy/PaymentFault";
 import { GetPaymentInfoT } from "../../../generated/pagopa-proxy/requestTypes";
+import { PagoPAEnvironment } from "../IPagoPAClientFactory";
 
 const aRptId = "123456";
 const acodiceContestoPagamento = "01234567890123456789012345678901" as CodiceContestoPagamento;
@@ -126,9 +127,9 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptId: aRptId
     });
@@ -140,9 +141,9 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
   });
 
   it("[TEST env] get payment info", async () => {
-    mockGetPaymentInfo.mockImplementation(() => {
-      return validPaymentInfoResponse;
-    });
+    mockGetPaymentInfo.mockImplementation(() =>
+      t.success(validPaymentInfoResponse)
+    );
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
@@ -151,9 +152,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
       test: true
     });
 
-    expect(mockGetClient).toHaveBeenCalledWith({
-      test: true
-    });
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -169,9 +168,9 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptId: aRptId
     });
@@ -185,9 +184,9 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptId: aRptId
     });
@@ -201,9 +200,9 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getPaymentInfo(aRptId);
+    const res = await service.getPaymentInfo({ rptId: aRptId });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
       rptId: aRptId
     });
@@ -225,7 +224,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const res = await service.activatePayment(validPaymentActivation);
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
@@ -237,20 +236,18 @@ describe("PagoPAProxyService#activatePayment", () => {
   });
 
   it("[TEST env] activate payment", async () => {
-    mockActivatePayment.mockImplementation(() => {
-      return validActivatePaymentResponse;
-    });
+    mockActivatePayment.mockImplementation(() =>
+      t.success(validActivatePaymentResponse)
+    );
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
     const res = await service.activatePayment({
-      paymentActivationsPostRequest: validPaymentActivation,
+      ...validPaymentActivation,
       test: true
     });
 
-    expect(mockGetClient).toHaveBeenCalledWith({
-      test: true
-    });
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
@@ -270,7 +267,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const res = await service.activatePayment(validPaymentActivation);
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
@@ -286,7 +283,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const res = await service.activatePayment(validPaymentActivation);
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
@@ -302,7 +299,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     const res = await service.activatePayment(validPaymentActivation);
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
       paymentActivationsPostRequest: validPaymentActivation
     });
@@ -322,9 +319,11 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
@@ -336,9 +335,9 @@ describe("PagoPAProxyService#getActivationStatus", () => {
   });
 
   it("[TEST env] get activation status", async () => {
-    mockGetActivationStatus.mockImplementation(() => {
-      return validActivationStatusResponse;
-    });
+    mockGetActivationStatus.mockImplementation(() =>
+      t.success(validActivationStatusResponse)
+    );
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
@@ -347,9 +346,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
       test: true
     });
 
-    expect(mockGetClient).toHaveBeenCalledWith({
-      test: true
-    });
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
@@ -367,9 +364,11 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
@@ -383,9 +382,11 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });
@@ -399,9 +400,11 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     const service = new PagoPAProxyService(pagoPAProxy);
 
-    const res = await service.getActivationStatus(acodiceContestoPagamento);
+    const res = await service.getActivationStatus({
+      codiceContestoPagamento: acodiceContestoPagamento
+    });
 
-    expect(mockGetClient).toHaveBeenCalledWith();
+    expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
       codiceContestoPagamento: acodiceContestoPagamento
     });

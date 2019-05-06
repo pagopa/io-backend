@@ -200,7 +200,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     const response = await controller.activatePayment(req);
 
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest,
+      ...paymentActivationsPostRequest,
       test: true
     });
     expect(response).toEqual({
@@ -256,7 +256,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     const response = await controller.getActivationStatus(req);
 
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      aCodiceContestoPagamento,
+      codiceContestoPagamento: aCodiceContestoPagamento,
       test: false
     });
     expect(response).toEqual({
@@ -310,7 +310,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     const response = await controller.getActivationStatus(req);
 
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      aCodiceContestoPagamento,
+      codiceContestoPagamento: aCodiceContestoPagamento,
       test: false
     });
     expect(response).toEqual(aResponseErrorInternal);
