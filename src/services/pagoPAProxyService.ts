@@ -87,6 +87,8 @@ export default class PagoPAProxyService {
           ? PagoPAEnvironment.TEST
           : PagoPAEnvironment.PRODUCTION
       );
+      // TODO: this can be re-enabled?
+      // tslint:disable:no-object-mutation
       delete paymentActivationsPostRequest.test;
       const validated = await client.activatePayment({
         paymentActivationsPostRequest
