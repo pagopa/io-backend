@@ -13,6 +13,6 @@ export interface IPagoPAClientFactoryInterface {
 }
 
 export enum PagoPAEnvironment {
-  PRODUCTION = "production",
-  TEST = "test"
+  PRODUCTION = "PRODUCTION",
+  TEST = "TEST"
 }

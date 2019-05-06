@@ -89,10 +89,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId,
-      test: false
-    });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId, false);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -116,10 +113,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId,
-      test: true
-    });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId, true);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -143,10 +137,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 
     const response = await controller.getPaymentInfo(req);
 
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId,
-      test: false
-    });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith(aRptId, false);
     expect(response).toEqual(aResponseErrorInternal);
   });
 });
@@ -172,10 +163,11 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith({
-      ...paymentActivationsPostRequest,
-      test: false
-    });
+    expect(mockActivatePayment).toHaveBeenCalledWith(
+      paymentActivationsPostRequest,
+      false
+    );
+
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -199,10 +191,10 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith({
-      ...paymentActivationsPostRequest,
-      test: true
-    });
+    expect(mockActivatePayment).toHaveBeenCalledWith(
+      paymentActivationsPostRequest,
+      true
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -226,10 +218,10 @@ describe("PagoPAProxyController#activatePayment", () => {
 
     const response = await controller.activatePayment(req);
 
-    expect(mockActivatePayment).toHaveBeenCalledWith({
-      ...paymentActivationsPostRequest,
-      test: false
-    });
+    expect(mockActivatePayment).toHaveBeenCalledWith(
+      paymentActivationsPostRequest,
+      false
+    );
     expect(response).toEqual(aResponseErrorInternal);
   });
 });
@@ -255,10 +247,10 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: aCodiceContestoPagamento,
-      test: false
-    });
+    expect(mockGetActivationStatus).toHaveBeenCalledWith(
+      aCodiceContestoPagamento,
+      false
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -282,10 +274,10 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: aCodiceContestoPagamento,
-      test: true
-    });
+    expect(mockGetActivationStatus).toHaveBeenCalledWith(
+      aCodiceContestoPagamento,
+      true
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -309,10 +301,10 @@ describe("PagoPAProxyController#getActivationStatus", () => {
 
     const response = await controller.getActivationStatus(req);
 
-    expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: aCodiceContestoPagamento,
-      test: false
-    });
+    expect(mockGetActivationStatus).toHaveBeenCalledWith(
+      aCodiceContestoPagamento,
+      false
+    );
     expect(response).toEqual(aResponseErrorInternal);
   });
 });

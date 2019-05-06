@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as t from "io-ts";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -8,12 +9,10 @@ import {
 
 import PagoPAProxyService from "../services/pagoPAProxyService";
 
-import { ActivatePaymentProxyRequest } from "../../generated/backend/ActivatePaymentProxyRequest";
-import { GetActivationStatusProxyRequest } from "../../generated/backend/GetActivationStatusProxyRequest";
-import { GetPaymentInfoProxyRequest } from "../../generated/backend/GetPaymentInfoProxyRequest";
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
+import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 
 import { withValidatedOrInternalError } from "../utils/responses";
 
@@ -32,13 +31,10 @@ export default class PagoPAProxyController {
     | IResponseErrorValidation
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
-    withValidatedOrInternalError(
-      GetPaymentInfoProxyRequest.decode({
-        rptId: req.params.rptId,
-        test: String(req.query.test).toLowerCase() === "true"
-      }),
-      this.pagoPAProxyService.getPaymentInfo
-    );
+    withValidatedOrInternalError(t.string.decode(req.params.rptId), rptId => {
+      const isTest = String(req.query.test).toLowerCase() === "true";
+      return this.pagoPAProxyService.getPaymentInfo(rptId, isTest);
+    });
 
   public readonly activatePayment = async (
     req: express.Request
@@ -50,11 +46,14 @@ export default class PagoPAProxyController {
     | IResponseSuccessJson<PaymentActivationsPostResponse>
   > =>
     withValidatedOrInternalError(
-      ActivatePaymentProxyRequest.decode({
-        ...req.body,
-        test: String(req.query.test).toLowerCase() === "true"
-      }),
-      this.pagoPAProxyService.activatePayment
+      PaymentActivationsPostRequest.decode(req.body),
+      paymentActivationsPostRequest => {
+        const isTest = String(req.query.test).toLowerCase() === "true";
+        return this.pagoPAProxyService.activatePayment(
+          paymentActivationsPostRequest,
+          isTest
+        );
+      }
     );
 
   public readonly getActivationStatus = async (
@@ -67,10 +66,13 @@ export default class PagoPAProxyController {
     | IResponseSuccessJson<PaymentActivationsGetResponse>
   > =>
     withValidatedOrInternalError(
-      GetActivationStatusProxyRequest.decode({
-        codiceContestoPagamento: req.params.codiceContestoPagamento,
-        test: String(req.query.test).toLowerCase() === "true"
-      }),
-      this.pagoPAProxyService.getActivationStatus
+      t.string.decode(req.params.codiceContestoPagamento),
+      codiceContestoPagamento => {
+        const isTest = String(req.query.test).toLowerCase() === "true";
+        return this.pagoPAProxyService.getActivationStatus(
+          codiceContestoPagamento,
+          isTest
+        );
+      }
     );
 }
