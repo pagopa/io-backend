@@ -34,7 +34,7 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       GetPaymentInfoProxyRequest.decode({
-        rptIf: req.params.rptIf,
+        rptId: req.params.rptId,
         test: String(req.query.test).toLowerCase() === "true"
       }),
       this.pagoPAProxyService.getPaymentInfo
