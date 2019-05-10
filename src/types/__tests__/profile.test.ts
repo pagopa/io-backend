@@ -58,6 +58,15 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   version: 1 as Version
 };
 
+// mock for a valid ExtendedProfile profile used for ToS test
+const mockedExtendedProfileTosTest: ExtendedProfileApi = {
+  email: anEmailAddress,
+  is_inbox_enabled: anIsInboxEnabled,
+  is_webhook_enabled: anIsWebhookEnabled,
+  preferred_languages: aPreferredLanguages,
+  version: 1 as Version
+};
+
 describe("profile type", () => {
   /*test case: Converts an existing API profile to a Proxy profile using user profile with email from Digital Citzen API and SPID*/
   it("should get an app Proxy profile user profile with email from Digital Citzen API and SPID", async () => {
@@ -127,12 +136,11 @@ describe("profile type", () => {
       expect(userDataKO._tag).toBe("Left");
     }
   });
+
   it("should get an app Proxy profile user profile with accepted_tos_version undefined ", async () => {
     // return app Proxy Profile.
-    delete mockedExtendedProfile.accepted_tos_version;
-
     const userData = toInitializedProfile(
-      mockedExtendedProfile, // from
+      mockedExtendedProfileTosTest, // from
       mockedUser // user
     );
 
