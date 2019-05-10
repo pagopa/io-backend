@@ -127,4 +127,15 @@ describe("profile type", () => {
       expect(userDataKO._tag).toBe("Left");
     }
   });
+  it("should get an app Proxy profile user profile with accepted_tos_version undefined ", async () => {
+    // return app Proxy Profile.
+    delete mockedExtendedProfile.accepted_tos_version;
+
+    const userData = toInitializedProfile(
+      mockedExtendedProfile, // from
+      mockedUser // user
+    );
+
+    expect(userData.accepted_tos_version).toBe(undefined);
+  });
 });
