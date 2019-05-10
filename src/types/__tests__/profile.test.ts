@@ -20,10 +20,12 @@ import { Version } from "../../../generated/backend/Version";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 
+import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
+const aTosVersion = 1 as AcceptedTosVersion;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
@@ -48,6 +50,7 @@ const mockedUser: User = {
 
 // mock for a valid ExtendedProfile profile
 const mockedExtendedProfile: ExtendedProfileApi = {
+  accepted_tos_version: aTosVersion,
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
@@ -64,6 +67,9 @@ describe("profile type", () => {
       mockedUser // user
     );
 
+    expect(userData.accepted_tos_version).toBe(
+      mockedExtendedProfile.accepted_tos_version
+    );
     expect(userData.email).toBe(mockedExtendedProfile.email);
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
