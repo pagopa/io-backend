@@ -29,6 +29,7 @@ const spidStrategy = async (
   spidAutologin: string,
   spidTestEnvUrl: string
 ) => {
+  // tslint:disable-next-line: no-any
   const options: { idp: { [key: string]: IDPMetadataOptions }; sp: any } = {
     idp: {
       arubaid: {
