@@ -164,7 +164,11 @@ const spidStrategy = async (
   );
   idpMetadata.forEach(idp => {
     if (IDP_IDS[idp.entityID]) {
-      options.idp[IDP_IDS[idp.entityID]] = idp.getIDPOption();
+      options.idp[IDP_IDS[idp.entityID]] = {
+        cert: idp.cert,
+        entryPoint: idp.entryPoint,
+        logoutUrl: idp.logoutUrl
+      };
     } else {
       log.error("Unsupported SPID idp from remote repository, will not used.");
     }

@@ -683,6 +683,24 @@ definitions:
     properties:
       message:
         type: string
+  IDPEntityDescriptor:
+    type: object
+    properties:
+      cert:
+        type: array
+        items:
+          type: string
+      entityID:
+        type: string
+      entryPoint:
+        type: string
+      logoutUrl:
+        type: string
+    required:
+      - cert
+      - entityID
+      - entryPoint
+      - logoutUrl
 responses: {}
 parameters:
   PaginationRequest:

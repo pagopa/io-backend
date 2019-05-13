@@ -1,5 +1,6 @@
 import nodeFetch from "node-fetch";
 import { DOMParser } from "xmldom";
+import { IDPEntityDescriptor } from "../../generated/backend/IDPEntityDescriptor";
 import { log } from "./logger";
 
 export interface IDPMetadataOptions {
@@ -40,29 +41,29 @@ const SingleLogoutServiceTAG = "md:SingleLogoutService";
 
 export async function parseIdpMetadata(
   ipdMetadataPage: string
-): Promise<ReadonlyArray<IDPMetadata>> {
+): Promise<ReadonlyArray<IDPEntityDescriptor>> {
   const domParser = new DOMParser().parseFromString(ipdMetadataPage);
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
-    (idp: ReadonlyArray<IDPMetadata>, element: Element) => {
-      if (validateEntityDescriptorFormat(element)) {
-        const elementInfo = new IDPMetadata({
-          cert: [
-            (element
-              .getElementsByTagName(X509CertificateTAG)
-              .item(0) as Element).textContent as string
-          ],
-          entityID: element.getAttribute("entityID") as string,
-          entryPoint: (element
-            .getElementsByTagName(SingleSignOnServiceTAG)
-            .item(0) as Element).getAttribute("Location") as string,
-          logoutUrl: (element
-            .getElementsByTagName(SingleLogoutServiceTAG)
-            .item(0) as Element).getAttribute("Location") as string
-        });
-        return [...idp, elementInfo];
+    (idp: ReadonlyArray<IDPEntityDescriptor>, element: Element) => {
+      const elementInfoOrErrors = IDPEntityDescriptor.decode({
+        cert: [
+          (element.getElementsByTagName(X509CertificateTAG).item(0) as Element)
+            .textContent
+        ],
+        entityID: element.getAttribute("entityID"),
+        entryPoint: (element
+          .getElementsByTagName(SingleSignOnServiceTAG)
+          .item(0) as Element).getAttribute("Location"),
+        logoutUrl: (element
+          .getElementsByTagName(SingleLogoutServiceTAG)
+          .item(0) as Element).getAttribute("Location")
+      });
+      if (elementInfoOrErrors.isLeft()) {
+        log.info("Invalid md:EntityDescriptor. Skipping ...");
+        return idp;
       }
-      return idp;
+      return [...idp, elementInfoOrErrors.value];
     },
     []
   );
@@ -73,25 +74,4 @@ export async function fetchIdpMetadata(
 ): Promise<string> {
   const idpMetadataRequest = await nodeFetch(IDP_METADATA_URL);
   return await idpMetadataRequest.text();
-}
-
-function validateEntityDescriptorFormat(element: Element): boolean {
-  if (
-    element.getAttribute("entityID") &&
-    element.getElementsByTagName(X509CertificateTAG).item(0) &&
-    element.getElementsByTagName(SingleSignOnServiceTAG).item(0) &&
-    element.getElementsByTagName(SingleLogoutServiceTAG).item(0) &&
-    (element.getElementsByTagName(X509CertificateTAG).item(0) as Element)
-      .textContent &&
-    (element
-      .getElementsByTagName(SingleSignOnServiceTAG)
-      .item(0) as Element).getAttribute("Location") &&
-    (element
-      .getElementsByTagName(SingleLogoutServiceTAG)
-      .item(0) as Element).getAttribute("Location")
-  ) {
-    return true;
-  }
-  log.info("Missing required element into md:EntityDescriptor. Skipping ...");
-  return false;
 }
