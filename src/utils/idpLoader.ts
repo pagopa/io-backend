@@ -1,6 +1,6 @@
 import nodeFetch from "node-fetch";
 import { DOMParser } from "xmldom";
-import { IDPEntityDescriptor } from "../../generated/backend/IDPEntityDescriptor";
+import { IDPEntityDescriptor } from "../types/IDPEntityDescriptor";
 import { log } from "./logger";
 
 const EntityDescriptorTAG = "md:EntityDescriptor";

@@ -5,10 +5,10 @@
 /* tslint:disable */
 
 import * as t from "io-ts";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-// required attributes
-const IDPEntityDescriptorR = t.interface({
-  cert: t.readonlyArray(t.string, "array of string"),
+export const IDPEntityDescriptor = t.interface({
+  cert: t.refinement(t.readonlyArray(NonEmptyString, "array of not empty string"), a => a.length > 0, "non empty array"),
 
   entityID: t.string,
 
@@ -16,15 +16,5 @@ const IDPEntityDescriptorR = t.interface({
 
   logoutUrl: t.string
 });
-
-// optional attributes
-const IDPEntityDescriptorO = t.partial({});
-
-export const IDPEntityDescriptor = t.exact(
-  t.intersection(
-    [IDPEntityDescriptorR, IDPEntityDescriptorO],
-    "IDPEntityDescriptor"
-  )
-);
 
 export type IDPEntityDescriptor = t.TypeOf<typeof IDPEntityDescriptor>;
