@@ -209,6 +209,7 @@ registerRequiredValue("API_BASE_PATH", "APIBasePath");
 registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
 
 // Register the spidStrategy.
+registerRequiredValue("IDP_METADATA_URL", "IDPMetadataUrl");
 export const SPID_STRATEGY = "spidStrategy";
 container.register({
   [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()

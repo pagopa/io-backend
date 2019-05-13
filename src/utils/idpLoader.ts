@@ -1,6 +1,6 @@
 import nodeFetch from "node-fetch";
 import { DOMParser } from "xmldom";
-import { log } from "./utils/logger";
+import { log } from "./logger";
 
 export interface IDPMetadataOptions {
   cert: ReadonlyArray<string>;
@@ -32,16 +32,6 @@ export class IDPMetadata {
     };
   }
 }
-
-export const ARUBA_ID = "https://loginspid.aruba.it";
-export const INFOCERT_ID = "https://identity.infocert.it";
-export const INTESA_ID = "https://spid.intesa.it";
-export const LEPIDA_ID = "https://id.lepida.it/idp/shibboleth";
-export const NAMIRIAL_ID = "https://idp.namirialtsp.com/idp";
-export const POSTE_ID = "https://posteid.poste.it";
-export const SIELTE_ID = "https://identity.sieltecloud.it";
-export const SPIDITALIA_ID = "https://spid.register.it";
-export const TIM_ID = "https://login.id.tim.it/affwebservices/public/saml2sso";
 
 const EntityDescriptorTAG = "md:EntityDescriptor";
 const X509CertificateTAG = "ds:X509Certificate";

@@ -4,20 +4,8 @@
  */
 // tslint:disable: no-object-mutation
 import * as SpidStrategy from "spid-passport";
-import {
-  ARUBA_ID,
-  IDPMetadataOptions,
-  INFOCERT_ID,
-  INTESA_ID,
-  LEPIDA_ID,
-  NAMIRIAL_ID,
-  parseIdpMetadata,
-  POSTE_ID,
-  SIELTE_ID,
-  SPIDITALIA_ID,
-  TIM_ID
-} from "../idpLoader";
 import { SpidUser } from "../types/user";
+import { IDPMetadataOptions, parseIdpMetadata } from "../utils/idpLoader";
 import { log } from "../utils/logger";
 
 const spidStrategy = async (
@@ -27,7 +15,8 @@ const spidStrategy = async (
   samlAcceptedClockSkewMs: number,
   samlAttributeConsumingServiceIndex: number,
   spidAutologin: string,
-  spidTestEnvUrl: string
+  spidTestEnvUrl: string,
+  IDPMetadataUrl: string
 ) => {
   // tslint:disable-next-line: no-any
   const options: { idp: { [key: string]: IDPMetadataOptions }; sp: any } = {
@@ -143,6 +132,16 @@ const spidStrategy = async (
     }
   };
 
+  const ARUBA_ID = "https://loginspid.aruba.it";
+  const INFOCERT_ID = "https://identity.infocert.it";
+  const INTESA_ID = "https://spid.intesa.it";
+  const LEPIDA_ID = "https://id.lepida.it/idp/shibboleth";
+  const NAMIRIAL_ID = "https://idp.namirialtsp.com/idp";
+  const POSTE_ID = "https://posteid.poste.it";
+  const SIELTE_ID = "https://identity.sieltecloud.it";
+  const SPIDITALIA_ID = "https://spid.register.it";
+  const TIM_ID = "https://login.id.tim.it/affwebservices/public/saml2sso";
+
   const IDP_IDS: { [key: string]: string } = {
     [ARUBA_ID]: "arubaid",
     [INFOCERT_ID]: "infocertid",
@@ -155,10 +154,7 @@ const spidStrategy = async (
     [TIM_ID]: "timid"
   };
 
-  if (!process.env.IDP_METADATA_URL) {
-    throw new Error("IDP_METADATA_URL ENV variable not provided");
-  }
-  const idpMetadata = await parseIdpMetadata(process.env.IDP_METADATA_URL);
+  const idpMetadata = await parseIdpMetadata(IDPMetadataUrl);
   idpMetadata.forEach(idp => {
     if (IDP_IDS[idp.entityID]) {
       options.idp[IDP_IDS[idp.entityID]] = idp.getIDPOption();

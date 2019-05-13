@@ -197,11 +197,9 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
 
 let controller: AuthenticationController;
 beforeAll(async () => {
-  if (!process.env.IDP_METADATA_URL) {
-    // TODO: Env variable will not load on local test env
-    process.env.IDP_METADATA_URL =
-      "https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml";
-  }
+  const IDPMetadataUrl =
+    process.env.IDP_METADATA_URL ||
+    "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
   const spidStrategyInstance = await spidStrategy(
     samlKey,
     samlCallbackUrl,
@@ -209,7 +207,8 @@ beforeAll(async () => {
     samlAcceptedClockSkewMs,
     samlAttributeConsumingServiceIndex,
     spidAutologin,
-    spidTestEnvUrl
+    spidTestEnvUrl,
+    IDPMetadataUrl
   );
   spidStrategyInstance.logout = jest.fn();
 
