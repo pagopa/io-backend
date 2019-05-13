@@ -50,8 +50,8 @@ function startApp(): void {
         });
       }
     })
-    .catch(() => {
-      log.error("Error loading app.");
+    .catch(err => {
+      log.error("Error loading app: %s", err);
     });
 }
 
