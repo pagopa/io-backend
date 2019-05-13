@@ -4,7 +4,7 @@
  */
 // tslint:disable: no-object-mutation
 import * as SpidStrategy from "spid-passport";
-import { IDPEntityDescriptor } from "../../generated/backend/IDPEntityDescriptor";
+import { IDPEntityDescriptor } from "../types/IDPEntityDescriptor";
 import { SpidUser } from "../types/user";
 import { fetchIdpMetadata, parseIdpMetadata } from "../utils/idpLoader";
 import { log } from "../utils/logger";
