@@ -690,6 +690,7 @@ definitions:
         type: array
         items:
           type: string
+        minItems: 1
       entityID:
         type: string
       entryPoint:
