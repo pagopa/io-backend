@@ -1,4 +1,4 @@
-import * as https from "https";
+import nodeFetch from "node-fetch";
 import { DOMParser } from "xmldom";
 import { log } from "./utils/logger";
 
@@ -51,7 +51,8 @@ const SingleLogoutServiceTAG = "md:SingleLogoutService";
 export async function parseIdpMetadata(
   IDP_METADATA_URL: string
 ): Promise<ReadonlyArray<IDPMetadata>> {
-  const ipdMetadataPage = await getRequest(IDP_METADATA_URL);
+  const idpMetadataRequest = await nodeFetch(IDP_METADATA_URL);
+  const ipdMetadataPage = await idpMetadataRequest.text();
   const domParser = new DOMParser().parseFromString(ipdMetadataPage);
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
@@ -77,29 +78,6 @@ export async function parseIdpMetadata(
     },
     []
   );
-}
-
-function getRequest(url: string): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    https
-      .get(url, res => {
-        // tslint:disable-next-line:no-let
-        let rawData: string = "";
-        res.on("data", d => {
-          rawData += d;
-        });
-        res.on("end", () => {
-          try {
-            resolve(rawData.toString());
-          } catch (e) {
-            reject(e);
-          }
-        });
-      })
-      .on("error", e => {
-        reject(e);
-      });
-  });
 }
 
 function validateEntityDescriptorFormat(element: Element): boolean {
