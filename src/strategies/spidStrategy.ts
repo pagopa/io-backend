@@ -17,6 +17,7 @@ const spidStrategy = async (
   spidAutologin: string,
   spidTestEnvUrl: string,
   IDPMetadataUrl: string
+  // tslint:disable-next-line: parameters-max-number
 ) => {
   // tslint:disable-next-line: no-any
   const options: { idp: { [key: string]: IDPMetadataOptions }; sp: any } = {
