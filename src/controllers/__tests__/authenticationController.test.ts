@@ -197,6 +197,11 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
 
 let controller: AuthenticationController;
 beforeAll(async () => {
+  if (!process.env.IDP_METADATA_URL) {
+    // TODO: Env variable will not load on local test env
+    process.env.IDP_METADATA_URL =
+      "https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml";
+  }
   const spidStrategyInstance = await spidStrategy(
     samlKey,
     samlCallbackUrl,

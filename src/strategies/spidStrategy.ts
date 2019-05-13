@@ -4,7 +4,19 @@
  */
 // tslint:disable: no-object-mutation
 import * as SpidStrategy from "spid-passport";
-import { parseIdpMetadata } from "../idpLoader";
+import {
+  ARUBA_ID,
+  IDPMetadataOptions,
+  INFOCERT_ID,
+  INTESA_ID,
+  LEPIDA_ID,
+  NAMIRIAL_ID,
+  parseIdpMetadata,
+  POSTE_ID,
+  SIELTE_ID,
+  SPIDITALIA_ID,
+  TIM_ID
+} from "../idpLoader";
 import { SpidUser } from "../types/user";
 import { log } from "../utils/logger";
 
@@ -17,7 +29,7 @@ const spidStrategy = async (
   spidAutologin: string,
   spidTestEnvUrl: string
 ) => {
-  const options = {
+  const options: { idp: { [key: string]: IDPMetadataOptions }; sp: any } = {
     idp: {
       arubaid: {
         cert: [
@@ -130,60 +142,29 @@ const spidStrategy = async (
     }
   };
 
-  const idpMetadata = await parseIdpMetadata(); // FIXME: handle the exception and use default configuration
-  for (const idp of idpMetadata) {
-    const idpOption = Object.assign({}, idp);
-    delete idpOption.entityID; // TODO: no-object-mutation
-    switch (idp.entityID) {
-      case "https://loginspid.aruba.it":
-        options.idp.arubaid.cert = Array.from(idpOption.cert);
-        options.idp.arubaid.entryPoint = idpOption.entryPoint;
-        options.idp.arubaid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://identity.infocert.it":
-        options.idp.infocertid.cert = Array.from(idpOption.cert);
-        options.idp.infocertid.entryPoint = idpOption.entryPoint;
-        options.idp.infocertid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://spid.intesa.it":
-        options.idp.intesaid.cert = Array.from(idpOption.cert);
-        options.idp.intesaid.entryPoint = idpOption.entryPoint;
-        options.idp.intesaid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://id.lepida.it/idp/shibboleth":
-        options.idp.lepidaid.cert = Array.from(idpOption.cert);
-        options.idp.lepidaid.entryPoint = idpOption.entryPoint;
-        options.idp.lepidaid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://idp.namirialtsp.com/idp":
-        options.idp.namirialid.cert = Array.from(idpOption.cert);
-        options.idp.namirialid.entryPoint = idpOption.entryPoint;
-        options.idp.namirialid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://posteid.poste.it":
-        options.idp.posteid.cert = Array.from(idpOption.cert);
-        options.idp.posteid.entryPoint = idpOption.entryPoint;
-        options.idp.posteid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://identity.sieltecloud.it":
-        options.idp.sielteid.cert = Array.from(idpOption.cert);
-        options.idp.sielteid.entryPoint = idpOption.entryPoint;
-        options.idp.sielteid.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://spid.register.it":
-        options.idp.spiditalia.cert = Array.from(idpOption.cert);
-        options.idp.spiditalia.entryPoint = idpOption.entryPoint;
-        options.idp.spiditalia.logoutUrl = idpOption.logoutUrl;
-        break;
-      case "https://login.id.tim.it/affwebservices/public/saml2sso":
-        options.idp.timid.cert = Array.from(idpOption.cert);
-        options.idp.timid.entryPoint = idpOption.entryPoint;
-        options.idp.timid.logoutUrl = idpOption.logoutUrl;
-        break;
-      default:
-        log.error("Unsupported SPID idp on remote repository, will not used");
-    }
+  const IDP_IDS: { [key: string]: string } = {
+    [ARUBA_ID]: "arubaid",
+    [INFOCERT_ID]: "infocertid",
+    [INTESA_ID]: "intesaid",
+    [LEPIDA_ID]: "lepidaid",
+    [NAMIRIAL_ID]: "namirialid",
+    [POSTE_ID]: "posteid",
+    [SIELTE_ID]: "sielteid",
+    [SPIDITALIA_ID]: "spiditalia",
+    [TIM_ID]: "timid"
+  };
+
+  if (!process.env.IDP_METADATA_URL) {
+    throw new Error("IDP_METADATA_URL ENV variable not provided");
   }
+  const idpMetadata = await parseIdpMetadata(process.env.IDP_METADATA_URL);
+  idpMetadata.forEach(idp => {
+    if (IDP_IDS[idp.entityID]) {
+      options.idp[IDP_IDS[idp.entityID]] = idp.getIDPOption();
+    } else {
+      log.error("Unsupported SPID idp from remote repository, will not used.");
+    }
+  });
 
   const optionsWithAutoLoginInfo = {
     ...options,

@@ -2,29 +2,62 @@ import * as https from "https";
 import { DOMParser } from "xmldom";
 import { log } from "./utils/logger";
 
-interface IDPMetadata {
+export interface IDPMetadataOptions {
   cert: ReadonlyArray<string>;
-  entityID: string;
   entryPoint: string;
   logoutUrl: string;
 }
+
+interface IDPMetadataParams extends IDPMetadataOptions {
+  entityID: string;
+}
+
+export class IDPMetadata {
+  public cert: ReadonlyArray<string>;
+  public entityID: string;
+  public entryPoint: string;
+  public logoutUrl: string;
+  constructor(params: IDPMetadataParams) {
+    this.cert = params.cert;
+    this.entityID = params.entityID;
+    this.entryPoint = params.entryPoint;
+    this.logoutUrl = params.logoutUrl;
+  }
+
+  public getIDPOption(): IDPMetadataOptions {
+    return {
+      cert: Array.from(this.cert),
+      entryPoint: this.entityID,
+      logoutUrl: this.logoutUrl
+    };
+  }
+}
+
+export const ARUBA_ID = "https://loginspid.aruba.it";
+export const INFOCERT_ID = "https://identity.infocert.it";
+export const INTESA_ID = "https://spid.intesa.it";
+export const LEPIDA_ID = "https://id.lepida.it/idp/shibboleth";
+export const NAMIRIAL_ID = "https://idp.namirialtsp.com/idp";
+export const POSTE_ID = "https://posteid.poste.it";
+export const SIELTE_ID = "https://identity.sieltecloud.it";
+export const SPIDITALIA_ID = "https://spid.register.it";
+export const TIM_ID = "https://login.id.tim.it/affwebservices/public/saml2sso";
 
 const EntityDescriptorTAG = "md:EntityDescriptor";
 const X509CertificateTAG = "ds:X509Certificate";
 const SingleSignOnServiceTAG = "md:SingleSignOnService";
 const SingleLogoutServiceTAG = "md:SingleLogoutService";
 
-export async function parseIdpMetadata(): Promise<ReadonlyArray<IDPMetadata>> {
-  const IDP_METADATA_ULR =
-    process.env.IDP_METADATA_ULR ||
-    "https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml"; // TODO: remove default configuration?
-  const ipdMetadataPage = await getRequest(IDP_METADATA_ULR); // TODO: Failure on download remote configuration will throw an exception
+export async function parseIdpMetadata(
+  IDP_METADATA_URL: string
+): Promise<ReadonlyArray<IDPMetadata>> {
+  const ipdMetadataPage = await getRequest(IDP_METADATA_URL);
   const domParser = new DOMParser().parseFromString(ipdMetadataPage);
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
     (idp: ReadonlyArray<IDPMetadata>, element: Element) => {
       if (validateEntityDescriptorFormat(element)) {
-        const elementInfo = {
+        const elementInfo = new IDPMetadata({
           cert: [
             (element
               .getElementsByTagName(X509CertificateTAG)
@@ -37,7 +70,7 @@ export async function parseIdpMetadata(): Promise<ReadonlyArray<IDPMetadata>> {
           logoutUrl: (element
             .getElementsByTagName(SingleLogoutServiceTAG)
             .item(0) as Element).getAttribute("Location") as string
-        };
+        });
         return [...idp, elementInfo];
       }
       return idp;
