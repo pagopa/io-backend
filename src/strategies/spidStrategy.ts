@@ -5,7 +5,11 @@
 // tslint:disable: no-object-mutation
 import * as SpidStrategy from "spid-passport";
 import { SpidUser } from "../types/user";
-import { IDPMetadataOptions, parseIdpMetadata } from "../utils/idpLoader";
+import {
+  fetchIdpMetadata,
+  IDPMetadataOptions,
+  parseIdpMetadata
+} from "../utils/idpLoader";
 import { log } from "../utils/logger";
 
 const spidStrategy = async (
@@ -155,7 +159,9 @@ const spidStrategy = async (
     [TIM_ID]: "timid"
   };
 
-  const idpMetadata = await parseIdpMetadata(IDPMetadataUrl);
+  const idpMetadata = await parseIdpMetadata(
+    await fetchIdpMetadata(IDPMetadataUrl)
+  );
   idpMetadata.forEach(idp => {
     if (IDP_IDS[idp.entityID]) {
       options.idp[IDP_IDS[idp.entityID]] = idp.getIDPOption();

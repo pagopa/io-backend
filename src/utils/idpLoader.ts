@@ -39,10 +39,8 @@ const SingleSignOnServiceTAG = "md:SingleSignOnService";
 const SingleLogoutServiceTAG = "md:SingleLogoutService";
 
 export async function parseIdpMetadata(
-  IDP_METADATA_URL: string
+  ipdMetadataPage: string
 ): Promise<ReadonlyArray<IDPMetadata>> {
-  const idpMetadataRequest = await nodeFetch(IDP_METADATA_URL);
-  const ipdMetadataPage = await idpMetadataRequest.text();
   const domParser = new DOMParser().parseFromString(ipdMetadataPage);
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
@@ -68,6 +66,13 @@ export async function parseIdpMetadata(
     },
     []
   );
+}
+
+export async function fetchIdpMetadata(
+  IDP_METADATA_URL: string
+): Promise<string> {
+  const idpMetadataRequest = await nodeFetch(IDP_METADATA_URL);
+  return await idpMetadataRequest.text();
 }
 
 function validateEntityDescriptorFormat(element: Element): boolean {
