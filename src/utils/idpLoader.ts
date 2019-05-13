@@ -3,37 +3,6 @@ import { DOMParser } from "xmldom";
 import { IDPEntityDescriptor } from "../../generated/backend/IDPEntityDescriptor";
 import { log } from "./logger";
 
-export interface IDPMetadataOptions {
-  cert: ReadonlyArray<string>;
-  entryPoint: string;
-  logoutUrl: string;
-}
-
-interface IDPMetadataParams extends IDPMetadataOptions {
-  entityID: string;
-}
-
-export class IDPMetadata {
-  public cert: ReadonlyArray<string>;
-  public entityID: string;
-  public entryPoint: string;
-  public logoutUrl: string;
-  constructor(params: IDPMetadataParams) {
-    this.cert = params.cert;
-    this.entityID = params.entityID;
-    this.entryPoint = params.entryPoint;
-    this.logoutUrl = params.logoutUrl;
-  }
-
-  public getIDPOption(): IDPMetadataOptions {
-    return {
-      cert: Array.from(this.cert),
-      entryPoint: this.entityID,
-      logoutUrl: this.logoutUrl
-    };
-  }
-}
-
 const EntityDescriptorTAG = "md:EntityDescriptor";
 const X509CertificateTAG = "ds:X509Certificate";
 const SingleSignOnServiceTAG = "md:SingleSignOnService";
