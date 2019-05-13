@@ -59,7 +59,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
 };
 
 // mock for a valid ExtendedProfile profile used for ToS test
-const mockedExtendedProfileTosTest: ExtendedProfileApi = {
+const mockedExtendedProfileWithoutTos: ExtendedProfileApi = {
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
@@ -137,10 +137,10 @@ describe("profile type", () => {
     }
   });
 
-  it("should get an app Proxy profile user profile with accepted_tos_version undefined ", async () => {
+  it("should get an app Proxy profile without tos", async () => {
     // return app Proxy Profile.
     const userData = toInitializedProfile(
-      mockedExtendedProfileTosTest, // from
+      mockedExtendedProfileWithoutTos, // from
       mockedUser // user
     );
 
