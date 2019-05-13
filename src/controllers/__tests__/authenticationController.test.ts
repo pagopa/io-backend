@@ -187,17 +187,6 @@ const redisSessionStorage = new RedisSessionStorage(
   tokenDurationSecs
 );
 
-const spidStrategyInstance = spidStrategy(
-  samlKey,
-  samlCallbackUrl,
-  samlIssuer,
-  samlAcceptedClockSkewMs,
-  samlAttributeConsumingServiceIndex,
-  spidAutologin,
-  spidTestEnvUrl
-);
-spidStrategyInstance.logout = jest.fn();
-
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   const url = "/profile.html?token={token}".replace("{token}", token);
 
@@ -206,13 +195,27 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   };
 };
 
-const controller = new AuthenticationController(
-  redisSessionStorage,
-  samlCert,
-  spidStrategyInstance,
-  tokenService,
-  getClientProfileRedirectionUrl
-);
+let controller: AuthenticationController;
+beforeAll(async () => {
+  const spidStrategyInstance = await spidStrategy(
+    samlKey,
+    samlCallbackUrl,
+    samlIssuer,
+    samlAcceptedClockSkewMs,
+    samlAttributeConsumingServiceIndex,
+    spidAutologin,
+    spidTestEnvUrl
+  );
+  spidStrategyInstance.logout = jest.fn();
+
+  controller = new AuthenticationController(
+    redisSessionStorage,
+    samlCert,
+    spidStrategyInstance,
+    tokenService,
+    getClientProfileRedirectionUrl
+  );
+});
 
 let clock: any;
 beforeEach(() => {

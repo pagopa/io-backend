@@ -92,14 +92,14 @@ function withSpidAuth(
   };
 }
 
-export function newApp(
+export async function newApp(
   env: NodeEnvironment,
   allowNotifyIPSourceRange: CIDR,
   allowPagoPAIPSourceRange: CIDR,
   authenticationBasePath: string,
   APIBasePath: string,
   PagoPABasePath: string
-): Express {
+): Promise<Express> {
   // Setup Passport.
 
   // Add the strategy to authenticate proxy clients.
@@ -107,7 +107,7 @@ export function newApp(
   // Add the strategy to authenticate webhook calls.
   passport.use(container.resolve(URL_TOKEN_STRATEGY));
   // Add the strategy to authenticate the proxy to SPID.
-  passport.use(container.resolve(SPID_STRATEGY));
+  passport.use(await container.resolve(SPID_STRATEGY));
 
   const spidAuth = passport.authenticate("spid", { session: false });
 

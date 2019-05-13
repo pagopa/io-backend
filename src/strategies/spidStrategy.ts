@@ -2,12 +2,13 @@
  * Builds and configure a Passport strategy to authenticate the proxy to the
  * different SPID IDPs.
  */
-
+// tslint:disable: no-object-mutation
 import * as SpidStrategy from "spid-passport";
+import { parseIdpMetadata } from "../idpLoader";
 import { SpidUser } from "../types/user";
 import { log } from "../utils/logger";
 
-const spidStrategy = (
+const spidStrategy = async (
   samlKey: string,
   samlCallbackUrl: string,
   samlIssuer: string,
@@ -128,6 +129,61 @@ const spidStrategy = (
       signatureAlgorithm: "sha256"
     }
   };
+
+  const idpMetadata = await parseIdpMetadata(); // FIXME: handle the exception and use default configuration
+  for (const idp of idpMetadata) {
+    const idpOption = Object.assign({}, idp);
+    delete idpOption.entityID; // TODO: no-object-mutation
+    switch (idp.entityID) {
+      case "https://loginspid.aruba.it":
+        options.idp.arubaid.cert = Array.from(idpOption.cert);
+        options.idp.arubaid.entryPoint = idpOption.entryPoint;
+        options.idp.arubaid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://identity.infocert.it":
+        options.idp.infocertid.cert = Array.from(idpOption.cert);
+        options.idp.infocertid.entryPoint = idpOption.entryPoint;
+        options.idp.infocertid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://spid.intesa.it":
+        options.idp.intesaid.cert = Array.from(idpOption.cert);
+        options.idp.intesaid.entryPoint = idpOption.entryPoint;
+        options.idp.intesaid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://id.lepida.it/idp/shibboleth":
+        options.idp.lepidaid.cert = Array.from(idpOption.cert);
+        options.idp.lepidaid.entryPoint = idpOption.entryPoint;
+        options.idp.lepidaid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://idp.namirialtsp.com/idp":
+        options.idp.namirialid.cert = Array.from(idpOption.cert);
+        options.idp.namirialid.entryPoint = idpOption.entryPoint;
+        options.idp.namirialid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://posteid.poste.it":
+        options.idp.posteid.cert = Array.from(idpOption.cert);
+        options.idp.posteid.entryPoint = idpOption.entryPoint;
+        options.idp.posteid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://identity.sieltecloud.it":
+        options.idp.sielteid.cert = Array.from(idpOption.cert);
+        options.idp.sielteid.entryPoint = idpOption.entryPoint;
+        options.idp.sielteid.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://spid.register.it":
+        options.idp.spiditalia.cert = Array.from(idpOption.cert);
+        options.idp.spiditalia.entryPoint = idpOption.entryPoint;
+        options.idp.spiditalia.logoutUrl = idpOption.logoutUrl;
+        break;
+      case "https://login.id.tim.it/affwebservices/public/saml2sso":
+        options.idp.timid.cert = Array.from(idpOption.cert);
+        options.idp.timid.entryPoint = idpOption.entryPoint;
+        options.idp.timid.logoutUrl = idpOption.logoutUrl;
+        break;
+      default:
+        log.error("Unsupported SPID idp on remote repository, will not used");
+    }
+  }
 
   const optionsWithAutoLoginInfo = {
     ...options,
