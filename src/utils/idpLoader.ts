@@ -15,11 +15,13 @@ export async function parseIdpMetadata(
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
     (idp: ReadonlyArray<IDPEntityDescriptor>, element: Element) => {
+      const certs = Array.from(
+        element.getElementsByTagName(X509CertificateTAG)
+      ).map(cert => {
+        return cert.textContent;
+      });
       const elementInfoOrErrors = IDPEntityDescriptor.decode({
-        cert: [
-          (element.getElementsByTagName(X509CertificateTAG).item(0) as Element)
-            .textContent
-        ],
+        cert: certs,
         entityID: element.getAttribute("entityID"),
         entryPoint: (element
           .getElementsByTagName(SingleSignOnServiceTAG)
