@@ -17,6 +17,7 @@ export const toInitializedProfile = (
   profile: ExtendedProfile,
   user: User
 ): InitializedProfile => ({
+  accepted_tos_version: profile.accepted_tos_version,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
   email: profile.email,
   family_name: user.family_name,
