@@ -18,7 +18,12 @@ export async function parseIdpMetadata(
     (idps: ReadonlyArray<IDPEntityDescriptor>, element: Element) => {
       const certs = Array.from(
         element.getElementsByTagName(X509CertificateTAG)
-      ).map(_ => _.textContent);
+      ).map(_ => {
+        if (_.textContent) {
+          return _.textContent.replace(/[\n\s]/g, "");
+        }
+        return "";
+      });
       const elementInfoOrErrors = IDPEntityDescriptor.decode({
         cert: certs,
         entityID: element.getAttribute("entityID"),
@@ -30,9 +35,11 @@ export async function parseIdpMetadata(
           .item(0) as Element).getAttribute("Location")
       });
       if (elementInfoOrErrors.isLeft()) {
-        log.warning(
-          "Invalid md:EntityDescriptor. Skipping ...",
+        log.warn(
+          "Invalid md:EntityDescriptor. %s",
           ReadableReporter.report(elementInfoOrErrors)
+            .reduce((report, _) => report + "\n" + _, "")
+            .replace(/\n/g, " / ")
         );
         return idps;
       }
@@ -43,8 +50,8 @@ export async function parseIdpMetadata(
 }
 
 export async function fetchIdpMetadata(
-  IDP_METADATA_URL: string
+  idpMetadataUrl: string
 ): Promise<string> {
-  const idpMetadataRequest = await nodeFetch(IDP_METADATA_URL);
+  const idpMetadataRequest = await nodeFetch(idpMetadataUrl);
   return await idpMetadataRequest.text();
 }

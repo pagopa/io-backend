@@ -63,7 +63,7 @@ const spidStrategy = async (
     }
   };
 
-  const IDP_IDS: { [key: string]: string } = {
+  const IDP_IDS: { [key: string]: string | undefined } = {
     "https://id.lepida.it/idp/shibboleth": "lepidaid",
     "https://identity.infocert.it": "infocertid",
     "https://identity.sieltecloud.it": "sielteid",
@@ -79,11 +79,12 @@ const spidStrategy = async (
     await fetchIdpMetadata(IDPMetadataUrl)
   );
   idpMetadata.forEach(idp => {
-    if (IDP_IDS[idp.entityID]) {
-      options.idp[IDP_IDS[idp.entityID]] = idp;
+    const IDP_KEY = IDP_IDS[idp.entityID];
+    if (IDP_KEY) {
+      options.idp[IDP_KEY] = idp;
     } else {
-      log.warning(
-        "Unsupported SPID idp from remote repository, will not used."
+      log.warn(
+        `Unsupported SPID idp from metadata repository [${idp.entityID}]`
       );
     }
   });
