@@ -1,12 +1,9 @@
 import * as t from "io-ts";
+import { createNonEmptyArrayFromArray } from "io-ts-types/lib/fp-ts/createNonEmptyArrayFromArray";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 export const IDPEntityDescriptor = t.interface({
-  cert: t.refinement(
-    t.readonlyArray(NonEmptyString, "array of not empty string"),
-    a => a.length > 0,
-    "non empty array"
-  ),
+  cert: createNonEmptyArrayFromArray(NonEmptyString),
 
   entityID: t.string,
 

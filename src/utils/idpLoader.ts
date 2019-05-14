@@ -1,3 +1,4 @@
+import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import nodeFetch from "node-fetch";
 import { DOMParser } from "xmldom";
 import { IDPEntityDescriptor } from "../types/IDPEntityDescriptor";
@@ -14,12 +15,10 @@ export async function parseIdpMetadata(
   const domParser = new DOMParser().parseFromString(ipdMetadataPage);
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
-    (idp: ReadonlyArray<IDPEntityDescriptor>, element: Element) => {
+    (idps: ReadonlyArray<IDPEntityDescriptor>, element: Element) => {
       const certs = Array.from(
         element.getElementsByTagName(X509CertificateTAG)
-      ).map(cert => {
-        return cert.textContent;
-      });
+      ).map(_ => _.textContent);
       const elementInfoOrErrors = IDPEntityDescriptor.decode({
         cert: certs,
         entityID: element.getAttribute("entityID"),
@@ -31,10 +30,13 @@ export async function parseIdpMetadata(
           .item(0) as Element).getAttribute("Location")
       });
       if (elementInfoOrErrors.isLeft()) {
-        log.info("Invalid md:EntityDescriptor. Skipping ...");
-        return idp;
+        log.warning(
+          "Invalid md:EntityDescriptor. Skipping ...",
+          ReadableReporter.report(elementInfoOrErrors)
+        );
+        return idps;
       }
-      return [...idp, elementInfoOrErrors.value];
+      return [...idps, elementInfoOrErrors.value];
     },
     []
   );
