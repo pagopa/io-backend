@@ -191,10 +191,52 @@ lMDbdL6Ec/0xAljQSOFpozFduGoYTKF6Ig2Z5NleHPuYVyWLmBhw0lGfyvKGyk9Ev55WxTwHapQB
         </md:Organization>
     </md:EntityDescriptor>
     <!-- ARUBA ID *end* -->
+    <!-- FAKE ID *start* -->
+    <md:EntityDescriptor ID="_a9c69a62-90b7-4ba6-80f8-98dc2f20579e" entityID="https://fake.spid.it">
+        <md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+            <md:KeyDescriptor use="signing">
+                <ds:KeyInfo>
+                    <ds:X509Data>
+                        <ds:X509Certificate>MIIDjDCCAnQCCQDrwdpdNHQoozANBgkqhkiG9w0BAQsFADCBhzELMAkGA1UEBhMCSVQxDTALBgNV
+                        BAgMBFJvbWExDTALBgNVBAcMBFJvbWExDTALBgNVBAoMBEFnSUQxDTALBgNVBAsMBFNQSUQxGTAX
+                        BgNVBAMMEHNwaWQuYWdpZC5nb3YuaXQxITAfBgkqhkiG9w0BCQEWEnJvc2luaUBhZ2lkLmdvdi5p
+                        dDAeFw0xODEyMjExNTE5NTdaFw0xOTEyMjExNTE5NTdaMIGHMQswCQYDVQQGEwJJVDENMAsGA1UE
+                        CAwEUm9tYTENMAsGA1UEBwwEUm9tYTENMAsGA1UECgwEQWdJRDENMAsGA1UECwwEU1BJRDEZMBcG
+                        A1UEAwwQc3BpZC5hZ2lkLmdvdi5pdDEhMB8GCSqGSIb3DQEJARYScm9zaW5pQGFnaWQuZ292Lml0
+                        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4HVbuVj/NajswD7LrDXg73FRxtFrTJZk
+                        IBrnxCt6NzhWAOdH2DjQ0qjDoY6XIGPMyTI5YLGCZhDY6g8jEh4yKsz2bLGvkz4rYzqODqkYJZys
+                        oYgnZ8oPdYkJON+2oqGewarcbXeeO1eKUNnbU8IzPffrSb4LReFOQpUrvUjFcjTkIyBYoxR79SGj
+                        CtlLuL55FpY4+N4/IOjVkiZcPudhbFhYY8G7yFFOsXgWlqB5RBCzMtmcIQeamWJkWb/Z8K4MnPjh
+                        BAuJoMf5fSRLrsmQlcjSnFGAY97lAxFnySb/mmtGoFh11aFEsi3WihlMpoTfHuVin1o2P4KAg+3y
+                        N5kgrwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCVgOxgPxVQhqzKTmBPMcTFQph4LWo89tAACR44
+                        oXvMqT5u1Qyi8cpYu7IOg3VWYMgsoTxExXC4sicWfQJa+aGBtSXv4jB1ZQ7HEXaJxVQuguahJBwQ
+                        5Y61ebWyNmiUPySbRNbpQlinL8ulTjE6uPSSydMvleOxpF9uyUH7gLvzfgkovLr8MZtNCNUaEfJs
+                        Youdvxtwmpv1yKvvkGpExGK99fsp60mHHdQDsbRq9ymH8GzY8vmbVVK63QFYdG5aJdGg8sCA/0th
+                        lMDbdL6Ec/0xAljQSOFpozFduGoYTKF6Ig2Z5NleHPuYVyWLmBhw0lGfyvKGyk9Ev55WxTwHapQB</ds:X509Certificate>
+                    </ds:X509Data>
+                </ds:KeyInfo>
+            </md:KeyDescriptor>
+            <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://fake.spid.it/ServiceLogoutRequest"/>
+            <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://fake.spid.it/ServiceLogoutRequest"/>
+            <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+            <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://fake.spid.it/ServiceLoginWelcome"/>
+            <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://fake.spid.it/ServiceLoginWelcome"/>
+            <saml2:Attribute xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" FriendlyName="Codice identificativo SPID" Name="spidCode"/>
+            <saml2:Attribute xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" FriendlyName="Nome" Name="name"/>
+            <saml2:Attribute xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" FriendlyName="Cognome" Name="familyName"/>
+        </md:IDPSSODescriptor>
+        <md:Organization>
+            <md:OrganizationName xml:lang="it">Fake S.p.A.</md:OrganizationName>
+            <md:OrganizationDisplayName xml:lang="it">Fake S.p.A.</md:OrganizationDisplayName>
+            <md:OrganizationURL xml:lang="it">https://www.fake.it/</md:OrganizationURL>
+        </md:Organization>
+    </md:EntityDescriptor>
+    <!-- FAKE ID *end* -->
 </md:EntitiesDescriptor>
 `;
 
 const arubaEntityId = "https://loginspid.aruba.it";
+const fakeEntityId = "https://fake.spid.it";
 
 const expectedMetadata = {
   cert: new NonEmptyArray(
@@ -214,7 +256,17 @@ describe("idpLoader#parseIdpMetadata", () => {
 
   it("parsing invalid metadata xml file", async () => {
     const parsedMetadata = await parseIdpMetadata(invalidMockMetadata);
-    expect(parsedMetadata).toEqual([]);
+    expect(parsedMetadata).toEqual([
+      {
+        cert: new NonEmptyArray(
+          "MIIDjDCCAnQCCQDrwdpdNHQoozANBgkqhkiG9w0BAQsFADCBhzELMAkGA1UEBhMCSVQxDTALBgNVBAgMBFJvbWExDTALBgNVBAcMBFJvbWExDTALBgNVBAoMBEFnSUQxDTALBgNVBAsMBFNQSUQxGTAXBgNVBAMMEHNwaWQuYWdpZC5nb3YuaXQxITAfBgkqhkiG9w0BCQEWEnJvc2luaUBhZ2lkLmdvdi5pdDAeFw0xODEyMjExNTE5NTdaFw0xOTEyMjExNTE5NTdaMIGHMQswCQYDVQQGEwJJVDENMAsGA1UECAwEUm9tYTENMAsGA1UEBwwEUm9tYTENMAsGA1UECgwEQWdJRDENMAsGA1UECwwEU1BJRDEZMBcGA1UEAwwQc3BpZC5hZ2lkLmdvdi5pdDEhMB8GCSqGSIb3DQEJARYScm9zaW5pQGFnaWQuZ292Lml0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4HVbuVj/NajswD7LrDXg73FRxtFrTJZkIBrnxCt6NzhWAOdH2DjQ0qjDoY6XIGPMyTI5YLGCZhDY6g8jEh4yKsz2bLGvkz4rYzqODqkYJZysoYgnZ8oPdYkJON+2oqGewarcbXeeO1eKUNnbU8IzPffrSb4LReFOQpUrvUjFcjTkIyBYoxR79SGjCtlLuL55FpY4+N4/IOjVkiZcPudhbFhYY8G7yFFOsXgWlqB5RBCzMtmcIQeamWJkWb/Z8K4MnPjhBAuJoMf5fSRLrsmQlcjSnFGAY97lAxFnySb/mmtGoFh11aFEsi3WihlMpoTfHuVin1o2P4KAg+3yN5kgrwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCVgOxgPxVQhqzKTmBPMcTFQph4LWo89tAACR44oXvMqT5u1Qyi8cpYu7IOg3VWYMgsoTxExXC4sicWfQJa+aGBtSXv4jB1ZQ7HEXaJxVQuguahJBwQ5Y61ebWyNmiUPySbRNbpQlinL8ulTjE6uPSSydMvleOxpF9uyUH7gLvzfgkovLr8MZtNCNUaEfJsYoudvxtwmpv1yKvvkGpExGK99fsp60mHHdQDsbRq9ymH8GzY8vmbVVK63QFYdG5aJdGg8sCA/0thlMDbdL6Ec/0xAljQSOFpozFduGoYTKF6Ig2Z5NleHPuYVyWLmBhw0lGfyvKGyk9Ev55WxTwHapQB",
+          []
+        ),
+        entityID: fakeEntityId,
+        entryPoint: "https://fake.spid.it/ServiceLoginWelcome",
+        logoutUrl: "https://fake.spid.it/ServiceLogoutRequest"
+      }
+    ]);
   });
 });
 
