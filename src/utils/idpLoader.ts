@@ -1,4 +1,4 @@
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import nodeFetch from "node-fetch";
 import { DOMParser } from "xmldom";
 import { IDPEntityDescriptor } from "../types/IDPEntityDescriptor";
@@ -37,9 +37,7 @@ export async function parseIdpMetadata(
       if (elementInfoOrErrors.isLeft()) {
         log.warn(
           "Invalid md:EntityDescriptor. %s",
-          ReadableReporter.report(elementInfoOrErrors)
-            .reduce((report, _) => report + "\n" + _, "")
-            .replace(/\n/g, " / ")
+          errorsToReadableMessages(elementInfoOrErrors.value).join(" / ")
         );
         return idps;
       }
