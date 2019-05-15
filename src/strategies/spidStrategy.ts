@@ -11,6 +11,24 @@ import { SpidUser } from "../types/user";
 import { fetchIdpMetadata, parseIdpMetadata } from "../utils/idpLoader";
 import { log } from "../utils/logger";
 
+export const remapIpdMetadata = (
+  // tslint:disable-next-line: no-any
+  options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any },
+  idpMetadata: ReadonlyArray<IDPEntityDescriptor>,
+  idpIds: { [key: string]: string | undefined }
+) => {
+  idpMetadata.forEach(idp => {
+    const IDP_KEY = idpIds[idp.entityID];
+    if (IDP_KEY) {
+      options.idp[IDP_KEY] = idp;
+    } else {
+      log.warn(
+        `Unsupported SPID idp from metadata repository [${idp.entityID}]`
+      );
+    }
+  });
+};
+
 const spidStrategy = async (
   samlKey: string,
   samlCallbackUrl: string,
@@ -78,16 +96,7 @@ const spidStrategy = async (
   const idpMetadata = await parseIdpMetadata(
     await fetchIdpMetadata(IDPMetadataUrl)
   );
-  idpMetadata.forEach(idp => {
-    const IDP_KEY = IDP_IDS[idp.entityID];
-    if (IDP_KEY) {
-      options.idp[IDP_KEY] = idp;
-    } else {
-      log.warn(
-        `Unsupported SPID idp from metadata repository [${idp.entityID}]`
-      );
-    }
-  });
+  remapIpdMetadata(options, idpMetadata, IDP_IDS);
 
   const optionsWithAutoLoginInfo = {
     ...options,
