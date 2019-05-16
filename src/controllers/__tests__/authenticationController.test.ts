@@ -240,8 +240,8 @@ describe("AuthenticationController#acs", () => {
 
     expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
-      "/profile.html?token=" + mockSessionToken,
-      301
+      301,
+      "/profile.html?token=" + mockSessionToken
     );
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
   });
@@ -302,7 +302,7 @@ describe("AuthenticationController#slo", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/", 301);
+    expect(res.redirect).toHaveBeenCalledWith(301, "/");
   });
 });
 
