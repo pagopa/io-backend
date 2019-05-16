@@ -25,34 +25,30 @@ const authenticationBasePath = container.resolve<string>(
 const APIBasePath = container.resolve<string>("APIBasePath");
 const PagoPABasePath = container.resolve<string>("PagoPABasePath");
 
-function startApp(): void {
-  newApp(
-    env,
-    allowNotifyIPSourceRange,
-    allowPagoPAIPSourceRange,
-    authenticationBasePath,
-    APIBasePath,
-    PagoPABasePath
-  )
-    .then(app => {
-      // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
-      // Kubernetes so the proxy has to run on HTTPS to behave correctly.
-      if (env === NodeEnvironmentEnum.DEVELOPMENT) {
-        const samlKey = container.resolve<string>(SAML_KEY);
-        const samlCert = container.resolve<string>(SAML_CERT);
-        const options = { key: samlKey, cert: samlCert };
-        https.createServer(options, app).listen(443, () => {
-          log.info("Listening on port 443");
-        });
-      } else {
-        http.createServer(app).listen(port, () => {
-          log.info("Listening on port %d", port);
-        });
-      }
-    })
-    .catch(err => {
-      log.error("Error loading app: %s", err);
-    });
-}
-
-startApp();
+newApp(
+  env,
+  allowNotifyIPSourceRange,
+  allowPagoPAIPSourceRange,
+  authenticationBasePath,
+  APIBasePath,
+  PagoPABasePath
+)
+  .then(app => {
+    // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
+    // Kubernetes so the proxy has to run on HTTPS to behave correctly.
+    if (env === NodeEnvironmentEnum.DEVELOPMENT) {
+      const samlKey = container.resolve<string>(SAML_KEY);
+      const samlCert = container.resolve<string>(SAML_CERT);
+      const options = { key: samlKey, cert: samlCert };
+      https.createServer(options, app).listen(443, () => {
+        log.info("Listening on port 443");
+      });
+    } else {
+      http.createServer(app).listen(port, () => {
+        log.info("Listening on port %d", port);
+      });
+    }
+  })
+  .catch(err => {
+    log.error("Error loading app: %s", err);
+  });

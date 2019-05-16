@@ -18,8 +18,8 @@ import { log } from "../utils/logger";
 export const mapIpdMetadata = (
   idpMetadata: ReadonlyArray<IDPEntityDescriptor>,
   idpIds: { [key: string]: string | undefined }
-) => {
-  return idpMetadata.reduce(
+) =>
+  idpMetadata.reduce(
     (prev, idp) => {
       const idpKey = idpIds[idp.entityID];
       if (idpKey) {
@@ -33,7 +33,6 @@ export const mapIpdMetadata = (
     },
     {} as { [key: string]: IDPEntityDescriptor | undefined }
   );
-};
 
 const spidStrategy = async (
   samlKey: string,
