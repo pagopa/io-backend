@@ -26,7 +26,7 @@ import {
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class MessagesService {
-  private magTooManyRequests: string = "Too many requests";
+  private msgTooManyRequests: string = "Too many requests";
 
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
@@ -56,7 +56,7 @@ export default class MessagesService {
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "User not found")
               : response.status === 429
-                ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+                ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
                 : unhandledResponseStatus(response.status)
       );
     });
@@ -94,7 +94,7 @@ export default class MessagesService {
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "Message not found")
               : response.status === 429
-                ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+                ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
                 : unhandledResponseStatus(response.status)
       );
     });
@@ -129,7 +129,7 @@ export default class MessagesService {
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "Service not found")
               : response.status === 429
-                ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+                ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
                 : unhandledResponseStatus(response.status)
       );
     });
@@ -159,7 +159,7 @@ export default class MessagesService {
                 ResponseSuccessJson
               )
             : response.status === 429
-              ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+              ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
               : unhandledResponseStatus(response.status)
       );
     });
@@ -183,7 +183,7 @@ export default class MessagesService {
                 ResponseSuccessJson
               )
             : response.status === 429
-              ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+              ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
               : unhandledResponseStatus(response.status)
       );
     });

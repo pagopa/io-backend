@@ -325,8 +325,6 @@ paths:
               "message": "ok"
         "401":
           description: Bearer token null or expired.
-        "429":
-          description: Too many requests
         "500":
           description: There was an error in registering the device to the Notification Hub.
           schema:
@@ -352,8 +350,6 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
-        "429":
-          description: Too many requests
   "/payment-requests/{rptId}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -386,8 +382,6 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
-        "429":
-          description: Too many requests
         "500":
           description: PagoPA services are not available or request is rejected
           schema:
@@ -429,8 +423,6 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
-        "429":
-          description: Too many requests
         "500":
           description: PagoPA services are not available or request is rejected
           schema:
@@ -470,8 +462,6 @@ paths:
           description: Activation status not found
           schema:
             $ref: "#/definitions/ProblemJson"
-        "429":
-          description: Too many requests
         "500":
           description: Unavailable service
           schema:
