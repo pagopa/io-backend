@@ -5,6 +5,7 @@
 import * as express from "express";
 import {
   IResponseErrorInternal,
+  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson
@@ -29,6 +30,7 @@ export default class PagoPAController {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PagoPAUser>
   > =>
     withUserFromRequest(req, async user => {

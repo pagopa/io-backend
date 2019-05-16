@@ -5,8 +5,10 @@
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   ResponseErrorNotFound,
+  ResponseErrorTooManyRequests,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -24,6 +26,8 @@ import {
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class MessagesService {
+  private magTooManyRequests: string = "Too many requests";
+
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
@@ -32,8 +36,10 @@ export default class MessagesService {
   public readonly getMessagesByUser = (
     user: User
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
   > =>
     withCatchAsInternalError(async () => {
@@ -49,7 +55,9 @@ export default class MessagesService {
             ? ResponseSuccessJson(response.value)
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "User not found")
-              : unhandledResponseStatus(response.status)
+              : response.status === 429
+                ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+                : unhandledResponseStatus(response.status)
       );
     });
 
@@ -60,8 +68,10 @@ export default class MessagesService {
     user: User,
     messageId: string
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<CreatedMessageWithContent>
   > =>
     withCatchAsInternalError(async () => {
@@ -83,7 +93,9 @@ export default class MessagesService {
             ? ResponseSuccessJson(response.value)
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "Message not found")
-              : unhandledResponseStatus(response.status)
+              : response.status === 429
+                ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+                : unhandledResponseStatus(response.status)
       );
     });
 
@@ -93,8 +105,10 @@ export default class MessagesService {
   public readonly getService = (
     serviceId: string
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePublic>
   > =>
     withCatchAsInternalError(async () => {
@@ -114,15 +128,19 @@ export default class MessagesService {
               )
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "Service not found")
-              : unhandledResponseStatus(response.status)
+              : response.status === 429
+                ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+                : unhandledResponseStatus(response.status)
       );
     });
 
   public readonly getServicesByRecipient = (
     user: User
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
   > =>
     withCatchAsInternalError(async () => {
@@ -140,12 +158,15 @@ export default class MessagesService {
                 PaginatedServiceTupleCollection.decode(response.value),
                 ResponseSuccessJson
               )
-            : unhandledResponseStatus(response.status)
+            : response.status === 429
+              ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+              : unhandledResponseStatus(response.status)
       );
     });
 
   public readonly getVisibleServices = (): Promise<
     | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
   > =>
     withCatchAsInternalError(async () => {
@@ -161,7 +182,9 @@ export default class MessagesService {
                 PaginatedServiceTupleCollection.decode(response.value),
                 ResponseSuccessJson
               )
-            : unhandledResponseStatus(response.status)
+            : response.status === 429
+              ? ResponseErrorTooManyRequests(this.magTooManyRequests)
+              : unhandledResponseStatus(response.status)
       );
     });
 }
