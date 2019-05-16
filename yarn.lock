@@ -2763,10 +2763,10 @@ italia-ts-commons@^5.1.1:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
-italia-tslint-rules@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/italia-tslint-rules/-/italia-tslint-rules-1.1.1.tgz#6181c182449d3bf26a93f17a9c512460c77f7015"
-  integrity sha512-xsu42r8xRFmYHCbzXl1xEZ6ptLPk13oD7K5+a3qU9TSInppANWzjGtH244W0rmFQatiWjkZQwQd9k6lXk6abSQ==
+italia-tslint-rules@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/italia-tslint-rules/-/italia-tslint-rules-1.1.3.tgz#efac0c9638d14cef6cc907be74f0799b8bab0976"
+  integrity sha512-vu1LsSPaAnreitYlFnMFzKvZvXJz1M6B2AeY8CsGZ1DGHG5gJhiTKdyOR86I3q5TjegEYbi3nLLieJV0uKDKcA==
   dependencies:
     tslint-config-prettier "^1.18.0"
     tslint-eslint-rules "^5.4.0"
