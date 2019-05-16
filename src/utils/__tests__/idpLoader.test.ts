@@ -250,12 +250,12 @@ const expectedMetadata = {
 
 describe("idpLoader#parseIdpMetadata", () => {
   it("parsing valid metadata xml file", async () => {
-    const parsedMetadata = await parseIdpMetadata(mockMetadata);
+    const parsedMetadata = parseIdpMetadata(mockMetadata);
     expect(parsedMetadata).toEqual([expectedMetadata]);
   });
 
   it("parsing invalid metadata xml file", async () => {
-    const parsedMetadata = await parseIdpMetadata(invalidMockMetadata);
+    const parsedMetadata = parseIdpMetadata(invalidMockMetadata);
     expect(parsedMetadata).toEqual([
       {
         cert: new NonEmptyArray(
@@ -272,7 +272,7 @@ describe("idpLoader#parseIdpMetadata", () => {
 
 describe("spidStrategy#remapIpdMetadata", () => {
   it("remap valid metadata xml file", async () => {
-    const parsedMetadata = await parseIdpMetadata(mockMetadata);
+    const parsedMetadata = parseIdpMetadata(mockMetadata);
     const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
       [arubaEntityId]: "arubaid"
     });
@@ -295,7 +295,7 @@ describe("spidStrategy#remapIpdMetadata", () => {
   });
 
   it("remap invalid metadata xml file", async () => {
-    const parsedMetadata = await parseIdpMetadata(invalidMockMetadata);
+    const parsedMetadata = parseIdpMetadata(invalidMockMetadata);
     const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
       [arubaEntityId]: "arubaid"
     });

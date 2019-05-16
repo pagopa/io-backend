@@ -57,9 +57,7 @@ const spidStrategy = async (
     "https://spid.register.it": "spiditalia"
   };
 
-  const idpMetadata = await parseIdpMetadata(
-    await fetchIdpMetadata(IDPMetadataUrl)
-  );
+  const idpMetadata = parseIdpMetadata(await fetchIdpMetadata(IDPMetadataUrl));
   const idpsMetadataOption = mapIpdMetadata(idpMetadata, IDP_IDS);
 
   const testenv2Cert = new NonEmptyArray<NonEmptyString>(

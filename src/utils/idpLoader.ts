@@ -9,9 +9,14 @@ const X509CertificateTAG = "ds:X509Certificate";
 const SingleSignOnServiceTAG = "md:SingleSignOnService";
 const SingleLogoutServiceTAG = "md:SingleLogoutService";
 
-export async function parseIdpMetadata(
+/**
+ * Parse a string that represents an XML file containing the ipd Metadata and converts it into an array of IDPEntityDescriptor
+ * Required namespace definitions into the XML are xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" and xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+ * An example file is provided in /test_idps/spid-entities-idps.xml of this project.
+ */
+export function parseIdpMetadata(
   ipdMetadataPage: string
-): Promise<ReadonlyArray<IDPEntityDescriptor>> {
+): ReadonlyArray<IDPEntityDescriptor> {
   const domParser = new DOMParser().parseFromString(ipdMetadataPage);
   const entityDescriptors = domParser.getElementsByTagName(EntityDescriptorTAG);
   return Array.from(entityDescriptors).reduce(
@@ -47,6 +52,9 @@ export async function parseIdpMetadata(
   );
 }
 
+/**
+ * Fetch an ipds Metadata XML file from a remote url and convert it into a string
+ */
 export async function fetchIdpMetadata(
   idpMetadataUrl: string
 ): Promise<string> {
