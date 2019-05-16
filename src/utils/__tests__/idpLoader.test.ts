@@ -276,8 +276,11 @@ describe("spidStrategy#remapIpdMetadata", () => {
     const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
       [arubaEntityId]: "arubaid"
     });
-    // tslint:disable-next-line: no-any
-    const options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any } = {
+    const options: {
+      idp: { [key: string]: IDPEntityDescriptor | undefined };
+      // tslint:disable-next-line: no-any
+      sp: any;
+    } = {
       idp: {
         ...idpsMetadataOption
       },
@@ -296,8 +299,11 @@ describe("spidStrategy#remapIpdMetadata", () => {
     const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
       [arubaEntityId]: "arubaid"
     });
-    // tslint:disable-next-line: no-any
-    const options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any } = {
+    const options: {
+      idp: { [key: string]: IDPEntityDescriptor | undefined };
+      // tslint:disable-next-line: no-any
+      sp: any;
+    } = {
       idp: {
         ...idpsMetadataOption
       },
