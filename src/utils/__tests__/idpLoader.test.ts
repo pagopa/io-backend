@@ -1,6 +1,6 @@
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { IDPEntityDescriptor } from "src/types/IDPEntityDescriptor";
-import { remapIpdMetadata } from "../../strategies/spidStrategy";
+import { mapIpdMetadata } from "../../strategies/spidStrategy";
 import { parseIdpMetadata } from "../idpLoader";
 
 const mockMetadata = `
@@ -273,14 +273,16 @@ describe("idpLoader#parseIdpMetadata", () => {
 describe("spidStrategy#remapIpdMetadata", () => {
   it("remap valid metadata xml file", async () => {
     const parsedMetadata = await parseIdpMetadata(mockMetadata);
-    // tslint:disable-next-line: no-any
-    const options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any } = {
-      idp: {},
-      sp: {}
-    };
-    remapIpdMetadata(options, parsedMetadata, {
+    const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
       [arubaEntityId]: "arubaid"
     });
+    // tslint:disable-next-line: no-any
+    const options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any } = {
+      idp: {
+        ...idpsMetadataOption
+      },
+      sp: {}
+    };
     expect(options).toEqual({
       idp: {
         arubaid: expectedMetadata
@@ -291,14 +293,16 @@ describe("spidStrategy#remapIpdMetadata", () => {
 
   it("remap invalid metadata xml file", async () => {
     const parsedMetadata = await parseIdpMetadata(invalidMockMetadata);
-    // tslint:disable-next-line: no-any
-    const options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any } = {
-      idp: {},
-      sp: {}
-    };
-    remapIpdMetadata(options, parsedMetadata, {
+    const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
       [arubaEntityId]: "arubaid"
     });
+    // tslint:disable-next-line: no-any
+    const options: { idp: { [key: string]: IDPEntityDescriptor }; sp: any } = {
+      idp: {
+        ...idpsMetadataOption
+      },
+      sp: {}
+    };
     expect(options).toEqual(options);
   });
 });
