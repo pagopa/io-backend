@@ -1,3 +1,4 @@
+import { Express } from "express";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
@@ -35,15 +36,18 @@ const aValidNotification = {
     service_name: "test service"
   }
 };
-
-const app = newApp(
-  NodeEnvironmentEnum.PRODUCTION,
-  aValidCIDR,
-  aValidCIDR,
-  "",
-  "/api/v1",
-  "/pagopa/api/v1"
-);
+// tslint:disable-next-line:no-let
+let app: Express;
+beforeAll(async () => {
+  app = await newApp(
+    NodeEnvironmentEnum.PRODUCTION,
+    aValidCIDR,
+    aValidCIDR,
+    "",
+    "/api/v1",
+    "/pagopa/api/v1"
+  );
+});
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 describe("Test redirect to HTTPS", () => {
