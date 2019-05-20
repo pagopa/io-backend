@@ -62,6 +62,14 @@ export async function fetchIdpMetadata(
   return await idpMetadataRequest.text();
 }
 
+export interface IDPOption {
+  // tslint:disable-next-line: readonly-array
+  cert: string[];
+  entityID: string;
+  entryPoint: string;
+  logoutUrl: string;
+}
+
 /**
  * Map provided idpMetadata in an object with idp key whitelisted in ipdIds.
  * Mapping is based on entityID property
@@ -73,13 +81,17 @@ export const mapIpdMetadata = (
   idpMetadata.reduce(
     (prev, idp) => {
       const idpKey = idpIds[idp.entityID];
+      const idpOption = {
+        ...idp,
+        cert: idp.cert.toArray()
+      };
       if (idpKey) {
-        return { ...prev, [idpKey]: idp };
+        return { ...prev, [idpKey]: idpOption };
       }
       log.warn(
         `Unsupported SPID idp from metadata repository [${idp.entityID}]`
       );
       return prev;
     },
-    {} as { [key: string]: IDPEntityDescriptor | undefined }
+    {} as { [key: string]: IDPOption | undefined }
   );
