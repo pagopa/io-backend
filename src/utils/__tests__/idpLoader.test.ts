@@ -1,7 +1,6 @@
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import { IDPEntityDescriptor } from "src/types/IDPEntityDescriptor";
-import { mapIpdMetadata } from "../../strategies/spidStrategy";
-import { parseIdpMetadata } from "../idpLoader";
+import { mapIpdMetadata, parseIdpMetadata } from "../idpLoader";
 
 const mockMetadata = `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntitiesDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_34aadd11-e3d9-4311-a410-4039de088446" Name="https://idps.spid.gov.it"><ds:Signature>
@@ -270,7 +269,7 @@ describe("idpLoader#parseIdpMetadata", () => {
   });
 });
 
-describe("spidStrategy#remapIpdMetadata", () => {
+describe("idpLoader#remapIpdMetadata", () => {
   it("remap valid metadata xml file", async () => {
     const parsedMetadata = parseIdpMetadata(mockMetadata);
     const idpsMetadataOption = mapIpdMetadata(parsedMetadata, {
@@ -310,5 +309,54 @@ describe("spidStrategy#remapIpdMetadata", () => {
       sp: {}
     };
     expect(options).toEqual(options);
+  });
+});
+
+describe("spidStrategy#loadFromRemote", () => {
+  const IDPMetadataUrl =
+    process.env.IDP_METADATA_URL ||
+    "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
+  const mockFetchIdpMetadata = jest.fn(
+    (url: string) =>
+      url ? Promise.resolve(mockMetadata) : Promise.reject(null)
+  );
+  const mockWarn = jest.fn();
+
+  beforeEach(() => {
+    jest.mock("../idpLoader", () => {
+      return {
+        fetchIdpMetadata: mockFetchIdpMetadata,
+        mapIpdMetadata,
+        parseIdpMetadata
+      };
+    });
+
+    jest.mock("../logger", () => {
+      return {
+        log: {
+          info: jest.fn(),
+          warn: mockWarn
+        }
+      };
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  it("load idp options with missing idps configurations", async () => {
+    const loadFromRemote = require("../../strategies/spidStrategy")
+      .loadFromRemote;
+    const idpOptions = await loadFromRemote(IDPMetadataUrl);
+    expect(mockFetchIdpMetadata).toHaveBeenCalledWith(IDPMetadataUrl);
+    expect(mockWarn).toHaveBeenCalledWith(
+      "Missing SPID metadata on [%s]",
+      IDPMetadataUrl
+    );
+    expect(idpOptions).toEqual({
+      arubaid: expectedMetadata
+    });
   });
 });

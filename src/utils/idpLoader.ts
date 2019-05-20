@@ -61,3 +61,30 @@ export async function fetchIdpMetadata(
   const idpMetadataRequest = await nodeFetch(idpMetadataUrl);
   return await idpMetadataRequest.text();
 }
+
+/**
+ * Map provided idpMetadata in an object with idp key whitelisted in ipdIds.
+ * Mapping is based on entityID property
+ */
+export const mapIpdMetadata = (
+  idpMetadata: ReadonlyArray<IDPEntityDescriptor>,
+  idpIds: { [key: string]: string | undefined }
+) =>
+  idpMetadata.reduce(
+    (prev, idp) => {
+      const idpKey = idpIds[idp.entityID];
+      if (idpKey) {
+        return { ...prev, [idpKey]: idp };
+      }
+      log.warn(
+        `Unsupported SPID idp from metadata repository [${idp.entityID}]`
+      );
+      return prev;
+    },
+    {} as { [key: string]: IDPEntityDescriptor | undefined }
+  );
+
+// tslint:disable: no-commented-code
+// const idpLoader = { fetchIdpMetadata, mapIpdMetadata, parseIdpMetadata };
+
+// export default idpLoader;
