@@ -83,8 +83,3 @@ export const mapIpdMetadata = (
     },
     {} as { [key: string]: IDPEntityDescriptor | undefined }
   );
-
-// tslint:disable: no-commented-code
-// const idpLoader = { fetchIdpMetadata, mapIpdMetadata, parseIdpMetadata };
-
-// export default idpLoader;

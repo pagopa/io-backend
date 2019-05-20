@@ -316,10 +316,12 @@ describe("spidStrategy#loadFromRemote", () => {
   const IDPMetadataUrl =
     process.env.IDP_METADATA_URL ||
     "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
+
   const mockFetchIdpMetadata = jest.fn(
     (url: string) =>
       url ? Promise.resolve(mockMetadata) : Promise.reject(null)
   );
+
   const mockWarn = jest.fn();
 
   beforeEach(() => {
@@ -330,7 +332,6 @@ describe("spidStrategy#loadFromRemote", () => {
         parseIdpMetadata
       };
     });
-
     jest.mock("../logger", () => {
       return {
         log: {
