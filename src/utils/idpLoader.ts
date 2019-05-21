@@ -29,24 +29,44 @@ export function parseIdpMetadata(
         }
         return "";
       });
-      const elementInfoOrErrors = IDPEntityDescriptor.decode({
-        cert: certs,
-        entityID: element.getAttribute("entityID"),
-        entryPoint: (element
-          .getElementsByTagName(SingleSignOnServiceTAG)
-          .item(0) as Element).getAttribute("Location"),
-        logoutUrl: (element
-          .getElementsByTagName(SingleLogoutServiceTAG)
-          .item(0) as Element).getAttribute("Location")
-      });
-      if (elementInfoOrErrors.isLeft()) {
+      try {
+        const elementInfoOrErrors = IDPEntityDescriptor.decode({
+          cert: certs,
+          entityID: element.getAttribute("entityID"),
+          entryPoint: Array.from(
+            element.getElementsByTagName(SingleSignOnServiceTAG)
+          )
+            .filter(
+              _ =>
+                _.getAttribute("Binding") ===
+                "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            )[0]
+            .getAttribute("Location"),
+          logoutUrl: Array.from(
+            element.getElementsByTagName(SingleLogoutServiceTAG)
+          )
+            .filter(
+              _ =>
+                _.getAttribute("Binding") ===
+                "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            )[0]
+            .getAttribute("Location")
+        });
+        if (elementInfoOrErrors.isLeft()) {
+          log.warn(
+            "Invalid md:EntityDescriptor. %s",
+            errorsToReadableMessages(elementInfoOrErrors.value).join(" / ")
+          );
+          return idps;
+        }
+        return [...idps, elementInfoOrErrors.value];
+      } catch {
         log.warn(
           "Invalid md:EntityDescriptor. %s",
-          errorsToReadableMessages(elementInfoOrErrors.value).join(" / ")
+          new Error("Unable to parse element info")
         );
         return idps;
       }
-      return [...idps, elementInfoOrErrors.value];
     },
     []
   );
