@@ -203,11 +203,11 @@ export function idpMetadataUpdater(
 
     container.cache.delete(SPID_STRATEGY);
 
-    const strategy = await container.resolve<Promise<passport.Strategy>>(
-      SPID_STRATEGY
-    );
     passport.unuse("spid");
-    passport.use("spid", strategy);
+    passport.use(
+      "spid",
+      await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
+    );
 
     const spidAuth = passport.authenticate("spid", { session: false });
 
