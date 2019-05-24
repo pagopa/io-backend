@@ -5,7 +5,8 @@ import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 
-import { newApp } from "../app";
+import { idpMetadataUpdater, newApp } from "../app";
+import { DEFAULT_IDP_METADATA_UPDATE_TIME } from "../container";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -40,7 +41,6 @@ const aValidNotification = {
 // tslint:disable:no-let
 let app: Express;
 let server: http.Server;
-
 beforeAll(async () => {
   app = await newApp(
     NodeEnvironmentEnum.PRODUCTION,
@@ -108,5 +108,27 @@ describe("Test the checkIP middleware", () => {
       .set(X_FORWARDED_PROTO_HEADER, "https")
       .set("X-Client-Ip", "192.0.0.0")
       .expect(401);
+  });
+});
+
+describe("Test refresh idp metadata", () => {
+  beforeAll(async () => {
+    jest.useFakeTimers();
+  });
+
+  it("app#idpMetadataUpdater", done => {
+    const listener = jest.fn();
+    idpMetadataUpdater(app, listener);
+    expect(setInterval).toHaveBeenCalledTimes(1);
+    expect(setInterval).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      DEFAULT_IDP_METADATA_UPDATE_TIME
+    );
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    setTimeout(() => {
+      expect(listener).toBeCalled();
+      done();
+    }, 1000);
   });
 });

@@ -194,17 +194,20 @@ export async function newApp(
   return app;
 }
 
-function idpMetadataUpdater(app: Express): NodeJS.Timer {
+export function idpMetadataUpdater(
+  app: Express,
+  listener?: () => void
+): NodeJS.Timer {
   return setInterval(async () => {
     log.info("Restart spid strategy initialization ...");
 
     container.cache.delete(SPID_STRATEGY);
 
-    passport.unuse("spid");
-    passport.use(
-      "spid",
-      await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
+    const strategy = await container.resolve<Promise<passport.Strategy>>(
+      SPID_STRATEGY
     );
+    passport.unuse("spid");
+    passport.use("spid", strategy);
 
     const spidAuth = passport.authenticate("spid", { session: false });
 
@@ -219,6 +222,9 @@ function idpMetadataUpdater(app: Express): NodeJS.Timer {
 
     app.get("/login", spidAuth);
     log.info("Spid strategy initialization complete.");
+    if (listener) {
+      listener();
+    }
   }, container.resolve<number>(IDP_REFRESH_TIME));
 }
 
