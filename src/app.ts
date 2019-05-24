@@ -107,13 +107,6 @@ export async function newApp(
   passport.use(container.resolve(BEARER_TOKEN_STRATEGY));
   // Add the strategy to authenticate webhook calls.
   passport.use(container.resolve(URL_TOKEN_STRATEGY));
-  // Add the strategy to authenticate the proxy to SPID.
-  passport.use(
-    "spid",
-    await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
-  );
-
-  const spidAuth = passport.authenticate("spid", { session: false });
 
   // Create and setup the Express app.
   const app = express();
@@ -180,8 +173,7 @@ export async function newApp(
   // Setup routes
   //
 
-  app.get("/login", spidAuth);
-
+  await registerLoginRoute(app);
   registerPublicRoutes(app);
   registerAuthenticationRoutes(app, authenticationBasePath);
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
@@ -194,6 +186,16 @@ export async function newApp(
   return app;
 }
 
+async function registerLoginRoute(app: Express): Promise<void> {
+  // Add the strategy to authenticate the proxy to SPID.
+  passport.use(
+    "spid",
+    await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
+  );
+  const spidAuth = passport.authenticate("spid", { session: false });
+  app.get("/login", spidAuth);
+}
+
 export function idpMetadataUpdater(
   app: Express,
   listener?: () => void
@@ -204,23 +206,22 @@ export function idpMetadataUpdater(
     container.cache.delete(SPID_STRATEGY);
 
     passport.unuse("spid");
-    passport.use(
-      "spid",
-      await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
-    );
 
-    const spidAuth = passport.authenticate("spid", { session: false });
-
-    // Override /login route with new updated spidAuth middleware
+    // Remove /login route from Express router stack
     // tslint:disable: no-any
     app._router.stack.reduce((prev: ReadonlyArray<any>, _: any) => {
-      if (_.route && _.route.path !== "/login") {
-        return [...prev, _];
+      if (
+        _.route &&
+        _.route.path === "/login" &&
+        _.route.methods &&
+        _.route.methods.get
+      ) {
+        return prev;
       }
-      return prev;
+      return [...prev, _];
     }, []);
 
-    app.get("/login", spidAuth);
+    await registerLoginRoute(app);
     log.info("Spid strategy initialization complete.");
     if (listener) {
       listener();
