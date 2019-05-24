@@ -217,7 +217,8 @@ container.register({
 
 // Set default idp metadata refresh time to 10 days
 export const DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS = 3600 * 24 * 10;
-const idpRefreshIntervalSeconds: number = process.env.IDP_METADATA_UPDATE_INTERVAL_SECONDS
+const idpRefreshIntervalSeconds: number = process.env
+  .IDP_METADATA_UPDATE_INTERVAL_SECONDS
   ? parseInt(process.env.IDP_METADATA_UPDATE_INTERVAL_SECONDS, 10)
   : DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS;
 export const IDP_REFRESH_INTERVAL_SECONDS = "idpRefreshIntervalSeconds";
