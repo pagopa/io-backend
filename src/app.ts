@@ -5,6 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
+  IDP_REFRESH_TIME,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
   PAGOPA_CONTROLLER,
@@ -107,7 +108,10 @@ export async function newApp(
   // Add the strategy to authenticate webhook calls.
   passport.use(container.resolve(URL_TOKEN_STRATEGY));
   // Add the strategy to authenticate the proxy to SPID.
-  passport.use(await container.resolve(SPID_STRATEGY));
+  passport.use(
+    "spid",
+    await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
+  );
 
   const spidAuth = passport.authenticate("spid", { session: false });
 
@@ -183,7 +187,39 @@ export async function newApp(
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
   registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
+  const timer = idpMetadataUpdater(app);
+  app.on("server:stop", () => {
+    clearInterval(timer);
+  });
   return app;
+}
+
+function idpMetadataUpdater(app: Express): NodeJS.Timer {
+  return setInterval(async () => {
+    log.info("Restart spid strategy initialization ...");
+
+    container.cache.delete(SPID_STRATEGY);
+
+    passport.unuse("spid");
+    passport.use(
+      "spid",
+      await container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY)
+    );
+
+    const spidAuth = passport.authenticate("spid", { session: false });
+
+    // Override /login route with new updated spidAuth middleware
+    // tslint:disable: no-any
+    app._router.stack.reduce((prev: ReadonlyArray<any>, _: any) => {
+      if (_.route && _.route.path !== "/login") {
+        return [...prev, _];
+      }
+      return prev;
+    }, []);
+
+    app.get("/login", spidAuth);
+    log.info("Spid strategy initialization complete.");
+  }, container.resolve<number>(IDP_REFRESH_TIME));
 }
 
 function registerPagoPARoutes(

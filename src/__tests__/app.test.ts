@@ -1,4 +1,5 @@
 import { Express } from "express";
+import * as http from "http";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
@@ -36,8 +37,10 @@ const aValidNotification = {
     service_name: "test service"
   }
 };
-// tslint:disable-next-line:no-let
+// tslint:disable:no-let
 let app: Express;
+let server: http.Server;
+
 beforeAll(async () => {
   app = await newApp(
     NodeEnvironmentEnum.PRODUCTION,
@@ -47,6 +50,15 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
+  server = http.createServer(app);
+  server.listen();
+});
+
+afterAll(done => {
+  server.close(() => {
+    app.emit("server:stop");
+    done();
+  });
 });
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
