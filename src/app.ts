@@ -181,7 +181,7 @@ export async function newApp(
 
   const timer = idpMetadataUpdater(
     app,
-    container.resolve<number>(IDP_REFRESH_INTERVAL_SECONDS)
+    container.resolve<number>(IDP_REFRESH_INTERVAL_SECONDS) * 1000
   );
   app.on("server:stop", () => {
     clearInterval(timer);

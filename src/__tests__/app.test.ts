@@ -120,13 +120,13 @@ describe("Test refresh idp metadata", () => {
     const onRefresh = jest.fn();
     idpMetadataUpdater(
       app,
-      DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS,
+      DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS * 1000,
       onRefresh
     );
     expect(setInterval).toHaveBeenCalledTimes(1);
     expect(setInterval).toHaveBeenLastCalledWith(
       expect.any(Function),
-      DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS
+      DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS * 1000
     );
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
