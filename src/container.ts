@@ -216,15 +216,18 @@ container.register({
 });
 
 // Set default idp metadata refresh time to 10 days
-export const DEFAULT_IDP_METADATA_UPDATE_TIME = 3600 * 24 * 10;
-const idpRefreshTime: number = process.env.IDP_METADATA_UPDATE_TIME
-  ? parseInt(process.env.IDP_METADATA_UPDATE_TIME, 10)
-  : DEFAULT_IDP_METADATA_UPDATE_TIME;
-export const IDP_REFRESH_TIME = "idpRefreshTime";
+export const DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS = 3600 * 24 * 10;
+const idpRefreshIntervalSeconds: number = process.env.IDP_METADATA_UPDATE_INTERVAL_SECONDS
+  ? parseInt(process.env.IDP_METADATA_UPDATE_INTERVAL_SECONDS, 10)
+  : DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS;
+export const IDP_REFRESH_INTERVAL_SECONDS = "idpRefreshIntervalSeconds";
 container.register({
-  [IDP_REFRESH_TIME]: awilix.asValue(idpRefreshTime)
+  [IDP_REFRESH_INTERVAL_SECONDS]: awilix.asValue(idpRefreshIntervalSeconds)
 });
-log.info("IDP metadata refresh time set to %s seconds", idpRefreshTime);
+log.info(
+  "IDP metadata refresh time set to %s seconds",
+  idpRefreshIntervalSeconds
+);
 
 // Register the bearerTokenStrategy.
 export const BEARER_TOKEN_STRATEGY = "bearerTokenStrategy";

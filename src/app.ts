@@ -5,7 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
-  IDP_REFRESH_TIME,
+  IDP_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
   PAGOPA_CONTROLLER,
@@ -179,7 +179,10 @@ export async function newApp(
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
   registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
-  const timer = idpMetadataUpdater(app);
+  const timer = idpMetadataUpdater(
+    app,
+    container.resolve<number>(IDP_REFRESH_INTERVAL_SECONDS)
+  );
   app.on("server:stop", () => {
     clearInterval(timer);
   });
@@ -196,37 +199,46 @@ async function registerLoginRoute(app: Express): Promise<void> {
   app.get("/login", spidAuth);
 }
 
+async function clearAndReloadSpidStrategy(
+  app: Express,
+  onRefresh?: () => void
+): Promise<void> {
+  log.info("Started Spid strategy re-initialization ...");
+
+  container.cache.delete(SPID_STRATEGY);
+
+  passport.unuse("spid");
+
+  // Remove /login route from Express router stack
+  // tslint:disable: no-any
+  // tslint:disable-next-line: no-object-mutation
+  app._router.stack = app._router.stack.filter((_: any) => {
+    if (
+      _.route &&
+      _.route.path === "/login" &&
+      _.route.methods &&
+      _.route.methods.get
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  await registerLoginRoute(app);
+  log.info("Spid strategy re-initialization complete.");
+  if (onRefresh) {
+    onRefresh();
+  }
+}
+
 export function idpMetadataUpdater(
   app: Express,
-  listener?: () => void
+  refreshTime: number,
+  onRefresh?: () => void
 ): NodeJS.Timer {
   return setInterval(async () => {
-    log.info("Restart spid strategy initialization ...");
-
-    container.cache.delete(SPID_STRATEGY);
-
-    passport.unuse("spid");
-
-    // Remove /login route from Express router stack
-    // tslint:disable: no-any
-    app._router.stack.reduce((prev: ReadonlyArray<any>, _: any) => {
-      if (
-        _.route &&
-        _.route.path === "/login" &&
-        _.route.methods &&
-        _.route.methods.get
-      ) {
-        return prev;
-      }
-      return [...prev, _];
-    }, []);
-
-    await registerLoginRoute(app);
-    log.info("Spid strategy initialization complete.");
-    if (listener) {
-      listener();
-    }
-  }, container.resolve<number>(IDP_REFRESH_TIME));
+    await clearAndReloadSpidStrategy(app, onRefresh);
+  }, refreshTime);
 }
 
 function registerPagoPARoutes(
