@@ -5,7 +5,7 @@ import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 
-import { idpMetadataUpdater, newApp } from "../app";
+import { newApp, startIdpMetadataUpdater } from "../app";
 import { DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS } from "../container";
 
 jest.mock("../services/redisSessionStorage");
@@ -118,7 +118,7 @@ describe("Test refresh idp metadata", () => {
 
   it("app#idpMetadataUpdater", done => {
     const onRefresh = jest.fn();
-    idpMetadataUpdater(
+    startIdpMetadataUpdater(
       app,
       DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS * 1000,
       onRefresh

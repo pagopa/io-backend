@@ -181,7 +181,7 @@ export async function newApp(
 
   const refreshTimeMilliseconds =
     container.resolve<number>(IDP_REFRESH_INTERVAL_SECONDS) * 1000;
-  const idpMetadataUpdateTimer = idpMetadataUpdater(
+  const idpMetadataUpdateTimer = startIdpMetadataUpdater(
     app,
     refreshTimeMilliseconds
   );
@@ -221,17 +221,11 @@ async function clearAndReloadSpidStrategy(
   passport.unuse("spid");
 
   // tslint:disable-next-line: no-any
-  const isLoginRoute = (route: any) => {
-    if (
-      route.route &&
-      route.route.path === "/login" &&
-      route.route.methods &&
-      route.route.methods.get
-    ) {
-      return true;
-    }
-    return false;
-  };
+  const isLoginRoute = (route: any) =>
+    route.route &&
+    route.route.path === "/login" &&
+    route.route.methods &&
+    route.route.methods.get;
 
   // Remove /login route from Express router stack
   // tslint:disable-next-line: no-object-mutation
@@ -247,7 +241,7 @@ async function clearAndReloadSpidStrategy(
 /**
  * Sets an interval to reload SpidStrategy
  */
-export function idpMetadataUpdater(
+export function startIdpMetadataUpdater(
   app: Express,
   refreshTimeMilliseconds: number,
   onRefresh?: () => void
