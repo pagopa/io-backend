@@ -145,8 +145,13 @@ export async function newApp(
       .getOrElse("")
   );
 
+  const obfuscate = (originalUrl: string) =>
+    originalUrl.replace(/([?&]token=)[^&]*(&?.*)/, "$1REDACTED$2");
+
+  morgan.token("obfuscated_url", (req, _) => obfuscate(req.originalUrl));
+
   const loggerFormat =
-    ":date[iso] - :method :url :status - :fiscal_code_short - :response-time ms - :detail";
+    ":date[iso] - :method :obfuscated_url :status - :fiscal_code_short - :response-time ms - :detail";
 
   app.use(morgan(loggerFormat));
 
