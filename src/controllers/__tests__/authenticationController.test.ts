@@ -187,17 +187,6 @@ const redisSessionStorage = new RedisSessionStorage(
   tokenDurationSecs
 );
 
-const spidStrategyInstance = spidStrategy(
-  samlKey,
-  samlCallbackUrl,
-  samlIssuer,
-  samlAcceptedClockSkewMs,
-  samlAttributeConsumingServiceIndex,
-  spidAutologin,
-  spidTestEnvUrl
-);
-spidStrategyInstance.logout = jest.fn();
-
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   const url = "/profile.html?token={token}".replace("{token}", token);
 
@@ -206,13 +195,31 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   };
 };
 
-const controller = new AuthenticationController(
-  redisSessionStorage,
-  samlCert,
-  spidStrategyInstance,
-  tokenService,
-  getClientProfileRedirectionUrl
-);
+let controller: AuthenticationController;
+beforeAll(async () => {
+  const IDPMetadataUrl =
+    process.env.IDP_METADATA_URL ||
+    "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
+  const spidStrategyInstance = await spidStrategy(
+    samlKey,
+    samlCallbackUrl,
+    samlIssuer,
+    samlAcceptedClockSkewMs,
+    samlAttributeConsumingServiceIndex,
+    spidAutologin,
+    spidTestEnvUrl,
+    IDPMetadataUrl
+  );
+  spidStrategyInstance.logout = jest.fn();
+
+  controller = new AuthenticationController(
+    redisSessionStorage,
+    samlCert,
+    spidStrategyInstance,
+    tokenService,
+    getClientProfileRedirectionUrl
+  );
+});
 
 let clock: any;
 beforeEach(() => {
