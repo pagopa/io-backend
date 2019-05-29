@@ -29,7 +29,6 @@ import {
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ProfileService {
-  private msgTooManyRequests: string = "Too many requests";
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
@@ -74,7 +73,7 @@ export default class ProfileService {
 
         // The user has sent too many requests in a given amount of time ("rate limiting").
         if (response.status === 429) {
-          return ResponseErrorTooManyRequests(this.msgTooManyRequests);
+          return ResponseErrorTooManyRequests();
         }
 
         return unhandledResponseStatus(response.status);
@@ -118,7 +117,7 @@ export default class ProfileService {
                 : response.status === 404
                   ? ResponseErrorNotFound("Not found", "User not found")
                   : response.status === 429
-                    ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
+                    ? ResponseErrorTooManyRequests()
                     : unhandledResponseStatus(response.status)
           );
         })

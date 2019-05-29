@@ -26,8 +26,6 @@ import {
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class MessagesService {
-  private msgTooManyRequests: string = "Too many requests";
-
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**
@@ -56,7 +54,7 @@ export default class MessagesService {
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "User not found")
               : response.status === 429
-                ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
+                ? ResponseErrorTooManyRequests()
                 : unhandledResponseStatus(response.status)
       );
     });
@@ -94,7 +92,7 @@ export default class MessagesService {
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "Message not found")
               : response.status === 429
-                ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
+                ? ResponseErrorTooManyRequests()
                 : unhandledResponseStatus(response.status)
       );
     });
@@ -129,7 +127,7 @@ export default class MessagesService {
             : response.status === 404
               ? ResponseErrorNotFound("Not found", "Service not found")
               : response.status === 429
-                ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
+                ? ResponseErrorTooManyRequests()
                 : unhandledResponseStatus(response.status)
       );
     });
@@ -159,7 +157,7 @@ export default class MessagesService {
                 ResponseSuccessJson
               )
             : response.status === 429
-              ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
+              ? ResponseErrorTooManyRequests()
               : unhandledResponseStatus(response.status)
       );
     });
@@ -183,7 +181,7 @@ export default class MessagesService {
                 ResponseSuccessJson
               )
             : response.status === 429
-              ? ResponseErrorTooManyRequests(this.msgTooManyRequests)
+              ? ResponseErrorTooManyRequests()
               : unhandledResponseStatus(response.status)
       );
     });
