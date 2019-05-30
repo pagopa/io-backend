@@ -90,7 +90,7 @@
     "@types/xmldom": "^0.1.29",
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
-    "italia-ts-commons": "git+https://github.com/teamdigitale/io-ts-commons.git#157896066-too-many-request",
+    "italia-ts-commons": "^5.1.4",
     "italia-tslint-rules": "^1.1.3",
     "italia-utils": "^4.0.0",
     "jest": "^23.6.0",
