@@ -5,6 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
+  IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
   PAGOPA_CONTROLLER,
@@ -32,12 +33,12 @@ import ServicesController from "./controllers/servicesController";
 
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
+import { not } from "fp-ts/lib/function";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import AuthenticationController from "./controllers/authenticationController";
@@ -106,10 +107,6 @@ export async function newApp(
   passport.use(container.resolve(BEARER_TOKEN_STRATEGY));
   // Add the strategy to authenticate webhook calls.
   passport.use(container.resolve(URL_TOKEN_STRATEGY));
-  // Add the strategy to authenticate the proxy to SPID.
-  passport.use(await container.resolve(SPID_STRATEGY));
-
-  const spidAuth = passport.authenticate("spid", { session: false });
 
   // Create and setup the Express app.
   const app = express();
@@ -182,14 +179,86 @@ export async function newApp(
   // Setup routes
   //
 
-  app.get("/login", spidAuth);
-
+  await registerLoginRoute(app);
   registerPublicRoutes(app);
   registerAuthenticationRoutes(app, authenticationBasePath);
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
   registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
+  const idpMetadataRefreshIntervalMillis =
+    container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
+  const idpMetadataRefreshTimer = startIdpMetadataUpdater(
+    app,
+    idpMetadataRefreshIntervalMillis
+  );
+  app.on("server:stop", () => {
+    clearInterval(idpMetadataRefreshTimer);
+  });
   return app;
+}
+
+/**
+ * Initializes SpidStrategy for passport and setup /login route.
+ */
+async function registerLoginRoute(app: Express): Promise<void> {
+  // Add the strategy to authenticate the proxy to SPID.
+  const spidStrategy = await container.resolve<Promise<passport.Strategy>>(
+    SPID_STRATEGY
+  );
+  passport.use("spid", spidStrategy);
+  const spidAuth = passport.authenticate("spid", { session: false });
+  app.get("/login", spidAuth);
+}
+
+/**
+ * Clears SPID_STRATEGY cache from awilix.
+ * Then /login route will be overridden with an updated SPID_STRATEGY.
+ */
+async function clearAndReloadSpidStrategy(
+  app: Express,
+  onRefresh?: () => void
+): Promise<void> {
+  log.info("Started Spid strategy re-initialization ...");
+
+  // Clear cache for SPID_STRATEGY definition (singleton lifetime) on awilix.
+  // The next resolution of SPID_STRATEGY will reinstantiate the registered class.
+  container.cache.delete(SPID_STRATEGY);
+
+  passport.unuse("spid");
+
+  // tslint:disable-next-line: no-any
+  const isLoginRoute = (route: any) =>
+    route.route &&
+    route.route.path === "/login" &&
+    route.route.methods &&
+    route.route.methods.get;
+
+  // Remove /login route from Express router stack
+  // tslint:disable-next-line: no-object-mutation
+  app._router.stack = app._router.stack.filter(not(isLoginRoute));
+
+  await registerLoginRoute(app);
+  log.info("Spid strategy re-initialization complete.");
+  if (onRefresh) {
+    onRefresh();
+  }
+}
+
+/**
+ * Sets an interval to reload SpidStrategy
+ */
+export function startIdpMetadataUpdater(
+  app: Express,
+  refreshTimeMilliseconds: number,
+  onRefresh?: () => void
+): NodeJS.Timer {
+  return setInterval(
+    () =>
+      clearAndReloadSpidStrategy(app, onRefresh).catch(err => {
+        log.error("Error on clearAndReloadSpidStrategy: %s", err);
+      }),
+    refreshTimeMilliseconds
+  );
 }
 
 function registerPagoPARoutes(
