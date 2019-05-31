@@ -1,10 +1,12 @@
 import { Express } from "express";
+import * as http from "http";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 
-import { newApp } from "../app";
+import { newApp, startIdpMetadataUpdater } from "../app";
+import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../container";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -36,8 +38,9 @@ const aValidNotification = {
     service_name: "test service"
   }
 };
-// tslint:disable-next-line:no-let
+// tslint:disable:no-let
 let app: Express;
+let server: http.Server;
 beforeAll(async () => {
   app = await newApp(
     NodeEnvironmentEnum.PRODUCTION,
@@ -47,6 +50,15 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
+  server = http.createServer(app);
+  server.listen();
+});
+
+afterAll(done => {
+  server.close(() => {
+    app.emit("server:stop");
+    done();
+  });
 });
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
@@ -96,5 +108,31 @@ describe("Test the checkIP middleware", () => {
       .set(X_FORWARDED_PROTO_HEADER, "https")
       .set("X-Client-Ip", "192.0.0.0")
       .expect(401);
+  });
+});
+
+describe("Test refresh idp metadata", () => {
+  beforeAll(async () => {
+    jest.useFakeTimers();
+  });
+
+  it("app#idpMetadataUpdater", done => {
+    const onRefresh = jest.fn();
+    startIdpMetadataUpdater(
+      app,
+      DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
+      onRefresh
+    );
+    expect(setInterval).toHaveBeenCalledTimes(1);
+    expect(setInterval).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
+    );
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    setTimeout(() => {
+      expect(onRefresh).toBeCalled();
+      done();
+    }, 1000);
   });
 });
