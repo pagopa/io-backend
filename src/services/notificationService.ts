@@ -110,15 +110,11 @@ export default class NotificationService {
               : GCMTemplate
         }
       };
-
       return new Promise<
         IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
       >(resolve => {
         notificationHubService.createOrUpdateInstallation(
-          // This any is needed because the `installation` argument type of `createOrUpdateInstallation` method is wrong.
-          // @see https://www.pivotaltracker.com/story/show/157122753
-          // tslint:disable-next-line:no-any
-          (azureInstallation as any) as string,
+          { ...azureInstallation, tags: [...azureInstallation.tags] },
           (error, _) =>
             resolve(
               error !== null
