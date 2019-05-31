@@ -36,7 +36,7 @@ export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
     private readonly samlCert: string,
-    private readonly spidStrategy: SpidStrategy,
+    private readonly spidStrategy: Promise<SpidStrategy>,
     private readonly tokenService: TokenService,
     private readonly getClientProfileRedirectionUrl: (
       token: string
@@ -137,7 +137,8 @@ export default class AuthenticationController {
    * The metadata for this Service Provider.
    */
   public async metadata(): Promise<IResponseSuccessXml<string>> {
-    const metadata = this.spidStrategy.generateServiceProviderMetadata(
+    const spidStrategy = await this.spidStrategy;
+    const metadata = spidStrategy.generateServiceProviderMetadata(
       this.samlCert
     );
 
