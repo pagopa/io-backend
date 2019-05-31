@@ -5,7 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
-  IDP_REFRESH_INTERVAL_SECONDS,
+  IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
   PAGOPA_CONTROLLER,
@@ -185,14 +185,14 @@ export async function newApp(
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
   registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
-  const refreshTimeMilliseconds =
-    container.resolve<number>(IDP_REFRESH_INTERVAL_SECONDS) * 1000;
-  const idpMetadataUpdateTimer = startIdpMetadataUpdater(
+  const idpMetadataRefreshIntervalMillis =
+    container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
+  const idpMetadataRefreshTimer = startIdpMetadataUpdater(
     app,
-    refreshTimeMilliseconds
+    idpMetadataRefreshIntervalMillis
   );
   app.on("server:stop", () => {
-    clearInterval(idpMetadataUpdateTimer);
+    clearInterval(idpMetadataRefreshTimer);
   });
   return app;
 }

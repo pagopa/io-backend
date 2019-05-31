@@ -6,7 +6,7 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 
 import { newApp, startIdpMetadataUpdater } from "../app";
-import { DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS } from "../container";
+import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../container";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -120,13 +120,13 @@ describe("Test refresh idp metadata", () => {
     const onRefresh = jest.fn();
     startIdpMetadataUpdater(
       app,
-      DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS * 1000,
+      DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
       onRefresh
     );
     expect(setInterval).toHaveBeenCalledTimes(1);
     expect(setInterval).toHaveBeenLastCalledWith(
       expect.any(Function),
-      DEFAULT_IDP_METADATA_UPDATE_INTERVAL_SECONDS * 1000
+      DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
     );
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
