@@ -63,7 +63,7 @@ newApp(
       development: process.env.NODE_ENV === "development",
       signals: "SIGINT SIGTERM",
       timeout: 30000,
-      finally(): void {
+      finally: () => log.info("Server gracefully shutting down.....")
         log.info("Server gracefully shutting down.....");
       }
     });
