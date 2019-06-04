@@ -60,10 +60,10 @@ newApp(
     });
 
     gracefulShutdown(server, {
+      development: false,
       signals: "SIGINT SIGTERM",
       timeout: 30000,
-      development: false,
-      finally() {
+      finally(): void {
         log.info("Server gracefully shutting down.....");
       }
     });
