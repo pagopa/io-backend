@@ -26,10 +26,19 @@ const authenticationBasePath = container.resolve<string>(
 const APIBasePath = container.resolve<string>("APIBasePath");
 const PagoPABasePath = container.resolve<string>("PagoPABasePath");
 
+// Set default for graceful-shutdown
+const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
+const DEFAULT_SHUTDOWN_TIMEOUT = 30000;
+
+const shutdownSignals: string =
+  process.env.SHUTDOWN_SIGNALS || DEFAULT_SHUTDOWN_SIGNALS;
+
+const shutdownTimeout: number = process.env.TOKEN_DURATION_IN_SECONDS
+  ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
+  : DEFAULT_SHUTDOWN_TIMEOUT;
+
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
-
-const gracefulShutdown = httpGracefulShutdown;
 
 newApp(
   env,
@@ -59,13 +68,11 @@ newApp(
       log.info("HTTP server close.");
     });
 
-    gracefulShutdown(server, {
+    httpGracefulShutdown(server, {
       development: process.env.NODE_ENV === "development",
-      signals: "SIGINT SIGTERM",
-      timeout: 30000,
-      finally: () => log.info("Server gracefully shutting down.....")
-        log.info("Server gracefully shutting down.....");
-      }
+      finally: () => log.info("Server gracefully shutting down....."),
+      signals: shutdownSignals,
+      timeout: shutdownTimeout
     });
   })
   .catch(err => {
