@@ -60,7 +60,7 @@ newApp(
     });
 
     gracefulShutdown(server, {
-      development: false,
+      development: process.env.NODE_ENV === "development",
       signals: "SIGINT SIGTERM",
       timeout: 30000,
       finally(): void {
