@@ -3,6 +3,7 @@
  */
 
 import * as http from "http";
+import * as httpGracefulShutdown from "http-graceful-shutdown";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
@@ -27,6 +28,9 @@ const PagoPABasePath = container.resolve<string>("PagoPABasePath");
 
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
+
+const gracefulShutdown = httpGracefulShutdown;
+
 newApp(
   env,
   allowNotifyIPSourceRange,
@@ -53,6 +57,15 @@ newApp(
     server.on("close", () => {
       app.emit("server:stop");
       log.info("HTTP server close.");
+    });
+
+    gracefulShutdown(server, {
+      signals: "SIGINT SIGTERM",
+      timeout: 30000,
+      development: false,
+      finally() {
+        log.info("Server gracefully shutting down.....");
+      }
     });
   })
   .catch(err => {

@@ -32,4 +32,4 @@ COPY --from=builder /usr/src/app/node_modules /usr/src/app/node_modules
 
 EXPOSE 80
 
-CMD ["yarn", "start"]
+CMD ["node", "src/server.js"]
