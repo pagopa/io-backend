@@ -281,7 +281,7 @@ describe("MessageService#getServicesByRecpient", () => {
     });
   });
 
-  it("returns an error if the getServicesByRecpient API returns an 429 HTTP error from the upstream API", () => {
+  it("returns an error if the getServicesByRecpient API returns an 429 HTTP error from the upstream API", async () => {
     mockGetServicesByRecipient.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );

@@ -135,14 +135,9 @@ describe("ProfileService#getProfile", () => {
 
     const service = new ProfileService(api);
 
-    try {
-      await service.getProfile(mockedUser);
-    } catch (e) {
-      expect(mockGetProfile).toHaveBeenCalledWith({
-        fiscalCode: mockedUser.fiscal_code
-      });
-      expect(e.kind).toEqual("IResponseErrorTooManyRequests");
-    }
+    const res = await service.getProfile(mockedUser);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 
   it("returns a default user profile if the response from the API is not found", async () => {
@@ -216,16 +211,14 @@ describe("ProfileService#upsertProfile", () => {
   });
 
   it("fails to create-update a user profile returns an 429 HTTP error from the upstream API", async () => {
-    mockGetProfile.mockImplementation(() =>
+    mockCreateOrUpdateProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );
 
     const service = new ProfileService(api);
 
-    try {
-      await service.upsertProfile(mockedUser, upsertRequest);
-    } catch (e) {
-      expect(e.kind).toEqual("IResponseErrorTooManyRequests");
-    }
+    const res = await service.upsertProfile(mockedUser, upsertRequest);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 });
