@@ -56,10 +56,12 @@ jest.mock("../../services/tokenService", () => {
 const mockSet = jest.fn();
 const mockGet = jest.fn();
 const mockDel = jest.fn();
+const mockKeys = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
 mockRedisClient.del = mockDel;
+mockRedisClient.keys = mockKeys;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
@@ -183,10 +185,13 @@ describe("RedisSessionStorage#set", () => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
         callback(walletSetErr, walletSetSuccess);
       });
+      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        callback(undefined, "OK");
+      });
 
       const response = await sessionStorage.set(aValidUser);
 
-      expect(mockSet).toHaveBeenCalledTimes(2);
+      expect(mockSet).toHaveBeenCalledTimes(3);
       expect(mockSet.mock.calls[0][0]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
@@ -195,7 +200,11 @@ describe("RedisSessionStorage#set", () => {
         `WALLET-${aValidUser.wallet_token}`
       );
       expect(mockSet.mock.calls[1][1]).toBe(aValidUser.session_token);
-
+      expect(mockSet.mock.calls[2][0]).toBe(
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      );
+      expect(mockSet.mock.calls[2][1]).toBeDefined();
+      expect(JSON.parse(mockSet.mock.calls[2][1])).toHaveProperty("timestamp");
       expect(response).toEqual(expected);
     }
   );
@@ -206,13 +215,9 @@ describe("RedisSessionStorage#get", () => {
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, null);
     });
-
     const response = await sessionStorage.getBySessionToken(
       "inexistent token" as SessionToken
     );
-
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet.mock.calls[0][0]).toBe(`SESSION-${"inexistent token"}`);
     expect(response).toEqual(left(new Error("Session not found")));
   });
 
@@ -236,15 +241,11 @@ describe("RedisSessionStorage#get", () => {
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, null);
     });
-
     const response = await sessionStorage.getBySessionToken(
       aValidUser.session_token
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet.mock.calls[0][0]).toBe(
-      `SESSION-${aValidUser.session_token}`
-    );
     expect(response).toEqual(left(new Error("Session not found")));
   });
 
@@ -358,6 +359,10 @@ describe("RedisSessionStorage#del", () => {
       expected: Error
     ) => {
       mockDel.mockImplementationOnce((_, callback) => {
+        callback(undefined, 1);
+      });
+
+      mockDel.mockImplementationOnce((_, callback) => {
         callback(sessionDelErr, sessionDelSuccess);
       });
 
@@ -365,16 +370,29 @@ describe("RedisSessionStorage#del", () => {
         callback(walletDelErr, walletDelSuccess);
       });
 
+      mockKeys.mockImplementation((_, callback) => {
+        callback(undefined, [
+          `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`,
+          `SESSION-${aValidUser.session_token}`
+        ]);
+      });
+
       const response = await sessionStorage.del(
         aValidUser.session_token,
         aValidUser.wallet_token
       );
 
-      expect(mockDel).toHaveBeenCalledTimes(2);
+      expect(mockKeys.mock.calls[0][0]).toBe(
+        `*SESSION-${aValidUser.session_token}`
+      );
+      expect(mockDel).toHaveBeenCalledTimes(3);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `SESSION-${aValidUser.session_token}`
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
       );
       expect(mockDel.mock.calls[1][0]).toBe(
+        `SESSION-${aValidUser.session_token}`
+      );
+      expect(mockDel.mock.calls[2][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
 
