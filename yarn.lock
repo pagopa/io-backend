@@ -44,9 +44,10 @@
     node-fetch "^2.1.1"
     url-template "^2.0.8"
 
-"@types/azure-sb@^0.0.32":
-  version "0.0.32"
-  resolved "https://registry.yarnpkg.com/@types/azure-sb/-/azure-sb-0.0.32.tgz#4977ba6ac8dce07c9e1c4905e5423d39c50e8d3a"
+"@types/azure-sb@^0.0.35":
+  version "0.0.35"
+  resolved "https://registry.yarnpkg.com/@types/azure-sb/-/azure-sb-0.0.35.tgz#2eae5c2fcc1d29054ef8eaa4c4e2f0e6a74eb5b4"
+  integrity sha512-l6cza08uTKc94PZJDFv0CeJZYq4dUL84I/ivUcTY31pIzHeckR8abcaFZQ2Gdqyxiz5FonrcfVa4dv9aVmL7Og==
   dependencies:
     "@types/node" "*"
 
