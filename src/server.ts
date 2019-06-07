@@ -28,7 +28,7 @@ const PagoPABasePath = container.resolve<string>("PagoPABasePath");
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
-const DEFAULT_SHUTDOWN_TIMEOUT = 30000;
+const DEFAULT_SHUTDOWN_TIMEOUT_MILLIS = 30000;
 
 const shutdownSignals: string =
   process.env.SHUTDOWN_SIGNALS || DEFAULT_SHUTDOWN_SIGNALS;
