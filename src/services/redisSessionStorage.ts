@@ -6,19 +6,22 @@ import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
 import { isNumber, promisify } from "util";
+import { SessionInfo } from "../../generated/backend/SessionInfo";
+import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 
-const sessionKeyPrefix = `SESSION-`;
-const walletKeyPrefix = `WALLET-`;
-const userKeyPrefix = `USER-`;
+const sessionKeyPrefix = "SESSION-";
+const walletKeyPrefix = "WALLET-";
+const userKeyPrefix = "USER-";
+const sessionNotFoundMessage = "Session not found";
 
 export default class RedisSessionStorage implements ISessionStorage {
-  private sessionNotFoundMessage = "Session not found";
   private keysAsync = promisify(this.redisClient.keys).bind(this.redisClient);
   private setAsync = promisify(this.redisSetWrap).bind(this);
+  private getAsync = promisify(this.redisClient.get).bind(this.redisClient);
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
@@ -43,11 +46,15 @@ export default class RedisSessionStorage implements ISessionStorage {
         "EX",
         this.tokenDurationSecs
       );
+      const newSessionInfo: SessionInfo = {
+        sessionToken: user.session_token,
+        timestamp: new Date()
+      };
       const setUserTokenInfo = await this.setAsync(
         `${userKeyPrefix}${user.fiscal_code}-${sessionKeyPrefix}${
           user.session_token
         }`,
-        JSON.stringify({ timestamp: Date.now() }),
+        JSON.stringify(newSessionInfo),
         "EX",
         this.tokenDurationSecs
       );
@@ -118,10 +125,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   ): Promise<Either<Error, boolean>> {
     const keys = await this.keysAsync(`*${sessionKeyPrefix}${sessionToken}`);
     if (keys.length === 0) {
-      return this.integerReply(
-        new Error(this.sessionNotFoundMessage),
-        undefined
-      );
+      return this.integerReply(new Error(sessionNotFoundMessage), undefined);
     }
     const deleteSessionTokens = keys.map(key => {
       return new Promise<Either<Error, boolean>>(resolve => {
@@ -157,12 +161,50 @@ export default class RedisSessionStorage implements ISessionStorage {
     return right<Error, boolean>(true);
   }
 
+  public async listUserSessions(
+    user: User
+  ): Promise<Either<Error, SessionsList>> {
+    const keys = await this.keysAsync(`${userKeyPrefix}${user.fiscal_code}*`);
+    if (keys.length === 0) {
+      return left(new Error(sessionNotFoundMessage));
+    }
+    const userSessionTokens = keys.map(key => this.getAsync(key));
+    const userSessionTokensResult = await Promise.all(userSessionTokens);
+    return right(
+      userSessionTokensResult.reduce(
+        (prev: SessionsList, _) => {
+          try {
+            const sessionInfoPayload = JSON.parse(_);
+            const errorOrDeserializedSessionInfo = SessionInfo.decode(
+              sessionInfoPayload
+            );
+
+            if (isLeft(errorOrDeserializedSessionInfo)) {
+              log.warn(
+                "Unable to decode the session info: %s",
+                ReadableReporter.report(errorOrDeserializedSessionInfo)
+              );
+              return prev;
+            }
+            return {
+              sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
+            };
+          } catch (err) {
+            log.error("Unable to parse the session info json");
+            return prev;
+          }
+        },
+        { sessions: [] } as SessionsList
+      )
+    );
+  }
+
   private redisSetWrap(
     key: string,
     value: string,
     mode?: string,
     duration?: number,
-    cb?: redis.Callback<"OK" | undefined> | undefined
+    cb?: redis.Callback<"OK" | undefined>
   ): boolean {
     if (mode && duration) {
       return this.redisClient.set(key, value, mode, duration, cb);
@@ -183,9 +225,7 @@ export default class RedisSessionStorage implements ISessionStorage {
         }
 
         if (value === null) {
-          return resolve(
-            left<Error, User>(new Error(this.sessionNotFoundMessage))
-          );
+          return resolve(left<Error, User>(new Error(sessionNotFoundMessage)));
         }
 
         // Try-catch is needed because parse() may throw an exception.
@@ -243,22 +283,6 @@ export default class RedisSessionStorage implements ISessionStorage {
       });
     });
   }
-
-  /**
-   * Parse the a Redis single string reply.
-   *
-   * @see https://redis.io/topics/protocol#simple-string-reply.
-   */
-  /* private singleStringReply(
-    err: Error | null,
-    reply: "OK" | undefined
-  ): Either<Error, boolean> {
-    if (err) {
-      return left<Error, boolean>(err);
-    }
-
-    return right<Error, boolean>(reply === "OK");
-  }*/
 
   /**
    * Parse the a Redis integer reply.

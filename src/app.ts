@@ -436,6 +436,18 @@ function registerAPIRoutes(
   );
 
   app.get(
+    `${basePath}/sessions`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(sessionController.listSessions)(
+        req,
+        res,
+        sessionController
+      );
+    }
+  );
+
+  app.get(
     `${basePath}/payment-requests/:rptId`,
     bearerTokenAuth,
     (req: express.Request, res: express.Response) => {

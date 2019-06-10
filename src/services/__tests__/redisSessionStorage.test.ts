@@ -12,6 +12,7 @@ import { createMockRedis } from "mock-redis-client";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
@@ -399,4 +400,56 @@ describe("RedisSessionStorage#del", () => {
       expect(response).toEqual(expected);
     }
   );
+});
+
+describe("RedisSessionStorage#listUserSessions", () => {
+  it("should fail getting a session for an inexistent token", async () => {
+    mockKeys.mockImplementation((_, callback) => {
+      callback(undefined, []);
+    });
+    const response = await sessionStorage.listUserSessions(aValidUser);
+    expect(response).toEqual(left(new Error("Session not found")));
+  });
+
+  it("should skip a session with invalid value", async () => {
+    mockKeys.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      ]);
+    });
+
+    mockGet.mockImplementation((_, callback) => {
+      callback(undefined, JSON.stringify({ test: "Invalid SessionInfo" }));
+    });
+
+    const response = await sessionStorage.listUserSessions(aValidUser);
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet.mock.calls[0][0]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+    );
+    const expectedSessionsList = SessionsList.decode({ sessions: [] });
+    expect(response).toEqual(expectedSessionsList);
+  });
+
+  it("should skip a session with unparseble value", async () => {
+    mockKeys.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      ]);
+    });
+
+    mockGet.mockImplementation((_, callback) => {
+      callback(undefined, "Invalid JSON value");
+    });
+
+    const response = await sessionStorage.listUserSessions(aValidUser);
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet.mock.calls[0][0]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+    );
+    const expectedSessionsList = SessionsList.decode({ sessions: [] });
+    expect(response).toEqual(expectedSessionsList);
+  });
 });
