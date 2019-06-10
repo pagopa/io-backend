@@ -128,7 +128,7 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
-  it("fails to read user profile returns an 429 HTTP error from the upstream API", async () => {
+  it("returns an 429 HTTP error from getProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );
@@ -210,7 +210,7 @@ describe("ProfileService#upsertProfile", () => {
     }
   });
 
-  it("fails to create-update a user profile returns an 429 HTTP error from the upstream API", async () => {
+  it("returns an 429 HTTP error from upsertProfile upstream API", async () => {
     mockCreateOrUpdateProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );
