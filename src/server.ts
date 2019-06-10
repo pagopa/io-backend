@@ -2,6 +2,7 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
+import { Express } from "express-serve-static-core";
 import * as http from "http";
 import * as httpGracefulShutdown from "http-graceful-shutdown";
 import * as https from "https";
@@ -40,6 +41,25 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
 
+export const serverShutdown = (app: Express) => {
+  function cleanup(): Promise<void> {
+    return new Promise(resolve => {
+      log.info("Gracefully shutting down in progress");
+      server.close(() => {
+        app.emit("server:stop");
+      });
+      resolve();
+    });
+  }
+
+  httpGracefulShutdown(server, {
+    development: process.env.NODE_ENV === "development",
+    onShutdown: cleanup,
+    signals: shutdownSignals,
+    timeout: shutdownTimeout
+  });
+};
+
 newApp(
   env,
   allowNotifyIPSourceRange,
@@ -69,22 +89,7 @@ newApp(
       log.info("HTTP server close.");
     });
 
-    function cleanup(): Promise<void> {
-      return new Promise(resolve => {
-        log.info("Gracefully shutting down in progress");
-        server.close(() => {
-          app.emit("server:stop");
-        });
-        resolve();
-      });
-    }
-
-    httpGracefulShutdown(server, {
-      development: process.env.NODE_ENV === "development",
-      onShutdown: cleanup,
-      signals: shutdownSignals,
-      timeout: shutdownTimeout
-    });
+    serverShutdown(app);
   })
   .catch(err => {
     log.error("Error loading app: %s", err);
