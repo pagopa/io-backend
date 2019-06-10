@@ -33,9 +33,9 @@ const DEFAULT_SHUTDOWN_TIMEOUT_MILLIS = 30000;
 const shutdownSignals: string =
   process.env.SHUTDOWN_SIGNALS || DEFAULT_SHUTDOWN_SIGNALS;
 
-const shutdownTimeout: number = process.env.TOKEN_DURATION_IN_SECONDS
-  ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
-  : DEFAULT_SHUTDOWN_TIMEOUT;
+const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
+  ? parseInt(process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS, 10)
+  : DEFAULT_SHUTDOWN_TIMEOUT_MILLIS;
 
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
@@ -63,14 +63,25 @@ newApp(
         log.info("Listening on port %d", port);
       });
     }
+
     server.on("close", () => {
       app.emit("server:stop");
       log.info("HTTP server close.");
     });
 
+    function cleanup(): Promise<void> {
+      return new Promise(resolve => {
+        log.info("Gracefully shutting down in progress");
+        server.close(() => {
+          app.emit("server:stop");
+        });
+        resolve();
+      });
+    }
+
     httpGracefulShutdown(server, {
       development: process.env.NODE_ENV === "development",
-      finally: () => log.info("Server gracefully shutting down....."),
+      onShutdown: cleanup,
       signals: shutdownSignals,
       timeout: shutdownTimeout
     });
