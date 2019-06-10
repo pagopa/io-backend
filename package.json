@@ -101,7 +101,7 @@
     "prettier": "^1.14.3",
     "superagent": "^3.8.3",
     "supertest": "^3.3.0",
-    "swagger-cli": "^2.1.0",
+    "swagger-cli": "^2.2.1",
     "swagger-parser": "^5.0.5",
     "ts-jest": "^23.10.4",
     "ts-node": "^7.0.1",
