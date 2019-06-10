@@ -7,6 +7,7 @@ import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
@@ -30,6 +31,7 @@ export default class MessagesController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
   > => withUserFromRequest(req, this.messagesService.getMessagesByUser);
 
@@ -43,6 +45,7 @@ export default class MessagesController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<CreatedMessageWithContent>
   > =>
     withUserFromRequest(req, user =>
