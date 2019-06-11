@@ -28,9 +28,9 @@ export default class RedisSessionStorage implements ISessionStorage {
    * {@inheritDoc}
    */
   public async set(user: User): Promise<Either<Error, boolean>> {
-    // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-    // @see https://redis.io/commands/set
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
       this.redisClient.set(
         `${sessionKeyPrefix}${user.session_token}`,
         JSON.stringify(user),
@@ -41,6 +41,8 @@ export default class RedisSessionStorage implements ISessionStorage {
     });
 
     const setWalletToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
       this.redisClient.set(
         `${walletKeyPrefix}${user.wallet_token}`,
         user.session_token,
@@ -71,7 +73,14 @@ export default class RedisSessionStorage implements ISessionStorage {
       setUserTokenInfo
     ]);
     if (setPromisesResult.some(_ => isLeft(_) || !_.value)) {
-      return left<Error, boolean>(new Error("Error setting the token"));
+      return left<Error, boolean>(
+        new Error(
+          setPromisesResult
+            .filter(_ => isLeft(_) || !_.value)
+            .map(_ => (isLeft(_) ? _.value.message : "Error setting the token"))
+            .join("|")
+        )
+      );
     }
     return right<Error, boolean>(true);
   }
@@ -123,21 +132,19 @@ export default class RedisSessionStorage implements ISessionStorage {
       resolve => {
         this.redisClient.keys(
           `*${sessionKeyPrefix}${sessionToken}`,
-          (err, response) => resolve(this.arrayStringReplay(err, response))
+          (err, response) => resolve(this.arrayStringReply(err, response))
         );
       }
     );
     if (isLeft(keys)) {
       return this.integerReply(keys.value, undefined);
     }
-    const deleteSessionTokens = keys.value.map(key => {
-      return new Promise<Either<Error, boolean>>(resolve => {
-        // Remove the specified key. A key is ignored if it does not exist.
-        // @see https://redis.io/commands/del
-        this.redisClient.del(key, (err, response) =>
-          resolve(this.integerReply(err, response))
-        );
-      });
+    const deleteSessionTokens = new Promise<Either<Error, boolean>>(resolve => {
+      // Remove the specified key. A key is ignored if it does not exist.
+      // @see https://redis.io/commands/del
+      this.redisClient.del(...keys.value, (err, response) =>
+        resolve(this.integerReply(err, response))
+      );
     });
 
     const deleteWalletToken = new Promise<Either<Error, boolean>>(resolve => {
@@ -150,7 +157,7 @@ export default class RedisSessionStorage implements ISessionStorage {
     });
 
     const deletePromises = await Promise.all([
-      ...deleteSessionTokens,
+      deleteSessionTokens,
       deleteWalletToken
     ]);
 
@@ -171,7 +178,7 @@ export default class RedisSessionStorage implements ISessionStorage {
       resolve => {
         this.redisClient.keys(
           `${userKeyPrefix}${user.fiscal_code}*`,
-          (err, response) => resolve(this.arrayStringReplay(err, response))
+          (err, response) => resolve(this.arrayStringReply(err, response))
         );
       }
     );
@@ -321,7 +328,7 @@ export default class RedisSessionStorage implements ISessionStorage {
     return right<Error, boolean>(isNumber(reply));
   }
 
-  private arrayStringReplay(
+  private arrayStringReply(
     err: Error | null,
     replay: ReadonlyArray<string> | undefined
   ): Either<Error, ReadonlyArray<string>> {

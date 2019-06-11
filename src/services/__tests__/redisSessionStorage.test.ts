@@ -95,7 +95,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
-      left(new Error("Error setting the token")),
+      left(new Error("hmset error")),
       "should fail if Redis client returns an error on saving the session"
     ],
     [
@@ -103,7 +103,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("hmset error|hset error")),
       "should fail if Redis client returns an error on saving the session and error saving the mapping"
     ],
     [
@@ -111,7 +111,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("hmset error|Error setting the token")),
       "should fail if Redis client returns an error on saving the session and false saving the mapping"
     ],
     [
@@ -127,7 +127,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("Error setting the token|hset error")),
       "should fail if Redis client returns false on saving the session and error saving the mapping"
     ],
     [
@@ -135,7 +135,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("Error setting the token|Error setting the token")),
       "should fail if Redis client returns false on saving the session and false saving the mapping"
     ],
     [
@@ -143,7 +143,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("hset error")),
       "should fail if Redis client returns an error on saving the mapping"
     ],
     [
@@ -151,7 +151,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("Error setting the token|hset error")),
       "should fail if Redis client returns an error on saving the mapping and false saving the session"
     ],
     [
@@ -167,7 +167,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("hmset error|Error setting the token")),
       "should fail if Redis client returns false on saving the mapping and error saving the session"
     ]
   ])(
@@ -359,11 +359,7 @@ describe("RedisSessionStorage#del", () => {
       walletDelSuccess: number,
       expected: Error
     ) => {
-      mockDel.mockImplementationOnce((_, callback) => {
-        callback(undefined, 1);
-      });
-
-      mockDel.mockImplementationOnce((_, callback) => {
+      mockDel.mockImplementationOnce((_, __, callback) => {
         callback(sessionDelErr, sessionDelSuccess);
       });
 
@@ -386,14 +382,14 @@ describe("RedisSessionStorage#del", () => {
       expect(mockKeys.mock.calls[0][0]).toBe(
         `*SESSION-${aValidUser.session_token}`
       );
-      expect(mockDel).toHaveBeenCalledTimes(3);
+      expect(mockDel).toHaveBeenCalledTimes(2);
       expect(mockDel.mock.calls[0][0]).toBe(
         `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
       );
-      expect(mockDel.mock.calls[1][0]).toBe(
+      expect(mockDel.mock.calls[0][1]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
-      expect(mockDel.mock.calls[2][0]).toBe(
+      expect(mockDel.mock.calls[1][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
 
