@@ -340,19 +340,19 @@ paths:
     x-swagger-router-controller: AuthenticationController
     get:
       operationId: listUserSessions
-      summary: List sessions of an User
+      summary: List sessions of a User
       description: Return all the active sessions for an authenticated User.
       responses:
         "200":
           description: Found.
           schema:
             $ref: "#/definitions/SessionsList"
-        "401":
-          description: Bearer token null or expired.
-        "404":
-          description: No sessions found for user
+        "400":
+          description: Bad request
           schema:
             $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: Unavailable service
           schema:
@@ -659,8 +659,8 @@ definitions:
       - walletToken
   SessionInfo:
     type: object
-    title: Session info of an user
-    description: Decribe a session of an autenticated user.
+    title: Session info of a user
+    description: Decribe a session of an authenticated user.
     properties:
       timestamp:
         $ref: '#/definitions/Timestamp'
@@ -670,7 +670,7 @@ definitions:
       - timestamp
       - sessionToken
   SessionsList:
-    description: Contains all active sessions for an autenticated user.
+    description: Contains all active sessions for an authenticated user.
     type: object
     properties:
       sessions:

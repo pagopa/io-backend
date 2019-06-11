@@ -5,11 +5,9 @@
 import * as express from "express";
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -19,6 +17,7 @@ import { SessionsList } from "../../generated/backend/SessionsList";
 import { isLeft } from "fp-ts/lib/Either";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
+import { log } from "../utils/logger";
 
 export default class SessionController {
   constructor(private readonly sessionStorage: RedisSessionStorage) {}
@@ -34,8 +33,6 @@ export default class SessionController {
   public readonly listSessions = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line: max-union-size
-    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseSuccessJson<SessionsList>
@@ -43,10 +40,15 @@ export default class SessionController {
     withUserFromRequest(req, async user => {
       const sessionsList = await this.sessionStorage.listUserSessions(user);
       if (isLeft(sessionsList)) {
+        log.error(
+          "Error reading user sessions: %s",
+          sessionsList.value.message
+        );
         return ResponseErrorInternal(sessionsList.value.message);
       }
       if (sessionsList.value.sessions.length === 0) {
-        return ResponseErrorNotFound("Not Found", "User sessions not found");
+        log.error("No valid sessions found for the user");
+        return ResponseErrorInternal("No valid sessions found for the user");
       }
       return ResponseSuccessJson<SessionsList>(sessionsList.value);
     });
