@@ -48,10 +48,10 @@ const mockedUser: User = {
 };
 const aTokenDurationSecs = 3600;
 const mockGet = jest.fn();
-const mockKeys = jest.fn();
+const mockSmembers = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.get = mockGet;
-mockRedisClient.keys = mockKeys;
+mockRedisClient.smembers = mockSmembers;
 const controller = new SessionController(
   new RedisSessionStorage(mockRedisClient, aTokenDurationSecs)
 );
@@ -82,7 +82,7 @@ describe("SessionController#listSessions", () => {
   };
   beforeEach(() => {
     jest.clearAllMocks();
-    mockKeys.mockImplementationOnce((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(null, [
         `USER-${mockedUser.fiscal_code}-SESSION-${mockedUser.session_token}`
       ]);

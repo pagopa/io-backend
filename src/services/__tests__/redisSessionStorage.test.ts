@@ -12,6 +12,7 @@ import { createMockRedis } from "mock-redis-client";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -57,12 +58,18 @@ jest.mock("../../services/tokenService", () => {
 const mockSet = jest.fn();
 const mockGet = jest.fn();
 const mockDel = jest.fn();
-const mockKeys = jest.fn();
+const mockSadd = jest.fn();
+const mockSrem = jest.fn();
+const mockSmembers = jest.fn();
+const mockExists = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
 mockRedisClient.del = mockDel;
-mockRedisClient.keys = mockKeys;
+mockRedisClient.sadd = mockSadd;
+mockRedisClient.srem = mockSrem;
+mockRedisClient.smembers = mockSmembers;
+mockRedisClient.exists = mockExists;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
@@ -190,6 +197,14 @@ describe("RedisSessionStorage#set", () => {
         callback(undefined, "OK");
       });
 
+      mockSadd.mockImplementation((_, __, callback) => {
+        callback(undefined, 1);
+      });
+
+      mockSmembers.mockImplementation((_, callback) => {
+        callback(undefined, []);
+      });
+
       const response = await sessionStorage.set(aValidUser);
 
       expect(mockSet).toHaveBeenCalledTimes(3);
@@ -211,7 +226,7 @@ describe("RedisSessionStorage#set", () => {
   );
 });
 
-describe("RedisSessionStorage#get", () => {
+describe("RedisSessionStorage#getBySessionToken", () => {
   it("should fail getting a session for an inexistent token", async () => {
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, null);
@@ -236,6 +251,22 @@ describe("RedisSessionStorage#get", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(left(new Error("Unable to decode the user")));
+  });
+
+  it("should fail parse of user payload", async () => {
+    mockGet.mockImplementation((_, callback) => {
+      callback(undefined, "Invalid JSON");
+    });
+
+    const response = await sessionStorage.getBySessionToken(
+      aValidUser.session_token
+    );
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet.mock.calls[0][0]).toBe(
+      `SESSION-${aValidUser.session_token}`
+    );
+    expect(response).toEqual(left(new Error("Unable to parse the user json")));
   });
 
   it("should return error if the session is expired", async () => {
@@ -367,11 +398,8 @@ describe("RedisSessionStorage#del", () => {
         callback(walletDelErr, walletDelSuccess);
       });
 
-      mockKeys.mockImplementation((_, callback) => {
-        callback(undefined, [
-          `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`,
-          `SESSION-${aValidUser.session_token}`
-        ]);
+      mockSrem.mockImplementation((_, __, callback) => {
+        callback(undefined, 1);
       });
 
       const response = await sessionStorage.del(
@@ -379,8 +407,9 @@ describe("RedisSessionStorage#del", () => {
         aValidUser.wallet_token
       );
 
-      expect(mockKeys.mock.calls[0][0]).toBe(
-        `*SESSION-${aValidUser.session_token}`
+      expect(mockSrem.mock.calls[0][0]).toBe(`USER-${aValidUser.fiscal_code}`);
+      expect(mockSrem.mock.calls[0][1]).toBe(
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
       );
       expect(mockDel).toHaveBeenCalledTimes(2);
       expect(mockDel.mock.calls[0][0]).toBe(
@@ -400,7 +429,7 @@ describe("RedisSessionStorage#del", () => {
 
 describe("RedisSessionStorage#listUserSessions", () => {
   it("should fail getting a session for an inexistent token", async () => {
-    mockKeys.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, []);
     });
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -408,7 +437,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should skip a session with invalid value", async () => {
-    mockKeys.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, [
         `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
       ]);
@@ -429,7 +458,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should skip a session with unparseble value", async () => {
-    mockKeys.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, [
         `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
       ]);
@@ -447,5 +476,89 @@ describe("RedisSessionStorage#listUserSessions", () => {
     );
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
+  });
+
+  it("should handle expired keys on user tokens set", async () => {
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`,
+        `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+      ]);
+    });
+
+    const expectedSessionInfo = SessionInfo.decode({
+      sessionToken: aValidUser.session_token,
+      timestamp: new Date()
+    });
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, JSON.stringify(expectedSessionInfo.value));
+    });
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, null);
+    });
+
+    const response = await sessionStorage.listUserSessions(aValidUser);
+
+    expect(mockGet).toHaveBeenCalledTimes(2);
+    expect(mockGet.mock.calls[0][0]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+    );
+    expect(mockGet.mock.calls[1][0]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+    );
+    const expectedSessionsList = SessionsList.decode({
+      sessions: [expectedSessionInfo.value]
+    });
+    expect(response).toEqual(expectedSessionsList);
+  });
+});
+
+describe("RedisSessionStorage#clearExpiredSetValues", () => {
+  it("error reading set members", async () => {
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(new Error("smembers error"), undefined);
+    });
+    const clearResults = await sessionStorage.clearExpiredSetValues(
+      aValidUser.fiscal_code
+    );
+    expect(clearResults).toEqual([]);
+  });
+  it("delete expired session key reference from user token set", async () => {
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`,
+        `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+      ]);
+    });
+    mockExists.mockImplementationOnce((_, callback) => {
+      callback(undefined, 1);
+    });
+    mockExists.mockImplementationOnce((_, callback) => {
+      callback(undefined, 0);
+    });
+    mockSrem.mockImplementation((_, __, callback) => {
+      callback(undefined, 1);
+    });
+
+    const clearResults = await sessionStorage.clearExpiredSetValues(
+      aValidUser.fiscal_code
+    );
+    expect(mockSmembers).toHaveBeenCalledTimes(1);
+    expect(mockSmembers.mock.calls[0][0]).toBe(
+      `USER-${aValidUser.fiscal_code}`
+    );
+    expect(mockExists).toHaveBeenCalledTimes(2);
+    expect(mockExists.mock.calls[0][0]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+    );
+    expect(mockExists.mock.calls[1][0]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+    );
+    expect(mockSrem).toHaveBeenCalledTimes(1);
+    expect(mockSrem.mock.calls[0][0]).toBe(`USER-${aValidUser.fiscal_code}`);
+    expect(mockSrem.mock.calls[0][1]).toBe(
+      `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+    );
+    expect(clearResults).toHaveLength(1);
   });
 });

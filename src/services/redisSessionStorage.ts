@@ -67,10 +67,20 @@ export default class RedisSessionStorage implements ISessionStorage {
         (err, response) => resolve(this.singleStringReply(err, response))
       );
     });
+    const updateUserTokensSet = new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.sadd(
+        `${userKeyPrefix}${user.fiscal_code}`,
+        `${userKeyPrefix}${user.fiscal_code}-${sessionKeyPrefix}${
+          user.session_token
+        }`,
+        (err, response) => resolve(this.integerReply(err, response))
+      );
+    });
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
-      setUserTokenInfo
+      setUserTokenInfo,
+      updateUserTokensSet
     ]);
     if (setPromisesResult.some(_ => isLeft(_) || !_.value)) {
       return left<Error, boolean>(
@@ -82,6 +92,7 @@ export default class RedisSessionStorage implements ISessionStorage {
         )
       );
     }
+    await this.clearExpiredSetValues(user.fiscal_code);
     return right<Error, boolean>(true);
   }
 
@@ -128,22 +139,28 @@ export default class RedisSessionStorage implements ISessionStorage {
     sessionToken: SessionToken,
     walletToken: WalletToken
   ): Promise<Either<Error, boolean>> {
-    const keys = await new Promise<Either<Error, ReadonlyArray<string>>>(
-      resolve => {
-        this.redisClient.keys(
-          `*${sessionKeyPrefix}${sessionToken}`,
-          (err, response) => resolve(this.arrayStringReply(err, response))
-        );
-      }
-    );
-    if (isLeft(keys)) {
-      return this.integerReply(keys.value, undefined);
+    const user = await this.loadSessionBySessionToken(sessionToken);
+    if (isLeft(user)) {
+      return left(user.value);
     }
+    await new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.srem(
+        `${userKeyPrefix}${user.value.fiscal_code}`,
+        `${userKeyPrefix}${
+          user.value.fiscal_code
+        }-${sessionKeyPrefix}${sessionToken}`,
+        (err, response) => resolve(this.integerReply(err, response))
+      );
+    });
     const deleteSessionTokens = new Promise<Either<Error, boolean>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
-      this.redisClient.del(...keys.value, (err, response) =>
-        resolve(this.integerReply(err, response))
+      this.redisClient.del(
+        `${userKeyPrefix}${
+          user.value.fiscal_code
+        }-${sessionKeyPrefix}${sessionToken}`,
+        `${sessionKeyPrefix}${sessionToken}`,
+        (err, response) => resolve(this.integerReply(err, response))
       );
     });
 
@@ -176,8 +193,8 @@ export default class RedisSessionStorage implements ISessionStorage {
   ): Promise<Either<Error, SessionsList>> {
     const keys = await new Promise<Either<Error, ReadonlyArray<string>>>(
       resolve => {
-        this.redisClient.keys(
-          `${userKeyPrefix}${user.fiscal_code}*`,
+        this.redisClient.smembers(
+          `${userKeyPrefix}${user.fiscal_code}`,
           (err, response) => resolve(this.arrayStringReply(err, response))
         );
       }
@@ -222,6 +239,46 @@ export default class RedisSessionStorage implements ISessionStorage {
         },
         { sessions: [] } as SessionsList
       )
+    );
+  }
+
+  public async clearExpiredSetValues(
+    fiscalCode: string
+  ): Promise<ReadonlyArray<Either<Error, boolean>>> {
+    const keys = await new Promise<ReadonlyArray<string>>(resolve => {
+      this.redisClient.smembers(
+        `${userKeyPrefix}${fiscalCode}`,
+        (err, response) => {
+          if (err) {
+            log.error("Error reading set members: %s", err);
+            return resolve([]);
+          }
+          resolve(response);
+        }
+      );
+    });
+    const activeKeys = await Promise.all(
+      keys.map(_ => {
+        return new Promise<Either<string, string>>(resolve => {
+          this.redisClient.exists(_, (err, response) => {
+            if (err || !response) {
+              return resolve(left(_));
+            }
+            return resolve(right(_));
+          });
+        });
+      })
+    );
+    return await Promise.all(
+      activeKeys.filter(isLeft).map(_ => {
+        return new Promise<Either<Error, boolean>>(resolve => {
+          this.redisClient.srem(
+            `${userKeyPrefix}${fiscalCode}`,
+            _.value,
+            (err, response) => resolve(this.integerReply(err, response))
+          );
+        });
+      })
     );
   }
 
