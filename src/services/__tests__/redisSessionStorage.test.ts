@@ -118,7 +118,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("hmset error|Error setting the token")),
+      left(new Error("hmset error|Error setting wallet token")),
       "should fail if Redis client returns an error on saving the session and false saving the mapping"
     ],
     [
@@ -126,7 +126,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
-      left(new Error("Error setting the token")),
+      left(new Error("Error setting session token")),
       "should fail if Redis client returns false on saving the session"
     ],
     [
@@ -134,7 +134,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting the token|hset error")),
+      left(new Error("Error setting session token|hset error")),
       "should fail if Redis client returns false on saving the session and error saving the mapping"
     ],
     [
@@ -142,7 +142,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error setting the token|Error setting the token")),
+      left(new Error("Error setting session token|Error setting wallet token")),
       "should fail if Redis client returns false on saving the session and false saving the mapping"
     ],
     [
@@ -158,7 +158,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting the token|hset error")),
+      left(new Error("Error setting session token|hset error")),
       "should fail if Redis client returns an error on saving the mapping and false saving the session"
     ],
     [
@@ -166,7 +166,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       undefined,
-      left(new Error("Error setting the token")),
+      left(new Error("Error setting wallet token")),
       "should fail if Redis client returns false on saving the mapping"
     ],
     [
@@ -174,7 +174,7 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("hmset error|Error setting the token")),
+      left(new Error("hmset error|Error setting wallet token")),
       "should fail if Redis client returns false on saving the mapping and error saving the session"
     ]
   ])(

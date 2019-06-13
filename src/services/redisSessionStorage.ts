@@ -86,8 +86,25 @@ export default class RedisSessionStorage implements ISessionStorage {
       return left<Error, boolean>(
         new Error(
           setPromisesResult
-            .filter(_ => isLeft(_) || !_.value)
-            .map(_ => (isLeft(_) ? _.value.message : "Error setting the token"))
+            .map((_, index) => {
+              if (isLeft(_)) {
+                return _.value.message;
+              }
+              if (!_.value) {
+                switch (index) {
+                  case 0:
+                    return "Error setting session token";
+                  case 1:
+                    return "Error setting wallet token";
+                  case 2:
+                    return "Error setting user token info";
+                  case 3:
+                    return "Error updating uset tokens info set";
+                }
+              }
+              return null;
+            })
+            .filter(_ => _ !== null)
             .join("|")
         )
       );
