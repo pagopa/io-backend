@@ -40,15 +40,6 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
 
-export const serverShutdown = () => {
-  httpGracefulShutdown(server, {
-    development: process.env.NODE_ENV === "development",
-    finally: () => log.info("Server gracefully shutting down....."),
-    signals: shutdownSignals,
-    timeout: shutdownTimeout
-  });
-};
-
 newApp(
   env,
   allowNotifyIPSourceRange,
@@ -78,7 +69,12 @@ newApp(
       log.info("HTTP server close.");
     });
 
-    serverShutdown();
+    httpGracefulShutdown(server, {
+      development: process.env.NODE_ENV === "development",
+      finally: () => log.info("Server gracefully shutting down..."),
+      signals: shutdownSignals,
+      timeout: shutdownTimeout
+    });
   })
   .catch(err => {
     log.error("Error loading app: %s", err);
