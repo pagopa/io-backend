@@ -77,8 +77,8 @@ describe("SessionController#getSessionState", () => {
 
 describe("SessionController#listSessions", () => {
   const expectedSessionInfo: SessionInfo = {
-    sessionToken: mockedUser.session_token,
-    timestamp: new Date()
+    createdAt: new Date(),
+    sessionToken: mockedUser.session_token
   };
   beforeEach(() => {
     jest.clearAllMocks();

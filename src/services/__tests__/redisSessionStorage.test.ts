@@ -220,7 +220,7 @@ describe("RedisSessionStorage#set", () => {
         `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
       );
       expect(mockSet.mock.calls[2][1]).toBeDefined();
-      expect(JSON.parse(mockSet.mock.calls[2][1])).toHaveProperty("timestamp");
+      expect(JSON.parse(mockSet.mock.calls[2][1])).toHaveProperty("createdAt");
       expect(response).toEqual(expected);
     }
   );
@@ -487,8 +487,8 @@ describe("RedisSessionStorage#listUserSessions", () => {
     });
 
     const expectedSessionInfo = SessionInfo.decode({
-      sessionToken: aValidUser.session_token,
-      timestamp: new Date()
+      createdAt: new Date(),
+      sessionToken: aValidUser.session_token
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(expectedSessionInfo.value));

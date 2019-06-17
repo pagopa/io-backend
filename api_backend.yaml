@@ -662,12 +662,12 @@ definitions:
     title: Session info of a user
     description: Decribe a session of an authenticated user.
     properties:
-      timestamp:
+      createdAt:
         $ref: '#/definitions/Timestamp'
       sessionToken:
         type: string
     required:
-      - timestamp
+      - createdAt
       - sessionToken
   SessionsList:
     description: Contains all active sessions for an authenticated user.

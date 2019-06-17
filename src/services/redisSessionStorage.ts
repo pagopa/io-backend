@@ -36,7 +36,13 @@ export default class RedisSessionStorage implements ISessionStorage {
         JSON.stringify(user),
         "EX",
         this.tokenDurationSecs,
-        (err, response) => resolve(this.singleStringReply(err, response))
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting session token")
+            )
+          )
       );
     });
 
@@ -48,13 +54,19 @@ export default class RedisSessionStorage implements ISessionStorage {
         user.session_token,
         "EX",
         this.tokenDurationSecs,
-        (err, response) => resolve(this.singleStringReply(err, response))
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting wallet token")
+            )
+          )
       );
     });
 
     const newSessionInfo: SessionInfo = {
-      sessionToken: user.session_token,
-      timestamp: new Date()
+      createdAt: new Date(),
+      sessionToken: user.session_token
     };
     const setUserTokenInfo = new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.set(
@@ -64,7 +76,13 @@ export default class RedisSessionStorage implements ISessionStorage {
         JSON.stringify(newSessionInfo),
         "EX",
         this.tokenDurationSecs,
-        (err, response) => resolve(this.singleStringReply(err, response))
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting user token info")
+            )
+          )
       );
     });
     const updateUserTokensSet = new Promise<Either<Error, boolean>>(resolve => {
@@ -73,7 +91,13 @@ export default class RedisSessionStorage implements ISessionStorage {
         `${userKeyPrefix}${user.fiscal_code}-${sessionKeyPrefix}${
           user.session_token
         }`,
-        (err, response) => resolve(this.integerReply(err, response))
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.integerReply(err, response),
+              new Error("Error updating uset tokens info set")
+            )
+          )
       );
     });
     const setPromisesResult = await Promise.all([
@@ -82,29 +106,13 @@ export default class RedisSessionStorage implements ISessionStorage {
       setUserTokenInfo,
       updateUserTokensSet
     ]);
-    if (setPromisesResult.some(_ => isLeft(_) || !_.value)) {
+    const isSetFailed = setPromisesResult.some(isLeft);
+    if (isSetFailed) {
       return left<Error, boolean>(
         new Error(
           setPromisesResult
-            .map((_, index) => {
-              if (isLeft(_)) {
-                return _.value.message;
-              }
-              if (!_.value) {
-                switch (index) {
-                  case 0:
-                    return "Error setting session token";
-                  case 1:
-                    return "Error setting wallet token";
-                  case 2:
-                    return "Error setting user token info";
-                  case 3:
-                    return "Error updating uset tokens info set";
-                }
-              }
-              return null;
-            })
-            .filter(_ => _ !== null)
+            .filter(isLeft)
+            .map(_ => _.value.message)
             .join("|")
         )
       );
@@ -412,5 +420,19 @@ export default class RedisSessionStorage implements ISessionStorage {
       return left(new Error(sessionNotFoundMessage));
     }
     return right(replay);
+  }
+
+  private falsyResponseToError(
+    response: Either<Error, boolean>,
+    error: Error
+  ): Either<Error, true> {
+    if (isLeft(response)) {
+      return left(response.value);
+    } else {
+      if (response.value) {
+        return right(true);
+      }
+      return left(error);
+    }
   }
 }
