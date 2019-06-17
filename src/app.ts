@@ -18,6 +18,7 @@ import container, {
 } from "./container";
 import ProfileController from "./controllers/profileController";
 
+import * as awilix from "awilix";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as helmet from "helmet";
@@ -53,6 +54,13 @@ import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
+
+const defaultModule = {
+  loadSpidStrategy,
+  newApp,
+  registerLoginRoute,
+  startIdpMetadataUpdater
+};
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -179,7 +187,14 @@ export async function newApp(
   // Setup routes
   //
 
-  await registerLoginRoute(app);
+  try {
+    const spidStrategy = await defaultModule.loadSpidStrategy();
+    app.set(SPID_STRATEGY, spidStrategy);
+    defaultModule.registerLoginRoute(app);
+  } catch (err) {
+    log.error("Fatal Error on loading spid strategy: %s", err);
+    process.exit(1);
+  }
   registerPublicRoutes(app);
   registerAuthenticationRoutes(app, authenticationBasePath);
   registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
@@ -200,12 +215,9 @@ export async function newApp(
 /**
  * Initializes SpidStrategy for passport and setup /login route.
  */
-async function registerLoginRoute(app: Express): Promise<void> {
+function registerLoginRoute(app: Express): void {
   // Add the strategy to authenticate the proxy to SPID.
-  const spidStrategy = await container.resolve<Promise<passport.Strategy>>(
-    SPID_STRATEGY
-  );
-  passport.use("spid", spidStrategy);
+  passport.use("spid", app.settings[SPID_STRATEGY]);
   const spidAuth = passport.authenticate("spid", { session: false });
   app.get("/login", spidAuth);
 }
@@ -220,6 +232,7 @@ async function clearAndReloadSpidStrategy(
 ): Promise<void> {
   log.info("Started Spid strategy re-initialization ...");
 
+  const previousSpidStrategy = app.settings[SPID_STRATEGY];
   // Clear cache for SPID_STRATEGY definition (singleton lifetime) on awilix.
   // The next resolution of SPID_STRATEGY will reinstantiate the registered class.
   container.cache.delete(SPID_STRATEGY);
@@ -237,8 +250,20 @@ async function clearAndReloadSpidStrategy(
   // tslint:disable-next-line: no-object-mutation
   app._router.stack = app._router.stack.filter(not(isLoginRoute));
 
-  await registerLoginRoute(app);
-  log.info("Spid strategy re-initialization complete.");
+  try {
+    const newSpidStratedy = await defaultModule.loadSpidStrategy();
+    app.set(SPID_STRATEGY, newSpidStratedy);
+    log.info("Spid strategy re-initialization complete.");
+  } catch (err) {
+    log.error("Error on update spid strategy: %s", err);
+    log.info("Restore previous spid strategy configuration");
+    container.register({
+      [SPID_STRATEGY]: awilix
+        .asFunction(() => Promise.resolve(previousSpidStrategy))
+        .singleton()
+    });
+  }
+  defaultModule.registerLoginRoute(app);
   if (onRefresh) {
     onRefresh();
   }
@@ -524,3 +549,9 @@ function registerPublicRoutes(app: Express): void {
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
   app.get("/ping", (_, res) => res.status(200).send("ok"));
 }
+
+function loadSpidStrategy(): Promise<passport.Strategy> {
+  return container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY);
+}
+
+export default defaultModule;
