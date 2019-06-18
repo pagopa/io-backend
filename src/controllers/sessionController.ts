@@ -17,7 +17,6 @@ import { SessionsList } from "../../generated/backend/SessionsList";
 import { isLeft } from "fp-ts/lib/Either";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
-import { log } from "../utils/logger";
 
 export default class SessionController {
   constructor(private readonly sessionStorage: RedisSessionStorage) {}
@@ -40,14 +39,9 @@ export default class SessionController {
     withUserFromRequest(req, async user => {
       const sessionsList = await this.sessionStorage.listUserSessions(user);
       if (isLeft(sessionsList)) {
-        log.error(
-          "Error reading user sessions: %s",
-          sessionsList.value.message
-        );
         return ResponseErrorInternal(sessionsList.value.message);
       }
       if (sessionsList.value.sessions.length === 0) {
-        log.error("No valid sessions found for the user");
         return ResponseErrorInternal("No valid sessions found for the user");
       }
       return ResponseSuccessJson<SessionsList>(sessionsList.value);

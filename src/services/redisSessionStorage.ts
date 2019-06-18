@@ -15,7 +15,8 @@ import { ISessionStorage } from "./ISessionStorage";
 
 const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
-const userKeyPrefix = "USER-";
+const userSessionsSetKeyPrefix = "USERSESSIONS-";
+const sessionInfoKeyPrefix = "SESSIONINFO-";
 const sessionNotFoundMessage = "Session not found";
 
 export default class RedisSessionStorage implements ISessionStorage {
@@ -68,11 +69,10 @@ export default class RedisSessionStorage implements ISessionStorage {
       createdAt: new Date(),
       sessionToken: user.session_token
     };
-    const setUserTokenInfo = new Promise<Either<Error, boolean>>(resolve => {
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${user.session_token}`;
+    const saveSessionInfo = new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.set(
-        `${userKeyPrefix}${user.fiscal_code}-${sessionKeyPrefix}${
-          user.session_token
-        }`,
+        sessionInfoKey,
         JSON.stringify(newSessionInfo),
         "EX",
         this.tokenDurationSecs,
@@ -85,26 +85,26 @@ export default class RedisSessionStorage implements ISessionStorage {
           )
       );
     });
-    const updateUserTokensSet = new Promise<Either<Error, boolean>>(resolve => {
-      this.redisClient.sadd(
-        `${userKeyPrefix}${user.fiscal_code}`,
-        `${userKeyPrefix}${user.fiscal_code}-${sessionKeyPrefix}${
-          user.session_token
-        }`,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.integerReply(err, response),
-              new Error("Error updating uset tokens info set")
+    const updateSessionInfoSet = new Promise<Either<Error, boolean>>(
+      resolve => {
+        this.redisClient.sadd(
+          `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
+          sessionInfoKey,
+          (err, response) =>
+            resolve(
+              this.falsyResponseToError(
+                this.integerReply(err, response),
+                new Error("Error updating uset tokens info set")
+              )
             )
-          )
-      );
-    });
+        );
+      }
+    );
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
-      setUserTokenInfo,
-      updateUserTokensSet
+      saveSessionInfo,
+      updateSessionInfoSet
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
@@ -168,12 +168,11 @@ export default class RedisSessionStorage implements ISessionStorage {
     if (isLeft(user)) {
       return left(user.value);
     }
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionToken}`;
     await new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.srem(
-        `${userKeyPrefix}${user.value.fiscal_code}`,
-        `${userKeyPrefix}${
-          user.value.fiscal_code
-        }-${sessionKeyPrefix}${sessionToken}`,
+        `${userSessionsSetKeyPrefix}${user.value.fiscal_code}`,
+        sessionInfoKey,
         (err, response) => resolve(this.integerReply(err, response))
       );
     });
@@ -181,9 +180,7 @@ export default class RedisSessionStorage implements ISessionStorage {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
       this.redisClient.del(
-        `${userKeyPrefix}${
-          user.value.fiscal_code
-        }-${sessionKeyPrefix}${sessionToken}`,
+        sessionInfoKey,
         `${sessionKeyPrefix}${sessionToken}`,
         (err, response) => resolve(this.integerReply(err, response))
       );
@@ -219,7 +216,7 @@ export default class RedisSessionStorage implements ISessionStorage {
     const keys = await new Promise<Either<Error, ReadonlyArray<string>>>(
       resolve => {
         this.redisClient.smembers(
-          `${userKeyPrefix}${user.fiscal_code}`,
+          `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
           (err, response) => resolve(this.arrayStringReply(err, response))
         );
       }
@@ -270,17 +267,15 @@ export default class RedisSessionStorage implements ISessionStorage {
   public async clearExpiredSetValues(
     fiscalCode: string
   ): Promise<ReadonlyArray<Either<Error, boolean>>> {
+    const userSessionSetKey = `${userSessionsSetKeyPrefix}${fiscalCode}`;
     const keys = await new Promise<ReadonlyArray<string>>(resolve => {
-      this.redisClient.smembers(
-        `${userKeyPrefix}${fiscalCode}`,
-        (err, response) => {
-          if (err) {
-            log.error("Error reading set members: %s", err);
-            return resolve([]);
-          }
-          resolve(response);
+      this.redisClient.smembers(userSessionSetKey, (err, response) => {
+        if (err) {
+          log.error("Error reading set members: %s", err);
+          return resolve([]);
         }
-      );
+        resolve(response);
+      });
     });
     const activeKeys = await Promise.all(
       keys.map(_ => {
@@ -297,10 +292,8 @@ export default class RedisSessionStorage implements ISessionStorage {
     return await Promise.all(
       activeKeys.filter(isLeft).map(_ => {
         return new Promise<Either<Error, boolean>>(resolve => {
-          this.redisClient.srem(
-            `${userKeyPrefix}${fiscalCode}`,
-            _.value,
-            (err, response) => resolve(this.integerReply(err, response))
+          this.redisClient.srem(userSessionSetKey, _.value, (err, response) =>
+            resolve(this.integerReply(err, response))
           );
         });
       })

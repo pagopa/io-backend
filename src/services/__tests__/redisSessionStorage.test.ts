@@ -217,7 +217,7 @@ describe("RedisSessionStorage#set", () => {
       );
       expect(mockSet.mock.calls[1][1]).toBe(aValidUser.session_token);
       expect(mockSet.mock.calls[2][0]).toBe(
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+        `SESSIONINFO-${aValidUser.session_token}`
       );
       expect(mockSet.mock.calls[2][1]).toBeDefined();
       expect(JSON.parse(mockSet.mock.calls[2][1])).toHaveProperty("createdAt");
@@ -407,13 +407,15 @@ describe("RedisSessionStorage#del", () => {
         aValidUser.wallet_token
       );
 
-      expect(mockSrem.mock.calls[0][0]).toBe(`USER-${aValidUser.fiscal_code}`);
+      expect(mockSrem.mock.calls[0][0]).toBe(
+        `USERSESSIONS-${aValidUser.fiscal_code}`
+      );
       expect(mockSrem.mock.calls[0][1]).toBe(
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+        `SESSIONINFO-${aValidUser.session_token}`
       );
       expect(mockDel).toHaveBeenCalledTimes(2);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+        `SESSIONINFO-${aValidUser.session_token}`
       );
       expect(mockDel.mock.calls[0][1]).toBe(
         `SESSION-${aValidUser.session_token}`
@@ -438,9 +440,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
   it("should skip a session with invalid value", async () => {
     mockSmembers.mockImplementation((_, callback) => {
-      callback(undefined, [
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
-      ]);
+      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
     });
 
     mockGet.mockImplementation((_, callback) => {
@@ -451,7 +451,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet.mock.calls[0][0]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      `SESSIONINFO-${aValidUser.session_token}`
     );
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
@@ -459,9 +459,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
   it("should skip a session with unparseble value", async () => {
     mockSmembers.mockImplementation((_, callback) => {
-      callback(undefined, [
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
-      ]);
+      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
     });
 
     mockGet.mockImplementation((_, callback) => {
@@ -472,7 +470,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet.mock.calls[0][0]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      `SESSIONINFO-${aValidUser.session_token}`
     );
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
@@ -481,8 +479,8 @@ describe("RedisSessionStorage#listUserSessions", () => {
   it("should handle expired keys on user tokens set", async () => {
     mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, [
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`,
-        `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+        `SESSIONINFO-${aValidUser.session_token}`,
+        `SESSIONINFO-expired_session_token`
       ]);
     });
 
@@ -501,11 +499,9 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     expect(mockGet).toHaveBeenCalledTimes(2);
     expect(mockGet.mock.calls[0][0]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      `SESSIONINFO-${aValidUser.session_token}`
     );
-    expect(mockGet.mock.calls[1][0]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
-    );
+    expect(mockGet.mock.calls[1][0]).toBe(`SESSIONINFO-expired_session_token`);
     const expectedSessionsList = SessionsList.decode({
       sessions: [expectedSessionInfo.value]
     });
@@ -526,8 +522,8 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
   it("delete expired session key reference from user token set", async () => {
     mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, [
-        `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`,
-        `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+        `SESSIONINFO-${aValidUser.session_token}`,
+        `SESSIONINFO-expired_session_token`
       ]);
     });
     mockExists.mockImplementationOnce((_, callback) => {
@@ -545,20 +541,20 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
     );
     expect(mockSmembers).toHaveBeenCalledTimes(1);
     expect(mockSmembers.mock.calls[0][0]).toBe(
-      `USER-${aValidUser.fiscal_code}`
+      `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockExists).toHaveBeenCalledTimes(2);
     expect(mockExists.mock.calls[0][0]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-${aValidUser.session_token}`
+      `SESSIONINFO-${aValidUser.session_token}`
     );
     expect(mockExists.mock.calls[1][0]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+      `SESSIONINFO-expired_session_token`
     );
     expect(mockSrem).toHaveBeenCalledTimes(1);
-    expect(mockSrem.mock.calls[0][0]).toBe(`USER-${aValidUser.fiscal_code}`);
-    expect(mockSrem.mock.calls[0][1]).toBe(
-      `USER-${aValidUser.fiscal_code}-SESSION-expired_session_token`
+    expect(mockSrem.mock.calls[0][0]).toBe(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
     );
+    expect(mockSrem.mock.calls[0][1]).toBe(`SESSIONINFO-expired_session_token`);
     expect(clearResults).toHaveLength(1);
   });
 });
