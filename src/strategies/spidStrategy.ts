@@ -24,22 +24,27 @@ const IDP_IDS: { [key: string]: string | undefined } = {
   "https://spid.register.it": "spiditalia"
 };
 
+const SPID_VALIDATOR_ID: { [key: string]: string | undefined } = {
+  "https://validator.spid.gov.it": "validatorspid"
+};
+
 /**
  * Load idp Metadata from a remote url, parse infomations and return a mapped and whitelisted idp options
  * for spidStrategy object.
  */
 export async function loadFromRemote(
-  idpMetadataUrl: string
+  idpMetadataUrl: string,
+  ids_providers: { [key: string]: string | undefined }
 ): Promise<{ [key: string]: IDPOption | undefined }> {
   log.info("Fetching SPID metadata from [%s]...", idpMetadataUrl);
   const idpMetadataXML = await fetchIdpMetadata(idpMetadataUrl);
   log.info("Parsing SPID metadata...");
   const idpMetadata = parseIdpMetadata(idpMetadataXML);
-  if (idpMetadata.length < Object.keys(IDP_IDS).length) {
+  if (idpMetadata.length < Object.keys(ids_providers).length) {
     log.warn("Missing SPID metadata on [%s]", idpMetadataUrl);
   }
   log.info("Configuring IdPs...");
-  return mapIpdMetadata(idpMetadata, IDP_IDS);
+  return mapIpdMetadata(idpMetadata, ids_providers);
 }
 
 const spidStrategy = async (
@@ -53,7 +58,11 @@ const spidStrategy = async (
   IDPMetadataUrl: string
   // tslint:disable-next-line: parameters-max-number
 ) => {
-  const idpsMetadataOption = await loadFromRemote(IDPMetadataUrl);
+  const idpsMetadataOption = await loadFromRemote(IDPMetadataUrl, IDP_IDS);
+  const spidValidatorMetadataOption = await loadFromRemote(
+    process.env.SPID_VALIDATOR_URL || "http://validator.spid:8080",
+    SPID_VALIDATOR_ID
+  );
 
   const options: {
     idp: { [key: string]: IDPOption | undefined };
@@ -62,6 +71,7 @@ const spidStrategy = async (
   } = {
     idp: {
       ...idpsMetadataOption,
+      ...spidValidatorMetadataOption,
       xx_testenv2: {
         cert: [
           "MIIC7TCCAdWgAwIBAgIJAMbxPOoBth1LMA0GCSqGSIb3DQEBCwUAMA0xCzAJBgNVBAYTAklUMB4XDTE4MDkwNDE0MDAxM1oXDTE4MTAwNDE0MDAxM1owDTELMAkGA1UEBhMCSVQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJrW3y8Zd2jESPXGMRY04cHC4Qfo3302HEY1C6x1aDfW7aR/tXzNplfdw8ZtZugSSmHZBxVrR8aA08dUVbbtUw5qD0uAWKIeREqGfhM+J1STAMSI2/ZxA6t2fLmv8l1eRd1QGeRDm7yF9EEKGY9iUZD3LJf2mWdVBAzzYlG23M769k+9JuGZxuviNWMjojgYRiQFgzypUJJQz+Ihh3q7LMjjiQiiULVb9vnJg7UdU9Wf3xGRkxk6uiGP9SzWigSObUekYYQ4ZAI/spILywgDxVMMtv/eVniUFKLABtljn5cE9zltECahPbm7wIuMJpDDu5GYHGdYO0j+K7fhjvF2mzAgMBAAGjUDBOMB0GA1UdDgQWBBQEVmzA/L1/fd70ok+6xtDRF8A3HjAfBgNVHSMEGDAWgBQEVmzA/L1/fd70ok+6xtDRF8A3HjAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCRMo4M4PqS0iLTTRWfikMF4hYMapcpmuna6p8aee7CwTjS5y7y18RLvKTi9l8OI0dVkgokH8fq8/o13vMw4feGxro1hMeUilRtH52funrWC+FgPrqk3o/8cZOnq+CqnFFDfILLiEb/PVJMddvTXgv2f9O6u17f8GmMLzde1yvYDa1fG/Pi0fG2F0yw/CmtP8OTLSvxjPtJ+ZckGzZa9GotwHsoVJ+Od21OU2lOeCnOjJOAbewHgqwkCB4O4AT5RM4ThAQtoU8QibjD1XDk/ZbEHdKcofnziDyl0V8gglP2SxpzDaPX0hm4wgHk9BOtSikb72tfOw+pNfeSrZEr6ItQ"
@@ -69,14 +79,6 @@ const spidStrategy = async (
         entityID: "xx_testenv2",
         entryPoint: spidTestEnvUrl + "/sso",
         logoutUrl: spidTestEnvUrl + "/slo"
-      },
-      validatorspid: {
-        cert: [
-          "MIIEGDCCAwCgAwIBAgIJAOrYj9oLEJCwMA0GCSqGSIb3DQEBCwUAMGUxCzAJBgNVBAYTAklUMQ4wDAYDVQQIEwVJdGFseTENMAsGA1UEBxMEUm9tZTENMAsGA1UEChMEQWdJRDESMBAGA1UECxMJQWdJRCBURVNUMRQwEgYDVQQDEwthZ2lkLmdvdi5pdDAeFw0xOTA0MTExMDAyMDhaFw0yNTAzMDgxMDAyMDhaMGUxCzAJBgNVBAYTAklUMQ4wDAYDVQQIEwVJdGFseTENMAsGA1UEBxMEUm9tZTENMAsGA1UEChMEQWdJRDESMBAGA1UECxMJQWdJRCBURVNUMRQwEgYDVQQDEwthZ2lkLmdvdi5pdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK8kJVo+ugRrbbv9xhXCuVrqi4B7/MQzQc62ocwlFFujJNd4m1mXkUHFbgvwhRkQqo2DAmFeHiwCkJT3K1eeXIFhNFFroEzGPzONyekLpjNvmYIs1CFvirGOj0bkEiGaKEs+/umzGjxIhy5JQlqXE96y1+Izp2QhJimDK0/KNij8I1bzxseP0Ygc4SFveKS+7QO+PrLzWklEWGMs4DM5Zc3VRK7g4LWPWZhKdImC1rnS+/lEmHSvHisdVp/DJtbSrZwSYTRvTTz5IZDSq4kAzrDfpj16h7b3t3nFGc8UoY2Ro4tRZ3ahJ2r3b79yK6C5phY7CAANuW3gDdhVjiBNYs0CAwEAAaOByjCBxzAdBgNVHQ4EFgQU3/7kV2tbdFtphbSA4LH7+w8SkcwwgZcGA1UdIwSBjzCBjIAU3/7kV2tbdFtphbSA4LH7+w8SkcyhaaRnMGUxCzAJBgNVBAYTAklUMQ4wDAYDVQQIEwVJdGFseTENMAsGA1UEBxMEUm9tZTENMAsGA1UEChMEQWdJRDESMBAGA1UECxMJQWdJRCBURVNUMRQwEgYDVQQDEwthZ2lkLmdvdi5pdIIJAOrYj9oLEJCwMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAJNFqXg/V3aimJKUmUaqmQEEoSc3qvXFITvT5f5bKw9yk/NVhR6wndL+z/24h1OdRqs76blgH8k116qWNkkDtt0AlSjQOx5qvFYh1UviOjNdRI4WkYONSw+vuavcx+fB6O5JDHNmMhMySKTnmRqTkyhjrch7zaFIWUSV7hsBuxpqmrWDoLWdXbV3eFH3mINA5AoIY/m0bZtzZ7YNgiFWzxQgekpxd0vcTseMnCcXnsAlctdir0FoCZztxMuZjlBjwLTtM6Ry3/48LMM8Z+lw7NMciKLLTGQyU8XmKKSSOh0dGh5Lrlt5GxIIJkH81C0YimWebz8464QPL3RbLnTKg+c="
-        ],
-        entityID: "validatorspid",
-        entryPoint: "http://validator.spid:8080/samlsso",
-        logoutUrl: "http://validator.spid:8080/samlslo"
       }
     },
     sp: {
