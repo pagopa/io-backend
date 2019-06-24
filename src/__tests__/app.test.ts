@@ -1,12 +1,15 @@
 import { Express } from "express";
-import * as http from "http";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 
+import passport = require("passport");
 import appModule from "../app";
-import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../container";
+import container, {
+  DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
+  SPID_STRATEGY
+} from "../container";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/apiClientFactory");
@@ -38,12 +41,11 @@ const aValidNotification = {
     service_name: "test service"
   }
 };
-// tslint:disable:no-let
-let app: Express;
-let server: http.Server;
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 describe("Success app start", () => {
+  // tslint:disable:no-let
+  let app: Express;
   beforeAll(async () => {
     app = await appModule.newApp(
       NodeEnvironmentEnum.PRODUCTION,
@@ -53,15 +55,10 @@ describe("Success app start", () => {
       "/api/v1",
       "/pagopa/api/v1"
     );
-    server = http.createServer(app);
-    server.listen();
   });
 
-  afterAll(done => {
-    server.close(() => {
-      app.emit("server:stop");
-      done();
-    });
+  afterAll(() => {
+    app.emit("server:stop");
   });
 
   describe("Test redirect to HTTPS", () => {
@@ -114,7 +111,11 @@ describe("Success app start", () => {
   });
 
   describe("Test refresh idp metadata", () => {
+    let spidStrategy: passport.Strategy;
     beforeEach(async () => {
+      spidStrategy = await container.resolve<Promise<passport.Strategy>>(
+        SPID_STRATEGY
+      );
       jest.useFakeTimers();
     });
 
@@ -122,6 +123,7 @@ describe("Success app start", () => {
       const onRefresh = jest.fn();
       appModule.startIdpMetadataUpdater(
         app,
+        spidStrategy,
         DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
         onRefresh
       );
@@ -133,36 +135,7 @@ describe("Success app start", () => {
       jest.runOnlyPendingTimers();
       jest.useRealTimers();
       setTimeout(() => {
-        expect(onRefresh).toBeCalled();
-        done();
-      }, 1000);
-    });
-    it("Use old spid strategy if idpMetadataUpdater fails", done => {
-      const onRefresh = jest.fn();
-      const mockExit = jest
-        .spyOn(process, "exit")
-        .mockImplementation(() => true);
-      const loadSpidStrategyMock = jest.fn();
-      // tslint:disable-next-line: no-object-mutation
-      const originalLoadSpidStrategy = require("../app").default
-        .loadSpidStrategy;
-      loadSpidStrategyMock.mockImplementationOnce(() =>
-        Promise.reject(new Error("Error download "))
-      );
-      loadSpidStrategyMock.mockImplementationOnce(originalLoadSpidStrategy);
-      // tslint:disable-next-line: no-object-mutation
-      appModule.loadSpidStrategy = loadSpidStrategyMock;
-      appModule.startIdpMetadataUpdater(
-        app,
-        DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
-        onRefresh
-      );
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-      setTimeout(() => {
-        expect(onRefresh).toBeCalled();
-        expect(loadSpidStrategyMock.mock.calls.length).toBe(2);
-        expect(mockExit).not.toBeCalled();
+        expect(onRefresh).toBeCalledTimes(1);
         done();
       }, 1000);
     });
@@ -171,12 +144,11 @@ describe("Success app start", () => {
 
 describe("Failure app start", () => {
   it("Close app if download IDP metadata fails on startup", async () => {
-    // tslint:disable-next-line: no-object-mutation
-    appModule.loadSpidStrategy = jest
-      .fn()
-      .mockImplementation(() => Promise.reject(new Error("Error download ")));
+    jest.spyOn(appModule, "loadSpidStrategy").mockImplementation(() => {
+      return Promise.reject(new Error("Error download "));
+    });
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
-    app = await appModule.newApp(
+    await appModule.newApp(
       NodeEnvironmentEnum.PRODUCTION,
       aValidCIDR,
       aValidCIDR,
@@ -185,6 +157,5 @@ describe("Failure app start", () => {
       "/pagopa/api/v1"
     );
     expect(mockExit).toBeCalledWith(1);
-    app.emit("server:stop");
   });
 });
