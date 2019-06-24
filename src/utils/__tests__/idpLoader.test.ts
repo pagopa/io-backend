@@ -383,6 +383,17 @@ describe("idpLoader#remapIpdMetadata", () => {
 });
 
 describe("spidStrategy#loadFromRemote", () => {
+  const IDP_IDS: { [key: string]: string | undefined } = {
+    "https://id.lepida.it/idp/shibboleth": "lepidaid",
+    "https://identity.infocert.it": "infocertid",
+    "https://identity.sieltecloud.it": "sielteid",
+    "https://idp.namirialtsp.com/idp": "namirialid",
+    "https://login.id.tim.it/affwebservices/public/saml2sso": "timid",
+    "https://loginspid.aruba.it": "arubaid",
+    "https://posteid.poste.it": "posteid",
+    "https://spid.intesa.it": "intesaid",
+    "https://spid.register.it": "spiditalia"
+  };
   const IDPMetadataUrl =
     process.env.IDP_METADATA_URL ||
     "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
@@ -420,7 +431,7 @@ describe("spidStrategy#loadFromRemote", () => {
   it("load idp options with missing idps configurations", async () => {
     const loadFromRemote = require("../../strategies/spidStrategy")
       .loadFromRemote;
-    const idpOptions = await loadFromRemote(IDPMetadataUrl);
+    const idpOptions = await loadFromRemote(IDPMetadataUrl, IDP_IDS);
     expect(mockFetchIdpMetadata).toHaveBeenCalledWith(IDPMetadataUrl);
     expect(mockWarn).toHaveBeenCalledWith(
       "Missing SPID metadata on [%s]",
