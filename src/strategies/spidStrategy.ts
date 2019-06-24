@@ -60,7 +60,8 @@ const spidStrategy = async (
 ) => {
   const idpsMetadataOption = await loadFromRemote(IDPMetadataUrl, IDP_IDS);
   const spidValidatorMetadataOption = await loadFromRemote(
-    process.env.SPID_VALIDATOR_URL || "http://validator.spid:8080",
+    process.env.SPID_VALIDATOR_URL ||
+      "https://validator.spid.gov.it/metadata.xml",
     SPID_VALIDATOR_ID
   );
 
