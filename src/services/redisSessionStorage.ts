@@ -94,7 +94,7 @@ export default class RedisSessionStorage implements ISessionStorage {
             resolve(
               this.falsyResponseToError(
                 this.integerReply(err, response),
-                new Error("Error updating uset tokens info set")
+                new Error("Error updating user tokens info set")
               )
             )
         );
@@ -169,13 +169,27 @@ export default class RedisSessionStorage implements ISessionStorage {
       return left(user.value);
     }
     const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionToken}`;
-    await new Promise<Either<Error, boolean>>(resolve => {
-      this.redisClient.srem(
-        `${userSessionsSetKeyPrefix}${user.value.fiscal_code}`,
-        sessionInfoKey,
-        (err, response) => resolve(this.integerReply(err, response))
+    const removeValueSessionInfoSet = await new Promise<Either<Error, boolean>>(
+      resolve => {
+        this.redisClient.srem(
+          `${userSessionsSetKeyPrefix}${user.value.fiscal_code}`,
+          sessionInfoKey,
+          (err, response) =>
+            resolve(
+              this.falsyResponseToError(
+                this.integerReply(err, response),
+                new Error("Unexpected response from redis client.")
+              )
+            )
+        );
+      }
+    );
+    if (isLeft(removeValueSessionInfoSet)) {
+      log.warn(
+        "Error removing session info key from session info set: %s",
+        removeValueSessionInfoSet.value.message
       );
-    });
+    }
     const deleteSessionTokens = new Promise<Either<Error, boolean>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
@@ -213,7 +227,7 @@ export default class RedisSessionStorage implements ISessionStorage {
   public async listUserSessions(
     user: User
   ): Promise<Either<Error, SessionsList>> {
-    const keys = await new Promise<Either<Error, ReadonlyArray<string>>>(
+    const sessionKeys = await new Promise<Either<Error, ReadonlyArray<string>>>(
       resolve => {
         this.redisClient.smembers(
           `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
@@ -221,20 +235,19 @@ export default class RedisSessionStorage implements ISessionStorage {
         );
       }
     );
-    if (isLeft(keys)) {
-      return left(keys.value);
+    if (isLeft(sessionKeys)) {
+      return left(sessionKeys.value);
     }
-    const userSessionTokens = keys.value.map(key => {
-      return new Promise<string>((resolve, reject) => {
-        this.redisClient.get(key, (err, response) => {
+    const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
+      (resolve, reject) => {
+        this.redisClient.mget(...sessionKeys.value, (err, response) => {
           if (err) {
             reject(err);
           }
           resolve(response);
         });
-      });
-    });
-    const userSessionTokensResult = await Promise.all(userSessionTokens);
+      }
+    );
     return right(
       userSessionTokensResult.reduce(
         (prev: SessionsList, _) => {

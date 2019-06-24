@@ -48,9 +48,11 @@ const mockedUser: User = {
 };
 const aTokenDurationSecs = 3600;
 const mockGet = jest.fn();
+const mockMget = jest.fn();
 const mockSmembers = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.get = mockGet;
+mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers;
 const controller = new SessionController(
   new RedisSessionStorage(mockRedisClient, aTokenDurationSecs)
@@ -87,8 +89,8 @@ describe("SessionController#listSessions", () => {
         `USER-${mockedUser.fiscal_code}-SESSION-${mockedUser.session_token}`
       ]);
     });
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(null, JSON.stringify(expectedSessionInfo));
+    mockMget.mockImplementationOnce((_, callback) => {
+      callback(null, [JSON.stringify(expectedSessionInfo)]);
     });
   });
   it("returns list of sessions for an authenticated user", async () => {
