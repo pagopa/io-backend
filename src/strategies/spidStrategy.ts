@@ -34,17 +34,17 @@ const SPID_VALIDATOR_ID: { [key: string]: string | undefined } = {
  */
 export async function loadFromRemote(
   idpMetadataUrl: string,
-  ids_providers: { [key: string]: string | undefined }
+  idsProviders: { [key: string]: string | undefined }
 ): Promise<{ [key: string]: IDPOption | undefined }> {
   log.info("Fetching SPID metadata from [%s]...", idpMetadataUrl);
   const idpMetadataXML = await fetchIdpMetadata(idpMetadataUrl);
   log.info("Parsing SPID metadata...");
   const idpMetadata = parseIdpMetadata(idpMetadataXML);
-  if (idpMetadata.length < Object.keys(ids_providers).length) {
+  if (idpMetadata.length < Object.keys(idsProviders).length) {
     log.warn("Missing SPID metadata on [%s]", idpMetadataUrl);
   }
   log.info("Configuring IdPs...");
-  return mapIpdMetadata(idpMetadata, ids_providers);
+  return mapIpdMetadata(idpMetadata, idsProviders);
 }
 
 const spidStrategy = async (
