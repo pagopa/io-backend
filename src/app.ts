@@ -200,7 +200,7 @@ export async function newApp(
       container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
     const idpMetadataRefreshTimer = startIdpMetadataUpdater(
       app,
-      spidStrategy,
+      newSpidStrategy,
       idpMetadataRefreshIntervalMillis
     );
     app.on("server:stop", () => {
@@ -218,10 +218,10 @@ export async function newApp(
  */
 function registerLoginRoute(
   app: Express,
-  spidStrategy: passport.Strategy
+  newSpidStrategy: passport.Strategy
 ): void {
   // Add the strategy to authenticate the proxy to SPID.
-  passport.use("spid", spidStrategy);
+  passport.use("spid", newSpidStrategy);
   const spidAuth = passport.authenticate("spid", { session: false });
   app.get("/login", spidAuth);
 }
@@ -294,15 +294,15 @@ export function startIdpMetadataUpdater(
   onRefresh?: () => void
 ): NodeJS.Timer {
   // tslint:disable-next-line: no-let
-  let spidStrategy: passport.Strategy | undefined;
+  let newSpidStrategy: passport.Strategy | undefined;
   return setInterval(() => {
     clearAndReloadSpidStrategy(
       app,
-      spidStrategy ? spidStrategy : originalSpidStrategy,
+      newSpidStrategy ? newSpidStrategy : originalSpidStrategy,
       onRefresh
     )
       .then(previousSpidStrategy => {
-        spidStrategy = previousSpidStrategy;
+        newSpidStrategy = previousSpidStrategy;
       })
       .catch(err => {
         log.error("Error on clearAndReloadSpidStrategy: %s", err);
