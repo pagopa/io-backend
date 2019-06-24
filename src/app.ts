@@ -255,13 +255,13 @@ async function clearAndReloadSpidStrategy(
   app._router.stack = app._router.stack.filter(not(isLoginRoute));
 
   // tslint:disable-next-line: no-let
-  let newSpidStratedy: passport.Strategy | undefined;
+  let newSpidStrategy: passport.Strategy | undefined;
   try {
     // Inject a new SPID Strategy generate function in awilix container
     container.register({
       [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
     });
-    newSpidStratedy = await defaultModule.loadSpidStrategy();
+    newSpidStrategy = await defaultModule.loadSpidStrategy();
     log.info("Spid strategy re-initialization complete.");
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
@@ -275,13 +275,13 @@ async function clearAndReloadSpidStrategy(
   } finally {
     defaultModule.registerLoginRoute(
       app,
-      newSpidStratedy ? newSpidStratedy : previousSpidStrategy
+      newSpidStrategy ? newSpidStrategy : previousSpidStrategy
     );
     if (onRefresh) {
       onRefresh();
     }
   }
-  return newSpidStratedy ? newSpidStratedy : previousSpidStrategy;
+  return newSpidStrategy ? newSpidStrategy : previousSpidStrategy;
 }
 
 /**
