@@ -659,6 +659,22 @@ definitions:
       - name
       - spid_email
       - spid_mobile_phone
+  UserMetadata:
+    type: object
+    title: User Metadata information
+    properties:
+      version:
+        type: number
+      metadata:
+        type: string
+    required:
+      - version
+      - metadata
+  UserMetadataResponse:
+    x-one-of: true
+    allOf:
+      - $ref: "#/definitions/UserMetadata"
+      - type: object
   PublicSession:
     type: object
     title: User session data
