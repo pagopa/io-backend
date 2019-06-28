@@ -299,7 +299,6 @@ container.register(
   "redisClient",
   awilix
     .asFunction(() => {
-      console.log("redisClient: ", env);
       // Use the Docker Redis instance when developing because the Azure Redis
       // cluster isn't accessible outside the Azure VNet.
       return env === NodeEnvironmentEnum.DEVELOPMENT
