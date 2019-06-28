@@ -5,13 +5,14 @@
 import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
-import { isArray, isNumber } from "util";
+import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
+import RedisStorageUtils from "./redisStorageUtils";
 
 const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
@@ -19,11 +20,14 @@ const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const sessionNotFoundMessage = "Session not found";
 
-export default class RedisSessionStorage implements ISessionStorage {
+export default class RedisSessionStorage extends RedisStorageUtils
+  implements ISessionStorage {
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * {@inheritDoc}
@@ -385,37 +389,6 @@ export default class RedisSessionStorage implements ISessionStorage {
       });
     });
   }
-
-  /**
-   * Parse the a Redis single string reply.
-   *
-   * @see https://redis.io/topics/protocol#simple-string-reply.
-   */
-  private singleStringReply(
-    err: Error | null,
-    reply: "OK" | undefined
-  ): Either<Error, boolean> {
-    if (err) {
-      return left<Error, boolean>(err);
-    }
-
-    return right<Error, boolean>(reply === "OK");
-  }
-
-  /**
-   * Parse the a Redis integer reply.
-   *
-   * @see https://redis.io/topics/protocol#integer-reply
-   */
-  // tslint:disable-next-line:no-any
-  private integerReply(err: Error | null, reply: any): Either<Error, boolean> {
-    if (err) {
-      return left<Error, boolean>(err);
-    }
-
-    return right<Error, boolean>(isNumber(reply));
-  }
-
   private arrayStringReply(
     err: Error | null,
     replay: ReadonlyArray<string> | undefined

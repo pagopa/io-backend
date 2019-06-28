@@ -26,6 +26,7 @@ import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import SessionController from "./controllers/sessionController";
+import UserMetadataController from "./controllers/userMetadataController";
 
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
@@ -34,6 +35,7 @@ import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
+import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 
 import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
@@ -297,6 +299,7 @@ container.register(
   "redisClient",
   awilix
     .asFunction(() => {
+      console.log("redisClient: ", env);
       // Use the Docker Redis instance when developing because the Azure Redis
       // cluster isn't accessible outside the Azure VNet.
       return env === NodeEnvironmentEnum.DEVELOPMENT
@@ -306,9 +309,16 @@ container.register(
     .singleton() // create only one instance of the redis client
 );
 
+// Register the user sessions storage service.
 export const SESSION_STORAGE = "sessionStorage";
 container.register({
   [SESSION_STORAGE]: awilix.asClass(RedisSessionStorage)
+});
+
+// Register the user metadata storage service.
+export const USER_METADATA_STORAGE = "userMetadataStorage";
+container.register({
+  [USER_METADATA_STORAGE]: awilix.asClass(RedisUserMetadataStorage)
 });
 
 // Register the token service.
@@ -399,6 +409,12 @@ container.register({
 export const PAGOPA_PROXY_CONTROLLER = "pagoPAProxyController";
 container.register({
   [PAGOPA_PROXY_CONTROLLER]: awilix.asClass(PagoPAProxyController)
+});
+
+// Register the user metadata controller as a service.
+export const USER_METADATA_CONTROLLER = "userMetadataController";
+container.register({
+  [USER_METADATA_CONTROLLER]: awilix.asClass(UserMetadataController)
 });
 
 export default container;

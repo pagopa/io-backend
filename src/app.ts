@@ -14,9 +14,11 @@ import container, {
   SERVICES_CONTROLLER,
   SESSION_CONTROLLER,
   SPID_STRATEGY,
-  URL_TOKEN_STRATEGY
+  URL_TOKEN_STRATEGY,
+  USER_METADATA_CONTROLLER
 } from "./container";
 import ProfileController from "./controllers/profileController";
+import UserMetadataController from "./controllers/userMetadataController";
 
 import * as awilix from "awilix";
 import * as bodyParser from "body-parser";
@@ -331,6 +333,7 @@ function registerPagoPARoutes(
   );
 }
 
+// tslint:disable-next-line: no-big-function
 function registerAPIRoutes(
   app: Express,
   basePath: string,
@@ -363,6 +366,10 @@ function registerAPIRoutes(
     PAGOPA_PROXY_CONTROLLER
   );
 
+  const userMetadataController: UserMetadataController = container.resolve(
+    USER_METADATA_CONTROLLER
+  );
+
   app.get(
     `${basePath}/profile`,
     bearerTokenAuth,
@@ -383,6 +390,30 @@ function registerAPIRoutes(
         req,
         res,
         profileController
+      );
+    }
+  );
+
+  app.get(
+    `${basePath}/user-metadata`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(userMetadataController.getMetadata)(
+        req,
+        res,
+        userMetadataController
+      );
+    }
+  );
+
+  app.post(
+    `${basePath}/user-metadata`,
+    bearerTokenAuth,
+    (req: express.Request, res: express.Response) => {
+      toExpressHandler(userMetadataController.upsertMetadata)(
+        req,
+        res,
+        userMetadataController
       );
     }
   );

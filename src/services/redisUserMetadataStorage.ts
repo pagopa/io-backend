@@ -6,12 +6,17 @@ import { User } from "src/types/user";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { log } from "../utils/logger";
 import { IUserMetadataStorage } from "./IUserMetadataStorage";
+import RedisStorageUtils from "./redisStorageUtils";
 
 const userMetadataPrefix = "USERMETA-";
-const metadataNotFoundError = new Error("User Metadata not found");
+export const metadataNotFoundError = new Error("User Metadata not found");
+export const invalidVersionNumberError = new Error("Invalid version number");
 
-export default class RedisUserMetadataStorage implements IUserMetadataStorage {
-  constructor(private readonly redisClient: redis.RedisClient) {}
+export default class RedisUserMetadataStorage extends RedisStorageUtils
+  implements IUserMetadataStorage {
+  constructor(private readonly redisClient: redis.RedisClient) {
+    super();
+  }
 
   /**
    * {@inheritDoc}
@@ -27,7 +32,7 @@ export default class RedisUserMetadataStorage implements IUserMetadataStorage {
       isRight(getUserMetadataResult) &&
       getUserMetadataResult.value.version !== payload.version - 1
     ) {
-      return left(new Error("Invalid version number"));
+      return left(invalidVersionNumberError);
     }
     if (
       isLeft(getUserMetadataResult) &&
@@ -51,26 +56,6 @@ export default class RedisUserMetadataStorage implements IUserMetadataStorage {
    */
   public async get(user: User): Promise<Either<Error, UserMetadata>> {
     return this.loadUserMetadataByFiscalCode(user.fiscal_code);
-  }
-
-  /**
-   * Parse the a Redis single string reply.
-   *
-   * @see https://redis.io/topics/protocol#simple-string-reply.
-   */
-  private singleStringReply(
-    /* TODO: Rimuovere questo metodo perché duplicato,
-    trovare stradigia per condividerlo tra
-    RedisUserMetadataStorage e RedisSessionStorage
-    */
-    err: Error | null,
-    reply: "OK" | undefined
-  ): Either<Error, boolean> {
-    if (err) {
-      return left<Error, boolean>(err);
-    }
-
-    return right<Error, boolean>(reply === "OK");
   }
 
   private loadUserMetadataByFiscalCode(
