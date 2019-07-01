@@ -12,6 +12,7 @@ import container, {
 } from "../container";
 
 jest.mock("../services/redisSessionStorage");
+jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 
 const mockNotify = jest.fn();
