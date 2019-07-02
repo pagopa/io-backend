@@ -46,7 +46,7 @@ export default class UserMetadataController {
           ? ResponseSuccessJson({})
           : ResponseErrorInternal(metadata.value.message);
       } else {
-        return ResponseSuccessJson(metadata);
+        return ResponseSuccessJson(metadata.value);
       }
     });
 
