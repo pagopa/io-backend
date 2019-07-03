@@ -79,12 +79,12 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
 
               if (isLeft(errorOrDeserializedUserMetadata)) {
                 log.error(
-                  "Unable to decode the user: %s",
+                  "Unable to decode the user metadata: %s",
                   ReadableReporter.report(errorOrDeserializedUserMetadata)
                 );
                 return resolve(
                   left<Error, UserMetadata>(
-                    new Error("Unable to decode the user")
+                    new Error("Unable to decode the user metadata")
                   )
                 );
               }
