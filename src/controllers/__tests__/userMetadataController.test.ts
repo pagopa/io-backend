@@ -98,7 +98,7 @@ describe("UserMetadataController#getMetadata", () => {
     expect(mockGetMetadata).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
+      kind: "IResponseNoContent",
       value: {}
     });
   });

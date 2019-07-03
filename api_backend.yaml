@@ -298,12 +298,14 @@ paths:
     get:
       operationId: getUserMetadata
       summary: Get user's metadata
-      description: Returns metadata for the user identified by the provided fiscal code.
+      description: Returns metadata for the current authenticated user.
       responses:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/UserMetadataResponse"
+            $ref: "#/definitions/UserMetadata"
+        "204":
+          description: No Content.
         "401":
           description: Bearer token null or expired.
         "500":
@@ -313,7 +315,7 @@ paths:
     post:
       operationId: upsertUserMetadata
       summary: Set User's metadata
-      description: Create or update metadata for the user identified by the provided fiscal code.
+      description: Create or update metadata for the current authenticated user.
       parameters:
         - in: body
           name: body
@@ -712,11 +714,6 @@ definitions:
     required:
       - version
       - metadata
-  UserMetadataResponse:
-    x-one-of: true
-    allOf:
-      - $ref: "#/definitions/UserMetadata"
-      - type: object
   PublicSession:
     type: object
     title: User session data

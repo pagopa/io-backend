@@ -13,7 +13,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { UserMetadataResponse } from "../../generated/backend/UserMetadataResponse";
+import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 
 import { isLeft } from "fp-ts/lib/Either";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
@@ -29,21 +29,22 @@ export default class UserMetadataController {
   constructor(private readonly userMetadataStorage: IUserMetadataStorage) {}
 
   /**
-   * Returns the metadata for the user identified by the provided fiscal
-   * code.
+   * Returns the metadata for the current authenticated user.
    */
   public readonly getMetadata = (
     req: express.Request
   ): Promise<
+    // tslint:disable-next-line: max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
-    | IResponseSuccessJson<UserMetadataResponse>
+    | IResponseNoContent
+    | IResponseSuccessJson<UserMetadata>
   > =>
     withUserFromRequest(req, async user => {
       const metadata = await this.userMetadataStorage.get(user);
       if (isLeft(metadata)) {
         return metadata.value === metadataNotFoundError
-          ? ResponseSuccessJson({})
+          ? ResponseNoContent()
           : ResponseErrorInternal(metadata.value.message);
       } else {
         return ResponseSuccessJson(metadata.value);
@@ -51,8 +52,7 @@ export default class UserMetadataController {
     });
 
   /**
-   * Create or update the metadata for the user identified by the provided
-   * fiscal code.
+   * Create or update the metadata for the current authenticated user.
    */
   public readonly upsertMetadata = (
     req: express.Request

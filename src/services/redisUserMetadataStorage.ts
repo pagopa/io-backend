@@ -12,6 +12,9 @@ const userMetadataPrefix = "USERMETA-";
 export const metadataNotFoundError = new Error("User Metadata not found");
 export const invalidVersionNumberError = new Error("Invalid version number");
 
+/**
+ * Service that manages user metadata stored into Redis database.
+ */
 export default class RedisUserMetadataStorage extends RedisStorageUtils
   implements IUserMetadataStorage {
   constructor(private readonly redisClient: redis.RedisClient) {

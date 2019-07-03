@@ -8,7 +8,7 @@ import { User } from "../types/user";
 
 export interface IUserMetadataStorage {
   /**
-   * Stores a User Metadata information from Redis Storage
+   * Stores a User Metadata information into Redis Storage
    */
   readonly set: (
     user: User,
@@ -16,7 +16,7 @@ export interface IUserMetadataStorage {
   ) => Promise<Either<Error, boolean>>;
 
   /**
-   * Retreive User Metadata information from Redis Storage
+   * Retrieves User Metadata information from Redis Storage
    */
   readonly get: (user: User) => Promise<Either<Error, UserMetadata>>;
 }
