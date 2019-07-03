@@ -53,6 +53,9 @@ export default class UserMetadataController {
 
   /**
    * Create or update the metadata for the current authenticated user.
+   *
+   * This API dosen't support atomic operations on concurrency scenario.
+   * Story https://www.pivotaltracker.com/story/show/167064659
    */
   public readonly upsertMetadata = (
     req: express.Request

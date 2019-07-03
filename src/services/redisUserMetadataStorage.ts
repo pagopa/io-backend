@@ -23,6 +23,9 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
 
   /**
    * {@inheritDoc}
+   *
+   * This method doesn't support atomic operations on concurrency scenario.
+   * Story https://www.pivotaltracker.com/story/show/167064659
    */
   public async set(
     user: User,
