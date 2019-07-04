@@ -93,6 +93,9 @@ const validApiServiceResponse = {
 const emptyApiMessagesResponse = {
   status: 404
 };
+const tooManyReqApiMessagesResponse = {
+  status: 429
+};
 const invalidApiMessagesResponse = {
   status: 500
 };
@@ -203,6 +206,18 @@ describe("MessageService#getMessagesByUser", () => {
     expect(res.kind).toEqual("IResponseErrorNotFound");
   });
 
+  it("returns an 429 HTTP error from getMessagesByUser upstream API", async () => {
+    mockGetMessages.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new MessageService(api);
+
+    const res = await service.getMessagesByUser(mockedUser);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+
   it("returns an error if the getMessagesByUser API returns an error", async () => {
     mockGetMessages.mockImplementation(() => t.success(problemJson));
 
@@ -261,6 +276,18 @@ describe("MessageService#getServicesByRecpient", () => {
       });
       expect(e.kind).toEqual("IResponseErrorInternal");
     });
+  });
+
+  it("returns an 429 HTTP error from getServicesByRecipient upstream API", async () => {
+    mockGetServicesByRecipient.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new MessageService(api);
+
+    const res = await service.getServicesByRecipient(mockedUser);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 
   it("returns unknown response if the response from the getServicesByRecpient API returns something wrong", async () => {
@@ -325,6 +352,18 @@ describe("MessageService#getMessage", () => {
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
+
+  it("returns an 429 HTTP error from getMessage upstream API", async () => {
+    mockGetMessage.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new MessageService(api);
+
+    const res = await service.getMessage(mockedUser, aValidMessageId);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
 });
 
 describe("MessageService#getService", () => {
@@ -367,5 +406,17 @@ describe("MessageService#getService", () => {
       service_id: aValidServiceID
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an 429 HTTP error from getService upstream API", async () => {
+    mockGetService.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new MessageService(api);
+
+    const res = await service.getService(aValidServiceID);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 });

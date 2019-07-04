@@ -7,6 +7,7 @@ import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
@@ -32,6 +33,7 @@ export default class ProfileController {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
     | IResponseSuccessJson<AuthenticatedProfile>
   > => withUserFromRequest(req, user => this.profileService.getProfile(user));
@@ -47,6 +49,7 @@ export default class ProfileController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > =>
     withUserFromRequest(req, async user =>
