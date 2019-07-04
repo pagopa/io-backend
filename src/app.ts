@@ -18,12 +18,14 @@ import container, {
 } from "./container";
 import ProfileController from "./controllers/profileController";
 
+import * as awilix from "awilix";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as helmet from "helmet";
 import * as t from "io-ts";
 import * as morgan from "morgan";
 import * as passport from "passport";
+import spidStrategy from "./strategies/spidStrategy";
 
 import { fromNullable } from "fp-ts/lib/Option";
 
@@ -53,6 +55,13 @@ import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
+
+const defaultModule = {
+  loadSpidStrategy,
+  newApp,
+  registerLoginRoute,
+  startIdpMetadataUpdater
+};
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -179,33 +188,40 @@ export async function newApp(
   // Setup routes
   //
 
-  await registerLoginRoute(app);
-  registerPublicRoutes(app);
-  registerAuthenticationRoutes(app, authenticationBasePath);
-  registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
-  registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
+  try {
+    const newSpidStrategy = await defaultModule.loadSpidStrategy();
+    defaultModule.registerLoginRoute(app, newSpidStrategy);
+    registerPublicRoutes(app);
+    registerAuthenticationRoutes(app, authenticationBasePath);
+    registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
+    registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
-  const idpMetadataRefreshIntervalMillis =
-    container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
-  const idpMetadataRefreshTimer = startIdpMetadataUpdater(
-    app,
-    idpMetadataRefreshIntervalMillis
-  );
-  app.on("server:stop", () => {
-    clearInterval(idpMetadataRefreshTimer);
-  });
+    const idpMetadataRefreshIntervalMillis =
+      container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
+    const idpMetadataRefreshTimer = startIdpMetadataUpdater(
+      app,
+      newSpidStrategy,
+      idpMetadataRefreshIntervalMillis
+    );
+    app.on("server:stop", () => {
+      clearInterval(idpMetadataRefreshTimer);
+    });
+  } catch (err) {
+    log.error("Fatal error during Express initialization: %s", err);
+    process.exit(1);
+  }
   return app;
 }
 
 /**
  * Initializes SpidStrategy for passport and setup /login route.
  */
-async function registerLoginRoute(app: Express): Promise<void> {
+function registerLoginRoute(
+  app: Express,
+  newSpidStrategy: passport.Strategy
+): void {
   // Add the strategy to authenticate the proxy to SPID.
-  const spidStrategy = await container.resolve<Promise<passport.Strategy>>(
-    SPID_STRATEGY
-  );
-  passport.use("spid", spidStrategy);
+  passport.use("spid", newSpidStrategy);
   const spidAuth = passport.authenticate("spid", { session: false });
   app.get("/login", spidAuth);
 }
@@ -216,8 +232,9 @@ async function registerLoginRoute(app: Express): Promise<void> {
  */
 async function clearAndReloadSpidStrategy(
   app: Express,
+  previousSpidStrategy: passport.Strategy,
   onRefresh?: () => void
-): Promise<void> {
+): Promise<passport.Strategy> {
   log.info("Started Spid strategy re-initialization ...");
 
   // Clear cache for SPID_STRATEGY definition (singleton lifetime) on awilix.
@@ -237,11 +254,34 @@ async function clearAndReloadSpidStrategy(
   // tslint:disable-next-line: no-object-mutation
   app._router.stack = app._router.stack.filter(not(isLoginRoute));
 
-  await registerLoginRoute(app);
-  log.info("Spid strategy re-initialization complete.");
-  if (onRefresh) {
-    onRefresh();
+  // tslint:disable-next-line: no-let
+  let newSpidStrategy: passport.Strategy | undefined;
+  try {
+    // Inject a new SPID Strategy generate function in awilix container
+    container.register({
+      [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
+    });
+    newSpidStrategy = await defaultModule.loadSpidStrategy();
+    log.info("Spid strategy re-initialization complete.");
+  } catch (err) {
+    log.error("Error on update spid strategy: %s", err);
+    log.info("Restore previous spid strategy configuration");
+    container.register({
+      [SPID_STRATEGY]: awilix
+        .asFunction(() => Promise.resolve(previousSpidStrategy))
+        .singleton()
+    });
+    throw new Error("Error while initializing SPID strategy");
+  } finally {
+    defaultModule.registerLoginRoute(
+      app,
+      newSpidStrategy ? newSpidStrategy : previousSpidStrategy
+    );
+    if (onRefresh) {
+      onRefresh();
+    }
   }
+  return newSpidStrategy ? newSpidStrategy : previousSpidStrategy;
 }
 
 /**
@@ -249,16 +289,25 @@ async function clearAndReloadSpidStrategy(
  */
 export function startIdpMetadataUpdater(
   app: Express,
+  originalSpidStrategy: passport.Strategy,
   refreshTimeMilliseconds: number,
   onRefresh?: () => void
 ): NodeJS.Timer {
-  return setInterval(
-    () =>
-      clearAndReloadSpidStrategy(app, onRefresh).catch(err => {
+  // tslint:disable-next-line: no-let
+  let newSpidStrategy: passport.Strategy | undefined;
+  return setInterval(() => {
+    clearAndReloadSpidStrategy(
+      app,
+      newSpidStrategy ? newSpidStrategy : originalSpidStrategy,
+      onRefresh
+    )
+      .then(previousSpidStrategy => {
+        newSpidStrategy = previousSpidStrategy;
+      })
+      .catch(err => {
         log.error("Error on clearAndReloadSpidStrategy: %s", err);
-      }),
-    refreshTimeMilliseconds
-  );
+      });
+  }, refreshTimeMilliseconds);
 }
 
 function registerPagoPARoutes(
@@ -524,3 +573,9 @@ function registerPublicRoutes(app: Express): void {
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
   app.get("/ping", (_, res) => res.status(200).send("ok"));
 }
+
+function loadSpidStrategy(): Promise<passport.Strategy> {
+  return container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY);
+}
+
+export default defaultModule;
