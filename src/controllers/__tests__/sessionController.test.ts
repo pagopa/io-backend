@@ -7,11 +7,15 @@
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
+import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SessionInfo } from "../../../generated/backend/SessionInfo";
+import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
+import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import SessionController from "../sessionController";
@@ -42,14 +46,23 @@ const mockedUser: User = {
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
+const aTokenDurationSecs = 3600;
+const mockGet = jest.fn();
+const mockMget = jest.fn();
+const mockSmembers = jest.fn();
+const mockRedisClient = createMockRedis().createClient();
+mockRedisClient.get = mockGet;
+mockRedisClient.mget = mockMget;
+mockRedisClient.smembers = mockSmembers;
+const controller = new SessionController(
+  new RedisSessionStorage(mockRedisClient, aTokenDurationSecs)
+);
 
-const controller = new SessionController();
+const res = mockRes();
+const req = mockReq();
 
-describe("AuthenticationController#getSessionState", () => {
+describe("SessionController#getSessionState", () => {
   it("returns correct session state for valid session", async () => {
-    const res = mockRes();
-    const req = mockReq();
-
     req.user = mockedUser;
 
     const response = await controller.getSessionState(req);
@@ -61,5 +74,35 @@ describe("AuthenticationController#getSessionState", () => {
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token
     });
+  });
+});
+
+describe("SessionController#listSessions", () => {
+  const expectedSessionInfo: SessionInfo = {
+    createdAt: new Date(),
+    sessionToken: mockedUser.session_token
+  };
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(null, [
+        `USER-${mockedUser.fiscal_code}-SESSION-${mockedUser.session_token}`
+      ]);
+    });
+    mockMget.mockImplementationOnce((_, callback) => {
+      callback(null, [JSON.stringify(expectedSessionInfo)]);
+    });
+  });
+  it("returns list of sessions for an authenticated user", async () => {
+    req.user = mockedUser;
+
+    const response = await controller.listSessions(req);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    const expectedResponse = SessionsList.decode({
+      sessions: [expectedSessionInfo]
+    });
+    expect(res.json).toHaveBeenCalledWith(expectedResponse.value);
   });
 });
