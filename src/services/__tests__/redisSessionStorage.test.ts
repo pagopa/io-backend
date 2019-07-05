@@ -17,7 +17,9 @@ import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
-import RedisSessionStorage from "../redisSessionStorage";
+import RedisSessionStorage, {
+  sessionNotFoundError
+} from "../redisSessionStorage";
 
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
@@ -458,6 +460,20 @@ describe("RedisSessionStorage#listUserSessions", () => {
     );
     expect(mockSadd.mock.calls[0][1]).toBe(expectedSessionInfoKey);
     expect(response).toEqual(right({ sessions: [expectedSessionInfo] }));
+  });
+
+  it("should fails if re-init session info and session info set don't complete", async () => {
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, []);
+    });
+    mockSet.mockImplementation((_, __, ___, ____, callback) => {
+      callback(new Error("REDIS ERROR"), undefined);
+    });
+    mockSadd.mockImplementation((_, __, callback) => {
+      callback(new Error("REDIS ERROR"), undefined);
+    });
+    const response = await sessionStorage.listUserSessions(aValidUser);
+    expect(response).toEqual(left(sessionNotFoundError));
   });
 
   it("should skip a session with invalid value", async () => {
