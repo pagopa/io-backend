@@ -327,9 +327,7 @@ function registerPagoPARoutes(
     `${basePath}/user`,
     checkIP(allowPagoPAIPSourceRange),
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagopaController.getUser, pagopaController)(req, res);
-    }
+    toExpressHandler(pagopaController.getUser, pagopaController)
   );
 }
 
@@ -373,23 +371,13 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/profile`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(profileController.getProfile, profileController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(profileController.getProfile, profileController)
   );
 
   app.post(
     `${basePath}/profile`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(profileController.upsertProfile, profileController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(profileController.upsertProfile, profileController)
   );
 
   app.get(
@@ -419,134 +407,89 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/messages`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        messagesController.getMessagesByUser,
-        messagesController
-      )(req, res);
-    }
+    toExpressHandler(messagesController.getMessagesByUser, messagesController)
   );
 
   app.get(
     `${basePath}/messages/:id`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(messagesController.getMessage, messagesController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(messagesController.getMessage, messagesController)
   );
 
   app.get(
     `${basePath}/services/:id`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(servicesController.getService, servicesController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(servicesController.getService, servicesController)
   );
 
   app.get(
     `${basePath}/services`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        servicesController.getVisibleServices,
-        servicesController
-      )(req, res);
-    }
+    toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
   app.get(
     `${basePath}/profile/sender-services`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        servicesController.getServicesByRecipient,
-        servicesController
-      )(req, res);
-    }
+    toExpressHandler(
+      servicesController.getServicesByRecipient,
+      servicesController
+    )
   );
 
   app.put(
     `${basePath}/installations/:id`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        notificationController.createOrUpdateInstallation,
-        notificationController
-      )(req, res);
-    }
+    toExpressHandler(
+      notificationController.createOrUpdateInstallation,
+      notificationController
+    )
   );
 
   app.post(
     `${basePath}/notify`,
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(notificationController.notify, notificationController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(notificationController.notify, notificationController)
   );
 
   app.get(
     `${basePath}/session`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(sessionController.getSessionState, sessionController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(sessionController.getSessionState, sessionController)
   );
 
   app.get(
     `${basePath}/sessions`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(sessionController.listSessions, sessionController)(
-        req,
-        res
-      );
-    }
+    toExpressHandler(sessionController.listSessions, sessionController)
   );
 
   app.get(
     `${basePath}/payment-requests/:rptId`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        pagoPAProxyController.getPaymentInfo,
-        pagoPAProxyController
-      )(req, res);
-    }
+    toExpressHandler(
+      pagoPAProxyController.getPaymentInfo,
+      pagoPAProxyController
+    )
   );
 
   app.post(
     `${basePath}/payment-activations`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        pagoPAProxyController.activatePayment,
-        pagoPAProxyController
-      )(req, res);
-    }
+    toExpressHandler(
+      pagoPAProxyController.activatePayment,
+      pagoPAProxyController
+    )
   );
 
   app.get(
     `${basePath}/payment-activations/:codiceContestoPagamento`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(
-        pagoPAProxyController.getActivationStatus,
-        pagoPAProxyController
-      )(req, res);
-    }
+    toExpressHandler(
+      pagoPAProxyController.getActivationStatus,
+      pagoPAProxyController
+    )
   );
 }
 
@@ -569,20 +512,17 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
   app.post(
     `${basePath}/logout`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.logout, acsController)(req, res);
-    }
+    toExpressHandler(acsController.logout, acsController)
   );
 
-  app.post(`${basePath}/slo`, (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.slo, acsController)(req, res);
-  });
+  app.post(
+    `${basePath}/slo`,
+    toExpressHandler(acsController.slo, acsController)
+  );
 
   app.get(
     `${basePath}/metadata`,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.metadata, acsController)(req, res);
-    }
+    toExpressHandler(acsController.metadata, acsController)
   );
 }
 
