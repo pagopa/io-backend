@@ -9,10 +9,11 @@ import {
  * which takes an express.Request as input and returns an IResponse,
  * into an express controller.
  */
-export function toExpressHandler<T>(
-  handler: (req: express.Request) => Promise<IResponse<T>>
-): <P>(req: express.Request, res: express.Response, object?: P) => void {
-  return async (req, res, object) => {
+export function toExpressHandler<T, P>(
+  handler: (req: express.Request) => Promise<IResponse<T>>,
+  object?: P
+): (req: express.Request, res: express.Response) => void {
+  return async (req, res) => {
     try {
       const response = await handler.call(object, req);
       // tslint:disable-next-line:no-object-mutation
