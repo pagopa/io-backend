@@ -432,12 +432,32 @@ describe("RedisSessionStorage#del", () => {
 });
 
 describe("RedisSessionStorage#listUserSessions", () => {
-  it("should fail getting a session for an inexistent token", async () => {
+  it("should re-init session info and session info set if valid a token is missing", async () => {
     mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, []);
     });
+    mockSet.mockImplementation((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+    mockSadd.mockImplementation((_, __, callback) => {
+      callback(undefined, 1);
+    });
+    const expectedSessionInfo: SessionInfo = {
+      createdAt: new Date(),
+      sessionToken: aValidUser.session_token
+    };
+    mockMget.mockImplementation((_, callback) => {
+      callback(undefined, [JSON.stringify(expectedSessionInfo)]);
+    });
     const response = await sessionStorage.listUserSessions(aValidUser);
-    expect(response).toEqual(left(new Error("Session not found")));
+    const expectedSessionInfoKey = `SESSIONINFO-${aValidUser.session_token}`;
+    expect(mockSet.mock.calls[0][0]).toBe(expectedSessionInfoKey);
+    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(expectedSessionInfo));
+    expect(mockSadd.mock.calls[0][0]).toBe(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSadd.mock.calls[0][1]).toBe(expectedSessionInfoKey);
+    expect(response).toEqual(right({ sessions: [expectedSessionInfo] }));
   });
 
   it("should skip a session with invalid value", async () => {

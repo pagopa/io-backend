@@ -2,7 +2,7 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import * as redis from "redis";
 import { isArray } from "util";
@@ -18,7 +18,7 @@ const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
-const sessionNotFoundMessage = "Session not found";
+const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
@@ -68,47 +68,12 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
       );
     });
+    const saveSessionInfoPromises = this.saveSessionInfo(user);
 
-    const newSessionInfo: SessionInfo = {
-      createdAt: new Date(),
-      sessionToken: user.session_token
-    };
-    const sessionInfoKey = `${sessionInfoKeyPrefix}${user.session_token}`;
-    const saveSessionInfo = new Promise<Either<Error, boolean>>(resolve => {
-      this.redisClient.set(
-        sessionInfoKey,
-        JSON.stringify(newSessionInfo),
-        "EX",
-        this.tokenDurationSecs,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting user token info")
-            )
-          )
-      );
-    });
-    const updateSessionInfoSet = new Promise<Either<Error, boolean>>(
-      resolve => {
-        this.redisClient.sadd(
-          `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
-          sessionInfoKey,
-          (err, response) =>
-            resolve(
-              this.falsyResponseToError(
-                this.integerReply(err, response),
-                new Error("Error updating user tokens info set")
-              )
-            )
-        );
-      }
-    );
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
-      saveSessionInfo,
-      updateSessionInfoSet
+      ...saveSessionInfoPromises
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
@@ -239,12 +204,25 @@ export default class RedisSessionStorage extends RedisStorageUtils
         );
       }
     );
-    if (isLeft(sessionKeys)) {
+    // tslint:disable-next-line: readonly-array
+    const initizedSessionKey: string[] = [];
+    if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
       return left(sessionKeys.value);
+    } else if (isLeft(sessionKeys)) {
+      const refreshUserSessionInfo = await Promise.all(
+        this.saveSessionInfo(user)
+      );
+      if (refreshUserSessionInfo.some(isLeft)) {
+        return left(sessionNotFoundError);
+      }
+      initizedSessionKey.push(`${sessionInfoKeyPrefix}${user.session_token}`);
     }
     const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
       (resolve, reject) => {
-        this.redisClient.mget(...sessionKeys.value, (err, response) => {
+        const keys = isRight(sessionKeys)
+          ? sessionKeys.value
+          : initizedSessionKey;
+        this.redisClient.mget(...keys, (err, response) => {
           if (err) {
             reject(err);
           }
@@ -317,6 +295,51 @@ export default class RedisSessionStorage extends RedisStorageUtils
     );
   }
 
+  /*
+  * Return the promises needed to store session info and 
+  * update session info set
+  */
+  private saveSessionInfo(
+    user: User
+  ): ReadonlyArray<Promise<Either<Error, boolean>>> {
+    const newSessionInfo: SessionInfo = {
+      createdAt: new Date(),
+      sessionToken: user.session_token
+    };
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${user.session_token}`;
+    const saveSessionInfo = new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.set(
+        sessionInfoKey,
+        JSON.stringify(newSessionInfo),
+        "EX",
+        this.tokenDurationSecs,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting user token info")
+            )
+          )
+      );
+    });
+    const updateSessionInfoSet = new Promise<Either<Error, boolean>>(
+      resolve => {
+        this.redisClient.sadd(
+          `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
+          sessionInfoKey,
+          (err, response) =>
+            resolve(
+              this.falsyResponseToError(
+                this.integerReply(err, response),
+                new Error("Error updating user tokens info set")
+              )
+            )
+        );
+      }
+    );
+    return [saveSessionInfo, updateSessionInfoSet];
+  }
+
   /**
    * Return a Session for this token.
    */
@@ -331,7 +354,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         }
 
         if (value === null) {
-          return resolve(left<Error, User>(new Error(sessionNotFoundMessage)));
+          return resolve(left<Error, User>(sessionNotFoundError));
         }
 
         // Try-catch is needed because parse() may throw an exception.
@@ -396,7 +419,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     if (err) {
       return left(err);
     } else if (!isArray(replay) || replay.length === 0) {
-      return left(new Error(sessionNotFoundMessage));
+      return left(sessionNotFoundError);
     }
     return right(replay);
   }
