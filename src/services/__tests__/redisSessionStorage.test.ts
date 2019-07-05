@@ -432,7 +432,7 @@ describe("RedisSessionStorage#del", () => {
 });
 
 describe("RedisSessionStorage#listUserSessions", () => {
-  it("should re-init session info and session info set if valid a token is missing", async () => {
+  it("should re-init session info and session info set for a user", async () => {
     mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, []);
     });
