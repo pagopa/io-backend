@@ -20,10 +20,13 @@ paths:
         "200":
           description: Found.
           schema:
-            - $ref: "#/definitions/PagoPAUser"
+            $ref: "#/definitions/PagoPAUser"
           examples:
             application/json:
               email: "email@example.com"
+              name: "Name"
+              family_name: "Surname"
+              mobile_phone: "+393331234567"
         "400":
           description: Bad request.
           schema:
