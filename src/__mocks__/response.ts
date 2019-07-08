@@ -60,7 +60,7 @@ export default function mockRes(): any {
 /**
  * resetMock
  */
-export function resetMock(this: any): any {
+function resetMock(this: any): any {
   this.append.mockClear();
   this.attachment.mockClear();
   this.cookie.mockClear();

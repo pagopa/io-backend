@@ -9,9 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "plugins": [
-      { "name": "tslint-language-service"}
-    ]
+    "baseUrl": "."
   },
   "include": [
     "./src/**/*"

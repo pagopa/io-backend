@@ -17,6 +17,7 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
+
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -25,6 +26,7 @@ import PagoPAProxyController from "./controllers/pagoPAProxyController";
 import ProfileController from "./controllers/profileController";
 import ServicesController from "./controllers/servicesController";
 import SessionController from "./controllers/sessionController";
+
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
@@ -33,9 +35,11 @@ import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import TokenService from "./services/tokenService";
+
 import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
+
 import { log } from "./utils/logger";
 
 // Without this the environment variables loaded by dotenv aren't available in
@@ -160,7 +164,8 @@ container.register({
 container.register({
   apiKey: awilix.asValue(process.env.API_KEY),
   apiUrl: awilix.asValue(process.env.API_URL),
-  pagoPAApiUrl: awilix.asValue(process.env.PAGOPA_API_URL)
+  pagoPAApiUrl: awilix.asValue(process.env.PAGOPA_API_URL),
+  pagoPAApiUrlTest: awilix.asValue(process.env.PAGOPA_API_URL_TEST)
 });
 
 // Notification URL pre shared key.
@@ -204,10 +209,29 @@ registerRequiredValue("API_BASE_PATH", "APIBasePath");
 registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
 
 // Register the spidStrategy.
+registerRequiredValue("IDP_METADATA_URL", "IDPMetadataUrl");
 export const SPID_STRATEGY = "spidStrategy";
 container.register({
   [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
 });
+
+// Set default idp metadata refresh time to 10 days
+export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
+const idpMetadataRefreshIntervalSeconds: number = process.env
+  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
+  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
+  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
+export const IDP_METADATA_REFRESH_INTERVAL_SECONDS =
+  "idpMetadataRefreshIntervalSeconds";
+container.register({
+  [IDP_METADATA_REFRESH_INTERVAL_SECONDS]: awilix.asValue(
+    idpMetadataRefreshIntervalSeconds
+  )
+});
+log.info(
+  "IDP metadata refresh interval set to %s seconds",
+  idpMetadataRefreshIntervalSeconds
+);
 
 // Register the bearerTokenStrategy.
 export const BEARER_TOKEN_STRATEGY = "bearerTokenStrategy";
@@ -288,43 +312,43 @@ container.register({
 });
 
 // Register the token service.
-export const TOKEN_SERVICE = "tokenService";
+const TOKEN_SERVICE = "tokenService";
 container.register({
   [TOKEN_SERVICE]: awilix.asClass(TokenService)
 });
 
 // Register a factory service to create API client.
-export const API_CLIENT = "apiClient";
+const API_CLIENT = "apiClient";
 container.register({
   [API_CLIENT]: awilix.asClass(ApiClientFactory).singleton()
 });
 
 // Register a factory service to create PagoPA client.
-export const PAGOPA_CLIENT = "pagoPAClient";
+const PAGOPA_CLIENT = "pagoPAClient";
 container.register({
   [PAGOPA_CLIENT]: awilix.asClass(PagoPAClientFactory)
 });
 
 // Register the profile service.
-export const PROFILE_SERVICE = "profileService";
+const PROFILE_SERVICE = "profileService";
 container.register({
   [PROFILE_SERVICE]: awilix.asClass(ProfileService)
 });
 
 // Register the messages service.
-export const MESSAGES_SERVICE = "messagesService";
+const MESSAGES_SERVICE = "messagesService";
 container.register({
   [MESSAGES_SERVICE]: awilix.asClass(MessagesService)
 });
 
 // Register the notification service.
-export const NOTIFICATION_SERVICE = "notificationService";
+const NOTIFICATION_SERVICE = "notificationService";
 container.register({
   [NOTIFICATION_SERVICE]: awilix.asClass(NotificationService)
 });
 
 // Register the PagoPA proxy service.
-export const PAGOPA_PROXY_SERVICE = "pagoPAProxyService";
+const PAGOPA_PROXY_SERVICE = "pagoPAProxyService";
 container.register({
   [PAGOPA_PROXY_SERVICE]: awilix.asClass(PagoPAProxyService)
 });

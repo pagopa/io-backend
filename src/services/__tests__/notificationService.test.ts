@@ -1,11 +1,12 @@
 /* tslint:disable:no-null-keyword */
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { InstallationID } from "../../types/api/InstallationID";
-import { MessageBodyMarkdown } from "../../types/api/MessageBodyMarkdown";
-import { MessageSubject } from "../../types/api/MessageSubject";
-import { PlatformEnum } from "../../types/api/Platform";
+
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { InstallationID } from "../../../generated/backend/InstallationID";
+import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
+import { MessageSubject } from "../../../generated/backend/MessageSubject";
+import { PlatformEnum } from "../../../generated/backend/Platform";
 import NotificationService from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -147,6 +148,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
+      detail: expect.anything(),
       kind: "IResponseErrorInternal"
     });
     expect(mockCreateOrUpdateInstallation).toBeCalledWith(
@@ -199,6 +201,7 @@ describe("NotificationService#notify", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
+      detail: expect.anything(),
       kind: "IResponseErrorInternal"
     });
     expect(mockSend).toBeCalledWith(

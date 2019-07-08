@@ -39,7 +39,7 @@ export default function mockReq(): any {
 /**
  * resetMock
  */
-export function resetMock(this: any): any {
+function resetMock(this: any): any {
   this.header.mockClear();
   this.accepts.mockClear();
   this.acceptsEncodings.mockClear();

@@ -4,17 +4,20 @@
  */
 
 import * as express from "express";
-import { Either, left } from "fp-ts/lib/Either";
+import { Either, left, right } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { JSONFromString } from "io-ts-types";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
+
+import { EmailAddress } from "../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
+
 import { log } from "../utils/logger";
-import { EmailAddress } from "./api/EmailAddress";
-import { FiscalCode } from "./api/FiscalCode";
-import { SpidLevel, SpidLevelEnum } from "./api/SpidLevel";
+import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
 import { SessionToken, WalletToken } from "./token";
@@ -88,9 +91,9 @@ export function toAppUser(
  * Validates a SPID User extracted from a SAML response.
  */
 // tslint:disable-next-line:no-any
-export function validateSpidUser(value: any): Either<Error, SpidUser> {
+export function validateSpidUser(value: any): Either<string, SpidUser> {
   if (!value.hasOwnProperty("fiscalNumber")) {
-    return left(new Error("Cannot decode a user without a fiscalNumber"));
+    return left("Cannot decode a user without a fiscalNumber");
   }
 
   // Remove the international prefix from fiscal number.
@@ -139,42 +142,35 @@ export function validateSpidUser(value: any): Either<Error, SpidUser> {
   const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 
   return result.mapLeft(err => {
-    return new Error(
-      "Cannot validate SPID user object: " + readableReport(err)
+    return (
+      "Cannot validate SPID user object: " +
+      errorsToReadableMessages(err).join(" / ")
     );
   });
 }
 
-/**
- * Extracts the user added to the request by Passport.
- */
-export function extractUserFromRequest(
-  from: express.Request
-): Either<Error, User> {
-  const result = User.decode(from.user);
-
-  // tslint:disable-next-line:no-identical-functions
-  return result.mapLeft(err => {
-    return new Error(
-      "Cannot extract the user from request: " + readableReport(err)
-    );
-  });
-}
+export const withUserFromRequest = async <T>(
+  req: express.Request,
+  f: (user: User) => Promise<T>
+): Promise<IResponseErrorValidation | T> =>
+  withValidatedOrValidationError(User.decode(req.user), f);
 
 /**
  * Extracts a user from a json string.
  */
-export function extractUserFromJson(from: string): Either<Error, User> {
-  return JSONFromString.decode(from)
-    .mapLeft(
-      err => new Error("Cannot parse the user JSON:" + readableReport(err))
+export const extractUserFromJson = (from: string): Either<string, User> =>
+  tryCatch(() => JSON.parse(from))
+    .fold(left<string, unknown>(`Invalid JSON for User [${from}]`), _ =>
+      right<string, unknown>(_)
     )
     .chain(json =>
       User.decode(json).mapLeft(
-        err => new Error("Cannot decode the user JSON: " + readableReport(err))
+        err =>
+          `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
+            " / "
+          )}`
       )
     );
-}
 
 /**
  * Extract AuthnContextClassRef from SAML response
@@ -196,7 +192,7 @@ function getAuthnContextFromResponse(xml: string): Option<string> {
         responseAuthLevelEl &&
         responseAuthLevelEl[0] &&
         responseAuthLevelEl[0].textContent
-          ? some(responseAuthLevelEl[0].textContent!.trim())
+          ? some(responseAuthLevelEl[0].textContent.trim())
           : none
     );
 }

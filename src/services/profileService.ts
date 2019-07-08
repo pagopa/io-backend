@@ -3,35 +3,30 @@
  * an API client.
  */
 
-import { Either, left, right } from "fp-ts/lib/Either";
 import {
-  IResponseErrorGeneric,
   IResponseErrorInternal,
   IResponseErrorNotFound,
-  IResponseSuccessJson
+  IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
+  ResponseErrorNotFound,
+  ResponseErrorTooManyRequests,
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { AuthenticatedProfile } from "../types/api/AuthenticatedProfile";
-import { InitializedProfile } from "../types/api/InitializedProfile";
 
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { ExtendedProfile } from "../types/api/ExtendedProfile";
-import { internalError, ServiceError } from "../types/error";
+import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
+
+import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
+import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backend/ExtendedProfile";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
-import { log } from "../utils/logger";
+import {
+  unhandledResponseStatus,
+  withCatchAsInternalError,
+  withValidatedOrInternalError
+} from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-
-const profileErrorOnUnknownError = "Unknown response.";
-const profileErrorOnApiError = "Api error.";
-const logErrorOnStatusNotOK = "Status is not 200 or 404: %s";
-const logErrorOnDecodeError = "Response can't be decoded: %O";
-const logErrorOnUnknownError = "Unknown error: %s";
-
-export type profileResponse<T> =
-  | IResponseErrorInternal
-  | IResponseErrorNotFound
-  | IResponseErrorGeneric
-  | IResponseSuccessJson<T>;
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -39,78 +34,93 @@ export default class ProfileService {
   /**
    * Retrieves the profile for a specific user.
    */
-  public async getProfile(
+  public readonly getProfile = (
     user: User
-  ): Promise<Either<ServiceError, AuthenticatedProfile | InitializedProfile>> {
-    try {
-      const client = this.apiClient.getClient();
-
-      const res = await client.getProfile({
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<InitializedProfile>
+    | IResponseSuccessJson<AuthenticatedProfile>
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.getProfile({
         fiscalCode: user.fiscal_code
       });
 
-      // The response is undefined (can't be decoded).
-      if (!res) {
-        log.error(logErrorOnDecodeError, res);
-        return left(internalError(profileErrorOnUnknownError));
-      }
+      return withValidatedOrInternalError(validated, response => {
+        if (response.status === 200) {
+          // we need an ExtendedProfile (and that's what we should have got) but
+          // since the response may be an ExtendedProfile or a LimitedProfile
+          // depending on the credentials, we must decode it as an
+          // ExtendedProfile to be sure it's what we need.
+          const validatedExtendedProfile = ExtendedProfileApi.decode(
+            response.value
+          );
 
-      // The response is correct.
-      if (res.status === 200) {
-        return ExtendedProfile.decode(res.value).bimap(
-          errs => internalError(readableReport(errs)),
-          profile => toInitializedProfile(profile, user)
-        );
-      }
+          return withValidatedOrInternalError(validatedExtendedProfile, p =>
+            ResponseSuccessJson(toInitializedProfile(p, user))
+          );
+        }
 
-      // If the profile doesn't exists on the API we still
-      // return 200 to the App with the information we have
-      // retrieved from SPID.
-      if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
-      }
+        // If the profile doesn't exists on the API we still
+        // return 200 to the App with the information we have
+        // retrieved from SPID.
+        if (response.status === 404) {
+          return ResponseSuccessJson(toAuthenticatedProfile(user));
+        }
 
-      // The API is returning an error.
-      log.error(logErrorOnStatusNotOK, res.status);
-      return left(internalError(profileErrorOnApiError));
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(profileErrorOnUnknownError));
-    }
-  }
+        // The user has sent too many requests in a given amount of time ("rate limiting").
+        if (response.status === 429) {
+          return ResponseErrorTooManyRequests();
+        }
+
+        return unhandledResponseStatus(response.status);
+      });
+    });
+  };
 
   /**
    * Upsert the profile of a specific user.
    */
-  public async upsertProfile(
+  public readonly upsertProfile = async (
     user: User,
-    upsertProfile: ExtendedProfile
-  ): Promise<Either<ServiceError, InitializedProfile | AuthenticatedProfile>> {
-    try {
-      const client = this.apiClient.getClient();
+    extendedProfileBackend: ExtendedProfileBackend
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<InitializedProfile>
+  > => {
+    const client = this.apiClient.getClient();
+    return withValidatedOrInternalError(
+      // we need to convert the ExtendedProfile from the backend specs to the
+      // ExtendedProfile model of the API specs - this decode should always
+      // succeed as the models should be exactly the same
+      ExtendedProfileApi.decode(extendedProfileBackend),
+      async extendedProfileApi =>
+        withCatchAsInternalError(async () => {
+          const validated = await client.upsertProfile({
+            extendedProfile: extendedProfileApi,
+            fiscalCode: user.fiscal_code
+          });
 
-      const res = await client.createOrUpdateProfile({
-        fiscalCode: user.fiscal_code,
-        newProfile: upsertProfile
-      });
-
-      // If the response is undefined (can't be decoded) or the status is not 200 dispatch a failure action.
-      if (!res) {
-        log.error(logErrorOnDecodeError, res);
-        return left(internalError(profileErrorOnApiError));
-      }
-
-      if (res.status === 200) {
-        return right(toInitializedProfile(res.value, user));
-      } else if (res.status === 404) {
-        return right(toAuthenticatedProfile(user));
-      } else {
-        log.error(logErrorOnStatusNotOK, res.status);
-        return left(internalError(profileErrorOnApiError));
-      }
-    } catch (e) {
-      log.error(logErrorOnUnknownError, e);
-      return left(internalError(profileErrorOnUnknownError));
-    }
-  }
+          return withValidatedOrInternalError(
+            validated,
+            response =>
+              response.status === 200
+                ? ResponseSuccessJson(
+                    toInitializedProfile(response.value, user)
+                  )
+                : response.status === 404
+                  ? ResponseErrorNotFound("Not found", "User not found")
+                  : response.status === 429
+                    ? ResponseErrorTooManyRequests()
+                    : unhandledResponseStatus(response.status)
+          );
+        })
+    );
+  };
 }

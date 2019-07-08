@@ -1,28 +1,31 @@
 /* tslint:disable:no-any */
+/* tslint:disable:no-object-mutation */
+/* tslint:disable:no-inferred-empty-object-type */
 
 import { isLeft, isRight } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../api/EmailAddress";
-import { ExtendedProfile } from "../api/ExtendedProfile";
-import { FiscalCode } from "../api/FiscalCode";
-import { IsInboxEnabled } from "../api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../api/IsWebhookEnabled";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/backend/ExtendedProfile";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "../api/PreferredLanguage";
-import { SpidLevelEnum } from "../api/SpidLevel";
-import { Version } from "../api/Version";
-import {
-  extractUpsertProfileFromRequest,
-  toAuthenticatedProfile,
-  toInitializedProfile
-} from "../profile";
+} from "../../../generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { Version } from "../../../generated/backend/Version";
+
+import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
+
+import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
+import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
+const aTosVersion = 1 as AcceptedTosVersion;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
@@ -46,7 +49,17 @@ const mockedUser: User = {
 };
 
 // mock for a valid ExtendedProfile profile
-const mockedExtendedProfile: ExtendedProfile = {
+const mockedExtendedProfile: ExtendedProfileApi = {
+  accepted_tos_version: aTosVersion,
+  email: anEmailAddress,
+  is_inbox_enabled: anIsInboxEnabled,
+  is_webhook_enabled: anIsWebhookEnabled,
+  preferred_languages: aPreferredLanguages,
+  version: 1 as Version
+};
+
+// mock for a valid ExtendedProfile profile used for ToS test
+const mockedExtendedProfileWithoutTos: ExtendedProfileApi = {
   email: anEmailAddress,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
@@ -63,6 +76,9 @@ describe("profile type", () => {
       mockedUser // user
     );
 
+    expect(userData.accepted_tos_version).toBe(
+      mockedExtendedProfile.accepted_tos_version
+    );
     expect(userData.email).toBe(mockedExtendedProfile.email);
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
@@ -104,7 +120,7 @@ describe("profile type", () => {
     req.body = mockedExtendedProfile;
 
     // extract the upsert user data from Express request with correct values. Return right.
-    const userDataOK = extractUpsertProfileFromRequest(req);
+    const userDataOK = ExtendedProfileBackend.decode(req.body);
 
     expect(isRight(userDataOK)).toBeTruthy();
     if (isRight(userDataOK)) {
@@ -114,10 +130,20 @@ describe("profile type", () => {
 
     // extract the upsert user data from Express request with incorrect values. Return left.
     req.body.email = "it.is.not.an.email";
-    const userDataKO = extractUpsertProfileFromRequest(req);
+    const userDataKO = ExtendedProfileBackend.decode(req.body);
     expect(isLeft(userDataKO)).toBeTruthy();
     if (isLeft(userDataKO)) {
       expect(userDataKO._tag).toBe("Left");
     }
+  });
+
+  it("should get an app Proxy profile without tos", async () => {
+    // return app Proxy Profile.
+    const userData = toInitializedProfile(
+      mockedExtendedProfileWithoutTos, // from
+      mockedUser // user
+    );
+
+    expect(userData.accepted_tos_version).toBe(undefined);
   });
 });

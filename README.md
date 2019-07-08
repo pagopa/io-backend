@@ -27,6 +27,8 @@ This repository contains the code of the backend used by the [web](https://githu
     - [Environment variables](#environment-variables)
     - [Logs](#logs)
     - [SPID user management](#spid-user-management)
+- [Redis Database](#redis-database)
+    - [Data Structure](#data-structure)
 - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies)
     - [Starting steps](#starting-steps)
@@ -146,8 +148,12 @@ Those are all Environment variables needed by the application:
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | API_BASE_PATH                          | The root path for the api endpoints                                               | string |
+| PAGOPA_API_URL                         | The url for the PagoPA api endpoints                                              | string |
+| PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
+| IDP_METADATA_URL                       | Url to download IDP metadata from                                                   | string |
+| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                          | int |
 
 ### Logs
 
@@ -160,6 +166,21 @@ The setup procedure adds some test users to the test IDP server, the full list c
 container.
 
 ---
+
+## Redis Database
+
+### Data Structure
+
+Redis Database stores data required only by application side functionalities. Below a table with an example of data for an hypothetical user with fiscal code `MRARSS80A01H501T` and with session token `HexToken`.
+
+
+| Key                          | Value                                                              | type   | expire in |
+|----------------------------------------|-----------------------------------------------------------------------------------|--------|-----------|
+| SESSION-HexToken       | a JSON representing the user object | `User` | TOKEN_DURATION_IN_SECONDS |
+| WALLET-WalletHexToken   | `"SESSION-HexToken"` | `String` | TOKEN_DURATION_IN_SECONDS |
+| SESSIONINFO-HexToken   | a JSON representing the `SessionInfo` object | `SessionInfo` | TOKEN_DURATION_IN_SECONDS |
+| USERSESSIONS-MRARSS80A01H501T | a Set of SessionInfo Keys | `Set<SessionInfoKey>` | never |
+
 
 ## How to contribute
 

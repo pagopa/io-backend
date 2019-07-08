@@ -10,7 +10,7 @@ COPY /package.json /usr/src/app/package.json
 COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
 COPY /api_notifications.yaml /usr/src/app/api_notifications.yaml
-COPY /api_proxy.yaml /usr/src/app/api_proxy.yaml
+COPY /api_backend.yaml /usr/src/app/api_backend.yaml
 COPY /api_pagopa.yaml /usr/src/app/api_pagopa.yaml
 COPY /api_public.yaml /usr/src/app/api_public.yaml
 
@@ -27,6 +27,7 @@ WORKDIR /usr/src/app
 COPY /package.json /usr/src/app/package.json
 COPY /public /usr/src/app/public
 COPY --from=builder /usr/src/app/src /usr/src/app/src
+COPY --from=builder /usr/src/app/generated /usr/src/app/generated
 COPY --from=builder /usr/src/app/node_modules /usr/src/app/node_modules
 
 EXPOSE 80
