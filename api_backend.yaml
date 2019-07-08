@@ -350,6 +350,27 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
+  "/sessions":
+    x-swagger-router-controller: AuthenticationController
+    get:
+      operationId: listUserSessions
+      summary: List sessions of a User
+      description: Return all the active sessions for an authenticated User.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/SessionsList"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Unavailable service
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/payment-requests/{rptId}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -650,6 +671,28 @@ definitions:
     required:
       - spidLevel
       - walletToken
+  SessionInfo:
+    type: object
+    title: Session info of a user
+    description: Decribe a session of an authenticated user.
+    properties:
+      createdAt:
+        $ref: '#/definitions/Timestamp'
+      sessionToken:
+        type: string
+    required:
+      - createdAt
+      - sessionToken
+  SessionsList:
+    description: Contains all active sessions for an authenticated user.
+    type: object
+    properties:
+      sessions:
+        type: array
+        items:
+          $ref: '#/definitions/SessionInfo'
+    required:
+      - sessions
   InstallationID:
     type: string
     description: |-
