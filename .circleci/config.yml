@@ -29,7 +29,7 @@ jobs:
         - run: npm install oval
         - run: npx oval validate -p api_notifications.yaml
         - run: npx oval validate -p api_pagopa.yaml
-        - run: npx oval validate -p api_proxy.yaml
+        - run: npx oval validate -p api_backend.yaml
         - run: npx oval validate -p api_public.yaml
   lint-typescript:
     docker:
