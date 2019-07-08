@@ -7,6 +7,7 @@ import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
@@ -31,6 +32,7 @@ export default class ServicesController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePublic>
   > => this.messagesService.getService(req.params.id);
 
@@ -41,6 +43,7 @@ export default class ServicesController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
   > =>
     withUserFromRequest(req, user =>
@@ -51,6 +54,7 @@ export default class ServicesController {
     _: express.Request
   ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
   > => this.messagesService.getVisibleServices();
 }

@@ -6,8 +6,10 @@
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   ResponseErrorNotFound,
+  ResponseErrorTooManyRequests,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -35,7 +37,9 @@ export default class ProfileService {
   public readonly getProfile = (
     user: User
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
     | IResponseSuccessJson<AuthenticatedProfile>
   > => {
@@ -67,6 +71,11 @@ export default class ProfileService {
           return ResponseSuccessJson(toAuthenticatedProfile(user));
         }
 
+        // The user has sent too many requests in a given amount of time ("rate limiting").
+        if (response.status === 429) {
+          return ResponseErrorTooManyRequests();
+        }
+
         return unhandledResponseStatus(response.status);
       });
     });
@@ -79,8 +88,10 @@ export default class ProfileService {
     user: User,
     extendedProfileBackend: ExtendedProfileBackend
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > => {
     const client = this.apiClient.getClient();
@@ -105,7 +116,9 @@ export default class ProfileService {
                   )
                 : response.status === 404
                   ? ResponseErrorNotFound("Not found", "User not found")
-                  : unhandledResponseStatus(response.status)
+                  : response.status === 429
+                    ? ResponseErrorTooManyRequests()
+                    : unhandledResponseStatus(response.status)
           );
         })
     );
