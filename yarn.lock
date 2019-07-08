@@ -3838,6 +3838,11 @@ ms@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
 
+nan@2.12.0:
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.12.0.tgz#9d443fdb5e13a20770cc5e602eee59760a685885"
+  integrity sha512-zT5nC0JhbljmyEf+Z456nvm7iO7XgRV2hYxoBtPpnyp+0Q4aCoP6uWNn76v/I6k2kCYNLWqWbwBWQcjsNI/bjw==
+
 nan@^2.9.2:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
@@ -5997,6 +6002,13 @@ ws@^5.2.0:
 x-xss-protection@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/x-xss-protection/-/x-xss-protection-1.1.0.tgz#4f1898c332deb1e7f2be1280efb3e2c53d69c1a7"
+
+x509@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/x509/-/x509-0.3.4.tgz#dcfc398d95506a505d51bda8130ce07a76bc8080"
+  integrity sha512-in6y2bl0kGHDMG4rD4Zzu5UH/4wAIiTXNwlrVOhBCyDptQmUujDHy0O60y8Nalb/p4Y0nsIbg70amKrCyZC9Ew==
+  dependencies:
+    nan "2.12.0"
 
 xdg-basedir@^3.0.0:
   version "3.0.0"

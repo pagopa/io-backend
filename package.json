@@ -65,6 +65,7 @@
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.0.0",
+    "x509": "^0.3.4",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {

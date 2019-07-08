@@ -2,9 +2,9 @@
  * Builds and configure a Passport strategy to authenticate the proxy to the
  * different SPID IDPs.
  */
-import * as child_process from "child_process";
 import * as fs from "fs";
 import * as SpidStrategy from "spid-passport";
+import * as x509 from "x509";
 import { SpidUser } from "../types/user";
 import {
   fetchIdpMetadata,
@@ -141,18 +141,16 @@ const spidStrategy = async (
 function logSamlCertExpiration(samlCert: string): void {
   try {
     const tempDir = fs.mkdtempSync("saml-cert");
-    fs.writeFileSync(`${tempDir}/samlCert.pem`, samlCert);
-    const out = child_process.execSync(
-      `openssl x509 -in ${tempDir}/samlCert.pem -noout -dates`
-    );
-    fs.unlinkSync(`${tempDir}/samlCert.pem`);
-    const matchResult = /notAfter=(.*)$/m.exec(out.toString());
-    if (matchResult) {
-      const expireAt = new Date(matchResult[1]);
-      const timeDiff = expireAt.valueOf() - Date.now();
+    const certPath = `${tempDir}/samlCert.pem`;
+    fs.writeFileSync(certPath, samlCert);
+    const out = x509.parseCert(certPath);
+    fs.unlinkSync(certPath);
+    fs.rmdirSync(tempDir);
+    if (out.notAfter) {
+      const timeDiff = out.notAfter.valueOf() - Date.now();
       log.info("samlCert expire in %s seconds", (timeDiff / 1000).toFixed(0));
     } else {
-      log.warn("Missing expiration date on saml certificate.");
+      log.error("Missing expiration date on saml certificate.");
     }
   } catch (e) {
     log.error("Error calculating saml cert expiration: %s", e);
