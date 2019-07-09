@@ -103,9 +103,10 @@ const spidStrategy = async (
       identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
       issuer: samlIssuer,
       organization: {
-        URL: "https://github.com/teamdigitale/italia-backend",
-        displayName: "Digital citizenship proxy",
-        name: "Digital citizenship proxy"
+        URL: "https://io.italia.it",
+        displayName: "IO - l'app dei servizi pubblici BETA",
+        name:
+          "Team per la Trasformazione Digitale - Presidenza Del Consiglio dei Ministri"
       },
       privateCert: samlKey,
       signatureAlgorithm: "sha256"

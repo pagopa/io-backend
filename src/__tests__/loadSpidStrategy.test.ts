@@ -8,6 +8,7 @@ import container, {
   SPID_STRATEGY
 } from "../container";
 jest.mock("../services/redisSessionStorage");
+jest.mock("../services/redisUserMetadataStorage");
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
