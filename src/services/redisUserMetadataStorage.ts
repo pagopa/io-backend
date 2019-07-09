@@ -2,8 +2,8 @@ import * as redis from "redis";
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
-import { User } from "src/types/user";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
+import { User } from "../types/user";
 import { log } from "../utils/logger";
 import { IUserMetadataStorage } from "./IUserMetadataStorage";
 import RedisStorageUtils from "./redisStorageUtils";
