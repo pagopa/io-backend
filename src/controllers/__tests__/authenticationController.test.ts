@@ -438,11 +438,11 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
     </AttributeConsumingService>
   </SPSSODescriptor>
   <Organization>
-    <OrganizationName xml:lang="it">Digital citizenship proxy</OrganizationName>
-    <OrganizationDisplayName xml:lang="it">Digital citizenship proxy</OrganizationDisplayName>
-    <OrganizationURL xml:lang="it">https://github.com/teamdigitale/italia-backend</OrganizationURL>
+    <OrganizationName xml:lang="it">Team per la Trasformazione Digitale - Presidenza Del Consiglio dei Ministri</OrganizationName>
+    <OrganizationDisplayName xml:lang="it">IO - l'app dei servizi pubblici BETA</OrganizationDisplayName>
+    <OrganizationURL xml:lang="it">https://io.italia.it</OrganizationURL>
   </Organization>
-<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/><SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"/><Reference URI=\"#https___spid_agid_gov_it_cd\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/><Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/><DigestValue>/9efFokTTLGaUA/iOO9o1Lhfu+uoQaqi+beEqYkvbF0=</DigestValue></Reference></SignedInfo><SignatureValue>cNQ9MzQLOw1snQIiWpfYaSu3DvfqzyyE6/hRb4sYX+rfQQ4sQtjBycxFyFEAqI8Q2TCSaG6yo5H1O3feCdVdKKE0+nh1Ctxjqfiw1BdZZV1LEYnsIt4IAVgVtIeVcAQ6gEe84Nnq6bvwjJKcABHk/hkzYBHAkLkUUEwUs+1qLWUcuzXMq9TwQBCpSG4PU8JtuIPGIPDV2LqzcqaY1YiNLI5+a7QNEaa2RRge38j3fdQmmwPb9aaG/M/dz2XDKuvsNjmiHCkaRYTdmUMoGS2KjpVFvWzH5+CDqOnlPplBqUDRYji4kp1xFg4LK0Btjajnq3Z5iOnJnOkRDpPclGDydMI=</SignatureValue><KeyInfo><X509Data><X509Certificate>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#https___spid_agid_gov_it_cd"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Iory2w3p4u2vl8UfYPey+it3VUAwpLodiNAjpRFjpRI=</DigestValue></Reference></SignedInfo><SignatureValue>FZ0A40/ssisamYRlT0xoZ8BxSsYTAXiiVnqlFvSKFF3BJpJSnVGdGJzvDYryb01QvY6MngUlnrHgbpUdtXYFVIbogD9vJieT7xLPFErnv9r/ncYB9lxaAFvcqecA5+oc8QI5QqEw93AqxhPTWAVqNpDgsVKaMEaroHB7P4xGKjAYiAS1rUfK+u19SXXuXDBfv+uqqcWGwCCQ0FekhXOYPwVTmYSExFZlJvpT67N4yA5yY/V9yimSuqRdE3wca+9t/Vm+l4WhgA/V6QRRicBPR88gm7gcPkpPmhcdB509k7s2zBKgIOb5O+RwqjqR9cXahoHG/+tjT9jDdqJ2f9Thd4Q=</SignatureValue><KeyInfo><X509Data><X509Certificate>
 MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
 MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
 dHBzOi8vaXRhbGlhLWJhY2tlbmQwHhcNMTcxMDI2MTAzNTQwWhcNMTgxMDI2MTAz
