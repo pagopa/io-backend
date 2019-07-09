@@ -383,25 +383,16 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/user-metadata`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(userMetadataController.getMetadata)(
-        req,
-        res,
-        userMetadataController
-      );
-    }
+    toExpressHandler(userMetadataController.getMetadata, userMetadataController)
   );
 
   app.post(
     `${basePath}/user-metadata`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(userMetadataController.upsertMetadata)(
-        req,
-        res,
-        userMetadataController
-      );
-    }
+    toExpressHandler(
+      userMetadataController.upsertMetadata,
+      userMetadataController
+    )
   );
 
   app.get(
