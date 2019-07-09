@@ -2,7 +2,7 @@
  * Builds and configure a Passport strategy to authenticate the proxy to the
  * different SPID IDPs.
  */
-import * as fs from "fs";
+import { distanceInWordsToNow, isAfter, subDays } from "date-fns";
 import * as SpidStrategy from "spid-passport";
 import * as x509 from "x509";
 import { SpidUser } from "../types/user";
@@ -140,15 +140,13 @@ const spidStrategy = async (
  */
 function logSamlCertExpiration(samlCert: string): void {
   try {
-    const tempDir = fs.mkdtempSync("saml-cert");
-    const certPath = `${tempDir}/samlCert.pem`;
-    fs.writeFileSync(certPath, samlCert);
-    const out = x509.parseCert(certPath);
-    fs.unlinkSync(certPath);
-    fs.rmdirSync(tempDir);
+    const out = x509.parseCert(samlCert);
     if (out.notAfter) {
-      const timeDiff = out.notAfter.valueOf() - Date.now();
-      log.info("samlCert expire in %s seconds", (timeDiff / 1000).toFixed(0));
+      const timeDiff = distanceInWordsToNow(out.notAfter);
+      const warningDate = subDays(new Date(), 60);
+      isAfter(out.notAfter, warningDate)
+        ? log.info("samlCert expire in %s", timeDiff)
+        : log.warn("samlCert expire in %s", timeDiff);
     } else {
       log.error("Missing expiration date on saml certificate.");
     }
