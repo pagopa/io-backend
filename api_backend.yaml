@@ -293,6 +293,50 @@ paths:
           description: Profile cannot be updated.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/user-metadata":
+    x-swagger-router-controller: userMetadataController
+    get:
+      operationId: getUserMetadata
+      summary: Get user's metadata
+      description: Returns metadata for the current authenticated user.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/UserMetadata"
+        "204":
+          description: No Content.
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: There was an error in retrieving the user metadata.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+    post:
+      operationId: upsertUserMetadata
+      summary: Set User's metadata
+      description: Create or update metadata for the current authenticated user.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/UserMetadata"
+          required: true
+      responses:
+        '200':
+          description: User Metadata updated.
+          schema:
+            $ref: "#/definitions/UserMetadata"
+        "400":
+          description: Invalid payload.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Profile cannot be updated.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/installations/{installationID}":
     x-swagger-router-controller: NotificationController
     parameters:
@@ -659,6 +703,17 @@ definitions:
       - name
       - spid_email
       - spid_mobile_phone
+  UserMetadata:
+    type: object
+    title: User Metadata information
+    properties:
+      version:
+        type: number
+      metadata:
+        type: string
+    required:
+      - version
+      - metadata
   PublicSession:
     type: object
     title: User session data
