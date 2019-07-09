@@ -144,9 +144,13 @@ function logSamlCertExpiration(samlCert: string): void {
     if (out.notAfter) {
       const timeDiff = distanceInWordsToNow(out.notAfter);
       const warningDate = subDays(new Date(), 60);
-      isAfter(out.notAfter, warningDate)
-        ? log.info("samlCert expire in %s", timeDiff)
-        : log.warn("samlCert expire in %s", timeDiff);
+      if (isAfter(out.notAfter, warningDate)) {
+        log.info("samlCert expire in %s", timeDiff);
+      } else if (isAfter(out.notAfter, new Date())) {
+        log.warn("samlCert expire in %s", timeDiff);
+      } else {
+        log.error("samlCert expired from %s", timeDiff);
+      }
     } else {
       log.error("Missing expiration date on saml certificate.");
     }
