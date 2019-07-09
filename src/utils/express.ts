@@ -13,8 +13,7 @@ export function toExpressHandler<T, P>(
   handler: (req: express.Request) => Promise<IResponse<T>>,
   object?: P
 ): (req: express.Request, res: express.Response) => void {
-  return (req, res) => {
-    // tslint:disable-next-line: no-floating-promises
+  return (req, res) =>
     handler
       .call(object, req)
       .catch(ResponseErrorInternal)
@@ -23,5 +22,4 @@ export function toExpressHandler<T, P>(
         res.locals.detail = response.detail;
         response.apply(res);
       });
-  };
 }
