@@ -333,6 +333,10 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
+        "409":
+          description: Conflict.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: Profile cannot be updated.
           schema:

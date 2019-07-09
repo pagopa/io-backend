@@ -5,11 +5,12 @@
 
 import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseErrorInternal,
-  ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -60,6 +61,8 @@ export default class UserMetadataController {
   public readonly upsertMetadata = (
     req: express.Request
   ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorConflict
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseSuccessJson<UserMetadata>
@@ -74,10 +77,7 @@ export default class UserMetadataController {
           );
           if (isLeft(setMetadataResponse)) {
             if (setMetadataResponse.value === invalidVersionNumberError) {
-              return ResponseErrorValidation(
-                "Bad request",
-                setMetadataResponse.value.message
-              );
+              return ResponseErrorConflict(setMetadataResponse.value.message);
             }
             return ResponseErrorInternal(setMetadataResponse.value.message);
           }
