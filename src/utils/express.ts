@@ -14,15 +14,11 @@ export function toExpressHandler<T, P>(
   object?: P
 ): (req: express.Request, res: express.Response) => void {
   return (req, res) => {
+    // tslint:disable-next-line: no-floating-promises
     handler
       .call(object, req)
+      .catch(ResponseErrorInternal)
       .then(response => {
-        // tslint:disable-next-line:no-object-mutation
-        res.locals.detail = response.detail;
-        response.apply(res);
-      })
-      .catch(e => {
-        const response = ResponseErrorInternal(e);
         // tslint:disable-next-line:no-object-mutation
         res.locals.detail = response.detail;
         response.apply(res);
