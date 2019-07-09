@@ -198,8 +198,8 @@ describe("UserMetadataController#upsertMetadata", () => {
     expect(mockUpsertMetadata).toHaveBeenCalledWith(mockedUser, mockMetadata);
     expect(response).toEqual({
       apply: expect.any(Function),
-      detail: `Bad request: ${invalidVersionNumberError.message}`,
-      kind: "IResponseErrorValidation"
+      detail: `Conflict: ${invalidVersionNumberError.message}`,
+      kind: "IResponseErrorConflict"
     });
   });
 });
