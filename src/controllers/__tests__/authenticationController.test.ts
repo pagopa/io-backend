@@ -202,6 +202,7 @@ beforeAll(async () => {
     "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
   const spidStrategyInstance = await spidStrategy(
     samlKey,
+    samlCert,
     samlCallbackUrl,
     samlIssuer,
     samlAcceptedClockSkewMs,

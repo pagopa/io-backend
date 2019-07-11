@@ -2,7 +2,9 @@
  * Builds and configure a Passport strategy to authenticate the proxy to the
  * different SPID IDPs.
  */
+import { distanceInWordsToNow, isAfter, subDays } from "date-fns";
 import * as SpidStrategy from "spid-passport";
+import * as x509 from "x509";
 import { SpidUser } from "../types/user";
 import {
   fetchIdpMetadata,
@@ -44,6 +46,7 @@ export async function loadFromRemote(
 
 const spidStrategy = async (
   samlKey: string,
+  samlCert: string,
   samlCallbackUrl: string,
   samlIssuer: string,
   samlAcceptedClockSkewMs: number,
@@ -54,6 +57,8 @@ const spidStrategy = async (
   // tslint:disable-next-line: parameters-max-number
 ) => {
   const idpsMetadataOption = await loadFromRemote(IDPMetadataUrl);
+
+  logSamlCertExpiration(samlCert);
 
   const options: {
     idp: { [key: string]: IDPOption | undefined };
@@ -129,5 +134,30 @@ const spidStrategy = async (
     }
   );
 };
+
+/**
+ * Reads dates information in x509 certificate and logs remaining time to its expiration date.
+ * @param samlCert x509 certificate as string
+ */
+function logSamlCertExpiration(samlCert: string): void {
+  try {
+    const out = x509.parseCert(samlCert);
+    if (out.notAfter) {
+      const timeDiff = distanceInWordsToNow(out.notAfter);
+      const warningDate = subDays(new Date(), 60);
+      if (isAfter(out.notAfter, warningDate)) {
+        log.info("samlCert expire in %s", timeDiff);
+      } else if (isAfter(out.notAfter, new Date())) {
+        log.warn("samlCert expire in %s", timeDiff);
+      } else {
+        log.error("samlCert expired from %s", timeDiff);
+      }
+    } else {
+      log.error("Missing expiration date on saml certificate.");
+    }
+  } catch (e) {
+    log.error("Error calculating saml cert expiration: %s", e);
+  }
+}
 
 export default spidStrategy;
