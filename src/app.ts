@@ -11,6 +11,7 @@ import container, {
   PAGOPA_CONTROLLER,
   PAGOPA_PROXY_CONTROLLER,
   PROFILE_CONTROLLER,
+  SERVICES_CACHE_CONTROLLER,
   SERVICES_CONTROLLER,
   SESSION_CONTROLLER,
   SPID_STRATEGY,
@@ -55,6 +56,7 @@ import checkIP from "./utils/middleware/checkIP";
 
 import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
+import ServicesCacheController from "./cache/servicesCacheController";
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
 
@@ -350,6 +352,10 @@ function registerAPIRoutes(
 
   const servicesController: ServicesController = container.resolve(
     SERVICES_CONTROLLER
+  );
+
+  const servicesCacheController: ServicesCacheController = container.resolve(
+    SERVICES_CACHE_CONTROLLER
   );
 
   const notificationController: NotificationController = container.resolve(
