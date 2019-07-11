@@ -1,5 +1,8 @@
 import { IncomingHttpHeaders } from "http";
 
+/**
+ * Supported cache-control properties
+ */
 export interface ICacheControl {
   "no-cache"?: true;
   "no-store"?: true;
@@ -9,6 +12,13 @@ export interface ICacheControl {
   "s-maxage"?: number;
   immutable?: true;
 }
+
+/**
+ * An implementation for a Cache-Control Header parser.
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+ * @param headers IncomingHttpHeaders
+ * @returns ICacheControl
+ */
 export function parseCacheControlHeader(
   headers: IncomingHttpHeaders
 ): ICacheControl {
