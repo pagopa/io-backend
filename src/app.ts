@@ -15,7 +15,8 @@ import container, {
   SESSION_CONTROLLER,
   SPID_STRATEGY,
   URL_TOKEN_STRATEGY,
-  USER_METADATA_CONTROLLER
+  USER_METADATA_CONTROLLER,
+  CACHE_MAX_AGE_SECONDS
 } from "./container";
 import ProfileController from "./controllers/profileController";
 import UserMetadataController from "./controllers/userMetadataController";
@@ -66,9 +67,11 @@ const defaultModule = {
   startIdpMetadataUpdater
 };
 
+const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
+
 const cache = apicache.options({
   debug: false,
-  defaultDuration: "5 minutes",
+  defaultDuration: cacheDuration,
   statusCodes: {
     include: [200]
   }

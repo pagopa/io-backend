@@ -68,6 +68,19 @@ container.register({
   env: awilix.asValue(env)
 });
 
+// Default cache control max-age value is 5 minutes
+const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
+
+// Resolve cache control default max-age value
+export const CACHE_MAX_AGE_SECONDS = "cacheMaxAgeSeconds";
+const cacheMaxAgeSeconds: number = parseInt(
+  process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
+  10
+);
+container.register({
+  [CACHE_MAX_AGE_SECONDS]: awilix.asValue(cacheMaxAgeSeconds)
+});
+
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () => {
   return readFile(
