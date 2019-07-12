@@ -11,7 +11,6 @@ import container, {
   PAGOPA_CONTROLLER,
   PAGOPA_PROXY_CONTROLLER,
   PROFILE_CONTROLLER,
-  SERVICES_CACHE_CONTROLLER,
   SERVICES_CONTROLLER,
   SESSION_CONTROLLER,
   SPID_STRATEGY,
@@ -21,6 +20,7 @@ import container, {
 import ProfileController from "./controllers/profileController";
 import UserMetadataController from "./controllers/userMetadataController";
 
+import * as apicache from "apicache";
 import * as awilix from "awilix";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -56,7 +56,6 @@ import checkIP from "./utils/middleware/checkIP";
 
 import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
-import ServicesCacheController from "./cache/servicesCacheController";
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
 
@@ -66,6 +65,14 @@ const defaultModule = {
   registerLoginRoute,
   startIdpMetadataUpdater
 };
+
+const cache = apicache.options({
+  debug: false,
+  defaultDuration: "5 minutes",
+  statusCodes: {
+    include: [200]
+  }
+}).middleware;
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -354,10 +361,6 @@ function registerAPIRoutes(
     SERVICES_CONTROLLER
   );
 
-  const servicesCacheController: ServicesCacheController = container.resolve(
-    SERVICES_CACHE_CONTROLLER
-  );
-
   const notificationController: NotificationController = container.resolve(
     NOTIFICATION_CONTROLLER
   );
@@ -416,6 +419,7 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services/:id`,
     bearerTokenAuth,
+    cache,
     toExpressHandler(servicesController.getService, servicesController)
   );
 

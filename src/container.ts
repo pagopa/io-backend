@@ -42,7 +42,6 @@ import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 
-import ServicesCacheController from "./cache/servicesCacheController";
 import { log } from "./utils/logger";
 
 // Without this the environment variables loaded by dotenv aren't available in
@@ -385,11 +384,6 @@ container.register({
 export const SERVICES_CONTROLLER = "servicesController";
 container.register({
   [SERVICES_CONTROLLER]: awilix.asClass(ServicesController)
-});
-
-export const SERVICES_CACHE_CONTROLLER = "servicesCacheController";
-container.register({
-  [SERVICES_CACHE_CONTROLLER]: awilix.asClass(ServicesCacheController)
 });
 
 // Register the notification controller as a service.
