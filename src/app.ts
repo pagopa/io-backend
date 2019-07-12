@@ -5,6 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
+  CACHE_MAX_AGE_SECONDS,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
@@ -15,8 +16,7 @@ import container, {
   SESSION_CONTROLLER,
   SPID_STRATEGY,
   URL_TOKEN_STRATEGY,
-  USER_METADATA_CONTROLLER,
-  CACHE_MAX_AGE_SECONDS
+  USER_METADATA_CONTROLLER
 } from "./container";
 import ProfileController from "./controllers/profileController";
 import UserMetadataController from "./controllers/userMetadataController";
