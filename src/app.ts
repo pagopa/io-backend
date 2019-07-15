@@ -540,7 +540,7 @@ function registerPublicRoutes(app: Express): void {
   // The minimum app version that support this API
   const minAppVersion = t.string
     .decode(packageJson.minAppVersion)
-    .getOrElse("0.0.0");
+    .getOrElse("UNKNOWN");
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
