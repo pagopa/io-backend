@@ -70,7 +70,9 @@ const defaultModule = {
 const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
 
 const cachingMiddleware = apicache.options({
-  debug: false,
+  debug:
+    process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
+    process.env.APICACHE_DEBUG === "true",
   defaultDuration: cacheDuration,
   statusCodes: {
     include: [200]
