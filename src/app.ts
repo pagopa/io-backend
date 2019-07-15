@@ -69,7 +69,7 @@ const defaultModule = {
 
 const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
 
-const cache = apicache.options({
+const cachingMiddleware = apicache.options({
   debug: false,
   defaultDuration: cacheDuration,
   statusCodes: {
@@ -422,7 +422,7 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services/:id`,
     bearerTokenAuth,
-    cache,
+    cachingMiddleware(),
     toExpressHandler(servicesController.getService, servicesController)
   );
 
