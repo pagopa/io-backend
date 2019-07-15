@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
+    "apicache": "^1.4.0",
     "awilix": "^3.0.9",
     "azure-sb": "^0.10.6",
     "body-parser": "^1.18.3",
@@ -70,6 +71,7 @@
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
+    "@types/apicache": "^1.2.0",
     "@types/azure-sb": "^0.0.35",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.16.0",

@@ -5,6 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
+  CACHE_MAX_AGE_SECONDS,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
@@ -20,6 +21,7 @@ import container, {
 import ProfileController from "./controllers/profileController";
 import UserMetadataController from "./controllers/userMetadataController";
 
+import * as apicache from "apicache";
 import * as awilix from "awilix";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -64,6 +66,18 @@ const defaultModule = {
   registerLoginRoute,
   startIdpMetadataUpdater
 };
+
+const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
+
+const cachingMiddleware = apicache.options({
+  debug:
+    process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
+    process.env.APICACHE_DEBUG === "true",
+  defaultDuration: cacheDuration,
+  statusCodes: {
+    include: [200]
+  }
+}).middleware;
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -410,12 +424,14 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services/:id`,
     bearerTokenAuth,
+    cachingMiddleware(),
     toExpressHandler(servicesController.getService, servicesController)
   );
 
   app.get(
     `${basePath}/services`,
     bearerTokenAuth,
+    cachingMiddleware(),
     toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
