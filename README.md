@@ -186,7 +186,7 @@ Redis Database stores data required only by application side functionalities. Be
 
 ## Mobile App compatibility
 
-To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `minAppVersion` inside the `package.json`. This value is provided to the app throw the `/info` API.
+To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `minAppVersion` inside the `package.json`. This value is provided to the app through the `/info` API.
 If the mobile app version is lower an upgrade is required.
 
 ## How to contribute
