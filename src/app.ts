@@ -429,6 +429,7 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services`,
     bearerTokenAuth,
+    cachingMiddleware(),
     toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
