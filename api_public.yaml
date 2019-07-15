@@ -31,8 +31,11 @@ definitions:
     properties:
       version:
         type: string
+      minAppVersion:
+        type: string
     required:
       - version
+      - minAppVersion
 consumes:
   - application/json
 produces:
