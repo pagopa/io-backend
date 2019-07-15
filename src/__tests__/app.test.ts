@@ -4,7 +4,9 @@ import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 
+import { isRight } from "fp-ts/lib/Either";
 import passport = require("passport");
+import { ServerInfo } from "../../generated/public/ServerInfo";
 import appModule from "../app";
 import container, {
   DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
@@ -139,6 +141,16 @@ describe("Success app start", () => {
         expect(onRefresh).toBeCalledTimes(1);
         done();
       }, 1000);
+    });
+  });
+
+  describe("GET /info", () => {
+    it("Get info and verify ServerInfo format", async () => {
+      const response = await request(app)
+        .get("/info")
+        .set(X_FORWARDED_PROTO_HEADER, "https")
+        .expect(200);
+      expect(isRight(ServerInfo.decode(response.body)));
     });
   });
 });

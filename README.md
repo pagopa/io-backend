@@ -29,6 +29,7 @@ This repository contains the code of the backend used by the [web](https://githu
     - [SPID user management](#spid-user-management)
 - [Redis Database](#redis-database)
     - [Data Structure](#data-structure)
+- [Mobile App compatibility](#mobile-app-compatibility)
 - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies)
     - [Starting steps](#starting-steps)
@@ -183,6 +184,10 @@ Redis Database stores data required only by application side functionalities. Be
 | SESSIONINFO-HexToken   | a JSON representing the `SessionInfo` object | `SessionInfo` | TOKEN_DURATION_IN_SECONDS |
 | USERSESSIONS-MRARSS80A01H501T | a Set of SessionInfo Keys | `Set<SessionInfoKey>` | never |
 
+## Mobile App compatibility
+
+To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `minAppVersion` inside the `package.json`. This value is provided to the app through the `/info` API.
+If the mobile app version is lower an upgrade is required.
 
 ## How to contribute
 
