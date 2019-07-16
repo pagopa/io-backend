@@ -20,4 +20,4 @@ index 116ca3c..30be436 100644
 +          "@Format": samlClient.options.identifierFormat
          };
        }
- 
+
