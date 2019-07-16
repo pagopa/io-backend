@@ -469,10 +469,8 @@ describe("RedisSessionStorage#listUserSessions", () => {
     mockSet.mockImplementation((_, __, ___, ____, callback) => {
       callback(new Error("REDIS ERROR"), undefined);
     });
-    mockSadd.mockImplementation((_, __, callback) => {
-      callback(new Error("REDIS ERROR"), undefined);
-    });
     const response = await sessionStorage.listUserSessions(aValidUser);
+    expect(mockSadd).not.toBeCalled();
     expect(response).toEqual(left(sessionNotFoundError));
   });
 
