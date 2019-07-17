@@ -294,7 +294,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
   }
 
   /*
-  * Return the promises needed to store session info and 
+  * Store session info and update session info set.
+  * The returned promise will reject if either operation fail.
   * update session info set
   */
   private saveSessionInfo(user: User): Promise<Either<Error, boolean>> {
