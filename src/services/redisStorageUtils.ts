@@ -1,4 +1,4 @@
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { isNumber } from "util";
 
 export default class RedisStorageUtils {
@@ -33,5 +33,19 @@ export default class RedisStorageUtils {
     }
 
     return right<Error, boolean>(isNumber(reply));
+  }
+
+  protected falsyResponseToError(
+    response: Either<Error, boolean>,
+    error: Error
+  ): Either<Error, true> {
+    if (isLeft(response)) {
+      return left(response.value);
+    } else {
+      if (response.value) {
+        return right(true);
+      }
+      return left(error);
+    }
   }
 }
