@@ -4,6 +4,7 @@
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -68,7 +69,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
       );
     });
-    const saveSessionInfoPromise = this.saveSessionInfo(user);
+    const sessionInfo: SessionInfo = {
+      createdAt: new Date(),
+      sessionToken: user.session_token
+    };
+    const saveSessionInfoPromise = this.saveSessionInfo(
+      sessionInfo,
+      user.fiscal_code
+    );
 
     const setPromisesResult = await Promise.all([
       setSessionToken,
@@ -209,7 +217,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
     if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
       return left(sessionKeys.value);
     } else if (isLeft(sessionKeys)) {
-      const refreshUserSessionInfo = await this.saveSessionInfo(user);
+      const sessionInfo: SessionInfo = {
+        createdAt: new Date(),
+        sessionToken: user.session_token
+      };
+      const refreshUserSessionInfo = await this.saveSessionInfo(
+        sessionInfo,
+        user.fiscal_code
+      );
       if (isLeft(refreshUserSessionInfo)) {
         return left(sessionNotFoundError);
       }
@@ -300,16 +315,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
   * The returned promise will reject if either operation fail.
   * update session info set
   */
-  private saveSessionInfo(user: User): Promise<Either<Error, boolean>> {
-    const newSessionInfo: SessionInfo = {
-      createdAt: new Date(),
-      sessionToken: user.session_token
-    };
-    const sessionInfoKey = `${sessionInfoKeyPrefix}${user.session_token}`;
+  private saveSessionInfo(
+    sessionInfo: SessionInfo,
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionInfo.sessionToken}`;
     return new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.set(
         sessionInfoKey,
-        JSON.stringify(newSessionInfo),
+        JSON.stringify(sessionInfo),
         "EX",
         this.tokenDurationSecs,
         (err, response) => {
@@ -321,7 +335,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
             return resolve(saveSessionInfoResult);
           }
           this.redisClient.sadd(
-            `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
+            `${userSessionsSetKeyPrefix}${fiscalCode}`,
             sessionInfoKey,
             (infoSetUpdateErr, infoSetUpdateRes) =>
               resolve(
