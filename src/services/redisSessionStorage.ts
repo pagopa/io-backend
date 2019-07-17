@@ -205,7 +205,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       }
     );
     // tslint:disable-next-line: readonly-array
-    const initizedSessionKey: string[] = [];
+    const initializedSessionKeys: string[] = [];
     if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
       return left(sessionKeys.value);
     } else if (isLeft(sessionKeys)) {
@@ -213,13 +213,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
       if (isLeft(refreshUserSessionInfo)) {
         return left(sessionNotFoundError);
       }
-      initizedSessionKey.push(`${sessionInfoKeyPrefix}${user.session_token}`);
+      initializedSessionKeys.push(
+        `${sessionInfoKeyPrefix}${user.session_token}`
+      );
     }
     const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
       (resolve, reject) => {
         const keys = isRight(sessionKeys)
           ? sessionKeys.value
-          : initizedSessionKey;
+          : initializedSessionKeys;
         this.redisClient.mget(...keys, (err, response) => {
           if (err) {
             reject(err);
