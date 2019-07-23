@@ -287,7 +287,7 @@ async function clearAndReloadSpidStrategy(
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
     log.info("Restore previous spid strategy configuration");
-    newContainer.register(SPID_STRATEGY,Promise.resolve(previousSpidStrategy)); // Update Container Spid Strategy
+    newContainer.register(SPID_STRATEGY, Promise.resolve(previousSpidStrategy)); // Update Container Spid Strategy
     throw new Error("Error while initializing SPID strategy");
   } finally {
     defaultModule.registerLoginRoute(
