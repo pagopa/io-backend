@@ -13,12 +13,11 @@ import {
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
-import { CIDR } from "italia-ts-commons/lib/strings";
+import { CIDR, IPatternStringTag } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
 
-import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
@@ -48,38 +47,22 @@ import { log } from "./utils/logger";
 // this file.
 dotenv.config();
 
-const container = awilix.createContainer({
-  injectionMode: awilix.InjectionMode.CLASSIC
-});
-
 // Server port.
 const DEFAULT_SERVER_PORT = "80";
 const serverPort: number = parseInt(
   process.env.PORT || DEFAULT_SERVER_PORT,
   10
 );
-container.register({
-  serverPort: awilix.asValue(serverPort)
-});
-
-// Resolve NODE_ENV environment (defaults to PRODUCTION).
-const env: NodeEnvironmentEnum = getNodeEnvironmentFromProcessEnv(process.env);
-container.register({
-  env: awilix.asValue(env)
-});
 
 // Default cache control max-age value is 5 minutes
 const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
 
 // Resolve cache control default max-age value
 export const CACHE_MAX_AGE_SECONDS = "cacheMaxAgeSeconds";
-const cacheMaxAgeSeconds: number = parseInt(
+const CACHE_MAX_AGE_SECONDS_VALUE: number = parseInt(
   process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
   10
 );
-container.register({
-  [CACHE_MAX_AGE_SECONDS]: awilix.asValue(cacheMaxAgeSeconds)
-});
 
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () => {
@@ -89,9 +72,7 @@ const samlKey = () => {
   );
 };
 export const SAML_KEY = "samlKey";
-container.register({
-  [SAML_KEY]: awilix.asFunction(samlKey).singleton()
-});
+const SAML_KEY_VALUE = samlKey();
 
 // Public certificate used in SAML authentication to a SPID IDP.
 const samlCert = () => {
@@ -101,9 +82,7 @@ const samlCert = () => {
   );
 };
 export const SAML_CERT = "samlCert";
-container.register({
-  [SAML_CERT]: awilix.asFunction(samlCert).singleton()
-});
+const SAML_CERT_VALUE = samlCert();
 
 // SAML settings.
 const SAML_CALLBACK_URL =
@@ -127,16 +106,25 @@ const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
 const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
 const SPID_TESTENV_URL =
   process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
-container.register({
-  samlAcceptedClockSkewMs: awilix.asValue(SAML_ACCEPTED_CLOCK_SKEW_MS),
-  samlAttributeConsumingServiceIndex: awilix.asValue(
-    SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX
-  ),
-  samlCallbackUrl: awilix.asValue(SAML_CALLBACK_URL),
-  samlIssuer: awilix.asValue(SAML_ISSUER),
-  spidAutologin: awilix.asValue(SPID_AUTOLOGIN),
-  spidTestEnvUrl: awilix.asValue(SPID_TESTENV_URL)
-});
+
+// Register the spidStrategy.
+export const IDP_METADATA_URL = "IDPMetadataUrl";
+const IDP_METADATA_URL_VALUE = getRequiredValue("IDP_METADATA_URL");
+export function generateSpidStrategy(): Promise<SpidStrategy> {
+  return spidStrategy(
+    SAML_KEY_VALUE,
+    SAML_CERT_VALUE,
+    SAML_CALLBACK_URL,
+    SAML_ISSUER,
+    SAML_ACCEPTED_CLOCK_SKEW_MS,
+    SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
+    SPID_AUTOLOGIN,
+    SPID_TESTENV_URL,
+    IDP_METADATA_URL_VALUE
+  );
+}
+export const SPID_STRATEGY = "spidStrategy";
+const SPID_STRATEGY_VALUE = generateSpidStrategy();
 
 // Redirection urls
 const clientProfileRedirectionUrl =
@@ -145,22 +133,223 @@ const clientProfileRedirectionUrl =
 if (!clientProfileRedirectionUrl.includes("{token}")) {
   log.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
 }
-container.register({
-  clientErrorRedirectionUrl: awilix.asValue(
-    process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html"
-  ),
-  clientLoginRedirectionUrl: awilix.asValue(
-    process.env.CLIENT_REDIRECTION_URL || "/login"
-  ),
-  getClientProfileRedirectionUrl: awilix.asValue(
-    (token: string): UrlFromString => {
-      const url = clientProfileRedirectionUrl.replace("{token}", token);
 
-      return {
-        href: url
-      };
-    }
-  )
+// Range IP allowed for notification.
+function decodeNotifyCIDR(): string & IPatternStringTag<string> {
+  const errorOrNotifyCIDR = CIDR.decode(
+    process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE
+  );
+  if (isLeft(errorOrNotifyCIDR)) {
+    log.error(
+      "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
+      ReadableReporter.report(errorOrNotifyCIDR)
+    );
+    return process.exit(1);
+  } else {
+    return errorOrNotifyCIDR.value;
+  }
+}
+const notifyCIDR = decodeNotifyCIDR();
+
+// Range IP allowed for PagoPA proxy.
+function decodePagoPACIDR(): string & IPatternStringTag<string> {
+  const errorOrPagoPACIDR = CIDR.decode(
+    process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE
+  );
+  if (isLeft(errorOrPagoPACIDR)) {
+    log.error(
+      "Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: %s",
+      ReadableReporter.report(errorOrPagoPACIDR)
+    );
+    return process.exit(1);
+  } else {
+    return errorOrPagoPACIDR.value;
+  }
+}
+const pagoPACIDR = decodePagoPACIDR();
+
+const API_KEY_VALUE = process.env.API_KEY || "";
+const API_URL_VALUE = process.env.API_URL || "";
+
+export const API_CLIENT = "apiClient";
+const API_CLIENT_VALUE = new ApiClientFactory(API_KEY_VALUE, API_URL_VALUE);
+
+// Register a factory service to create PagoPA client.
+const pagoPAApiUrl = process.env.PAGOPA_API_URL || "";
+const pagoPAApiUrlTest = process.env.PAGOPA_API_URL_TEST || "";
+const PAGOPA_CLIENT = "pagoPAClient";
+const PAGOPA_CLIENT_VALUE = new PagoPAClientFactory(
+  pagoPAApiUrl,
+  pagoPAApiUrlTest
+);
+
+// Register the PagoPA proxy service.
+const PAGOPA_PROXY_SERVICE = "pagoPAProxyService";
+const PAGOPA_PROXY_SERVICE_VALUE = new PagoPAProxyService(PAGOPA_CLIENT_VALUE);
+
+// Register the profile service.
+const PROFILE_SERVICE = "profileService";
+const PROFILE_SERVICE_VALUE = new ProfileService(API_CLIENT_VALUE);
+
+// Register the messages service.
+const MESSAGES_SERVICE = "messagesService";
+const MESSAGES_SERVICE_VALUE = new MessagesService(API_CLIENT_VALUE);
+
+// Azure Notification Hub credentials.
+const hubName = getRequiredValue("AZURE_NH_HUB_NAME");
+const endpointOrConnectionString = getRequiredValue("AZURE_NH_ENDPOINT");
+
+// Register the notification service.
+const NOTIFICATION_SERVICE = "notificationService";
+const NOTIFICATION_SERVICE_VALUE = new NotificationService(
+  hubName,
+  endpointOrConnectionString
+);
+
+// Register the PagoPA controller as a service.
+export const PAGOPA_CONTROLLER = "pagoPAController";
+const PAGOPA_CONTROLLER_VALUE = new PagoPAController(PROFILE_SERVICE_VALUE);
+
+// Register the PagoPAProxy controller as a service.
+export const PAGOPA_PROXY_CONTROLLER = "pagoPAProxyController";
+const PAGOPA_PROXY_CONTROLLER_VALUE = new PagoPAProxyController(
+  PAGOPA_PROXY_SERVICE_VALUE
+);
+
+// Register the profile controller as a service.
+export const PROFILE_CONTROLLER = "profileController";
+const PROFILE_CONTROLLER_VALUE = new ProfileController(PROFILE_SERVICE_VALUE);
+
+// Register the messages controller as a service.
+export const MESSAGES_CONTROLLER = "messagesController";
+const MESSAGES_CONTROLLER_VALUE = new MessagesController(
+  MESSAGES_SERVICE_VALUE
+);
+
+// Register the services controller as a service.
+export const SERVICES_CONTROLLER = "servicesController";
+const SERVICES_CONTROLLER_VALUE = new ServicesController(
+  MESSAGES_SERVICE_VALUE
+);
+
+// Register the notification controller as a service.
+export const NOTIFICATION_CONTROLLER = "notificationController";
+const NOTIFICATION_CONTROLLER_VALUE = new NotificationController(
+  NOTIFICATION_SERVICE_VALUE
+);
+
+export interface IContainer {
+  serverPort: number;
+  [CACHE_MAX_AGE_SECONDS]: number;
+  [SAML_KEY]: string;
+  [SAML_CERT]: string;
+
+  samlAcceptedClockSkewMs: number;
+  samlAttributeConsumingServiceIndex: number;
+  samlCallbackUrl: string;
+  samlIssuer: string;
+  spidAutologin: string;
+  spidTestEnvUrl: string;
+  [IDP_METADATA_URL]: string;
+  [SPID_STRATEGY]: Promise<SpidStrategy>;
+
+  clientErrorRedirectionUrl: string;
+  clientLoginRedirectionUrl: string;
+  getClientProfileRedirectionUrl: (token: string) => UrlFromString;
+
+  // Resolve NODE_ENV environment (defaults to PRODUCTION).
+  env: NodeEnvironmentEnum;
+
+  allowNotifyIPSourceRange: string & IPatternStringTag<string>;
+  allowPagoPAIPSourceRange: string & IPatternStringTag<string>;
+
+  apiKey: string;
+  apiUrl: string;
+
+  pagoPAApiUrl: string;
+  pagoPAApiUrlTest: string;
+  [PAGOPA_CLIENT]: PagoPAClientFactory;
+
+  [API_CLIENT]: ApiClientFactory;
+  [PAGOPA_PROXY_SERVICE]: PagoPAProxyService;
+  [PROFILE_SERVICE]: ProfileService;
+  [MESSAGES_SERVICE]: MessagesService;
+  [NOTIFICATION_SERVICE]: NotificationService;
+
+  [PAGOPA_CONTROLLER]: PagoPAController;
+  [PAGOPA_PROXY_CONTROLLER]: PagoPAProxyController;
+  [PROFILE_CONTROLLER]: ProfileController;
+  [MESSAGES_CONTROLLER]: MessagesController;
+  [SERVICES_CONTROLLER]: ServicesController;
+  [NOTIFICATION_CONTROLLER]: NotificationController;
+}
+
+const staticContainer: IContainer = {
+  serverPort,
+  [CACHE_MAX_AGE_SECONDS]: CACHE_MAX_AGE_SECONDS_VALUE,
+  [SAML_KEY]: SAML_KEY_VALUE,
+  [SAML_CERT]: SAML_CERT_VALUE,
+
+  samlAcceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
+  samlAttributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
+  samlCallbackUrl: SAML_CALLBACK_URL,
+  samlIssuer: SAML_ISSUER,
+  spidAutologin: SPID_AUTOLOGIN,
+  spidTestEnvUrl: SPID_TESTENV_URL,
+  [IDP_METADATA_URL]: IDP_METADATA_URL_VALUE,
+  [SPID_STRATEGY]: SPID_STRATEGY_VALUE,
+
+  clientErrorRedirectionUrl:
+    process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html",
+  clientLoginRedirectionUrl: process.env.CLIENT_REDIRECTION_URL || "/login",
+  getClientProfileRedirectionUrl: (token: string): UrlFromString => {
+    const url = clientProfileRedirectionUrl.replace("{token}", token);
+
+    return {
+      href: url
+    };
+  },
+
+  // Resolve NODE_ENV environment (defaults to PRODUCTION).
+  env: getNodeEnvironmentFromProcessEnv(process.env),
+
+  allowNotifyIPSourceRange: notifyCIDR,
+  allowPagoPAIPSourceRange: pagoPACIDR,
+
+  apiKey: API_KEY_VALUE,
+  apiUrl: API_URL_VALUE,
+
+  pagoPAApiUrl,
+  pagoPAApiUrlTest,
+  [PAGOPA_CLIENT]: PAGOPA_CLIENT_VALUE,
+
+  [API_CLIENT]: API_CLIENT_VALUE,
+  [PAGOPA_PROXY_SERVICE]: PAGOPA_PROXY_SERVICE_VALUE,
+  [PROFILE_SERVICE]: PROFILE_SERVICE_VALUE,
+  [MESSAGES_SERVICE]: MESSAGES_SERVICE_VALUE,
+  [NOTIFICATION_SERVICE]: NOTIFICATION_SERVICE_VALUE,
+
+  [PAGOPA_CONTROLLER]: PAGOPA_CONTROLLER_VALUE,
+  [PAGOPA_PROXY_CONTROLLER]: PAGOPA_PROXY_CONTROLLER_VALUE,
+  [PROFILE_CONTROLLER]: PROFILE_CONTROLLER_VALUE,
+  [MESSAGES_CONTROLLER]: MESSAGES_CONTROLLER_VALUE,
+  [SERVICES_CONTROLLER]: SERVICES_CONTROLLER_VALUE,
+  [NOTIFICATION_CONTROLLER]: NOTIFICATION_CONTROLLER_VALUE
+};
+
+export const newContainer = {
+  staticContainer,
+  register<K extends keyof IContainer>(key: K, value: IContainer[K]): void {
+    // tslint:disable-next-line: no-object-mutation
+    newContainer.staticContainer[key] = value;
+  },
+  resolve<K extends keyof IContainer>(key: K): IContainer[K] {
+    return newContainer.staticContainer[key];
+  }
+};
+
+const container = awilix.createContainer({
+  injectionMode: awilix.InjectionMode.CLASSIC
 });
 
 // Redis server settings.
@@ -176,59 +365,13 @@ container.register({
   tokenDurationSecs: awilix.asValue(tokenDurationSecs)
 });
 
-container.register({
-  apiKey: awilix.asValue(process.env.API_KEY),
-  apiUrl: awilix.asValue(process.env.API_URL),
-  pagoPAApiUrl: awilix.asValue(process.env.PAGOPA_API_URL),
-  pagoPAApiUrlTest: awilix.asValue(process.env.PAGOPA_API_URL_TEST)
-});
-
 // Notification URL pre shared key.
 registerRequiredValue("PRE_SHARED_KEY", "preSharedKey");
-
-// Range IP allowed for notification.
-const errorOrNotifyCIDR = CIDR.decode(process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE);
-if (isLeft(errorOrNotifyCIDR)) {
-  log.error(
-    "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
-    ReadableReporter.report(errorOrNotifyCIDR)
-  );
-  process.exit(1);
-} else {
-  container.register({
-    allowNotifyIPSourceRange: awilix.asValue(errorOrNotifyCIDR.value)
-  });
-}
-
-// Range IP allowed for PagoPA proxy.
-const errorOrPagoPACIDR = CIDR.decode(process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE);
-if (isLeft(errorOrPagoPACIDR)) {
-  log.error(
-    "Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: %s",
-    ReadableReporter.report(errorOrPagoPACIDR)
-  );
-  process.exit(1);
-} else {
-  container.register({
-    allowPagoPAIPSourceRange: awilix.asValue(errorOrPagoPACIDR.value)
-  });
-}
-
-// Azure Notification Hub credentials.
-registerRequiredValue("AZURE_NH_HUB_NAME", "hubName");
-registerRequiredValue("AZURE_NH_ENDPOINT", "endpointOrConnectionString");
 
 // API endpoint mount.
 registerRequiredValue("AUTHENTICATION_BASE_PATH", "AuthenticationBasePath");
 registerRequiredValue("API_BASE_PATH", "APIBasePath");
 registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
-
-// Register the spidStrategy.
-registerRequiredValue("IDP_METADATA_URL", "IDPMetadataUrl");
-export const SPID_STRATEGY = "spidStrategy";
-container.register({
-  [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
-});
 
 // Set default idp metadata refresh time to 10 days
 export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
@@ -314,7 +457,7 @@ container.register(
     .asFunction(() => {
       // Use the Docker Redis instance when developing because the Azure Redis
       // cluster isn't accessible outside the Azure VNet.
-      return env === NodeEnvironmentEnum.DEVELOPMENT
+      return newContainer.resolve("env") === NodeEnvironmentEnum.DEVELOPMENT
         ? createSimpleRedisClient()
         : createClusterRedisClient();
     })
@@ -334,93 +477,15 @@ container.register({
 });
 
 // Register the token service.
-const TOKEN_SERVICE = "tokenService";
+export const TOKEN_SERVICE = "tokenService";
 container.register({
   [TOKEN_SERVICE]: awilix.asClass(TokenService)
-});
-
-// Register a factory service to create API client.
-const API_CLIENT = "apiClient";
-container.register({
-  [API_CLIENT]: awilix.asClass(ApiClientFactory).singleton()
-});
-
-// Register a factory service to create PagoPA client.
-const PAGOPA_CLIENT = "pagoPAClient";
-container.register({
-  [PAGOPA_CLIENT]: awilix.asClass(PagoPAClientFactory)
-});
-
-// Register the profile service.
-const PROFILE_SERVICE = "profileService";
-container.register({
-  [PROFILE_SERVICE]: awilix.asClass(ProfileService)
-});
-
-// Register the messages service.
-const MESSAGES_SERVICE = "messagesService";
-container.register({
-  [MESSAGES_SERVICE]: awilix.asClass(MessagesService)
-});
-
-// Register the notification service.
-const NOTIFICATION_SERVICE = "notificationService";
-container.register({
-  [NOTIFICATION_SERVICE]: awilix.asClass(NotificationService)
-});
-
-// Register the PagoPA proxy service.
-const PAGOPA_PROXY_SERVICE = "pagoPAProxyService";
-container.register({
-  [PAGOPA_PROXY_SERVICE]: awilix.asClass(PagoPAProxyService)
-});
-
-// Register the authentication controller as a service.
-export const AUTHENTICATION_CONTROLLER = "authenticationController";
-container.register({
-  [AUTHENTICATION_CONTROLLER]: awilix.asClass(AuthenticationController)
-});
-
-// Register the profile controller as a service.
-export const PROFILE_CONTROLLER = "profileController";
-container.register({
-  [PROFILE_CONTROLLER]: awilix.asClass(ProfileController)
-});
-
-// Register the messages controller as a service.
-export const MESSAGES_CONTROLLER = "messagesController";
-container.register({
-  [MESSAGES_CONTROLLER]: awilix.asClass(MessagesController)
-});
-
-// Register the services controller as a service.
-export const SERVICES_CONTROLLER = "servicesController";
-container.register({
-  [SERVICES_CONTROLLER]: awilix.asClass(ServicesController)
-});
-
-// Register the notification controller as a service.
-export const NOTIFICATION_CONTROLLER = "notificationController";
-container.register({
-  [NOTIFICATION_CONTROLLER]: awilix.asClass(NotificationController)
 });
 
 // Register the session controller as a service.
 export const SESSION_CONTROLLER = "sessionController";
 container.register({
   [SESSION_CONTROLLER]: awilix.asClass(SessionController)
-});
-
-// Register the PagoPA controller as a service.
-export const PAGOPA_CONTROLLER = "pagoPAController";
-container.register({
-  [PAGOPA_CONTROLLER]: awilix.asClass(PagoPAController)
-});
-
-// Register the PagoPAProxy controller as a service.
-export const PAGOPA_PROXY_CONTROLLER = "pagoPAProxyController";
-container.register({
-  [PAGOPA_PROXY_CONTROLLER]: awilix.asClass(PagoPAProxyController)
 });
 
 // Register the user metadata controller as a service.
@@ -458,5 +523,21 @@ function registerRequiredValue(envName: string, valueName: string): void {
     container.register({
       [valueName]: awilix.asValue(process.env[envName])
     });
+  }
+}
+
+/**
+ * Get a required value reading from the environment.
+ *
+ * @param {string} envName
+ * @param {string} valueName
+ */
+function getRequiredValue(envName: string): string {
+  const envVal = process.env[envName];
+  if (envVal === undefined) {
+    log.error("Missing %s environment variable", envName);
+    return process.exit(1);
+  } else {
+    return envVal;
   }
 }
