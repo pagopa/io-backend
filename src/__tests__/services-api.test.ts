@@ -1,5 +1,4 @@
 import * as apicache from "apicache";
-import * as awilix from "awilix";
 import { Express, NextFunction, Request, Response } from "express";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
@@ -24,19 +23,26 @@ jest.spyOn(passport, "authenticate").mockImplementation((_, __) => {
   };
 });
 const expectedCacheDurationSeconds = 1;
-import container, { CACHE_MAX_AGE_SECONDS } from "../container";
-container.register({
-  [CACHE_MAX_AGE_SECONDS]: awilix.asValue(expectedCacheDurationSeconds)
+
+jest.mock("../services/apiClientFactory");
+jest.mock("../services/redisSessionStorage");
+jest.mock("../services/redisUserMetadataStorage");
+
+const mockGetService = jest.fn();
+jest.mock("../services/messagesService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      getService: mockGetService
+    }))
+  };
 });
+import { CACHE_MAX_AGE_SECONDS, newContainer } from "../container";
+newContainer.register(CACHE_MAX_AGE_SECONDS, expectedCacheDurationSeconds);
 import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
-
-jest.mock("../services/redisSessionStorage");
-jest.mock("../services/redisUserMetadataStorage");
-jest.mock("../services/apiClientFactory");
 
 const proxyService: ServicePublic = {
   department_name: "Department name" as DepartmentName,
@@ -55,15 +61,6 @@ const newProxyService: ServicePublic = {
   service_name: "Service name" as ServiceName,
   version: 43 as NonNegativeInteger
 };
-
-const mockGetService = jest.fn();
-jest.mock("../services/messagesService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      getService: mockGetService
-    }))
-  };
-});
 
 describe("GET /services/:id", () => {
   const serviceApiUrl = `/api/v1/services/${proxyService.service_id}`;

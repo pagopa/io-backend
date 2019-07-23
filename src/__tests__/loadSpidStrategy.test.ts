@@ -1,10 +1,10 @@
 import { Express } from "express";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-import passport = require("passport");
 import appModule from "../app";
-import container, {
+import {
   DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
+  newContainer,
   SPID_STRATEGY
 } from "../container";
 jest.mock("../services/redisSessionStorage");
@@ -15,7 +15,7 @@ const aValidCIDR = "192.168.0.0/16" as CIDR;
 // tslint:disable-next-line: no-let
 let app: Express;
 // tslint:disable-next-line: no-let
-let spidStrategy: passport.Strategy;
+let spidStrategy: SpidStrategy;
 beforeAll(async () => {
   jest.resetAllMocks();
   jest.clearAllMocks();
@@ -27,9 +27,7 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
-  spidStrategy = await container.resolve<Promise<passport.Strategy>>(
-    SPID_STRATEGY
-  );
+  spidStrategy = await newContainer.resolve(SPID_STRATEGY);
   jest.useFakeTimers();
 });
 
@@ -42,12 +40,14 @@ describe("Restore of previous SPID Strategy on update failure", () => {
     const onRefresh = jest.fn();
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
     // tslint:disable-next-line: no-object-mutation
-    const loadSpidStrategyMock = jest
+    const mockSpidStrategy = jest
       .spyOn(appModule, "loadSpidStrategy")
-      .mockImplementation(() => {
-        return Promise.reject(new Error("Error download "));
-      });
-    loadSpidStrategyMock.mockClear();
+      .mockImplementation(() =>
+        Promise.reject(new Error("Error download metadata"))
+      );
+    mockSpidStrategy.mockImplementation(() =>
+      Promise.reject(new Error("Error download metadata"))
+    );
     appModule.startIdpMetadataUpdater(
       app,
       spidStrategy,
@@ -63,7 +63,7 @@ describe("Restore of previous SPID Strategy on update failure", () => {
     jest.useRealTimers();
     setTimeout(() => {
       expect(onRefresh).toBeCalled();
-      expect(loadSpidStrategyMock.mock.calls.length).toBe(1);
+      expect(mockSpidStrategy).toHaveBeenCalledTimes(1);
       expect(mockExit).not.toBeCalled();
       done();
     }, 1000);
