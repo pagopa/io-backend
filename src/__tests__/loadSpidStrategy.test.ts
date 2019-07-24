@@ -1,6 +1,7 @@
 import { Express } from "express";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
+jest.mock("../utils/redis");
 import appModule from "../app";
 import {
   container,

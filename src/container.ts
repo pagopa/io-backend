@@ -11,7 +11,6 @@ import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import { CIDR, IPatternStringTag } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
-import RedisClustr = require("redis-clustr");
 
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -40,6 +39,11 @@ import { fromNullable } from "fp-ts/lib/Option";
 import * as passport from "passport";
 import { getRequiredENVVar, readFile } from "./utils/container";
 import { log } from "./utils/logger";
+
+import {
+  createClusterRedisClient,
+  createSimpleRedisClient
+} from "./utils/redis";
 
 // Without this the environment variables loaded by dotenv aren't available in
 // this file.
@@ -177,38 +181,6 @@ const API_CLIENT_VALUE = new ApiClientFactory(API_KEY_VALUE, API_URL_VALUE);
 //
 // Register a session storage service backed by Redis.
 //
-
-function createSimpleRedisClient(): redis.RedisClient {
-  const redisUrl = process.env.REDIS_URL || "redis://redis";
-  log.info("Creating SIMPLE redis client", { url: redisUrl });
-  return redis.createClient(redisUrl);
-}
-
-function createClusterRedisClient(): redis.RedisClient {
-  const DEFAULT_REDIS_PORT = "6379";
-
-  const redisUrl = getRequiredENVVar("REDIS_URL");
-  const redisPassword = process.env.REDIS_PASSWORD;
-  const redisPort: number = parseInt(
-    process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
-    10
-  );
-  log.info("Creating CLUSTER redis client", { url: redisUrl });
-  return new RedisClustr({
-    redisOptions: {
-      auth_pass: redisPassword,
-      tls: {
-        servername: redisUrl
-      }
-    },
-    servers: [
-      {
-        host: redisUrl,
-        port: redisPort
-      }
-    ]
-  }) as redis.RedisClient; // Casting RedisClustr with missing typings to RedisClient (same usage).
-}
 
 // Redis server settings.
 export const REDIS_CLIENT = "redisClient";
