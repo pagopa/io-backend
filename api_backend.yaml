@@ -47,6 +47,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the service.
           schema:
@@ -78,6 +80,8 @@ paths:
           description: Bearer token null or expired.
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the services.
           schema:
@@ -108,6 +112,8 @@ paths:
           description: Bearer token null or expired.
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the services.
           schema:
@@ -157,6 +163,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the messages.
           schema:
@@ -202,6 +210,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the message.
           schema:
@@ -238,6 +248,8 @@ paths:
           description: Bearer token null or expired.
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the user profile.
           schema:
@@ -289,6 +301,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: Profile cannot be updated.
           schema:
