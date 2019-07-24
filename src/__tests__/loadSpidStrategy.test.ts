@@ -3,8 +3,8 @@ import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import appModule from "../app";
 import {
+  container,
   DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  newContainer,
   SPID_STRATEGY
 } from "../container";
 jest.mock("../services/redisSessionStorage");
@@ -27,7 +27,7 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
-  spidStrategy = await newContainer.resolve(SPID_STRATEGY);
+  spidStrategy = await container.resolve(SPID_STRATEGY);
   jest.useFakeTimers();
 });
 
@@ -66,6 +66,6 @@ describe("Restore of previous SPID Strategy on update failure", () => {
       expect(mockSpidStrategy).toHaveBeenCalledTimes(1);
       expect(mockExit).not.toBeCalled();
       done();
-    }, 1000);
+    }, 2000);
   });
 });

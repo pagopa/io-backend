@@ -2,17 +2,18 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
-import container, {
+import {
   BEARER_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
+  container,
   generateSpidStrategy,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
-  newContainer,
   NOTIFICATION_CONTROLLER,
   PAGOPA_CONTROLLER,
   PAGOPA_PROXY_CONTROLLER,
   PROFILE_CONTROLLER,
+  PROFILE_SERVICE_VALUE,
   SAML_CERT,
   SERVICES_CONTROLLER,
   SESSION_CONTROLLER,
@@ -73,7 +74,7 @@ const defaultModule = {
   startIdpMetadataUpdater
 };
 
-const cacheDuration = `${newContainer.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
+const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
 
 const cachingMiddleware = apicache.options({
   debug:
@@ -219,7 +220,7 @@ export async function newApp(
   //
 
   try {
-    const newSpidStrategy = await newContainer.resolve(SPID_STRATEGY); // SPID Strategy from container "DEFAULT"
+    const newSpidStrategy = await container.resolve(SPID_STRATEGY); // SPID Strategy from container "DEFAULT"
     defaultModule.registerLoginRoute(app, newSpidStrategy);
     registerPublicRoutes(app);
     registerAuthenticationRoutes(app, authenticationBasePath);
@@ -227,7 +228,7 @@ export async function newApp(
     registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
     const idpMetadataRefreshIntervalMillis =
-      container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
+      container.resolve(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
     const idpMetadataRefreshTimer = startIdpMetadataUpdater(
       app,
       newSpidStrategy,
@@ -254,7 +255,7 @@ function registerLoginRoute(app: Express, newSpidStrategy: SpidStrategy): void {
 }
 
 /**
- * Clears SPID_STRATEGY cache from awilix.
+ * Override SPID_STRATEGY inside the container.
  * Then /login route will be overridden with an updated SPID_STRATEGY.
  */
 async function clearAndReloadSpidStrategy(
@@ -280,14 +281,14 @@ async function clearAndReloadSpidStrategy(
   // tslint:disable-next-line: no-let
   let newSpidStrategy: SpidStrategy | undefined;
   try {
-    // Inject a new SPID Strategy generate function in awilix container
-    newContainer.register(SPID_STRATEGY, defaultModule.loadSpidStrategy());
-    newSpidStrategy = await newContainer.resolve(SPID_STRATEGY);
+    // Inject a new SPID Strategy generate function inside the container
+    container.register(SPID_STRATEGY, defaultModule.loadSpidStrategy());
+    newSpidStrategy = await container.resolve(SPID_STRATEGY);
     log.info("Spid strategy re-initialization complete.");
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
     log.info("Restore previous spid strategy configuration");
-    newContainer.register(SPID_STRATEGY, Promise.resolve(previousSpidStrategy)); // Update Container Spid Strategy
+    container.register(SPID_STRATEGY, Promise.resolve(previousSpidStrategy)); // Update Container Spid Strategy
     throw new Error("Error while initializing SPID strategy");
   } finally {
     defaultModule.registerLoginRoute(
@@ -334,7 +335,7 @@ function registerPagoPARoutes(
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
-  const pagopaController: PagoPAController = newContainer.resolve(
+  const pagopaController: PagoPAController = container.resolve(
     PAGOPA_CONTROLLER
   );
 
@@ -355,19 +356,19 @@ function registerAPIRoutes(
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
   const urlTokenAuth = passport.authenticate("authtoken", { session: false });
 
-  const profileController: ProfileController = newContainer.resolve(
+  const profileController: ProfileController = container.resolve(
     PROFILE_CONTROLLER
   );
 
-  const messagesController: MessagesController = newContainer.resolve(
+  const messagesController: MessagesController = container.resolve(
     MESSAGES_CONTROLLER
   );
 
-  const servicesController: ServicesController = newContainer.resolve(
+  const servicesController: ServicesController = container.resolve(
     SERVICES_CONTROLLER
   );
 
-  const notificationController: NotificationController = newContainer.resolve(
+  const notificationController: NotificationController = container.resolve(
     NOTIFICATION_CONTROLLER
   );
 
@@ -375,7 +376,7 @@ function registerAPIRoutes(
     SESSION_CONTROLLER
   );
 
-  const pagoPAProxyController: PagoPAProxyController = newContainer.resolve(
+  const pagoPAProxyController: PagoPAProxyController = container.resolve(
     PAGOPA_PROXY_CONTROLLER
   );
 
@@ -521,18 +522,19 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
 
   const acsController: AuthenticationController = new AuthenticationController(
     container.resolve(SESSION_STORAGE),
-    newContainer.resolve(SAML_CERT),
-    newContainer.resolve(SPID_STRATEGY),
+    container.resolve(SAML_CERT),
+    container.resolve(SPID_STRATEGY),
     container.resolve(TOKEN_SERVICE),
-    newContainer.resolve("getClientProfileRedirectionUrl")
+    container.resolve("getClientProfileRedirectionUrl"),
+    PROFILE_SERVICE_VALUE
   );
 
   app.post(
     `${basePath}/assertionConsumerService`,
     withSpidAuth(
       acsController,
-      newContainer.resolve("clientErrorRedirectionUrl"),
-      newContainer.resolve("clientLoginRedirectionUrl")
+      container.resolve("clientErrorRedirectionUrl"),
+      container.resolve("clientLoginRedirectionUrl")
     )
   );
 

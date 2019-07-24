@@ -36,8 +36,10 @@ jest.mock("../services/messagesService", () => {
     }))
   };
 });
-import { CACHE_MAX_AGE_SECONDS, newContainer } from "../container";
-newContainer.register(CACHE_MAX_AGE_SECONDS, expectedCacheDurationSeconds);
+
+import { CACHE_MAX_AGE_SECONDS, container } from "../container";
+container.register(CACHE_MAX_AGE_SECONDS, expectedCacheDurationSeconds);
+
 import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;

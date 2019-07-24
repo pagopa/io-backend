@@ -8,19 +8,24 @@ import * as http from "http";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
-import container, { newContainer, SAML_CERT, SAML_KEY } from "./container";
+import {
+  API_BASE_PATH,
+  AUTHENTICATION_BASE_PATH,
+  container,
+  PAGOPA_BASE_PATH,
+  SAML_CERT,
+  SAML_KEY
+} from "./container";
 import { initAppInsights } from "./utils/appinsights";
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 
-const port = newContainer.resolve("serverPort");
-const env = newContainer.resolve("env");
+const port = container.resolve("serverPort");
+const env = container.resolve("env");
 
-const authenticationBasePath = container.resolve<string>(
-  "AuthenticationBasePath"
-);
-const APIBasePath = container.resolve<string>("APIBasePath");
-const PagoPABasePath = container.resolve<string>("PagoPABasePath");
+const authenticationBasePath = container.resolve(AUTHENTICATION_BASE_PATH);
+const APIBasePath = container.resolve(API_BASE_PATH);
+const PagoPABasePath = container.resolve(PAGOPA_BASE_PATH);
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -49,8 +54,8 @@ const maybeAppInsightsClient = fromNullable(
 
 newApp(
   env,
-  newContainer.resolve("allowNotifyIPSourceRange"),
-  newContainer.resolve("allowPagoPAIPSourceRange"),
+  container.resolve("allowNotifyIPSourceRange"),
+  container.resolve("allowPagoPAIPSourceRange"),
   authenticationBasePath,
   APIBasePath,
   PagoPABasePath
@@ -59,8 +64,8 @@ newApp(
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (env === NodeEnvironmentEnum.DEVELOPMENT) {
-      const samlKey: string = newContainer.resolve(SAML_KEY);
-      const samlCert = newContainer.resolve(SAML_CERT);
+      const samlKey = container.resolve(SAML_KEY);
+      const samlCert = container.resolve(SAML_CERT);
       const options = { key: samlKey, cert: samlCert };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
