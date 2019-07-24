@@ -36,6 +36,7 @@ jest.mock("../services/messagesService", () => {
     }))
   };
 });
+jest.mock("../utils/redis");
 
 import { CACHE_MAX_AGE_SECONDS, container } from "../container";
 container.register(CACHE_MAX_AGE_SECONDS, expectedCacheDurationSeconds);

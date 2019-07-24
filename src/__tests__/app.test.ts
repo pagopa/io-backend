@@ -9,6 +9,7 @@ import { ServerInfo } from "../../generated/public/ServerInfo";
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
+jest.mock("../utils/redis");
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
