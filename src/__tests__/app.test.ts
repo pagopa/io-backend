@@ -20,10 +20,10 @@ jest.mock("../controllers/notificationController", () => {
 });
 
 import appModule, { startIdpMetadataUpdater } from "../app";
-import { SPID_STRATEGY } from "../container";
 import {
+  container,
   DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  newContainer
+  SPID_STRATEGY
 } from "../container";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
@@ -116,8 +116,8 @@ describe("Success app start", () => {
   describe("Test refresh idp metadata", () => {
     let spidStrategyImpl: SpidStrategy;
     beforeEach(async () => {
-      spidStrategyImpl = await newContainer.resolve(SPID_STRATEGY);
       jest.useFakeTimers();
+      spidStrategyImpl = await container.resolve(SPID_STRATEGY);
     });
 
     it("app#idpMetadataUpdater", done => {
@@ -156,7 +156,7 @@ describe("Success app start", () => {
 describe("Failure app start", () => {
   it("Close app if download IDP metadata fails on startup", async () => {
     // Override Spid Strategy inside the container with a rejected promise.
-    newContainer.register(
+    container.register(
       SPID_STRATEGY,
       Promise.reject(new Error("Error download metadata"))
     );

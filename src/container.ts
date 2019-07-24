@@ -1,13 +1,8 @@
 /**
  * Defines services and register them to the Service Container.
- *
- * @see https://github.com/jeffijoe/awilix
  */
-
-import * as awilix from "awilix";
 import * as dotenv from "dotenv";
 import { isLeft } from "fp-ts/lib/Either";
-import * as fs from "fs";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
@@ -41,6 +36,8 @@ import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 
+import * as passport from "passport";
+import { getRequiredENVVar, readFile } from "./utils/container";
 import { log } from "./utils/logger";
 
 // Without this the environment variables loaded by dotenv aren't available in
@@ -53,6 +50,8 @@ const serverPort: number = parseInt(
   process.env.PORT || DEFAULT_SERVER_PORT,
   10
 );
+
+const ENV_VALUE = getNodeEnvironmentFromProcessEnv(process.env);
 
 // Default cache control max-age value is 5 minutes
 const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
@@ -109,7 +108,7 @@ const SPID_TESTENV_URL =
 
 // Register the spidStrategy.
 export const IDP_METADATA_URL = "IDPMetadataUrl";
-const IDP_METADATA_URL_VALUE = getRequiredValue("IDP_METADATA_URL");
+const IDP_METADATA_URL_VALUE = getRequiredENVVar("IDP_METADATA_URL");
 export function generateSpidStrategy(): Promise<SpidStrategy> {
   return spidStrategy(
     SAML_KEY_VALUE,
@@ -174,6 +173,69 @@ const API_URL_VALUE = process.env.API_URL || "";
 export const API_CLIENT = "apiClient";
 const API_CLIENT_VALUE = new ApiClientFactory(API_KEY_VALUE, API_URL_VALUE);
 
+//
+// Register a session storage service backed by Redis.
+//
+
+function createSimpleRedisClient(): redis.RedisClient {
+  const redisUrl = process.env.REDIS_URL || "redis://redis";
+  log.info("Creating SIMPLE redis client", { url: redisUrl });
+  return redis.createClient(redisUrl);
+}
+
+function createClusterRedisClient(): redis.RedisClient {
+  const DEFAULT_REDIS_PORT = "6379";
+
+  const redisUrl = getRequiredENVVar("REDIS_URL");
+  const redisPassword = process.env.REDIS_PASSWORD;
+  const redisPort: number = parseInt(
+    process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
+    10
+  );
+  log.info("Creating CLUSTER redis client", { url: redisUrl });
+  return new RedisClustr({
+    redisOptions: {
+      auth_pass: redisPassword,
+      tls: {
+        servername: redisUrl
+      }
+    },
+    servers: [
+      {
+        host: redisUrl,
+        port: redisPort
+      }
+    ]
+  }) as redis.RedisClient; // Casting RedisClustr with missing typings to RedisClient (same usage).
+}
+
+// Redis server settings.
+export const REDIS_CLIENT = "redisClient";
+const REDIS_CLIENT_VALUE =
+  ENV_VALUE === NodeEnvironmentEnum.DEVELOPMENT
+    ? createSimpleRedisClient()
+    : createClusterRedisClient();
+
+// Set default session duration to 30 days
+const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
+const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
+  ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
+  : DEFAULT_TOKEN_DURATION_IN_SECONDS;
+log.info("Session token duration set to %s seconds", tokenDurationSecs);
+
+// Register the user sessions storage service.
+export const SESSION_STORAGE = "sessionStorage";
+const SESSION_STORAGE_VALUE = new RedisSessionStorage(
+  REDIS_CLIENT_VALUE,
+  tokenDurationSecs
+);
+
+// Register the user metadata storage service.
+export const USER_METADATA_STORAGE = "userMetadataStorage";
+const USER_METADATA_STORAGE_VALUE = new RedisUserMetadataStorage(
+  REDIS_CLIENT_VALUE
+);
+
 // Register a factory service to create PagoPA client.
 const pagoPAApiUrl = process.env.PAGOPA_API_URL || "";
 const pagoPAApiUrlTest = process.env.PAGOPA_API_URL_TEST || "";
@@ -196,8 +258,8 @@ const MESSAGES_SERVICE = "messagesService";
 const MESSAGES_SERVICE_VALUE = new MessagesService(API_CLIENT_VALUE);
 
 // Azure Notification Hub credentials.
-const hubName = getRequiredValue("AZURE_NH_HUB_NAME");
-const endpointOrConnectionString = getRequiredValue("AZURE_NH_ENDPOINT");
+const hubName = getRequiredENVVar("AZURE_NH_HUB_NAME");
+const endpointOrConnectionString = getRequiredENVVar("AZURE_NH_ENDPOINT");
 
 // Register the notification service.
 const NOTIFICATION_SERVICE = "notificationService";
@@ -238,6 +300,59 @@ const NOTIFICATION_CONTROLLER_VALUE = new NotificationController(
   NOTIFICATION_SERVICE_VALUE
 );
 
+// Register the session controller as a service.
+export const SESSION_CONTROLLER = "sessionController";
+const SESSION_CONTROLLER_VALUE = new SessionController(SESSION_STORAGE_VALUE);
+
+// Register the user metadata controller as a service.
+export const USER_METADATA_CONTROLLER = "userMetadataController";
+const USER_METADATA_CONTROLLER_VALUE = new UserMetadataController(
+  USER_METADATA_STORAGE_VALUE
+);
+
+// Set default idp metadata refresh time to 10 days
+export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
+const idpMetadataRefreshIntervalSeconds: number = process.env
+  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
+  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
+  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
+export const IDP_METADATA_REFRESH_INTERVAL_SECONDS =
+  "idpMetadataRefreshIntervalSeconds";
+log.info(
+  "IDP metadata refresh interval set to %s seconds",
+  idpMetadataRefreshIntervalSeconds
+);
+
+// API endpoint mount.
+export const AUTHENTICATION_BASE_PATH = "AuthenticationBasePath";
+const AUTHENTICATION_BASE_PATH_VALUE = getRequiredENVVar(
+  "AUTHENTICATION_BASE_PATH"
+);
+export const API_BASE_PATH = "APIBasePath";
+const API_BASE_PATH_VALUE = getRequiredENVVar("API_BASE_PATH");
+export const PAGOPA_BASE_PATH = "PagoPABasePath";
+const PAGOPA_BASE_PATH_VALUE = getRequiredENVVar("PAGOPA_BASE_PATH");
+
+// Notification URL pre shared key.
+export const PRE_SHARED_KEY = "preSharedKey";
+const PRE_SHARED_KEY_VALUE = getRequiredENVVar("PRE_SHARED_KEY");
+
+// Register the bearerTokenStrategy.
+export const BEARER_TOKEN_STRATEGY = "bearerTokenStrategy";
+const BEARER_TOKEN_STRATEGY_VALUE = bearerTokenStrategy(
+  AUTHENTICATION_BASE_PATH_VALUE,
+  API_BASE_PATH_VALUE,
+  PAGOPA_BASE_PATH_VALUE
+);
+
+// Register the urlTokenStrategy.
+export const URL_TOKEN_STRATEGY = "urlTokenStrategy";
+const URL_TOKEN_STRATEGY_VALUE = urlTokenStrategy(PRE_SHARED_KEY_VALUE);
+
+// Register the token service.
+export const TOKEN_SERVICE = "tokenService";
+const TOKEN_SERVICE_VALUE = new TokenService();
+
 export interface IContainer {
   serverPort: number;
   [CACHE_MAX_AGE_SECONDS]: number;
@@ -271,6 +386,10 @@ export interface IContainer {
   [PAGOPA_CLIENT]: PagoPAClientFactory;
 
   [API_CLIENT]: ApiClientFactory;
+  [REDIS_CLIENT]: redis.RedisClient;
+  tokenDurationSecs: number;
+  [SESSION_STORAGE]: RedisSessionStorage;
+  [USER_METADATA_STORAGE]: RedisUserMetadataStorage;
   [PAGOPA_PROXY_SERVICE]: PagoPAProxyService;
   [PROFILE_SERVICE]: ProfileService;
   [MESSAGES_SERVICE]: MessagesService;
@@ -282,9 +401,21 @@ export interface IContainer {
   [MESSAGES_CONTROLLER]: MessagesController;
   [SERVICES_CONTROLLER]: ServicesController;
   [NOTIFICATION_CONTROLLER]: NotificationController;
+  [SESSION_CONTROLLER]: SessionController;
+  [USER_METADATA_CONTROLLER]: UserMetadataController;
+
+  [IDP_METADATA_REFRESH_INTERVAL_SECONDS]: number;
+
+  [TOKEN_SERVICE]: TokenService;
+  [AUTHENTICATION_BASE_PATH]: string;
+  [API_BASE_PATH]: string;
+  [PAGOPA_BASE_PATH]: string;
+  [PRE_SHARED_KEY]: string;
+  [BEARER_TOKEN_STRATEGY]: passport.Strategy;
+  [URL_TOKEN_STRATEGY]: passport.Strategy;
 }
 
-const staticContainer: IContainer = {
+const initContainer: IContainer = {
   serverPort,
   [CACHE_MAX_AGE_SECONDS]: CACHE_MAX_AGE_SECONDS_VALUE,
   [SAML_KEY]: SAML_KEY_VALUE,
@@ -311,7 +442,7 @@ const staticContainer: IContainer = {
   },
 
   // Resolve NODE_ENV environment (defaults to PRODUCTION).
-  env: getNodeEnvironmentFromProcessEnv(process.env),
+  env: ENV_VALUE,
 
   allowNotifyIPSourceRange: notifyCIDR,
   allowPagoPAIPSourceRange: pagoPACIDR,
@@ -324,6 +455,10 @@ const staticContainer: IContainer = {
   [PAGOPA_CLIENT]: PAGOPA_CLIENT_VALUE,
 
   [API_CLIENT]: API_CLIENT_VALUE,
+  [REDIS_CLIENT]: REDIS_CLIENT_VALUE,
+  tokenDurationSecs,
+  [SESSION_STORAGE]: SESSION_STORAGE_VALUE,
+  [USER_METADATA_STORAGE]: USER_METADATA_STORAGE_VALUE,
   [PAGOPA_PROXY_SERVICE]: PAGOPA_PROXY_SERVICE_VALUE,
   [PROFILE_SERVICE]: PROFILE_SERVICE_VALUE,
   [MESSAGES_SERVICE]: MESSAGES_SERVICE_VALUE,
@@ -334,210 +469,28 @@ const staticContainer: IContainer = {
   [PROFILE_CONTROLLER]: PROFILE_CONTROLLER_VALUE,
   [MESSAGES_CONTROLLER]: MESSAGES_CONTROLLER_VALUE,
   [SERVICES_CONTROLLER]: SERVICES_CONTROLLER_VALUE,
-  [NOTIFICATION_CONTROLLER]: NOTIFICATION_CONTROLLER_VALUE
+  [NOTIFICATION_CONTROLLER]: NOTIFICATION_CONTROLLER_VALUE,
+  [SESSION_CONTROLLER]: SESSION_CONTROLLER_VALUE,
+  [USER_METADATA_CONTROLLER]: USER_METADATA_CONTROLLER_VALUE,
+
+  [IDP_METADATA_REFRESH_INTERVAL_SECONDS]: idpMetadataRefreshIntervalSeconds,
+
+  [TOKEN_SERVICE]: TOKEN_SERVICE_VALUE,
+  [AUTHENTICATION_BASE_PATH]: AUTHENTICATION_BASE_PATH_VALUE,
+  [API_BASE_PATH]: API_BASE_PATH_VALUE,
+  [PAGOPA_BASE_PATH]: PAGOPA_BASE_PATH_VALUE,
+  [PRE_SHARED_KEY]: PRE_SHARED_KEY_VALUE,
+  [BEARER_TOKEN_STRATEGY]: BEARER_TOKEN_STRATEGY_VALUE,
+  [URL_TOKEN_STRATEGY]: URL_TOKEN_STRATEGY_VALUE
 };
 
-export const newContainer = {
-  staticContainer,
+export const container = {
+  _container: initContainer,
   register<K extends keyof IContainer>(key: K, value: IContainer[K]): void {
     // tslint:disable-next-line: no-object-mutation
-    newContainer.staticContainer[key] = value;
+    container._container[key] = value;
   },
   resolve<K extends keyof IContainer>(key: K): IContainer[K] {
-    return newContainer.staticContainer[key];
+    return container._container[key];
   }
 };
-
-const container = awilix.createContainer({
-  injectionMode: awilix.InjectionMode.CLASSIC
-});
-
-// Redis server settings.
-
-// Set default session duration to 30 days
-const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
-const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
-  ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
-  : DEFAULT_TOKEN_DURATION_IN_SECONDS;
-log.info("Session token duration set to %s seconds", tokenDurationSecs);
-
-container.register({
-  tokenDurationSecs: awilix.asValue(tokenDurationSecs)
-});
-
-// Notification URL pre shared key.
-registerRequiredValue("PRE_SHARED_KEY", "preSharedKey");
-
-// API endpoint mount.
-registerRequiredValue("AUTHENTICATION_BASE_PATH", "AuthenticationBasePath");
-registerRequiredValue("API_BASE_PATH", "APIBasePath");
-registerRequiredValue("PAGOPA_BASE_PATH", "PagoPABasePath");
-
-// Set default idp metadata refresh time to 10 days
-export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
-const idpMetadataRefreshIntervalSeconds: number = process.env
-  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
-  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
-  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
-export const IDP_METADATA_REFRESH_INTERVAL_SECONDS =
-  "idpMetadataRefreshIntervalSeconds";
-container.register({
-  [IDP_METADATA_REFRESH_INTERVAL_SECONDS]: awilix.asValue(
-    idpMetadataRefreshIntervalSeconds
-  )
-});
-log.info(
-  "IDP metadata refresh interval set to %s seconds",
-  idpMetadataRefreshIntervalSeconds
-);
-
-// Register the bearerTokenStrategy.
-export const BEARER_TOKEN_STRATEGY = "bearerTokenStrategy";
-container.register({
-  [BEARER_TOKEN_STRATEGY]: awilix.asFunction(bearerTokenStrategy).singleton()
-});
-
-// Register the urlTokenStrategy.
-export const URL_TOKEN_STRATEGY = "urlTokenStrategy";
-container.register({
-  [URL_TOKEN_STRATEGY]: awilix.asFunction(urlTokenStrategy).singleton()
-});
-
-//
-// Register a session storage service backed by Redis.
-//
-
-function createSimpleRedisClient(): redis.RedisClient {
-  const redisUrl = process.env.REDIS_URL || "redis://redis";
-  log.info("Creating SIMPLE redis client", { url: redisUrl });
-  return redis.createClient(redisUrl);
-}
-
-function createClusterRedisClient():
-  | redis.RedisClient
-  | RedisClustr
-  | undefined {
-  const DEFAULT_REDIS_PORT = "6379";
-
-  const redisUrl = process.env.REDIS_URL;
-  const redisPassword = process.env.REDIS_PASSWORD;
-  const redisPort: number = parseInt(
-    process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
-    10
-  );
-
-  if (redisUrl === undefined || redisPassword === undefined) {
-    log.error(
-      "Missing required environment variables needed to connect to Redis host (REDIS_URL, REDIS_PASSWORD)."
-    );
-    process.exit(1);
-    return;
-  }
-
-  log.info("Creating CLUSTER redis client", { url: redisUrl });
-  return new RedisClustr({
-    redisOptions: {
-      auth_pass: redisPassword,
-      tls: {
-        servername: redisUrl
-      }
-    },
-    servers: [
-      {
-        host: redisUrl,
-        port: redisPort
-      }
-    ]
-  });
-}
-
-container.register(
-  "redisClient",
-  awilix
-    .asFunction(() => {
-      // Use the Docker Redis instance when developing because the Azure Redis
-      // cluster isn't accessible outside the Azure VNet.
-      return newContainer.resolve("env") === NodeEnvironmentEnum.DEVELOPMENT
-        ? createSimpleRedisClient()
-        : createClusterRedisClient();
-    })
-    .singleton() // create only one instance of the redis client
-);
-
-// Register the user sessions storage service.
-export const SESSION_STORAGE = "sessionStorage";
-container.register({
-  [SESSION_STORAGE]: awilix.asClass(RedisSessionStorage)
-});
-
-// Register the user metadata storage service.
-export const USER_METADATA_STORAGE = "userMetadataStorage";
-container.register({
-  [USER_METADATA_STORAGE]: awilix.asClass(RedisUserMetadataStorage)
-});
-
-// Register the token service.
-export const TOKEN_SERVICE = "tokenService";
-container.register({
-  [TOKEN_SERVICE]: awilix.asClass(TokenService)
-});
-
-// Register the session controller as a service.
-export const SESSION_CONTROLLER = "sessionController";
-container.register({
-  [SESSION_CONTROLLER]: awilix.asClass(SessionController)
-});
-
-// Register the user metadata controller as a service.
-export const USER_METADATA_CONTROLLER = "userMetadataController";
-container.register({
-  [USER_METADATA_CONTROLLER]: awilix.asClass(UserMetadataController)
-});
-
-export default container;
-
-/**
- * Reads a file from the filesystem..
- *
- * @param path
- * @param type
- * @returns {string}
- */
-function readFile(path: string, type: string): string {
-  log.info("Reading %s file from %s", type, path);
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
-  return fs.readFileSync(path, "utf-8");
-}
-
-/**
- * Registers a required value reading from the environment.
- *
- * @param {string} envName
- * @param {string} valueName
- */
-function registerRequiredValue(envName: string, valueName: string): void {
-  if (process.env[envName] === undefined) {
-    log.error("Missing %s environment variable", envName);
-    process.exit(1);
-  } else {
-    container.register({
-      [valueName]: awilix.asValue(process.env[envName])
-    });
-  }
-}
-
-/**
- * Get a required value reading from the environment.
- *
- * @param {string} envName
- * @param {string} valueName
- */
-function getRequiredValue(envName: string): string {
-  const envVal = process.env[envName];
-  if (envVal === undefined) {
-    log.error("Missing %s environment variable", envName);
-    return process.exit(1);
-  } else {
-    return envVal;
-  }
-}
