@@ -116,9 +116,9 @@ describe("Success app start", () => {
   describe("Test refresh idp metadata", () => {
     let spidStrategy: passport.Strategy;
     beforeEach(async () => {
-      spidStrategy = await container.resolve<Promise<passport.Strategy>>(
+      spidStrategy = ((await container.resolve(
         SPID_STRATEGY
-      );
+      )) as unknown) as passport.Strategy;
       jest.useFakeTimers();
     });
 

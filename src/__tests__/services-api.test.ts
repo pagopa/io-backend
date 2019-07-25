@@ -25,9 +25,10 @@ jest.spyOn(passport, "authenticate").mockImplementation((_, __) => {
 });
 const expectedCacheDurationSeconds = 1;
 import container, { CACHE_MAX_AGE_SECONDS } from "../container";
-container.register({
-  [CACHE_MAX_AGE_SECONDS]: awilix.asValue(expectedCacheDurationSeconds)
-});
+container.register(
+  CACHE_MAX_AGE_SECONDS,
+  awilix.asValue(expectedCacheDurationSeconds)
+);
 import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;

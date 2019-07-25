@@ -213,7 +213,7 @@ export async function newApp(
     registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
     const idpMetadataRefreshIntervalMillis =
-      container.resolve<number>(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
+      container.resolve(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
     const idpMetadataRefreshTimer = startIdpMetadataUpdater(
       app,
       newSpidStrategy,
@@ -274,19 +274,23 @@ async function clearAndReloadSpidStrategy(
   let newSpidStrategy: passport.Strategy | undefined;
   try {
     // Inject a new SPID Strategy generate function in awilix container
-    container.register({
-      [SPID_STRATEGY]: awilix.asFunction(spidStrategy).singleton()
-    });
+    container.register(
+      SPID_STRATEGY,
+      awilix.asFunction(spidStrategy).singleton()
+    );
     newSpidStrategy = await defaultModule.loadSpidStrategy();
     log.info("Spid strategy re-initialization complete.");
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
     log.info("Restore previous spid strategy configuration");
-    container.register({
-      [SPID_STRATEGY]: awilix
-        .asFunction(() => Promise.resolve(previousSpidStrategy))
+    container.register(
+      SPID_STRATEGY,
+      awilix
+        .asFunction(() =>
+          Promise.resolve((previousSpidStrategy as unknown) as SpidStrategy)
+        )
         .singleton()
-    });
+    );
     throw new Error("Error while initializing SPID strategy");
   } finally {
     defaultModule.registerLoginRoute(
@@ -557,7 +561,9 @@ function registerPublicRoutes(app: Express): void {
 }
 
 function loadSpidStrategy(): Promise<passport.Strategy> {
-  return container.resolve<Promise<passport.Strategy>>(SPID_STRATEGY);
+  return (container.resolve(SPID_STRATEGY) as unknown) as Promise<
+    passport.Strategy
+  >;
 }
 
 export default defaultModule;

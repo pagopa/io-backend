@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-import passport = require("passport");
+import * as passport from "passport";
 import appModule from "../app";
 import container, {
   DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
@@ -27,9 +27,9 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
-  spidStrategy = await container.resolve<Promise<passport.Strategy>>(
+  spidStrategy = ((await container.resolve(
     SPID_STRATEGY
-  );
+  )) as unknown) as passport.Strategy;
   jest.useFakeTimers();
 });
 

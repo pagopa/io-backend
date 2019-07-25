@@ -5,25 +5,18 @@
 import * as http from "http";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
 import { newApp } from "./app";
 import container, { SAML_CERT, SAML_KEY } from "./container";
 import { log } from "./utils/logger";
 
-const port = container.resolve<number>("serverPort");
-const env = container.resolve<NodeEnvironmentEnum>("env");
-const allowNotifyIPSourceRange = container.resolve<CIDR>(
-  "allowNotifyIPSourceRange"
-);
-const allowPagoPAIPSourceRange = container.resolve<CIDR>(
-  "allowPagoPAIPSourceRange"
-);
+const port = container.resolve("serverPort");
+const env = container.resolve("env");
+const allowNotifyIPSourceRange = container.resolve("allowNotifyIPSourceRange");
+const allowPagoPAIPSourceRange = container.resolve("allowPagoPAIPSourceRange");
 
-const authenticationBasePath = container.resolve<string>(
-  "AuthenticationBasePath"
-);
-const APIBasePath = container.resolve<string>("APIBasePath");
-const PagoPABasePath = container.resolve<string>("PagoPABasePath");
+const authenticationBasePath = container.resolve("AuthenticationBasePath");
+const APIBasePath = container.resolve("APIBasePath");
+const PagoPABasePath = container.resolve("PagoPABasePath");
 
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
@@ -39,8 +32,8 @@ newApp(
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (env === NodeEnvironmentEnum.DEVELOPMENT) {
-      const samlKey = container.resolve<string>(SAML_KEY);
-      const samlCert = container.resolve<string>(SAML_CERT);
+      const samlKey = container.resolve(SAML_KEY);
+      const samlCert = container.resolve(SAML_CERT);
       const options = { key: samlKey, cert: samlCert };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
