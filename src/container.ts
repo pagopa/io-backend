@@ -12,6 +12,7 @@ import { CIDR, IPatternStringTag } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
 
+import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
@@ -325,6 +326,22 @@ const URL_TOKEN_STRATEGY_VALUE = urlTokenStrategy(PRE_SHARED_KEY_VALUE);
 export const TOKEN_SERVICE = "tokenService";
 const TOKEN_SERVICE_VALUE = new TokenService();
 
+const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
+  const url = clientProfileRedirectionUrl.replace("{token}", token);
+  return {
+    href: url
+  };
+};
+
+export const AUTHORIZATION_CONTROLLER = "authorizationController";
+const AUTHORIZATION_CONTROLLER_VALUE = new AuthenticationController(
+  SESSION_STORAGE_VALUE,
+  SAML_CERT_VALUE,
+  SPID_STRATEGY_VALUE,
+  TOKEN_SERVICE_VALUE,
+  getClientProfileRedirectionUrl
+);
+
 export interface IContainer {
   serverPort: number;
   [CACHE_MAX_AGE_SECONDS]: number;
@@ -369,6 +386,7 @@ export interface IContainer {
 
   [PAGOPA_CONTROLLER]: PagoPAController;
   [PAGOPA_PROXY_CONTROLLER]: PagoPAProxyController;
+  [AUTHORIZATION_CONTROLLER]: AuthenticationController;
   [PROFILE_CONTROLLER]: ProfileController;
   [MESSAGES_CONTROLLER]: MessagesController;
   [SERVICES_CONTROLLER]: ServicesController;
@@ -405,13 +423,7 @@ const initContainer: IContainer = {
   clientErrorRedirectionUrl:
     process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html",
   clientLoginRedirectionUrl: process.env.CLIENT_REDIRECTION_URL || "/login",
-  getClientProfileRedirectionUrl: (token: string): UrlFromString => {
-    const url = clientProfileRedirectionUrl.replace("{token}", token);
-
-    return {
-      href: url
-    };
-  },
+  getClientProfileRedirectionUrl,
 
   // Resolve NODE_ENV environment (defaults to PRODUCTION).
   env: ENV_VALUE,
@@ -438,6 +450,7 @@ const initContainer: IContainer = {
 
   [PAGOPA_CONTROLLER]: PAGOPA_CONTROLLER_VALUE,
   [PAGOPA_PROXY_CONTROLLER]: PAGOPA_PROXY_CONTROLLER_VALUE,
+  [AUTHORIZATION_CONTROLLER]: AUTHORIZATION_CONTROLLER_VALUE,
   [PROFILE_CONTROLLER]: PROFILE_CONTROLLER_VALUE,
   [MESSAGES_CONTROLLER]: MESSAGES_CONTROLLER_VALUE,
   [SERVICES_CONTROLLER]: SERVICES_CONTROLLER_VALUE,

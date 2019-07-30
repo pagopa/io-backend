@@ -3,6 +3,7 @@
  */
 
 import {
+  AUTHORIZATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
   container,
@@ -13,12 +14,9 @@ import {
   PAGOPA_CONTROLLER,
   PAGOPA_PROXY_CONTROLLER,
   PROFILE_CONTROLLER,
-  SAML_CERT,
   SERVICES_CONTROLLER,
   SESSION_CONTROLLER,
-  SESSION_STORAGE,
   SPID_STRATEGY,
-  TOKEN_SERVICE,
   URL_TOKEN_STRATEGY,
   USER_METADATA_CONTROLLER
 } from "./container";
@@ -492,12 +490,8 @@ function registerAPIRoutes(
 function registerAuthenticationRoutes(app: Express, basePath: string): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
-  const acsController: AuthenticationController = new AuthenticationController(
-    container.resolve(SESSION_STORAGE),
-    container.resolve(SAML_CERT),
-    container.resolve(SPID_STRATEGY),
-    container.resolve(TOKEN_SERVICE),
-    container.resolve("getClientProfileRedirectionUrl")
+  const acsController: AuthenticationController = container.resolve(
+    AUTHORIZATION_CONTROLLER
   );
 
   app.post(
