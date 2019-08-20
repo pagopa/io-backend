@@ -51,7 +51,7 @@
     "helmet": "3.13.0",
     "io-ts": "1.8.5",
     "io-ts-types": "^0.4.7",
-    "italia-ts-commons": "^5.1.4",
+    "italia-ts-commons": "^5.1.7",
     "json-set-map": "^1.0.2",
     "morgan": "^1.9.1",
     "node-fetch": "^2.2.0",
