@@ -20,8 +20,6 @@ import {
   URL_TOKEN_STRATEGY,
   USER_METADATA_STORAGE
 } from "./container";
-import ProfileController from "./controllers/profileController";
-import UserMetadataController from "./controllers/userMetadataController";
 
 import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
@@ -33,10 +31,6 @@ import * as passport from "passport";
 
 import { fromNullable } from "fp-ts/lib/Option";
 
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import ServicesController from "./controllers/servicesController";
-
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import { not } from "fp-ts/lib/function";
@@ -45,12 +39,18 @@ import {
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
+import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import AuthenticationController from "./controllers/authenticationController";
+import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
 import PagoPAProxyController from "./controllers/pagoPAProxyController";
+import ProfileController from "./controllers/profileController";
+import ServicesController from "./controllers/servicesController";
 import SessionController from "./controllers/sessionController";
+import UserMetadataController from "./controllers/userMetadataController";
 
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
@@ -61,12 +61,18 @@ import NotificationService from "./services/notificationService";
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
 
+import MessagesService from "./services/messagesService";
+import PagoPAProxyService from "./services/pagoPAProxyService";
+import ProfileService from "./services/profileService";
+import RedisSessionStorage from "./services/redisSessionStorage";
+import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
+import TokenService from "./services/tokenService";
+
 const defaultModule = {
+  SPID_STRATEGY: generateSpidStrategy(),
   loadSpidStrategy,
   newApp,
   registerLoginRoute,
-  // tslint:disable-next-line: object-literal-sort-keys
-  SPID_STRATEGY: generateSpidStrategy(),
   startIdpMetadataUpdater
 };
 
@@ -208,12 +214,38 @@ export async function newApp(
   //
 
   try {
-    const newSpidStrategy = await defaultModule.SPID_STRATEGY; // SPID Strategy from container "DEFAULT"
+    const newSpidStrategy = await defaultModule.SPID_STRATEGY;
     defaultModule.registerLoginRoute(app, newSpidStrategy);
     registerPublicRoutes(app);
-    registerAuthenticationRoutes(app, authenticationBasePath);
-    registerAPIRoutes(app, APIBasePath, allowNotifyIPSourceRange);
-    registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
+    registerAuthenticationRoutes(
+      app,
+      authenticationBasePath,
+      SESSION_STORAGE,
+      SAML_CERT,
+      TOKEN_SERVICE,
+      getClientProfileRedirectionUrl
+    );
+    const NOTIFICATION_SERVICE = new NotificationService(
+      hubName,
+      endpointOrConnectionString
+    );
+    registerAPIRoutes(
+      app,
+      APIBasePath,
+      allowNotifyIPSourceRange,
+      PROFILE_SERVICE,
+      MESSAGES_SERVICE,
+      NOTIFICATION_SERVICE,
+      SESSION_STORAGE,
+      PAGOPA_PROXY_SERVICE,
+      USER_METADATA_STORAGE
+    );
+    registerPagoPARoutes(
+      app,
+      PagoPABasePath,
+      allowPagoPAIPSourceRange,
+      PROFILE_SERVICE
+    );
 
     const idpMetadataRefreshIntervalMillis =
       container.resolve(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
@@ -321,12 +353,13 @@ export function startIdpMetadataUpdater(
 function registerPagoPARoutes(
   app: Express,
   basePath: string,
-  allowPagoPAIPSourceRange: CIDR
+  allowPagoPAIPSourceRange: CIDR,
+  profileService: ProfileService
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
   const pagopaController: PagoPAController = new PagoPAController(
-    PROFILE_SERVICE
+    profileService
   );
 
   app.get(
@@ -338,40 +371,47 @@ function registerPagoPARoutes(
 }
 
 // tslint:disable-next-line: no-big-function
+// tslint:disable-next-line: parameters-max-number
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  allowNotifyIPSourceRange: CIDR
+  allowNotifyIPSourceRange: CIDR,
+  profileService: ProfileService,
+  messagesService: MessagesService,
+  notificationService: NotificationService,
+  sessionStorage: RedisSessionStorage,
+  pagoPaProxyService: PagoPAProxyService,
+  userMetadataStorage: RedisUserMetadataStorage
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
   const urlTokenAuth = passport.authenticate("authtoken", { session: false });
 
   const profileController: ProfileController = new ProfileController(
-    PROFILE_SERVICE
+    profileService
   );
 
   const messagesController: MessagesController = new MessagesController(
-    MESSAGES_SERVICE
+    messagesService
   );
 
   const servicesController: ServicesController = new ServicesController(
-    MESSAGES_SERVICE
+    messagesService
   );
 
   const notificationController: NotificationController = new NotificationController(
-    new NotificationService(hubName, endpointOrConnectionString)
+    notificationService
   );
 
   const sessionController: SessionController = new SessionController(
-    SESSION_STORAGE
+    sessionStorage
   );
 
   const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(
-    PAGOPA_PROXY_SERVICE
+    pagoPaProxyService
   );
 
   const userMetadataController: UserMetadataController = new UserMetadataController(
-    USER_METADATA_STORAGE
+    userMetadataStorage
   );
 
   app.get(
@@ -492,15 +532,22 @@ function registerAPIRoutes(
   );
 }
 
-function registerAuthenticationRoutes(app: Express, basePath: string): void {
+function registerAuthenticationRoutes(
+  app: Express,
+  basePath: string,
+  sessionStorage: RedisSessionStorage,
+  samlCert: string,
+  tokenService: TokenService,
+  getRedirectionUrl: (token: string) => UrlFromString
+): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
   const acsController: AuthenticationController = new AuthenticationController(
-    SESSION_STORAGE,
-    SAML_CERT,
+    sessionStorage,
+    samlCert,
     defaultModule.SPID_STRATEGY,
-    TOKEN_SERVICE,
-    getClientProfileRedirectionUrl
+    tokenService,
+    getRedirectionUrl
   );
 
   app.post(
