@@ -3,11 +3,7 @@ import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 jest.mock("../utils/redis");
 import appModule from "../app";
-import {
-  container,
-  DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  SPID_STRATEGY
-} from "../container";
+import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../container";
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 
@@ -28,7 +24,7 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
-  spidStrategy = await container.resolve(SPID_STRATEGY);
+  spidStrategy = await appModule.SPID_STRATEGY;
   jest.useFakeTimers();
 });
 

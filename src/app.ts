@@ -3,22 +3,22 @@
  */
 
 import {
-  AUTHORIZATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
   container,
+  endpointOrConnectionString,
   generateSpidStrategy,
+  getClientProfileRedirectionUrl,
+  hubName,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  MESSAGES_CONTROLLER,
-  NOTIFICATION_CONTROLLER,
-  PAGOPA_CONTROLLER,
-  PAGOPA_PROXY_CONTROLLER,
-  PROFILE_CONTROLLER,
-  SERVICES_CONTROLLER,
-  SESSION_CONTROLLER,
-  SPID_STRATEGY,
+  MESSAGES_SERVICE,
+  PAGOPA_PROXY_SERVICE,
+  PROFILE_SERVICE,
+  SAML_CERT,
+  SESSION_STORAGE,
+  TOKEN_SERVICE,
   URL_TOKEN_STRATEGY,
-  USER_METADATA_CONTROLLER
+  USER_METADATA_STORAGE
 } from "./container";
 import ProfileController from "./controllers/profileController";
 import UserMetadataController from "./controllers/userMetadataController";
@@ -57,6 +57,7 @@ import checkIP from "./utils/middleware/checkIP";
 
 import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
+import NotificationService from "./services/notificationService";
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
 
@@ -64,6 +65,8 @@ const defaultModule = {
   loadSpidStrategy,
   newApp,
   registerLoginRoute,
+  // tslint:disable-next-line: object-literal-sort-keys
+  SPID_STRATEGY: generateSpidStrategy(),
   startIdpMetadataUpdater
 };
 
@@ -205,7 +208,7 @@ export async function newApp(
   //
 
   try {
-    const newSpidStrategy = await container.resolve(SPID_STRATEGY); // SPID Strategy from container "DEFAULT"
+    const newSpidStrategy = await defaultModule.SPID_STRATEGY; // SPID Strategy from container "DEFAULT"
     defaultModule.registerLoginRoute(app, newSpidStrategy);
     registerPublicRoutes(app);
     registerAuthenticationRoutes(app, authenticationBasePath);
@@ -267,13 +270,15 @@ async function clearAndReloadSpidStrategy(
   let newSpidStrategy: SpidStrategy | undefined;
   try {
     // Inject a new SPID Strategy generate function inside the container
-    container.register(SPID_STRATEGY, defaultModule.loadSpidStrategy());
-    newSpidStrategy = await container.resolve(SPID_STRATEGY);
+    // tslint:disable-next-line: no-object-mutation
+    defaultModule.SPID_STRATEGY = defaultModule.loadSpidStrategy();
+    newSpidStrategy = await defaultModule.SPID_STRATEGY;
     log.info("Spid strategy re-initialization complete.");
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
     log.info("Restore previous spid strategy configuration");
-    container.register(SPID_STRATEGY, Promise.resolve(previousSpidStrategy)); // Update Container Spid Strategy
+    // tslint:disable-next-line: no-object-mutation
+    defaultModule.SPID_STRATEGY = Promise.resolve(previousSpidStrategy); // Update Container Spid Strategy
     throw new Error("Error while initializing SPID strategy");
   } finally {
     defaultModule.registerLoginRoute(
@@ -320,8 +325,8 @@ function registerPagoPARoutes(
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
-  const pagopaController: PagoPAController = container.resolve(
-    PAGOPA_CONTROLLER
+  const pagopaController: PagoPAController = new PagoPAController(
+    PROFILE_SERVICE
   );
 
   app.get(
@@ -341,32 +346,32 @@ function registerAPIRoutes(
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
   const urlTokenAuth = passport.authenticate("authtoken", { session: false });
 
-  const profileController: ProfileController = container.resolve(
-    PROFILE_CONTROLLER
+  const profileController: ProfileController = new ProfileController(
+    PROFILE_SERVICE
   );
 
-  const messagesController: MessagesController = container.resolve(
-    MESSAGES_CONTROLLER
+  const messagesController: MessagesController = new MessagesController(
+    MESSAGES_SERVICE
   );
 
-  const servicesController: ServicesController = container.resolve(
-    SERVICES_CONTROLLER
+  const servicesController: ServicesController = new ServicesController(
+    MESSAGES_SERVICE
   );
 
-  const notificationController: NotificationController = container.resolve(
-    NOTIFICATION_CONTROLLER
+  const notificationController: NotificationController = new NotificationController(
+    new NotificationService(hubName, endpointOrConnectionString)
   );
 
-  const sessionController: SessionController = container.resolve(
-    SESSION_CONTROLLER
+  const sessionController: SessionController = new SessionController(
+    SESSION_STORAGE
   );
 
-  const pagoPAProxyController: PagoPAProxyController = container.resolve(
-    PAGOPA_PROXY_CONTROLLER
+  const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(
+    PAGOPA_PROXY_SERVICE
   );
 
-  const userMetadataController: UserMetadataController = container.resolve(
-    USER_METADATA_CONTROLLER
+  const userMetadataController: UserMetadataController = new UserMetadataController(
+    USER_METADATA_STORAGE
   );
 
   app.get(
@@ -490,8 +495,12 @@ function registerAPIRoutes(
 function registerAuthenticationRoutes(app: Express, basePath: string): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
-  const acsController: AuthenticationController = container.resolve(
-    AUTHORIZATION_CONTROLLER
+  const acsController: AuthenticationController = new AuthenticationController(
+    SESSION_STORAGE,
+    SAML_CERT,
+    defaultModule.SPID_STRATEGY,
+    TOKEN_SERVICE,
+    getClientProfileRedirectionUrl
   );
 
   app.post(
