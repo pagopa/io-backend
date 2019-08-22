@@ -72,8 +72,6 @@ const defaultModule = {
   currentSpidStrategy: undefined as SpidStrategy | undefined,
   newApp,
   registerLoginRoute,
-  // tslint:disable-next-line: object-literal-sort-keys
-  SPID_STRATEGY: generateSpidStrategy(),
   startIdpMetadataUpdater
 };
 
