@@ -3,7 +3,10 @@
  */
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import {
+  errorsToReadableMessages,
+  ReadableReporter
+} from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
@@ -11,6 +14,7 @@ import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
+import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
@@ -86,11 +90,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
       return left<Error, boolean>(
-        new Error(
-          setPromisesResult
-            .filter(isLeft)
-            .map(_ => _.value.message)
-            .join("|")
+        multipleErrorsFormatter(
+          setPromisesResult.filter(isLeft).map(_ => _.value),
+          "RedisSessionStorage.set"
         )
       );
     }
@@ -107,8 +109,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const errorOrSession = await this.loadSessionBySessionToken(token);
 
     if (isLeft(errorOrSession)) {
-      const error = errorOrSession.value;
-      return left(error);
+      return left(errorOrSession.value); // TODO: Error not propagated
     }
 
     const user = errorOrSession.value;
@@ -126,7 +127,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     if (isLeft(errorOrSession)) {
       const error = errorOrSession.value;
-      return left(error);
+      return left(error); // TODO: Error not propagated
     }
 
     const user = errorOrSession.value;
@@ -155,7 +156,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
             resolve(
               this.falsyResponseToError(
                 this.integerReply(err, response),
-                new Error("Unexpected response from redis client.")
+                new Error(
+                  "Unexpected response from redis client deleting token from SessionKeySet."
+                )
               )
             )
         );
@@ -167,22 +170,38 @@ export default class RedisSessionStorage extends RedisStorageUtils
         removeValueSessionInfoSet.value.message
       );
     }
-    const deleteSessionTokens = new Promise<Either<Error, boolean>>(resolve => {
+    const deleteSessionTokens = new Promise<Either<Error, true>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
       this.redisClient.del(
         sessionInfoKey,
         `${sessionKeyPrefix}${sessionToken}`,
-        (err, response) => resolve(this.integerReply(err, response))
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.integerReply(err, response, 2),
+              new Error(
+                "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+              )
+            )
+          )
       );
     });
 
-    const deleteWalletToken = new Promise<Either<Error, boolean>>(resolve => {
+    const deleteWalletToken = new Promise<Either<Error, true>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
       this.redisClient.del(
         `${walletKeyPrefix}${walletToken}`,
-        (err, response) => resolve(this.integerReply(err, response))
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.integerReply(err, response),
+              new Error(
+                "Unexpected response from redis client deleting walletToken."
+              )
+            )
+          )
       );
     });
 
@@ -191,12 +210,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
       deleteWalletToken
     ]);
 
-    if (
-      deletePromises.some(_ => {
-        return isLeft(_) || !_.value;
-      })
-    ) {
-      return left<Error, boolean>(new Error("Error deleting the token"));
+    const isDeleteFailed = deletePromises.some(isLeft);
+    if (isDeleteFailed) {
+      return left<Error, boolean>(
+        multipleErrorsFormatter(
+          deletePromises.filter(isLeft).map(_ => _.value),
+          "RedisSessionStorage.del"
+        )
+      );
     }
     return right<Error, boolean>(true);
   }
@@ -256,7 +277,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
             if (isLeft(errorOrDeserializedSessionInfo)) {
               log.warn(
-                "Unable to decode the session info: %s",
+                "Unable to decode the session info: %s. Skipped.",
                 ReadableReporter.report(errorOrDeserializedSessionInfo)
               );
               return prev;
@@ -265,7 +286,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
               sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
             };
           } catch (err) {
-            log.error("Unable to parse the session info json");
+            log.error("Unable to parse the session info json. Skipped.");
             return prev;
           }
         },
@@ -274,7 +295,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     );
   }
 
-  public async clearExpiredSetValues(
+  private async clearExpiredSetValues(
     fiscalCode: string
   ): Promise<ReadonlyArray<Either<Error, boolean>>> {
     const userSessionSetKey = `${userSessionsSetKeyPrefix}${fiscalCode}`;
@@ -373,13 +394,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
           const errorOrDeserializedUser = User.decode(userPayload);
 
           if (isLeft(errorOrDeserializedUser)) {
-            log.error(
-              "Unable to decode the user: %s",
-              ReadableReporter.report(errorOrDeserializedUser)
+            const decodeErrorMessage = new Error(
+              errorsToReadableMessages(errorOrDeserializedUser.value).join("/")
             );
-            return resolve(
-              left<Error, User>(new Error("Unable to decode the user"))
-            );
+            return resolve(left<Error, User>(decodeErrorMessage));
           }
 
           const user = errorOrDeserializedUser.value;

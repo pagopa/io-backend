@@ -5,11 +5,13 @@
 /* tslint:disable:no-null-keyword */
 /* tslint:disable:no-object-mutation */
 
-import { left, right } from "fp-ts/lib/Either";
+import { left, Left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 
+import { ValidationError } from "io-ts";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
@@ -17,6 +19,7 @@ import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
+import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
@@ -106,7 +109,12 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
-      left(new Error("hmset error")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("hmset error")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns an error on saving the session"
     ],
     [
@@ -114,7 +122,12 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("hmset error|hset error")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("hmset error"), new Error("hset error")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns an error on saving the session and error saving the mapping"
     ],
     [
@@ -122,7 +135,12 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("hmset error|Error setting wallet token")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("hmset error"), new Error("Error setting wallet token")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns an error on saving the session and false saving the mapping"
     ],
     [
@@ -130,23 +148,28 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
-      left(new Error("Error setting session token")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("Error setting session token")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns false on saving the session"
     ],
     [
       undefined,
       undefined,
-      new Error("hset error"),
-      undefined,
-      left(new Error("Error setting session token|hset error")),
-      "should fail if Redis client returns false on saving the session and error saving the mapping"
-    ],
-    [
       undefined,
       undefined,
-      undefined,
-      undefined,
-      left(new Error("Error setting session token|Error setting wallet token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error("Error setting session token"),
+            new Error("Error setting wallet token")
+          ],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns false on saving the session and false saving the mapping"
     ],
     [
@@ -154,7 +177,12 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       new Error("hset error"),
       undefined,
-      left(new Error("hset error")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("hset error")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns an error on saving the mapping"
     ],
     [
@@ -162,7 +190,12 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
-      left(new Error("Error setting session token|hset error")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("Error setting session token"), new Error("hset error")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns an error on saving the mapping and false saving the session"
     ],
     [
@@ -170,7 +203,12 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       undefined,
-      left(new Error("Error setting wallet token")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("Error setting wallet token")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns false on saving the mapping"
     ],
     [
@@ -178,7 +216,12 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("hmset error|Error setting wallet token")),
+      left(
+        multipleErrorsFormatter(
+          [new Error("hmset error"), new Error("Error setting wallet token")],
+          "RedisSessionStorage.set"
+        )
+      ),
       "should fail if Redis client returns false on saving the mapping and error saving the session"
     ]
   ])(
@@ -245,7 +288,13 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
-
+    const expectedDecodedError = User.decode(anInvalidUser) as Left<
+      ReadonlyArray<ValidationError>,
+      User
+    >;
+    const expectedError = new Error(
+      errorsToReadableMessages(expectedDecodedError.value).join("/")
+    );
     const response = await sessionStorage.getBySessionToken(
       aValidUser.session_token
     );
@@ -254,7 +303,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet.mock.calls[0][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(left(new Error("Unable to decode the user")));
+    expect(response).toEqual(left(expectedError));
   });
 
   it("should fail parse of user payload", async () => {
@@ -302,15 +351,25 @@ describe("RedisSessionStorage#getBySessionToken", () => {
   });
 });
 
+// tslint:disable-next-line: no-big-function
 describe("RedisSessionStorage#del", () => {
   it.each([
-    [undefined, 1, undefined, 1, right(true), "should delete a session"],
+    [undefined, 2, undefined, 1, right(true), "should delete a session"],
     [
       new Error("del error"),
       undefined,
       undefined,
       1,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns an error deleting the session"
     ],
     [
@@ -318,7 +377,19 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       new Error("hdel error"),
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            ),
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns an error deleting the session and an error deleting the mapping"
     ],
     [
@@ -326,7 +397,19 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            ),
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns an error deleting the session and false deleting the mapping"
     ],
     [
@@ -334,7 +417,16 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       1,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns false on deleting the session"
     ],
     [
@@ -342,7 +434,19 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       new Error("hdel error"),
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            ),
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns false on deleting the session and error deleting the mapping"
     ],
     [
@@ -350,15 +454,36 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            ),
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns false on deleting the session and false deleting the mapping"
     ],
     [
       undefined,
-      1,
+      2,
       new Error("hdel error"),
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns an error on deleting the mapping"
     ],
     [
@@ -366,15 +491,36 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       new Error("hdel error"),
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            ),
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns an error on deleting the mapping and false deleting the session"
     ],
     [
       undefined,
-      1,
+      2,
       undefined,
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns false on deleting the mapping"
     ],
     [
@@ -382,7 +528,19 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       undefined,
-      left(new Error("Error deleting the token")),
+      left(
+        multipleErrorsFormatter(
+          [
+            new Error(
+              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
+            ),
+            new Error(
+              "Unexpected response from redis client deleting walletToken."
+            )
+          ],
+          "RedisSessionStorage.del"
+        )
+      ),
       "should fail if Redis client returns false on deleting the mapping and error deleting the session"
     ]
   ])(
@@ -547,7 +705,8 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
     mockSmembers.mockImplementation((_, callback) => {
       callback(new Error("smembers error"), undefined);
     });
-    const clearResults = await sessionStorage.clearExpiredSetValues(
+    // tslint:disable-next-line: no-string-literal
+    const clearResults = await sessionStorage["clearExpiredSetValues"](
       aValidUser.fiscal_code
     );
     expect(clearResults).toEqual([]);
@@ -569,7 +728,8 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
       callback(undefined, 1);
     });
 
-    const clearResults = await sessionStorage.clearExpiredSetValues(
+    // tslint:disable-next-line: no-string-literal
+    const clearResults = await sessionStorage["clearExpiredSetValues"](
       aValidUser.fiscal_code
     );
     expect(mockSmembers).toHaveBeenCalledTimes(1);
