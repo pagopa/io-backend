@@ -61,9 +61,11 @@ describe("Server graceful shutdown", () => {
 
   it("Test server graceful shutdown on test route", done => {
     const neverCalledFunction = jest.fn();
+    const completeAsyncOp = jest.fn();
     nodeFetch(testApiUrl)
       .then(async _ => {
         expect(await _.json()).toEqual(expectedResponse);
+        completeAsyncOp();
       })
       .catch(neverCalledFunction);
 
@@ -76,6 +78,7 @@ describe("Server graceful shutdown", () => {
         .then(neverCalledFunction)
         .catch(_ => {
           expect(_.code).toBe("ECONNREFUSED");
+          completeAsyncOp();
         });
     }, 10);
 
@@ -83,6 +86,7 @@ describe("Server graceful shutdown", () => {
     setTimeout(() => {
       expect(finallyMock).toBeCalledTimes(1);
       expect(neverCalledFunction).not.toBeCalled();
+      expect(completeAsyncOp).toBeCalledTimes(2);
       done();
     }, gracefulShutdownTimeout);
   });
