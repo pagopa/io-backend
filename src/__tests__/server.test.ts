@@ -82,7 +82,7 @@ describe("Server graceful shutdown", () => {
     expect(await response.json()).toEqual(expectedResponse);
 
     // Check that the shutting down process has been completed after the timeout value.
-    return await new Promise(resolve => {
+    return await new Promise<void>(resolve => {
       setTimeout(() => {
         // Finally is called twice, one when the stack of connections become zero and one when the graceful shutdown timeout is reached.
         expect(finallyMock).toBeCalledTimes(2);
