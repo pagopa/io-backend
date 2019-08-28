@@ -26,10 +26,12 @@ describe("Server graceful shutdown", () => {
 
   const testApiUrl = `http://localhost:${port}${testRoutePath}`;
 
-  beforeAll(async () => {
-    jest.spyOn(process, "exit").mockImplementation(() => {
-      return true;
-    });
+  jest.spyOn(process, "exit").mockImplementation(() => {
+    return true;
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
     jest.useRealTimers();
     app = await newApp(
       NodeEnvironmentEnum.DEVELOPMENT,
@@ -59,35 +61,37 @@ describe("Server graceful shutdown", () => {
     });
   });
 
-  it("Test server graceful shutdown on test route", done => {
+  it("should wait requests on test route to complete before shitting down the server", async () => {
     const neverCalledFunction = jest.fn();
     const completeAsyncOp = jest.fn();
-    nodeFetch(testApiUrl)
-      .then(async _ => {
-        expect(await _.json()).toEqual(expectedResponse);
-        completeAsyncOp();
-      })
-      .catch(neverCalledFunction);
 
-    // Call the same api and expect that the response will be refused
-    // Shutting down process in progress.
-    setTimeout(() => {
-      // Start Server shutdown just after the first call of this API
+    // Call test api after SIGTERM and expect that the response will be refused
+    setTimeout(async () => {
+      // Start Server shutdown
       process.emit("SIGTERM");
-      nodeFetch(testApiUrl)
-        .then(neverCalledFunction)
-        .catch(_ => {
-          expect(_.code).toBe("ECONNREFUSED");
-          completeAsyncOp();
-        });
+      try {
+        await nodeFetch(testApiUrl);
+        neverCalledFunction(); // test API will never succeded
+      } catch (e) {
+        expect(e.code).toBe("ECONNREFUSED");
+        completeAsyncOp(); // check that the test API return an error
+      }
     }, 10);
 
+    const response = await nodeFetch(testApiUrl);
+    expect(await response.json()).toEqual(expectedResponse);
+
     // Check that the shutting down process has been completed after the timeout value.
-    setTimeout(() => {
-      expect(finallyMock).toBeCalledTimes(1);
-      expect(neverCalledFunction).not.toBeCalled();
-      expect(completeAsyncOp).toBeCalledTimes(2);
-      done();
-    }, gracefulShutdownTimeout);
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        // Finally is called twice, one when the stack of connections become zero and one when the graceful shutdown timeout is reached.
+        expect(finallyMock).toBeCalledTimes(2);
+
+        // check that the second test API call never succeded
+        expect(neverCalledFunction).not.toBeCalled();
+        expect(completeAsyncOp).toBeCalledTimes(1);
+        resolve();
+      }, gracefulShutdownTimeout);
+    });
   });
 });
