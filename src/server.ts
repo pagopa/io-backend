@@ -3,12 +3,12 @@
  */
 
 import * as http from "http";
-import * as httpGracefulShutdown from "http-graceful-shutdown";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import { newApp } from "./app";
 import container, { SAML_CERT, SAML_KEY } from "./container";
+import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 
 const port = container.resolve<number>("serverPort");
@@ -69,9 +69,11 @@ newApp(
       log.info("HTTP server close.");
     });
 
-    httpGracefulShutdown(server, {
-      development: process.env.NODE_ENV === "development",
-      finally: () => log.info("Server gracefully shutting down..."),
+    initHttpGracefulShutdown(server, app, {
+      development: env === NodeEnvironmentEnum.DEVELOPMENT,
+      finally: () => {
+        log.info("Server graceful shutdown complete.");
+      },
       signals: shutdownSignals,
       timeout: shutdownTimeout
     });
