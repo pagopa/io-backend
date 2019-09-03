@@ -6,8 +6,9 @@ import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
 import * as passport from "passport-http-bearer";
 import { IVerifyOptions } from "passport-http-bearer";
-import { SESSION_STORAGE } from "../container";
+import { REDIS_CLIENT, tokenDurationSecs } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
+import RedisSessionStorage from "../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 
@@ -28,7 +29,10 @@ const bearerTokenStrategy = (
     done: (error: any, user?: any, options?: IVerifyOptions | string) => void
   ) => {
     const path = req.route.path;
-    const sessionStorage: ISessionStorage = SESSION_STORAGE;
+    const sessionStorage: ISessionStorage = new RedisSessionStorage(
+      REDIS_CLIENT,
+      tokenDurationSecs
+    );
 
     if (
       path === `${AuthenticationBasePath}/logout` || // We need to use this strategy with the SessionToken also for `/logout` path

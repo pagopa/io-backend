@@ -6,6 +6,7 @@ services:
     container_name: italia-backend
     environment:
       - NODE_ENV=dev
+      - REDIS_URL=redis://redis
     expose:
       - "443"
     ports:

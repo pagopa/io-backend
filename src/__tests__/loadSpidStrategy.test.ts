@@ -3,7 +3,7 @@ import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 jest.mock("../utils/redis");
 import appModule from "../app";
-import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../container";
+import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../config";
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 

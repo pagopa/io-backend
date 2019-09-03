@@ -24,7 +24,7 @@ import appModule, { startIdpMetadataUpdater } from "../app";
 import {
   DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   generateSpidStrategy
-} from "../container";
+} from "../config";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
