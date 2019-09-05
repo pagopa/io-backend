@@ -4,11 +4,16 @@ import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
 import PagoPAClientFactory from "../pagoPAClientFactory";
 import PagoPAProxyService from "../pagoPAProxyService";
 
+import { isRight } from "fp-ts/lib/Either";
 import { CodiceContestoPagamento } from "../../../generated/pagopa-proxy/CodiceContestoPagamento";
 import { ImportoEuroCents } from "../../../generated/pagopa-proxy/ImportoEuroCents";
 import { PaymentActivationsPostRequest } from "../../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 import { PaymentFaultEnum } from "../../../generated/pagopa-proxy/PaymentFault";
-import { GetPaymentInfoT } from "../../../generated/pagopa-proxy/requestTypes";
+import {
+  getPaymentInfoDefaultDecoder,
+  GetPaymentInfoT
+} from "../../../generated/pagopa-proxy/requestTypes";
+import mockRes from "../../__mocks__/response";
 import { PagoPAEnvironment } from "../IPagoPAClientFactory";
 
 const aRptId = "123456";
@@ -35,7 +40,7 @@ const errorPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   headers: {},
   status: 500,
   value: {
-    detail: PaymentFaultEnum.PAYMENT_UNAVAILABLE
+    detail: PaymentFaultEnum.DOMAIN_UNKNOWN
   }
 };
 
@@ -175,6 +180,24 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
       rptId: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
+  });
+
+  it("getPaymentInfoDefaultDecoder must validate correctly a PaymentProblemJson response", async () => {
+    const a = {
+      detail: PaymentFaultEnum.DOMAIN_UNKNOWN
+    };
+    const validator = getPaymentInfoDefaultDecoder();
+    const res = mockRes();
+    // tslint:disable: no-object-mutation
+    res.body = a;
+    res.status = 500;
+    // tslint:enable: no-object-mutation
+    const validation = await validator(res);
+    if (validation !== undefined) {
+      expect(isRight(validation));
+    } else {
+      expect(false);
+    }
   });
 
   it("get payment info fails with error 500 if PagoPA proxy fails with error 500", async () => {
