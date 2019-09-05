@@ -2,7 +2,7 @@ version: "2.2"
 
 services:
   backend:
-    command: ["yarn", "hot-reload"]
+    command: ["node", "src/server.js"]
     container_name: italia-backend
     environment:
       - NODE_ENV=dev
