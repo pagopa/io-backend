@@ -2,8 +2,9 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -18,7 +19,7 @@ const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
-const sessionNotFoundMessage = "Session not found";
+export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
@@ -68,47 +69,19 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
       );
     });
-
-    const newSessionInfo: SessionInfo = {
+    const sessionInfo: SessionInfo = {
       createdAt: new Date(),
       sessionToken: user.session_token
     };
-    const sessionInfoKey = `${sessionInfoKeyPrefix}${user.session_token}`;
-    const saveSessionInfo = new Promise<Either<Error, boolean>>(resolve => {
-      this.redisClient.set(
-        sessionInfoKey,
-        JSON.stringify(newSessionInfo),
-        "EX",
-        this.tokenDurationSecs,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting user token info")
-            )
-          )
-      );
-    });
-    const updateSessionInfoSet = new Promise<Either<Error, boolean>>(
-      resolve => {
-        this.redisClient.sadd(
-          `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
-          sessionInfoKey,
-          (err, response) =>
-            resolve(
-              this.falsyResponseToError(
-                this.integerReply(err, response),
-                new Error("Error updating user tokens info set")
-              )
-            )
-        );
-      }
+    const saveSessionInfoPromise = this.saveSessionInfo(
+      sessionInfo,
+      user.fiscal_code
     );
+
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
-      saveSessionInfo,
-      updateSessionInfoSet
+      saveSessionInfoPromise
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
@@ -239,12 +212,32 @@ export default class RedisSessionStorage extends RedisStorageUtils
         );
       }
     );
-    if (isLeft(sessionKeys)) {
+    // tslint:disable-next-line: readonly-array
+    const initializedSessionKeys: string[] = [];
+    if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
       return left(sessionKeys.value);
+    } else if (isLeft(sessionKeys)) {
+      const sessionInfo: SessionInfo = {
+        createdAt: new Date(),
+        sessionToken: user.session_token
+      };
+      const refreshUserSessionInfo = await this.saveSessionInfo(
+        sessionInfo,
+        user.fiscal_code
+      );
+      if (isLeft(refreshUserSessionInfo)) {
+        return left(sessionNotFoundError);
+      }
+      initializedSessionKeys.push(
+        `${sessionInfoKeyPrefix}${user.session_token}`
+      );
     }
     const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
       (resolve, reject) => {
-        this.redisClient.mget(...sessionKeys.value, (err, response) => {
+        const keys = isRight(sessionKeys)
+          ? sessionKeys.value
+          : initializedSessionKeys;
+        this.redisClient.mget(...keys, (err, response) => {
           if (err) {
             reject(err);
           }
@@ -317,6 +310,46 @@ export default class RedisSessionStorage extends RedisStorageUtils
     );
   }
 
+  /*
+  * Store session info and update session info set.
+  * The returned promise will reject if either operation fail.
+  * update session info set
+  */
+  private saveSessionInfo(
+    sessionInfo: SessionInfo,
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionInfo.sessionToken}`;
+    return new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.set(
+        sessionInfoKey,
+        JSON.stringify(sessionInfo),
+        "EX",
+        this.tokenDurationSecs,
+        (err, response) => {
+          const saveSessionInfoResult = this.falsyResponseToError(
+            this.singleStringReply(err, response),
+            new Error("Error setting user token info")
+          );
+          if (isLeft(saveSessionInfoResult)) {
+            return resolve(saveSessionInfoResult);
+          }
+          this.redisClient.sadd(
+            `${userSessionsSetKeyPrefix}${fiscalCode}`,
+            sessionInfoKey,
+            (infoSetUpdateErr, infoSetUpdateRes) =>
+              resolve(
+                this.falsyResponseToError(
+                  this.integerReply(infoSetUpdateErr, infoSetUpdateRes),
+                  new Error("Error updating user tokens info set")
+                )
+              )
+          );
+        }
+      );
+    });
+  }
+
   /**
    * Return a Session for this token.
    */
@@ -331,7 +364,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         }
 
         if (value === null) {
-          return resolve(left<Error, User>(new Error(sessionNotFoundMessage)));
+          return resolve(left<Error, User>(sessionNotFoundError));
         }
 
         // Try-catch is needed because parse() may throw an exception.
@@ -396,22 +429,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
     if (err) {
       return left(err);
     } else if (!isArray(replay) || replay.length === 0) {
-      return left(new Error(sessionNotFoundMessage));
+      return left(sessionNotFoundError);
     }
     return right(replay);
-  }
-
-  private falsyResponseToError(
-    response: Either<Error, boolean>,
-    error: Error
-  ): Either<Error, true> {
-    if (isLeft(response)) {
-      return left(response.value);
-    } else {
-      if (response.value) {
-        return right(true);
-      }
-      return left(error);
-    }
   }
 }

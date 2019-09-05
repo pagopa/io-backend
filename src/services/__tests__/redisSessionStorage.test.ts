@@ -17,7 +17,9 @@ import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
-import RedisSessionStorage from "../redisSessionStorage";
+import RedisSessionStorage, {
+  sessionNotFoundError
+} from "../redisSessionStorage";
 
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
@@ -432,12 +434,44 @@ describe("RedisSessionStorage#del", () => {
 });
 
 describe("RedisSessionStorage#listUserSessions", () => {
-  it("should fail getting a session for an inexistent token", async () => {
+  it("should re-init session info and session info set for a user", async () => {
     mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, []);
     });
+    mockSet.mockImplementation((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+    mockSadd.mockImplementation((_, __, callback) => {
+      callback(undefined, 1);
+    });
+    const expectedSessionInfo: SessionInfo = {
+      createdAt: new Date(),
+      sessionToken: aValidUser.session_token
+    };
+    mockMget.mockImplementation((_, callback) => {
+      callback(undefined, [JSON.stringify(expectedSessionInfo)]);
+    });
     const response = await sessionStorage.listUserSessions(aValidUser);
-    expect(response).toEqual(left(new Error("Session not found")));
+    const expectedSessionInfoKey = `SESSIONINFO-${aValidUser.session_token}`;
+    expect(mockSet.mock.calls[0][0]).toBe(expectedSessionInfoKey);
+    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(expectedSessionInfo));
+    expect(mockSadd.mock.calls[0][0]).toBe(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSadd.mock.calls[0][1]).toBe(expectedSessionInfoKey);
+    expect(response).toEqual(right({ sessions: [expectedSessionInfo] }));
+  });
+
+  it("should fails if re-init session info and session info set don't complete", async () => {
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, []);
+    });
+    mockSet.mockImplementation((_, __, ___, ____, callback) => {
+      callback(new Error("REDIS ERROR"), undefined);
+    });
+    const response = await sessionStorage.listUserSessions(aValidUser);
+    expect(mockSadd).not.toBeCalled();
+    expect(response).toEqual(left(sessionNotFoundError));
   });
 
   it("should skip a session with invalid value", async () => {

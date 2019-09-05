@@ -5,6 +5,7 @@
 import container, {
   AUTHENTICATION_CONTROLLER,
   BEARER_TOKEN_STRATEGY,
+  CACHE_MAX_AGE_SECONDS,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   MESSAGES_CONTROLLER,
   NOTIFICATION_CONTROLLER,
@@ -20,6 +21,7 @@ import container, {
 import ProfileController from "./controllers/profileController";
 import UserMetadataController from "./controllers/userMetadataController";
 
+import * as apicache from "apicache";
 import * as awilix from "awilix";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -64,6 +66,18 @@ const defaultModule = {
   registerLoginRoute,
   startIdpMetadataUpdater
 };
+
+const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
+
+const cachingMiddleware = apicache.options({
+  debug:
+    process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
+    process.env.APICACHE_DEBUG === "true",
+  defaultDuration: cacheDuration,
+  statusCodes: {
+    include: [200]
+  }
+}).middleware;
 
 /**
  * Catch SPID authentication errors and redirect the client to
@@ -327,9 +341,7 @@ function registerPagoPARoutes(
     `${basePath}/user`,
     checkIP(allowPagoPAIPSourceRange),
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagopaController.getUser)(req, res, pagopaController);
-    }
+    toExpressHandler(pagopaController.getUser, pagopaController)
   );
 }
 
@@ -373,194 +385,118 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/profile`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(profileController.getProfile)(
-        req,
-        res,
-        profileController
-      );
-    }
+    toExpressHandler(profileController.getProfile, profileController)
   );
 
   app.post(
     `${basePath}/profile`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(profileController.upsertProfile)(
-        req,
-        res,
-        profileController
-      );
-    }
+    toExpressHandler(profileController.upsertProfile, profileController)
   );
 
   app.get(
     `${basePath}/user-metadata`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(userMetadataController.getMetadata)(
-        req,
-        res,
-        userMetadataController
-      );
-    }
+    toExpressHandler(userMetadataController.getMetadata, userMetadataController)
   );
 
   app.post(
     `${basePath}/user-metadata`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(userMetadataController.upsertMetadata)(
-        req,
-        res,
-        userMetadataController
-      );
-    }
+    toExpressHandler(
+      userMetadataController.upsertMetadata,
+      userMetadataController
+    )
   );
 
   app.get(
     `${basePath}/messages`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(messagesController.getMessagesByUser)(
-        req,
-        res,
-        messagesController
-      );
-    }
+    toExpressHandler(messagesController.getMessagesByUser, messagesController)
   );
 
   app.get(
     `${basePath}/messages/:id`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(messagesController.getMessage)(
-        req,
-        res,
-        messagesController
-      );
-    }
+    toExpressHandler(messagesController.getMessage, messagesController)
   );
 
   app.get(
     `${basePath}/services/:id`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(servicesController.getService)(
-        req,
-        res,
-        servicesController
-      );
-    }
+    cachingMiddleware(),
+    toExpressHandler(servicesController.getService, servicesController)
   );
 
   app.get(
     `${basePath}/services`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(servicesController.getVisibleServices)(
-        req,
-        res,
-        servicesController
-      );
-    }
+    cachingMiddleware(),
+    toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
   app.get(
     `${basePath}/profile/sender-services`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(servicesController.getServicesByRecipient)(
-        req,
-        res,
-        servicesController
-      );
-    }
+    toExpressHandler(
+      servicesController.getServicesByRecipient,
+      servicesController
+    )
   );
 
   app.put(
     `${basePath}/installations/:id`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(notificationController.createOrUpdateInstallation)(
-        req,
-        res,
-        notificationController
-      );
-    }
+    toExpressHandler(
+      notificationController.createOrUpdateInstallation,
+      notificationController
+    )
   );
 
   app.post(
     `${basePath}/notify`,
     checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(notificationController.notify)(
-        req,
-        res,
-        notificationController
-      );
-    }
+    toExpressHandler(notificationController.notify, notificationController)
   );
 
   app.get(
     `${basePath}/session`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(sessionController.getSessionState)(
-        req,
-        res,
-        sessionController
-      );
-    }
+    toExpressHandler(sessionController.getSessionState, sessionController)
   );
 
   app.get(
     `${basePath}/sessions`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(sessionController.listSessions)(
-        req,
-        res,
-        sessionController
-      );
-    }
+    toExpressHandler(sessionController.listSessions, sessionController)
   );
 
   app.get(
     `${basePath}/payment-requests/:rptId`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagoPAProxyController.getPaymentInfo)(
-        req,
-        res,
-        pagoPAProxyController
-      );
-    }
+    toExpressHandler(
+      pagoPAProxyController.getPaymentInfo,
+      pagoPAProxyController
+    )
   );
 
   app.post(
     `${basePath}/payment-activations`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagoPAProxyController.activatePayment)(
-        req,
-        res,
-        pagoPAProxyController
-      );
-    }
+    toExpressHandler(
+      pagoPAProxyController.activatePayment,
+      pagoPAProxyController
+    )
   );
 
   app.get(
     `${basePath}/payment-activations/:codiceContestoPagamento`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(pagoPAProxyController.getActivationStatus)(
-        req,
-        res,
-        pagoPAProxyController
-      );
-    }
+    toExpressHandler(
+      pagoPAProxyController.getActivationStatus,
+      pagoPAProxyController
+    )
   );
 }
 
@@ -583,20 +519,17 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
   app.post(
     `${basePath}/logout`,
     bearerTokenAuth,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.logout)(req, res, acsController);
-    }
+    toExpressHandler(acsController.logout, acsController)
   );
 
-  app.post(`${basePath}/slo`, (req: express.Request, res: express.Response) => {
-    toExpressHandler(acsController.slo)(req, res, acsController);
-  });
+  app.post(
+    `${basePath}/slo`,
+    toExpressHandler(acsController.slo, acsController)
+  );
 
   app.get(
     `${basePath}/metadata`,
-    (req: express.Request, res: express.Response) => {
-      toExpressHandler(acsController.metadata)(req, res, acsController);
-    }
+    toExpressHandler(acsController.metadata, acsController)
   );
 }
 
@@ -604,8 +537,14 @@ function registerPublicRoutes(app: Express): void {
   const packageJson = require("../package.json");
   const version = t.string.decode(packageJson.version).getOrElse("UNKNOWN");
 
+  // The minimum app version that support this API
+  const minAppVersion = t.string
+    .decode(packageJson.minAppVersion)
+    .getOrElse("UNKNOWN");
+
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
+      minAppVersion,
       version
     };
     res.status(200).json(serverInfo);

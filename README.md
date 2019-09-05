@@ -29,6 +29,7 @@ This repository contains the code of the backend used by the [web](https://githu
     - [SPID user management](#spid-user-management)
 - [Redis Database](#redis-database)
     - [Data Structure](#data-structure)
+- [Mobile App compatibility](#mobile-app-compatibility)
 - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies)
     - [Starting steps](#starting-steps)
@@ -152,8 +153,10 @@ Those are all Environment variables needed by the application:
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
-| IDP_METADATA_URL                       | Url to download IDP metadata from                                                   | string |
-| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                          | int |
+| IDP_METADATA_URL                       | Url to download IDP metadata from                                                 | string |
+| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int |
+| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
+| APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 
 ### Logs
 
@@ -181,6 +184,10 @@ Redis Database stores data required only by application side functionalities. Be
 | SESSIONINFO-HexToken   | a JSON representing the `SessionInfo` object | `SessionInfo` | TOKEN_DURATION_IN_SECONDS |
 | USERSESSIONS-MRARSS80A01H501T | a Set of SessionInfo Keys | `Set<SessionInfoKey>` | never |
 
+## Mobile App compatibility
+
+To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `minAppVersion` inside the `package.json`. This value is provided to the app through the `/info` API.
+If the mobile app version is lower an upgrade is required.
 
 ## How to contribute
 
