@@ -27,14 +27,14 @@ import {
   UpsertProfileT
 } from "../../generated/io-api/requestTypes";
 
-const OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-type OcpApimSubscriptionKey = typeof OcpApimSubscriptionKey;
-
+// we want to authenticate against the platform APIs with the APIM header key or
+// the Azure Functions header key, so we send both headers
 function SubscriptionKeyHeaderProducer<P>(
   token: string
-): RequestHeaderProducer<P, OcpApimSubscriptionKey> {
+): RequestHeaderProducer<P, "X-Functions-Key" | "Ocp-Apim-Subscription-Key"> {
   return () => ({
-    [OcpApimSubscriptionKey]: token
+    "Ocp-Apim-Subscription-Key": token,
+    "X-Functions-Key": token
   });
 }
 
