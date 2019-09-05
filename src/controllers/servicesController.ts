@@ -4,16 +4,19 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
 import {
-  ResponseErrorInternal,
-  ResponseSuccessJson
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import MessagesService, { MessagesResponse } from "../services/messagesService";
-import { ServiceList } from "../types/api/ServiceList";
-import { ServicePublic as ProxyServicePublic } from "../types/api/ServicePublic";
-import { toHttpError } from "../types/error";
-import { extractUserFromRequest } from "../types/user";
+
+import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
+import { ServicePublic } from "../../generated/backend/ServicePublic";
+
+import MessagesService from "../services/messagesService";
+import { withUserFromRequest } from "../types/user";
 
 export default class ServicesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -22,58 +25,36 @@ export default class ServicesController {
    * Returns the service identified by the provided id
    * code.
    */
-  public async getService(
+  public readonly getService = (
     req: express.Request
-  ): Promise<MessagesResponse<ProxyServicePublic>> {
-    // TODO: validate req.params.id
-    const errorOrService = await this.messagesService.getService(req.params.id);
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ServicePublic>
+  > => this.messagesService.getService(req.params.id);
 
-    if (isLeft(errorOrService)) {
-      const error = errorOrService.value;
-      return toHttpError(error);
-    }
-
-    const service = errorOrService.value;
-    return ResponseSuccessJson(service);
-  }
-
-  public async getServicesByRecipient(
+  public readonly getServicesByRecipient = (
     req: express.Request
-  ): Promise<MessagesResponse<ServiceList>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    // TODO: validate req.params.id
-    const user = errorOrUser.value;
-    const errorOrServices = await this.messagesService.getServicesByRecipient(
-      user
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<PaginatedServiceTupleCollection>
+  > =>
+    withUserFromRequest(req, user =>
+      this.messagesService.getServicesByRecipient(user)
     );
 
-    if (isLeft(errorOrServices)) {
-      const error = errorOrServices.value;
-      return toHttpError(error);
-    }
-
-    const services = errorOrServices.value;
-    return ResponseSuccessJson(services);
-  }
-
-  public async getVisibleServices(
+  public readonly getVisibleServices = (
     _: express.Request
-  ): Promise<MessagesResponse<ServiceList>> {
-    const errorOrServices = await this.messagesService.getVisibleServices();
-
-    if (isLeft(errorOrServices)) {
-      const error = errorOrServices.value;
-      return toHttpError(error);
-    }
-
-    const services = errorOrServices.value;
-    return ResponseSuccessJson(services);
-  }
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<PaginatedServiceTupleCollection>
+  > => this.messagesService.getVisibleServices();
 }

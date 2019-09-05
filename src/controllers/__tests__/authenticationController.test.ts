@@ -3,20 +3,23 @@
 /* tslint:disable:no-let */
 /* tslint:disable:no-identical-functions */
 /* tslint:disable:no-big-function */
+/* tslint:disable:no-object-mutation */
 
 import { left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
+
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
@@ -144,6 +147,13 @@ const anErrorResponse = {
   type: undefined
 };
 
+const badRequestErrorResponse = {
+  detail: expect.any(String),
+  status: 400,
+  title: expect.any(String),
+  type: undefined
+};
+
 const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
 const mockGetByWalletToken = jest.fn();
@@ -177,17 +187,6 @@ const redisSessionStorage = new RedisSessionStorage(
   tokenDurationSecs
 );
 
-const spidStrategyInstance = spidStrategy(
-  samlKey,
-  samlCallbackUrl,
-  samlIssuer,
-  samlAcceptedClockSkewMs,
-  samlAttributeConsumingServiceIndex,
-  spidAutologin,
-  spidTestEnvUrl
-);
-spidStrategyInstance.logout = jest.fn();
-
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   const url = "/profile.html?token={token}".replace("{token}", token);
 
@@ -196,13 +195,32 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   };
 };
 
-const controller = new AuthenticationController(
-  redisSessionStorage,
-  samlCert,
-  spidStrategyInstance,
-  tokenService,
-  getClientProfileRedirectionUrl
-);
+let controller: AuthenticationController;
+beforeAll(async () => {
+  const IDPMetadataUrl =
+    process.env.IDP_METADATA_URL ||
+    "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml";
+  const spidStrategyInstance = await spidStrategy(
+    samlKey,
+    samlCert,
+    samlCallbackUrl,
+    samlIssuer,
+    samlAcceptedClockSkewMs,
+    samlAttributeConsumingServiceIndex,
+    spidAutologin,
+    spidTestEnvUrl,
+    IDPMetadataUrl
+  );
+  spidStrategyInstance.logout = jest.fn();
+
+  controller = new AuthenticationController(
+    redisSessionStorage,
+    samlCert,
+    spidStrategyInstance,
+    tokenService,
+    getClientProfileRedirectionUrl
+  );
+});
 
 let clock: any;
 beforeEach(() => {
@@ -230,8 +248,8 @@ describe("AuthenticationController#acs", () => {
 
     expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
-      "/profile.html?token=" + mockSessionToken,
-      301
+      301,
+      "/profile.html?token=" + mockSessionToken
     );
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
   });
@@ -243,14 +261,9 @@ describe("AuthenticationController#acs", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(400);
 
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining(
-        "value.email is not a string that represents an email address"
-      )
-    });
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
     expect(mockSet).not.toHaveBeenCalled();
   });
 
@@ -297,7 +310,7 @@ describe("AuthenticationController#slo", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(res.redirect).toHaveBeenCalledWith("/", 301);
+    expect(res.redirect).toHaveBeenCalledWith(301, "/");
   });
 });
 
@@ -336,11 +349,8 @@ describe("AuthenticationController#logout", () => {
 
     expect(controller).toBeTruthy();
     expect(mockDel).not.toBeCalled();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      ...anErrorResponse,
-      detail: expect.stringContaining("value.family_name is not a string")
-    });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
   it("should fail if the session can not be destroyed", async () => {
@@ -385,9 +395,29 @@ describe("AuthenticationController#metadata", () => {
 
   it("renders the correct metadata", async () => {
     const res = mockRes();
-    const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://spid.agid.gov.it/cd" ID="https___spid_agid_gov_it_cd">
+    const response = `<?xml version="1.0"?><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://spid.agid.gov.it/cd" ID="https___spid_agid_gov_it_cd"><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#https___spid_agid_gov_it_cd"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>mfxo77RIibQ+NPeF9lAITMWfMXLfH6JuctAgKROxzZk=</DigestValue></Reference></SignedInfo><SignatureValue>CKivnvnXQnN8VhZdI+MEkW+0j3uxZ48pCEBIlPzGtZ+YSPxUXwXixePNE6QQ7VJZNg2BnWarB/HW21rhzfUQjaAOocG1t1b7vYtL7/SBGJt8a8A0zZxr9Ru38y3q3TSkVmEjnNXQ+jM2NfcWBbR9cKA2SXg/+76EBsIxq1zhPctSxyDb9aHrP9EuUqweZzC+1NaUOLQg0CxAOH+OxNlvi4bxbs5nzRN2KQzHZhRld/0jwssiDgLlw1VP5rIe4FZiGxazI5PD5Tvact7qIQD2myMNpE4NTm+imibLTQLBNayEqoONGKaJOYgbMg3aC2G7pYCJaflc/ub55fKy5YVWlYc=</SignatureValue><KeyInfo><X509Data><X509Certificate>
+MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
+MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
+dHBzOi8vaXRhbGlhLWJhY2tlbmQwHhcNMTcxMDI2MTAzNTQwWhcNMTgxMDI2MTAz
+NTQwWjBTMQswCQYDVQQGEwJpdDENMAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdp
+ZC5nb3YuaXQxHzAdBgNVBAMMFmh0dHBzOi8vaXRhbGlhLWJhY2tlbmQwggEjMA0G
+CSqGSIb3DQEBAQUAA4IBEAAwggELAoIBAgCXozdOvdlQhX2zyOvnpZJZWyhjmiRq
+kBW7jkZHcmFRceeoVkXGn4bAFGGcqESFMVmaigTEm1c6gJpRojo75smqyWxngEk1
+XLctn1+Qhb5SCbd2oHh0oLE5jpHyrxfxw8V+N2Hty26GavJE7i9jORbjeQCMkbgg
+t0FahmlmaZr20akK8wNGMHDcpnMslJPxHl6uKxjAfe6sbNqjWxfcnirm05Jh5gYN
+T4vkwC1vx6AZpS2G9pxOV1q5GapuvUBqwNu+EH1ufMRRXvu0+GtJ4WtsErOakSF4
+KMezrMqKCrVPoK5SGxQMD/kwEQ8HfUPpim3cdi3RVmqQjsi/on6DMn/xTQIDAQAB
+o1AwTjAdBgNVHQ4EFgQULOauBsRgsAudzlxzwEXYXd4uPyIwHwYDVR0jBBgwFoAU
+LOauBsRgsAudzlxzwEXYXd4uPyIwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQ0F
+AAOCAQIAQOT5nIiAefn8FAWiVYu2uEsHpxUQ/lKWn1Trnj7MyQW3QA/jNaJHL/Ep
+szJ5GONOE0lVEG1on35kQOWR7qFWYhH9Llb8EAAAb5tbnCiA+WIx4wjRTE3CNLul
+L8MoscacIc/rqWf5WygZQcPDX1yVxmK4F3YGG2qDTD3fr4wPweYHxn95JidTwzW8
+Jv46ajSBvFJ95CoCYL3BUHaxPIlYkGbJFjQhuoxo2XM4iT6KFD4IGmdssS4NFgW+
+OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
+IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
+</X509Certificate></X509Data></KeyInfo></Signature>
   <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
-    <KeyDescriptor>
+    <KeyDescriptor use="signing">
       <ds:KeyInfo>
         <ds:X509Data>
           <ds:X509Certificate>
@@ -421,39 +451,19 @@ IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
     <AssertionConsumerService index="0" isDefault="true" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://italia-backend/assertionConsumerService"/>
     <AttributeConsumingService index="0">
       <ServiceName xml:lang="it">Required attributes</ServiceName>
-      <RequestedAttribute Name="fiscalNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Codice fiscale"/>
-      <RequestedAttribute Name="name" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Nome"/>
-      <RequestedAttribute Name="familyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Cognome"/>
-      <RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Email"/>
-      <RequestedAttribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" FriendlyName="Numero di telefono"/>
+      <RequestedAttribute Name="fiscalNumber" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" FriendlyName="Codice fiscale"/>
+      <RequestedAttribute Name="name" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" FriendlyName="Nome"/>
+      <RequestedAttribute Name="familyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" FriendlyName="Cognome"/>
+      <RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" FriendlyName="Email"/>
+      <RequestedAttribute Name="mobilePhone" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" FriendlyName="Numero di telefono"/>
     </AttributeConsumingService>
   </SPSSODescriptor>
   <Organization>
-    <OrganizationName>Digital citizenship proxy</OrganizationName>
-    <OrganizationDisplayName>Digital citizenship proxy</OrganizationDisplayName>
-    <OrganizationURL>https://github.com/teamdigitale/italia-backend</OrganizationURL>
+    <OrganizationName xml:lang="it">Team per la Trasformazione Digitale - Presidenza Del Consiglio dei Ministri</OrganizationName>
+    <OrganizationDisplayName xml:lang="it">IO - l'app dei servizi pubblici BETA</OrganizationDisplayName>
+    <OrganizationURL xml:lang="it">https://io.italia.it</OrganizationURL>
   </Organization>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI="#https___spid_agid_gov_it_cd"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>/kp1MJ01wT1K0jbuXvAbAWuRVJlLUsW4Lrr1Ywzs+ec=</DigestValue></Reference></SignedInfo><SignatureValue>CIg2vqJRysINX5vSET+YTOY4O29NqD1nmhXPrEQgeUXr6x2h20nFb+59JmhcVwrmlScguj5po6ZGoVf3Hy2jsTPiL5h4g2h+TYY3r01AoqHk/FR0ab8KUOg/o/cG/4IDs328Mf2mXcKRyGuDn0TQTe38Sklzgln0uZcDOk2fAK8fCCTZaAtrfj+kl1k3FC9hyQBYdvl43ZAI0hXLHwbGyiqOfxknFfLmE3MZkDzvYu2IOCSCwyfupiajAl8HlQVJr9DSuGJwk0BgN55E+wgwAUxd9qJxawD5Zh0rRbV+D5W+uQNBb5rNUF7LkWloZTDNewxyo+r+2ihMu+dsUpEY6XM=</SignatureValue><KeyInfo><X509Data><X509Certificate>
-MIIDczCCAlqgAwIBAgIBADANBgkqhkiG9w0BAQ0FADBTMQswCQYDVQQGEwJpdDEN
-MAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdpZC5nb3YuaXQxHzAdBgNVBAMMFmh0
-dHBzOi8vaXRhbGlhLWJhY2tlbmQwHhcNMTcxMDI2MTAzNTQwWhcNMTgxMDI2MTAz
-NTQwWjBTMQswCQYDVQQGEwJpdDENMAsGA1UECAwEUm9tZTEUMBIGA1UECgwLYWdp
-ZC5nb3YuaXQxHzAdBgNVBAMMFmh0dHBzOi8vaXRhbGlhLWJhY2tlbmQwggEjMA0G
-CSqGSIb3DQEBAQUAA4IBEAAwggELAoIBAgCXozdOvdlQhX2zyOvnpZJZWyhjmiRq
-kBW7jkZHcmFRceeoVkXGn4bAFGGcqESFMVmaigTEm1c6gJpRojo75smqyWxngEk1
-XLctn1+Qhb5SCbd2oHh0oLE5jpHyrxfxw8V+N2Hty26GavJE7i9jORbjeQCMkbgg
-t0FahmlmaZr20akK8wNGMHDcpnMslJPxHl6uKxjAfe6sbNqjWxfcnirm05Jh5gYN
-T4vkwC1vx6AZpS2G9pxOV1q5GapuvUBqwNu+EH1ufMRRXvu0+GtJ4WtsErOakSF4
-KMezrMqKCrVPoK5SGxQMD/kwEQ8HfUPpim3cdi3RVmqQjsi/on6DMn/xTQIDAQAB
-o1AwTjAdBgNVHQ4EFgQULOauBsRgsAudzlxzwEXYXd4uPyIwHwYDVR0jBBgwFoAU
-LOauBsRgsAudzlxzwEXYXd4uPyIwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQ0F
-AAOCAQIAQOT5nIiAefn8FAWiVYu2uEsHpxUQ/lKWn1Trnj7MyQW3QA/jNaJHL/Ep
-szJ5GONOE0lVEG1on35kQOWR7qFWYhH9Llb8EAAAb5tbnCiA+WIx4wjRTE3CNLul
-L8MoscacIc/rqWf5WygZQcPDX1yVxmK4F3YGG2qDTD3fr4wPweYHxn95JidTwzW8
-Jv46ajSBvFJ95CoCYL3BUHaxPIlYkGbJFjQhuoxo2XM4iT6KFD4IGmdssS4NFgW+
-OM+P8UsrYi2KZuyzSrHq5c0GJz0UzSs8cIDC/CPEajx2Uy+7TABwR4d20Hyo6WIm
-IFJiDanROwzoG0YNd8aCWE8ZM2y81Ww=
-</X509Certificate></X509Data></KeyInfo></Signature></EntityDescriptor>`;
+</EntityDescriptor>`;
 
     const metadata = await controller.metadata();
     metadata.apply(res);

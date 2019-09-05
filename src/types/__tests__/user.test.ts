@@ -1,17 +1,18 @@
 /* tslint:disable:no-any */
+/* tslint:disable:no-object-mutation */
+/* tslint:disable:no-inferred-empty-object-type */
 
 import { Either, isLeft, isRight } from "fp-ts/lib/Either";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../api/EmailAddress";
-import { FiscalCode } from "../api/FiscalCode";
-import { SpidLevelEnum } from "../api/SpidLevel";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { Issuer } from "../issuer";
 import { SessionToken, WalletToken } from "../token";
 import {
   extractUserFromJson,
-  extractUserFromRequest,
   toAppUser,
   User,
   validateSpidUser
@@ -81,7 +82,7 @@ describe("user type", () => {
     req.user = mockedUser;
 
     // extract the user data from Express request
-    const userData = extractUserFromRequest(req);
+    const userData = User.decode(req.user);
 
     expect(isRight(userData)).toBeTruthy();
     if (isRight(userData)) {
@@ -112,7 +113,7 @@ describe("user type", () => {
   /*test case: extract User from json string*/
   it("should get a user from a correct Json string with extractUserFromJson", async () => {
     // extract User from correct JSON string. Return right.
-    const userDataOK: Either<Error, User> = extractUserFromJson(
+    const userDataOK: Either<string, User> = extractUserFromJson(
       JSON.stringify(mockedUser)
     );
 

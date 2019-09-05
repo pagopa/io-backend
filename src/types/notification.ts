@@ -6,9 +6,10 @@ import * as crypto from "crypto";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { tag } from "italia-ts-commons/lib/types";
-import { FiscalCode } from "./api/FiscalCode";
-import { InstallationID } from "./api/InstallationID";
-import { Platform } from "./api/Platform";
+
+import { FiscalCode } from "../../generated/backend/FiscalCode";
+import { InstallationID } from "../../generated/backend/InstallationID";
+import { Platform } from "../../generated/backend/Platform";
 
 /**
  * An hashed fiscal code.
@@ -20,9 +21,9 @@ interface IFiscalCodeHashTag {
   readonly kind: "IFiscalCodeHashTag";
 }
 
-export const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
+const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
 
-export type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
+type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
 
 /**
  * Notification template.
@@ -38,7 +39,7 @@ export interface INotificationTemplate {
  *
  * @see https://msdn.microsoft.com/en-us/library/azure/mt621153.aspx
  */
-export interface INotificationTemplates {
+interface INotificationTemplates {
   readonly [name: string]: INotificationTemplate;
 }
 
@@ -51,7 +52,7 @@ export interface IInstallation {
   readonly installationId: InstallationID;
   readonly platform: Platform;
   readonly pushChannel: string;
-  readonly tags: [FiscalCodeHash];
+  readonly tags: ReadonlyArray<FiscalCodeHash>;
   readonly templates: INotificationTemplates;
 }
 

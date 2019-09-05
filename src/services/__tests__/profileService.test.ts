@@ -1,14 +1,16 @@
-import { right } from "fp-ts/lib/Either";
+import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../../types/api/EmailAddress";
-import { FiscalCode } from "../../types/api/FiscalCode";
-import { IsInboxEnabled } from "../../types/api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../types/api/IsWebhookEnabled";
+
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { FiscalCode } from "../../../generated/backend/FiscalCode";
+import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
+import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
-} from "../../types/api/PreferredLanguage";
-import { SpidLevelEnum } from "../../types/api/SpidLevel";
+} from "../../../generated/backend/PreferredLanguage";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
@@ -70,6 +72,10 @@ const APIError = {
   status: 500
 };
 
+const tooManyReqApiMessagesResponse = {
+  status: 429
+};
+
 // mock for a valid User
 const mockedUser: User = {
   created_at: 1183518855,
@@ -87,8 +93,8 @@ const mockGetProfile = jest.fn();
 const mockCreateOrUpdateProfile = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
-    createOrUpdateProfile: mockCreateOrUpdateProfile,
-    getProfile: mockGetProfile
+    getProfile: mockGetProfile,
+    upsertProfile: mockCreateOrUpdateProfile
   };
 });
 jest.mock("../../services/apiClientFactory", () => {
@@ -107,9 +113,7 @@ describe("ProfileService#getProfile", () => {
   });
 
   it("returns a user profile from the API", async () => {
-    mockGetProfile.mockImplementation(() => {
-      return validApiProfileResponse;
-    });
+    mockGetProfile.mockImplementation(() => t.success(validApiProfileResponse));
 
     const service = new ProfileService(api);
 
@@ -118,13 +122,26 @@ describe("ProfileService#getProfile", () => {
     expect(mockGetProfile).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(right(proxyInitializedProfileResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyInitializedProfileResponse
+    });
+  });
+
+  it("returns an 429 HTTP error from getProfile upstream API", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getProfile(mockedUser);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 
   it("returns a default user profile if the response from the API is not found", async () => {
-    mockGetProfile.mockImplementation(() => {
-      return emptyApiProfileResponse;
-    });
+    mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
 
     const service = new ProfileService(api);
 
@@ -133,13 +150,14 @@ describe("ProfileService#getProfile", () => {
     expect(mockGetProfile).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(right(proxyAuthenticatedProfileResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyAuthenticatedProfileResponse
+    });
   });
 
   it("returns an error if the API returns an error", async () => {
-    mockGetProfile.mockImplementation(() => {
-      return APIError;
-    });
+    mockGetProfile.mockImplementation(() => t.success(APIError));
 
     const service = new ProfileService(api);
 
@@ -160,25 +178,28 @@ describe("ProfileService#upsertProfile", () => {
   });
 
   it("create a new user profile to the API", async () => {
-    mockCreateOrUpdateProfile.mockImplementation(() => {
-      return validApiProfileResponse;
-    });
+    mockCreateOrUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponse)
+    );
 
     const service = new ProfileService(api);
 
     const res = await service.upsertProfile(mockedUser, upsertRequest);
 
     expect(mockCreateOrUpdateProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      newProfile: upsertRequest
+      extendedProfile: upsertRequest,
+      fiscalCode: mockedUser.fiscal_code
     });
-    expect(res).toEqual(right(proxyInitializedProfileResponse));
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyInitializedProfileResponse
+    });
   });
 
   it("fails to create a new user profile to the API", async () => {
-    mockCreateOrUpdateProfile.mockImplementation(() => {
-      return emptyApiProfileResponse;
-    });
+    mockCreateOrUpdateProfile.mockImplementation(() =>
+      t.success(emptyApiProfileResponse)
+    );
 
     const service = new ProfileService(api);
 
@@ -187,5 +208,17 @@ describe("ProfileService#upsertProfile", () => {
     } catch (e) {
       expect(e).toEqual(new Error("Api error."));
     }
+  });
+
+  it("returns an 429 HTTP error from upsertProfile upstream API", async () => {
+    mockCreateOrUpdateProfile.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.upsertProfile(mockedUser, upsertRequest);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 });

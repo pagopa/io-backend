@@ -27,6 +27,9 @@ This repository contains the code of the backend used by the [web](https://githu
     - [Environment variables](#environment-variables)
     - [Logs](#logs)
     - [SPID user management](#spid-user-management)
+- [Redis Database](#redis-database)
+    - [Data Structure](#data-structure)
+- [Mobile App compatibility](#mobile-app-compatibility)
 - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies)
     - [Starting steps](#starting-steps)
@@ -106,7 +109,7 @@ A Linux/macOS environment is required at the moment.
     localhost    italia-backend
     ```
 
-12. copy `app/.env.example` to `app/.env` and fill the variables with your values
+12. copy `.env.example` to `.env` and fill the variables with your values
 13. point your browser to [https://italia-backend/metadata](https://italia-backend/metadata) and copy the source of the
     page to a new `testenv2/conf/sp_metadata.xml` file
 15. run `docker-compose up -d` to restart the containers
@@ -146,8 +149,14 @@ Those are all Environment variables needed by the application:
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | API_BASE_PATH                          | The root path for the api endpoints                                               | string |
+| PAGOPA_API_URL                         | The url for the PagoPA api endpoints                                              | string |
+| PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
+| IDP_METADATA_URL                       | Url to download IDP metadata from                                                 | string |
+| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int |
+| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
+| APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 
 ### Logs
 
@@ -160,6 +169,25 @@ The setup procedure adds some test users to the test IDP server, the full list c
 container.
 
 ---
+
+## Redis Database
+
+### Data Structure
+
+Redis Database stores data required only by application side functionalities. Below a table with an example of data for an hypothetical user with fiscal code `MRARSS80A01H501T` and with session token `HexToken`.
+
+
+| Key                          | Value                                                              | type   | expire in |
+|----------------------------------------|-----------------------------------------------------------------------------------|--------|-----------|
+| SESSION-HexToken       | a JSON representing the user object | `User` | TOKEN_DURATION_IN_SECONDS |
+| WALLET-WalletHexToken   | `"SESSION-HexToken"` | `String` | TOKEN_DURATION_IN_SECONDS |
+| SESSIONINFO-HexToken   | a JSON representing the `SessionInfo` object | `SessionInfo` | TOKEN_DURATION_IN_SECONDS |
+| USERSESSIONS-MRARSS80A01H501T | a Set of SessionInfo Keys | `Set<SessionInfoKey>` | never |
+
+## Mobile App compatibility
+
+To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `minAppVersion` inside the `package.json`. This value is provided to the app through the `/info` API.
+If the mobile app version is lower an upgrade is required.
 
 ## How to contribute
 

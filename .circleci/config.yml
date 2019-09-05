@@ -1,5 +1,56 @@
+node_cache_key: &node_cache_key v1-dependencies-{{ checksum "yarn.lock" }}
+
+# Download and cache dependencies
+restore_node_cache: &restore_node_cache
+  restore_cache:
+    keys:
+      - *node_cache_key
+
+# Save node_modules to the cache
+save_node_cache: &save_node_cache
+  save_cache:
+    paths:
+      - node_modules
+      - ~/.cache/yarn
+    key: *node_cache_key
+
+# Install yarn dependencies
+install_node_modules: &install_node_modules
+  run: yarn install --cache-folder ~/.cache/yarn
+
 version: 2
 jobs:
+  lint-api:
+      docker:
+        - image: circleci/node:8.9.4
+      working_directory: ~/repo
+      steps:
+        - checkout
+        - run: npm install oval
+        - run: npx oval validate -p api_notifications.yaml
+        - run: npx oval validate -p api_pagopa.yaml
+        - run: npx oval validate -p api_backend.yaml
+        - run: npx oval validate -p api_public.yaml
+  lint-typescript:
+    docker:
+      - image: circleci/node:8.9.4
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - *restore_node_cache
+      - *install_node_modules
+      - run: yarn lint
+  danger:
+    docker:
+      - image: circleci/node:8.9.4
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - *restore_node_cache
+      - *install_node_modules
+      - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'
   build:
     docker:
       - image: circleci/node:8.9.4
@@ -8,23 +59,28 @@ jobs:
 
     steps:
       - checkout
+      - *restore_node_cache
+      - *install_node_modules
+      - *save_node_cache
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "yarn.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+      # Install required libraries
+      - run: sudo apt-get install libunwind8
 
-      # Install yarn dependencies
-      - run: yarn install --cache-folder ~/.cache/yarn
+      # Generate the proxy API models
+      - run: yarn generate:proxy-models
 
-      # Save node_modules to the cache
-      - save_cache:
-          paths:
-            - node_modules
-            - ~/.cache/yarn
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
+      # Generate certificates
+      - run: yarn generate:test-certs
+  tests:
+    docker:
+      - image: circleci/node:8.9.4
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - *restore_node_cache
+      - *install_node_modules
 
       # Install required libraries
       - run: sudo apt-get install libunwind8
@@ -36,7 +92,6 @@ jobs:
       - run: yarn generate:test-certs
 
       # Run tests
-      - run: yarn lint
       - run: yarn build-noemit
       - run:
           name: Run tests
@@ -49,8 +104,18 @@ jobs:
             AZURE_NH_ENDPOINT: ""
             AUTHENTICATION_BASE_PATH: ""
             API_BASE_PATH: "/api/v1"
+            PAGOPA_API_URL: "https://pagopa-proxy"
+            PAGOPA_API_URL_TEST: "https://pagopa-proxy-test"
             PAGOPA_BASE_PATH: "/pagopa/api/v1"
+            IDP_METADATA_URL: "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml"
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
-      # Run DangerJS
-      - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint-api
+      - lint-typescript
+      - danger
+      - tests
+      - build

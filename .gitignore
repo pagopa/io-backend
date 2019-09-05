@@ -25,6 +25,7 @@ npm-debug.log
 
 # Excluded auto-generated API types.
 /src/types/api/*.ts
+/generated
 
 # Exclude certificates
 *.pem

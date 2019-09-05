@@ -4,73 +4,51 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
 import {
-  ResponseErrorInternal,
-  ResponseSuccessJson
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import MessagesService, { MessagesResponse } from "../services/messagesService";
-import { CreatedMessageWithContent } from "../types/api/CreatedMessageWithContent";
-import { Messages } from "../types/api/Messages";
-import { toHttpError } from "../types/error";
-import { extractUserFromRequest } from "../types/user";
+
+import MessagesService from "../services/messagesService";
+import { withUserFromRequest } from "../types/user";
+
+import { CreatedMessageWithContent } from "../../generated/backend/CreatedMessageWithContent";
+import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
   /**
-   * Returns the messages for the user identified by the provided fiscal
-   * code.
+   * Returns the messages for the user identified by the provided fiscal code.
    */
-  public async getMessagesByUser(
+  public readonly getMessagesByUser = (
     req: express.Request
-  ): Promise<MessagesResponse<Messages>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    const user = errorOrUser.value;
-    const errorOrMessages = await this.messagesService.getMessagesByUser(user);
-
-    if (isLeft(errorOrMessages)) {
-      const error = errorOrMessages.value;
-      return toHttpError(error);
-    }
-    const messages = errorOrMessages.value;
-    return ResponseSuccessJson(messages);
-  }
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
+  > => withUserFromRequest(req, this.messagesService.getMessagesByUser);
 
   /**
    * Returns the message identified by the message id.
    */
-  public async getMessage(
+  public readonly getMessage = (
     req: express.Request
-  ): Promise<MessagesResponse<CreatedMessageWithContent>> {
-    const errorOrUser = extractUserFromRequest(req);
-
-    if (isLeft(errorOrUser)) {
-      // Unable to extract the user from the request.
-      const error = errorOrUser.value;
-      return ResponseErrorInternal(error.message);
-    }
-
-    // TODO: validate req.params.id
-    const user = errorOrUser.value;
-    const errorOrMessage = await this.messagesService.getMessage(
-      user,
-      req.params.id
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<CreatedMessageWithContent>
+  > =>
+    withUserFromRequest(req, user =>
+      this.messagesService.getMessage(user, req.params.id)
     );
-
-    if (isLeft(errorOrMessage)) {
-      const error = errorOrMessage.value;
-      return toHttpError(error);
-    }
-
-    const message = errorOrMessage.value;
-    return ResponseSuccessJson(message);
-  }
 }

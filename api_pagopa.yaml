@@ -20,10 +20,17 @@ paths:
         "200":
           description: Found.
           schema:
-            - $ref: "#/definitions/PagoPAUser"
+            $ref: "#/definitions/PagoPAUser"
           examples:
             application/json:
               email: "email@example.com"
+              name: "Name"
+              family_name: "Surname"
+              mobile_phone: "+393331234567"
+        "400":
+          description: Bad request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "401":
           description: Token null or invalid.
         "500":
@@ -32,9 +39,9 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions/v0.61.0/api/definitions.yaml#/EmailAddress"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/digital-citizenship-functions/v0.51.0/api/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions/v0.61.0/api/definitions.yaml#/ProblemJson"
   PagoPAUser:
     title: PagoPA user
     description: User data needed by PagaPA proxy.
