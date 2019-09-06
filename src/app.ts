@@ -69,7 +69,7 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 
 const defaultModule = {
-  SPID_STRATEGY: generateSpidStrategy(),
+  currentSpidStrategy: generateSpidStrategy(),
   loadSpidStrategy,
   newApp,
   registerLoginRoute,
@@ -214,7 +214,7 @@ export async function newApp(
   //
 
   try {
-    const newSpidStrategy = await defaultModule.SPID_STRATEGY;
+    const newSpidStrategy = await defaultModule.currentSpidStrategy;
     defaultModule.registerLoginRoute(app, newSpidStrategy);
     registerPublicRoutes(app);
     registerAuthenticationRoutes(
@@ -223,6 +223,7 @@ export async function newApp(
       SESSION_STORAGE,
       SAML_CERT,
       TOKEN_SERVICE,
+      defaultModule.currentSpidStrategy,
       getClientProfileRedirectionUrl
     );
     const NOTIFICATION_SERVICE = new NotificationService(
@@ -303,14 +304,14 @@ async function clearAndReloadSpidStrategy(
   try {
     // Inject a new SPID Strategy generate function inside the container
     // tslint:disable-next-line: no-object-mutation
-    defaultModule.SPID_STRATEGY = defaultModule.loadSpidStrategy();
-    newSpidStrategy = await defaultModule.SPID_STRATEGY;
+    defaultModule.currentSpidStrategy = defaultModule.loadSpidStrategy();
+    newSpidStrategy = await defaultModule.currentSpidStrategy;
     log.info("Spid strategy re-initialization complete.");
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
     log.info("Restore previous spid strategy configuration");
     // tslint:disable-next-line: no-object-mutation
-    defaultModule.SPID_STRATEGY = Promise.resolve(previousSpidStrategy); // Update Container Spid Strategy
+    defaultModule.currentSpidStrategy = Promise.resolve(previousSpidStrategy); // Update Container Spid Strategy
     throw new Error("Error while initializing SPID strategy");
   } finally {
     defaultModule.registerLoginRoute(
@@ -538,6 +539,7 @@ function registerAuthenticationRoutes(
   sessionStorage: RedisSessionStorage,
   samlCert: string,
   tokenService: TokenService,
+  spidStrategy: Promise<SpidStrategy>,
   getRedirectionUrl: (token: string) => UrlFromString
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
@@ -545,7 +547,7 @@ function registerAuthenticationRoutes(
   const acsController: AuthenticationController = new AuthenticationController(
     sessionStorage,
     samlCert,
-    defaultModule.SPID_STRATEGY,
+    spidStrategy,
     tokenService,
     getRedirectionUrl
   );

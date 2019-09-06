@@ -38,8 +38,7 @@ newApp(
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (env === NodeEnvironmentEnum.DEVELOPMENT) {
       const samlKey = container.resolve(SAML_KEY);
-      const samlCert = SAML_CERT;
-      const options = { key: samlKey, cert: samlCert };
+      const options = { key: samlKey, cert: SAML_CERT };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
       });

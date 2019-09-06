@@ -24,7 +24,7 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
-  spidStrategy = await appModule.SPID_STRATEGY;
+  spidStrategy = await appModule.currentSpidStrategy;
   jest.useFakeTimers();
 });
 

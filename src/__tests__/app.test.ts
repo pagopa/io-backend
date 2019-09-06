@@ -114,7 +114,7 @@ describe("Success app start", () => {
     let spidStrategyImpl: SpidStrategy;
     beforeEach(async () => {
       jest.useFakeTimers();
-      spidStrategyImpl = await appModule.SPID_STRATEGY;
+      spidStrategyImpl = await appModule.currentSpidStrategy;
     });
 
     it("app#idpMetadataUpdater", done => {
@@ -154,7 +154,7 @@ describe("Failure app start", () => {
   it("Close app if download IDP metadata fails on startup", async () => {
     // Override Spid Strategy inside the container with a rejected promise.
     // tslint:disable-next-line: no-object-mutation
-    appModule.SPID_STRATEGY = Promise.reject(
+    appModule.currentSpidStrategy = Promise.reject(
       new Error("Error download metadata")
     );
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
