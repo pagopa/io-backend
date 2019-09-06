@@ -64,6 +64,7 @@ const mockedUser: User = {
 // mock for upsert user (Extended Profile)
 const mockedUpsertProfile: ExtendedProfile = {
   email: anEmailAddress,
+  is_email_enabled: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
