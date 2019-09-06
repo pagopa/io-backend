@@ -60,6 +60,7 @@ const proxyAuthenticatedProfileResponse = {
 };
 const upsertRequest = {
   email: aValidAPIEmail,
+  is_email_enabled: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
