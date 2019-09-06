@@ -182,16 +182,16 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
 
-  it("getPaymentInfoDefaultDecoder must validate correctly a PaymentProblemJson response", async () => {
+  it("response decoder of getPaymentInfo must return a Right type if PagoPA proxy fails with error 500", async () => {
     const a = {
       detail: PaymentFaultEnum.DOMAIN_UNKNOWN
     };
     const validator = getPaymentInfoDefaultDecoder();
     const res = mockRes();
-    // tslint:disable: no-object-mutation
+    // tslint:disable-next-line: no-object-mutation
     res.body = a;
+    // tslint:disable-next-line: no-object-mutation
     res.status = 500;
-    // tslint:enable: no-object-mutation
     const validation = await validator(res);
     if (validation !== undefined) {
       expect(isRight(validation));
