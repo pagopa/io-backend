@@ -3,6 +3,7 @@
  */
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
+import { none, Option, some } from "fp-ts/lib/Option";
 import {
   errorsToReadableMessages,
   ReadableReporter
@@ -105,16 +106,19 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   public async getBySessionToken(
     token: SessionToken
-  ): Promise<Either<Error, User>> {
+  ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionBySessionToken(token);
 
     if (isLeft(errorOrSession)) {
+      if (errorOrSession.value === sessionNotFoundError) {
+        return right(none);
+      }
       return left(errorOrSession.value);
     }
 
     const user = errorOrSession.value;
 
-    return right(user);
+    return right(some(user));
   }
 
   /**
@@ -122,17 +126,19 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   public async getByWalletToken(
     token: WalletToken
-  ): Promise<Either<Error, User>> {
+  ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionByWalletToken(token);
 
     if (isLeft(errorOrSession)) {
-      const error = errorOrSession.value;
-      return left(error);
+      if (errorOrSession.value === sessionNotFoundError) {
+        return right(none);
+      }
+      return left(errorOrSession.value);
     }
 
     const user = errorOrSession.value;
 
-    return right(user);
+    return right(some(user));
   }
 
   /**

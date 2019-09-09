@@ -10,6 +10,7 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 
+import { none, some } from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -281,7 +282,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     const response = await sessionStorage.getBySessionToken(
       "inexistent token" as SessionToken
     );
-    expect(response).toEqual(left(new Error("Session not found")));
+    expect(response).toEqual(right(none));
   });
 
   it("should fail getting a session with invalid value", async () => {
@@ -331,7 +332,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(left(new Error("Session not found")));
+    expect(response).toEqual(right(none));
   });
 
   it("should get a session with valid values", async () => {
@@ -347,7 +348,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet.mock.calls[0][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(right(aValidUser));
+    expect(response).toEqual(right(some(aValidUser)));
   });
 });
 

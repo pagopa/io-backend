@@ -4,6 +4,7 @@
 
 import * as express from "express";
 import { Either } from "fp-ts/lib/Either";
+import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
 import { IVerifyOptions } from "passport-http-bearer";
 import container, { SESSION_STORAGE } from "../container";
@@ -35,7 +36,7 @@ const bearerTokenStrategy = (
       path.startsWith(APIBasePath)
     ) {
       sessionStorage.getBySessionToken(token as SessionToken).then(
-        (errorOrUser: Either<Error, User>) => {
+        (errorOrUser: Either<Error, Option<User>>) => {
           fulfill(errorOrUser, done, token);
         },
         () => {
@@ -44,7 +45,7 @@ const bearerTokenStrategy = (
       );
     } else if (path.startsWith(PagoPABasePath)) {
       sessionStorage.getByWalletToken(token as WalletToken).then(
-        (errorOrUser: Either<Error, User>) => {
+        (errorOrUser: Either<Error, Option<User>>) => {
           fulfill(errorOrUser, done, token);
         },
         () => {
@@ -58,7 +59,7 @@ const bearerTokenStrategy = (
 };
 
 function fulfill(
-  errorOrUser: Either<Error, User>,
+  errorOrUser: Either<Error, Option<User>>,
   // tslint:disable-next-line:no-any
   done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
   scope: string
@@ -69,7 +70,7 @@ function fulfill(
         message: error.message,
         scope
       }),
-    user => done(undefined, user)
+    user => done(undefined, user.isNone() ? false : user.value)
   );
 }
 
