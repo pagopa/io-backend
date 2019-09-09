@@ -109,7 +109,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const errorOrSession = await this.loadSessionBySessionToken(token);
 
     if (isLeft(errorOrSession)) {
-      return left(errorOrSession.value); // TODO: Error not propagated
+      return left(errorOrSession.value);
     }
 
     const user = errorOrSession.value;
@@ -127,7 +127,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     if (isLeft(errorOrSession)) {
       const error = errorOrSession.value;
-      return left(error); // TODO: Error not propagated
+      return left(error);
     }
 
     const user = errorOrSession.value;

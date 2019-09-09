@@ -1,13 +1,4 @@
 /**
- * Stringify the Error
- * @param error
- * @returns A formatted string of the error.
- */
-function getMessage(error: Error): string {
-  return `value [${JSON.stringify(error)}]`;
-}
-
-/**
  * Merge into one single Error several errors provided in input and add a context description
  * @param errors
  * @param context
@@ -19,9 +10,7 @@ export function multipleErrorsFormatter(
 ): Error {
   return new Error(
     errors
-      .map(_ => {
-        return getMessage(_);
-      })
+      .map(_ => `value [${JSON.stringify(_)}]`)
       .join(` at [context: ${context}]\n`)
   );
 }
