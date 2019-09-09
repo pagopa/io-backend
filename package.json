@@ -93,7 +93,7 @@
     "@types/supertest": "^2.0.6",
     "@types/swagger-parser": "^4.0.2",
     "@types/validator": "^9.4.2",
-    "@types/xml2js": "^0.4.3",
+    "@types/xml2js": "^0.4.5",
     "@types/xmldom": "^0.1.29",
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
