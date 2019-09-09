@@ -68,9 +68,11 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 
+// tslint:disable-next-line: no-let prefer-const
+let currentSpidStrategy: SpidStrategy | undefined;
+
 const defaultModule = {
-  currentSpidStrategy: generateSpidStrategy(),
-  loadSpidStrategy,
+  currentSpidStrategy,
   newApp,
   registerLoginRoute,
   startIdpMetadataUpdater
@@ -214,8 +216,9 @@ export async function newApp(
   //
 
   try {
-    const newSpidStrategy = await defaultModule.currentSpidStrategy;
-    defaultModule.registerLoginRoute(app, newSpidStrategy);
+    // tslint:disable-next-line: no-object-mutation
+    defaultModule.currentSpidStrategy = await generateSpidStrategy();
+    defaultModule.registerLoginRoute(app, defaultModule.currentSpidStrategy);
     registerPublicRoutes(app);
     registerAuthenticationRoutes(
       app,
@@ -252,7 +255,7 @@ export async function newApp(
       container.resolve(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
     const idpMetadataRefreshTimer = startIdpMetadataUpdater(
       app,
-      newSpidStrategy,
+      defaultModule.currentSpidStrategy,
       idpMetadataRefreshIntervalMillis
     );
     app.on("server:stop", () => {
@@ -303,15 +306,13 @@ async function clearAndReloadSpidStrategy(
   let newSpidStrategy: SpidStrategy | undefined;
   try {
     // Inject a new SPID Strategy generate function inside the container
+    newSpidStrategy = await generateSpidStrategy();
     // tslint:disable-next-line: no-object-mutation
-    defaultModule.currentSpidStrategy = defaultModule.loadSpidStrategy();
-    newSpidStrategy = await defaultModule.currentSpidStrategy;
+    defaultModule.currentSpidStrategy = newSpidStrategy;
     log.info("Spid strategy re-initialization complete.");
   } catch (err) {
     log.error("Error on update spid strategy: %s", err);
     log.info("Restore previous spid strategy configuration");
-    // tslint:disable-next-line: no-object-mutation
-    defaultModule.currentSpidStrategy = Promise.resolve(previousSpidStrategy); // Update Container Spid Strategy
     throw new Error("Error while initializing SPID strategy");
   } finally {
     defaultModule.registerLoginRoute(
@@ -539,7 +540,7 @@ function registerAuthenticationRoutes(
   sessionStorage: RedisSessionStorage,
   samlCert: string,
   tokenService: TokenService,
-  spidStrategy: Promise<SpidStrategy>,
+  spidStrategy: SpidStrategy,
   getRedirectionUrl: (token: string) => UrlFromString
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
@@ -572,6 +573,7 @@ function registerAuthenticationRoutes(
     toExpressHandler(acsController.slo, acsController)
   );
 
+  // TODO: This route need to be reloaded after clearAndReloadSpidStrategy?
   app.get(
     `${basePath}/metadata`,
     toExpressHandler(acsController.metadata, acsController)
@@ -599,10 +601,6 @@ function registerPublicRoutes(app: Express): void {
   // @see
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
   app.get("/ping", (_, res) => res.status(200).send("ok"));
-}
-
-function loadSpidStrategy(): Promise<SpidStrategy> {
-  return generateSpidStrategy();
 }
 
 export default defaultModule;

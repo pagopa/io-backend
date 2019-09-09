@@ -24,7 +24,8 @@ beforeAll(async () => {
     "/api/v1",
     "/pagopa/api/v1"
   );
-  spidStrategy = await appModule.currentSpidStrategy;
+  expect(appModule.currentSpidStrategy).toBeDefined();
+  spidStrategy = appModule.currentSpidStrategy as SpidStrategy;
   jest.useFakeTimers();
 });
 
@@ -33,18 +34,15 @@ afterAll(() => {
 });
 
 describe("Restore of previous SPID Strategy on update failure", () => {
-  it("Use old spid strategy if loadSpidStrategy fails", done => {
+  it("Use old spid strategy if generateSpidStrategy fails", async () => {
     const onRefresh = jest.fn();
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
-    // tslint:disable-next-line: no-object-mutation
+    const container = require("../container");
     const mockSpidStrategy = jest
-      .spyOn(appModule, "loadSpidStrategy")
+      .spyOn(container, "generateSpidStrategy")
       .mockImplementation(() =>
         Promise.reject(new Error("Error download metadata"))
       );
-    mockSpidStrategy.mockImplementation(() =>
-      Promise.reject(new Error("Error download metadata"))
-    );
     appModule.startIdpMetadataUpdater(
       app,
       spidStrategy,
@@ -58,11 +56,14 @@ describe("Restore of previous SPID Strategy on update failure", () => {
     );
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-    setTimeout(() => {
-      expect(onRefresh).toBeCalled();
-      expect(mockSpidStrategy).toHaveBeenCalledTimes(1);
-      expect(mockExit).not.toBeCalled();
-      done();
-    }, 2000);
+    await new Promise(resolve => {
+      setTimeout(() => {
+        expect(onRefresh).toBeCalled();
+        expect(mockSpidStrategy).toHaveBeenCalledTimes(1);
+        expect(mockExit).not.toBeCalled();
+        expect(appModule.currentSpidStrategy).toBe(spidStrategy);
+        resolve();
+      }, 2000);
+    });
   });
 });
