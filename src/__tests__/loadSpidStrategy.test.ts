@@ -56,7 +56,7 @@ describe("Restore of previous SPID Strategy on update failure", () => {
     );
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       setTimeout(() => {
         expect(onRefresh).toBeCalled();
         expect(mockSpidStrategy).toHaveBeenCalledTimes(1);
