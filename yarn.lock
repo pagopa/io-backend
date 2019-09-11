@@ -184,9 +184,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/request-ip@^0.0.33":
-  version "0.0.33"
-  resolved "https://registry.yarnpkg.com/@types/request-ip/-/request-ip-0.0.33.tgz#4c4a16f8b27a4ed906470fdac64168bc4de6c295"
+"@types/request-ip@^0.0.34":
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/@types/request-ip/-/request-ip-0.0.34.tgz#9709f9b23ddbda925fba16c6c52ffb782f6c2b73"
+  integrity sha512-smiJc+Pzg5RJzVn6xEYEC4qrd9bnIeqTVLb4k2dTLIfi69HPamfDXRuUW8TvA+tKRbCkp1/heEGngPhwJZYX8Q==
   dependencies:
     "@types/node" "*"
 
