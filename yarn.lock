@@ -177,18 +177,11 @@
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.2.tgz#fa8e1ad1d474688a757140c91de6dace6f4abc8d"
 
-"@types/redis@*":
+"@types/redis@*", "@types/redis@^2.8.13":
   version "2.8.13"
   resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.13.tgz#fdd76d9a8b7c36ff24d8506a94ef2a890c87f498"
   integrity sha512-p86cm5P6DMotUqCS6odQRz0JJwc5QXZw9eyH0ALVIqmq12yqtex5ighWyGFHKxak9vaA/GF/Ilu0KZ0MuXXUbg==
   dependencies:
-    "@types/node" "*"
-
-"@types/redis@^2.8.5":
-  version "2.8.6"
-  resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.6.tgz#3674d07a13ad76bccda4c37dc3909e4e95757e7e"
-  dependencies:
-    "@types/events" "*"
     "@types/node" "*"
 
 "@types/request-ip@^0.0.33":
@@ -2330,10 +2323,10 @@ http-errors@1.6.3, http-errors@~1.6.2, http-errors@~1.6.3:
     setprototypeof "1.1.0"
     statuses ">= 1.4.0 < 2"
 
-http-graceful-shutdown@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/http-graceful-shutdown/-/http-graceful-shutdown-2.3.1.tgz#55f9e8e5cbb14847fa18eb7724bdfc142ed09b33"
-  integrity sha512-ai2VJoymgBZ/tUo/HJv2LNfyWQOPTmFSlrmNJnjuQef3ybUZUX/P3f37m+TYNnjJxOONTMdnWPUH24S08hPVUA==
+http-graceful-shutdown@^2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/http-graceful-shutdown/-/http-graceful-shutdown-2.3.2.tgz#2334e3036c88283567fdab5e371ffad327fb886e"
+  integrity sha512-Dn7fJjHWboN7WjNDuo7d7ZISdUlbnyQEtOjBwMGJig45ZztHQxCsnW9N89Pr3gb6VzvZy1HySgAu2Q98j6S17w==
   dependencies:
     debug "^4.1.1"
 
