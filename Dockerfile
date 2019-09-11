@@ -22,6 +22,11 @@ RUN sudo chmod -R 777 /usr/src/app \
 FROM node:8.9.4-alpine
 LABEL maintainer="https://teamdigitale.governo.it"
 
+# Install major CA certificates to cover
+# https://github.com/SparebankenVest/azure-key-vault-to-kubernetes integration
+RUN apk update && \
+    apk add ca-certificates
+
 WORKDIR /usr/src/app
 
 COPY /package.json /usr/src/app/package.json
