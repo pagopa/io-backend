@@ -52,6 +52,7 @@ const mockedUser: User = {
 const mockedExtendedProfile: ExtendedProfileApi = {
   accepted_tos_version: aTosVersion,
   email: anEmailAddress,
+  is_email_enabled: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
