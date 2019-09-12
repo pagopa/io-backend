@@ -570,7 +570,6 @@ function registerAuthenticationRoutes(
     toExpressHandler(acsController.slo, acsController)
   );
 
-  // TODO: This route need to be reloaded after clearAndReloadSpidStrategy?
   app.get(
     `${basePath}/metadata`,
     toExpressHandler(acsController.metadata, acsController)
