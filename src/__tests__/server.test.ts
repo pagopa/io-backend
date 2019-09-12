@@ -68,7 +68,7 @@ describe("Server graceful shutdown", () => {
     // Call test api after SIGTERM and expect that the response will be refused
     setTimeout(async () => {
       // Start Server shutdown
-      process.emit("SIGTERM");
+      process.emit("SIGTERM", "SIGTERM");
       try {
         await nodeFetch(testApiUrl);
         neverCalledFunction(); // test API will never succeded

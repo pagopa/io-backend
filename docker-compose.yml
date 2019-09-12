@@ -10,7 +10,7 @@ services:
       - "443"
     ports:
       - "443:443"
-    image: node:8.9.4-alpine
+    image: node:10.14.2-alpine
     volumes:
       - ".:/usr/src/app:delegated"
       - "./certs:/usr/src/app/certs:delegated"

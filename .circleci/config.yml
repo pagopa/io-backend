@@ -22,7 +22,7 @@ version: 2
 jobs:
   lint-api:
       docker:
-        - image: circleci/node:8.9.4
+        - image: circleci/node:10.14.2
       working_directory: ~/repo
       steps:
         - checkout
@@ -33,7 +33,7 @@ jobs:
         - run: npx oval validate -p api_public.yaml
   lint-typescript:
     docker:
-      - image: circleci/node:8.9.4
+      - image: circleci/node:10.14.2
 
     working_directory: ~/repo
 
@@ -44,7 +44,7 @@ jobs:
       - run: yarn lint
   danger:
     docker:
-      - image: circleci/node:8.9.4
+      - image: circleci/node:10.14.2
     working_directory: ~/repo
     steps:
       - checkout
@@ -53,7 +53,7 @@ jobs:
       - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'
   build:
     docker:
-      - image: circleci/node:8.9.4
+      - image: circleci/node:10.14.2
 
     working_directory: ~/repo
 
@@ -73,7 +73,7 @@ jobs:
       - run: yarn generate:test-certs
   tests:
     docker:
-      - image: circleci/node:8.9.4
+      - image: circleci/node:10.14.2
 
     working_directory: ~/repo
 
