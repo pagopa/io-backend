@@ -68,11 +68,8 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 
-// tslint:disable-next-line: no-let prefer-const
-let currentSpidStrategy: SpidStrategy | undefined;
-
 const defaultModule = {
-  currentSpidStrategy,
+  currentSpidStrategy: undefined as SpidStrategy | undefined,
   newApp,
   registerLoginRoute,
   startIdpMetadataUpdater
