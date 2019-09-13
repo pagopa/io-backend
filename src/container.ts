@@ -12,19 +12,8 @@ import { CIDR, IPatternStringTag } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as redis from "redis";
 
-import AuthenticationController from "./controllers/authenticationController";
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import PagoPAController from "./controllers/pagoPAController";
-import PagoPAProxyController from "./controllers/pagoPAProxyController";
-import ProfileController from "./controllers/profileController";
-import ServicesController from "./controllers/servicesController";
-import SessionController from "./controllers/sessionController";
-import UserMetadataController from "./controllers/userMetadataController";
-
 import ApiClientFactory from "./services/apiClientFactory";
 import MessagesService from "./services/messagesService";
-import NotificationService from "./services/notificationService";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
@@ -86,8 +75,8 @@ const samlCert = () => {
     "SAML certificate"
   );
 };
-export const SAML_CERT = "samlCert";
-const SAML_CERT_VALUE = samlCert();
+
+export const SAML_CERT = samlCert();
 
 // SAML settings.
 const SAML_CALLBACK_URL =
@@ -118,7 +107,7 @@ const IDP_METADATA_URL_VALUE = getRequiredENVVar("IDP_METADATA_URL");
 export function generateSpidStrategy(): Promise<SpidStrategy> {
   return spidStrategy(
     SAML_KEY_VALUE,
-    SAML_CERT_VALUE,
+    SAML_CERT,
     SAML_CALLBACK_URL,
     SAML_ISSUER,
     SAML_ACCEPTED_CLOCK_SKEW_MS,
@@ -128,8 +117,6 @@ export function generateSpidStrategy(): Promise<SpidStrategy> {
     IDP_METADATA_URL_VALUE
   );
 }
-export const SPID_STRATEGY = "spidStrategy";
-const SPID_STRATEGY_VALUE = generateSpidStrategy();
 
 // Redirection urls
 const clientProfileRedirectionUrl =
@@ -206,16 +193,14 @@ const ALLOW_MULTIPLE_SESSIONS = fromNullable(
   .getOrElse(false);
 
 // Register the user sessions storage service.
-export const SESSION_STORAGE = "sessionStorage";
-const SESSION_STORAGE_VALUE = new RedisSessionStorage(
+export const SESSION_STORAGE = new RedisSessionStorage(
   REDIS_CLIENT_VALUE,
   tokenDurationSecs,
   ALLOW_MULTIPLE_SESSIONS
 );
 
 // Register the user metadata storage service.
-export const USER_METADATA_STORAGE = "userMetadataStorage";
-const USER_METADATA_STORAGE_VALUE = new RedisUserMetadataStorage(
+export const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
   REDIS_CLIENT_VALUE
 );
 
@@ -228,70 +213,17 @@ const PAGOPA_CLIENT_VALUE = new PagoPAClientFactory(
   pagoPAApiUrlTest
 );
 
-// Register the PagoPA proxy service.
-const PAGOPA_PROXY_SERVICE = "pagoPAProxyService";
-const PAGOPA_PROXY_SERVICE_VALUE = new PagoPAProxyService(PAGOPA_CLIENT_VALUE);
+export const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT_VALUE);
 
-// Register the profile service.
-const PROFILE_SERVICE = "profileService";
-const PROFILE_SERVICE_VALUE = new ProfileService(API_CLIENT_VALUE);
+export const PROFILE_SERVICE = new ProfileService(API_CLIENT_VALUE);
 
 // Register the messages service.
-const MESSAGES_SERVICE = "messagesService";
-const MESSAGES_SERVICE_VALUE = new MessagesService(API_CLIENT_VALUE);
+export const MESSAGES_SERVICE = new MessagesService(API_CLIENT_VALUE);
 
 // Azure Notification Hub credentials.
-const hubName = getRequiredENVVar("AZURE_NH_HUB_NAME");
-const endpointOrConnectionString = getRequiredENVVar("AZURE_NH_ENDPOINT");
-
-// Register the notification service.
-const NOTIFICATION_SERVICE = "notificationService";
-const NOTIFICATION_SERVICE_VALUE = new NotificationService(
-  hubName,
-  endpointOrConnectionString
-);
-
-// Register the PagoPA controller as a service.
-export const PAGOPA_CONTROLLER = "pagoPAController";
-const PAGOPA_CONTROLLER_VALUE = new PagoPAController();
-
-// Register the PagoPAProxy controller as a service.
-export const PAGOPA_PROXY_CONTROLLER = "pagoPAProxyController";
-const PAGOPA_PROXY_CONTROLLER_VALUE = new PagoPAProxyController(
-  PAGOPA_PROXY_SERVICE_VALUE
-);
-
-// Register the profile controller as a service.
-export const PROFILE_CONTROLLER = "profileController";
-const PROFILE_CONTROLLER_VALUE = new ProfileController(PROFILE_SERVICE_VALUE);
-
-// Register the messages controller as a service.
-export const MESSAGES_CONTROLLER = "messagesController";
-const MESSAGES_CONTROLLER_VALUE = new MessagesController(
-  MESSAGES_SERVICE_VALUE
-);
-
-// Register the services controller as a service.
-export const SERVICES_CONTROLLER = "servicesController";
-const SERVICES_CONTROLLER_VALUE = new ServicesController(
-  MESSAGES_SERVICE_VALUE
-);
-
-// Register the notification controller as a service.
-export const NOTIFICATION_CONTROLLER = "notificationController";
-const NOTIFICATION_CONTROLLER_VALUE = new NotificationController(
-  NOTIFICATION_SERVICE_VALUE,
-  SESSION_STORAGE_VALUE
-);
-
-// Register the session controller as a service.
-export const SESSION_CONTROLLER = "sessionController";
-const SESSION_CONTROLLER_VALUE = new SessionController(SESSION_STORAGE_VALUE);
-
-// Register the user metadata controller as a service.
-export const USER_METADATA_CONTROLLER = "userMetadataController";
-const USER_METADATA_CONTROLLER_VALUE = new UserMetadataController(
-  USER_METADATA_STORAGE_VALUE
+export const hubName = getRequiredENVVar("AZURE_NH_HUB_NAME");
+export const endpointOrConnectionString = getRequiredENVVar(
+  "AZURE_NH_ENDPOINT"
 );
 
 // Set default idp metadata refresh time to 10 days
@@ -334,31 +266,21 @@ export const URL_TOKEN_STRATEGY = "urlTokenStrategy";
 const URL_TOKEN_STRATEGY_VALUE = urlTokenStrategy(PRE_SHARED_KEY_VALUE);
 
 // Register the token service.
-export const TOKEN_SERVICE = "tokenService";
-const TOKEN_SERVICE_VALUE = new TokenService();
+export const TOKEN_SERVICE = new TokenService();
 
-const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
+export const getClientProfileRedirectionUrl = (
+  token: string
+): UrlFromString => {
   const url = clientProfileRedirectionUrl.replace("{token}", token);
   return {
     href: url
   };
 };
 
-export const AUTHORIZATION_CONTROLLER = "authorizationController";
-const AUTHORIZATION_CONTROLLER_VALUE = new AuthenticationController(
-  SESSION_STORAGE_VALUE,
-  SAML_CERT_VALUE,
-  SPID_STRATEGY_VALUE,
-  TOKEN_SERVICE_VALUE,
-  getClientProfileRedirectionUrl,
-  PROFILE_SERVICE_VALUE
-);
-
 export interface IContainer {
   serverPort: number;
   [CACHE_MAX_AGE_SECONDS]: number;
   [SAML_KEY]: string;
-  [SAML_CERT]: string;
 
   samlAcceptedClockSkewMs: number;
   samlAttributeConsumingServiceIndex: number;
@@ -367,11 +289,9 @@ export interface IContainer {
   spidAutologin: string;
   spidTestEnvUrl: string;
   [IDP_METADATA_URL]: string;
-  [SPID_STRATEGY]: Promise<SpidStrategy>;
 
   clientErrorRedirectionUrl: string;
   clientLoginRedirectionUrl: string;
-  getClientProfileRedirectionUrl: (token: string) => UrlFromString;
 
   // Resolve NODE_ENV environment (defaults to PRODUCTION).
   env: NodeEnvironmentEnum;
@@ -389,26 +309,9 @@ export interface IContainer {
   [API_CLIENT]: ApiClientFactory;
   [REDIS_CLIENT]: redis.RedisClient;
   tokenDurationSecs: number;
-  [SESSION_STORAGE]: RedisSessionStorage;
-  [USER_METADATA_STORAGE]: RedisUserMetadataStorage;
-  [PAGOPA_PROXY_SERVICE]: PagoPAProxyService;
-  [PROFILE_SERVICE]: ProfileService;
-  [MESSAGES_SERVICE]: MessagesService;
-  [NOTIFICATION_SERVICE]: NotificationService;
-
-  [PAGOPA_CONTROLLER]: PagoPAController;
-  [PAGOPA_PROXY_CONTROLLER]: PagoPAProxyController;
-  [AUTHORIZATION_CONTROLLER]: AuthenticationController;
-  [PROFILE_CONTROLLER]: ProfileController;
-  [MESSAGES_CONTROLLER]: MessagesController;
-  [SERVICES_CONTROLLER]: ServicesController;
-  [NOTIFICATION_CONTROLLER]: NotificationController;
-  [SESSION_CONTROLLER]: SessionController;
-  [USER_METADATA_CONTROLLER]: UserMetadataController;
 
   [IDP_METADATA_REFRESH_INTERVAL_SECONDS]: number;
 
-  [TOKEN_SERVICE]: TokenService;
   [AUTHENTICATION_BASE_PATH]: string;
   [API_BASE_PATH]: string;
   [PAGOPA_BASE_PATH]: string;
@@ -421,7 +324,6 @@ const initContainer: IContainer = {
   serverPort,
   [CACHE_MAX_AGE_SECONDS]: CACHE_MAX_AGE_SECONDS_VALUE,
   [SAML_KEY]: SAML_KEY_VALUE,
-  [SAML_CERT]: SAML_CERT_VALUE,
 
   samlAcceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
   samlAttributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
@@ -430,12 +332,10 @@ const initContainer: IContainer = {
   spidAutologin: SPID_AUTOLOGIN,
   spidTestEnvUrl: SPID_TESTENV_URL,
   [IDP_METADATA_URL]: IDP_METADATA_URL_VALUE,
-  [SPID_STRATEGY]: SPID_STRATEGY_VALUE,
 
   clientErrorRedirectionUrl:
     process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html",
   clientLoginRedirectionUrl: process.env.CLIENT_REDIRECTION_URL || "/login",
-  getClientProfileRedirectionUrl,
 
   // Resolve NODE_ENV environment (defaults to PRODUCTION).
   env: ENV_VALUE,
@@ -453,26 +353,9 @@ const initContainer: IContainer = {
   [API_CLIENT]: API_CLIENT_VALUE,
   [REDIS_CLIENT]: REDIS_CLIENT_VALUE,
   tokenDurationSecs,
-  [SESSION_STORAGE]: SESSION_STORAGE_VALUE,
-  [USER_METADATA_STORAGE]: USER_METADATA_STORAGE_VALUE,
-  [PAGOPA_PROXY_SERVICE]: PAGOPA_PROXY_SERVICE_VALUE,
-  [PROFILE_SERVICE]: PROFILE_SERVICE_VALUE,
-  [MESSAGES_SERVICE]: MESSAGES_SERVICE_VALUE,
-  [NOTIFICATION_SERVICE]: NOTIFICATION_SERVICE_VALUE,
-
-  [PAGOPA_CONTROLLER]: PAGOPA_CONTROLLER_VALUE,
-  [PAGOPA_PROXY_CONTROLLER]: PAGOPA_PROXY_CONTROLLER_VALUE,
-  [AUTHORIZATION_CONTROLLER]: AUTHORIZATION_CONTROLLER_VALUE,
-  [PROFILE_CONTROLLER]: PROFILE_CONTROLLER_VALUE,
-  [MESSAGES_CONTROLLER]: MESSAGES_CONTROLLER_VALUE,
-  [SERVICES_CONTROLLER]: SERVICES_CONTROLLER_VALUE,
-  [NOTIFICATION_CONTROLLER]: NOTIFICATION_CONTROLLER_VALUE,
-  [SESSION_CONTROLLER]: SESSION_CONTROLLER_VALUE,
-  [USER_METADATA_CONTROLLER]: USER_METADATA_CONTROLLER_VALUE,
 
   [IDP_METADATA_REFRESH_INTERVAL_SECONDS]: idpMetadataRefreshIntervalSeconds,
 
-  [TOKEN_SERVICE]: TOKEN_SERVICE_VALUE,
   [AUTHENTICATION_BASE_PATH]: AUTHENTICATION_BASE_PATH_VALUE,
   [API_BASE_PATH]: API_BASE_PATH_VALUE,
   [PAGOPA_BASE_PATH]: PAGOPA_BASE_PATH_VALUE,
