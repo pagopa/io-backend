@@ -83,13 +83,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    const removeUserSessionsPromise = this.removeOtherUserSessions(user);
+    const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
 
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
       saveSessionInfoPromise,
-      removeUserSessionsPromise
+      removeOtherUserSessionsPromise
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
