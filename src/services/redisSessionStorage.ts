@@ -11,7 +11,6 @@ import {
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
-import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
@@ -297,7 +296,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     );
   }
 
-  private async clearExpiredSetValues(
+  public async clearExpiredSetValues(
     fiscalCode: string
   ): Promise<ReadonlyArray<Either<Error, boolean>>> {
     const userSessionSetKey = `${userSessionsSetKeyPrefix}${fiscalCode}`;
