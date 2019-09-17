@@ -37,7 +37,7 @@ const bearerTokenStrategy = (
     ) {
       sessionStorage.getBySessionToken(token as SessionToken).then(
         (errorOrUser: Either<Error, Option<User>>) => {
-          fulfill(errorOrUser, done, token);
+          fulfill(errorOrUser, done);
         },
         () => {
           done(undefined, false);
@@ -46,7 +46,7 @@ const bearerTokenStrategy = (
     } else if (path.startsWith(PagoPABasePath)) {
       sessionStorage.getByWalletToken(token as WalletToken).then(
         (errorOrUser: Either<Error, Option<User>>) => {
-          fulfill(errorOrUser, done, token);
+          fulfill(errorOrUser, done);
         },
         () => {
           done(undefined, false);
@@ -61,15 +61,10 @@ const bearerTokenStrategy = (
 function fulfill(
   errorOrUser: Either<Error, Option<User>>,
   // tslint:disable-next-line:no-any
-  done: (error: any, user?: any, options?: IVerifyOptions | string) => void,
-  scope: string
+  done: (error: any, user?: any, options?: IVerifyOptions | string) => void
 ): void {
   errorOrUser.fold(
-    error =>
-      done(undefined, false, {
-        message: error.message,
-        scope
-      }),
+    error => done(undefined, false, error.message),
     user => done(undefined, user.isNone() ? false : user.value)
   );
 }
