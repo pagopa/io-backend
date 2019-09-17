@@ -156,8 +156,8 @@ describe("Success app start", () => {
 describe("Failure app start", () => {
   it("Close app if download IDP metadata fails on startup", async () => {
     // Override return value of generateSpidStrategy with a rejected promise.
-    const container = require("../container");
-    jest.spyOn(container, "generateSpidStrategy").mockImplementation(() => {
+    const config = require("../config");
+    jest.spyOn(config, "generateSpidStrategy").mockImplementation(() => {
       return Promise.reject(new Error("Error download metadata"));
     });
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);

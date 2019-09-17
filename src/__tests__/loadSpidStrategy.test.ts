@@ -37,9 +37,9 @@ describe("Restore of previous SPID Strategy on update failure", () => {
   it("Use old spid strategy if generateSpidStrategy fails", async () => {
     const onRefresh = jest.fn();
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
-    const container = require("../container");
+    const config = require("../config");
     const mockSpidStrategy = jest
-      .spyOn(container, "generateSpidStrategy")
+      .spyOn(config, "generateSpidStrategy")
       .mockImplementation(() =>
         Promise.reject(new Error("Error download metadata"))
       );
