@@ -5,7 +5,7 @@
 /* tslint:disable:no-null-keyword */
 /* tslint:disable:no-object-mutation */
 
-import { left, Left, right } from "fp-ts/lib/Either";
+import { Either, left, Left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
@@ -272,6 +272,35 @@ describe("RedisSessionStorage#set", () => {
       expect(response).toEqual(expected);
     }
   );
+});
+
+describe("RedisSessionStorage#removeOtherUserSessions", () => {
+  it("should delete only older session token", async () => {
+    const oldSessionToken = "old_session_token";
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `SESSIONINFO-${oldSessionToken}`,
+        `SESSIONINFO-${oldSessionToken}2`,
+        `SESSIONINFO-${aValidUser.session_token}`
+      ]);
+    });
+    mockDel.mockImplementation((_, __, callback) => {
+      callback(undefined, 1);
+    });
+
+    const response: Either<Error, boolean> = await sessionStorage[
+      // tslint:disable-next-line: no-string-literal
+      "removeOtherUserSessions"
+    ](aValidUser);
+    expect(mockSmembers).toBeCalledTimes(1);
+    expect(mockSmembers.mock.calls[0][0]).toBe(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(`SESSION-${oldSessionToken}`);
+    expect(mockDel.mock.calls[0][1]).toBe(`SESSION-${oldSessionToken}2`);
+    expect(response.isRight());
+  });
 });
 
 describe("RedisSessionStorage#getBySessionToken", () => {

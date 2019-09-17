@@ -11,6 +11,7 @@ import {
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
+import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
@@ -83,10 +84,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
+    const removeUserSessionsPromise = this.removeOtherUserSessions(user);
+
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
-      saveSessionInfoPromise
+      saveSessionInfoPromise,
+      removeUserSessionsPromise
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
@@ -97,7 +101,6 @@ export default class RedisSessionStorage extends RedisStorageUtils
         )
       );
     }
-    await this.clearExpiredSetValues(user.fiscal_code);
     return right<Error, boolean>(true);
   }
 
@@ -231,14 +234,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async listUserSessions(
     user: User
   ): Promise<Either<Error, SessionsList>> {
-    const sessionKeys = await new Promise<Either<Error, ReadonlyArray<string>>>(
-      resolve => {
-        this.redisClient.smembers(
-          `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
-          (err, response) => resolve(this.arrayStringReply(err, response))
-        );
-      }
-    );
+    const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
     // tslint:disable-next-line: readonly-array
     const initializedSessionKeys: string[] = [];
     if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
@@ -446,6 +442,41 @@ export default class RedisSessionStorage extends RedisStorageUtils
       });
     });
   }
+
+  private async removeOtherUserSessions(
+    user: User
+  ): Promise<Either<Error, boolean>> {
+    const sessionInfoKeys = await this.readSessionInfoKeys(user.fiscal_code);
+    if (isRight(sessionInfoKeys)) {
+      const sessionKeys = sessionInfoKeys.value
+        .filter(
+          _ =>
+            _.startsWith(sessionInfoKeyPrefix) &&
+            _ !== `${sessionInfoKeyPrefix}${user.session_token}`
+        )
+        .map(_ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`);
+      return await new Promise(resolve => {
+        this.redisClient.del(...sessionKeys, (err, response) =>
+          resolve(this.integerReply(err, response))
+        );
+      });
+    }
+    return sessionInfoKeys.value === sessionNotFoundError
+      ? right(true)
+      : left(sessionInfoKeys.value);
+  }
+
+  private readSessionInfoKeys(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, ReadonlyArray<string>>> {
+    return new Promise<Either<Error, ReadonlyArray<string>>>(resolve => {
+      this.redisClient.smembers(
+        `${userSessionsSetKeyPrefix}${fiscalCode}`,
+        (err, response) => resolve(this.arrayStringReply(err, response))
+      );
+    });
+  }
+
   private arrayStringReply(
     err: Error | null,
     replay: ReadonlyArray<string> | undefined
