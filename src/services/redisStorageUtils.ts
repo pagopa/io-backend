@@ -26,12 +26,15 @@ export default class RedisStorageUtils {
   protected integerReply(
     err: Error | null,
     // tslint:disable-next-line:no-any
-    reply: unknown
+    reply: unknown,
+    expectedReply?: number
   ): Either<Error, boolean> {
     if (err) {
       return left<Error, boolean>(err);
     }
-
+    if (expectedReply !== undefined && expectedReply !== reply) {
+      return right<Error, boolean>(false);
+    }
     return right<Error, boolean>(isNumber(reply));
   }
 

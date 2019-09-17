@@ -3,6 +3,7 @@
  */
 
 import { Either } from "fp-ts/lib/Either";
+import { Option } from "fp-ts/lib/Option";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 
@@ -17,14 +18,14 @@ export interface ISessionStorage {
    */
   readonly getBySessionToken: (
     token: SessionToken
-  ) => Promise<Either<Error, User>>;
+  ) => Promise<Either<Error, Option<User>>>;
 
   /**
    * Retrieves a value from the cache using the wallet token.
    */
   readonly getByWalletToken: (
     token: WalletToken
-  ) => Promise<Either<Error, User>>;
+  ) => Promise<Either<Error, Option<User>>>;
 
   /**
    * Removes a value from the cache.
