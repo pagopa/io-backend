@@ -1,4 +1,4 @@
-FROM circleci/node:8.9.4 as builder
+FROM circleci/node:10.14.2 as builder
 
 RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-3.2
 
@@ -19,8 +19,13 @@ RUN sudo chmod -R 777 /usr/src/app \
   && yarn generate:proxy-models \
   && yarn build
 
-FROM node:8.9.4-alpine
+FROM node:10.14.2-alpine
 LABEL maintainer="https://teamdigitale.governo.it"
+
+# Install major CA certificates to cover
+# https://github.com/SparebankenVest/azure-key-vault-to-kubernetes integration
+RUN apk update && \
+    apk add ca-certificates
 
 WORKDIR /usr/src/app
 
