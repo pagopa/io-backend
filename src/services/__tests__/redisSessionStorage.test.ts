@@ -582,7 +582,7 @@ describe("RedisSessionStorage#del", () => {
       walletDelSuccess: number,
       expected: Error
     ) => {
-      mockDel.mockImplementationOnce((_, __, callback) => {
+      mockDel.mockImplementationOnce((_, callback) => {
         callback(sessionDelErr, sessionDelSuccess);
       });
 
@@ -590,31 +590,19 @@ describe("RedisSessionStorage#del", () => {
         callback(walletDelErr, walletDelSuccess);
       });
 
-      mockSrem.mockImplementation((_, __, callback) => {
-        callback(undefined, 1);
-      });
-
       const response = await sessionStorage.del(
         aValidUser.session_token,
         aValidUser.wallet_token
       );
 
-      expect(mockSrem.mock.calls[0][0]).toBe(
-        `USERSESSIONS-${aValidUser.fiscal_code}`
-      );
-      expect(mockSrem.mock.calls[0][1]).toBe(
-        `SESSIONINFO-${aValidUser.session_token}`
-      );
       expect(mockDel).toHaveBeenCalledTimes(2);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `SESSIONINFO-${aValidUser.session_token}`
-      );
-      expect(mockDel.mock.calls[0][1]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
       expect(mockDel.mock.calls[1][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
+      expect(mockSrem).not.toBeCalled();
 
       expect(response).toEqual(expected);
     }

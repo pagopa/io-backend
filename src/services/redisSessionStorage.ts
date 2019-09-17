@@ -154,35 +154,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
     if (isLeft(user)) {
       return left(user.value);
     }
-    const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionToken}`;
-    const removeValueSessionInfoSet = await new Promise<Either<Error, boolean>>(
-      resolve => {
-        this.redisClient.srem(
-          `${userSessionsSetKeyPrefix}${user.value.fiscal_code}`,
-          sessionInfoKey,
-          (err, response) =>
-            resolve(
-              this.falsyResponseToError(
-                this.integerReply(err, response),
-                new Error(
-                  "Unexpected response from redis client deleting token from SessionKeySet."
-                )
-              )
-            )
-        );
-      }
-    );
-    if (isLeft(removeValueSessionInfoSet)) {
-      log.warn(
-        "Error removing session info key from session info set: %s",
-        removeValueSessionInfoSet.value.message
-      );
-    }
+
     const deleteSessionTokens = new Promise<Either<Error, true>>(resolve => {
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
       this.redisClient.del(
-        sessionInfoKey,
         `${sessionKeyPrefix}${sessionToken}`,
         (err, response) =>
           resolve(
