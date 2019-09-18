@@ -22,7 +22,7 @@ version: 2
 jobs:
   lint-api:
       docker:
-        - image: circleci/node:10.14.2-jessie
+        - image: circleci/node:10.14.2
       working_directory: ~/repo
       steps:
         - checkout
@@ -33,7 +33,7 @@ jobs:
         - run: npx oval validate -p api_public.yaml
   lint-typescript:
     docker:
-      - image: circleci/node:10.14.2-jessie
+      - image: circleci/node:10.14.2
 
     working_directory: ~/repo
 
@@ -44,7 +44,7 @@ jobs:
       - run: yarn lint
   danger:
     docker:
-      - image: circleci/node:10.14.2-jessie
+      - image: circleci/node:10.14.2
     working_directory: ~/repo
     steps:
       - checkout
@@ -53,7 +53,7 @@ jobs:
       - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'
   build:
     docker:
-      - image: circleci/node:10.14.2-jessie
+      - image: circleci/node:10.14.2
 
     working_directory: ~/repo
 
@@ -64,7 +64,7 @@ jobs:
       - *save_node_cache
 
       # Install required libraries
-      - run: sudo apt-get install libunwind8 libstdc++6
+      - run: sudo apt-get install libunwind8
 
       # Generate the proxy API models
       - run: yarn generate:proxy-models
@@ -73,7 +73,7 @@ jobs:
       - run: yarn generate:test-certs
   tests:
     docker:
-      - image: circleci/node:10.14.2-jessie
+      - image: circleci/node:10.14.2
 
     working_directory: ~/repo
 
@@ -83,7 +83,7 @@ jobs:
       - *install_node_modules
 
       # Install required libraries
-      - run: sudo apt-get install libunwind8 libstdc++6
+      - run: sudo apt-get install libunwind8=1.1-4.1
 
       # Generate the proxy API models
       - run: yarn generate:proxy-models
