@@ -2,19 +2,21 @@ version: "2.2"
 
 services:
   backend:
-    command: ["node", "src/server.js"]
     container_name: italia-backend
+    build:
+      context: ./
+      dockerfile: Dockerfile
     environment:
       - NODE_ENV=dev
+      - REDIS_URL=redis://redis
     expose:
       - "443"
     ports:
       - "443:443"
     image: node:10.14.2-alpine
     volumes:
-      - ".:/usr/src/app:delegated"
+      - ".env:/usr/src/app/.env:delegated"
       - "./certs:/usr/src/app/certs:delegated"
-    working_dir: "/usr/src/app"
 
   spid-testenv2:
     container_name: spid-testenv2
