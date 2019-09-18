@@ -1,6 +1,6 @@
 FROM circleci/node:10.14.2-jessie as builder
 
-RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-3.2
+RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-3.2 libstdc++6
 
 WORKDIR /usr/src/app
 

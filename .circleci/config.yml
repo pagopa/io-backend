@@ -64,7 +64,7 @@ jobs:
       - *save_node_cache
 
       # Install required libraries
-      - run: sudo apt-get install libunwind8
+      - run: sudo apt-get install libunwind8 libstdc++6
 
       # Generate the proxy API models
       - run: yarn generate:proxy-models
@@ -83,7 +83,7 @@ jobs:
       - *install_node_modules
 
       # Install required libraries
-      - run: sudo apt-get install libunwind8
+      - run: sudo apt-get install libunwind8 libstdc++6
 
       # Generate the proxy API models
       - run: yarn generate:proxy-models
