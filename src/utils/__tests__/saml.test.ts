@@ -41,7 +41,7 @@ describe("Get Issuer from saml Response", () => {
       SAMLResponse: ""
     };
     const issuer = getSamlIssuer(body);
-    expect(issuer).toBeUndefined();
+    expect(issuer).toBe("UNKNOWN");
   });
 
   it("should return undefined if saml issuer is missing", () => {
@@ -50,6 +50,6 @@ describe("Get Issuer from saml Response", () => {
       SAMLResponse: Buffer.from(noIssuerSamlResponse).toString("base64")
     };
     const issuer = getSamlIssuer(body);
-    expect(issuer).toBeUndefined();
+    expect(issuer).toBe("UNKNOWN");
   });
 });

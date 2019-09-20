@@ -101,7 +101,11 @@ function withSpidAuth(
     passport.authenticate("spid", async (err, user) => {
       const issuer = getSamlIssuer(req.body);
       if (err) {
-        log.error("Error in SPID authentication: %s | Issuer: %s", err, issuer);
+        log.error(
+          "Spid Authentication|Authentication Error|ERROR=%s|ISSUER=%s",
+          err,
+          issuer
+        );
         return res.redirect(
           clientErrorRedirectionUrl +
             fromNullable(err.statusXml)
@@ -112,7 +116,7 @@ function withSpidAuth(
       }
       if (!user) {
         log.error(
-          "Error in SPID authentication: no user found | Issuer: %s",
+          "Spid Authentication|Authentication Error|ERROR=user_not_found|ISSUER=%s",
           issuer
         );
         return res.redirect(clientLoginRedirectionUrl);
