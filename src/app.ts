@@ -59,6 +59,7 @@ import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
+import { getSamlIssuer } from "./utils/saml";
 
 const defaultModule = {
   loadSpidStrategy,
@@ -98,8 +99,9 @@ function withSpidAuth(
     next: express.NextFunction
   ) => {
     passport.authenticate("spid", async (err, user) => {
+      const issuer = getSamlIssuer(req.body);
       if (err) {
-        log.error("Error in SPID authentication: %s", err);
+        log.error("Error in SPID authentication: %s | Issuer: %s", err, issuer);
         return res.redirect(
           clientErrorRedirectionUrl +
             fromNullable(err.statusXml)
@@ -109,7 +111,10 @@ function withSpidAuth(
         );
       }
       if (!user) {
-        log.error("Error in SPID authentication: no user found");
+        log.error(
+          "Error in SPID authentication: no user found | Issuer: %s",
+          issuer
+        );
         return res.redirect(clientLoginRedirectionUrl);
       }
       const response = await controller.acs(user);
