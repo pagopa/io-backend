@@ -1,4 +1,4 @@
-import { getSamlIssuer, ISamlResponse } from "../saml";
+import { getSamlIssuer, SAMLResponse } from "../saml";
 
 const expectedSamlIssuer = "https://spid-testenv2:8088";
 const samlResponse = `<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
@@ -27,7 +27,7 @@ IssueInstant="2019-09-20T08:43:15Z">
 
 describe("Get Issuer from saml Response", () => {
   it("should get the expected saml issuer", () => {
-    const body: ISamlResponse = {
+    const body: SAMLResponse = {
       RelayState: "",
       SAMLResponse: Buffer.from(samlResponse).toString("base64")
     };
@@ -36,7 +36,7 @@ describe("Get Issuer from saml Response", () => {
   });
 
   it("should return undefined if saml response is invalid", () => {
-    const body: ISamlResponse = {
+    const body: SAMLResponse = {
       RelayState: "",
       SAMLResponse: ""
     };
@@ -45,7 +45,7 @@ describe("Get Issuer from saml Response", () => {
   });
 
   it("should return undefined if saml issuer is missing", () => {
-    const body: ISamlResponse = {
+    const body: SAMLResponse = {
       RelayState: "",
       SAMLResponse: Buffer.from(noIssuerSamlResponse).toString("base64")
     };

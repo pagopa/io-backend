@@ -1,15 +1,22 @@
+import { isLeft } from "fp-ts/lib/Either";
+import * as t from "io-ts";
 import { DOMParser } from "xmldom";
 
-export interface ISamlResponse {
-  RelayState: string;
-  SAMLResponse: string;
-}
+const SAMLResponse = t.type({
+  RelayState: t.string,
+  SAMLResponse: t.string
+});
+export type SAMLResponse = t.TypeOf<typeof SAMLResponse>;
 
-export const getSamlIssuer = (body: ISamlResponse): string => {
-  const decodedResponse =
-    body && body.SAMLResponse
-      ? Buffer.from(body.SAMLResponse, "base64").toString("utf8")
-      : "";
+export const getSamlIssuer = (body: unknown): string => {
+  const samlResponseOrError = SAMLResponse.decode(body);
+  if (isLeft(samlResponseOrError)) {
+    return "UNKNOWN";
+  }
+  const decodedResponse = Buffer.from(
+    samlResponseOrError.value.SAMLResponse,
+    "base64"
+  ).toString("utf8");
   const domParser = new DOMParser().parseFromString(decodedResponse);
   if (domParser === undefined) {
     return "UNKNOWN";
