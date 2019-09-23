@@ -28,25 +28,30 @@ IssueInstant="2019-09-20T08:43:15Z">
 describe("Get Issuer from saml Response", () => {
   it("should get the expected saml issuer", () => {
     const body: SAMLResponse = {
-      RelayState: "",
       SAMLResponse: Buffer.from(samlResponse).toString("base64")
     };
     const issuer = getSamlIssuer(body);
     expect(issuer).toBe(expectedSamlIssuer);
   });
 
-  it("should return undefined if saml response is invalid", () => {
-    const body: SAMLResponse = {
-      RelayState: "",
+  it("should return UNKNOWN if saml response is invalid", () => {
+    const body: unknown = {
       SAMLResponse: ""
     };
     const issuer = getSamlIssuer(body);
     expect(issuer).toBe("UNKNOWN");
   });
 
-  it("should return undefined if saml issuer is missing", () => {
+  it("should return UNKNOWN if saml response is missing", () => {
+    const body: unknown = {
+      RelayState: ""
+    };
+    const issuer = getSamlIssuer(body);
+    expect(issuer).toBe("UNKNOWN");
+  });
+
+  it("should return UNKNOWN if saml issuer is missing", () => {
     const body: SAMLResponse = {
-      RelayState: "",
       SAMLResponse: Buffer.from(noIssuerSamlResponse).toString("base64")
     };
     const issuer = getSamlIssuer(body);
