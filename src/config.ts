@@ -8,7 +8,7 @@ import {
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
-import { CIDR, IPatternStringTag } from "italia-ts-commons/lib/strings";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import ApiClientFactory from "./services/apiClientFactory";
@@ -26,7 +26,7 @@ import {
   createSimpleRedisClient
 } from "./utils/redis";
 
-// Without this the environment variables loaded by dotenv aren't available in
+// Without this, the environment variables loaded by dotenv aren't available in
 // this file.
 dotenv.config();
 
@@ -115,7 +115,7 @@ if (!clientProfileRedirectionUrl.includes("{token}")) {
 }
 
 // Range IP allowed for notification.
-function decodeNotifyCIDR(): string & IPatternStringTag<string> {
+function decodeNotifyCIDR(): CIDR {
   const errorOrNotifyCIDR = CIDR.decode(
     process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE
   );
@@ -132,7 +132,7 @@ function decodeNotifyCIDR(): string & IPatternStringTag<string> {
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = decodeNotifyCIDR();
 
 // Range IP allowed for PagoPA proxy.
-function decodePagoPACIDR(): string & IPatternStringTag<string> {
+function decodePagoPACIDR(): CIDR {
   const errorOrPagoPACIDR = CIDR.decode(
     process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE
   );
@@ -148,8 +148,8 @@ function decodePagoPACIDR(): string & IPatternStringTag<string> {
 }
 export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodePagoPACIDR();
 
-export const API_KEY = process.env.API_KEY || "";
-export const API_URL = process.env.API_URL || "";
+export const API_KEY = getRequiredENVVar("API_KEY");
+export const API_URL = getRequiredENVVar("API_URL");
 
 export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL);
 
@@ -171,8 +171,8 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
 // Register a factory service to create PagoPA client.
-const pagoPAApiUrl = process.env.PAGOPA_API_URL || "";
-const pagoPAApiUrlTest = process.env.PAGOPA_API_URL_TEST || "";
+const pagoPAApiUrl = getRequiredENVVar("PAGOPA_API_URL");
+const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
 export const PAGOPA_CLIENT = new PagoPAClientFactory(
   pagoPAApiUrl,
   pagoPAApiUrlTest

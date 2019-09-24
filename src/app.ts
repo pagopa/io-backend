@@ -217,7 +217,7 @@ export async function newApp(
     defaultModule.registerLoginRoute(app, defaultModule.currentSpidStrategy);
     registerPublicRoutes(app);
 
-    // Create the Session Storage ervice
+    // Create the Session Storage service
     const SESSION_STORAGE = new RedisSessionStorage(
       REDIS_CLIENT,
       tokenDurationSecs
