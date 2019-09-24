@@ -98,6 +98,8 @@ jobs:
           command: yarn test
           environment:
             PRE_SHARED_KEY: "12345"
+            API_KEY: "fake_api_key_here"
+            API_URL: "https://agid-apim-prod.azure-api.net/api/v1"
             ALLOW_NOTIFY_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             ALLOW_PAGOPA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             AZURE_NH_HUB_NAME: ""
