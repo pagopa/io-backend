@@ -16,6 +16,9 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
+import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
+import { SpidUserIdentity } from "../../generated/backend/SpidUserIdentity";
+import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
@@ -35,6 +38,7 @@ export const User = t.intersection([
     wallet_token: WalletToken
   }),
   t.partial({
+    date_of_birth: t.string,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
@@ -57,6 +61,7 @@ export const SpidUser = t.intersection([
     name: t.string
   }),
   t.partial({
+    dateOfBirth: t.string,
     email: EmailAddress,
     nameID: t.string,
     nameIDFormat: t.string,
@@ -76,6 +81,7 @@ export function toAppUser(
 ): User {
   return {
     created_at: new Date().getTime(),
+    date_of_birth: from.dateOfBirth,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,
@@ -85,6 +91,25 @@ export function toAppUser(
     spid_mobile_phone: from.mobilePhone,
     wallet_token: walletToken
   };
+}
+
+/**
+ * Discriminate from a CieUserIdentity and a SpidUserIdentity
+ * checking the spid_email property.
+ * @param user
+ */
+export function isSpidUserIdentity(
+  user: CieUserIdentity | SpidUserIdentity
+): user is SpidUserIdentity {
+  return (user as SpidUserIdentity).spid_email !== undefined;
+}
+
+export function exactUserIdentityDecode(
+  user: UserIdentity
+): Either<t.Errors, UserIdentity> {
+  return isSpidUserIdentity(user)
+    ? t.exact(SpidUserIdentity.type).decode(user)
+    : t.exact(CieUserIdentity.type).decode(user);
 }
 
 /**
