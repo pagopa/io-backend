@@ -5,7 +5,7 @@
 /* tslint:disable:no-big-function */
 /* tslint:disable:no-object-mutation */
 
-import { left, right, isRight } from "fp-ts/lib/Either";
+import { isRight, left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
