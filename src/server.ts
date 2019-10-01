@@ -8,6 +8,7 @@ import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import { newApp } from "./app";
 import container, { SAML_CERT, SAML_KEY } from "./container";
+import { AppInsightsClientBuilder } from "./utils/appinsights";
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 
@@ -62,6 +63,35 @@ newApp(
       server = http.createServer(app).listen(port, () => {
         log.info("Listening on port %d", port);
       });
+    }
+
+    // Monitor all the requests to the server and track all to AppInsights
+    if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY !== undefined) {
+      const appInsightsClientBuilder = new AppInsightsClientBuilder(
+        process.env.APPINSIGHTS_INSTRUMENTATIONKEY
+      );
+      const appInsightsClient = appInsightsClientBuilder.getClient();
+      server.on(
+        "request",
+        (req: http.IncomingMessage, res: http.ServerResponse) => {
+          const requestTimeMs = Date.now();
+          res.on("finish", () => {
+            const responseTimeMs = Date.now();
+            appInsightsClient.trackRequest({
+              // Request processing time untill the response is sent
+              duration: responseTimeMs - requestTimeMs,
+              // HTTP method and url without query parameters
+              name: `${req.method || "UNKNOWN"} ${
+                (req.url || "UNKNOWN").split("?")[0]
+              }`,
+              resultCode: res.statusCode || "UNKNOWN",
+              success: [200, 201, 301, 302].indexOf(res.statusCode || 0) !== -1,
+              url: `https://${req.headers.host || "UNKNOWN"}${req.url ||
+                "/UNKNOWN"}`
+            });
+          });
+        }
+      );
     }
 
     server.on("close", () => {

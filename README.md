@@ -170,6 +170,11 @@ container.
 
 ---
 
+## API Monitoring
+
+Is possible link the API to AppInsignts service by setting the ENV variable `APPINSIGHTS_INSTRUMENTATIONKEY`. Stats of API CPU and RAM usage, API call execution time, success or failure of API calls are collected.
+Realtime data collection is enabled.
+
 ## Redis Database
 
 ### Data Structure
