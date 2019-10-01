@@ -378,9 +378,9 @@ paths:
   "/user-identity":
     x-swagger-router-controller: ProfileController
     get:
-      operationId: getSpidProfile
-      summary: Get stored user's spid profile
-      description: Returns the SPID profile stored during the login phase
+      operationId: getUserIdentity
+      summary: Get stored user's identity
+      description: Returns the User Identity stored during the login phase
       responses:
         "200":
           description: Found.
@@ -400,7 +400,7 @@ paths:
         "401":
           description: Bearer token null or expired.
         "500":
-          description: There was an error in retrieving the user profile.
+          description: There was an error in retrieving the user identity.
           schema:
             $ref: "#/definitions/ProblemJson"
   "/user-metadata":
@@ -897,7 +897,7 @@ definitions:
   SpidUserIdentity:
     type: object
     title: SPID User Identity
-    description: Describes the user's profile while it's authenticated with Spid.
+    description: Describes the user's identity while it's authenticated with Spid.
     properties:
       family_name:
         type: string
@@ -919,7 +919,7 @@ definitions:
   CieUserIdentity:
     type: object
     title: CIE User Identity
-    description: Describes the user's profile while it's authenticated with CIE.
+    description: Describes the user's idenitty while it's authenticated with CIE.
     properties:
       family_name:
         type: string
