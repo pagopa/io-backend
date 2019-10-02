@@ -1,11 +1,27 @@
 import * as appInsights from "applicationinsights";
+
+interface IInsightsRequestData {
+  baseType: "RequestData";
+  baseData: {
+    ver: number;
+    properties: {};
+    measurements: {};
+    id: string;
+    name: string;
+    url: string;
+    source?: string;
+    duration: string;
+    responseCode: string;
+    success: boolean;
+  };
+}
 export class AppInsightsClientBuilder {
   private client: appInsights.TelemetryClient;
   constructor(instrumentalKey: string) {
     appInsights
       .setup(instrumentalKey)
       .setAutoDependencyCorrelation(true)
-      .setAutoCollectRequests(false)
+      .setAutoCollectRequests(true)
       .setAutoCollectPerformance(true)
       .setAutoCollectExceptions(true)
       .setAutoCollectDependencies(true)
@@ -15,9 +31,25 @@ export class AppInsightsClientBuilder {
       .setSendLiveMetrics(true)
       .start();
     this.client = appInsights.defaultClient;
+    this.client.addTelemetryProcessor(this.removeQueryParamsPreprocessor);
   }
 
   public getClient(): appInsights.TelemetryClient {
     return this.client;
+  }
+  private removeQueryParamsPreprocessor(
+    envelope: appInsights.Contracts.Envelope,
+    _?: {
+      [name: string]: unknown;
+    }
+  ): boolean {
+    if (envelope.data.baseType === "RequestData") {
+      const originalUrl = (envelope.data as IInsightsRequestData).baseData.url;
+      // tslint:disable-next-line: no-object-mutation
+      (envelope.data as IInsightsRequestData).baseData.url = originalUrl.split(
+        "?"
+      )[0];
+    }
+    return true;
   }
 }
