@@ -18,12 +18,18 @@ interface IInsightsRequestData {
 export class AppInsightsClientBuilder {
   private client: appInsights.TelemetryClient;
   constructor(instrumentalKey: string) {
+    /*
+    * App Insights is initialized to collect the following informations:
+    * - Incoming API calls
+    * - Server performance information (CPU, RAM)
+    * - Unandled Runtime Exceptions
+    * - Outcoming API Calls (dependencies)
+    * - Realtime API metrics
+    */
     appInsights
       .setup(instrumentalKey)
       .setAutoDependencyCorrelation(true)
-      // setAutoCollectRequests is disabled becouse Requests events are collected with trackNodeHttpRequest into server.js
-      // otherwise the events are sent twice.
-      .setAutoCollectRequests(false)
+      .setAutoCollectRequests(true)
       .setAutoCollectPerformance(true)
       .setAutoCollectExceptions(true)
       .setAutoCollectDependencies(true)

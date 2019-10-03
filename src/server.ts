@@ -3,7 +3,6 @@
  */
 
 import * as appInsights from "applicationinsights";
-import { Express } from "express";
 import { none, some } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
@@ -44,7 +43,13 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
 
-// If APPINSIGHTS_INSTRUMENTATIONKEY env is provided initialize an App Insights client
+/**
+ * If APPINSIGHTS_INSTRUMENTATIONKEY env is provided initialize an App Insights Client
+ * WARNING: When the key is provided several information are collected automatically
+ * and sent to App Insights.
+ * To see what kind of informations are automatically collected
+ * @see: utils/appinsights.js into the class AppInsightsClientBuilder
+ */
 const maybeAppInsightsClient = process.env.APPINSIGHTS_INSTRUMENTATIONKEY
   ? some(
       new AppInsightsClientBuilder(
@@ -68,29 +73,18 @@ newApp(
       const samlKey = container.resolve<string>(SAML_KEY);
       const samlCert = container.resolve<string>(SAML_CERT);
       const options = { key: samlKey, cert: samlCert };
-      server = https
-        .createServer(
-          options,
-          maybeAppInsightsClient.fold(app, appInsightsClient =>
-            appInsightsRequestListner(appInsightsClient, app)
-          )
-        )
-        .listen(443, () => {
-          log.info("Listening on port 443");
-        });
+      server = https.createServer(options, app).listen(443, () => {
+        log.info("Listening on port 443");
+      });
     } else {
-      server = http
-        .createServer(
-          maybeAppInsightsClient.fold(app, appInsightsClient =>
-            appInsightsRequestListner(appInsightsClient, app)
-          )
-        )
-        .listen(port, () => {
-          log.info("Listening on port %d", port);
-        });
+      server = http.createServer(app).listen(port, () => {
+        log.info("Listening on port %d", port);
+      });
     }
     server.on("close", () => {
       app.emit("server:stop");
+
+      // If an AppInsights Client is initialized, flush all pending data and reset the configuration.
       maybeAppInsightsClient.map(appInsightsClient => {
         appInsightsClient.flush();
         appInsights.dispose();
@@ -110,16 +104,3 @@ newApp(
   .catch(err => {
     log.error("Error loading app: %s", err);
   });
-
-function appInsightsRequestListner(
-  telemetryClient: appInsights.TelemetryClient,
-  app: Express
-): (_: http.IncomingMessage, __: http.ServerResponse) => void {
-  return (request: http.IncomingMessage, response: http.ServerResponse) => {
-    telemetryClient.trackNodeHttpRequest({
-      request,
-      response
-    });
-    app(request, response);
-  };
-}
