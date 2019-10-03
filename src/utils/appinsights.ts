@@ -21,7 +21,9 @@ export class AppInsightsClientBuilder {
     appInsights
       .setup(instrumentalKey)
       .setAutoDependencyCorrelation(true)
-      .setAutoCollectRequests(true)
+      // setAutoCollectRequests is disabled becouse Requests events are collected with trackNodeHttpRequest into server.js
+      // otherwise the events are sent twice.
+      .setAutoCollectRequests(false)
       .setAutoCollectPerformance(true)
       .setAutoCollectExceptions(true)
       .setAutoCollectDependencies(true)

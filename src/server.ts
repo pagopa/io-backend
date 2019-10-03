@@ -4,6 +4,7 @@
 
 import * as appInsights from "applicationinsights";
 import { Express } from "express";
+import { none, some } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
@@ -42,15 +43,15 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
 
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
-// tslint:disable-next-line: no-let
-let appInsightsClient: appInsights.TelemetryClient;
-// Monitor all the requests to the server and track all to AppInsights
-if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY !== undefined) {
-  const appInsightsClientBuilder = new AppInsightsClientBuilder(
-    process.env.APPINSIGHTS_INSTRUMENTATIONKEY
-  );
-  appInsightsClient = appInsightsClientBuilder.getClient();
-}
+
+// If APPINSIGHTS_INSTRUMENTATIONKEY env is provided initialize an App Insights client
+const maybeAppInsightsClient = process.env.APPINSIGHTS_INSTRUMENTATIONKEY
+  ? some(
+      new AppInsightsClientBuilder(
+        process.env.APPINSIGHTS_INSTRUMENTATIONKEY
+      ).getClient()
+    )
+  : none;
 
 newApp(
   env,
@@ -70,24 +71,30 @@ newApp(
       server = https
         .createServer(
           options,
-          appInsightsRequestListner(app, appInsightsClient)
+          maybeAppInsightsClient.fold(app, appInsightsClient =>
+            appInsightsRequestListner(appInsightsClient, app)
+          )
         )
         .listen(443, () => {
           log.info("Listening on port 443");
         });
     } else {
       server = http
-        .createServer(appInsightsRequestListner(app, appInsightsClient))
+        .createServer(
+          maybeAppInsightsClient.fold(app, appInsightsClient =>
+            appInsightsRequestListner(appInsightsClient, app)
+          )
+        )
         .listen(port, () => {
           log.info("Listening on port %d", port);
         });
     }
     server.on("close", () => {
       app.emit("server:stop");
-      if (appInsightsClient !== undefined) {
+      maybeAppInsightsClient.map(appInsightsClient => {
         appInsightsClient.flush();
         appInsights.dispose();
-      }
+      });
       log.info("HTTP server close.");
     });
 
@@ -105,16 +112,14 @@ newApp(
   });
 
 function appInsightsRequestListner(
-  app: Express,
-  telemetryClient?: appInsights.TelemetryClient
+  telemetryClient: appInsights.TelemetryClient,
+  app: Express
 ): (_: http.IncomingMessage, __: http.ServerResponse) => void {
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
-    if (telemetryClient !== undefined) {
-      telemetryClient.trackNodeHttpRequest({
-        request,
-        response
-      });
-    }
+    telemetryClient.trackNodeHttpRequest({
+      request,
+      response
+    });
     app(request, response);
   };
 }
