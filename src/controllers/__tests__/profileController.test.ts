@@ -48,6 +48,14 @@ const proxyUserResponse = {
   version: 1 as NonNegativeInteger
 };
 
+const apiUserProfileResponse = {
+  email: anEmailAddress,
+  is_inbox_enabled: true,
+  is_webhook_enabled: true,
+  preferred_languages: ["it_IT"],
+  version: 42
+};
+
 // mock for a valid User
 const mockedUser: User = {
   created_at: aTimestamp,
@@ -79,10 +87,12 @@ const badRequestErrorResponse = {
 };
 
 const mockGetProfile = jest.fn();
+const mockGetApiProfile = jest.fn();
 const mockUpsertProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
+      getApiProfile: mockGetApiProfile,
       getProfile: mockGetProfile,
       upsertProfile: mockUpsertProfile
     }))
@@ -136,6 +146,56 @@ describe("ProfileController#getProfile", () => {
 
     // getProfile is not called
     expect(mockGetProfile).not.toBeCalled();
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("ProfileController#getApiProfile", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the getApiProfile on the ProfileService with valid values", async () => {
+    const req = mockReq();
+
+    mockGetApiProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(profileService);
+    const response = await controller.getApiProfile(req);
+
+    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: apiUserProfileResponse
+    });
+  });
+
+  it("calls the getApiProfile on the ProfileService with empty user", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetApiProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
+    );
+
+    req.user = "";
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(profileService);
+
+    const response = await controller.getApiProfile(req);
+    response.apply(res);
+
+    // getApiProfile is not called
+    expect(mockGetApiProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });

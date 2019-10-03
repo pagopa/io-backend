@@ -397,6 +397,12 @@ function registerAPIRoutes(
     toExpressHandler(profileController.getProfile, profileController)
   );
 
+  app.get(
+    `${basePath}/api-profile`,
+    bearerTokenAuth,
+    toExpressHandler(profileController.getApiProfile, profileController)
+  );
+
   app.post(
     `${basePath}/profile`,
     bearerTokenAuth,
