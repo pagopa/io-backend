@@ -10,7 +10,7 @@ import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import { newApp } from "./app";
 import container, { SAML_CERT, SAML_KEY } from "./container";
-import { AppInsightsClientBuilder } from "./utils/appinsights";
+import { initAppInsights } from "./utils/appinsights";
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 
@@ -51,11 +51,7 @@ let server: http.Server | https.Server;
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder
  */
 const maybeAppInsightsClient = process.env.APPINSIGHTS_INSTRUMENTATIONKEY
-  ? some(
-      new AppInsightsClientBuilder(
-        process.env.APPINSIGHTS_INSTRUMENTATIONKEY
-      ).getClient()
-    )
+  ? some(initAppInsights(process.env.APPINSIGHTS_INSTRUMENTATIONKEY))
   : none;
 
 newApp(

@@ -1,7 +1,7 @@
 import * as appInsights from "applicationinsights";
-import { AppInsightsClientBuilder } from "../appinsights";
+import { initAppInsights, removeQueryParamsPreprocessor } from "../appinsights";
 
-describe("AppInsightsClientBuilder#contructor", () => {
+describe("Create an App Insights Telemetry Client", () => {
   const mockSetAutoDependencyCorrelation = jest.fn();
   const mockSetAutoCollectRequests = jest.fn();
   const mockSetAutoCollectPerformance = jest.fn();
@@ -50,9 +50,9 @@ describe("AppInsightsClientBuilder#contructor", () => {
   mockSetUseDiskRetryCaching.mockImplementation(() => mockedConfiguration);
   mockSetSendLiveMetrics.mockImplementation(() => mockedConfiguration);
 
-  it("Create a new App Insights Client Builder", () => {
+  it("should create a new App Insights Telemetry Client", () => {
     // tslint:disable-next-line: no-unused-expression
-    new AppInsightsClientBuilder(expectedAppInsightsKey);
+    const telemetryClient = initAppInsights(expectedAppInsightsKey);
     expect(mockSetup).toBeCalledWith(expectedAppInsightsKey);
     expect(mockSetAutoDependencyCorrelation).toBeCalledWith(true);
     expect(mockSetAutoCollectRequests).toBeCalledWith(true);
@@ -63,22 +63,14 @@ describe("AppInsightsClientBuilder#contructor", () => {
     expect(mockSetUseDiskRetryCaching).toBeCalledWith(false);
     expect(mockSetSendLiveMetrics).toBeCalledWith(true);
     expect(mockAddTelemetryProcessor).toBeCalledWith(
-      // tslint:disable-next-line: no-string-literal
-      AppInsightsClientBuilder.prototype["removeQueryParamsPreprocessor"]
+      removeQueryParamsPreprocessor
     );
-  });
-
-  it("Get the intialized TelemetryClient", () => {
-    // tslint:disable-next-line: no-unused-expression
-    const telemetryClient = new AppInsightsClientBuilder(
-      expectedAppInsightsKey
-    ).getClient();
     expect(telemetryClient).toEqual(expectedTelemetryClient);
   });
 });
 
-describe("AppInsightsClientBuilder#removeQueryParamsPreprocessor", () => {
-  it("test", () => {
+describe("Custom Telemetry Preprocessor", () => {
+  it("should remove query params from http requests", () => {
     const expectedUrl = "https://test-url.com";
     const testValidEnvelope = {
       data: {
@@ -96,8 +88,7 @@ describe("AppInsightsClientBuilder#removeQueryParamsPreprocessor", () => {
         baseType: "RequestData"
       }
     };
-    // tslint:disable-next-line: no-string-literal
-    AppInsightsClientBuilder.prototype["removeQueryParamsPreprocessor"](
+    removeQueryParamsPreprocessor(
       (testValidEnvelope as unknown) as appInsights.Contracts.Envelope
     );
     expect(testValidEnvelope.data.baseData.url).toEqual(expectedUrl);
