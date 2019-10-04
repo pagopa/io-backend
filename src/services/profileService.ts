@@ -8,6 +8,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
+  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessJson
@@ -19,7 +20,7 @@ import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfi
 import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
-import { Profile } from "../../generated/io-api/Profile";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {
@@ -89,7 +90,7 @@ export default class ProfileService {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
-    | IResponseSuccessJson<Profile>
+    | IResponseSuccessJson<ExtendedProfileApi>
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
@@ -98,7 +99,12 @@ export default class ProfileService {
       });
       return withValidatedOrInternalError(validated, response => {
         if (response.status === 200) {
-          return ResponseSuccessJson(response.value);
+          return ExtendedProfileApi.decode(response.value).fold<
+            IResponseSuccessJson<ExtendedProfileApi> | IResponseErrorInternal
+          >(
+            _ => ResponseErrorInternal(errorsToReadableMessages(_).join(" / ")),
+            _ => ResponseSuccessJson(_)
+          );
         }
         // The profile doesn't exists for the user
         if (response.status === 404) {

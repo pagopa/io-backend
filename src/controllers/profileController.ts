@@ -15,8 +15,8 @@ import {
 import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
 import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
-import { Profile } from "../../generated/io-api/Profile";
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
@@ -51,7 +51,7 @@ export default class ProfileController {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
-    | IResponseSuccessJson<Profile>
+    | IResponseSuccessJson<ExtendedProfileApi>
   > =>
     withUserFromRequest(req, user => this.profileService.getApiProfile(user));
 
