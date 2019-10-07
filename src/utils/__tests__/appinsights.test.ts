@@ -32,8 +32,10 @@ describe("Create an App Insights Telemetry Client", () => {
     addTelemetryProcessor: mockAddTelemetryProcessor,
     context: {
       keys: {
-        applicationVersion: undefined
-      }
+        applicationVersion: "ai.application.ver",
+        cloudRole: "ai.cloud.role"
+      },
+      tags: {}
     }
   };
 
