@@ -58,7 +58,10 @@ import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
 
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
-import { getApiVersion, getValueFromPackageJson } from "./utils/package";
+import {
+  getCurrentBackendVersion,
+  getValueFromPackageJson
+} from "./utils/package";
 import { getSamlIssuer } from "./utils/saml";
 
 const defaultModule = {
@@ -544,7 +547,7 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
 
 function registerPublicRoutes(app: Express): void {
   // Current Backend API version
-  const version = getApiVersion();
+  const version = getCurrentBackendVersion();
   // The minimum app version that support this API
   const minAppVersion = getValueFromPackageJson("minAppVersion");
 

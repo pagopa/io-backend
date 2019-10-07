@@ -13,4 +13,5 @@ export const getValueFromPackageJson = (key: string): string =>
  * Parse the current API version from the version field into the package.json file.
  * If it doesn't exists, returns 'UNKNOWN'
  */
-export const getApiVersion = (): string => getValueFromPackageJson("version");
+export const getCurrentBackendVersion = (): string =>
+  getValueFromPackageJson("version");
