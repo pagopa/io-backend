@@ -3,7 +3,7 @@
  */
 
 import * as appInsights from "applicationinsights";
-import { none, some } from "fp-ts/lib/Option";
+import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
@@ -50,9 +50,9 @@ let server: http.Server | https.Server;
  * To see what kind of informations are automatically collected
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder
  */
-const maybeAppInsightsClient = process.env.APPINSIGHTS_INSTRUMENTATIONKEY
-  ? some(initAppInsights(process.env.APPINSIGHTS_INSTRUMENTATIONKEY))
-  : none;
+const maybeAppInsightsClient = fromNullable(
+  process.env.APPINSIGHTS_INSTRUMENTATIONKEY
+).map(initAppInsights);
 
 newApp(
   env,

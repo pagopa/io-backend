@@ -25,10 +25,10 @@ interface IInsightsRequestData {
  * - Realtime API metrics
  */
 export function initAppInsights(
-  instrumentalKey: string
+  instrumentationKey: string
 ): appInsights.TelemetryClient {
   appInsights
-    .setup(instrumentalKey)
+    .setup(instrumentationKey)
     .setAutoDependencyCorrelation(true)
     .setAutoCollectRequests(true)
     .setAutoCollectPerformance(true)
