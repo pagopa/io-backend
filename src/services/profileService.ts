@@ -21,7 +21,7 @@ import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backe
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
+import { toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -42,6 +42,7 @@ export default class ProfileService {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
     | IResponseSuccessJson<AuthenticatedProfile>
   > => {
@@ -66,11 +67,8 @@ export default class ProfileService {
           );
         }
 
-        // If the profile doesn't exists on the API we still
-        // return 200 to the App with the information we have
-        // retrieved from SPID.
         if (response.status === 404) {
-          return ResponseSuccessJson(toAuthenticatedProfile(user));
+          return ResponseErrorNotFound("Not Found", "Profile not found");
         }
 
         // The user has sent too many requests in a given amount of time ("rate limiting").

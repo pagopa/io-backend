@@ -8,6 +8,8 @@ import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
@@ -20,7 +22,9 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
+import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 import { ISessionStorage } from "../services/ISessionStorage";
+import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
 import { SuccessResponse } from "../types/commons";
 import { SessionToken, WalletToken } from "../types/token";
@@ -40,7 +44,8 @@ export default class AuthenticationController {
     private readonly tokenService: TokenService,
     private readonly getClientProfileRedirectionUrl: (
       token: string
-    ) => UrlFromString
+    ) => UrlFromString,
+    private readonly profileService: ProfileService
   ) {}
 
   /**
@@ -50,8 +55,11 @@ export default class AuthenticationController {
     // tslint:disable-next-line:no-any
     userPayload: unknown
   ): Promise<
+    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
     | IResponsePermanentRedirect
   > {
     const errorOrUser = validateSpidUser(userPayload);
@@ -83,6 +91,30 @@ export default class AuthenticationController {
       log.error("Error storing the user in the session");
       return ResponseErrorInternal("Error creating the user session");
     }
+    // Check if a Profile for the user exists into the API
+    const getProfileResponse = await this.profileService.getProfile(user);
+    if (getProfileResponse.kind === "IResponseErrorNotFound") {
+      // TODO: Actual ExtendedProfile doesn't support is_email_verified properties
+      const extendedProfile: ExtendedProfile & {
+        is_email_verified: boolean;
+      } = {
+        email: user.spid_email,
+        is_email_verified: Boolean(user.spid_email),
+        is_inbox_enabled: true,
+        is_webhook_enabled: true,
+        version: 1
+      };
+      const upsertProfileResponse = await this.profileService.upsertProfile(
+        user,
+        extendedProfile
+      );
+      if (upsertProfileResponse.kind !== "IResponseSuccessJson") {
+        return upsertProfileResponse;
+      }
+    } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
+      return getProfileResponse;
+    }
+
     const urlWithToken = this.getClientProfileRedirectionUrl(
       user.session_token
     );

@@ -50,14 +50,15 @@ const proxyInitializedProfileResponse = {
   spid_mobile_phone: "3222222222222",
   version: 42
 };
-const proxyAuthenticatedProfileResponse = {
+// tslint:disable-next-line: no-commented-code
+/* const proxyAuthenticatedProfileResponse = {
   family_name: "Lusso",
   fiscal_code: aValidFiscalCode,
   has_profile: false,
   name: "Luca",
   spid_email: aValidSPIDEmail,
   spid_mobile_phone: "3222222222222"
-};
+};*/
 const upsertRequest = {
   email: aValidAPIEmail,
   is_email_enabled: true,
@@ -143,7 +144,7 @@ describe("ProfileService#getProfile", () => {
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 
-  it("returns a default user profile if the response from the API is not found", async () => {
+  it("forward not found error if the response from the API is not found", async () => {
     mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
 
     const service = new ProfileService(api);
@@ -154,8 +155,7 @@ describe("ProfileService#getProfile", () => {
       fiscalCode: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: proxyAuthenticatedProfileResponse
+      kind: "IResponseErrorNotFound"
     });
   });
 

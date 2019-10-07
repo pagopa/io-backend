@@ -8,6 +8,13 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import { User } from "./user";
 
 /**
@@ -43,3 +50,20 @@ export const toAuthenticatedProfile = (user: User): AuthenticatedProfile => ({
   spid_email: user.spid_email,
   spid_mobile_phone: user.spid_mobile_phone
 });
+
+export const notFoundProfileToAuthenticatedProfile = (
+  // tslint:disable-next-line: prettier
+  response:
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<InitializedProfile>
+    | IResponseSuccessJson<AuthenticatedProfile>,
+  user: User
+) => {
+  if (response.kind === "IResponseErrorNotFound") {
+    return ResponseSuccessJson(toAuthenticatedProfile(user));
+  }
+  return response;
+};

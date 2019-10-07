@@ -18,6 +18,7 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
 import ProfileService from "../services/profileService";
+import { notFoundProfileToAuthenticatedProfile } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
@@ -37,7 +38,13 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
     | IResponseSuccessJson<AuthenticatedProfile>
-  > => withUserFromRequest(req, user => this.profileService.getProfile(user));
+  > =>
+    withUserFromRequest(req, async user => {
+      return notFoundProfileToAuthenticatedProfile(
+        await this.profileService.getProfile(user),
+        user
+      );
+    });
 
   /**
    * Returns the profile for the user identified by the provided fiscal

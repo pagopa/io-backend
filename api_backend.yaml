@@ -736,7 +736,6 @@ definitions:
       - is_inbox_enabled
       - is_webhook_enabled
       - name
-      - spid_email
       - spid_mobile_phone
       - version
   AuthenticatedProfile:
@@ -762,7 +761,6 @@ definitions:
       - fiscal_code
       - has_profile
       - name
-      - spid_email
       - spid_mobile_phone
   UserMetadata:
     type: object
