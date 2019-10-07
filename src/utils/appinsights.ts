@@ -1,4 +1,5 @@
 import * as appInsights from "applicationinsights";
+import { getApiVersion } from "./package";
 
 interface IInsightsRequestData {
   baseType: "RequestData";
@@ -42,6 +43,10 @@ export function initAppInsights(
   appInsights.defaultClient.addTelemetryProcessor(
     removeQueryParamsPreprocessor
   );
+  // Configure the data context of the telemetry client
+  // refering the current version of the backend
+  // tslint:disable-next-line: no-object-mutation
+  appInsights.defaultClient.context.keys.applicationVersion = getApiVersion();
   return appInsights.defaultClient;
 }
 
