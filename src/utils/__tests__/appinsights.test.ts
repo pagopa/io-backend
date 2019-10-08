@@ -29,7 +29,14 @@ describe("Create an App Insights Telemetry Client", () => {
   const mockAddTelemetryProcessor = jest.fn();
 
   const expectedTelemetryClient = {
-    addTelemetryProcessor: mockAddTelemetryProcessor
+    addTelemetryProcessor: mockAddTelemetryProcessor,
+    context: {
+      keys: {
+        applicationVersion: "ai.application.ver",
+        cloudRole: "ai.cloud.role"
+      },
+      tags: {}
+    }
   };
 
   // Override defaultClient readonly property for testing purpose

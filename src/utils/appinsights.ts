@@ -1,4 +1,5 @@
 import * as appInsights from "applicationinsights";
+import { getCurrentBackendVersion, getValueFromPackageJson } from "./package";
 
 interface IInsightsRequestData {
   baseType: "RequestData";
@@ -42,6 +43,17 @@ export function initAppInsights(
   appInsights.defaultClient.addTelemetryProcessor(
     removeQueryParamsPreprocessor
   );
+  // Configure the data context of the telemetry client
+  // refering to the current beckend version with a specific CloudRole
+  // tslint:disable-next-line: no-object-mutation
+  appInsights.defaultClient.context.tags[
+    appInsights.defaultClient.context.keys.applicationVersion
+  ] = getCurrentBackendVersion();
+  // tslint:disable-next-line: no-object-mutation
+  appInsights.defaultClient.context.tags[
+    appInsights.defaultClient.context.keys.cloudRole
+  ] = getValueFromPackageJson("name");
+
   return appInsights.defaultClient;
 }
 
