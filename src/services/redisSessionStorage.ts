@@ -233,11 +233,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
     try {
       const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
         (resolve, reject) => {
-          const keys = isRight(sessionKeys)
-            ? sessionKeys.value
-            : initializedSessionKeys;
           this.redisClient.mget(
-            ...keys,
+            ...sessionKeys.getOrElse(initializedSessionKeys),
             this.genericPromisifyCallback(resolve, reject)
           );
         }

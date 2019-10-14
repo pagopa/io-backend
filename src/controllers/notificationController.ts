@@ -38,10 +38,10 @@ export default class NotificationController {
     withValidatedOrValidationError(
       Notification.decode(req.body),
       async (data: Notification) => {
-        const userHasSessionOrError = await this.sessionStorage.userHasActiveSessions(
+        const errorOrHasSession = await this.sessionStorage.userHasActiveSessions(
           data.message.fiscal_code
         );
-        if (isRight(userHasSessionOrError) && userHasSessionOrError.value) {
+        if (isRight(errorOrHasSession) && errorOrHasSession.value) {
           return this.notificationService.notify(data);
         }
         const newData = {
