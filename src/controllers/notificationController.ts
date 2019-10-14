@@ -15,12 +15,18 @@ import { InstallationID } from "../../generated/backend/InstallationID";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
+import { isRight } from "fp-ts/lib/Either";
+import { IWithinRangeStringTag } from "italia-ts-commons/lib/strings";
 import NotificationService from "../services/notificationService";
+import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly sessionStorage: RedisSessionStorage
+  ) {}
 
   public readonly notify = async (
     req: express.Request
@@ -31,7 +37,29 @@ export default class NotificationController {
   > =>
     withValidatedOrValidationError(
       Notification.decode(req.body),
-      this.notificationService.notify
+      async (data: Notification) => {
+        const userHasSessionOrError = await this.sessionStorage.userHasActiveSessions(
+          data.message.fiscal_code
+        );
+        if (isRight(userHasSessionOrError) && userHasSessionOrError.value) {
+          return this.notificationService.notify(data);
+        }
+        const newData = {
+          ...data,
+          message: {
+            ...data.message,
+            content: {
+              ...data.message.content,
+              subject: "Entra nell'app per leggere il contenuto" as string &
+                IWithinRangeStringTag<10, 121>
+            }
+          }
+        };
+        return await this.notificationService.notify(
+          newData,
+          "Hai un nuovo messaggio su IO"
+        );
+      }
     );
 
   public async createOrUpdateInstallation(

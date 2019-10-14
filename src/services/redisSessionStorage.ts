@@ -230,46 +230,22 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
     }
-    const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
-      (resolve, reject) => {
-        const keys = isRight(sessionKeys)
-          ? sessionKeys.value
-          : initializedSessionKeys;
-        this.redisClient.mget(...keys, (err, response) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(response);
-        });
-      }
-    );
-    return right(
-      userSessionTokensResult.reduce(
-        (prev: SessionsList, _) => {
-          try {
-            const sessionInfoPayload = JSON.parse(_);
-            const errorOrDeserializedSessionInfo = SessionInfo.decode(
-              sessionInfoPayload
-            );
-
-            if (isLeft(errorOrDeserializedSessionInfo)) {
-              log.warn(
-                "Unable to decode the session info: %s. Skipped.",
-                ReadableReporter.report(errorOrDeserializedSessionInfo)
-              );
-              return prev;
-            }
-            return {
-              sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
-            };
-          } catch (err) {
-            log.error("Unable to parse the session info json. Skipped.");
-            return prev;
-          }
-        },
-        { sessions: [] } as SessionsList
-      )
-    );
+    try {
+      const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
+        (resolve, reject) => {
+          const keys = isRight(sessionKeys)
+            ? sessionKeys.value
+            : initializedSessionKeys;
+          this.redisClient.mget(
+            ...keys,
+            this.genericPromisifyCallback(resolve, reject)
+          );
+        }
+      );
+      return right(this.parseUserSessionList(userSessionTokensResult));
+    } catch (err) {
+      return left(err);
+    }
   }
 
   public async clearExpiredSetValues(
@@ -306,6 +282,45 @@ export default class RedisSessionStorage extends RedisStorageUtils
         });
       })
     );
+  }
+
+  public async userHasActiveSessions(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const sessionKeys = await this.readSessionInfoKeys(fiscalCode);
+    if (sessionKeys.value === sessionNotFoundError) {
+      return right(false);
+    } else if (isLeft(sessionKeys)) {
+      return left(sessionKeys.value);
+    }
+    try {
+      const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
+        (resolve, reject) => {
+          this.redisClient.mget(
+            ...sessionKeys.value,
+            this.genericPromisifyCallback(resolve, reject)
+          );
+        }
+      );
+      const sessionTokens = this.parseUserSessionList(
+        userSessionTokensResult
+      ).sessions.map(_ => _.sessionToken);
+      if (sessionTokens.length === 0) {
+        return right(false);
+      }
+
+      const activeSessions = await new Promise<ReadonlyArray<string>>(
+        (resolve, reject) => {
+          this.redisClient.mget(
+            ...sessionTokens,
+            this.genericPromisifyCallback(resolve, reject)
+          );
+        }
+      );
+      return right(activeSessions.length > 0);
+    } catch (err) {
+      return left(err);
+    }
   }
 
   /*
@@ -462,5 +477,35 @@ export default class RedisSessionStorage extends RedisStorageUtils
       return left(sessionNotFoundError);
     }
     return right(replay);
+  }
+
+  private parseUserSessionList(
+    userSessionTokensResult: ReadonlyArray<string>
+  ): SessionsList {
+    return userSessionTokensResult.reduce(
+      (prev: SessionsList, _) => {
+        try {
+          const sessionInfoPayload = JSON.parse(_);
+          const errorOrDeserializedSessionInfo = SessionInfo.decode(
+            sessionInfoPayload
+          );
+
+          if (isLeft(errorOrDeserializedSessionInfo)) {
+            log.warn(
+              "Unable to decode the session info: %s. Skipped.",
+              ReadableReporter.report(errorOrDeserializedSessionInfo)
+            );
+            return prev;
+          }
+          return {
+            sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
+          };
+        } catch (err) {
+          log.error("Unable to parse the session info json. Skipped.");
+          return prev;
+        }
+      },
+      { sessions: [] } as SessionsList
+    );
   }
 }

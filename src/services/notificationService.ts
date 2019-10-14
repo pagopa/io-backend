@@ -17,6 +17,7 @@ import { PlatformEnum } from "../../generated/backend/Platform";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
+import { fromNullable } from "fp-ts/lib/Option";
 import {
   IInstallation,
   INotificationTemplate,
@@ -51,7 +52,8 @@ export default class NotificationService {
   ) {}
 
   public readonly notify = (
-    notification: Notification
+    notification: Notification,
+    notificationTitle?: string
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> =>
     withCatchAsInternalError(() => {
       const notificationHubService = azure.createNotificationHubService(
@@ -65,9 +67,11 @@ export default class NotificationService {
         const payload = {
           message: notification.message.content.subject,
           message_id: notification.message.id,
-          title: `${notification.sender_metadata.service_name} - ${
-            notification.sender_metadata.organization_name
-          }`
+          title: fromNullable(notificationTitle).getOrElse(
+            `${notification.sender_metadata.service_name} - ${
+              notification.sender_metadata.organization_name
+            }`
+          )
         };
         notificationHubService.send(
           toFiscalCodeHash(notification.message.fiscal_code),

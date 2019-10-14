@@ -50,4 +50,17 @@ export default class RedisStorageUtils {
       return left(error);
     }
   }
+
+  protected genericPromisifyCallback<E, T>(
+    resolve: (data: T) => void,
+    reject: (error: E) => void
+  ): (err: E, result: T) => void {
+    return (err: E, result: T) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    };
+  }
 }
