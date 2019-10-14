@@ -17,6 +17,7 @@ import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
+import { ICommand, promisifyWithParams } from "../utils/promise";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
@@ -231,13 +232,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
       );
     }
     try {
-      const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
-        (resolve, reject) => {
-          this.redisClient.mget(
-            ...sessionKeys.getOrElse(initializedSessionKeys),
-            this.genericPromisifyCallback(resolve, reject)
-          );
-        }
+      const userSessionTokensResult = await promisifyWithParams(
+        this.redisClient.mget as ICommand<
+          string,
+          Error,
+          ReadonlyArray<string>,
+          boolean
+        >,
+        sessionKeys.getOrElse(initializedSessionKeys)
       );
       return right(this.parseUserSessionList(userSessionTokensResult));
     } catch (err) {
@@ -291,13 +293,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
       return left(sessionKeys.value);
     }
     try {
-      const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
-        (resolve, reject) => {
-          this.redisClient.mget(
-            ...sessionKeys.value,
-            this.genericPromisifyCallback(resolve, reject)
-          );
-        }
+      const userSessionTokensResult = await promisifyWithParams(
+        this.redisClient.mget as ICommand<
+          string,
+          Error,
+          ReadonlyArray<string>,
+          boolean
+        >,
+        sessionKeys.value
       );
       const sessionTokens = this.parseUserSessionList(
         userSessionTokensResult
@@ -306,13 +309,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
         return right(false);
       }
 
-      const activeSessions = await new Promise<ReadonlyArray<string>>(
-        (resolve, reject) => {
-          this.redisClient.mget(
-            ...sessionTokens,
-            this.genericPromisifyCallback(resolve, reject)
-          );
-        }
+      const activeSessions = await promisifyWithParams(
+        this.redisClient.mget as ICommand<
+          string,
+          Error,
+          ReadonlyArray<string>,
+          boolean
+        >,
+        sessionTokens
       );
       return right(activeSessions.length > 0);
     } catch (err) {
