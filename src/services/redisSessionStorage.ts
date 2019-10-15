@@ -240,7 +240,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
     }
-    return await this.mgetTask(...sessionKeys.getOrElse(initializedSessionKeys))
+    return this.mgetTask(...sessionKeys.getOrElse(initializedSessionKeys))
       .map(_ => this.parseUserSessionList(_))
       .run();
   }
