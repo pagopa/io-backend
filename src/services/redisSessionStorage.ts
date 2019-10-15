@@ -479,9 +479,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
               log.warn("Unable to decode the session info: %s. Skipped.", err);
               return prev;
             },
-            __ => {
+            sessionInfo => {
               return {
-                sessions: [...prev.sessions, __]
+                sessions: [...prev.sessions, sessionInfo]
               };
             }
           );
