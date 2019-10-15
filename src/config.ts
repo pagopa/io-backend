@@ -21,6 +21,7 @@ import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar, readFile } from "./utils/container";
 import { log } from "./utils/logger";
 
+import RedisSessionStorage from "./services/redisSessionStorage";
 import {
   createClusterRedisClient,
   createSimpleRedisClient
@@ -205,11 +206,18 @@ export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 // Notification URL pre shared key.
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 
+// Create the Session Storage service
+export const SESSION_STORAGE = new RedisSessionStorage(
+  REDIS_CLIENT,
+  tokenDurationSecs
+);
+
 // Register the bearerTokenStrategy.
 export const BEARER_TOKEN_STRATEGY = bearerTokenStrategy(
   AUTHENTICATION_BASE_PATH,
   API_BASE_PATH,
-  PAGOPA_BASE_PATH
+  PAGOPA_BASE_PATH,
+  SESSION_STORAGE
 );
 
 // Register the urlTokenStrategy.

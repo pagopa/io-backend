@@ -16,7 +16,7 @@ import {
   PAGOPA_CLIENT,
   REDIS_CLIENT,
   SAML_CERT,
-  tokenDurationSecs,
+  SESSION_STORAGE,
   URL_TOKEN_STRATEGY
 } from "./config";
 
@@ -216,12 +216,6 @@ export async function newApp(
     defaultModule.currentSpidStrategy = await generateSpidStrategy();
     defaultModule.registerLoginRoute(app, defaultModule.currentSpidStrategy);
     registerPublicRoutes(app);
-
-    // Create the Session Storage service
-    const SESSION_STORAGE = new RedisSessionStorage(
-      REDIS_CLIENT,
-      tokenDurationSecs
-    );
 
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
