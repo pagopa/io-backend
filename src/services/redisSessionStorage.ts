@@ -2,12 +2,17 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
 import {
-  errorsToReadableMessages,
-  ReadableReporter
-} from "italia-ts-commons/lib/reporters";
+  Either,
+  isLeft,
+  isRight,
+  left,
+  right,
+  toError
+} from "fp-ts/lib/Either";
+import { none, Option, some } from "fp-ts/lib/Option";
+import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
@@ -15,9 +20,9 @@ import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
+import { parseJSON } from "../utils/Either";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
-import { ICommand, promisifyWithParams } from "../utils/promise";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
@@ -29,11 +34,15 @@ export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
+  private mgetTask: (
+    ...args: ReadonlyArray<string>
+  ) => TaskEither<Error, ReadonlyArray<string>>;
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
   ) {
     super();
+    this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
   }
 
   /**
@@ -231,20 +240,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
     }
-    try {
-      const userSessionTokensResult = await promisifyWithParams(
-        this.redisClient.mget as ICommand<
-          string,
-          Error,
-          ReadonlyArray<string>,
-          boolean
-        >,
-        sessionKeys.getOrElse(initializedSessionKeys)
-      );
-      return right(this.parseUserSessionList(userSessionTokensResult));
-    } catch (err) {
-      return left(err);
-    }
+    return await this.mgetTask(...sessionKeys.getOrElse(initializedSessionKeys))
+      .map(_ => this.parseUserSessionList(_))
+      .run();
   }
 
   public async clearExpiredSetValues(
@@ -292,36 +290,21 @@ export default class RedisSessionStorage extends RedisStorageUtils
     } else if (isLeft(sessionKeys)) {
       return left(sessionKeys.value);
     }
-    try {
-      const userSessionTokensResult = await promisifyWithParams(
-        this.redisClient.mget as ICommand<
-          string,
-          Error,
-          ReadonlyArray<string>,
-          boolean
-        >,
-        sessionKeys.value
-      );
-      const sessionTokens = this.parseUserSessionList(
-        userSessionTokensResult
-      ).sessions.map(_ => _.sessionToken);
-      if (sessionTokens.length === 0) {
-        return right(false);
-      }
+    const errorOrSessionTokens = await this.mgetTask(...sessionKeys.value)
+      .map(_ =>
+        this.parseUserSessionList(_).sessions.map(__ => __.sessionToken)
+      )
+      .run();
 
-      const activeSessions = await promisifyWithParams(
-        this.redisClient.mget as ICommand<
-          string,
-          Error,
-          ReadonlyArray<string>,
-          boolean
-        >,
-        sessionTokens
-      );
-      return right(activeSessions.length > 0);
-    } catch (err) {
-      return left(err);
+    if (errorOrSessionTokens.isLeft()) {
+      return left(errorOrSessionTokens.value);
+    } else if (errorOrSessionTokens.value.length === 0) {
+      return right(false);
     }
+
+    return this.mgetTask(...errorOrSessionTokens.value)
+      .map(_ => _.length > 0)
+      .run();
   }
 
   /*
@@ -485,26 +468,23 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): SessionsList {
     return userSessionTokensResult.reduce(
       (prev: SessionsList, _) => {
-        try {
-          const sessionInfoPayload = JSON.parse(_);
-          const errorOrDeserializedSessionInfo = SessionInfo.decode(
-            sessionInfoPayload
+        return parseJSON<Error>(_, toError)
+          .chain(data => {
+            return SessionInfo.decode(data).mapLeft(err => {
+              return new Error(errorsToReadableMessages(err).join("/"));
+            });
+          })
+          .fold(
+            err => {
+              log.warn("Unable to decode the session info: %s. Skipped.", err);
+              return prev;
+            },
+            __ => {
+              return {
+                sessions: [...prev.sessions, __]
+              };
+            }
           );
-
-          if (isLeft(errorOrDeserializedSessionInfo)) {
-            log.warn(
-              "Unable to decode the session info: %s. Skipped.",
-              ReadableReporter.report(errorOrDeserializedSessionInfo)
-            );
-            return prev;
-          }
-          return {
-            sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
-          };
-        } catch (err) {
-          log.error("Unable to parse the session info json. Skipped.");
-          return prev;
-        }
       },
       { sessions: [] } as SessionsList
     );
