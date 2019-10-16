@@ -20,6 +20,7 @@ import { Version } from "../../../generated/backend/Version";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 
+import { fromNullable } from "fp-ts/lib/Option";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";
@@ -84,6 +85,9 @@ describe("profile type", () => {
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
     expect(userData.has_profile).toBeTruthy();
+    expect(userData.is_email_enabled).toBe(
+      fromNullable(mockedExtendedProfile.is_email_enabled).getOrElse(true)
+    );
     expect(userData.is_inbox_enabled).toBe(
       mockedExtendedProfile.is_inbox_enabled
     );
@@ -146,5 +150,10 @@ describe("profile type", () => {
     );
 
     expect(userData.accepted_tos_version).toBe(undefined);
+    expect(userData.is_email_enabled).toBe(
+      fromNullable(mockedExtendedProfileWithoutTos.is_email_enabled).getOrElse(
+        true
+      )
+    );
   });
 });
