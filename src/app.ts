@@ -3,23 +3,22 @@
  */
 
 import {
+  API_CLIENT,
   BEARER_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
-  container,
+  CLIENT_ERROR_REDIRECTION_URL,
+  CLIENT_REDIRECTION_URL,
   endpointOrConnectionString,
   generateSpidStrategy,
   getClientProfileRedirectionUrl,
   hubName,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  MESSAGES_SERVICE,
-  PAGOPA_PROXY_SERVICE,
-  PROFILE_SERVICE,
+  PAGOPA_CLIENT,
+  REDIS_CLIENT,
   SAML_CERT,
   SESSION_STORAGE,
-  TOKEN_SERVICE,
-  URL_TOKEN_STRATEGY,
-  USER_METADATA_STORAGE
-} from "./container";
+  URL_TOKEN_STRATEGY
+} from "./config";
 
 import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
@@ -79,7 +78,7 @@ const defaultModule = {
   startIdpMetadataUpdater
 };
 
-const cacheDuration = `${container.resolve(CACHE_MAX_AGE_SECONDS)} seconds`;
+const cacheDuration = `${CACHE_MAX_AGE_SECONDS} seconds`;
 
 const cachingMiddleware = apicache.options({
   debug:
@@ -149,9 +148,9 @@ export async function newApp(
   // Setup Passport.
 
   // Add the strategy to authenticate proxy clients.
-  passport.use(container.resolve(BEARER_TOKEN_STRATEGY));
+  passport.use(BEARER_TOKEN_STRATEGY);
   // Add the strategy to authenticate webhook calls.
-  passport.use(container.resolve(URL_TOKEN_STRATEGY));
+  passport.use(URL_TOKEN_STRATEGY);
 
   // Create and setup the Express app.
   const app = express();
@@ -229,6 +228,12 @@ export async function newApp(
     defaultModule.currentSpidStrategy = await generateSpidStrategy();
     defaultModule.registerLoginRoute(app, defaultModule.currentSpidStrategy);
     registerPublicRoutes(app);
+
+    // Ceate the Token Service
+    const TOKEN_SERVICE = new TokenService();
+    // Create the profile service
+    const PROFILE_SERVICE = new ProfileService(API_CLIENT);
+
     registerAuthenticationRoutes(
       app,
       authenticationBasePath,
@@ -239,10 +244,17 @@ export async function newApp(
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE
     );
+
+    // Create the Notification Service
     const NOTIFICATION_SERVICE = new NotificationService(
       hubName,
       endpointOrConnectionString
     );
+    // Create the messages service.
+    const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
+    const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
+    // Register the user metadata storage service.
+    const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
     registerAPIRoutes(
       app,
       APIBasePath,
@@ -257,7 +269,7 @@ export async function newApp(
     registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
 
     const idpMetadataRefreshIntervalMillis =
-      container.resolve(IDP_METADATA_REFRESH_INTERVAL_SECONDS) * 1000;
+      IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000;
     const idpMetadataRefreshTimer = startIdpMetadataUpdater(
       app,
       defaultModule.currentSpidStrategy,
@@ -578,8 +590,8 @@ function registerAuthenticationRoutes(
     `${basePath}/assertionConsumerService`,
     withSpidAuth(
       acsController,
-      container.resolve("clientErrorRedirectionUrl"),
-      container.resolve("clientLoginRedirectionUrl")
+      CLIENT_ERROR_REDIRECTION_URL,
+      CLIENT_REDIRECTION_URL
     )
   );
 

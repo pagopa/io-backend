@@ -258,7 +258,8 @@ export const BEARER_TOKEN_STRATEGY = "bearerTokenStrategy";
 const BEARER_TOKEN_STRATEGY_VALUE = bearerTokenStrategy(
   AUTHENTICATION_BASE_PATH_VALUE,
   API_BASE_PATH_VALUE,
-  PAGOPA_BASE_PATH_VALUE
+  PAGOPA_BASE_PATH_VALUE,
+  SESSION_STORAGE
 );
 
 // Register the urlTokenStrategy.

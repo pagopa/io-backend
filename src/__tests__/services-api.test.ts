@@ -23,6 +23,8 @@ jest.spyOn(passport, "authenticate").mockImplementation((_, __) => {
   };
 });
 const expectedCacheDurationSeconds = 1;
+// tslint:disable-next-line: no-object-mutation
+process.env.CACHE_MAX_AGE_SECONDS = String(expectedCacheDurationSeconds);
 
 jest.mock("../services/apiClientFactory");
 jest.mock("../services/redisSessionStorage");
@@ -37,9 +39,6 @@ jest.mock("../services/messagesService", () => {
   };
 });
 jest.mock("../utils/redis");
-
-import { CACHE_MAX_AGE_SECONDS, container } from "../container";
-container.register(CACHE_MAX_AGE_SECONDS, expectedCacheDurationSeconds);
 
 import appModule from "../app";
 
