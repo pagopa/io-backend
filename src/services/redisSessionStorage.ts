@@ -163,7 +163,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         (err, response) =>
           resolve(
             this.falsyResponseToError(
-              this.integerReply(err, response),
+              this.integerReply(err, response, 1),
               new Error(
                 "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
               )
@@ -180,7 +180,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         (err, response) =>
           resolve(
             this.falsyResponseToError(
-              this.integerReply(err, response),
+              this.integerReply(err, response, 1),
               new Error(
                 "Unexpected response from redis client deleting walletToken."
               )
