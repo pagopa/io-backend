@@ -102,12 +102,12 @@ export default class AuthenticationController {
           .map(() => true)
           .getOrElse(false)
       };
-      const upsertProfileResponse = await this.profileService.createProfile(
+      const createProfileResponse = await this.profileService.createProfile(
         user,
         newProfile
       );
-      if (upsertProfileResponse.kind !== "IResponseSuccessJson") {
-        return upsertProfileResponse;
+      if (createProfileResponse.kind !== "IResponseSuccessJson") {
+        return createProfileResponse;
       }
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
       return getProfileResponse;
