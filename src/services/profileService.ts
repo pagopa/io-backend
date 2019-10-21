@@ -181,9 +181,11 @@ export default class ProfileService {
                 ? ResponseSuccessJson(
                     toInitializedProfile(response.value, user)
                   )
-                : response.status === 429
-                  ? ResponseErrorTooManyRequests()
-                  : unhandledResponseStatus(response.status)
+                : response.status === 404
+                  ? ResponseErrorNotFound("Not found", "User not found")
+                  : response.status === 429
+                    ? ResponseErrorTooManyRequests()
+                    : unhandledResponseStatus(response.status)
           );
         })
     );
