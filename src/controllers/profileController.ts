@@ -71,7 +71,7 @@ export default class ProfileController {
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
-    // | IResponseErrorNotFound
+    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>

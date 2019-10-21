@@ -157,7 +157,7 @@ export default class ProfileService {
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
-    // | IResponseErrorNotFound The spec never returns status 404
+    | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > => {
