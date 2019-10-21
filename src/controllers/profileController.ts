@@ -63,15 +63,15 @@ export default class ProfileController {
     withUserFromRequest(req, user => this.profileService.getApiProfile(user));
 
   /**
-   * Create or update the preferences for the user identified by the provided
+   * Update the preferences for the user identified by the provided
    * fiscal code.
    */
-  public readonly upsertProfile = (
+  public readonly updateProfile = (
     req: express.Request
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
-    | IResponseErrorNotFound
+    // | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
@@ -80,7 +80,7 @@ export default class ProfileController {
       withValidatedOrValidationError(
         ExtendedProfile.decode(req.body),
         extendedProfile =>
-          this.profileService.upsertProfile(user, extendedProfile)
+          this.profileService.updateProfile(user, extendedProfile)
       )
     );
 }

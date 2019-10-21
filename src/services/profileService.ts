@@ -15,8 +15,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
+import { NewProfile } from "../../generated/io-api/NewProfile";
 
-import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
 import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
@@ -44,7 +44,6 @@ export default class ProfileService {
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
-    | IResponseSuccessJson<AuthenticatedProfile>
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
@@ -120,15 +119,45 @@ export default class ProfileService {
   };
 
   /**
+   * Create the profile of a specific user.
+   */
+  public readonly createProfile = async (
+    user: User,
+    newProfile: NewProfile
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<InitializedProfile>
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.createProfile({
+        fiscalCode: user.fiscal_code,
+        newProfile
+      });
+
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
+      );
+    });
+  };
+
+  /**
    * Upsert the profile of a specific user.
    */
-  public readonly upsertProfile = async (
+  public readonly updateProfile = async (
     user: User,
     extendedProfileBackend: ExtendedProfileBackend
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
-    | IResponseErrorNotFound
+    // | IResponseErrorNotFound The spec never returns status 404
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > => {
@@ -140,9 +169,9 @@ export default class ProfileService {
       ExtendedProfileApi.decode(extendedProfileBackend),
       async extendedProfileApi =>
         withCatchAsInternalError(async () => {
-          const validated = await client.upsertProfile({
-            extendedProfile: extendedProfileApi,
-            fiscalCode: user.fiscal_code
+          const validated = await client.updateProfile({
+            fiscalCode: user.fiscal_code,
+            profile: extendedProfileApi
           });
 
           return withValidatedOrInternalError(
@@ -152,11 +181,9 @@ export default class ProfileService {
                 ? ResponseSuccessJson(
                     toInitializedProfile(response.value, user)
                   )
-                : response.status === 404
-                  ? ResponseErrorNotFound("Not found", "User not found")
-                  : response.status === 429
-                    ? ResponseErrorTooManyRequests()
-                    : unhandledResponseStatus(response.status)
+                : response.status === 429
+                  ? ResponseErrorTooManyRequests()
+                  : unhandledResponseStatus(response.status)
           );
         })
     );

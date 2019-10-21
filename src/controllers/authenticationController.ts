@@ -6,6 +6,7 @@
 
 import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
+import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -22,7 +23,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
-import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
+import { NewProfile } from "generated/io-api/NewProfile";
+
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
@@ -94,19 +96,15 @@ export default class AuthenticationController {
     // Check if a Profile for the user exists into the API
     const getProfileResponse = await this.profileService.getProfile(user);
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
-      // TODO: Actual ExtendedProfile doesn't support is_email_verified properties
-      const extendedProfile: ExtendedProfile & {
-        is_email_verified: boolean;
-      } = {
-        email: user.spid_email,
-        is_email_verified: Boolean(user.spid_email),
-        is_inbox_enabled: true,
-        is_webhook_enabled: true,
-        version: 1
+      const newProfile: NewProfile = {
+        email: spidUser.email,
+        is_email_validated: fromNullable(spidUser.email)
+          .map(() => true)
+          .getOrElse(false)
       };
-      const upsertProfileResponse = await this.profileService.upsertProfile(
+      const upsertProfileResponse = await this.profileService.createProfile(
         user,
-        extendedProfile
+        newProfile
       );
       if (upsertProfileResponse.kind !== "IResponseSuccessJson") {
         return upsertProfileResponse;

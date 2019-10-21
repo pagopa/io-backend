@@ -98,7 +98,7 @@ const mockCreateOrUpdateProfile = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
     getProfile: mockGetProfile,
-    upsertProfile: mockCreateOrUpdateProfile
+    updateProfile: mockCreateOrUpdateProfile
   };
 });
 jest.mock("../../services/apiClientFactory", () => {
@@ -240,23 +240,23 @@ describe("ProfileService#getApiProfile", () => {
   });
 });
 
-describe("ProfileService#upsertProfile", () => {
+describe("ProfileService#updateProfile", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("create a new user profile to the API", async () => {
+  it("update an user profile to the API", async () => {
     mockCreateOrUpdateProfile.mockImplementation(() =>
       t.success(validApiProfileResponse)
     );
 
     const service = new ProfileService(api);
 
-    const res = await service.upsertProfile(mockedUser, upsertRequest);
+    const res = await service.updateProfile(mockedUser, upsertRequest);
 
     expect(mockCreateOrUpdateProfile).toHaveBeenCalledWith({
-      extendedProfile: upsertRequest,
-      fiscalCode: mockedUser.fiscal_code
+      fiscalCode: mockedUser.fiscal_code,
+      profile: upsertRequest
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -264,7 +264,7 @@ describe("ProfileService#upsertProfile", () => {
     });
   });
 
-  it("fails to create a new user profile to the API", async () => {
+  it("fails to update an user profile to the API", async () => {
     mockCreateOrUpdateProfile.mockImplementation(() =>
       t.success(emptyApiProfileResponse)
     );
@@ -272,20 +272,20 @@ describe("ProfileService#upsertProfile", () => {
     const service = new ProfileService(api);
 
     try {
-      await service.upsertProfile(mockedUser, upsertRequest);
+      await service.updateProfile(mockedUser, upsertRequest);
     } catch (e) {
       expect(e).toEqual(new Error("Api error."));
     }
   });
 
-  it("returns an 429 HTTP error from upsertProfile upstream API", async () => {
+  it("returns an 429 HTTP error from updateProfile upstream API", async () => {
     mockCreateOrUpdateProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );
 
     const service = new ProfileService(api);
 
-    const res = await service.upsertProfile(mockedUser, upsertRequest);
+    const res = await service.updateProfile(mockedUser, upsertRequest);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });

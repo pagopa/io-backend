@@ -88,13 +88,13 @@ const badRequestErrorResponse = {
 
 const mockGetProfile = jest.fn();
 const mockGetApiProfile = jest.fn();
-const mockUpsertProfile = jest.fn();
+const mockUpdateProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getApiProfile: mockGetApiProfile,
       getProfile: mockGetProfile,
-      upsertProfile: mockUpsertProfile
+      updateProfile: mockUpdateProfile
     }))
   };
 });
@@ -208,7 +208,7 @@ describe("ProfileController#upsertProfile", () => {
   it("calls the upsertProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
 
-    mockUpsertProfile.mockReturnValue(
+    mockUpdateProfile.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
@@ -219,9 +219,9 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    const response = await controller.upsertProfile(req);
+    const response = await controller.updateProfile(req);
 
-    expect(mockUpsertProfile).toHaveBeenCalledWith(
+    expect(mockUpdateProfile).toHaveBeenCalledWith(
       mockedUser,
       mockedUpsertProfile
     );
@@ -236,7 +236,7 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockUpsertProfile.mockReturnValue(
+    mockUpdateProfile.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
@@ -247,10 +247,10 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    const response = await controller.upsertProfile(req);
+    const response = await controller.updateProfile(req);
     response.apply(res);
 
-    expect(mockUpsertProfile).not.toBeCalled();
+    expect(mockUpdateProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
@@ -258,7 +258,7 @@ describe("ProfileController#upsertProfile", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockUpsertProfile.mockReturnValue(
+    mockUpdateProfile.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
@@ -269,10 +269,10 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(profileService);
 
-    const response = await controller.upsertProfile(req);
+    const response = await controller.updateProfile(req);
     response.apply(res);
 
-    expect(mockUpsertProfile).not.toBeCalled();
+    expect(mockUpdateProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
