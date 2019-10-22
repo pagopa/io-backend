@@ -2,7 +2,10 @@
 /* tslint:disable:no-object-mutation */
 
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import {
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -27,6 +30,8 @@ const aTimestamp = 1518010929530;
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
+const aValidName = "Giuseppe Maria";
+const aValidFamilyname = "Garibaldi";
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
@@ -37,11 +42,11 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const proxyUserResponse = {
   created_at: aTimestamp,
   email: anEmailAddress,
-  family_name: "Garibaldi",
+  family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebookEnabled,
-  name: "Giuseppe Maria",
+  name: aValidName,
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
@@ -59,14 +64,23 @@ const apiUserProfileResponse = {
 // mock for a valid User
 const mockedUser: User = {
   created_at: aTimestamp,
-  family_name: "Garibaldi",
+  family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
+  name: aValidName,
   session_token: "123hexToken" as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
+};
+
+const proxyAuthenticatedProfileResponse = {
+  family_name: aValidFamilyname,
+  fiscal_code: aFiscalNumber,
+  has_profile: false,
+  name: aValidName,
+  spid_email: anEmailAddress,
+  spid_mobile_phone: "3222222222222"
 };
 
 // mock for upsert user (Extended Profile)
@@ -147,6 +161,31 @@ describe("ProfileController#getProfile", () => {
     // getProfile is not called
     expect(mockGetProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should return an authenticated profile if no profile was found", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseErrorNotFound("Not found", "Profile not found"))
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(profileService);
+
+    const response = await controller.getProfile(req);
+    response.apply(res);
+
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyAuthenticatedProfileResponse
+    });
   });
 });
 

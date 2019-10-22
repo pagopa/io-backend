@@ -2,6 +2,7 @@ import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
@@ -10,6 +11,7 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { NewProfile } from "../../../generated/io-api/NewProfile";
 
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
@@ -50,16 +52,8 @@ const proxyInitializedProfileResponse = {
   spid_mobile_phone: "3222222222222",
   version: 42
 };
-// tslint:disable-next-line: no-commented-code
-/* const proxyAuthenticatedProfileResponse = {
-  family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
-  has_profile: false,
-  name: "Luca",
-  spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222"
-};*/
-const upsertRequest = {
+
+const updateProfileRequest: ExtendedProfile = {
   email: aValidAPIEmail,
   is_email_enabled: true,
   is_inbox_enabled: anIsInboxEnabled,
@@ -67,6 +61,12 @@ const upsertRequest = {
   preferred_languages: aPreferredLanguages,
   version: 42
 };
+
+const createProfileRequest: NewProfile = {
+  email: aValidAPIEmail,
+  is_email_validated: true
+};
+
 const emptyApiProfileResponse = {
   status: 404
 };
@@ -94,11 +94,13 @@ const mockedUser: User = {
 const expectedApiError = new Error("Api error.");
 
 const mockGetProfile = jest.fn();
-const mockCreateOrUpdateProfile = jest.fn();
+const mockUpdateProfile = jest.fn();
+const mockCreateProfile = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
+    createProfile: mockCreateProfile,
     getProfile: mockGetProfile,
-    updateProfile: mockCreateOrUpdateProfile
+    updateProfile: mockUpdateProfile
   };
 });
 jest.mock("../../services/apiClientFactory", () => {
@@ -246,17 +248,17 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("update an user profile to the API", async () => {
-    mockCreateOrUpdateProfile.mockImplementation(() =>
+    mockUpdateProfile.mockImplementation(() =>
       t.success(validApiProfileResponse)
     );
 
     const service = new ProfileService(api);
 
-    const res = await service.updateProfile(mockedUser, upsertRequest);
+    const res = await service.updateProfile(mockedUser, updateProfileRequest);
 
-    expect(mockCreateOrUpdateProfile).toHaveBeenCalledWith({
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscalCode: mockedUser.fiscal_code,
-      profile: upsertRequest
+      profile: updateProfileRequest
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -265,27 +267,72 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("fails to update an user profile to the API", async () => {
-    mockCreateOrUpdateProfile.mockImplementation(() =>
+    mockUpdateProfile.mockImplementation(() =>
       t.success(emptyApiProfileResponse)
     );
 
     const service = new ProfileService(api);
 
-    try {
-      await service.updateProfile(mockedUser, upsertRequest);
-    } catch (e) {
-      expect(e).toEqual(new Error("Api error."));
-    }
+    const res = await service.updateProfile(mockedUser, updateProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorNotFound");
   });
 
   it("returns an 429 HTTP error from updateProfile upstream API", async () => {
-    mockCreateOrUpdateProfile.mockImplementation(() =>
+    mockUpdateProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );
 
     const service = new ProfileService(api);
 
-    const res = await service.updateProfile(mockedUser, upsertRequest);
+    const res = await service.updateProfile(mockedUser, updateProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+});
+
+describe("ProfileService#createProfile", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("create an user profile to the API", async () => {
+    mockCreateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.createProfile(mockedUser, createProfileRequest);
+
+    expect(mockCreateProfile).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code,
+      newProfile: createProfileRequest
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyInitializedProfileResponse
+    });
+  });
+
+  it("fails to create an user profile to the API", async () => {
+    mockCreateProfile.mockImplementation(() => t.success(APIError));
+
+    const service = new ProfileService(api);
+
+    const res = await service.createProfile(mockedUser, createProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an 429 HTTP error from createProfile upstream API", async () => {
+    mockCreateProfile.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.createProfile(mockedUser, createProfileRequest);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
