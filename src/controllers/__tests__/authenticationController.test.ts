@@ -21,6 +21,7 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { UserIdentity } from "../../../generated/backend/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClientFactory from "../../services/apiClientFactory";
@@ -136,7 +137,7 @@ const validUserPayload = {
   mobilePhone: "3222222222222",
   name: aValidname
 };
-// invalidUser lacks the required email field.
+// invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   fiscalNumber: aFiscalNumber,
@@ -463,7 +464,8 @@ describe("AuthenticationController#getUserIdentity", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    const expectedValue = exactUserIdentityDecode(mockedUser);
+    /* tslint:disable-next-line:no-useless-cast */
+    const expectedValue = exactUserIdentityDecode(mockedUser as UserIdentity);
     expect(isRight(expectedValue)).toBeTruthy();
     expect(response).toEqual({
       apply: expect.any(Function),

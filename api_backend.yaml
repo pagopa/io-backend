@@ -796,6 +796,9 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
+      date_of_birth:
+        type: string
+        formate: date
       version:
         $ref: '#/definitions/Version'
     required:
@@ -806,7 +809,6 @@ definitions:
       - is_email_enabled
       - is_webhook_enabled
       - name
-      - spid_mobile_phone
       - version
   UserMetadata:
     type: object

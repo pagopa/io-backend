@@ -57,13 +57,15 @@ export default class PagoPAController {
         );
       }
 
-      const pagopaUser: PagoPAUser = {
+      return PagoPAUser.decode({
         email: profile.email,
         family_name: user.family_name,
         mobile_phone: user.spid_mobile_phone,
         name: user.name
-      };
-
-      return ResponseSuccessJson(pagopaUser);
+      }).fold<IResponseErrorValidation | IResponseSuccessJson<PagoPAUser>>(
+        _ =>
+          ResponseErrorValidation("Validation Error", "Invalid User Profile"),
+        pagopaUser => ResponseSuccessJson(pagopaUser)
+      );
     });
 }
