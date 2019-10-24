@@ -3,7 +3,7 @@
  */
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
+import { fromNullable, none, Option, some } from "fp-ts/lib/Option";
 import {
   errorsToReadableMessages,
   ReadableReporter
@@ -83,7 +83,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
+    // Read ENV to disable unique user's session functionality
+    const DISABLE_UNIQUE_SESSION = fromNullable(
+      process.env.DISABLE_UNIQUE_SESSION
+    )
+      .map(_ => Boolean(_))
+      .getOrElse(false);
+    const removeOtherUserSessionsPromise = DISABLE_UNIQUE_SESSION
+      ? Promise.resolve(right<Error, boolean>(true))
+      : this.removeOtherUserSessions(user);
 
     const setPromisesResult = await Promise.all([
       setSessionToken,
