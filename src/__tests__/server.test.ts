@@ -61,6 +61,12 @@ describe("Server graceful shutdown", () => {
     });
   });
 
+  afterAll(() => {
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    app.emit("server:stop");
+  });
+
   it("should wait requests on test route to complete before shitting down the server", async () => {
     const neverCalledFunction = jest.fn();
     const completeAsyncOp = jest.fn();
