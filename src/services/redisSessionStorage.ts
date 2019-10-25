@@ -83,13 +83,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    // Read ENV to disable unique user's session functionality
-    const DISABLE_UNIQUE_SESSION = fromNullable(
-      process.env.DISABLE_UNIQUE_SESSION
+    // Read ENV to allow multiple user's sessions functionality
+    // Default value is false when the ENV var is not provided
+    const ALLOW_MULTIPLE_SESSIONS = fromNullable(
+      process.env.ALLOW_MULTIPLE_SESSIONS
     )
       .map(_ => Boolean(_))
       .getOrElse(false);
-    const removeOtherUserSessionsPromise = DISABLE_UNIQUE_SESSION
+    const removeOtherUserSessionsPromise = ALLOW_MULTIPLE_SESSIONS
       ? Promise.resolve(right<Error, boolean>(true))
       : this.removeOtherUserSessions(user);
 
