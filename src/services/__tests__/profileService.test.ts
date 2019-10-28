@@ -90,6 +90,8 @@ const mockedUser: User = {
   wallet_token: "HexToKen" as WalletToken
 };
 
+const expectedApiError = new Error("Api error.");
+
 const mockGetProfile = jest.fn();
 const mockCreateOrUpdateProfile = jest.fn();
 const mockGetClient = jest.fn().mockImplementation(() => {
@@ -168,7 +170,72 @@ describe("ProfileService#getProfile", () => {
       expect(mockGetProfile).toHaveBeenCalledWith({
         fiscalCode: mockedUser.fiscal_code
       });
-      expect(e).toEqual(new Error("Api error."));
+      expect(e).toEqual(expectedApiError);
+    }
+  });
+});
+
+describe("ProfileService#getApiProfile", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns a user profile from the API", async () => {
+    mockGetProfile.mockImplementation(() => t.success(validApiProfileResponse));
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: validApiProfileResponse.value
+    });
+  });
+
+  it("returns an 429 HTTP error from getApiProfile upstream API", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+
+  it("returns 404 response if the profile of the user not exists into the api", async () => {
+    mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      detail: "Not found: Profile not found.",
+      kind: "IResponseErrorNotFound"
+    });
+  });
+
+  it("returns an error if the API returns an error", async () => {
+    mockGetProfile.mockImplementation(() => t.success(APIError));
+
+    const service = new ProfileService(api);
+
+    try {
+      await service.getApiProfile(mockedUser);
+    } catch (e) {
+      expect(mockGetProfile).toHaveBeenCalledWith({
+        fiscalCode: mockedUser.fiscal_code
+      });
+      expect(e).toEqual(expectedApiError);
     }
   });
 });
