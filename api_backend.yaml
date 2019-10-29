@@ -329,9 +329,9 @@ paths:
               version: 1
               sender_allowed: true
         "400":
-            description: Bad request
-            schema:
-              $ref: "#/definitions/ProblemJson"
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
         "404":
