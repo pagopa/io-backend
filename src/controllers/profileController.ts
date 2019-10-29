@@ -15,6 +15,7 @@ import {
 import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
 import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";
@@ -37,6 +38,22 @@ export default class ProfileController {
     | IResponseSuccessJson<InitializedProfile>
     | IResponseSuccessJson<AuthenticatedProfile>
   > => withUserFromRequest(req, user => this.profileService.getProfile(user));
+
+  /**
+   * Returns the profile for the user identified by the provided fiscal
+   * code stored into the API.
+   */
+  public readonly getApiProfile = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<ExtendedProfileApi>
+  > =>
+    withUserFromRequest(req, user => this.profileService.getApiProfile(user));
 
   /**
    * Create or update the preferences for the user identified by the provided

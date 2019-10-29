@@ -307,6 +307,45 @@ paths:
           description: Profile cannot be updated.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/api-profile":
+    x-swagger-router-controller: ProfileController
+    get:
+      operationId: getApiUserProfile
+      summary: Get user's profile stored into the API
+      description: Returns the profile for the user identified by the provided fiscal code.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/ExtendedProfile"
+          examples:
+            application/json:
+              email: "email@example.com"
+              preferred_languages: ["it_IT"]
+              is_inbox_enabled: true
+              accepted_tos_version: 1
+              is_webhook_enabled: true
+              is_email_enabled: true
+              version: 1
+              sender_allowed: true
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Profile not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error in retrieving the user profile.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/user-metadata":
     x-swagger-router-controller: userMetadataController
     get:
