@@ -88,7 +88,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const ALLOW_MULTIPLE_SESSIONS = fromNullable(
       process.env.ALLOW_MULTIPLE_SESSIONS
     )
-      .map(_ => Boolean(_))
+      .map(_ => _.toLowerCase() === "true")
       .getOrElse(false);
     const removeOtherUserSessionsPromise = ALLOW_MULTIPLE_SESSIONS
       ? Promise.resolve(right<Error, boolean>(true))
