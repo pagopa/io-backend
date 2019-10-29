@@ -11,7 +11,7 @@ import {
   right,
   toError
 } from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
+import { isSome, none, Option, some } from "fp-ts/lib/Option";
 import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
@@ -420,6 +420,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
     });
   }
 
+  /**
+   * Remove other user sessions and wallet tokens
+   */
   private async removeOtherUserSessions(
     user: User
   ): Promise<Either<Error, boolean>> {
@@ -432,8 +435,48 @@ export default class RedisSessionStorage extends RedisStorageUtils
             _ !== `${sessionInfoKeyPrefix}${user.session_token}`
         )
         .map(_ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`);
+      /**
+       * Retrieve all user wallet tokens related to session tokens.
+       * Wallet tokens are stored inside user payload.
+       */
+      const errorOrUserWalletTokens = await new Promise<
+        Either<Error, ReadonlyArray<string>>
+      >(resolve => {
+        this.redisClient.mget(...sessionKeys, (err, response) =>
+          resolve(this.arrayStringReply(err, response))
+        );
+      });
+      // Map every user payload with an Option<WalletToken>
+      // If the value is invalid or must be skipped, it will be mapped with none
+      const walletsToken = errorOrUserWalletTokens
+        .fold(
+          _ => [],
+          _ =>
+            _.map(value => {
+              try {
+                // TODO: When https://github.com/teamdigitale/io-backend/pull/511 will be merged,
+                // update the following code using parseJSON ported from fp-ts
+                const userPayload = JSON.parse(value);
+                const errorOrDeserializedUser = User.decode(userPayload);
+                if (
+                  isLeft(errorOrDeserializedUser) ||
+                  errorOrDeserializedUser.value.wallet_token ===
+                    user.wallet_token
+                ) {
+                  return none;
+                }
+                return some(errorOrDeserializedUser.value.wallet_token);
+              } catch {
+                return none;
+              }
+            })
+        )
+        .filter(isSome)
+        .map(_ => `${walletKeyPrefix}${_.value}`);
+      // Delete all active session tokens and wallet tokens that are different
+      // from the new one genetated and provided inside user object.
       return await new Promise(resolve => {
-        this.redisClient.del(...sessionKeys, (err, response) =>
+        this.redisClient.del(...sessionKeys, ...walletsToken, (err, response) =>
           resolve(this.integerReply(err, response))
         );
       });
