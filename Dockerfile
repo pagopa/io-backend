@@ -24,8 +24,7 @@ LABEL maintainer="https://teamdigitale.governo.it"
 
 # Install major CA certificates to cover
 # https://github.com/SparebankenVest/azure-key-vault-to-kubernetes integration
-RUN apk update && \
-    apk add ca-certificates
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /usr/src/app
 
