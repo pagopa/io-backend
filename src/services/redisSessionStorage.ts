@@ -474,7 +474,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         .filter(isSome)
         .map(_ => `${walletKeyPrefix}${_.value}`);
       // Delete all active session tokens and wallet tokens that are different
-      // from the new one genetated and provided inside user object.
+      // from the new one generated and provided inside user object.
       return await new Promise(resolve => {
         this.redisClient.del(...sessionKeys, ...walletsToken, (err, response) =>
           resolve(this.integerReply(err, response))
