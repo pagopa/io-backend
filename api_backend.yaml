@@ -606,6 +606,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsEmailEnabled"
   IsInboxEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsInboxEnabled"
+  IsEmailValidated:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsEmailValidated"
   IsWebhookEnabled:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
@@ -714,6 +716,8 @@ definitions:
         $ref: "#/definitions/PreferredLanguages"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
+      is_email_validated:
+        $ref: "#/definitions/IsEmailValidated"
       is_webhook_enabled:
         $ref: "#/definitions/IsWebhookEnabled"
       family_name:
