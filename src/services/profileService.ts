@@ -16,9 +16,10 @@ import {
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../generated/io-api/NewProfile";
+import { Profile as ProfileApi } from "../../generated/io-api/Profile";
 
-import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { Profile as ProfileBackend } from "../../generated/backend/Profile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { toInitializedProfile } from "../types/profile";
@@ -153,7 +154,7 @@ export default class ProfileService {
    */
   public readonly updateProfile = async (
     user: User,
-    extendedProfileBackend: ExtendedProfileBackend
+    profileBackend: ProfileBackend
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
@@ -166,7 +167,7 @@ export default class ProfileService {
       // we need to convert the ExtendedProfile from the backend specs to the
       // ExtendedProfile model of the API specs - this decode should always
       // succeed as the models should be exactly the same
-      ExtendedProfileApi.decode(extendedProfileBackend),
+      ProfileApi.decode(profileBackend),
       async extendedProfileApi =>
         withCatchAsInternalError(async () => {
           const validated = await client.updateProfile({

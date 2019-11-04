@@ -13,8 +13,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
-import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { Profile } from "../../generated/backend/Profile";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
 import ProfileService from "../services/profileService";
@@ -78,7 +78,7 @@ export default class ProfileController {
   > =>
     withUserFromRequest(req, async user =>
       withValidatedOrValidationError(
-        ExtendedProfile.decode(req.body),
+        Profile.decode(req.body),
         extendedProfile =>
           this.profileService.updateProfile(user, extendedProfile)
       )

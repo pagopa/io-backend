@@ -262,7 +262,7 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/ExtendedProfile"
+            $ref: "#/definitions/Profile"
           required: true
           x-examples:
             application/json:
@@ -598,6 +598,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/DepartmentName"
   EmailAddress:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/EmailAddress"
+  Profile:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/Profile"
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
