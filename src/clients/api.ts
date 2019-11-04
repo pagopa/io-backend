@@ -11,6 +11,8 @@ import { Omit } from "italia-ts-commons/lib/types";
 import nodeFetch from "node-fetch";
 
 import {
+  createProfileDefaultDecoder,
+  CreateProfileT,
   getMessageDefaultDecoder,
   getMessagesByUserDefaultDecoder,
   GetMessagesByUserT,
@@ -23,8 +25,8 @@ import {
   GetServiceT,
   getVisibleServicesDefaultDecoder,
   GetVisibleServicesT,
-  upsertProfileDefaultDecoder,
-  UpsertProfileT
+  updateProfileDefaultDecoder,
+  UpdateProfileT
 } from "../../generated/io-api/requestTypes";
 
 // we want to authenticate against the platform APIs with the APIM header key or
@@ -44,10 +46,11 @@ export function APIClient(
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch // TODO: customize fetch with timeout
 ): {
-  readonly upsertProfile: TypeofApiCall<typeof upsertProfileT>;
+  readonly updateProfile: TypeofApiCall<typeof updateProfileT>;
   readonly getMessage: TypeofApiCall<typeof getMessageT>;
   readonly getMessages: TypeofApiCall<typeof getMessagesT>;
   readonly getProfile: TypeofApiCall<typeof getProfileT>;
+  readonly createProfile: TypeofApiCall<typeof createProfileT>;
   readonly getService: TypeofApiCall<typeof getServiceT>;
   readonly getVisibleServices: TypeofApiCall<typeof getVisibleServicesT>;
   readonly getServicesByRecipient: TypeofApiCall<
@@ -72,15 +75,27 @@ export function APIClient(
     url: params => `/profiles/${params.fiscalCode}`
   };
 
-  const upsertProfileT: ReplaceRequestParams<
-    UpsertProfileT,
-    Omit<RequestParams<UpsertProfileT>, "SubscriptionKey">
+  const createProfileT: ReplaceRequestParams<
+    CreateProfileT,
+    Omit<RequestParams<CreateProfileT>, "SubscriptionKey">
   > = {
-    body: params => JSON.stringify(params.extendedProfile),
+    body: params => JSON.stringify(params.newProfile),
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
-    response_decoder: upsertProfileDefaultDecoder(),
+    response_decoder: createProfileDefaultDecoder(),
+    url: params => `/profiles/${params.fiscalCode}`
+  };
+
+  const updateProfileT: ReplaceRequestParams<
+    UpdateProfileT,
+    Omit<RequestParams<UpdateProfileT>, "SubscriptionKey">
+  > = {
+    body: params => JSON.stringify(params.profile),
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    method: "put",
+    query: _ => ({}),
+    response_decoder: updateProfileDefaultDecoder(),
     url: params => `/profiles/${params.fiscalCode}`
   };
 
@@ -140,6 +155,7 @@ export function APIClient(
   };
 
   return {
+    createProfile: createFetchRequestForApi(createProfileT, options),
     getMessage: createFetchRequestForApi(getMessageT, options),
     getMessages: createFetchRequestForApi(getMessagesT, options),
     getProfile: createFetchRequestForApi(getProfileT, options),
@@ -149,7 +165,7 @@ export function APIClient(
       options
     ),
     getVisibleServices: createFetchRequestForApi(getVisibleServicesT, options),
-    upsertProfile: createFetchRequestForApi(upsertProfileT, options)
+    updateProfile: createFetchRequestForApi(updateProfileT, options)
   };
 }
 

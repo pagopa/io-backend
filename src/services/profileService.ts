@@ -15,13 +15,13 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
+import { NewProfile } from "../../generated/io-api/NewProfile";
 
-import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
 import { ExtendedProfile as ExtendedProfileBackend } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { toAuthenticatedProfile, toInitializedProfile } from "../types/profile";
+import { toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -42,8 +42,8 @@ export default class ProfileService {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
-    | IResponseSuccessJson<AuthenticatedProfile>
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
@@ -66,11 +66,8 @@ export default class ProfileService {
           );
         }
 
-        // If the profile doesn't exists on the API we still
-        // return 200 to the App with the information we have
-        // retrieved from SPID.
         if (response.status === 404) {
-          return ResponseSuccessJson(toAuthenticatedProfile(user));
+          return ResponseErrorNotFound("Not Found", "Profile not found");
         }
 
         // The user has sent too many requests in a given amount of time ("rate limiting").
@@ -122,9 +119,39 @@ export default class ProfileService {
   };
 
   /**
+   * Create the profile of a specific user.
+   */
+  public readonly createProfile = async (
+    user: User,
+    newProfile: NewProfile
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<InitializedProfile>
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.createProfile({
+        fiscalCode: user.fiscal_code,
+        newProfile
+      });
+
+      return withValidatedOrInternalError(
+        validated,
+        response =>
+          response.status === 200
+            ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
+      );
+    });
+  };
+
+  /**
    * Upsert the profile of a specific user.
    */
-  public readonly upsertProfile = async (
+  public readonly updateProfile = async (
     user: User,
     extendedProfileBackend: ExtendedProfileBackend
   ): Promise<
@@ -142,9 +169,9 @@ export default class ProfileService {
       ExtendedProfileApi.decode(extendedProfileBackend),
       async extendedProfileApi =>
         withCatchAsInternalError(async () => {
-          const validated = await client.upsertProfile({
-            extendedProfile: extendedProfileApi,
-            fiscalCode: user.fiscal_code
+          const validated = await client.updateProfile({
+            fiscalCode: user.fiscal_code,
+            profile: extendedProfileApi
           });
 
           return withValidatedOrInternalError(
