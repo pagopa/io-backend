@@ -30,6 +30,7 @@ export const toInitializedProfile = (
   family_name: user.family_name,
   fiscal_code: user.fiscal_code,
   has_profile: true,
+  is_email_validated: profile.is_email_validated,
   is_inbox_enabled: profile.is_inbox_enabled,
   is_webhook_enabled: profile.is_webhook_enabled,
   name: user.name,
