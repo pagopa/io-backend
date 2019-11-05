@@ -14,9 +14,17 @@ import * as redis from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { NewProfile } from "../../../generated/io-api/NewProfile";
 
+import {
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
+import ApiClientFactory from "../../services/apiClientFactory";
+import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
@@ -93,6 +101,7 @@ const theCurrentTimestampMillis = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidname = "Giuseppe Maria";
+const aValidsurname = "Garibaldi";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // authentication constant
@@ -104,7 +113,7 @@ const mockWalletToken =
 // mock for a valid User
 const mockedUser: User = {
   created_at: aTimestamp,
-  family_name: "Garibaldi",
+  family_name: aValidsurname,
   fiscal_code: aFiscalNumber,
   name: aValidname,
   session_token: mockSessionToken as SessionToken,
@@ -118,7 +127,7 @@ const mockedUser: User = {
 const validUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   email: anEmailAddress,
-  familyName: "Garibaldi",
+  familyName: aValidsurname,
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: {
@@ -130,7 +139,6 @@ const validUserPayload = {
 // invalidUser lacks the required email field.
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
-  familyName: "Garibaldi",
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: {
@@ -138,6 +146,21 @@ const invalidUserPayload = {
   },
   mobilePhone: "3222222222222",
   name: aValidname
+};
+
+const proxyInitializedProfileResponse = {
+  blocked_inbox_or_channels: undefined,
+  email: anEmailAddress,
+  family_name: aValidsurname,
+  fiscal_code: aFiscalNumber,
+  has_profile: true,
+  is_inbox_enabled: true,
+  is_webhook_enabled: true,
+  name: aValidname,
+  preferred_languages: ["it_IT"],
+  spid_email: anEmailAddress,
+  spid_mobile_phone: "3222222222222",
+  version: 42
 };
 
 const anErrorResponse = {
@@ -178,6 +201,18 @@ jest.mock("../../services/tokenService", () => {
   };
 });
 
+const mockGetProfile = jest.fn();
+const mockCreateProfile = jest.fn();
+
+jest.mock("../../services/profileService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      createProfile: mockCreateProfile,
+      getProfile: mockGetProfile
+    }))
+  };
+});
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -213,12 +248,16 @@ beforeAll(async () => {
   );
   spidStrategyInstance.logout = jest.fn();
 
+  const api = new ApiClientFactory("", "");
+  const service = new ProfileService(api);
+
   controller = new AuthenticationController(
     redisSessionStorage,
     samlCert,
     spidStrategyInstance,
     tokenService,
-    getClientProfileRedirectionUrl
+    getClientProfileRedirectionUrl,
+    service
   );
 });
 
@@ -234,8 +273,12 @@ afterEach(() => {
 });
 
 describe("AuthenticationController#acs", () => {
-  it("redirects to the correct url if userPayload is a valid User", async () => {
+  it("redirects to the correct url if userPayload is a valid User and a profile not exists", async () => {
     const res = mockRes();
+    const expectedNewProfile: NewProfile = {
+      email: validUserPayload.email,
+      is_email_validated: true
+    };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
 
@@ -243,6 +286,12 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
 
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(proxyInitializedProfileResponse)
+    );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
@@ -252,6 +301,100 @@ describe("AuthenticationController#acs", () => {
       "/profile.html?token=" + mockSessionToken
     );
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockCreateProfile).toHaveBeenCalledWith(
+      mockedUser,
+      expectedNewProfile
+    );
+  });
+
+  it("redirects to the correct url if userPayload is a valid User and a profile exists", async () => {
+    const res = mockRes();
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
+
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson(proxyInitializedProfileResponse)
+    );
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      "/profile.html?token=" + mockSessionToken
+    );
+    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockCreateProfile).not.toBeCalled();
+  });
+
+  it("should fail if a profile cannot be created", async () => {
+    const res = mockRes();
+    const expectedNewProfile: NewProfile = {
+      email: validUserPayload.email,
+      is_email_validated: true
+    };
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
+
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseErrorInternal("Error creating new user profile")
+    );
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockCreateProfile).toHaveBeenCalledWith(
+      mockedUser,
+      expectedNewProfile
+    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Error creating new user profile"
+    });
+  });
+
+  it("should fail if an error occours checking the profile", async () => {
+    const res = mockRes();
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
+
+    mockGetProfile.mockReturnValue(
+      ResponseErrorInternal("Error reading the user profile")
+    );
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockCreateProfile).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Error reading the user profile"
+    });
   });
 
   it("should fail if userPayload is invalid", async () => {
