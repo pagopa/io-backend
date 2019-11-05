@@ -8,6 +8,7 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -15,6 +16,7 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
 
 import ProfileService from "../services/profileService";
+import { notFoundProfileToAuthenticatedProfile } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 
 export default class PagoPAController {
@@ -34,7 +36,10 @@ export default class PagoPAController {
     | IResponseSuccessJson<PagoPAUser>
   > =>
     withUserFromRequest(req, async user => {
-      const response = await this.profileService.getProfile(user);
+      const response = notFoundProfileToAuthenticatedProfile(
+        await this.profileService.getProfile(user),
+        user
+      );
       if (response.kind !== "IResponseSuccessJson") {
         // if getProfile returns a failure, we just return it
         return response;
@@ -54,6 +59,13 @@ export default class PagoPAController {
       // InitializedProfile but an email has not been set, we fall back to
       // the email from the SPID profile
       const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
+
+      if (!email) {
+        return ResponseErrorValidation(
+          "Validation Error",
+          "Missing User Email"
+        );
+      }
 
       const pagopaUser: PagoPAUser = {
         email,

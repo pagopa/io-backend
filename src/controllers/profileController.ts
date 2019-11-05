@@ -13,11 +13,12 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
-import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { Profile } from "../../generated/backend/Profile";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
 import ProfileService from "../services/profileService";
+import { notFoundProfileToAuthenticatedProfile } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
@@ -37,7 +38,13 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
     | IResponseSuccessJson<AuthenticatedProfile>
-  > => withUserFromRequest(req, user => this.profileService.getProfile(user));
+  > =>
+    withUserFromRequest(req, async user => {
+      return notFoundProfileToAuthenticatedProfile(
+        await this.profileService.getProfile(user),
+        user
+      );
+    });
 
   /**
    * Returns the profile for the user identified by the provided fiscal
@@ -56,10 +63,10 @@ export default class ProfileController {
     withUserFromRequest(req, user => this.profileService.getApiProfile(user));
 
   /**
-   * Create or update the preferences for the user identified by the provided
+   * Update the preferences for the user identified by the provided
    * fiscal code.
    */
-  public readonly upsertProfile = (
+  public readonly updateProfile = (
     req: express.Request
   ): Promise<
     // tslint:disable-next-line:max-union-size
@@ -71,9 +78,9 @@ export default class ProfileController {
   > =>
     withUserFromRequest(req, async user =>
       withValidatedOrValidationError(
-        ExtendedProfile.decode(req.body),
+        Profile.decode(req.body),
         extendedProfile =>
-          this.profileService.upsertProfile(user, extendedProfile)
+          this.profileService.updateProfile(user, extendedProfile)
       )
     );
 }
