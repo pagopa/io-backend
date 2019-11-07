@@ -84,7 +84,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    const removeOtherUserSessionsPromise = this.allowMultipleSessions
+    const removeOtherUserSessionsOrNopPromise = this.allowMultipleSessions
       ? Promise.resolve(right<Error, boolean>(true))
       : this.removeOtherUserSessions(user);
 
@@ -92,7 +92,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       setSessionToken,
       setWalletToken,
       saveSessionInfoPromise,
-      removeOtherUserSessionsPromise
+      removeOtherUserSessionsOrNopPromise
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
