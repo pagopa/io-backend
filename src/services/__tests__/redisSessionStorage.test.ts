@@ -97,6 +97,7 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+// tslint:disable-next-line: no-big-function
 describe("RedisSessionStorage#set", () => {
   it.each([
     [
