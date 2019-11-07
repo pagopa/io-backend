@@ -3,7 +3,7 @@
  */
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { fromNullable, none, Option, some } from "fp-ts/lib/Option";
+import { none, Option, some } from "fp-ts/lib/Option";
 import {
   errorsToReadableMessages,
   ReadableReporter
@@ -30,7 +30,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
   constructor(
     private readonly redisClient: redis.RedisClient,
-    private readonly tokenDurationSecs: number
+    private readonly tokenDurationSecs: number,
+    private readonly allowMultipleSessions: boolean
   ) {
     super();
   }
@@ -83,14 +84,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    // Read ENV to allow multiple user's sessions functionality
-    // Default value is false when the ENV var is not provided
-    const ALLOW_MULTIPLE_SESSIONS = fromNullable(
-      process.env.ALLOW_MULTIPLE_SESSIONS
-    )
-      .map(_ => _.toLowerCase() === "true")
-      .getOrElse(false);
-    const removeOtherUserSessionsPromise = ALLOW_MULTIPLE_SESSIONS
+    const removeOtherUserSessionsPromise = this.allowMultipleSessions
       ? Promise.resolve(right<Error, boolean>(true))
       : this.removeOtherUserSessions(user);
 

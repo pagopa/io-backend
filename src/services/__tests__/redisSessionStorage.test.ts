@@ -25,6 +25,7 @@ import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
 
+const allowMultipleSessions = false;
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
 
@@ -81,7 +82,8 @@ mockRedisClient.exists = mockExists;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
-  aTokenDurationSecs
+  aTokenDurationSecs,
+  allowMultipleSessions
 );
 
 let clock: any;
