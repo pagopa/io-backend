@@ -275,7 +275,7 @@ describe("RedisSessionStorage#set", () => {
     }
   );
 
-  it("should removeOtherUserSessions never been called if ALLOW_MULTIPLE_SESSION is true", async () => {
+  it("should never call removeOtherUserSessions if ALLOW_MULTIPLE_SESSION is true", async () => {
     const multipleSessionsStorage = new RedisSessionStorage(
       mockRedisClient,
       aTokenDurationSecs,
