@@ -274,6 +274,42 @@ describe("RedisSessionStorage#set", () => {
       expect(response).toEqual(expected);
     }
   );
+
+  it("should removeOtherUserSessions never been called if ALLOW_MULTIPLE_SESSION is true", async () => {
+    const multipleSessionsStorage = new RedisSessionStorage(
+      mockRedisClient,
+      aTokenDurationSecs,
+      true
+    );
+
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+
+    mockSadd.mockImplementation((_, __, callback) => {
+      callback(undefined, 1);
+    });
+    const oldSessionToken = "old_session_token";
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `SESSIONINFO-${oldSessionToken}`,
+        `SESSIONINFO-${oldSessionToken}2`,
+        `SESSIONINFO-${aValidUser.session_token}`
+      ]);
+    });
+
+    const response = await multipleSessionsStorage.set(aValidUser);
+
+    expect(mockDel).not.toBeCalled(); // Old session will be not deleted
+    expect(response.isRight());
+  });
 });
 
 describe("RedisSessionStorage#removeOtherUserSessions", () => {
