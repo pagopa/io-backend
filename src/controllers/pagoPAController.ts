@@ -14,6 +14,7 @@ import {
 
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
 
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import ProfileService from "../services/profileService";
 import { notFoundProfileToInternalServerError } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
@@ -50,7 +51,19 @@ export default class PagoPAController {
       // a custom email may have been set in the InitializedProfile, thus we
       // have to check if the profile it's an InitializedProfile to be able to
       // retrieve it
-      if (!profile.email || !profile.is_email_validated) {
+      const maybeCustomEmailValidated =
+        InitializedProfile.is(profile) && profile.is_email_validated
+          ? profile.email
+          : undefined;
+
+      // if the profile is an AuthenticatedProfile or the profile is an
+      // InitializedProfile but an email has not been set, we fall back to
+      // the email from the SPID profile
+      const email = maybeCustomEmailValidated
+        ? maybeCustomEmailValidated
+        : profile.spid_email;
+
+      if (!email) {
         return ResponseErrorValidation(
           "Validation Error",
           "Missing User Email"
