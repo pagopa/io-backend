@@ -234,6 +234,9 @@ export async function newApp(
     // Create the profile service
     const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
+    // Create the profile service
+    const PROFILE_SERVICE = new ProfileService(API_CLIENT);
+
     registerAuthenticationRoutes(
       app,
       authenticationBasePath,
