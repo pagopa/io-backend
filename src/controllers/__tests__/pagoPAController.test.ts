@@ -56,6 +56,7 @@ const userInitializedProfile: InitializedProfile = {
   family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
   has_profile: true,
+  is_email_enabled: true,
   is_email_validated: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
