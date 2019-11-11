@@ -15,6 +15,7 @@ import { OrganizationName } from "../../../generated/backend/OrganizationName";
 import { ServiceName } from "../../../generated/backend/ServiceName";
 import { ServicePublic } from "../../../generated/backend/ServicePublic";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { NotificationChannelEnum } from "../../../generated/io-api/NotificationChannel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -31,6 +32,7 @@ const aServiceId: string = "service-id";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyService: ServicePublic = {
+  available_notification_channels: [NotificationChannelEnum.EMAIL],
   department_name: "Department name" as DepartmentName,
   organization_fiscal_code: "12431435345" as OrganizationFiscalCode,
   organization_name: "Organization name" as OrganizationName,
