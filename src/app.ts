@@ -231,8 +231,6 @@ export async function newApp(
 
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
-    // Create the profile service
-    const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
     // Create the profile service
     const PROFILE_SERVICE = new ProfileService(API_CLIENT);
