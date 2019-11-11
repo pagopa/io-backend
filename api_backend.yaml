@@ -720,6 +720,8 @@ definitions:
         $ref: "#/definitions/IsInboxEnabled"
       is_email_validated:
         $ref: "#/definitions/IsEmailValidated"
+      is_email_enabled:
+        $ref: "#/definitions/IsEmailEnabled"
       is_webhook_enabled:
         $ref: "#/definitions/IsWebhookEnabled"
       family_name:
@@ -742,6 +744,7 @@ definitions:
       - fiscal_code
       - has_profile
       - is_inbox_enabled
+      - is_email_enabled
       - is_webhook_enabled
       - name
       - spid_mobile_phone
