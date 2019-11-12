@@ -51,17 +51,14 @@ export default class PagoPAController {
       // a custom email may have been set in the InitializedProfile, thus we
       // have to check if the profile it's an InitializedProfile to be able to
       // retrieve it
-      const maybeCustomEmailValidated =
-        InitializedProfile.is(profile) && profile.is_email_validated
-          ? profile.email
-          : undefined;
+      const maybeCustomEmail = InitializedProfile.is(profile)
+        ? profile.email
+        : undefined;
 
       // if the profile is an AuthenticatedProfile or the profile is an
       // InitializedProfile but an email has not been set, we fall back to
       // the email from the SPID profile
-      const email = maybeCustomEmailValidated
-        ? maybeCustomEmailValidated
-        : profile.spid_email;
+      const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
 
       if (!email) {
         return ResponseErrorValidation(
@@ -70,15 +67,16 @@ export default class PagoPAController {
         );
       }
 
+      // The field spid_mobile_phone is optional, if not provieded the decode process fail.
+      // mobile_phone is removed from PagoPAUser into https://github.com/teamdigitale/io-backend/pull/537/
       return PagoPAUser.decode({
-        email: profile.email,
+        email,
         family_name: user.family_name,
         mobile_phone: user.spid_mobile_phone,
         name: user.name
       }).fold<IResponseErrorValidation | IResponseSuccessJson<PagoPAUser>>(
-        _ =>
-          ResponseErrorValidation("Validation Error", "Invalid User Profile"),
-        pagopaUser => ResponseSuccessJson(pagopaUser)
+        _ => ResponseErrorValidation("Bad Request", "Invalid User Profile"),
+        _ => ResponseSuccessJson(_)
       );
     });
 }
