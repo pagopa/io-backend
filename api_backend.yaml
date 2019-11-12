@@ -780,30 +780,6 @@ definitions:
       - name
       - spid_mobile_phone
       - version
-  AuthenticatedProfile:
-    type: object
-    title: Temporary SPID profile
-    description: Describes the user's profile while it's authenticated but not yet stored in the Profile API.
-    properties:
-      family_name:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      has_profile:
-        $ref: "#/definitions/HasProfile"
-      name:
-        type: string
-      spid_email:
-        $ref: '#/definitions/EmailAddress'
-      spid_mobile_phone:
-        type: string
-        minLength: 1
-    required:
-      - family_name
-      - fiscal_code
-      - has_profile
-      - name
-      - spid_mobile_phone
   UserMetadata:
     type: object
     title: User Metadata information
@@ -891,10 +867,7 @@ definitions:
       - https://www.spid.gov.it/SpidL2
       - https://www.spid.gov.it/SpidL3
   UserProfile:
-    x-one-of: true
-    allOf:
-      - $ref: "#/definitions/InitializedProfile"
-      - $ref: "#/definitions/AuthenticatedProfile"
+    - $ref: "#/definitions/InitializedProfile"
   SuccessResponse:
     type: object
     properties:

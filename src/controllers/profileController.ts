@@ -38,7 +38,6 @@ export default class ProfileController {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
-    | IResponseSuccessJson<AuthenticatedProfile>
   > =>
     withUserFromRequest(req, async user => {
       return notFoundProfileToAuthenticatedProfile(
