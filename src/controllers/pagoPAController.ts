@@ -44,7 +44,7 @@ export default class PagoPAController {
         return response;
       }
 
-      // getProfile may return an InitializedProfile or an AuthenticatedProfile
+      // getProfile returns an InitializedProfile
       const profile = response.value;
 
       // a custom email may have been set in the InitializedProfile, thus we
