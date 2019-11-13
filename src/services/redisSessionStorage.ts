@@ -7,6 +7,7 @@ import {
   isLeft,
   isRight,
   left,
+  parseJSON,
   right,
   toError
 } from "fp-ts/lib/Either";
@@ -20,7 +21,6 @@ import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
-import { parseJSON } from "../utils/Either";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
