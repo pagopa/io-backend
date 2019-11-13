@@ -226,7 +226,7 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/UserProfile"
+            $ref: "#/definitions/InitializedProfile"
           examples:
             application/json:
               email: "email@example.com"
@@ -866,8 +866,6 @@ definitions:
       - https://www.spid.gov.it/SpidL1
       - https://www.spid.gov.it/SpidL2
       - https://www.spid.gov.it/SpidL3
-  UserProfile:
-    - $ref: "#/definitions/InitializedProfile"
   SuccessResponse:
     type: object
     properties:

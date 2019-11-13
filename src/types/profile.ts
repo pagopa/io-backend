@@ -7,6 +7,13 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 
 import { fromNullable } from "fp-ts/lib/Option";
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
+  ResponseErrorInternal
+} from "italia-ts-commons/lib/responses";
 import { User } from "./user";
 
 /**
@@ -32,3 +39,20 @@ export const toInitializedProfile = (
   spid_mobile_phone: user.spid_mobile_phone,
   version: profile.version
 });
+
+export const profileMissingErrorResponse = ResponseErrorInternal(
+  "Profile Missing"
+);
+
+export const notFoundProfileToInternalServerError = (
+  // tslint:disable-next-line: prettier
+  getProfile:
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<ExtendedProfile>
+) =>
+  getProfile.kind === "IResponseErrorNotFound"
+    ? profileMissingErrorResponse
+    : getProfile;

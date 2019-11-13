@@ -12,11 +12,10 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
 
 import ProfileService from "../services/profileService";
-import { notFoundProfileToAuthenticatedProfile } from "../types/profile";
+import { notFoundProfileToInternalServerError } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 
 export default class PagoPAController {
@@ -36,10 +35,10 @@ export default class PagoPAController {
     | IResponseSuccessJson<PagoPAUser>
   > =>
     withUserFromRequest(req, async user => {
-      const response = notFoundProfileToAuthenticatedProfile(
-        await this.profileService.getProfile(user),
-        user
+      const response = notFoundProfileToInternalServerError(
+        await this.profileService.getProfile(user)
       );
+
       if (response.kind !== "IResponseSuccessJson") {
         // if getProfile returns a failure, we just return it
         return response;
@@ -51,16 +50,7 @@ export default class PagoPAController {
       // a custom email may have been set in the InitializedProfile, thus we
       // have to check if the profile it's an InitializedProfile to be able to
       // retrieve it
-      const maybeCustomEmail = InitializedProfile.is(profile)
-        ? profile.email
-        : undefined;
-
-      // if the profile is an AuthenticatedProfile or the profile is an
-      // InitializedProfile but an email has not been set, we fall back to
-      // the email from the SPID profile
-      const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
-
-      if (!email) {
+      if (!profile.email || !profile.is_email_validated) {
         return ResponseErrorValidation(
           "Validation Error",
           "Missing User Email"
@@ -68,7 +58,7 @@ export default class PagoPAController {
       }
 
       const pagopaUser: PagoPAUser = {
-        email,
+        email: profile.email,
         family_name: user.family_name,
         mobile_phone: user.spid_mobile_phone,
         name: user.name
