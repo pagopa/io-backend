@@ -622,6 +622,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   NotificationChannelStatusValue:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+  NotificationChannel:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannel"
   MessageSubject:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageSubject"
   OrganizationName:
