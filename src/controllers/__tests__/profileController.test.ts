@@ -8,6 +8,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
+import { isRight } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -17,6 +18,7 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
+import { Profile } from "../../../generated/backend/Profile";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -44,6 +46,7 @@ const proxyUserResponse = {
   email: anEmailAddress,
   family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
+  isEmailValidated: true,
   isInboxEnabled: anIsInboxEnabled,
   isWebhookEnabled: anIsWebookEnabled,
   name: aValidName,
@@ -55,6 +58,7 @@ const proxyUserResponse = {
 
 const apiUserProfileResponse = {
   email: anEmailAddress,
+  is_email_validated: true,
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
@@ -87,6 +91,7 @@ const proxyAuthenticatedProfileResponse = {
 const mockedUpsertProfile: ExtendedProfile = {
   email: anEmailAddress,
   is_email_enabled: true,
+  is_email_validated: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
@@ -260,9 +265,12 @@ describe("ProfileController#upsertProfile", () => {
 
     const response = await controller.updateProfile(req);
 
+    const errorOrProfile = Profile.decode(req.body);
+    expect(isRight(errorOrProfile)).toBeTruthy();
+
     expect(mockUpdateProfile).toHaveBeenCalledWith(
       mockedUser,
-      mockedUpsertProfile
+      errorOrProfile.value
     );
     expect(response).toEqual({
       apply: expect.any(Function),

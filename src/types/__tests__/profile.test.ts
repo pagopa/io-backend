@@ -22,6 +22,7 @@ import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api
 
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
+import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";
 import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
@@ -35,6 +36,7 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsEmailEnabled = true as IsEmailEnabled;
+const anIsEmailValidated = true as IsEmailValidated;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User extracted from SPID
@@ -55,6 +57,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   accepted_tos_version: aTosVersion,
   email: anEmailAddress,
   is_email_enabled: anIsEmailEnabled,
+  is_email_validated: anIsEmailValidated,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
@@ -65,6 +68,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
 const mockedExtendedProfileWithoutTos: ExtendedProfileApi = {
   email: anEmailAddress,
   is_email_enabled: anIsEmailEnabled,
+  is_email_validated: anIsEmailValidated,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
