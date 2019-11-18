@@ -46,13 +46,13 @@ export const profileMissingErrorResponse = ResponseErrorInternal(
 
 export const notFoundProfileToInternalServerError = (
   // tslint:disable-next-line: prettier
-  getProfile:
+  getProfileResponse:
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
 ) =>
-  getProfile.kind === "IResponseErrorNotFound"
+  getProfileResponse.kind === "IResponseErrorNotFound"
     ? profileMissingErrorResponse
-    : getProfile;
+    : getProfileResponse;
