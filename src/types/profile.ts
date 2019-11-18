@@ -51,7 +51,7 @@ export const notFoundProfileToInternalServerError = (
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
-    | IResponseSuccessJson<ExtendedProfile>
+    | IResponseSuccessJson<InitializedProfile>
 ) =>
   getProfile.kind === "IResponseErrorNotFound"
     ? profileMissingErrorResponse
