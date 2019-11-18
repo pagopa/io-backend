@@ -25,6 +25,8 @@ import {
   GetServiceT,
   getVisibleServicesDefaultDecoder,
   GetVisibleServicesT,
+  startEmailValidationProcessDefaultDecoder,
+  StartEmailValidationProcessT,
   updateProfileDefaultDecoder,
   UpdateProfileT
 } from "../../generated/io-api/requestTypes";
@@ -51,6 +53,9 @@ export function APIClient(
   readonly getMessages: TypeofApiCall<typeof getMessagesT>;
   readonly getProfile: TypeofApiCall<typeof getProfileT>;
   readonly createProfile: TypeofApiCall<typeof createProfileT>;
+  readonly emailValidationProcess: TypeofApiCall<
+    typeof emailValidationProcessT
+  >;
   readonly getService: TypeofApiCall<typeof getServiceT>;
   readonly getVisibleServices: TypeofApiCall<typeof getVisibleServicesT>;
   readonly getServicesByRecipient: TypeofApiCall<
@@ -97,6 +102,18 @@ export function APIClient(
     query: _ => ({}),
     response_decoder: updateProfileDefaultDecoder(),
     url: params => `/profiles/${params.fiscalCode}`
+  };
+
+  const emailValidationProcessT: ReplaceRequestParams<
+    StartEmailValidationProcessT,
+    Omit<RequestParams<StartEmailValidationProcessT>, "SubscriptionKey">
+  > = {
+    body: _ => "{}",
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    method: "post",
+    query: _ => ({}),
+    response_decoder: startEmailValidationProcessDefaultDecoder(),
+    url: params => `/email-validation-process/${params.fiscalCode}`
   };
 
   const getServicesByRecipientT: ReplaceRequestParams<
@@ -156,6 +173,10 @@ export function APIClient(
 
   return {
     createProfile: createFetchRequestForApi(createProfileT, options),
+    emailValidationProcess: createFetchRequestForApi(
+      emailValidationProcessT,
+      options
+    ),
     getMessage: createFetchRequestForApi(getMessageT, options),
     getMessages: createFetchRequestForApi(getMessagesT, options),
     getProfile: createFetchRequestForApi(getProfileT, options),

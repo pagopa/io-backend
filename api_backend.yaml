@@ -346,6 +346,35 @@ paths:
           description: There was an error in retrieving the user profile.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/email-validation-process":
+    x-swagger-router-controller: ProfileController
+    post:
+      operationId: startEmailValidationProcess
+      summary: Start the Email Validation Process
+      description: |-
+        Start the email validation process that create the validation token
+        and send the validation email
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Profile not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error in retrieving the user profile.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/user-metadata":
     x-swagger-router-controller: userMetadataController
     get:
