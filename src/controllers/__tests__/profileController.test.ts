@@ -4,6 +4,7 @@
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
+  ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -108,9 +109,11 @@ const badRequestErrorResponse = {
 const mockGetProfile = jest.fn();
 const mockGetApiProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
+const mockEmailValidationProcess = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
+      emailValidationProcess: mockEmailValidationProcess,
       getApiProfile: mockGetApiProfile,
       getProfile: mockGetProfile,
       updateProfile: mockUpdateProfile
@@ -321,5 +324,33 @@ describe("ProfileController#upsertProfile", () => {
 
     expect(mockUpdateProfile).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("ProfileController#startEmailValidationProcess", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the emailValidationProcess on the ProfileService with valid values", async () => {
+    const req = mockReq();
+
+    mockEmailValidationProcess.mockReturnValue(
+      Promise.resolve(ResponseSuccessAccepted())
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(profileService);
+
+    const response = await controller.startEmailValidationProcess(req);
+
+    expect(mockEmailValidationProcess).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessAccepted"
+    });
   });
 });

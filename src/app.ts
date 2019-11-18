@@ -412,6 +412,15 @@ function registerAPIRoutes(
     toExpressHandler(profileController.updateProfile, profileController)
   );
 
+  app.post(
+    `${basePath}/email-validation-process`,
+    bearerTokenAuth,
+    toExpressHandler(
+      profileController.startEmailValidationProcess,
+      profileController
+    )
+  );
+
   app.get(
     `${basePath}/user-metadata`,
     bearerTokenAuth,

@@ -74,7 +74,10 @@ const createProfileRequest: NewProfile = {
   is_email_validated: true
 };
 
-const emptyApiProfileResponse = {
+const acceptedApiResponse = {
+  status: 202
+};
+const notFoundApiResponse = {
   status: 404
 };
 const APIError = {
@@ -103,9 +106,12 @@ const expectedApiError = new Error("Api error.");
 const mockGetProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
 const mockCreateProfile = jest.fn();
+const mockEmailValidationProcess = jest.fn();
+
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
     createProfile: mockCreateProfile,
+    emailValidationProcess: mockEmailValidationProcess,
     getProfile: mockGetProfile,
     updateProfile: mockUpdateProfile
   };
@@ -154,7 +160,7 @@ describe("ProfileService#getProfile", () => {
   });
 
   it("forward not found error if the response from the API is not found", async () => {
-    mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
+    mockGetProfile.mockImplementation(() => t.success(notFoundApiResponse));
 
     const service = new ProfileService(api);
 
@@ -218,7 +224,7 @@ describe("ProfileService#getApiProfile", () => {
   });
 
   it("returns 404 response if the profile of the user not exists into the api", async () => {
-    mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
+    mockGetProfile.mockImplementation(() => t.success(notFoundApiResponse));
 
     const service = new ProfileService(api);
 
@@ -274,9 +280,7 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("fails to update an user profile to the API", async () => {
-    mockUpdateProfile.mockImplementation(() =>
-      t.success(emptyApiProfileResponse)
-    );
+    mockUpdateProfile.mockImplementation(() => t.success(notFoundApiResponse));
 
     const service = new ProfileService(api);
 
@@ -340,6 +344,59 @@ describe("ProfileService#createProfile", () => {
     const service = new ProfileService(api);
 
     const res = await service.createProfile(mockedUser, createProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+});
+
+describe("ProfileService#emailValidationProcess", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should returns ResponseSuccessAccepted if no error occours", async () => {
+    mockEmailValidationProcess.mockImplementation(() =>
+      t.success(acceptedApiResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.emailValidationProcess(mockedUser);
+
+    expect(mockEmailValidationProcess).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessAccepted"
+    });
+  });
+
+  it("returns 404 response if the 404 was provided from the functions API", async () => {
+    mockEmailValidationProcess.mockImplementation(() =>
+      t.success(notFoundApiResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.emailValidationProcess(mockedUser);
+
+    expect(mockEmailValidationProcess).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      detail: "Not found: User not found.",
+      kind: "IResponseErrorNotFound"
+    });
+  });
+
+  it("returns an 429 HTTP error from emailValidationProcess upstream API", async () => {
+    mockEmailValidationProcess.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.emailValidationProcess(mockedUser);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
