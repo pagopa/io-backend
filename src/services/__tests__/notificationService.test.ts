@@ -7,6 +7,7 @@ import { InstallationID } from "../../../generated/backend/InstallationID";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
 import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
+import { APNSPushType } from "../../types/notification";
 import NotificationService from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -77,6 +78,13 @@ jest.mock("azure-sb", () => {
     })
   };
 });
+
+const expectedSendOptions = {
+  headers: {
+    ["apns-push-type"]: APNSPushType.ALERT,
+    ["apns-priority"]: 10
+  }
+};
 
 const aGenericError = "An error occurred!";
 
@@ -164,7 +172,7 @@ describe("NotificationService#notify", () => {
   });
 
   it("should submit a notification to the Notification Hub", async () => {
-    mockSend.mockImplementation((_, __, callback) => {
+    mockSend.mockImplementation((_, __, ___, callback) => {
       callback(null);
     });
 
@@ -186,12 +194,13 @@ describe("NotificationService#notify", () => {
           aValidNotification.sender_metadata.organization_name
         }`
       },
+      expectedSendOptions,
       expect.any(Function)
     );
   });
 
   it("should fail if the Notification Hub fails", async () => {
-    mockSend.mockImplementation((_, __, callback) => {
+    mockSend.mockImplementation((_, __, ___, callback) => {
       callback(new Error(aGenericError));
     });
 
@@ -213,6 +222,7 @@ describe("NotificationService#notify", () => {
           aValidNotification.sender_metadata.organization_name
         }`
       },
+      expectedSendOptions,
       expect.any(Function)
     );
   });
