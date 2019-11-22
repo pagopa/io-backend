@@ -1,14 +1,14 @@
 import {
   ApiHeaderJson,
   composeHeaderProducers,
+  composeResponseDecoders,
+  constantResponseDecoder,
   createFetchRequestForApi,
+  ioResponseDecoder,
   ReplaceRequestParams,
   RequestHeaderProducer,
   RequestParams,
-  TypeofApiCall,
-  composeResponseDecoders,
-  constantResponseDecoder,
-  ioResponseDecoder
+  TypeofApiCall
 } from "italia-ts-commons/lib/requests";
 import { ProblemJson } from "italia-ts-commons/lib/responses";
 import { Omit } from "italia-ts-commons/lib/types";
@@ -74,6 +74,7 @@ export function APIClient(
 
   // Custom decoder until we fix the problem in the io-utils generator
   // https://www.pivotaltracker.com/story/show/169915207
+  // tslint:disable-next-line:typedef
   function startEmailValidationProcessCustomDecoder() {
     return composeResponseDecoders(
       composeResponseDecoders(
