@@ -7,10 +7,12 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseSuccessAccepted,
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
+  ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -190,5 +192,34 @@ export default class ProfileService {
           );
         })
     );
+  };
+
+  /**
+   * Resend the email to complete email validation process
+   */
+  public readonly emailValidationProcess = async (
+    user: User
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessAccepted
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.emailValidationProcess({
+        fiscalCode: user.fiscal_code
+      });
+      return withValidatedOrInternalError(validated, response => {
+        return response.status === 202
+          ? ResponseSuccessAccepted()
+          : response.status === 404
+            ? ResponseErrorNotFound("Not found", "User not found.")
+            : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status);
+      });
+    });
   };
 }
