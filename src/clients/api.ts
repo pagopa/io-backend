@@ -1,12 +1,16 @@
 import {
   ApiHeaderJson,
   composeHeaderProducers,
+  composeResponseDecoders,
+  constantResponseDecoder,
   createFetchRequestForApi,
+  ioResponseDecoder,
   ReplaceRequestParams,
   RequestHeaderProducer,
   RequestParams,
   TypeofApiCall
 } from "italia-ts-commons/lib/requests";
+import { ProblemJson } from "italia-ts-commons/lib/responses";
 import { Omit } from "italia-ts-commons/lib/types";
 import nodeFetch from "node-fetch";
 
@@ -25,6 +29,7 @@ import {
   GetServiceT,
   getVisibleServicesDefaultDecoder,
   GetVisibleServicesT,
+  StartEmailValidationProcessT,
   updateProfileDefaultDecoder,
   UpdateProfileT
 } from "../../generated/io-api/requestTypes";
@@ -51,6 +56,9 @@ export function APIClient(
   readonly getMessages: TypeofApiCall<typeof getMessagesT>;
   readonly getProfile: TypeofApiCall<typeof getProfileT>;
   readonly createProfile: TypeofApiCall<typeof createProfileT>;
+  readonly emailValidationProcess: TypeofApiCall<
+    typeof emailValidationProcessT
+  >;
   readonly getService: TypeofApiCall<typeof getServiceT>;
   readonly getVisibleServices: TypeofApiCall<typeof getVisibleServicesT>;
   readonly getServicesByRecipient: TypeofApiCall<
@@ -63,6 +71,29 @@ export function APIClient(
   };
 
   const tokenHeaderProducer = SubscriptionKeyHeaderProducer(token);
+
+  // Custom decoder until we fix the problem in the io-utils generator
+  // https://www.pivotaltracker.com/story/show/169915207
+  // tslint:disable-next-line:typedef
+  function startEmailValidationProcessCustomDecoder() {
+    return composeResponseDecoders(
+      composeResponseDecoders(
+        composeResponseDecoders(
+          composeResponseDecoders(
+            constantResponseDecoder<undefined, 202>(202, undefined),
+            ioResponseDecoder<
+              400,
+              (typeof ProblemJson)["_A"],
+              (typeof ProblemJson)["_O"]
+            >(400, ProblemJson)
+          ),
+          constantResponseDecoder<undefined, 401>(401, undefined)
+        ),
+        constantResponseDecoder<undefined, 404>(404, undefined)
+      ),
+      constantResponseDecoder<undefined, 429>(429, undefined)
+    );
+  }
 
   const getProfileT: ReplaceRequestParams<
     GetProfileT,
@@ -97,6 +128,18 @@ export function APIClient(
     query: _ => ({}),
     response_decoder: updateProfileDefaultDecoder(),
     url: params => `/profiles/${params.fiscalCode}`
+  };
+
+  const emailValidationProcessT: ReplaceRequestParams<
+    StartEmailValidationProcessT,
+    Omit<RequestParams<StartEmailValidationProcessT>, "SubscriptionKey">
+  > = {
+    body: _ => "{}",
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    method: "post",
+    query: _ => ({}),
+    response_decoder: startEmailValidationProcessCustomDecoder(),
+    url: params => `/email-validation-process/${params.fiscalCode}`
   };
 
   const getServicesByRecipientT: ReplaceRequestParams<
@@ -156,6 +199,10 @@ export function APIClient(
 
   return {
     createProfile: createFetchRequestForApi(createProfileT, options),
+    emailValidationProcess: createFetchRequestForApi(
+      emailValidationProcessT,
+      options
+    ),
     getMessage: createFetchRequestForApi(getMessageT, options),
     getMessages: createFetchRequestForApi(getMessagesT, options),
     getProfile: createFetchRequestForApi(getProfileT, options),

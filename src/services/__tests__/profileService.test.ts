@@ -11,6 +11,7 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 
 import { SessionToken, WalletToken } from "../../types/token";
@@ -28,15 +29,19 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
 
+const validApiProfile: ExtendedProfileApi = {
+  email: aValidAPIEmail,
+  is_email_enabled: true,
+  is_email_validated: true,
+  is_inbox_enabled: true,
+  is_webhook_enabled: true,
+  preferred_languages: aPreferredLanguages,
+  version: 42
+};
+
 const validApiProfileResponse = {
   status: 200,
-  value: {
-    email: aValidAPIEmail,
-    is_inbox_enabled: true,
-    is_webhook_enabled: true,
-    preferred_languages: ["it_IT"],
-    version: 42
-  }
+  value: validApiProfile
 };
 const proxyInitializedProfileResponse = {
   blocked_inbox_or_channels: undefined,
@@ -44,10 +49,11 @@ const proxyInitializedProfileResponse = {
   family_name: "Lusso",
   fiscal_code: "XUZTCT88A51Y311X",
   has_profile: true,
+  is_email_validated: true,
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   name: "Luca",
-  preferred_languages: ["it_IT"],
+  preferred_languages: aPreferredLanguages,
   spid_email: aValidSPIDEmail,
   spid_mobile_phone: "3222222222222",
   version: 42
@@ -56,6 +62,7 @@ const proxyInitializedProfileResponse = {
 const updateProfileRequest: ExtendedProfile = {
   email: aValidAPIEmail,
   is_email_enabled: true,
+  is_email_validated: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
@@ -67,7 +74,10 @@ const createProfileRequest: NewProfile = {
   is_email_validated: true
 };
 
-const emptyApiProfileResponse = {
+const acceptedApiResponse = {
+  status: 202
+};
+const notFoundApiResponse = {
   status: 404
 };
 const APIError = {
@@ -96,9 +106,12 @@ const expectedApiError = new Error("Api error.");
 const mockGetProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
 const mockCreateProfile = jest.fn();
+const mockEmailValidationProcess = jest.fn();
+
 const mockGetClient = jest.fn().mockImplementation(() => {
   return {
     createProfile: mockCreateProfile,
+    emailValidationProcess: mockEmailValidationProcess,
     getProfile: mockGetProfile,
     updateProfile: mockUpdateProfile
   };
@@ -147,7 +160,7 @@ describe("ProfileService#getProfile", () => {
   });
 
   it("forward not found error if the response from the API is not found", async () => {
-    mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
+    mockGetProfile.mockImplementation(() => t.success(notFoundApiResponse));
 
     const service = new ProfileService(api);
 
@@ -211,7 +224,7 @@ describe("ProfileService#getApiProfile", () => {
   });
 
   it("returns 404 response if the profile of the user not exists into the api", async () => {
-    mockGetProfile.mockImplementation(() => t.success(emptyApiProfileResponse));
+    mockGetProfile.mockImplementation(() => t.success(notFoundApiResponse));
 
     const service = new ProfileService(api);
 
@@ -267,9 +280,7 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("fails to update an user profile to the API", async () => {
-    mockUpdateProfile.mockImplementation(() =>
-      t.success(emptyApiProfileResponse)
-    );
+    mockUpdateProfile.mockImplementation(() => t.success(notFoundApiResponse));
 
     const service = new ProfileService(api);
 
@@ -333,6 +344,59 @@ describe("ProfileService#createProfile", () => {
     const service = new ProfileService(api);
 
     const res = await service.createProfile(mockedUser, createProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+});
+
+describe("ProfileService#emailValidationProcess", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should returns ResponseSuccessAccepted if no error occours", async () => {
+    mockEmailValidationProcess.mockImplementation(() =>
+      t.success(acceptedApiResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.emailValidationProcess(mockedUser);
+
+    expect(mockEmailValidationProcess).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessAccepted"
+    });
+  });
+
+  it("returns 404 response if the 404 was provided from the functions API", async () => {
+    mockEmailValidationProcess.mockImplementation(() =>
+      t.success(notFoundApiResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.emailValidationProcess(mockedUser);
+
+    expect(mockEmailValidationProcess).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      detail: "Not found: User not found.",
+      kind: "IResponseErrorNotFound"
+    });
+  });
+
+  it("returns an 429 HTTP error from emailValidationProcess upstream API", async () => {
+    mockEmailValidationProcess.mockImplementation(() =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.emailValidationProcess(mockedUser);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });

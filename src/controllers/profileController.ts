@@ -9,6 +9,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
+  IResponseSuccessAccepted,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -82,5 +83,22 @@ export default class ProfileController {
         extendedProfile =>
           this.profileService.updateProfile(user, extendedProfile)
       )
+    );
+
+  /**
+   * Send an email to start the email validation process
+   */
+  public readonly startEmailValidationProcess = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessAccepted
+  > =>
+    withUserFromRequest(req, async user =>
+      this.profileService.emailValidationProcess(user)
     );
 }

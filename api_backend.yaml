@@ -346,6 +346,35 @@ paths:
           description: There was an error in retrieving the user profile.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/email-validation-process":
+    x-swagger-router-controller: ProfileController
+    post:
+      operationId: startEmailValidationProcess
+      summary: Start the Email Validation Process
+      description: |-
+        Start the email validation process that create the validation token
+        and send the validation email
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Profile not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error in retrieving the user profile.
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/user-metadata":
     x-swagger-router-controller: userMetadataController
     get:
@@ -591,79 +620,81 @@ paths:
 definitions:
   # Definitions from the digital citizenship APIs
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/AcceptedTosVersion"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/AcceptedTosVersion"
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/DepartmentName"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/EmailAddress"
   Profile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/Profile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/Profile"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/FiscalCode"
   IsEmailEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsEmailEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsEmailEnabled"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsInboxEnabled"
   IsEmailValidated:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsEmailValidated"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsEmailValidated"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/LimitedProfile"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   NotificationChannelStatusValue:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+  NotificationChannel:
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/NotificationChannel"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageSubject"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/OrganizationName"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaginationResponse"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ProblemJson"
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ServiceId"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ServiceId"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ServicePublic"
   ServiceTuple:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/ServiceTuple"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ServiceTuple"
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PaymentNoticeNumber"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaymentNoticeNumber"
   PaymentAmount:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PaymentAmount"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaymentAmount"
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PaymentData"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaymentData"
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/TimeToLiveSeconds"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/CreatedMessageWithContent"
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
   CreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
   PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
   MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.4.0/openapi/definitions.yaml#/MessageResponseWithContent"
+    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/MessageResponseWithContent"
   # Definitions from pagopa-proxy
   PaymentProblemJson:
     $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentProblemJson"
