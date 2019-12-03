@@ -73,6 +73,7 @@ export default class PagoPAController {
       const pagopaUser: PagoPAUser = {
         email,
         family_name: user.family_name,
+        mobile_phone: user.spid_mobile_phone,
         name: user.name
       };
 

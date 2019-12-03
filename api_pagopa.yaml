@@ -53,10 +53,14 @@ definitions:
         type: string
       email:
         $ref: '#/definitions/EmailAddress'
+      mobile_phone:
+        type: string
+        minLength: 1
     required:
       - name
       - family_name
       - email
+      - mobile_phone
 responses: {}
 parameters: {}
 consumes:

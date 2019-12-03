@@ -70,6 +70,7 @@ const userInitializedProfile: InitializedProfile = {
 const proxyUserResponse: PagoPAUser = {
   email: anEmailAddress,
   family_name: aValidFamilyname,
+  mobile_phone: aMobilePhone,
   name: aValidName
 };
 
