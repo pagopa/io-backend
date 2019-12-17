@@ -127,7 +127,11 @@ const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
 const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
 const SPID_TESTENV_URL =
   process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
+const HAS_SPID_VALIDATOR_ENABLED = process.env.HAS_SPID_VALIDATOR_ENABLED
+  ? process.env.HAS_SPID_VALIDATOR_ENABLED.toLocaleLowerCase() === "true"
+  : false;
 container.register({
+  hasSpidValidatorEnabled: awilix.asValue(HAS_SPID_VALIDATOR_ENABLED),
   samlAcceptedClockSkewMs: awilix.asValue(SAML_ACCEPTED_CLOCK_SKEW_MS),
   samlAttributeConsumingServiceIndex: awilix.asValue(
     SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX
