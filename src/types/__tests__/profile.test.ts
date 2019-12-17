@@ -20,10 +20,15 @@ import { Version } from "../../../generated/backend/Version";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 
+import { ResponseErrorNotFound } from "italia-ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
 import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";
-import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
+import {
+  notFoundProfileToInternalServerError,
+  profileMissingErrorResponse,
+  toInitializedProfile
+} from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
@@ -106,20 +111,6 @@ describe("profile type", () => {
     expect(userData.version).toBe(mockedExtendedProfile.version);
   });
 
-  /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
-  it("should get an app Proxy profile without email from user data extracted from SPID", async () => {
-    // validate SpidUser. Return right.
-    const userData = toAuthenticatedProfile(
-      mockedUser // user
-    );
-
-    expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.has_profile).toBeFalsy();
-
-    expect(userData.spid_email).toBe(mockedUser.spid_email);
-  });
-
   /*test case: Extracts a user profile from the body of a request.*/
   it("should get a user upsert profile from request", async () => {
     // Express request mock
@@ -155,5 +146,18 @@ describe("profile type", () => {
 
     expect(userData.accepted_tos_version).toBe(undefined);
     expect(userData.is_email_enabled).toBe(anIsEmailEnabled);
+  });
+
+  /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
+  it("should get an ResponseErrorInternal if profile is not found", async () => {
+    // validate SpidUser. Return right.
+    const response = notFoundProfileToInternalServerError(
+      ResponseErrorNotFound("Not found", "Profile not found")
+    );
+
+    expect(response).toEqual({
+      ...profileMissingErrorResponse,
+      apply: expect.any(Function)
+    });
   });
 });
