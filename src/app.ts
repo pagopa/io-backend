@@ -386,6 +386,13 @@ function registerPagoPARoutes(
     bearerTokenAuth,
     toExpressHandler(pagopaController.getUser, pagopaController)
   );
+
+  app.get(
+    `${basePath}/user_extended`,
+    checkIP(allowPagoPAIPSourceRange),
+    bearerTokenAuth,
+    toExpressHandler(pagopaController.getExtendedUser, pagopaController)
+  );
 }
 
 // tslint:disable-next-line: no-big-function
