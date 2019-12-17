@@ -18,6 +18,7 @@ import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import {
+  APNSPushType,
   IInstallation,
   INotificationTemplate,
   toFiscalCodeHash
@@ -72,6 +73,14 @@ export default class NotificationService {
         notificationHubService.send(
           toFiscalCodeHash(notification.message.fiscal_code),
           payload,
+          {
+            // Add required headers for APNS notification to iOS 13
+            // https://azure.microsoft.com/en-us/updates/azure-notification-hubs-updates-ios13/
+            headers: {
+              ["apns-push-type"]: APNSPushType.ALERT,
+              ["apns-priority"]: 10
+            }
+          },
           (error, _) => {
             return resolve(
               error !== null
