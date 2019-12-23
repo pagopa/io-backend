@@ -19,7 +19,7 @@ RUN sudo chmod -R 777 /usr/src/app \
   && yarn generate:proxy-models \
   && yarn build
 
-FROM node:10.14.2-alpine
+FROM node:13.5.0-alpine
 LABEL maintainer="https://teamdigitale.governo.it"
 
 # Install major CA certificates to cover
