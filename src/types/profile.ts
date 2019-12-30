@@ -2,8 +2,6 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-
-import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
@@ -14,7 +12,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
-  ResponseSuccessJson
+  ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
 import { User } from "./user";
 
@@ -42,31 +40,19 @@ export const toInitializedProfile = (
   version: profile.version
 });
 
-/**
- * Converts an authenticated User to an AuthenticatedProfile.
- */
-export const toAuthenticatedProfile = (user: User): AuthenticatedProfile => ({
-  family_name: user.family_name,
-  fiscal_code: user.fiscal_code,
-  has_profile: false,
-  name: user.name,
-  spid_email: user.spid_email,
-  spid_mobile_phone: user.spid_mobile_phone
-});
+export const profileMissingErrorResponse = ResponseErrorInternal(
+  "Profile Missing"
+);
 
-export const notFoundProfileToAuthenticatedProfile = (
+export const notFoundProfileToInternalServerError = (
   // tslint:disable-next-line: prettier
-  response:
+  getProfileResponse:
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
-    | IResponseSuccessJson<AuthenticatedProfile>,
-  user: User
-) => {
-  if (response.kind === "IResponseErrorNotFound") {
-    return ResponseSuccessJson(toAuthenticatedProfile(user));
-  }
-  return response;
-};
+) =>
+  getProfileResponse.kind === "IResponseErrorNotFound"
+    ? profileMissingErrorResponse
+    : getProfileResponse;

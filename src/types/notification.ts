@@ -57,6 +57,20 @@ export interface IInstallation {
 }
 
 /**
+ * APNS apns-push-type available values
+ *
+ * @see https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/sending_notification_requests_to_apns
+ */
+export enum APNSPushType {
+  ALERT = "alert",
+  BACKGROUND = "background",
+  VOIP = "voip",
+  COMPLICATION = "complication",
+  FILEPROVIDER = "fileprovider",
+  MDM = "mdm"
+}
+
+/**
  * Compute the sha256 hash of a string.
  */
 export const toFiscalCodeHash = (fiscalCode: FiscalCode): FiscalCodeHash => {

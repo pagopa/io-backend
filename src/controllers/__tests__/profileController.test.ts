@@ -25,6 +25,7 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
+import { profileMissingErrorResponse } from "../../types/profile";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
@@ -77,15 +78,6 @@ const mockedUser: User = {
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
-};
-
-const proxyAuthenticatedProfileResponse = {
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  has_profile: false,
-  name: aValidName,
-  spid_email: anEmailAddress,
-  spid_mobile_phone: "3222222222222"
 };
 
 // mock for upsert user (Extended Profile)
@@ -171,7 +163,7 @@ describe("ProfileController#getProfile", () => {
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
-  it("should return an authenticated profile if no profile was found", async () => {
+  it("should return an ResponseErrorInternal if no profile was found", async () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -190,9 +182,8 @@ describe("ProfileController#getProfile", () => {
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyAuthenticatedProfileResponse
+      ...profileMissingErrorResponse,
+      apply: expect.any(Function)
     });
   });
 });
