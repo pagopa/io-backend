@@ -372,11 +372,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
         "500":
-<<<<<<< HEAD
-          description: There was an error in retrieving the user profile.
-=======
           description: There was an error starting email validation process
->>>>>>> 15cde21... [#168779317] Fixed wrong rebase merge
           schema:
             $ref: "#/definitions/ProblemJson"
   "/user-identity":
@@ -941,8 +937,6 @@ definitions:
       - fiscal_code
       - name
       - date_of_birth
-  UserProfile:
-    $ref: "#/definitions/InitializedProfile"
   UserIdentity:
     x-one-of: true
     allOf:
