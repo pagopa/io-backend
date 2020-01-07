@@ -62,6 +62,10 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Token null or invalid.
+        "404":
+          description: User Profile not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
           schema:

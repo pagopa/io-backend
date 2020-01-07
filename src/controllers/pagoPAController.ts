@@ -5,6 +5,7 @@
 import * as express from "express";
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
@@ -12,11 +13,10 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { EmailAddress } from "../../generated/io-api/EmailAddress";
 import { ExtendedPagoPAUser } from "../../generated/pagopa/ExtendedPagoPAUser";
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
 import ProfileService from "../services/profileService";
-import { notFoundProfileToAuthenticatedProfile } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 
 const VALIDATION_ERROR_TITLE = "Validation Error";
@@ -58,44 +58,39 @@ export default class PagoPAController {
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ExtendedPagoPAUser>
   > =>
     withUserFromRequest(req, async user => {
-      const response = notFoundProfileToAuthenticatedProfile(
-        await this.profileService.getProfile(user),
-        user
-      );
+      const response = await this.profileService.getProfile(user);
       if (response.kind !== "IResponseSuccessJson") {
         // if getProfile returns a failure, we just return it
         return response;
       }
-
-      // getProfile may return an InitializedProfile or an AuthenticatedProfile
       const profile = response.value;
 
-      // a validated custom email may have been set in the InitializedProfile, thus we
-      // have to check if the profile it's an InitializedProfile to be able to
-      // retrieve it
+      // a validated custom email may have been set in the InitializedProfile,
+      // this email must be used only if is present and validated.
       const maybeCustomEmailValidated =
-        InitializedProfile.is(profile) && profile.is_email_validated
-          ? profile.email
-          : undefined;
+        profile.email && profile.is_email_validated ? profile.email : undefined;
 
-      // if the profile is an AuthenticatedProfile or the profile is an
-      // InitializedProfile but an email has not been set or is not yet validated,
-      // we fall back to the email from the SPID profile
-      const email = maybeCustomEmailValidated
+      // if no validated email is provided into InitializedProfile
+      // spid email will be used for notice email
+      const maybeNoticeEmail:
+        | EmailAddress
+        | undefined = maybeCustomEmailValidated
         ? maybeCustomEmailValidated
         : user.spid_email;
 
+      // If no valid notice email is present an validation error is returned as response
       return ExtendedPagoPAUser.decode({
         family_name: user.family_name,
         fiscal_code: profile.fiscal_code,
         mobile_phone: user.spid_mobile_phone,
         name: user.name,
-        notice_email: email,
+        notice_email: maybeNoticeEmail,
         spid_email: user.spid_email
       }).fold<
         IResponseSuccessJson<ExtendedPagoPAUser> | IResponseErrorValidation
