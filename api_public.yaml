@@ -23,7 +23,8 @@ paths:
           examples:
             application/json:
               version: "0.0.1"
-              uptime_seconds: 12345
+              minAppVersion: "0.0.0"
+              minAppVersionPagoPa: "0.0.0"
 definitions:
   ServerInfo:
     type: object
@@ -33,9 +34,12 @@ definitions:
         type: string
       minAppVersion:
         type: string
+      minAppVersionPagoPa:
+        type: string
     required:
       - version
       - minAppVersion
+      - minAppVersionPagoPa
 consumes:
   - application/json
 produces:

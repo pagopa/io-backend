@@ -565,10 +565,12 @@ function registerPublicRoutes(app: Express): void {
   const version = getCurrentBackendVersion();
   // The minimum app version that support this API
   const minAppVersion = getValueFromPackageJson("minAppVersion");
+  const minAppVersionPagoPa = getValueFromPackageJson("minAppVersionPagoPa");
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
       minAppVersion,
+      minAppVersionPagoPa,
       version
     };
     res.status(200).json(serverInfo);
