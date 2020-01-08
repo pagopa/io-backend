@@ -23,8 +23,8 @@ paths:
           examples:
             application/json:
               version: "0.0.1"
-              minAppVersion: "0.0.0"
-              minAppVersionPagoPa: "0.0.0"
+              min_app_version: "0.0.0"
+              min_app_version_pagopa: "0.0.0"
 definitions:
   ServerInfo:
     type: object
@@ -32,14 +32,14 @@ definitions:
     properties:
       version:
         type: string
-      minAppVersion:
+      min_app_version:
         type: string
-      minAppVersionPagoPa:
+      min_app_version_pagopa:
         type: string
     required:
       - version
-      - minAppVersion
-      - minAppVersionPagoPa
+      - min_app_version
+      - min_app_version_pagopa
 consumes:
   - application/json
 produces:
