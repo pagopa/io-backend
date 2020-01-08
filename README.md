@@ -193,12 +193,12 @@ Redis Database stores data required only by application side functionalities. Be
 
 ### Backend
 
-To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `minAppVersion` inside the `package.json`. This value is provided to the app through the `/info` API.
+To handle Backend compatibility with several Mobile App versions, the oldest mobile app version supported by the backend is stored into the property `min_app_version` inside the `package.json`. This value is provided to the app through the `/info` API.
 If the mobile app version is lower an upgrade is required.
 
 ### PagoPa
 
-To handle the mobile app compatibility with the latest implementation of PagoPA APIs, the backend exposes through the `/info` API a property called `minAppVersionPagoPa` defined into `package.json` file. If the mobile app version is lower of this value, all the functions that require PagoPa are disabled to avoid compatibility issues.
+To handle the mobile app compatibility with the latest implementation of PagoPA APIs, the backend exposes through the `/info` API a property called `min_app_version_pagopa` defined into `package.json` file. If the mobile app version is lower of this value, all the functions that require PagoPa are disabled to avoid compatibility issues.
 
 ## How to contribute
 
