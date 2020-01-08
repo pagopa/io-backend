@@ -198,7 +198,7 @@ If the mobile app version is lower an upgrade is required.
 
 ### PagoPa
 
-To handle the mobile app compatibility with the latest implementation of PagoPA APIs, the backend exposes through the `/info` API a propertie called `minAppVersionPagoPa` defined inside `package.json` file. If the mobile app version is lower of this value, all the functions that require PagoPa are disabled to avoid compatibility issues.
+To handle the mobile app compatibility with the latest implementation of PagoPA APIs, the backend exposes through the `/info` API a property called `minAppVersionPagoPa` defined into `package.json` file. If the mobile app version is lower of this value, all the functions that require PagoPa are disabled to avoid compatibility issues.
 
 ## How to contribute
 
