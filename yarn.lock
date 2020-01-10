@@ -4353,9 +4353,10 @@ passport-http-bearer@^1.0.1:
   dependencies:
     passport-strategy "1.x.x"
 
-passport-saml@^0.33.0:
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-0.33.0.tgz#51b99f19dced56d246ee4e2887e32f06321fbecf"
+passport-saml@^0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-0.34.0.tgz#1ce6c0d129d1eff7376c70ee3a942981516d52f8"
+  integrity sha512-sSIf1vCqVrLrgp2A+J1Ay1DeJ3D/uW0EVkRm262L/Upat+SCEV6dLYloyGyHw7BLLIL+xH5M17cBZHUeowmQrg==
   dependencies:
     passport-strategy "*"
     q "^1.5.0"
@@ -5122,7 +5123,7 @@ spdx-license-ids@^3.0.0:
   resolved "git://github.com/teamdigitale/spid-passport.git#35b22204ba67ca07885b387e2b26151d42b93182"
   dependencies:
     passport "^0.4.0"
-    passport-saml "^0.33.0"
+    passport-saml "^0.34.0"
     passport-strategy "^1.0.0"
     q "^1.5.1"
     winston "^3.0.0"

@@ -60,6 +60,7 @@
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
+    "passport-saml": "^0.34.0",
     "passport-strategy": "^1.0.0",
     "patch-package": "^5.1.1",
     "range_check": "^1.4.0",
