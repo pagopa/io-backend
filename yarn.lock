@@ -4366,6 +4366,20 @@ passport-saml@^0.34.0:
     xmlbuilder "^9.0.4"
     xmldom "0.1.x"
 
+passport-saml@^1.0.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-1.2.0.tgz#45900e42ce57186be43be835147546d941095d71"
+  integrity sha512-CU1JOx9FTITF8+vl/G1g7FV6kHWXYzECV3pq3D8K3RIM1MS0efbfQ2hkgDFdoZGdG9DdMH5z8OBW/O8qoXnkLQ==
+  dependencies:
+    debug "^3.1.0"
+    passport-strategy "*"
+    q "^1.5.0"
+    xml-crypto "^1.1.4"
+    xml-encryption "^0.11.0"
+    xml2js "0.4.x"
+    xmlbuilder "^11.0.0"
+    xmldom "0.1.x"
+
 passport-strategy@*, passport-strategy@1.x.x, passport-strategy@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/passport-strategy/-/passport-strategy-1.0.0.tgz#b5539aa8fc225a3d1ad179476ddf236b440f52e4"
@@ -5123,7 +5137,7 @@ spdx-license-ids@^3.0.0:
   resolved "git://github.com/teamdigitale/spid-passport.git#35b22204ba67ca07885b387e2b26151d42b93182"
   dependencies:
     passport "^0.4.0"
-    passport-saml "^0.34.0"
+    passport-saml "^0.33.0"
     passport-strategy "^1.0.0"
     q "^1.5.1"
     winston "^3.0.0"
@@ -6010,6 +6024,14 @@ xml-crypto@^0.10.1:
     xmldom "=0.1.19"
     xpath.js ">=0.0.3"
 
+xml-crypto@^1.1.4:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-1.4.0.tgz#de1cec8cd31cbd689cd90d3d6e8a27d4ae807de7"
+  integrity sha512-K8FRdRxICVulK4WhiTUcJrRyAIJFPVOqxfurA3x/JlmXBTxy+SkEENF6GeRt7p/rB6WSOUS9g0gXNQw5n+407g==
+  dependencies:
+    xmldom "0.1.27"
+    xpath "0.0.27"
+
 xml-encryption@^0.11.0:
   version "0.11.2"
   resolved "https://registry.yarnpkg.com/xml-encryption/-/xml-encryption-0.11.2.tgz#c217f5509547e34b500b829f2c0bca85cca73a21"
@@ -6049,11 +6071,16 @@ xmlbuilder@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-10.0.0.tgz#c64e52f8ae097fe5fd46d1c38adaade071ee1b55"
 
+xmlbuilder@^11.0.0:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-11.0.1.tgz#be9bae1c8a046e76b31127726347d0ad7002beb3"
+  integrity sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==
+
 xmlbuilder@^9.0.4, xmlbuilder@~9.0.1:
   version "9.0.7"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-9.0.7.tgz#132ee63d2ec5565c557e20f4c22df9aca686b10d"
 
-xmldom@0.1.x, xmldom@^0.1.27, xmldom@~0.1.15:
+xmldom@0.1.27, xmldom@0.1.x, xmldom@^0.1.27, xmldom@~0.1.15:
   version "0.1.27"
   resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.1.27.tgz#d501f97b3bdb403af8ef9ecc20573187aadac0e9"
 
