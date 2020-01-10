@@ -148,7 +148,7 @@ describe("PagoPaController#getExtendedUser", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getExtendedUser on the PagoPaController with valid values", async () => {
+  it("should return a successful response with validated email", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -171,7 +171,7 @@ describe("PagoPaController#getExtendedUser", () => {
     });
   });
 
-  it("calls the getExtendedUser on the PagoPaController and skip not validated custom email", async () => {
+  it("should return a successful response with notice_email equals to spid_email when user email is unverified", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -204,7 +204,7 @@ describe("PagoPaController#getExtendedUser", () => {
     });
   });
 
-  it("should return an error calling getExtendedUser is no valid email is provided", async () => {
+  it("should return a validation error response when user email is not verified and spid_email is not available", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
