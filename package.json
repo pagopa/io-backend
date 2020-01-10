@@ -1,7 +1,8 @@
 {
   "name": "italia-backend",
   "version": "2.6.0",
-  "minAppVersion": "0.0.0",
+  "min_app_version": "0.0.0",
+  "min_app_version_pagopa": "0.0.0",
   "description": "Italia app and web backend",
   "main": "index.js",
   "engines": {
