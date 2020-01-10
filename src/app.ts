@@ -388,7 +388,7 @@ function registerPagoPARoutes(
   );
 
   app.get(
-    `${basePath}/user_extended`,
+    `${basePath}/user-extended`,
     checkIP(allowPagoPAIPSourceRange),
     bearerTokenAuth,
     toExpressHandler(pagopaController.getExtendedUser, pagopaController)

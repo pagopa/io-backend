@@ -15,7 +15,7 @@ paths:
     get:
       operationId: getUser
       summary: Get user's data
-      description: Returns the user data needed by PagaPA Wallet backend.
+      description: Returns the user data needed by PagoPA Wallet backend.
       responses:
         "200":
           description: Found.
@@ -37,12 +37,12 @@ paths:
           description: There was an error in retrieving the user data.
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/user_extended":
+  "/user-extended":
     x-swagger-router-controller: PagoPAController
     get:
       operationId: getExtendedUser
       summary: Get user's data
-      description: Returns the user data needed by PagaPA Wallet backend.
+      description: Returns the user data needed by PagoPA Wallet backend.
       responses:
         "200":
           description: Found.
