@@ -57,13 +57,15 @@ export default class PagoPAController {
         );
       }
 
-      const pagopaUser: PagoPAUser = {
+      // The field spid_mobile_phone is optional, if not provided the decode process fail.
+      return PagoPAUser.decode({
         email: profile.email,
         family_name: user.family_name,
         mobile_phone: user.spid_mobile_phone,
         name: user.name
-      };
-
-      return ResponseSuccessJson(pagopaUser);
+      }).fold<IResponseErrorValidation | IResponseSuccessJson<PagoPAUser>>(
+        _ => ResponseErrorValidation("Bad Request", "Invalid User Profile"),
+        _ => ResponseSuccessJson(_)
+      );
     });
 }
