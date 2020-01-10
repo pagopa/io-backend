@@ -149,11 +149,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*":
-  version "10.7.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.7.1.tgz#b704d7c259aa40ee052eec678758a68d07132a2e"
-
-"@types/node@10.14.2":
+"@types/node@*", "@types/node@10.14.2":
   version "10.14.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.2.tgz#0c4d73f10a8f7093cdb634ee79dd59a609114c7b"
   integrity sha512-Y1kCfTShKcJH4CsG5+m5RMA+0tQKa8TrxyMczy0zE8QeDKbuOAJMF8JRM5ouCFyakaSoAhhgy2beCSKLVz+daw==
@@ -1116,11 +1112,7 @@ combined-stream@1.0.6, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@^2.12.1, commander@^2.13.0, commander@^2.7.1:
-  version "2.17.1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
-
-commander@~2.20.0:
+commander@^2.12.1, commander@^2.13.0, commander@^2.7.1, commander@~2.20.0:
   version "2.20.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.0.tgz#d58bb2b5c1ee8f87b0d340027e9e94e222c5a422"
   integrity sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
@@ -1335,11 +1327,7 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
-date-fns@^1.28.5:
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.29.0.tgz#12e609cdcb935127311d04d33334e2960a2a54e6"
-
-date-fns@^1.30.1:
+date-fns@^1.28.5, date-fns@^1.30.1:
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
@@ -2036,9 +2024,14 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
-fp-ts@1.12.0, fp-ts@^1.0.0:
+fp-ts@1.12.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.12.0.tgz#d333310e4ac104cdcb6bea47908e381bb09978e7"
+
+fp-ts@^1.0.0, fp-ts@~1.17.0:
+  version "1.17.4"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.17.4.tgz#f41eeeb2a8924b51b11521f93f5f59d28d0503be"
+  integrity sha512-OaIM5w0FceJm6zO0OjMY05Rdg02nlFCpilTrMitzGnHORh/8neP0NH9OcRvnGQdOEh2T5xjtcutzzctvWOQtCQ==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -2097,14 +2090,7 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
 
-fsevents@^1.2.3:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.4.tgz#f41dcb1af2582af3692da36fc55cbd8e1041c426"
-  dependencies:
-    nan "^2.9.2"
-    node-pre-gyp "^0.10.0"
-
-fsevents@^1.2.7:
+fsevents@^1.2.3, fsevents@^1.2.7:
   version "1.2.9"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.9.tgz#3f5ed66583ccd6f400b5a00db6f7e861363e388f"
   integrity sha512-oeyj2H3EjjonWcFjD5NvZNE9Rqe4UW+nQBU2HNeKw0koVLEFIhtyETyAakeAM3de7Z/SW5kcA+fZUait9EApnw==
@@ -2520,14 +2506,14 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@~2.0.1, inherits@~2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
-
-inherits@^2.0.3:
+inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.1, inherits@~2.0.3:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
+
+inherits@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
 ini@^1.3.4, ini@^1.3.5, ini@~1.3.0:
   version "1.3.5"
@@ -2892,16 +2878,7 @@ istanbul-reports@^1.3.0:
   dependencies:
     handlebars "^4.0.3"
 
-italia-ts-commons@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.0.1.tgz#6890eaad8c1fbf6a2b3213d542fe4d56217fca8e"
-  dependencies:
-    fp-ts "1.12.0"
-    io-ts "1.8.5"
-    json-set-map "^1.0.2"
-    validator "^10.1.0"
-
-italia-ts-commons@^5.1.12:
+italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.12:
   version "5.1.12"
   resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.12.tgz#7af568872914469a1292f6594c93af63f94d5abf"
   integrity sha512-ssYne0ypD1FxJsKe5kd/6nKQe077RVdG3pRtbQvpruVep1vRRdAJWWyvzN398MICct2K4fjfI2mkWIDOqkVh7g==
@@ -3318,16 +3295,7 @@ json-parse-better-errors@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
 
-json-schema-ref-parser@^5.0.3:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/json-schema-ref-parser/-/json-schema-ref-parser-5.1.2.tgz#c9cdaec76ea894f71eb3776c3b3291dfa62e56c9"
-  dependencies:
-    call-me-maybe "^1.0.1"
-    debug "^3.1.0"
-    js-yaml "^3.12.0"
-    ono "^4.0.5"
-
-json-schema-ref-parser@^5.1.3:
+json-schema-ref-parser@^5.0.3, json-schema-ref-parser@^5.1.3:
   version "5.1.3"
   resolved "https://registry.yarnpkg.com/json-schema-ref-parser/-/json-schema-ref-parser-5.1.3.tgz#f86c5868f40898e69169e1bbc854725a4fd0e1ad"
   dependencies:
@@ -3692,13 +3660,9 @@ make-dir@^1.0.0:
   dependencies:
     pify "^3.0.0"
 
-make-error@1.x:
+make-error@1.x, make-error@^1.1.1:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.5.tgz#efe4e81f6db28cadd605c70f29c831b58ef776c8"
-
-make-error@^1.1.1:
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.4.tgz#19978ed575f9e9545d2ff8c13e33b5d18a67d535"
 
 makeerror@1.0.x:
   version "1.0.11"
@@ -3903,10 +3867,6 @@ nan@^2.12.1:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.0.tgz#7818f722027b2459a86f0295d434d1fc2336c52c"
   integrity sha512-INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==
 
-nan@^2.9.2:
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
-
 nanomatch@^1.2.9:
   version "1.2.13"
   resolved "https://registry.yarnpkg.com/nanomatch/-/nanomatch-1.2.13.tgz#b87a8aa4fc0de8fe6be88895b38983ff265bd119"
@@ -3990,21 +3950,6 @@ node-notifier@^5.2.1:
     semver "^5.4.1"
     shellwords "^0.1.1"
     which "^1.3.0"
-
-node-pre-gyp@^0.10.0:
-  version "0.10.3"
-  resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.10.3.tgz#3070040716afdc778747b61b6887bf78880b80fc"
-  dependencies:
-    detect-libc "^1.0.2"
-    mkdirp "^0.5.1"
-    needle "^2.2.1"
-    nopt "^4.0.1"
-    npm-packlist "^1.1.6"
-    npmlog "^4.0.2"
-    rc "^1.2.7"
-    rimraf "^2.6.1"
-    semver "^5.3.0"
-    tar "^4"
 
 node-pre-gyp@^0.12.0:
   version "0.12.0"
@@ -4408,9 +4353,10 @@ passport-http-bearer@^1.0.1:
   dependencies:
     passport-strategy "1.x.x"
 
-passport-saml@^0.33.0:
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-0.33.0.tgz#51b99f19dced56d246ee4e2887e32f06321fbecf"
+passport-saml@^0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/passport-saml/-/passport-saml-0.34.0.tgz#1ce6c0d129d1eff7376c70ee3a942981516d52f8"
+  integrity sha512-sSIf1vCqVrLrgp2A+J1Ay1DeJ3D/uW0EVkRm262L/Upat+SCEV6dLYloyGyHw7BLLIL+xH5M17cBZHUeowmQrg==
   dependencies:
     passport-strategy "*"
     q "^1.5.0"
@@ -5177,7 +5123,7 @@ spdx-license-ids@^3.0.0:
   resolved "git://github.com/teamdigitale/spid-passport.git#35b22204ba67ca07885b387e2b26151d42b93182"
   dependencies:
     passport "^0.4.0"
-    passport-saml "^0.33.0"
+    passport-saml "^0.34.0"
     passport-strategy "^1.0.0"
     q "^1.5.1"
     winston "^3.0.0"

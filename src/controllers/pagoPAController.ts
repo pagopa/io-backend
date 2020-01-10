@@ -35,7 +35,7 @@ export default class PagoPAController {
         name: user.name
       }).fold<IResponseErrorValidation | IResponseSuccessJson<PagoPAUser>>(
         _ => ResponseErrorValidation("Validation Error", "Invalid User Data"),
-        pagopaUser => ResponseSuccessJson(pagopaUser)
+        ResponseSuccessJson
       )
     );
 }

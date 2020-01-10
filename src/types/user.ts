@@ -31,15 +31,16 @@ export const User = t.intersection([
     name: t.string,
     session_token: SessionToken,
     spid_level: SpidLevel,
-    spid_mobile_phone: NonEmptyString,
     wallet_token: WalletToken
   }),
   t.partial({
+    date_of_birth: t.string,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
     spid_email: EmailAddress,
-    spid_idp: t.string
+    spid_idp: t.string,
+    spid_mobile_phone: NonEmptyString
   })
 ]);
 
@@ -53,11 +54,12 @@ export const SpidUser = t.intersection([
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
     issuer: Issuer,
-    mobilePhone: NonEmptyString,
     name: t.string
   }),
   t.partial({
+    dateOfBirth: t.string,
     email: EmailAddress,
+    mobilePhone: NonEmptyString,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string
@@ -76,6 +78,7 @@ export function toAppUser(
 ): User {
   return {
     created_at: new Date().getTime(),
+    date_of_birth: from.dateOfBirth,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,
