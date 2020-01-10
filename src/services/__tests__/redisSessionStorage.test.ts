@@ -25,6 +25,7 @@ import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
 
+const allowMultipleSessions = false;
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
 
@@ -81,7 +82,8 @@ mockRedisClient.exists = mockExists;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
-  aTokenDurationSecs
+  aTokenDurationSecs,
+  allowMultipleSessions
 );
 
 let clock: any;
@@ -95,6 +97,7 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+// tslint:disable-next-line: no-big-function
 describe("RedisSessionStorage#set", () => {
   it.each([
     [
@@ -272,6 +275,42 @@ describe("RedisSessionStorage#set", () => {
       expect(response).toEqual(expected);
     }
   );
+
+  it("should never call removeOtherUserSessions if ALLOW_MULTIPLE_SESSION is true", async () => {
+    const multipleSessionsStorage = new RedisSessionStorage(
+      mockRedisClient,
+      aTokenDurationSecs,
+      true
+    );
+
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+      callback(undefined, "OK");
+    });
+
+    mockSadd.mockImplementation((_, __, callback) => {
+      callback(undefined, 1);
+    });
+    const oldSessionToken = "old_session_token";
+    mockSmembers.mockImplementation((_, callback) => {
+      callback(undefined, [
+        `SESSIONINFO-${oldSessionToken}`,
+        `SESSIONINFO-${oldSessionToken}2`,
+        `SESSIONINFO-${aValidUser.session_token}`
+      ]);
+    });
+
+    const response = await multipleSessionsStorage.set(aValidUser);
+
+    expect(mockDel).not.toBeCalled(); // Old session will be not deleted
+    expect(response.isRight());
+  });
 });
 
 describe("RedisSessionStorage#removeOtherUserSessions", () => {
