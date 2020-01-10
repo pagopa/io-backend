@@ -315,15 +315,32 @@ describe("RedisSessionStorage#set", () => {
 
 describe("RedisSessionStorage#removeOtherUserSessions", () => {
   it("should delete only older session token", async () => {
-    const oldSessionToken = "old_session_token";
+    const oldSessionToken = "old_session_token" as SessionToken;
+    const oldWalletToken = "old_wallet_token" as WalletToken;
+    const oldUserPayload: User = {
+      ...aValidUser,
+      session_token: oldSessionToken,
+      wallet_token: oldWalletToken
+    };
+    const oldUserPayload2: User = {
+      ...aValidUser,
+      session_token: `${oldSessionToken}2` as SessionToken,
+      wallet_token: `${oldWalletToken}2` as WalletToken
+    };
     mockSmembers.mockImplementation((_, callback) => {
       callback(undefined, [
-        `SESSIONINFO-${oldSessionToken}`,
-        `SESSIONINFO-${oldSessionToken}2`,
+        `SESSIONINFO-${oldUserPayload.session_token}`,
+        `SESSIONINFO-${oldUserPayload2.session_token}`,
         `SESSIONINFO-${aValidUser.session_token}`
       ]);
     });
-    mockDel.mockImplementation((_, __, callback) => {
+    mockMget.mockImplementation((_, __, callback) => {
+      callback(undefined, [
+        JSON.stringify(oldUserPayload),
+        JSON.stringify(oldUserPayload2)
+      ]);
+    });
+    mockDel.mockImplementation((_, __, ___, ____, callback) => {
       callback(undefined, 1);
     });
 
@@ -336,8 +353,18 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(`SESSION-${oldSessionToken}`);
-    expect(mockDel.mock.calls[0][1]).toBe(`SESSION-${oldSessionToken}2`);
+    expect(mockDel.mock.calls[0][0]).toBe(
+      `SESSION-${oldUserPayload.session_token}`
+    );
+    expect(mockDel.mock.calls[0][1]).toBe(
+      `SESSION-${oldUserPayload2.session_token}`
+    );
+    expect(mockDel.mock.calls[0][2]).toBe(
+      `WALLET-${oldUserPayload.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][3]).toBe(
+      `WALLET-${oldUserPayload2.wallet_token}`
+    );
     expect(response.isRight());
   });
 });
@@ -388,7 +415,9 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet.mock.calls[0][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(left(new Error("Unable to parse the user json")));
+    expect(response).toEqual(
+      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+    );
   });
 
   it("should return error if the session is expired", async () => {
