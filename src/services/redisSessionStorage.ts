@@ -417,10 +417,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
             _ !== `${sessionInfoKeyPrefix}${user.session_token}`
         )
         .map(_ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`);
-      /**
-       * Retrieve all user wallet tokens related to session tokens.
-       * Wallet tokens are stored inside user payload.
-       */
+
+      // Retrieve all user wallet tokens related to session tokens.
+      // Wallet tokens are stored inside user payload.
       const errorOrUserWalletTokens = await new Promise<
         Either<Error, ReadonlyArray<string>>
       >(resolve => {
