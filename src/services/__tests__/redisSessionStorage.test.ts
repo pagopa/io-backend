@@ -415,7 +415,9 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet.mock.calls[0][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(left(new Error("Unable to parse the user json")));
+    expect(response).toEqual(
+      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+    );
   });
 
   it("should return error if the session is expired", async () => {

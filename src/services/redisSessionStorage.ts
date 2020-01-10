@@ -366,26 +366,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
         if (value === null) {
           return resolve(left<Error, User>(sessionNotFoundError));
         }
-
-        // Try-catch is needed because parse() may throw an exception.
-        try {
-          const userPayload = JSON.parse(value);
-          const errorOrDeserializedUser = User.decode(userPayload);
-
-          if (isLeft(errorOrDeserializedUser)) {
-            const decodeErrorMessage = new Error(
-              errorsToReadableMessages(errorOrDeserializedUser.value).join("/")
-            );
-            return resolve(left<Error, User>(decodeErrorMessage));
+        const errorOrDeserializedUser = parseJSON<Error>(value, toError).chain(
+          data => {
+            return User.decode(data).mapLeft(_ => {
+              return new Error(errorsToReadableMessages(_).join("/"));
+            });
           }
-
-          const user = errorOrDeserializedUser.value;
-          return resolve(right<Error, User>(user));
-        } catch (err) {
-          return resolve(
-            left<Error, User>(new Error("Unable to parse the user json"))
-          );
-        }
+        );
+        return resolve(errorOrDeserializedUser);
       });
     });
   }
@@ -454,10 +442,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
           _ =>
             _.map(value => {
               try {
-                // TODO: When https://github.com/teamdigitale/io-backend/pull/511 will be merged,
-                // update the following code using parseJSON ported from fp-ts
-                const userPayload = JSON.parse(value);
-                const errorOrDeserializedUser = User.decode(userPayload);
+                const errorOrDeserializedUser = parseJSON<Error>(
+                  value,
+                  toError
+                ).chain(data => {
+                  return User.decode(data).mapLeft(err => {
+                    return new Error(errorsToReadableMessages(err).join("/"));
+                  });
+                });
                 if (
                   isLeft(errorOrDeserializedUser) ||
                   errorOrDeserializedUser.value.wallet_token ===
