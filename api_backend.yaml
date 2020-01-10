@@ -378,9 +378,9 @@ paths:
   "/user-identity":
     x-swagger-router-controller: ProfileController
     get:
-      operationId: getSpidProfile
-      summary: Get stored user's spid profile
-      description: Returns the SPID profile stored during the login phase
+      operationId: getUserIdentity
+      summary: Get stored user identity
+      description: Returns the user identity stored during the login phase
       responses:
         "200":
           description: Found.

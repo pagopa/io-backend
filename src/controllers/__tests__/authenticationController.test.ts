@@ -217,10 +217,12 @@ jest.mock("../../services/profileService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
+const allowMultipleSessions = false;
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  allowMultipleSessions
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {

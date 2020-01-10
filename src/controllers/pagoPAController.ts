@@ -5,7 +5,6 @@
 import * as express from "express";
 import {
   IResponseErrorInternal,
-  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorValidation,
@@ -13,15 +12,9 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
-
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import ProfileService from "../services/profileService";
-import { notFoundProfileToInternalServerError } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 
 export default class PagoPAController {
-  constructor(private readonly profileService: ProfileService) {}
-
   /**
    * Returns the profile for the user identified by the provided fiscal
    * code.
@@ -32,51 +25,17 @@ export default class PagoPAController {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PagoPAUser>
   > =>
-    withUserFromRequest(req, async user => {
-      const response = notFoundProfileToInternalServerError(
-        await this.profileService.getProfile(user)
-      );
-
-      if (response.kind !== "IResponseSuccessJson") {
-        // if getProfile returns a failure, we just return it
-        return response;
-      }
-
-      // getProfile returns an InitializedProfile
-      const profile = response.value;
-
-      // a custom email may have been set in the InitializedProfile, thus we
-      // have to check if the profile it's an InitializedProfile to be able to
-      // retrieve it
-      const maybeCustomEmail = InitializedProfile.is(profile)
-        ? profile.email
-        : undefined;
-
-      // if the profile is an AuthenticatedProfile or the profile is an
-      // InitializedProfile but an email has not been set, we fall back to
-      // the email from the SPID profile
-      const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
-
-      if (!email) {
-        return ResponseErrorValidation(
-          "Validation Error",
-          "Missing User Email"
-        );
-      }
-
-      // The field spid_mobile_phone is optional, if not provieded the decode process fail.
-      // mobile_phone is removed from PagoPAUser into https://github.com/teamdigitale/io-backend/pull/537/
-      return PagoPAUser.decode({
-        email,
+    withUserFromRequest(req, async user =>
+      PagoPAUser.decode({
+        email: user.spid_email,
         family_name: user.family_name,
         mobile_phone: user.spid_mobile_phone,
         name: user.name
       }).fold<IResponseErrorValidation | IResponseSuccessJson<PagoPAUser>>(
-        _ => ResponseErrorValidation("Bad Request", "Invalid User Profile"),
-        _ => ResponseSuccessJson(_)
-      );
-    });
+        _ => ResponseErrorValidation("Validation Error", "Invalid User Data"),
+        ResponseSuccessJson
+      )
+    );
 }
