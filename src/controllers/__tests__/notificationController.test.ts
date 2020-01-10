@@ -1,5 +1,4 @@
 /* tslint:disable:no-object-mutation */
-
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
@@ -9,12 +8,18 @@ import { InstallationID } from "../../../generated/backend/InstallationID";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
+import { Notification } from "../../../generated/notifications/Notification";
+
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
+import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
+
+import { right } from "fp-ts/lib/Either";
+import * as redis from "redis";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -111,8 +116,28 @@ jest.mock("../../services/notificationService", () => {
   };
 });
 
+const mockUserHasActiveSessions = jest.fn();
+jest.mock("../../services/redisSessionStorage", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      userHasActiveSessions: mockUserHasActiveSessions
+    }))
+  };
+});
+
+const redisClient = {} as redis.RedisClient;
+
+const tokenDurationSecs = 0;
+const redisSessionStorage = new RedisSessionStorage(
+  redisClient,
+  tokenDurationSecs
+);
+
 const notificationService = new NotificationService("", "");
-const controller = new NotificationController(notificationService);
+const controller = new NotificationController(
+  notificationService,
+  redisSessionStorage
+);
 
 describe("NotificationController#notify", () => {
   beforeEach(() => {
@@ -122,6 +147,8 @@ describe("NotificationController#notify", () => {
   it("should return success if data is correct", async () => {
     const req = mockReq();
 
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
     );
@@ -129,6 +156,44 @@ describe("NotificationController#notify", () => {
     req.body = aValidNotification;
 
     const res = await controller.notify(req);
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+  });
+
+  it("should send generic notification if user has not active sessions", async () => {
+    const req = mockReq();
+
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(false)));
+
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
+
+    req.body = aValidNotification;
+    const expectedNotification = {
+      ...aValidNotification,
+      message: {
+        ...aValidNotification.message,
+        content: {
+          ...aValidNotification.message.content,
+          subject: "Entra nell'app per leggere il contenuto"
+        }
+      }
+    };
+    const expectedNotificationOrError = Notification.decode(
+      expectedNotification
+    );
+    const res = await controller.notify(req);
+
+    expect(expectedNotificationOrError.isRight()).toBeTruthy();
+    expect(mockNotify).toBeCalledWith(
+      expectedNotificationOrError.value,
+      "Hai un nuovo messaggio su IO"
+    );
 
     expect(res).toEqual({
       apply: expect.any(Function),

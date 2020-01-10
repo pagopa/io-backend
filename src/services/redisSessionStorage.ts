@@ -2,12 +2,18 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
 import {
-  errorsToReadableMessages,
-  ReadableReporter
-} from "italia-ts-commons/lib/reporters";
+  Either,
+  isLeft,
+  isRight,
+  left,
+  parseJSON,
+  right,
+  toError
+} from "fp-ts/lib/Either";
+import { none, Option, some } from "fp-ts/lib/Option";
+import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
@@ -28,11 +34,15 @@ export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
+  private mgetTask: (
+    ...args: ReadonlyArray<string>
+  ) => TaskEither<Error, ReadonlyArray<string>>;
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
   ) {
     super();
+    this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
   }
 
   /**
@@ -230,46 +240,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
     }
-    const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
-      (resolve, reject) => {
-        const keys = isRight(sessionKeys)
-          ? sessionKeys.value
-          : initializedSessionKeys;
-        this.redisClient.mget(...keys, (err, response) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(response);
-        });
-      }
-    );
-    return right(
-      userSessionTokensResult.reduce(
-        (prev: SessionsList, _) => {
-          try {
-            const sessionInfoPayload = JSON.parse(_);
-            const errorOrDeserializedSessionInfo = SessionInfo.decode(
-              sessionInfoPayload
-            );
-
-            if (isLeft(errorOrDeserializedSessionInfo)) {
-              log.warn(
-                "Unable to decode the session info: %s. Skipped.",
-                ReadableReporter.report(errorOrDeserializedSessionInfo)
-              );
-              return prev;
-            }
-            return {
-              sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
-            };
-          } catch (err) {
-            log.error("Unable to parse the session info json. Skipped.");
-            return prev;
-          }
-        },
-        { sessions: [] } as SessionsList
-      )
-    );
+    return this.mgetTask(...sessionKeys.getOrElse(initializedSessionKeys))
+      .map(_ => this.parseUserSessionList(_))
+      .run();
   }
 
   public async clearExpiredSetValues(
@@ -306,6 +279,32 @@ export default class RedisSessionStorage extends RedisStorageUtils
         });
       })
     );
+  }
+
+  public async userHasActiveSessions(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const sessionKeys = await this.readSessionInfoKeys(fiscalCode);
+    if (sessionKeys.value === sessionNotFoundError) {
+      return right(false);
+    } else if (isLeft(sessionKeys)) {
+      return left(sessionKeys.value);
+    }
+    const errorOrSessionTokens = await this.mgetTask(...sessionKeys.value)
+      .map(_ =>
+        this.parseUserSessionList(_).sessions.map(__ => __.sessionToken)
+      )
+      .run();
+
+    if (errorOrSessionTokens.isLeft()) {
+      return left(errorOrSessionTokens.value);
+    } else if (errorOrSessionTokens.value.length === 0) {
+      return right(false);
+    }
+
+    return this.mgetTask(...errorOrSessionTokens.value)
+      .map(_ => _.length > 0)
+      .run();
   }
 
   /*
@@ -462,5 +461,32 @@ export default class RedisSessionStorage extends RedisStorageUtils
       return left(sessionNotFoundError);
     }
     return right(replay);
+  }
+
+  private parseUserSessionList(
+    userSessionTokensResult: ReadonlyArray<string>
+  ): SessionsList {
+    return userSessionTokensResult.reduce(
+      (prev: SessionsList, _) => {
+        return parseJSON<Error>(_, toError)
+          .chain(data => {
+            return SessionInfo.decode(data).mapLeft(err => {
+              return new Error(errorsToReadableMessages(err).join("/"));
+            });
+          })
+          .fold(
+            err => {
+              log.warn("Unable to decode the session info: %s. Skipped.", err);
+              return prev;
+            },
+            sessionInfo => {
+              return {
+                sessions: [...prev.sessions, sessionInfo]
+              };
+            }
+          );
+      },
+      { sessions: [] } as SessionsList
+    );
   }
 }
