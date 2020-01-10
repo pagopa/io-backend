@@ -130,7 +130,8 @@ const redisClient = {} as redis.RedisClient;
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  false
 );
 
 const notificationService = new NotificationService("", "");
