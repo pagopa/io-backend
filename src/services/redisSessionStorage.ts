@@ -366,13 +366,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         if (value === null) {
           return resolve(left<Error, User>(sessionNotFoundError));
         }
-        const errorOrDeserializedUser = parseJSON<Error>(value, toError).chain(
-          data => {
-            return User.decode(data).mapLeft(_ => {
-              return new Error(errorsToReadableMessages(_).join("/"));
-            });
-          }
-        );
+        const errorOrDeserializedUser = this.parseUser(value);
         return resolve(errorOrDeserializedUser);
       });
     });
@@ -441,26 +435,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
           _ => [],
           _ =>
             _.map(value => {
-              try {
-                const errorOrDeserializedUser = parseJSON<Error>(
-                  value,
-                  toError
-                ).chain(data => {
-                  return User.decode(data).mapLeft(err => {
-                    return new Error(errorsToReadableMessages(err).join("/"));
-                  });
-                });
-                if (
-                  isLeft(errorOrDeserializedUser) ||
-                  errorOrDeserializedUser.value.wallet_token ===
-                    user.wallet_token
-                ) {
-                  return none;
-                }
-                return some(errorOrDeserializedUser.value.wallet_token);
-              } catch {
+              const errorOrDeserializedUser = this.parseUser(value);
+              if (
+                isLeft(errorOrDeserializedUser) ||
+                errorOrDeserializedUser.value.wallet_token === user.wallet_token
+              ) {
                 return none;
               }
+              return some(errorOrDeserializedUser.value.wallet_token);
             })
         )
         .filter(isSome)
@@ -499,6 +481,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
       return left(sessionNotFoundError);
     }
     return right(replay);
+  }
+
+  private parseUser(value: string): Either<Error, User> {
+    return parseJSON<Error>(value, toError).chain(data => {
+      return User.decode(data).mapLeft(err => {
+        return new Error(errorsToReadableMessages(err).join("/"));
+      });
+    });
   }
 
   private parseUserSessionList(
