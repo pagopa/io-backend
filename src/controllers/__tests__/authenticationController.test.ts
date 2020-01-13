@@ -5,7 +5,7 @@
 /* tslint:disable:no-big-function */
 /* tslint:disable:no-object-mutation */
 
-import { left, right } from "fp-ts/lib/Either";
+import { isRight, left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
@@ -21,6 +21,7 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { UserIdentity } from "../../../generated/backend/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClientFactory from "../../services/apiClientFactory";
@@ -29,7 +30,7 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import spidStrategy from "../../strategies/spidStrategy";
 import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
 
 // saml configuration vars
@@ -136,7 +137,7 @@ const validUserPayload = {
   mobilePhone: "3222222222222",
   name: aValidname
 };
-// invalidUser lacks the required email field.
+// invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   fiscalNumber: aFiscalNumber,
@@ -216,10 +217,12 @@ jest.mock("../../services/profileService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
+const allowMultipleSessions = false;
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  allowMultipleSessions
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
@@ -438,6 +441,62 @@ describe("AuthenticationController#acs", () => {
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
       detail: "Redis error"
+    });
+  });
+});
+
+describe("AuthenticationController#getUserIdentity", () => {
+  let mockUserDecode: jest.Mock | undefined;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  afterEach(() => {
+    if (mockUserDecode !== undefined) {
+      mockUserDecode.mockRestore();
+    }
+  });
+
+  it("shoud return a success response with the User Identity", async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    const response = await controller.getUserIdentity(req);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    /* tslint:disable-next-line:no-useless-cast */
+    const expectedValue = exactUserIdentityDecode(mockedUser as UserIdentity);
+    expect(isRight(expectedValue)).toBeTruthy();
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: expectedValue.value
+    });
+  });
+
+  it("should fail if the User object doesn't match UserIdentity decoder contraints", async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = invalidUserPayload;
+
+    // Emulate a successfully User decode and a failure on UserIdentity decode
+    const user = require("../../types/user").User;
+    mockUserDecode = jest
+      .spyOn(user, "decode")
+      .mockImplementation((_: unknown) => right(_));
+
+    const response = await controller.getUserIdentity(req);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      detail: "Internal server error: Unexpected User Identity data format.",
+      kind: "IResponseErrorInternal"
     });
   });
 });

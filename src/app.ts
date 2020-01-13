@@ -558,17 +558,25 @@ function registerAuthenticationRoutes(app: Express, basePath: string): void {
     `${basePath}/metadata`,
     toExpressHandler(acsController.metadata, acsController)
   );
+
+  app.get(
+    `${basePath}/user-identity`,
+    bearerTokenAuth,
+    toExpressHandler(acsController.getUserIdentity, acsController)
+  );
 }
 
 function registerPublicRoutes(app: Express): void {
   // Current Backend API version
   const version = getCurrentBackendVersion();
   // The minimum app version that support this API
-  const minAppVersion = getValueFromPackageJson("minAppVersion");
+  const minAppVersion = getValueFromPackageJson("min_app_version");
+  const minAppVersionPagoPa = getValueFromPackageJson("min_app_version_pagopa");
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
-      minAppVersion,
+      min_app_version: minAppVersion,
+      min_app_version_pagopa: minAppVersionPagoPa,
       version
     };
     res.status(200).json(serverInfo);

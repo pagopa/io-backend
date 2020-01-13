@@ -2,12 +2,18 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
-import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
 import {
-  errorsToReadableMessages,
-  ReadableReporter
-} from "italia-ts-commons/lib/reporters";
+  Either,
+  isLeft,
+  isRight,
+  left,
+  parseJSON,
+  right,
+  toError
+} from "fp-ts/lib/Either";
+import { isSome, none, Option, some } from "fp-ts/lib/Option";
+import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
@@ -28,11 +34,16 @@ export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
+  private mgetTask: (
+    ...args: ReadonlyArray<string>
+  ) => TaskEither<Error, ReadonlyArray<string>>;
   constructor(
     private readonly redisClient: redis.RedisClient,
-    private readonly tokenDurationSecs: number
+    private readonly tokenDurationSecs: number,
+    private readonly allowMultipleSessions: boolean
   ) {
     super();
+    this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
   }
 
   /**
@@ -83,13 +94,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
+    const removeOtherUserSessionsOrNopPromise = this.allowMultipleSessions
+      ? Promise.resolve(right<Error, boolean>(true))
+      : this.removeOtherUserSessions(user);
 
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
       saveSessionInfoPromise,
-      removeOtherUserSessionsPromise
+      removeOtherUserSessionsOrNopPromise
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {
@@ -230,46 +243,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
     }
-    const userSessionTokensResult = await new Promise<ReadonlyArray<string>>(
-      (resolve, reject) => {
-        const keys = isRight(sessionKeys)
-          ? sessionKeys.value
-          : initializedSessionKeys;
-        this.redisClient.mget(...keys, (err, response) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(response);
-        });
-      }
-    );
-    return right(
-      userSessionTokensResult.reduce(
-        (prev: SessionsList, _) => {
-          try {
-            const sessionInfoPayload = JSON.parse(_);
-            const errorOrDeserializedSessionInfo = SessionInfo.decode(
-              sessionInfoPayload
-            );
-
-            if (isLeft(errorOrDeserializedSessionInfo)) {
-              log.warn(
-                "Unable to decode the session info: %s. Skipped.",
-                ReadableReporter.report(errorOrDeserializedSessionInfo)
-              );
-              return prev;
-            }
-            return {
-              sessions: [...prev.sessions, errorOrDeserializedSessionInfo.value]
-            };
-          } catch (err) {
-            log.error("Unable to parse the session info json. Skipped.");
-            return prev;
-          }
-        },
-        { sessions: [] } as SessionsList
-      )
-    );
+    return this.mgetTask(...sessionKeys.getOrElse(initializedSessionKeys))
+      .map(_ => this.parseUserSessionList(_))
+      .run();
   }
 
   public async clearExpiredSetValues(
@@ -306,6 +282,32 @@ export default class RedisSessionStorage extends RedisStorageUtils
         });
       })
     );
+  }
+
+  public async userHasActiveSessions(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const sessionKeys = await this.readSessionInfoKeys(fiscalCode);
+    if (sessionKeys.value === sessionNotFoundError) {
+      return right(false);
+    } else if (isLeft(sessionKeys)) {
+      return left(sessionKeys.value);
+    }
+    const errorOrSessionTokens = await this.mgetTask(...sessionKeys.value)
+      .map(_ =>
+        this.parseUserSessionList(_).sessions.map(__ => __.sessionToken)
+      )
+      .run();
+
+    if (errorOrSessionTokens.isLeft()) {
+      return left(errorOrSessionTokens.value);
+    } else if (errorOrSessionTokens.value.length === 0) {
+      return right(false);
+    }
+
+    return this.mgetTask(...errorOrSessionTokens.value)
+      .map(_ => _.length > 0)
+      .run();
   }
 
   /*
@@ -364,26 +366,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
         if (value === null) {
           return resolve(left<Error, User>(sessionNotFoundError));
         }
-
-        // Try-catch is needed because parse() may throw an exception.
-        try {
-          const userPayload = JSON.parse(value);
-          const errorOrDeserializedUser = User.decode(userPayload);
-
-          if (isLeft(errorOrDeserializedUser)) {
-            const decodeErrorMessage = new Error(
-              errorsToReadableMessages(errorOrDeserializedUser.value).join("/")
-            );
-            return resolve(left<Error, User>(decodeErrorMessage));
-          }
-
-          const user = errorOrDeserializedUser.value;
-          return resolve(right<Error, User>(user));
-        } catch (err) {
-          return resolve(
-            left<Error, User>(new Error("Unable to parse the user json"))
-          );
-        }
+        const errorOrDeserializedUser = this.parseUser(value);
+        return resolve(errorOrDeserializedUser);
       });
     });
   }
@@ -418,6 +402,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
     });
   }
 
+  /**
+   * Remove other user sessions and wallet tokens
+   */
   private async removeOtherUserSessions(
     user: User
   ): Promise<Either<Error, boolean>> {
@@ -430,8 +417,39 @@ export default class RedisSessionStorage extends RedisStorageUtils
             _ !== `${sessionInfoKeyPrefix}${user.session_token}`
         )
         .map(_ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`);
+
+      // Retrieve all user wallet tokens related to session tokens.
+      // Wallet tokens are stored inside user payload.
+      const errorOrUserWalletTokens = await new Promise<
+        Either<Error, ReadonlyArray<string>>
+      >(resolve => {
+        this.redisClient.mget(...sessionKeys, (err, response) =>
+          resolve(this.arrayStringReply(err, response))
+        );
+      });
+      // Map every user payload with an Option<WalletToken>
+      // If the value is invalid or must be skipped, it will be mapped with none
+      const walletsToken = errorOrUserWalletTokens
+        .fold(
+          _ => [],
+          _ =>
+            _.map(value => {
+              const errorOrDeserializedUser = this.parseUser(value);
+              if (
+                isLeft(errorOrDeserializedUser) ||
+                errorOrDeserializedUser.value.wallet_token === user.wallet_token
+              ) {
+                return none;
+              }
+              return some(errorOrDeserializedUser.value.wallet_token);
+            })
+        )
+        .filter(isSome)
+        .map(_ => `${walletKeyPrefix}${_.value}`);
+      // Delete all active session tokens and wallet tokens that are different
+      // from the new one generated and provided inside user object.
       return await new Promise(resolve => {
-        this.redisClient.del(...sessionKeys, (err, response) =>
+        this.redisClient.del(...sessionKeys, ...walletsToken, (err, response) =>
           resolve(this.integerReply(err, response))
         );
       });
@@ -462,5 +480,40 @@ export default class RedisSessionStorage extends RedisStorageUtils
       return left(sessionNotFoundError);
     }
     return right(replay);
+  }
+
+  private parseUser(value: string): Either<Error, User> {
+    return parseJSON<Error>(value, toError).chain(data => {
+      return User.decode(data).mapLeft(err => {
+        return new Error(errorsToReadableMessages(err).join("/"));
+      });
+    });
+  }
+
+  private parseUserSessionList(
+    userSessionTokensResult: ReadonlyArray<string>
+  ): SessionsList {
+    return userSessionTokensResult.reduce(
+      (prev: SessionsList, _) => {
+        return parseJSON<Error>(_, toError)
+          .chain(data => {
+            return SessionInfo.decode(data).mapLeft(err => {
+              return new Error(errorsToReadableMessages(err).join("/"));
+            });
+          })
+          .fold(
+            err => {
+              log.warn("Unable to decode the session info: %s. Skipped.", err);
+              return prev;
+            },
+            sessionInfo => {
+              return {
+                sessions: [...prev.sessions, sessionInfo]
+              };
+            }
+          );
+      },
+      { sessions: [] } as SessionsList
+    );
   }
 }

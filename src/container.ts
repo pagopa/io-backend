@@ -42,6 +42,7 @@ import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
 import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 
+import { fromNullable } from "fp-ts/lib/Option";
 import { log } from "./utils/logger";
 
 // Without this the environment variables loaded by dotenv aren't available in
@@ -176,7 +177,15 @@ const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
+// Read ENV to allow multiple user's sessions functionality
+// Default value is false when the ENV var is not provided
+const ALLOW_MULTIPLE_SESSIONS = fromNullable(
+  process.env.ALLOW_MULTIPLE_SESSIONS
+)
+  .map(_ => _.toLowerCase() === "true")
+  .getOrElse(false);
 container.register({
+  allowMultipleSessions: awilix.asValue(ALLOW_MULTIPLE_SESSIONS),
   tokenDurationSecs: awilix.asValue(tokenDurationSecs)
 });
 

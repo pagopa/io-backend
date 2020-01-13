@@ -329,9 +329,9 @@ paths:
               version: 1
               sender_allowed: true
         "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
+            description: Bad request
+            schema:
+              $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -371,6 +371,34 @@ paths:
           description: Too many requests
           schema:
             $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error starting email validation process
+          schema:
+            $ref: "#/definitions/ProblemJson"
+  "/user-identity":
+    x-swagger-router-controller: ProfileController
+    get:
+      operationId: getUserIdentity
+      summary: Get stored user identity
+      description: Returns the user identity stored during the login phase
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/UserIdentity"
+          examples:
+            application/json:
+              family_name: "Rossi"
+              fiscal_code: "TMMEXQ60A10Y526X"
+              name: "Mario"
+              spid_email: "preferred@example.com"
+              spid_mobile_phone: "1234567890"
+        "400":
+            description: Bad request
+            schema:
+              $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: There was an error in retrieving the user profile.
           schema:
@@ -768,6 +796,9 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
+      date_of_birth:
+        type: string
+        format: date
       version:
         $ref: '#/definitions/Version'
     required:
@@ -778,7 +809,6 @@ definitions:
       - is_email_enabled
       - is_webhook_enabled
       - name
-      - spid_mobile_phone
       - version
   UserMetadata:
     type: object
@@ -866,6 +896,52 @@ definitions:
       - https://www.spid.gov.it/SpidL1
       - https://www.spid.gov.it/SpidL2
       - https://www.spid.gov.it/SpidL3
+  SpidUserIdentity:
+    type: object
+    title: SPID User Identity
+    description: Describes the user's profile while it's authenticated with Spid.
+    properties:
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      name:
+        type: string
+      spid_email:
+        $ref: '#/definitions/EmailAddress'
+      spid_mobile_phone:
+        type: string
+        minLength: 1
+    required:
+      - family_name
+      - fiscal_code
+      - name
+      - spid_email
+      - spid_mobile_phone
+  CieUserIdentity:
+    type: object
+    title: CIE User Identity
+    description: Describes the user's profile while it's authenticated with CIE.
+    properties:
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      name:
+        type: string
+      date_of_birth:
+        type: string
+        format: date
+    required:
+      - family_name
+      - fiscal_code
+      - name
+      - date_of_birth
+  UserIdentity:
+    x-one-of: true
+    allOf:
+      - $ref: "#/definitions/SpidUserIdentity"
+      - $ref: "#/definitions/CieUserIdentity"
   SuccessResponse:
     type: object
     properties:
