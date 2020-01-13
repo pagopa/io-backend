@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
-    "apicache": "^1.4.0",
+    "apicache": "^1.5.3",
     "applicationinsights": "^1.4.2",
     "awilix": "^3.0.9",
     "azure-sb": "^0.10.6",
