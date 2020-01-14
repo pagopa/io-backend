@@ -92,6 +92,12 @@ const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
 const SPID_TESTENV_URL =
   process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
 
+const HAS_SPID_VALIDATOR_ENABLED = fromNullable(
+  process.env.HAS_SPID_VALIDATOR_ENABLED
+)
+  .map(_ => _.toLowerCase() === "true")
+  .getOrElse(false);
+
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 export function generateSpidStrategy(): Promise<SpidStrategy> {
@@ -104,7 +110,8 @@ export function generateSpidStrategy(): Promise<SpidStrategy> {
     SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
     SPID_AUTOLOGIN,
     SPID_TESTENV_URL,
-    IDP_METADATA_URL
+    IDP_METADATA_URL,
+    HAS_SPID_VALIDATOR_ENABLED
   );
 }
 

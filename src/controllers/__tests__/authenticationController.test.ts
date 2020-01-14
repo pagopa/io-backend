@@ -247,7 +247,8 @@ beforeAll(async () => {
     samlAttributeConsumingServiceIndex,
     spidAutologin,
     spidTestEnvUrl,
-    IDPMetadataUrl
+    IDPMetadataUrl,
+    false
   );
   spidStrategyInstance.logout = jest.fn();
 
