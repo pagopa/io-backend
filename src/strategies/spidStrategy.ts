@@ -14,7 +14,7 @@ import {
 } from "../utils/idpLoader";
 import { log } from "../utils/logger";
 
-const IDP_IDS: { [key: string]: string | undefined } = {
+export const IDP_IDS: { [key: string]: string | undefined } = {
   "https://id.lepida.it/idp/shibboleth": "lepidaid",
   "https://identity.infocert.it": "infocertid",
   "https://identity.sieltecloud.it": "sielteid",
@@ -31,17 +31,18 @@ const IDP_IDS: { [key: string]: string | undefined } = {
  * for spidStrategy object.
  */
 export async function loadFromRemote(
-  idpMetadataUrl: string
+  idpMetadataUrl: string,
+  idpIds: { [key: string]: string | undefined }
 ): Promise<{ [key: string]: IDPOption | undefined }> {
   log.info("Fetching SPID metadata from [%s]...", idpMetadataUrl);
   const idpMetadataXML = await fetchIdpMetadata(idpMetadataUrl);
   log.info("Parsing SPID metadata...");
   const idpMetadata = parseIdpMetadata(idpMetadataXML);
-  if (idpMetadata.length < Object.keys(IDP_IDS).length) {
+  if (idpMetadata.length < Object.keys(idpIds).length) {
     log.warn("Missing SPID metadata on [%s]", idpMetadataUrl);
   }
   log.info("Configuring IdPs...");
-  return mapIpdMetadata(idpMetadata, IDP_IDS);
+  return mapIpdMetadata(idpMetadata, idpIds);
 }
 
 const spidStrategy = async (
@@ -53,10 +54,16 @@ const spidStrategy = async (
   samlAttributeConsumingServiceIndex: number,
   spidAutologin: string,
   spidTestEnvUrl: string,
-  IDPMetadataUrl: string
+  IDPMetadataUrl: string,
+  hasSpidValidatorEnabled: boolean
   // tslint:disable-next-line: parameters-max-number
 ) => {
-  const idpsMetadataOption = await loadFromRemote(IDPMetadataUrl);
+  const idpsMetadataOption = await loadFromRemote(IDPMetadataUrl, IDP_IDS);
+  const idpsSpidValidatorOption = hasSpidValidatorEnabled
+    ? await loadFromRemote("https://validator.spid.gov.it/metadata.xml", {
+        "https://validator.spid.gov.it": "validator"
+      })
+    : {};
 
   logSamlCertExpiration(samlCert);
 
@@ -67,6 +74,7 @@ const spidStrategy = async (
   } = {
     idp: {
       ...idpsMetadataOption,
+      ...idpsSpidValidatorOption,
       xx_servizicie_test: {
         cert: [
           "MIIDdTCCAl2gAwIBAgIUU79XEfveueyClDtLkqUlSPZ2o8owDQYJKoZIhvcNAQELBQAwLTErMCkGA1UEAwwiaWRzZXJ2ZXIuc2Vydml6aWNpZS5pbnRlcm5vLmdvdi5pdDAeFw0xODEwMTkwODM1MDVaFw0zODEwMTkwODM1MDVaMC0xKzApBgNVBAMMImlkc2VydmVyLnNlcnZpemljaWUuaW50ZXJuby5nb3YuaXQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDHraj3iOTCIILTlOzicSEuFt03kKvQDqGWRd5o7s1W7SP2EtcTmg3xron/sbrLEL/eMUQV/Biz6J4pEGoFpMZQHGxOVypmO7Nc8pkFot7yUTApr6Ikuy4cUtbx0g5fkQLNb3upIg0Vg1jSnRXEvUCygr/9EeKCUOi/2ptmOVSLad+dT7TiRsZTwY3FvRWcleDfyYwcIMgz5dLSNLMZqwzQZK1DzvWeD6aGtBKCYPRftacHoESD+6bhukHZ6w95foRMJLOaBpkp+XfugFQioYvrM0AB1YQZ5DCQRhhc8jejwdY+bOB3eZ1lJY7Oannfu6XPW2fcknelyPt7PGf22rNfAgMBAAGjgYwwgYkwHQYDVR0OBBYEFK3Ah+Do3/zB9XjZ66i4biDpUEbAMGgGA1UdEQRhMF+CImlkc2VydmVyLnNlcnZpemljaWUuaW50ZXJuby5nb3YuaXSGOWh0dHBzOi8vaWRzZXJ2ZXIuc2Vydml6aWNpZS5pbnRlcm5vLmdvdi5pdC9pZHAvc2hpYmJvbGV0aDANBgkqhkiG9w0BAQsFAAOCAQEAVtpn/s+lYVf42pAtdgJnGTaSIy8KxHeZobKNYNFEY/XTaZEt9QeV5efUMBVVhxKTTHN0046DR96WFYXs4PJ9Fpyq6Hmy3k/oUdmHJ1c2bwWF/nZ82CwOO081Yg0GBcfPEmKLUGOBK8T55ncW+RSZadvWTyhTtQhLUtLKcWyzKB5aS3kEE5LSzR8sw3owln9P41Mz+QtL3WeNESRHW0qoQkFotYXXW6Rvh69+GyzJLxvq2qd7D1qoJgOMrarshBKKPk+ABaLYoEf/cru4e0RDIp2mD0jkGOGDkn9XUl+3ddALq/osTki6CEawkhiZEo6ABEAjEWNkH9W3/ZzvJnWo6Q=="
