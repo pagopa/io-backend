@@ -98,6 +98,8 @@ jobs:
           command: yarn test
           environment:
             PRE_SHARED_KEY: "12345"
+            API_KEY: "fake_api_key_here"
+            API_URL: "https://api.gateway.example.com/api/v1"
             ALLOW_NOTIFY_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             ALLOW_PAGOPA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             AZURE_NH_HUB_NAME: ""
@@ -108,6 +110,7 @@ jobs:
             PAGOPA_API_URL_TEST: "https://pagopa-proxy-test"
             PAGOPA_BASE_PATH: "/pagopa/api/v1"
             IDP_METADATA_URL: "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml"
+            REDIS_URL: redis://localhost
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
 workflows:
