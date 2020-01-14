@@ -60,10 +60,11 @@ import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
 import {
   getCurrentBackendVersion,
-  getValueFromPackageJson
+  getObjectFromPackageJson
 } from "./utils/package";
 import { getSamlIssuer } from "./utils/saml";
 
+import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
@@ -623,13 +624,25 @@ function registerPublicRoutes(app: Express): void {
   // Current Backend API version
   const version = getCurrentBackendVersion();
   // The minimum app version that support this API
-  const minAppVersion = getValueFromPackageJson("min_app_version");
-  const minAppVersionPagoPa = getValueFromPackageJson("min_app_version_pagopa");
+  const minAppVersion = getObjectFromPackageJson(
+    "min_app_version",
+    VersionPerPlatform
+  );
+  const minAppVersionPagoPa = getObjectFromPackageJson(
+    "min_app_version_pagopa",
+    VersionPerPlatform
+  );
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
-      min_app_version: minAppVersion,
-      min_app_version_pagopa: minAppVersionPagoPa,
+      min_app_version: minAppVersion.getOrElse({
+        android: "UNKNOWN",
+        ios: "UNKNOWN"
+      }),
+      min_app_version_pagopa: minAppVersionPagoPa.getOrElse({
+        android: "UNKNOWN",
+        ios: "UNKNOWN"
+      }),
       version
     };
     res.status(200).json(serverInfo);
