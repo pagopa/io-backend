@@ -1,27 +1,25 @@
 import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
-import { getRequiredENVVar } from "./container";
 import { log } from "./logger";
 
-export function createSimpleRedisClient(): redis.RedisClient {
-  const redisUrl = process.env.REDIS_URL || "redis://redis";
-  log.info("Creating SIMPLE redis client", { url: redisUrl });
-  return redis.createClient(redisUrl);
+export function createSimpleRedisClient(redisUrl?: string): redis.RedisClient {
+  const redisUrlOrDefault = redisUrl || "redis://redis";
+  log.info("Creating SIMPLE redis client", { url: redisUrlOrDefault });
+  return redis.createClient(redisUrlOrDefault);
 }
 
-export function createClusterRedisClient(): redis.RedisClient {
+export function createClusterRedisClient(
+  redisUrl: string,
+  password?: string,
+  port?: string
+): redis.RedisClient {
   const DEFAULT_REDIS_PORT = "6379";
 
-  const redisUrl = getRequiredENVVar("REDIS_URL");
-  const redisPassword = process.env.REDIS_PASSWORD;
-  const redisPort: number = parseInt(
-    process.env.REDIS_PORT || DEFAULT_REDIS_PORT,
-    10
-  );
+  const redisPort: number = parseInt(port || DEFAULT_REDIS_PORT, 10);
   log.info("Creating CLUSTER redis client", { url: redisUrl });
   return new RedisClustr({
     redisOptions: {
-      auth_pass: redisPassword,
+      auth_pass: password,
       tls: {
         servername: redisUrl
       }

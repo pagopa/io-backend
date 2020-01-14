@@ -169,8 +169,12 @@ export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL);
 // Redis server settings.
 export const REDIS_CLIENT =
   ENV === NodeEnvironmentEnum.DEVELOPMENT
-    ? createSimpleRedisClient()
-    : createClusterRedisClient();
+    ? createSimpleRedisClient(process.env.REDIS_URL)
+    : createClusterRedisClient(
+        getRequiredENVVar("REDIS_URL"),
+        process.env.REDIS_PASSWORD,
+        process.env.REDIS_PORT
+      );
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
