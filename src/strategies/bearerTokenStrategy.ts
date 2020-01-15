@@ -22,38 +22,41 @@ const bearerTokenStrategy = (
     realm: "Proxy API",
     scope: "request"
   };
-  return new passport.Strategy(options, (
-    req: express.Request,
-    token: string,
-    // tslint:disable-next-line:no-any
-    done: (error: any, user?: any, options?: IVerifyOptions | string) => void
-  ) => {
-    const path = req.route.path;
-    if (
-      path === `${AuthenticationBasePath}/logout` || // We need to use this strategy with the SessionToken also for `/logout` path
-      path.startsWith(APIBasePath)
-    ) {
-      sessionStorage.getBySessionToken(token as SessionToken).then(
-        (errorOrUser: Either<Error, Option<User>>) => {
-          fulfill(errorOrUser, done);
-        },
-        () => {
-          done(undefined, false);
-        }
-      );
-    } else if (path.startsWith(PagoPABasePath)) {
-      sessionStorage.getByWalletToken(token as WalletToken).then(
-        (errorOrUser: Either<Error, Option<User>>) => {
-          fulfill(errorOrUser, done);
-        },
-        () => {
-          done(undefined, false);
-        }
-      );
-    } else {
-      done(undefined, false);
+  return new passport.Strategy(
+    options,
+    (
+      req: express.Request,
+      token: string,
+      // tslint:disable-next-line:no-any
+      done: (error: any, user?: any, options?: IVerifyOptions | string) => void
+    ) => {
+      const path = req.route.path;
+      if (
+        path === `${AuthenticationBasePath}/logout` || // We need to use this strategy with the SessionToken also for `/logout` path
+        path.startsWith(APIBasePath)
+      ) {
+        sessionStorage.getBySessionToken(token as SessionToken).then(
+          (errorOrUser: Either<Error, Option<User>>) => {
+            fulfill(errorOrUser, done);
+          },
+          () => {
+            done(undefined, false);
+          }
+        );
+      } else if (path.startsWith(PagoPABasePath)) {
+        sessionStorage.getByWalletToken(token as WalletToken).then(
+          (errorOrUser: Either<Error, Option<User>>) => {
+            fulfill(errorOrUser, done);
+          },
+          () => {
+            done(undefined, false);
+          }
+        );
+      } else {
+        done(undefined, false);
+      }
     }
-  });
+  );
 };
 
 function fulfill(

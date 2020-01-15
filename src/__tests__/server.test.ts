@@ -26,9 +26,7 @@ describe("Server graceful shutdown", () => {
 
   const testApiUrl = `http://localhost:${port}${testRoutePath}`;
 
-  jest.spyOn(process, "exit").mockImplementation(() => {
-    return true;
-  });
+  jest.spyOn(process, "exit").mockImplementation(() => true as never);
 
   beforeEach(async () => {
     jest.clearAllMocks();

@@ -139,14 +139,12 @@ export default class ProfileService {
         newProfile
       });
 
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? ResponseSuccessJson(toInitializedProfile(response.value, user))
-            : response.status === 429
-              ? ResponseErrorTooManyRequests()
-              : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
       );
     });
   };
@@ -177,18 +175,14 @@ export default class ProfileService {
             profile: extendedProfileApi
           });
 
-          return withValidatedOrInternalError(
-            validated,
-            response =>
-              response.status === 200
-                ? ResponseSuccessJson(
-                    toInitializedProfile(response.value, user)
-                  )
-                : response.status === 404
-                  ? ResponseErrorNotFound("Not found", "User not found")
-                  : response.status === 429
-                    ? ResponseErrorTooManyRequests()
-                    : unhandledResponseStatus(response.status)
+          return withValidatedOrInternalError(validated, response =>
+            response.status === 200
+              ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+              : response.status === 404
+              ? ResponseErrorNotFound("Not found", "User not found")
+              : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status)
           );
         })
     );
@@ -215,10 +209,10 @@ export default class ProfileService {
         return response.status === 202
           ? ResponseSuccessAccepted()
           : response.status === 404
-            ? ResponseErrorNotFound("Not found", "User not found.")
-            : response.status === 429
-              ? ResponseErrorTooManyRequests()
-              : unhandledResponseStatus(response.status);
+          ? ResponseErrorNotFound("Not found", "User not found.")
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status);
       });
     });
   };

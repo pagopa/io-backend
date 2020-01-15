@@ -99,11 +99,11 @@ function withSpidAuth(
   controller: AuthenticationController,
   clientErrorRedirectionUrl: string,
   clientLoginRedirectionUrl: string
-): ((
+): (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
-) => void) {
+) => void {
   return (
     req: express.Request,
     res: express.Response,
