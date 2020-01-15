@@ -82,7 +82,7 @@ definitions:
       - mobile_phone
   ExtendedPagoPAUser:
     title: ExtendedPagoPA user
-    description: User data needed by PagaPA proxy with custom user email.
+    description: User data needed by PagoPA proxy with custom user email.
     type: object
     properties:
       name:
