@@ -48,8 +48,8 @@ export const profileMissingErrorResponse = ResponseErrorInternal(
 export const notFoundProfileToInternalServerError = (
   // tslint:disable-next-line: prettier
   getProfileResponse:
-    // tslint:disable-next-line: max-union-size
-    | IResponseErrorInternal
+  // tslint:disable-next-line: max-union-size
+  | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>

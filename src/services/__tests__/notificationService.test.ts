@@ -190,9 +190,7 @@ describe("NotificationService#notify", () => {
       {
         message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
-        title: `${aValidNotification.sender_metadata.service_name} - ${
-          aValidNotification.sender_metadata.organization_name
-        }`
+        title: `${aValidNotification.sender_metadata.service_name} - ${aValidNotification.sender_metadata.organization_name}`
       },
       expectedSendOptions,
       expect.any(Function)
@@ -218,9 +216,7 @@ describe("NotificationService#notify", () => {
       {
         message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
-        title: `${aValidNotification.sender_metadata.service_name} - ${
-          aValidNotification.sender_metadata.organization_name
-        }`
+        title: `${aValidNotification.sender_metadata.service_name} - ${aValidNotification.sender_metadata.organization_name}`
       },
       expectedSendOptions,
       expect.any(Function)

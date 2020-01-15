@@ -160,7 +160,9 @@ describe("Failure app start", () => {
     jest.spyOn(config, "generateSpidStrategy").mockImplementation(() => {
       return Promise.reject(new Error("Error download metadata"));
     });
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
+    const mockExit = jest
+      .spyOn(process, "exit")
+      .mockImplementation(() => true as never);
     await appModule.newApp(
       NodeEnvironmentEnum.PRODUCTION,
       aValidCIDR,

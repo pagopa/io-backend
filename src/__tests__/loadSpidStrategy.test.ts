@@ -36,7 +36,9 @@ afterAll(() => {
 describe("Restore of previous SPID Strategy on update failure", () => {
   it("Use old spid strategy if generateSpidStrategy fails", async () => {
     const onRefresh = jest.fn();
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
+    const mockExit = jest
+      .spyOn(process, "exit")
+      .mockImplementation(() => true as never);
     const config = require("../config");
     const mockSpidStrategy = jest
       .spyOn(config, "generateSpidStrategy")
