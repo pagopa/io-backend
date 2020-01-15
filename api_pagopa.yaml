@@ -16,46 +16,26 @@ paths:
       operationId: getUser
       summary: Get user's data
       description: Returns the user data needed by PagoPA Wallet backend.
+      parameters:
+        - in: query
+          name: version
+          type: string
+          enum:
+            - "20200114"
       responses:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/PagoPAUser"
+            x-one-of: true
+            allOf:
+              - $ref: "#/definitions/PagoPAUser"
+              - $ref: "#/definitions/ExtendedPagoPAUser"
           examples:
             application/json:
               email: "email@example.com"
               name: "Name"
               family_name: "Surname"
               mobile_phone: "+393331234567"
-        "400":
-          description: Bad request.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
-          description: Token null or invalid.
-        "500":
-          description: There was an error in retrieving the user data.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-  "/user-extended":
-    x-swagger-router-controller: PagoPAController
-    get:
-      operationId: getExtendedUser
-      summary: Get user's data
-      description: Returns the user data needed by PagoPA Wallet backend.
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/ExtendedPagoPAUser"
-          examples:
-            application/json:
-              spid_email: "spid-email@example.com"
-              notice_email: "custom-email@example.com"
-              name: "Name"
-              family_name: "Surname"
-              mobile_phone: "+393331234567"
-              fiscal_code: "SRNNMA80B01H501Z"
         "400":
           description: Bad request.
           schema:

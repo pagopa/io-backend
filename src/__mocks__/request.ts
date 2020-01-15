@@ -17,6 +17,7 @@ export default function mockReq(): any {
     header: jest.fn(),
     is: jest.fn(),
     param: jest.fn(),
+    query: {},
     range: jest.fn(),
     reset: resetMock
   };

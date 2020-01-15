@@ -157,12 +157,16 @@ describe("PagoPaController#getExtendedUser", () => {
 
     // tslint:disable-next-line: no-object-mutation
     req.user = mockedUser;
+    // tslint:disable-next-line: no-object-mutation
+    req.query = {
+      version: "20200114"
+    };
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(profileService);
 
-    const response = await pagoPAController.getExtendedUser(req);
+    const response = await pagoPAController.getUser(req);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -186,12 +190,16 @@ describe("PagoPaController#getExtendedUser", () => {
 
     // tslint:disable-next-line: no-object-mutation
     req.user = mockedUser;
+    // tslint:disable-next-line: no-object-mutation
+    req.query = {
+      version: "20200114"
+    };
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(profileService);
 
-    const response = await pagoPAController.getExtendedUser(req);
+    const response = await pagoPAController.getUser(req);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -224,16 +232,41 @@ describe("PagoPaController#getExtendedUser", () => {
     };
     // tslint:disable-next-line: no-object-mutation
     req.user = notSpidUserSessionUser;
+    // tslint:disable-next-line: no-object-mutation
+    req.query = {
+      version: "20200114"
+    };
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(profileService);
 
-    const response = await pagoPAController.getExtendedUser(req);
+    const response = await pagoPAController.getUser(req);
     expect(mockGetProfile).toHaveBeenCalledWith(notSpidUserSessionUser);
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: "Validation Error: Invalid User Data",
+      kind: "IResponseErrorValidation"
+    });
+  });
+
+  it("should return a validation error response when version is invalid", async () => {
+    const req = mockReq();
+    // tslint:disable-next-line: no-object-mutation
+    req.user = mockedUser;
+    // tslint:disable-next-line: no-object-mutation
+    req.query = {
+      version: "invalid_version"
+    };
+
+    const apiClient = new ApiClientFactory("", "");
+    const profileService = new ProfileService(apiClient);
+    const pagoPAController = new PagoPAController(profileService);
+
+    const response = await pagoPAController.getUser(req);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      detail: "Validation Error: Invalid Version number",
       kind: "IResponseErrorValidation"
     });
   });
