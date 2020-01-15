@@ -48,21 +48,18 @@ export default class PagoPAProxyService {
       const validated = await client.getPaymentInfo({
         rptId
       });
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? withValidatedOrInternalError(
-                PaymentRequestsGetResponse.decode(response.value),
-                ResponseSuccessJson
-              )
-            : response.status === 400
-              ? ResponseErrorValidation(
-                  response.value.title || "Bad request (upstream)",
-                  response.value.detail ||
-                    "Bad request response from upstream API"
-                )
-              : ResponseErrorInternal(response.value.detail)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              PaymentRequestsGetResponse.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 400
+          ? ResponseErrorValidation(
+              response.value.title || "Bad request (upstream)",
+              response.value.detail || "Bad request response from upstream API"
+            )
+          : ResponseErrorInternal(response.value.detail)
       );
     });
 
@@ -87,21 +84,18 @@ export default class PagoPAProxyService {
         paymentActivationsPostRequest
       });
 
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? withValidatedOrInternalError(
-                PaymentActivationsPostResponse.decode(response.value),
-                ResponseSuccessJson
-              )
-            : response.status === 400
-              ? ResponseErrorValidation(
-                  response.value.title || "Bad request (upstream)",
-                  response.value.detail ||
-                    "Bad request response from upstream API"
-                )
-              : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              PaymentActivationsPostResponse.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 400
+          ? ResponseErrorValidation(
+              response.value.title || "Bad request (upstream)",
+              response.value.detail || "Bad request response from upstream API"
+            )
+          : unhandledResponseStatus(response.status)
       );
     });
 
@@ -125,29 +119,26 @@ export default class PagoPAProxyService {
       const validated = await client.getActivationStatus({
         codiceContestoPagamento
       });
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? withValidatedOrInternalError(
-                PaymentActivationsGetResponse.decode(response.value),
-                ResponseSuccessJson
-              )
-            : response.status === 400
-              ? ResponseErrorValidation(
-                  response.value.title || "Bad request (upstream)",
-                  response.value.detail ||
-                    "Bad request response from upstream API"
-                )
-              : response.status === 404
-                ? ResponseErrorNotFound(
-                    response.value.title || "Not found (upstream)",
-                    response.value.detail || "Not found response from upstream"
-                  )
-                : ResponseErrorInternal(
-                    response.value.detail ||
-                      "Internal server error response from upstream"
-                  )
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              PaymentActivationsGetResponse.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 400
+          ? ResponseErrorValidation(
+              response.value.title || "Bad request (upstream)",
+              response.value.detail || "Bad request response from upstream API"
+            )
+          : response.status === 404
+          ? ResponseErrorNotFound(
+              response.value.title || "Not found (upstream)",
+              response.value.detail || "Not found response from upstream"
+            )
+          : ResponseErrorInternal(
+              response.value.detail ||
+                "Internal server error response from upstream"
+            )
       );
     });
 }

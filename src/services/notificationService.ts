@@ -69,9 +69,7 @@ export default class NotificationService {
           message: notification.message.content.subject,
           message_id: notification.message.id,
           title: fromNullable(notificationTitle).getOrElse(
-            `${notification.sender_metadata.service_name} - ${
-              notification.sender_metadata.organization_name
-            }`
+            `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
           )
         };
         notificationHubService.send(
@@ -89,9 +87,7 @@ export default class NotificationService {
             return resolve(
               error !== null
                 ? ResponseErrorInternal(
-                    `Error while sending notification to NotificationHub [${
-                      error.message
-                    }]`
+                    `Error while sending notification to NotificationHub [${error.message}]`
                   )
                 : ResponseSuccessJson({ message: "ok" })
             );

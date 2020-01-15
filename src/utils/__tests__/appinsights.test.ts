@@ -1,4 +1,5 @@
 import * as appInsights from "applicationinsights";
+import { Configuration } from "applicationinsights";
 import { initAppInsights, removeQueryParamsPreprocessor } from "../appinsights";
 
 describe("Create an App Insights Telemetry Client", () => {
@@ -12,7 +13,7 @@ describe("Create an App Insights Telemetry Client", () => {
   const mockSetSendLiveMetrics = jest.fn();
   const mockStart = jest.fn();
 
-  const mockedConfiguration = {
+  const mockedConfiguration: Configuration = {
     setAutoCollectConsole: mockSetAutoCollectConsole,
     setAutoCollectDependencies: mockSetAutoCollectDependencies,
     setAutoCollectExceptions: mockSetAutoCollectExceptions,
@@ -25,7 +26,8 @@ describe("Create an App Insights Telemetry Client", () => {
   };
   const mockSetup = jest
     .spyOn(appInsights, "setup")
-    .mockImplementation(() => mockedConfiguration);
+    // tslint:disable-next-line: no-any
+    .mockImplementation(() => mockedConfiguration as any);
   const mockAddTelemetryProcessor = jest.fn();
 
   const expectedTelemetryClient = {

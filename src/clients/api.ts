@@ -83,8 +83,8 @@ export function APIClient(
             constantResponseDecoder<undefined, 202>(202, undefined),
             ioResponseDecoder<
               400,
-              (typeof ProblemJson)["_A"],
-              (typeof ProblemJson)["_O"]
+              typeof ProblemJson["_A"],
+              typeof ProblemJson["_O"]
             >(400, ProblemJson)
           ),
           constantResponseDecoder<undefined, 401>(401, undefined)

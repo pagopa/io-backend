@@ -14,11 +14,10 @@ export default function getErrorCodeFromResponse(
   xml: string
 ): Option<SpidError> {
   return tryCatch(() => new DOMParser().parseFromString(xml))
-    .chain(
-      xmlResponse =>
-        xmlResponse
-          ? some(xmlResponse.getElementsByTagName("StatusMessage"))
-          : none
+    .chain(xmlResponse =>
+      xmlResponse
+        ? some(xmlResponse.getElementsByTagName("StatusMessage"))
+        : none
     )
     .chain(responseStatusMessageEl => {
       return responseStatusMessageEl &&

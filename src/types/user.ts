@@ -206,18 +206,16 @@ export const extractUserFromJson = (from: string): Either<string, User> =>
 function getAuthnContextFromResponse(xml: string): Option<string> {
   return fromNullable(xml)
     .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
-    .chain(
-      xmlResponse =>
-        xmlResponse
-          ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
-          : none
+    .chain(xmlResponse =>
+      xmlResponse
+        ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
+        : none
     )
-    .chain(
-      responseAuthLevelEl =>
-        responseAuthLevelEl &&
-        responseAuthLevelEl[0] &&
-        responseAuthLevelEl[0].textContent
-          ? some(responseAuthLevelEl[0].textContent.trim())
-          : none
+    .chain(responseAuthLevelEl =>
+      responseAuthLevelEl &&
+      responseAuthLevelEl[0] &&
+      responseAuthLevelEl[0].textContent
+        ? some(responseAuthLevelEl[0].textContent.trim())
+        : none
     );
 }

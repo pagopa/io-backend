@@ -46,16 +46,14 @@ export default class MessagesService {
         fiscalCode: user.fiscal_code
       });
 
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? ResponseSuccessJson(response.value)
-            : response.status === 404
-              ? ResponseErrorNotFound("Not found", "User not found")
-              : response.status === 429
-                ? ResponseErrorTooManyRequests()
-                : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? ResponseSuccessJson(response.value)
+          : response.status === 404
+          ? ResponseErrorNotFound("Not found", "User not found")
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
       );
     });
 
@@ -80,20 +78,18 @@ export default class MessagesService {
         id: messageId
       });
 
-      const resMessageContent = res.map(
-        _ => (_.status === 200 ? { ..._, value: _.value.message } : _)
+      const resMessageContent = res.map(_ =>
+        _.status === 200 ? { ..._, value: _.value.message } : _
       );
 
-      return withValidatedOrInternalError(
-        resMessageContent,
-        response =>
-          response.status === 200
-            ? ResponseSuccessJson(response.value)
-            : response.status === 404
-              ? ResponseErrorNotFound("Not found", "Message not found")
-              : response.status === 429
-                ? ResponseErrorTooManyRequests()
-                : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(resMessageContent, response =>
+        response.status === 200
+          ? ResponseSuccessJson(response.value)
+          : response.status === 404
+          ? ResponseErrorNotFound("Not found", "Message not found")
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
       );
     });
 
@@ -116,19 +112,17 @@ export default class MessagesService {
         service_id: serviceId
       });
 
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? withValidatedOrInternalError(
-                ServicePublic.decode(response.value),
-                ResponseSuccessJson
-              )
-            : response.status === 404
-              ? ResponseErrorNotFound("Not found", "Service not found")
-              : response.status === 429
-                ? ResponseErrorTooManyRequests()
-                : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              ServicePublic.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 404
+          ? ResponseErrorNotFound("Not found", "Service not found")
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
       );
     });
 
@@ -148,17 +142,15 @@ export default class MessagesService {
         recipient: user.fiscal_code
       });
 
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? withValidatedOrInternalError(
-                PaginatedServiceTupleCollection.decode(response.value),
-                ResponseSuccessJson
-              )
-            : response.status === 429
-              ? ResponseErrorTooManyRequests()
-              : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              PaginatedServiceTupleCollection.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
       );
     });
 
@@ -172,17 +164,15 @@ export default class MessagesService {
 
       const validated = await client.getVisibleServices({});
 
-      return withValidatedOrInternalError(
-        validated,
-        response =>
-          response.status === 200
-            ? withValidatedOrInternalError(
-                PaginatedServiceTupleCollection.decode(response.value),
-                ResponseSuccessJson
-              )
-            : response.status === 429
-              ? ResponseErrorTooManyRequests()
-              : unhandledResponseStatus(response.status)
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? withValidatedOrInternalError(
+              PaginatedServiceTupleCollection.decode(response.value),
+              ResponseSuccessJson
+            )
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
       );
     });
 }

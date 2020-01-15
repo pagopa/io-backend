@@ -311,10 +311,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
   }
 
   /*
-  * Store session info and update session info set.
-  * The returned promise will reject if either operation fail.
-  * update session info set
-  */
+   * Store session info and update session info set.
+   * The returned promise will reject if either operation fail.
+   * update session info set
+   */
   private saveSessionInfo(
     sessionInfo: SessionInfo,
     fiscalCode: FiscalCode

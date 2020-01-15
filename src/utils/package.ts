@@ -17,7 +17,11 @@ export const getValueFromPackageJson = (key: string): string =>
 export const getObjectFromPackageJson = <T>(
   key: string,
   type: t.Type<T>
-): Option<T> => type.decode(packageJson[key]).fold(_ => none, _ => some(_));
+): Option<T> =>
+  type.decode(packageJson[key]).fold(
+    _ => none,
+    _ => some(_)
+  );
 
 /**
  * Parse the current API version from the version field into the package.json file.
