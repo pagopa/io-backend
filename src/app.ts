@@ -268,7 +268,12 @@ export async function newApp(
       PAGOPA_PROXY_SERVICE,
       USER_METADATA_STORAGE
     );
-    registerPagoPARoutes(app, PagoPABasePath, allowPagoPAIPSourceRange);
+    registerPagoPARoutes(
+      app,
+      PagoPABasePath,
+      allowPagoPAIPSourceRange,
+      PROFILE_SERVICE
+    );
 
     const idpMetadataRefreshIntervalMillis =
       IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000;
@@ -374,11 +379,14 @@ export function startIdpMetadataUpdater(
 function registerPagoPARoutes(
   app: Express,
   basePath: string,
-  allowPagoPAIPSourceRange: CIDR
+  allowPagoPAIPSourceRange: CIDR,
+  profileService: ProfileService
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
 
-  const pagopaController: PagoPAController = new PagoPAController();
+  const pagopaController: PagoPAController = new PagoPAController(
+    profileService
+  );
 
   app.get(
     `${basePath}/user`,
