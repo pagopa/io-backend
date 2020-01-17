@@ -38,7 +38,13 @@ import {
   withUserFromRequest
 } from "../types/user";
 import { log } from "../utils/logger";
-import { withCatchAsInternalError } from "../utils/responses";
+import {
+  IResponseErrorForbidden,
+  ResponseErrorForbidden,
+  withCatchAsInternalError
+} from "../utils/responses";
+
+import { isAdult } from "../utils/date";
 
 export default class AuthenticationController {
   constructor(
@@ -62,6 +68,7 @@ export default class AuthenticationController {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
+    | IResponseErrorForbidden
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponsePermanentRedirect
@@ -78,6 +85,15 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
+
+    // If the user isn't an adult a forbidden response will be provided
+    if (
+      !fromNullable(spidUser.dateOfBirth)
+        .map(isAdult)
+        .getOrElse(true)
+    ) {
+      return ResponseErrorForbidden("Forbidden", "The user must be an adult");
+    }
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
     const walletToken = this.tokenService.getNewToken() as WalletToken;
     const user = toAppUser(spidUser, sessionToken, walletToken);

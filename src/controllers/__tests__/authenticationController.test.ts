@@ -443,6 +443,29 @@ describe("AuthenticationController#acs", () => {
       detail: "Redis error"
     });
   });
+
+  it("should return a forbidden error response if user isn't adult", async () => {
+    const res = mockRes();
+
+    const todayDate = new Date();
+    const notAdultUser = {
+      ...validUserPayload,
+      dateOfBirth: `${todayDate.getFullYear() - 17}-01-01`
+    };
+    const response = await controller.acs(notAdultUser);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(403);
+
+    const expectedForbiddenResponse = {
+      detail: expect.any(String),
+      status: 403,
+      title: "Forbidden",
+      type: undefined
+    };
+    expect(res.json).toHaveBeenCalledWith(expectedForbiddenResponse);
+  });
 });
 
 describe("AuthenticationController#getUserIdentity", () => {
