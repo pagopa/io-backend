@@ -76,22 +76,14 @@ export default class PagoPAController {
             }
             const profile = response.value;
 
-            // a validated custom email may have been set in the InitializedProfile,
-            // this email must be used only if is present and validated.
-            const maybeCustomEmailValidated =
+            // if no validated email is provided into InitializedProfile
+            // spid_email will be used for notice email
+            const maybeNoticeEmail: EmailAddress | undefined =
               profile.email && profile.is_email_validated
                 ? profile.email
-                : undefined;
+                : user.spid_email;
 
-            // if no validated email is provided into InitializedProfile
-            // spid email will be used for notice email
-            const maybeNoticeEmail:
-              | EmailAddress
-              | undefined = maybeCustomEmailValidated
-              ? maybeCustomEmailValidated
-              : user.spid_email;
-
-            // If no valid notice email is present an validation error is returned as response
+            // If no valid notice_email is present a validation error is returned as response
             return ExtendedPagoPAUser.decode({
               family_name: user.family_name,
               fiscal_code: profile.fiscal_code,
