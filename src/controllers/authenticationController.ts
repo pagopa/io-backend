@@ -44,7 +44,7 @@ import {
   withCatchAsInternalError
 } from "../utils/responses";
 
-import { isAdult } from "../utils/date";
+import { isOlderThan } from "../utils/date";
 
 export default class AuthenticationController {
   constructor(
@@ -88,9 +88,9 @@ export default class AuthenticationController {
 
     // If the user isn't an adult a forbidden response will be provided
     if (
-      !fromNullable(spidUser.dateOfBirth)
-        .map(isAdult)
-        .getOrElse(true)
+      fromNullable(spidUser.dateOfBirth).exists(
+        _ => !isOlderThan(18)(new Date(_), new Date())
+      )
     ) {
       return ResponseErrorForbidden("Forbidden", "The user must be an adult");
     }

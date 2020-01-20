@@ -276,6 +276,10 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+// tslint:disable-next-line: no-var-requires
+const dateUtils = require("../../utils/date");
+const mockIsOlderThan = jest.spyOn(dateUtils, "isOlderThan");
+
 describe("AuthenticationController#acs", () => {
   it("redirects to the correct url if userPayload is a valid User and a profile not exists", async () => {
     const res = mockRes();
@@ -447,15 +451,24 @@ describe("AuthenticationController#acs", () => {
   it("should return a forbidden error response if user isn't adult", async () => {
     const res = mockRes();
 
-    const todayDate = new Date();
+    // Mock isOlderThan to return false
+    const mockInnerIsOlderThan = jest.fn();
+    mockInnerIsOlderThan.mockImplementationOnce(() => false);
+    mockIsOlderThan.mockImplementationOnce(() => mockInnerIsOlderThan);
+
+    const expectedDateOfBirth = "2000-01-01";
     const notAdultUser = {
       ...validUserPayload,
-      dateOfBirth: `${todayDate.getFullYear() - 17}-01-01`
+      dateOfBirth: expectedDateOfBirth
     };
     const response = await controller.acs(notAdultUser);
     response.apply(res);
 
     expect(controller).toBeTruthy();
+    expect(mockIsOlderThan).toBeCalledWith(18);
+    expect(mockInnerIsOlderThan.mock.calls[0][0]).toEqual(
+      new Date(expectedDateOfBirth)
+    );
     expect(res.status).toHaveBeenCalledWith(403);
 
     const expectedForbiddenResponse = {
