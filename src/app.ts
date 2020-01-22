@@ -15,7 +15,6 @@ import {
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   PAGOPA_CLIENT,
   REDIS_CLIENT,
-  SAML_CERT,
   SESSION_STORAGE,
   URL_TOKEN_STRATEGY
 } from "./config";
@@ -27,17 +26,13 @@ import * as helmet from "helmet";
 import * as morgan from "morgan";
 import * as passport from "passport";
 
-import { fromNullable } from "fp-ts/lib/Option";
-
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
-import { not } from "fp-ts/lib/function";
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-import { UrlFromString } from "italia-ts-commons/lib/url";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import AuthenticationController from "./controllers/authenticationController";
@@ -53,8 +48,6 @@ import UserMetadataController from "./controllers/userMetadataController";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
-import getErrorCodeFromResponse from "./utils/getErrorCodeFromResponse";
-
 import NotificationService from "./services/notificationService";
 import { User } from "./types/user";
 import { toExpressHandler } from "./utils/express";
@@ -62,8 +55,8 @@ import {
   getCurrentBackendVersion,
   getObjectFromPackageJson
 } from "./utils/package";
-import { getSamlIssuer } from "./utils/saml";
 
+import { SpidPassportBuilder } from "io-spid-commons";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -73,9 +66,8 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 
 const defaultModule = {
-  currentSpidStrategy: undefined as SpidStrategy | undefined,
   newApp,
-  registerLoginRoute,
+  spidPassportBuilder: undefined as SpidPassportBuilder | undefined,
   startIdpMetadataUpdater
 };
 
@@ -90,53 +82,6 @@ const cachingMiddleware = apicache.options({
     include: [200]
   }
 }).middleware;
-
-/**
- * Catch SPID authentication errors and redirect the client to
- * clientErrorRedirectionUrl.
- */
-function withSpidAuth(
-  controller: AuthenticationController,
-  clientErrorRedirectionUrl: string,
-  clientLoginRedirectionUrl: string
-): (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => void {
-  return (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    passport.authenticate("spid", async (err, user) => {
-      const issuer = getSamlIssuer(req.body);
-      if (err) {
-        log.error(
-          "Spid Authentication|Authentication Error|ERROR=%s|ISSUER=%s",
-          err,
-          issuer
-        );
-        return res.redirect(
-          clientErrorRedirectionUrl +
-            fromNullable(err.statusXml)
-              .chain(statusXml => getErrorCodeFromResponse(statusXml))
-              .map(errorCode => `?errorCode=${errorCode}`)
-              .getOrElse("")
-        );
-      }
-      if (!user) {
-        log.error(
-          "Spid Authentication|Authentication Error|ERROR=user_not_found|ISSUER=%s",
-          issuer
-        );
-        return res.redirect(clientLoginRedirectionUrl);
-      }
-      const response = await controller.acs(user);
-      response.apply(res);
-    })(req, res, next);
-  };
-}
 
 export async function newApp(
   env: NodeEnvironment,
@@ -226,9 +171,7 @@ export async function newApp(
 
   try {
     // tslint:disable-next-line: no-object-mutation
-    defaultModule.currentSpidStrategy = await generateSpidStrategy();
-    defaultModule.registerLoginRoute(app, defaultModule.currentSpidStrategy);
-    registerPublicRoutes(app);
+    defaultModule.spidPassportBuilder = generateSpidStrategy(app);
 
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
@@ -236,16 +179,23 @@ export async function newApp(
     // Create the profile service
     const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
-    registerAuthenticationRoutes(
-      app,
-      authenticationBasePath,
+    const acsController: AuthenticationController = new AuthenticationController(
       SESSION_STORAGE,
-      SAML_CERT,
       TOKEN_SERVICE,
-      defaultModule.currentSpidStrategy,
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE
     );
+    // tslint:disable-next-line: no-useless-cast
+    await defaultModule
+      .spidPassportBuilder!.init(
+        acsController,
+        CLIENT_ERROR_REDIRECTION_URL,
+        CLIENT_REDIRECTION_URL
+      )
+      .run();
+    registerPublicRoutes(app);
+
+    registerAuthenticationRoutes(app, authenticationBasePath, acsController);
 
     // Create the Notification Service
     const NOTIFICATION_SERVICE = new NotificationService(
@@ -274,17 +224,17 @@ export async function newApp(
       allowPagoPAIPSourceRange,
       PROFILE_SERVICE
     );
-
-    const idpMetadataRefreshIntervalMillis =
-      IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000;
-    const idpMetadataRefreshTimer = startIdpMetadataUpdater(
-      app,
-      defaultModule.currentSpidStrategy,
-      idpMetadataRefreshIntervalMillis
-    );
-    app.on("server:stop", () => {
-      clearInterval(idpMetadataRefreshTimer);
-    });
+    if (defaultModule.spidPassportBuilder) {
+      const idpMetadataRefreshIntervalMillis =
+        IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000;
+      const idpMetadataRefreshTimer = startIdpMetadataUpdater(
+        defaultModule.spidPassportBuilder,
+        idpMetadataRefreshIntervalMillis
+      );
+      app.on("server:stop", () => {
+        clearInterval(idpMetadataRefreshTimer);
+      });
+    }
   } catch (err) {
     log.error("Fatal error during Express initialization: %s", err);
     return process.exit(1);
@@ -293,86 +243,25 @@ export async function newApp(
 }
 
 /**
- * Initializes SpidStrategy for passport and setup /login route.
- */
-function registerLoginRoute(app: Express, newSpidStrategy: SpidStrategy): void {
-  // Add the strategy to authenticate the proxy to SPID.
-  passport.use("spid", (newSpidStrategy as unknown) as passport.Strategy);
-  const spidAuth = passport.authenticate("spid", { session: false });
-  app.get("/login", spidAuth);
-}
-
-/**
- * Override SPID_STRATEGY inside the container.
- * Then /login route will be overridden with an updated SPID_STRATEGY.
- */
-async function clearAndReloadSpidStrategy(
-  app: Express,
-  previousSpidStrategy: SpidStrategy,
-  onRefresh?: () => void
-): Promise<SpidStrategy> {
-  log.info("Started Spid strategy re-initialization ...");
-
-  passport.unuse("spid");
-
-  // tslint:disable-next-line: no-any
-  const isLoginRoute = (route: any) =>
-    route.route &&
-    route.route.path === "/login" &&
-    route.route.methods &&
-    route.route.methods.get;
-
-  // Remove /login route from Express router stack
-  // tslint:disable-next-line: no-object-mutation
-  app._router.stack = app._router.stack.filter(not(isLoginRoute));
-
-  // tslint:disable-next-line: no-let
-  let newSpidStrategy: SpidStrategy | undefined;
-  try {
-    // Inject a new SPID Strategy generate function inside the container
-    newSpidStrategy = await generateSpidStrategy();
-    // tslint:disable-next-line: no-object-mutation
-    defaultModule.currentSpidStrategy = newSpidStrategy;
-    log.info("Spid strategy re-initialization complete.");
-  } catch (err) {
-    log.error("Error on update spid strategy: %s", err);
-    log.info("Restore previous spid strategy configuration");
-    throw new Error("Error while initializing SPID strategy");
-  } finally {
-    defaultModule.registerLoginRoute(
-      app,
-      newSpidStrategy ? newSpidStrategy : previousSpidStrategy
-    );
-    if (onRefresh) {
-      onRefresh();
-    }
-  }
-  return newSpidStrategy ? newSpidStrategy : previousSpidStrategy;
-}
-
-/**
  * Sets an interval to reload SpidStrategy
  */
 export function startIdpMetadataUpdater(
-  app: Express,
-  originalSpidStrategy: SpidStrategy,
+  spidPassportBuilder: SpidPassportBuilder,
   refreshTimeMilliseconds: number,
   onRefresh?: () => void
 ): NodeJS.Timer {
-  // tslint:disable-next-line: no-let
-  let newSpidStrategy: SpidStrategy | undefined;
-  return setInterval(() => {
-    clearAndReloadSpidStrategy(
-      app,
-      newSpidStrategy ? newSpidStrategy : originalSpidStrategy,
-      onRefresh
-    )
-      .then(previousSpidStrategy => {
-        newSpidStrategy = previousSpidStrategy;
+  return setInterval(async () => {
+    await spidPassportBuilder
+      .clearAndReloadSpidStrategy()
+      .mapLeft(_ => {
+        log.error("Error on clearAndReloadSpidStrategy: %s", _);
       })
-      .catch(err => {
-        log.error("Error on clearAndReloadSpidStrategy: %s", err);
-      });
+      .map(_ => {
+        if (onRefresh) {
+          onRefresh();
+        }
+      })
+      .run();
   }, refreshTimeMilliseconds);
 }
 
@@ -578,47 +467,14 @@ function registerAPIRoutes(
 function registerAuthenticationRoutes(
   app: Express,
   basePath: string,
-  sessionStorage: RedisSessionStorage,
-  samlCert: string,
-  tokenService: TokenService,
-  spidStrategy: SpidStrategy,
-  getRedirectionUrl: (token: string) => UrlFromString,
-  profileService: ProfileService
+  acsController: AuthenticationController
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
-
-  const acsController: AuthenticationController = new AuthenticationController(
-    sessionStorage,
-    samlCert,
-    spidStrategy,
-    tokenService,
-    getRedirectionUrl,
-    profileService
-  );
-
-  app.post(
-    `${basePath}/assertionConsumerService`,
-    withSpidAuth(
-      acsController,
-      CLIENT_ERROR_REDIRECTION_URL,
-      CLIENT_REDIRECTION_URL
-    )
-  );
 
   app.post(
     `${basePath}/logout`,
     bearerTokenAuth,
     toExpressHandler(acsController.logout, acsController)
-  );
-
-  app.post(
-    `${basePath}/slo`,
-    toExpressHandler(acsController.slo, acsController)
-  );
-
-  app.get(
-    `${basePath}/metadata`,
-    toExpressHandler(acsController.metadata, acsController)
   );
 
   app.get(

@@ -20,11 +20,7 @@ jest.mock("../controllers/notificationController", () => {
   };
 });
 
-import appModule, { startIdpMetadataUpdater } from "../app";
-import {
-  DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  generateSpidStrategy
-} from "../config";
+import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
@@ -110,35 +106,6 @@ describe("Success app start", () => {
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .set("X-Client-Ip", "192.0.0.0")
         .expect(401);
-    });
-  });
-
-  describe("Test refresh idp metadata", () => {
-    let spidStrategyImpl: SpidStrategy;
-    beforeEach(async () => {
-      jest.useFakeTimers();
-      spidStrategyImpl = await generateSpidStrategy();
-    });
-
-    it("app#idpMetadataUpdater", done => {
-      const onRefresh = jest.fn();
-      startIdpMetadataUpdater(
-        app,
-        spidStrategyImpl,
-        DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
-        onRefresh
-      );
-      expect(setInterval).toHaveBeenCalledTimes(1);
-      expect(setInterval).toHaveBeenLastCalledWith(
-        expect.any(Function),
-        DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
-      );
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-      setTimeout(() => {
-        expect(onRefresh).toBeCalledTimes(1);
-        done();
-      }, 1000);
     });
   });
 

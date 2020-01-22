@@ -57,6 +57,7 @@
     "fp-ts": "~1.17.0",
     "helmet": "3.21.0",
     "http-graceful-shutdown": "^2.3.2",
+    "io-spid-commons": "../io-spid-commons",
     "io-ts": "1.8.5",
     "io-ts-types": "^0.4.7",
     "italia-ts-commons": "^5.1.12",
@@ -148,5 +149,9 @@
       "!src/types/api/*.{ts}",
       "!src/**/*.d.ts"
     ]
+  },
+  "resolutions": {
+    "fp-ts": "1.17.4",
+    "passport-saml": "0.34.0"
   }
 }

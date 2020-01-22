@@ -2,6 +2,7 @@
  * Defines services and register them to the Service Container.
  */
 import * as dotenv from "dotenv";
+import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
@@ -16,12 +17,12 @@ import ApiClientFactory from "./services/apiClientFactory";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 
 import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
-import spidStrategy from "./strategies/spidStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 
 import { getRequiredENVVar, readFile } from "./utils/container";
 import { log } from "./utils/logger";
 
+import { SamlAttribute, SpidPassportBuilder } from "io-spid-commons";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import {
   createClusterRedisClient,
@@ -92,7 +93,7 @@ const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
 const SPID_TESTENV_URL =
   process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
 
-const HAS_SPID_VALIDATOR_ENABLED = fromNullable(
+export const HAS_SPID_VALIDATOR_ENABLED = fromNullable(
   process.env.HAS_SPID_VALIDATOR_ENABLED
 )
   .map(_ => _.toLowerCase() === "true")
@@ -100,20 +101,42 @@ const HAS_SPID_VALIDATOR_ENABLED = fromNullable(
 
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
-export function generateSpidStrategy(): Promise<SpidStrategy> {
-  return spidStrategy(
-    SAML_KEY,
-    SAML_CERT,
-    SAML_CALLBACK_URL,
-    SAML_ISSUER,
-    SAML_ACCEPTED_CLOCK_SKEW_MS,
-    SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
-    SPID_AUTOLOGIN,
-    SPID_TESTENV_URL,
-    IDP_METADATA_URL,
-    HAS_SPID_VALIDATOR_ENABLED
+
+export const generateSpidStrategy = (app: express.Express) => {
+  return new SpidPassportBuilder(
+    app,
+    "/login",
+    "/slo",
+    "/metadata",
+    "/assertionConsumerService",
+    {
+      IDPMetadataUrl: IDP_METADATA_URL,
+      hasSpidValidatorEnabled: HAS_SPID_VALIDATOR_ENABLED,
+      organization: {
+        URL: "https://io.italia.it",
+        displayName:
+          "IO onboarding - il portale di onboarding degli enti del progetto IO",
+        name:
+          "Team per la Trasformazione Digitale - Presidenza Del Consiglio dei Ministri"
+      },
+      requiredAttributes: [
+        SamlAttribute.NAME,
+        SamlAttribute.FAMILY_NAME,
+        SamlAttribute.EMAIL,
+        SamlAttribute.FISCAL_NUMBER,
+        SamlAttribute.DATE_OF_BIRTH
+      ],
+      samlAcceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
+      samlAttributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
+      samlCallbackUrl: SAML_CALLBACK_URL,
+      samlCert: SAML_CERT,
+      samlIssuer: SAML_ISSUER,
+      samlKey: SAML_KEY,
+      spidAutologin: SPID_AUTOLOGIN || "",
+      spidTestEnvUrl: SPID_TESTENV_URL
+    }
   );
-}
+};
 
 // Redirection urls
 const clientProfileRedirectionUrl =
