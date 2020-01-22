@@ -105,7 +105,7 @@ export default class AuthenticationController
       if (createProfileResponse.kind !== "IResponseSuccessJson") {
         // TODO: Must be extended IAuthenticationController to support IResponseErrorTooManyRequests?
         return createProfileResponse.kind === "IResponseErrorTooManyRequests"
-          ? ResponseErrorInternal("To many requests")
+          ? ResponseErrorInternal("Too many requests")
           : createProfileResponse;
       }
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
