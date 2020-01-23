@@ -11,6 +11,9 @@ import RedisStorageUtils from "./redisStorageUtils";
 const userMetadataPrefix = "USERMETA-";
 export const metadataNotFoundError = new Error("User Metadata not found");
 export const invalidVersionNumberError = new Error("Invalid version number");
+export const concurrentWriteRejectionError = new Error(
+  "Concurrent write operation"
+);
 
 /**
  * Service that manages user metadata stored into Redis database.
@@ -23,14 +26,33 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
 
   /**
    * {@inheritDoc}
-   *
-   * This method doesn't support atomic operations on concurrency scenario.
-   * Story https://www.pivotaltracker.com/story/show/167064659
+   * This method uses Optimistic Lock to prevent race condition
+   * during write operations of user metadata
+   * @see https://github.com/NodeRedis/node_redis#optimistic-locks
    */
   public async set(
     user: User,
     payload: UserMetadata
   ): Promise<Either<Error, boolean>> {
+    // In order to work properly, optimistic lock needs to be initialized on different
+    // redis client instances
+    const duplicatedRedisClient = this.redisClient.duplicate();
+    const userMetadataWatchResult = await new Promise<Either<Error, true>>(
+      resolve => {
+        duplicatedRedisClient.watch(
+          `${userMetadataPrefix}${user.fiscal_code}`,
+          err => {
+            if (err) {
+              return resolve(left(err));
+            }
+            resolve(right(true));
+          }
+        );
+      }
+    );
+    if (isLeft(userMetadataWatchResult)) {
+      return userMetadataWatchResult;
+    }
     const getUserMetadataResult = await this.loadUserMetadataByFiscalCode(
       user.fiscal_code
     );
@@ -47,13 +69,21 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       return left(getUserMetadataResult.value);
     }
     return await new Promise<Either<Error, boolean>>(resolve => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${userMetadataPrefix}${user.fiscal_code}`,
-        JSON.stringify(payload),
-        (err, response) => resolve(this.singleStringReply(err, response))
-      );
+      duplicatedRedisClient
+        .multi()
+        .set(
+          `${userMetadataPrefix}${user.fiscal_code}`,
+          JSON.stringify(payload)
+        )
+        .exec((err, results) => {
+          if (err) {
+            return resolve(left(err));
+          }
+          if (results === null) {
+            return resolve(left(concurrentWriteRejectionError));
+          }
+          resolve(this.singleStringReply(err, results[0]));
+        });
     });
   }
 
