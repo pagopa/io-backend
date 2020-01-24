@@ -1,5 +1,5 @@
 {
-  "name": "italia-backend",
+  "name": "io-backend",
   "version": "2.6.0",
   "min_app_version": {
     "ios": "0.0.0",
@@ -9,7 +9,7 @@
     "ios": "0.0.0",
     "android": "0.0.0"
   },
-  "description": "Italia app and web backend",
+  "description": "IO app and web backend",
   "main": "index.js",
   "engines": {
     "node": "10.14.2"
