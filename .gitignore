@@ -18,6 +18,7 @@ npm-debug.log
 
 # Exclude typescript generated javascript files.
 *.js
+!.release-it.js
 *.js.map
 
 # Excluded auto-generated API client.
