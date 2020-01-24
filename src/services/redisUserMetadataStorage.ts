@@ -35,7 +35,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
     payload: UserMetadata
   ): Promise<Either<Error, boolean>> {
     // In order to work properly, optimistic lock needs to be initialized on different
-    // redis client instances
+    // redis client instances @see https://github.com/NodeRedis/node_redis/issues/1320#issuecomment-373200541
     const duplicatedRedisClient = this.redisClient.duplicate();
     const userMetadataWatchResult = await new Promise<Either<Error, true>>(
       resolve => {
