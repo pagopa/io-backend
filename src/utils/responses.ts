@@ -2,7 +2,9 @@ import * as express from "express";
 import * as t from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import {
+  HttpStatusCodeEnum,
   IResponse,
+  ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorValidation
 } from "italia-ts-commons/lib/responses";
@@ -21,6 +23,26 @@ export function ResponseNoContent(): IResponseNoContent {
     apply: (res: express.Response) => res.status(204).json({}),
     kind: "IResponseNoContent",
     value: {}
+  };
+}
+
+/**
+ * Interface for a forbidden error response.
+ */
+export interface IResponseErrorForbidden
+  extends IResponse<"IResponseErrorForbidden"> {
+  readonly detail: string;
+}
+/**
+ * Returns a forbidden error response with status code 403.
+ */
+export function ResponseErrorForbidden(
+  title: string,
+  detail: string
+): IResponseErrorForbidden {
+  return {
+    ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_403, title, detail),
+    ...{ detail: `${title}: ${detail}`, kind: "IResponseErrorForbidden" }
   };
 }
 
