@@ -46,6 +46,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
+    "@pagopa/io-spid-commons": "1.1.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
     "azure-sb": "^0.10.6",
@@ -148,5 +149,9 @@
       "!src/types/api/*.{ts}",
       "!src/**/*.d.ts"
     ]
+  },
+  "resolutions": {
+    "fp-ts": "1.17.4",
+    "passport-saml": "0.34.0"
   }
 }

@@ -9,22 +9,19 @@ import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
-  IResponseSuccessXml,
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponsePermanentRedirect,
-  ResponseSuccessJson,
-  ResponseSuccessXml
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
+import { IAuthenticationController } from "@pagopa/io-spid-commons";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -40,11 +37,10 @@ import {
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 
-export default class AuthenticationController {
+export default class AuthenticationController
+  implements IAuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
-    private readonly samlCert: string,
-    private readonly spidStrategy: SpidStrategy,
     private readonly tokenService: TokenService,
     private readonly getClientProfileRedirectionUrl: (
       token: string
@@ -62,8 +58,6 @@ export default class AuthenticationController {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseErrorTooManyRequests
-    | IResponseErrorNotFound
     | IResponsePermanentRedirect
   > {
     const errorOrUser = validateSpidUser(userPayload);
@@ -109,10 +103,16 @@ export default class AuthenticationController {
         newProfile
       );
       if (createProfileResponse.kind !== "IResponseSuccessJson") {
-        return createProfileResponse;
+        // TODO: Must be extended IAuthenticationController to support IResponseErrorTooManyRequests?
+        return createProfileResponse.kind === "IResponseErrorTooManyRequests"
+          ? ResponseErrorInternal("Too many requests")
+          : createProfileResponse;
       }
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
-      return getProfileResponse;
+      // TODO: IAuthenticationController type needs to support IResponseErrorTooManyRequests
+      return getProfileResponse.kind === "IResponseErrorTooManyRequests"
+        ? ResponseErrorInternal("Too many requests")
+        : getProfileResponse;
     }
 
     const urlWithToken = this.getClientProfileRedirectionUrl(
@@ -163,17 +163,6 @@ export default class AuthenticationController {
     };
 
     return ResponsePermanentRedirect(url);
-  }
-
-  /**
-   * The metadata for this Service Provider.
-   */
-  public async metadata(): Promise<IResponseSuccessXml<string>> {
-    const metadata = this.spidStrategy.generateServiceProviderMetadata(
-      this.samlCert
-    );
-
-    return ResponseSuccessXml(metadata);
   }
 
   /**

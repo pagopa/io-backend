@@ -14,6 +14,10 @@ save_node_cache: &save_node_cache
       - ~/.cache/yarn
     key: *node_cache_key
 
+# Init .npmrc file
+npmrc_init: &npmrc_init
+  run: bash ./scripts/init-npm.sh
+
 # Install yarn dependencies
 install_node_modules: &install_node_modules
   run: yarn install --cache-folder ~/.cache/yarn
@@ -40,6 +44,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
       - run: yarn lint
   danger:
@@ -49,6 +54,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
       - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'
   build:
@@ -60,6 +66,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
       - *save_node_cache
 
@@ -80,6 +87,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
 
       # Install required libraries

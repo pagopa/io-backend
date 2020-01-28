@@ -1,53 +1,59 @@
+import { SpidPassportBuilder } from "@pagopa/io-spid-commons";
 import { Express } from "express";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-jest.mock("../utils/redis");
 import appModule from "../app";
-import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../config";
+
+jest.mock("../utils/redis");
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
+
+import { fromLeft, TaskEither } from "fp-ts/lib/TaskEither";
+import { DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS } from "../config";
+import { log } from "../utils/logger";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
 // tslint:disable-next-line: no-let
 let app: Express;
-// tslint:disable-next-line: no-let
-let spidStrategy: SpidStrategy;
-beforeAll(async () => {
-  jest.resetAllMocks();
-  jest.clearAllMocks();
-  app = await appModule.newApp(
-    NodeEnvironmentEnum.PRODUCTION,
-    aValidCIDR,
-    aValidCIDR,
-    "",
-    "/api/v1",
-    "/pagopa/api/v1"
-  );
-  expect(appModule.currentSpidStrategy).toBeDefined();
-  spidStrategy = appModule.currentSpidStrategy as SpidStrategy;
-  jest.useFakeTimers();
-});
 
-afterAll(() => {
-  app.emit("server:stop");
-});
+describe("app#startIdpMetadataUpdater", () => {
+  // tslint:disable-next-line: no-let
+  let currentSpidPassportBuilder: SpidPassportBuilder | undefined;
+  // tslint:disable-next-line: no-let
+  let mockClearAndReloadSpidStrategy: jest.SpyInstance<TaskEither<Error, void>>;
+  beforeEach(async () => {
+    app = await appModule.newApp(
+      NodeEnvironmentEnum.PRODUCTION,
+      aValidCIDR,
+      aValidCIDR,
+      "",
+      "/api/v1",
+      "/pagopa/api/v1"
+    );
+    // tslint:disable-next-line: no-useless-cast
+    currentSpidPassportBuilder = appModule.spidPassportBuilder as SpidPassportBuilder;
+    mockClearAndReloadSpidStrategy = jest.spyOn(
+      currentSpidPassportBuilder,
+      "clearAndReloadSpidStrategy"
+    );
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    app.emit("server:stop");
+    currentSpidPassportBuilder = undefined;
+    mockClearAndReloadSpidStrategy.mockRestore();
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
 
-describe("Restore of previous SPID Strategy on update failure", () => {
-  it("Use old spid strategy if generateSpidStrategy fails", async () => {
+  it("startIdpMetadataUpdater must create an interval that call clearAndReloadSpidStrategy", done => {
     const onRefresh = jest.fn();
-    const mockExit = jest
-      .spyOn(process, "exit")
-      .mockImplementation(() => true as never);
-    const config = require("../config");
-    const mockSpidStrategy = jest
-      .spyOn(config, "generateSpidStrategy")
-      .mockImplementation(() =>
-        Promise.reject(new Error("Error download metadata"))
-      );
+    if (!currentSpidPassportBuilder) {
+      return done(new Error("Spid strategy builder not defined"));
+    }
     appModule.startIdpMetadataUpdater(
-      app,
-      spidStrategy,
+      currentSpidPassportBuilder,
       DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
       onRefresh
     );
@@ -58,14 +64,35 @@ describe("Restore of previous SPID Strategy on update failure", () => {
     );
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        expect(onRefresh).toBeCalled();
-        expect(mockSpidStrategy).toHaveBeenCalledTimes(1);
-        expect(mockExit).not.toBeCalled();
-        expect(appModule.currentSpidStrategy).toBe(spidStrategy);
-        resolve();
-      }, 2000);
-    });
+    setTimeout(() => {
+      expect(mockClearAndReloadSpidStrategy).toBeCalledTimes(1);
+      expect(onRefresh).toBeCalledTimes(1);
+      done();
+    }, 1000);
+  });
+
+  it("when clearAndReloadSpidStrategy fails an error must be logged", done => {
+    const onRefresh = jest.fn();
+    if (!currentSpidPassportBuilder) {
+      return done(new Error("Spid strategy builder not defined"));
+    }
+    const expectedError = new Error("clearAndReloadSpidStrategy failure");
+    mockClearAndReloadSpidStrategy.mockImplementation(() =>
+      fromLeft(expectedError)
+    );
+    const mockLogger = jest.spyOn(log, "error");
+    appModule.startIdpMetadataUpdater(
+      currentSpidPassportBuilder,
+      DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
+      onRefresh
+    );
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    setTimeout(() => {
+      expect(mockClearAndReloadSpidStrategy).toBeCalledTimes(1);
+      expect(onRefresh).not.toBeCalled();
+      expect(mockLogger).toBeCalledWith(expect.any(String), expectedError);
+      done();
+    }, 1000);
   });
 });
