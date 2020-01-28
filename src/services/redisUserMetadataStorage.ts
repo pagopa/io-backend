@@ -8,6 +8,9 @@ import { log } from "../utils/logger";
 import { IUserMetadataStorage } from "./IUserMetadataStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
+import { Sema } from "async-sema";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
+
 const userMetadataPrefix = "USERMETA-";
 export const metadataNotFoundError = new Error("User Metadata not found");
 export const invalidVersionNumberError = new Error("Invalid version number");
@@ -20,6 +23,8 @@ export const concurrentWriteRejectionError = new Error(
  */
 export default class RedisUserMetadataStorage extends RedisStorageUtils
   implements IUserMetadataStorage {
+  private setOperations: Record<string, true | undefined> = {};
+  private mutex: Sema = new Sema(1);
   constructor(private readonly redisClient: redis.RedisClient) {
     super();
   }
@@ -30,16 +35,27 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
    * during write operations of user metadata
    * @see https://github.com/NodeRedis/node_redis#optimistic-locks
    */
+  // tslint:disable-next-line: cognitive-complexity
   public async set(
     user: User,
     payload: UserMetadata
   ): Promise<Either<Error, boolean>> {
     // In order to work properly, optimistic lock needs to be initialized on different
     // redis client instances @see https://github.com/NodeRedis/node_redis/issues/1320#issuecomment-373200541
-    const duplicatedRedisClient = this.redisClient.duplicate();
+    await this.mutex.acquire();
+    const raceCondition = this.setOperations[user.fiscal_code];
+    // tslint:disable-next-line: no-let
+    let duplicatedOrOriginalRedisClient = this.redisClient;
+    if (raceCondition === undefined) {
+      // tslint:disable-next-line: no-object-mutation
+      this.setOperations[user.fiscal_code] = true;
+    } else {
+      duplicatedOrOriginalRedisClient = this.redisClient.duplicate();
+    }
+    this.mutex.release();
     const userMetadataWatchResult = await new Promise<Either<Error, true>>(
       resolve => {
-        duplicatedRedisClient.watch(
+        duplicatedOrOriginalRedisClient.watch(
           `${userMetadataPrefix}${user.fiscal_code}`,
           err => {
             if (err) {
@@ -51,7 +67,9 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       }
     );
     if (isLeft(userMetadataWatchResult)) {
-      duplicatedRedisClient.end(true);
+      raceCondition
+        ? duplicatedOrOriginalRedisClient.end(true)
+        : await this.resetOperation(user.fiscal_code);
       return userMetadataWatchResult;
     }
     const getUserMetadataResult = await this.loadUserMetadataByFiscalCode(
@@ -61,25 +79,31 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       isRight(getUserMetadataResult) &&
       getUserMetadataResult.value.version !== payload.version - 1
     ) {
-      duplicatedRedisClient.end(true);
+      raceCondition
+        ? duplicatedOrOriginalRedisClient.end(true)
+        : await this.resetOperation(user.fiscal_code);
       return left(invalidVersionNumberError);
     }
     if (
       isLeft(getUserMetadataResult) &&
       getUserMetadataResult.value !== metadataNotFoundError
     ) {
-      duplicatedRedisClient.end(true);
+      raceCondition
+        ? duplicatedOrOriginalRedisClient.end(true)
+        : await this.resetOperation(user.fiscal_code);
       return left(getUserMetadataResult.value);
     }
     return await new Promise<Either<Error, boolean>>(resolve => {
-      duplicatedRedisClient
+      duplicatedOrOriginalRedisClient
         .multi()
         .set(
           `${userMetadataPrefix}${user.fiscal_code}`,
           JSON.stringify(payload)
         )
-        .exec((err, results) => {
-          duplicatedRedisClient.end(true);
+        .exec(async (err, results) => {
+          raceCondition
+            ? duplicatedOrOriginalRedisClient.end(true)
+            : await this.resetOperation(user.fiscal_code);
           if (err) {
             return resolve(left(err));
           }
@@ -141,5 +165,12 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
         }
       );
     });
+  }
+
+  private async resetOperation(fiscalCode: FiscalCode): Promise<void> {
+    await this.mutex.acquire();
+    // tslint:disable-next-line: no-object-mutation
+    this.setOperations[fiscalCode] = undefined;
+    this.mutex.release();
   }
 }
