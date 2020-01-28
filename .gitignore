@@ -33,3 +33,6 @@ npm-debug.log
 
 # Exclude local files
 local.*
+
+# Exclude .npmrc file
+.npmrc 
