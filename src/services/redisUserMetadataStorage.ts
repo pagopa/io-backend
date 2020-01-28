@@ -51,6 +51,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       }
     );
     if (isLeft(userMetadataWatchResult)) {
+      duplicatedRedisClient.end(true);
       return userMetadataWatchResult;
     }
     const getUserMetadataResult = await this.loadUserMetadataByFiscalCode(
@@ -60,12 +61,14 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       isRight(getUserMetadataResult) &&
       getUserMetadataResult.value.version !== payload.version - 1
     ) {
+      duplicatedRedisClient.end(true);
       return left(invalidVersionNumberError);
     }
     if (
       isLeft(getUserMetadataResult) &&
       getUserMetadataResult.value !== metadataNotFoundError
     ) {
+      duplicatedRedisClient.end(true);
       return left(getUserMetadataResult.value);
     }
     return await new Promise<Either<Error, boolean>>(resolve => {
@@ -76,6 +79,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
           JSON.stringify(payload)
         )
         .exec((err, results) => {
+          duplicatedRedisClient.end(true);
           if (err) {
             return resolve(left(err));
           }
