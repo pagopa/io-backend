@@ -56,7 +56,7 @@ import {
   getObjectFromPackageJson
 } from "./utils/package";
 
-import { SpidPassportBuilder } from "io-spid-commons";
+import { SpidPassportBuilder } from "@pagopa/io-spid-commons";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";

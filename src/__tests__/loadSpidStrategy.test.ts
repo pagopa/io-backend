@@ -1,5 +1,5 @@
+import { SpidPassportBuilder } from "@pagopa/io-spid-commons";
 import { Express } from "express";
-import { SpidPassportBuilder } from "io-spid-commons";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import appModule from "../app";

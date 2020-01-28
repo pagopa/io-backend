@@ -21,7 +21,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
-import { IAuthenticationController } from "io-spid-commons";
+import { IAuthenticationController } from "@pagopa/io-spid-commons";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";

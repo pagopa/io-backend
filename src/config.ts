@@ -22,7 +22,7 @@ import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar, readFile } from "./utils/container";
 import { log } from "./utils/logger";
 
-import { SamlAttribute, SpidPassportBuilder } from "io-spid-commons";
+import { SamlAttribute, SpidPassportBuilder } from "@pagopa/io-spid-commons";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import {
   createClusterRedisClient,

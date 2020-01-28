@@ -46,6 +46,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
+    "@pagopa/io-spid-commons": "1.1.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
     "azure-sb": "^0.10.6",
@@ -57,7 +58,6 @@
     "fp-ts": "~1.17.0",
     "helmet": "3.21.0",
     "http-graceful-shutdown": "^2.3.2",
-    "io-spid-commons": "../io-spid-commons",
     "io-ts": "1.8.5",
     "io-ts-types": "^0.4.7",
     "italia-ts-commons": "^5.1.12",

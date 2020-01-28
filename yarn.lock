@@ -138,6 +138,24 @@
   dependencies:
     "@types/node" ">= 8"
 
+"@pagopa/io-spid-commons@1.1.0":
+  version "1.1.0"
+  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/1.1.0/3ca22ddd78240174634402c8d2aa9d70b554004a76504bd9aa2587b18291c810#8f9b98c25cccb26793f3d1124e4af2172bb227bd"
+  integrity sha512-ZTBIPHS3IFPcE8aihRCeixm+stmWU6+eL0bo3BSOD0hLDvMTuOAz0fJR7KqaC8036te9wTnhKtzn+YFieR926Q==
+  dependencies:
+    date-fns "^1.30.1"
+    fp-ts "1.12.0"
+    io-ts "1.8.5"
+    io-ts-types "^0.4.7"
+    italia-ts-commons "^5.1.4"
+    italia-utils "^4.1.0"
+    node-fetch "^2.2.0"
+    passport-strategy "^1.0.0"
+    spid-passport "git://github.com/teamdigitale/spid-passport.git#v1.1.7"
+    winston "^3.0.0"
+    x509 "^0.3.4"
+    xmldom "^0.1.27"
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -2688,15 +2706,6 @@ fs-extra@^6.0.0:
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
-fs-extra@^8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.1.0.tgz#49d43c45a88cd9677668cb7be1b46efdb8d2e1c0"
-  integrity sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
-  dependencies:
-    graceful-fs "^4.2.0"
-    jsonfile "^4.0.0"
-    universalify "^0.1.0"
-
 fs-minipass@^1.2.5:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-1.2.7.tgz#ccff8570841e7fe4265693da88936c55aed7f7c7"
@@ -2931,7 +2940,7 @@ got@^6.7.1:
     unzip-response "^2.0.1"
     url-parse-lax "^1.0.0"
 
-graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0:
+graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.3.tgz#4a12ff1b60376ef09862c2093edd908328be8423"
   integrity sha512-a30VEBm4PEdx1dRB7MFK7BejejvCvBronbLjht+sHuGYj8PHs7M/5Z+rt5lw551vZ7yfTCj4Vuyy3mSJytDWRQ==
@@ -3354,24 +3363,6 @@ invert-kv@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
   integrity sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA==
-
-io-spid-commons@../io-spid-commons:
-  version "1.1.0"
-  dependencies:
-    date-fns "^1.30.1"
-    fp-ts "1.12.0"
-    fs-extra "^8.1.0"
-    io-ts "1.8.5"
-    io-ts-types "^0.4.7"
-    italia-ts-commons "^5.1.4"
-    italia-utils "^4.1.0"
-    node-fetch "^2.2.0"
-    passport-strategy "^1.0.0"
-    spid-passport "git://github.com/teamdigitale/spid-passport.git#v1.1.7"
-    winston "^3.0.0"
-    x509 "^0.3.4"
-    xmldom "^0.1.27"
-    yargs "^15.1.0"
 
 io-ts-types@^0.4.7:
   version "0.4.8"
@@ -7837,7 +7828,7 @@ yargs@^11.0.0, yargs@^11.1.0:
     y18n "^3.2.1"
     yargs-parser "^9.0.2"
 
-yargs@^15.0.2, yargs@^15.1.0:
+yargs@^15.0.2:
   version "15.1.0"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-15.1.0.tgz#e111381f5830e863a89550bd4b136bb6a5f37219"
   integrity sha512-T39FNN1b6hCW4SOIk1XyTOWxtXdcen0t+XYrysQmChzSipvhBO8Bj0nK1ozAasdk24dNWuMZvr4k24nz+8HHLg==
