@@ -48,7 +48,8 @@ mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
 mockRedisClient.watch = mockWatch;
 mockRedisClient.multi = mockMulti;
-mockRedisClient.duplicate = () => mockRedisClient;
+const mockDuplicate = jest.fn().mockImplementation(() => mockRedisClient);
+mockRedisClient.duplicate = mockDuplicate;
 
 mockMulti.mockImplementation(() => {
   return {
@@ -120,7 +121,7 @@ describe("RedisUserMetadataStorage#get", () => {
   );
 });
 
-describe("RedisUserMetadataStorage#get", () => {
+describe("RedisUserMetadataStorage#set", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -240,5 +241,31 @@ describe("RedisUserMetadataStorage#get", () => {
     expect(mockGet).not.toBeCalled();
     expect(mockSet).not.toBeCalled();
     expect(response).toEqual(left(expectedWatchError));
+  });
+
+  it("should duplicate the redis client if a race condition happens on the same key", async () => {
+    mockWatch.mockImplementation((_, callback) => callback(null));
+    mockGet.mockImplementation((_, callback) => {
+      callback(undefined, JSON.stringify(aValidUserMetadata));
+    });
+    mockExec.mockImplementationOnce(callback => {
+      callback(undefined, ["OK"]);
+    });
+    mockExec.mockImplementationOnce(callback => {
+      callback(undefined, null);
+    });
+    const newMetadata: UserMetadata = {
+      metadata,
+      version: validNewVersion
+    };
+    const response = await Promise.all([
+      userMetadataStorage.set(aValidUser, newMetadata),
+      userMetadataStorage.set(aValidUser, newMetadata)
+    ]);
+    expect(mockDuplicate).toBeCalledTimes(1);
+    expect(response).toEqual([
+      right(true),
+      left(concurrentWriteRejectionError)
+    ]);
   });
 });
