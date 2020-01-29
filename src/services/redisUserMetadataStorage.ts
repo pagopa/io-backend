@@ -15,7 +15,6 @@ import {
   taskify,
   tryCatch
 } from "fp-ts/lib/TaskEither";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
 
 const userMetadataPrefix = "USERMETA-";
 export const metadataNotFoundError = new Error("User Metadata not found");
@@ -54,8 +53,8 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
     if (raceCondition === false) {
       this.setOperations.add(user.fiscal_code);
     } else {
-      // A duplicate redis client must be created only if the main client is already
-      // in use into an optimistic lock update on the same key
+      // A duplicated redis client must be created only if the main client is already
+      // in use for another optimistic lock update on the same key to prevent performance drop
       duplicatedOrOriginalRedisClient = this.redisClient.duplicate();
     }
     this.mutex.release();
@@ -116,7 +115,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       .run();
     raceCondition
       ? duplicatedOrOriginalRedisClient.end(true)
-      : await this.resetOperation(user.fiscal_code);
+      : this.setOperations.delete(user.fiscal_code);
     return userMetadataWatchResult;
   }
 
@@ -170,11 +169,5 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
         }
       );
     });
-  }
-
-  private async resetOperation(fiscalCode: FiscalCode): Promise<void> {
-    await this.mutex.acquire();
-    this.setOperations.delete(fiscalCode);
-    this.mutex.release();
   }
 }
