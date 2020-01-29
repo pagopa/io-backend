@@ -28,7 +28,7 @@ export const concurrentWriteRejectionError = new Error(
  */
 export default class RedisUserMetadataStorage extends RedisStorageUtils
   implements IUserMetadataStorage {
-  private setOperations: Set<string> = new Set();
+  private activeClients: Set<string> = new Set();
   private mutex: Sema = new Sema(1);
   constructor(private readonly redisClient: redis.RedisClient) {
     super();
@@ -47,18 +47,18 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
     // In order to work properly, optimistic lock needs to be initialized on different
     // redis client instances @see https://github.com/NodeRedis/node_redis/issues/1320#issuecomment-373200541
     await this.mutex.acquire();
-    const raceCondition = this.setOperations.has(user.fiscal_code);
+    const hasActiveClient = this.activeClients.has(user.fiscal_code);
     // tslint:disable-next-line: no-let
     let duplicatedOrOriginalRedisClient = this.redisClient;
-    if (raceCondition === false) {
-      this.setOperations.add(user.fiscal_code);
+    if (hasActiveClient === false) {
+      this.activeClients.add(user.fiscal_code);
     } else {
       // A duplicated redis client must be created only if the main client is already
       // in use for another optimistic lock update on the same key to prevent performance drop
       duplicatedOrOriginalRedisClient = this.redisClient.duplicate();
     }
     this.mutex.release();
-    const userMetadataWatchResult = await taskify(
+    const errorOrIsUpdateSuccessful = await taskify(
       (key: string, callback: (err: Error | null, value: true) => void) => {
         duplicatedOrOriginalRedisClient.watch(key, err => callback(err, true));
       }
@@ -113,10 +113,10 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       )
       .chain(fromEither)
       .run();
-    raceCondition
+    hasActiveClient
       ? duplicatedOrOriginalRedisClient.end(true)
-      : this.setOperations.delete(user.fiscal_code);
-    return userMetadataWatchResult;
+      : this.activeClients.delete(user.fiscal_code);
+    return errorOrIsUpdateSuccessful;
   }
 
   /**
