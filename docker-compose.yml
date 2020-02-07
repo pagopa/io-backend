@@ -9,13 +9,14 @@ services:
     environment:
       - NODE_ENV=dev
       - REDIS_URL=redis://redis
+      - GITHUB_TOKEN
     expose:
       - "443"
     ports:
       - "443:443"
     image: node:10.14.2-alpine
     volumes:
-      - ".env:/usr/src/app/.env:delegated"
+      - ".env:/usr/src/app/.env"
       - "./certs:/usr/src/app/certs:delegated"
 
   spid-testenv2:
