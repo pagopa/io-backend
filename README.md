@@ -105,8 +105,8 @@ A Linux/macOS environment is required at the moment.
 9. edit your `/etc/hosts` file by adding:
 
     ```
-    localhost    spid-testenv2
-    localhost    italia-backend
+    127.0.0.1    spid-testenv2
+    127.0.0.1    italia-backend
     ```
 
 12. copy `.env.example` to `.env` and fill the variables with your values
@@ -158,6 +158,7 @@ Those are all Environment variables needed by the application:
 | CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 | ALLOW_MULTIPLE_SESSIONS                | When is `true` allow multiple sessions for an user (default `false`)              | boolean |
+| GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase  | string |
 
 ### Logs
 
