@@ -1,6 +1,6 @@
 import * as redis from "redis";
 
-import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right, toError } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { User } from "../types/user";
@@ -8,53 +8,115 @@ import { log } from "../utils/logger";
 import { IUserMetadataStorage } from "./IUserMetadataStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
+import { Sema } from "async-sema";
+import {
+  fromEither,
+  fromPredicate,
+  taskify,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
+
 const userMetadataPrefix = "USERMETA-";
 export const metadataNotFoundError = new Error("User Metadata not found");
 export const invalidVersionNumberError = new Error("Invalid version number");
+export const concurrentWriteRejectionError = new Error(
+  "Concurrent write operation"
+);
 
 /**
  * Service that manages user metadata stored into Redis database.
  */
 export default class RedisUserMetadataStorage extends RedisStorageUtils
   implements IUserMetadataStorage {
+  private activeClients: Set<string> = new Set();
+  private mutex: Sema = new Sema(1);
   constructor(private readonly redisClient: redis.RedisClient) {
     super();
   }
 
   /**
    * {@inheritDoc}
-   *
-   * This method doesn't support atomic operations on concurrency scenario.
-   * Story https://www.pivotaltracker.com/story/show/167064659
+   * This method uses Optimistic Lock to prevent race condition
+   * during write operations of user metadata
+   * @see https://github.com/NodeRedis/node_redis#optimistic-locks
    */
   public async set(
     user: User,
     payload: UserMetadata
   ): Promise<Either<Error, boolean>> {
-    const getUserMetadataResult = await this.loadUserMetadataByFiscalCode(
-      user.fiscal_code
-    );
-    if (
-      isRight(getUserMetadataResult) &&
-      getUserMetadataResult.value.version !== payload.version - 1
-    ) {
-      return left(invalidVersionNumberError);
+    // In order to work properly, optimistic lock needs to be initialized on different
+    // redis client instances @see https://github.com/NodeRedis/node_redis/issues/1320#issuecomment-373200541
+    await this.mutex.acquire();
+    const hasActiveClient = this.activeClients.has(user.fiscal_code);
+    // tslint:disable-next-line: no-let
+    let duplicatedOrOriginalRedisClient = this.redisClient;
+    if (hasActiveClient === false) {
+      this.activeClients.add(user.fiscal_code);
+    } else {
+      // A duplicated redis client must be created only if the main client is already
+      // in use for another optimistic lock update on the same key to prevent performance drop
+      duplicatedOrOriginalRedisClient = this.redisClient.duplicate();
     }
-    if (
-      isLeft(getUserMetadataResult) &&
-      getUserMetadataResult.value !== metadataNotFoundError
-    ) {
-      return left(getUserMetadataResult.value);
-    }
-    return await new Promise<Either<Error, boolean>>(resolve => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${userMetadataPrefix}${user.fiscal_code}`,
-        JSON.stringify(payload),
-        (err, response) => resolve(this.singleStringReply(err, response))
-      );
-    });
+    this.mutex.release();
+    const errorOrIsUpdateSuccessful = await taskify(
+      (key: string, callback: (err: Error | null, value: true) => void) => {
+        duplicatedOrOriginalRedisClient.watch(key, err => callback(err, true));
+      }
+    )(`${userMetadataPrefix}${user.fiscal_code}`)
+      .chain(() =>
+        tryCatch(
+          () => this.loadUserMetadataByFiscalCode(user.fiscal_code),
+          toError
+        )
+      )
+      .chain(_ => {
+        if (isLeft(_) && _.value === metadataNotFoundError) {
+          return fromEither(
+            right({
+              metadata: "",
+              version: 0
+            })
+          );
+        }
+        return fromEither(_);
+      })
+      .chain(
+        fromPredicate(
+          _ => _.version === payload.version - 1,
+          _ => invalidVersionNumberError
+        )
+      )
+      .chain(() =>
+        taskify(
+          (
+            key: string,
+            data: string,
+            callback: (
+              err: Error | null,
+              value?: Either<Error, boolean>
+            ) => void
+          ) => {
+            duplicatedOrOriginalRedisClient
+              .multi()
+              .set(key, data)
+              .exec((err, results) => {
+                if (err) {
+                  return callback(err);
+                }
+                if (results === null) {
+                  return callback(concurrentWriteRejectionError);
+                }
+                callback(null, this.singleStringReply(err, results[0]));
+              });
+          }
+        )(`${userMetadataPrefix}${user.fiscal_code}`, JSON.stringify(payload))
+      )
+      .chain(fromEither)
+      .run();
+    hasActiveClient
+      ? duplicatedOrOriginalRedisClient.end(true)
+      : this.activeClients.delete(user.fiscal_code);
+    return errorOrIsUpdateSuccessful;
   }
 
   /**

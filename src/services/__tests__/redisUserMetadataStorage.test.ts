@@ -10,6 +10,7 @@ import { UserMetadata } from "../../../generated/backend/UserMetadata";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import RedisUserMetadataStorage, {
+  concurrentWriteRejectionError,
   invalidVersionNumberError,
   metadataNotFoundError
 } from "../redisUserMetadataStorage";
@@ -40,9 +41,27 @@ const validNewVersion = 11;
 
 const mockSet = jest.fn();
 const mockGet = jest.fn();
+const mockWatch = jest.fn();
+const mockMulti = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
+mockRedisClient.watch = mockWatch;
+mockRedisClient.multi = mockMulti;
+const mockDuplicate = jest.fn().mockImplementation(() => mockRedisClient);
+mockRedisClient.duplicate = mockDuplicate;
+
+mockMulti.mockImplementation(() => {
+  return {
+    set: mockSet
+  };
+});
+const mockExec = jest.fn();
+mockSet.mockImplementation((_, __) => {
+  return {
+    exec: mockExec
+  };
+});
 
 const userMetadataStorage = new RedisUserMetadataStorage(mockRedisClient);
 const redisClientError = new Error("REDIS CLIENT ERROR");
@@ -102,17 +121,18 @@ describe("RedisUserMetadataStorage#get", () => {
   );
 });
 
-describe("RedisUserMetadataStorage#get", () => {
+describe("RedisUserMetadataStorage#set", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should update user metadata", async () => {
+    mockWatch.mockImplementation((_, callback) => callback(null));
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, JSON.stringify(aValidUserMetadata));
     });
-    mockSet.mockImplementation((_, __, callback) => {
-      callback(undefined, "OK");
+    mockExec.mockImplementation(callback => {
+      callback(undefined, ["OK"]);
     });
     const newMetadata: UserMetadata = {
       metadata,
@@ -126,11 +146,12 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should set user metadata if don't exists", async () => {
+    mockWatch.mockImplementation((_, callback) => callback(null));
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, null);
     });
-    mockSet.mockImplementation((_, __, callback) => {
-      callback(undefined, "OK");
+    mockExec.mockImplementation(callback => {
+      callback(undefined, ["OK"]);
     });
     const newMetadata: UserMetadata = {
       metadata,
@@ -172,10 +193,11 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should fail update user metadata if redis client error occours on set", async () => {
+    mockWatch.mockImplementation((_, callback) => callback(null));
     mockGet.mockImplementation((_, callback) => {
       callback(undefined, JSON.stringify(aValidUserMetadata));
     });
-    mockSet.mockImplementation((_, __, callback) => {
+    mockExec.mockImplementation(callback => {
       callback(redisClientError, undefined);
     });
     const newMetadata: UserMetadata = {
@@ -187,5 +209,63 @@ describe("RedisUserMetadataStorage#get", () => {
     expect(mockSet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
     expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(newMetadata));
     expect(response).toEqual(left(redisClientError));
+  });
+
+  it("should fail update user metadata if happens a concurrent write operation", async () => {
+    mockWatch.mockImplementation((_, callback) => callback(null));
+    mockGet.mockImplementation((_, callback) => {
+      callback(undefined, JSON.stringify(aValidUserMetadata));
+    });
+    mockExec.mockImplementation(callback => {
+      callback(undefined, null);
+    });
+    const newMetadata: UserMetadata = {
+      metadata,
+      version: validNewVersion
+    };
+    const response = await userMetadataStorage.set(aValidUser, newMetadata);
+    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(newMetadata));
+    expect(response).toEqual(left(concurrentWriteRejectionError));
+  });
+
+  it("should fail update user metadata if optimistic lock can't be initialized", async () => {
+    const expectedWatchError = new Error("Error on redis watch method");
+    mockWatch.mockImplementation((_, callback) => callback(expectedWatchError));
+    const newMetadata: UserMetadata = {
+      metadata,
+      version: validNewVersion
+    };
+    const response = await userMetadataStorage.set(aValidUser, newMetadata);
+    expect(mockGet).not.toBeCalled();
+    expect(mockSet).not.toBeCalled();
+    expect(response).toEqual(left(expectedWatchError));
+  });
+
+  it("should duplicate the redis client if a race condition happens on the same key", async () => {
+    mockWatch.mockImplementation((_, callback) => callback(null));
+    mockGet.mockImplementation((_, callback) => {
+      callback(undefined, JSON.stringify(aValidUserMetadata));
+    });
+    mockExec.mockImplementationOnce(callback => {
+      callback(undefined, ["OK"]);
+    });
+    mockExec.mockImplementationOnce(callback => {
+      callback(undefined, null);
+    });
+    const newMetadata: UserMetadata = {
+      metadata,
+      version: validNewVersion
+    };
+    const response = await Promise.all([
+      userMetadataStorage.set(aValidUser, newMetadata),
+      userMetadataStorage.set(aValidUser, newMetadata)
+    ]);
+    expect(mockDuplicate).toBeCalledTimes(1);
+    expect(response).toEqual([
+      right(true),
+      left(concurrentWriteRejectionError)
+    ]);
   });
 });

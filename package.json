@@ -49,6 +49,7 @@
     "@pagopa/io-spid-commons": "1.1.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
+    "async-sema": "^3.1.0",
     "azure-sb": "^0.10.6",
     "body-parser": "^1.18.3",
     "date-fns": "^1.30.1",
