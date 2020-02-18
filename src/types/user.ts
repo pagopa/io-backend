@@ -159,7 +159,7 @@ export function validateSpidUser(value: any): Either<string, SpidUser> {
   if (!isSpidL(valueWithDefaultSPIDLevel.authnContextClassRef)) {
     log.warn(
       "Response from IDP: %s doesn't contain a valid SPID level: %s",
-      value.issuer._,
+      value.issuer,
       value.authnContextClassRef
     );
   }

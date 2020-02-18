@@ -21,7 +21,6 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
-import { IAuthenticationController } from "@pagopa/io-spid-commons";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -37,8 +36,7 @@ import {
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 
-export default class AuthenticationController
-  implements IAuthenticationController {
+export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
     private readonly tokenService: TokenService,

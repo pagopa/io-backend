@@ -4,17 +4,16 @@
 
 import {
   API_CLIENT,
+  appConfig,
   BEARER_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
-  CLIENT_ERROR_REDIRECTION_URL,
-  CLIENT_REDIRECTION_URL,
   endpointOrConnectionString,
-  generateSpidStrategy,
   getClientProfileRedirectionUrl,
   hubName,
-  IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   PAGOPA_CLIENT,
   REDIS_CLIENT,
+  samlConfig,
+  serviceProviderConfig,
   SESSION_STORAGE,
   URL_TOKEN_STRATEGY
 } from "./config";
@@ -56,7 +55,9 @@ import {
   getObjectFromPackageJson
 } from "./utils/package";
 
-import { SpidPassportBuilder } from "@pagopa/io-spid-commons";
+import { withSpid } from "@pagopa/io-spid-commons";
+import { toError } from "fp-ts/lib/Either";
+import { tryCatch } from "fp-ts/lib/TaskEither";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -66,9 +67,7 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 
 const defaultModule = {
-  newApp,
-  spidPassportBuilder: undefined as SpidPassportBuilder | undefined,
-  startIdpMetadataUpdater
+  newApp
 };
 
 const cacheDuration = `${CACHE_MAX_AGE_SECONDS} seconds`;
@@ -83,7 +82,7 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
-export async function newApp(
+export function newApp(
   env: NodeEnvironment,
   allowNotifyIPSourceRange: CIDR,
   allowPagoPAIPSourceRange: CIDR,
@@ -169,10 +168,7 @@ export async function newApp(
   // Setup routes
   //
 
-  try {
-    // tslint:disable-next-line: no-object-mutation
-    defaultModule.spidPassportBuilder = generateSpidStrategy(app);
-
+  return tryCatch(async () => {
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
 
@@ -185,14 +181,6 @@ export async function newApp(
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE
     );
-    // tslint:disable-next-line: no-useless-cast
-    await defaultModule
-      .spidPassportBuilder!.init(
-        acsController,
-        CLIENT_ERROR_REDIRECTION_URL,
-        CLIENT_REDIRECTION_URL
-      )
-      .run();
     registerPublicRoutes(app);
 
     registerAuthenticationRoutes(app, authenticationBasePath, acsController);
@@ -224,45 +212,24 @@ export async function newApp(
       allowPagoPAIPSourceRange,
       PROFILE_SERVICE
     );
-    if (defaultModule.spidPassportBuilder) {
-      const idpMetadataRefreshIntervalMillis =
-        IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000;
-      const idpMetadataRefreshTimer = startIdpMetadataUpdater(
-        defaultModule.spidPassportBuilder,
-        idpMetadataRefreshIntervalMillis
-      );
-      app.on("server:stop", () => {
-        clearInterval(idpMetadataRefreshTimer);
-      });
-    }
-  } catch (err) {
-    log.error("Fatal error during Express initialization: %s", err);
-    return process.exit(1);
-  }
-  return app;
-}
-
-/**
- * Sets an interval to reload SpidStrategy
- */
-export function startIdpMetadataUpdater(
-  spidPassportBuilder: SpidPassportBuilder,
-  refreshTimeMilliseconds: number,
-  onRefresh?: () => void
-): NodeJS.Timer {
-  return setInterval(async () => {
-    await spidPassportBuilder
-      .clearAndReloadSpidStrategy()
-      .mapLeft(_ => {
-        log.error("Error on clearAndReloadSpidStrategy: %s", _);
-      })
-      .map(_ => {
-        if (onRefresh) {
-          onRefresh();
-        }
-      })
-      .run();
-  }, refreshTimeMilliseconds);
+    return { app, acsController };
+  }, toError)
+    .chain(_ =>
+      withSpid(
+        appConfig,
+        samlConfig,
+        REDIS_CLIENT,
+        serviceProviderConfig,
+        _.app,
+        _.acsController.acs.bind(_.acsController),
+        _.acsController.slo.bind(_.acsController)
+      )
+    )
+    .getOrElseL(err => {
+      log.error("Fatal error during Express initialization: %s", err);
+      process.exit(1);
+    })
+    .run();
 }
 
 function registerPagoPARoutes(

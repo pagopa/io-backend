@@ -1,5 +1,8 @@
+import * as spid from "@pagopa/io-spid-commons";
 import { Express } from "express";
 import { isRight } from "fp-ts/lib/Either";
+import { Task } from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
@@ -123,9 +126,10 @@ describe("Success app start", () => {
 describe("Failure app start", () => {
   it("Close app if download IDP metadata fails on startup", async () => {
     // Override return value of generateSpidStrategy with a rejected promise.
-    const config = require("../config");
-    jest.spyOn(config, "generateSpidStrategy").mockImplementation(() => {
-      return Promise.reject(new Error("Error download metadata"));
+    jest.spyOn(spid, "withSpid").mockImplementation(() => {
+      return TE.left(
+        new Task(async () => new Error("Error download metadata"))
+      );
     });
     const mockExit = jest
       .spyOn(process, "exit")

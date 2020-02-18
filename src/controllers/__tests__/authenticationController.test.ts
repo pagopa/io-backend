@@ -69,9 +69,7 @@ const validUserPayload = {
   familyName: aValidsurname,
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
-  issuer: {
-    _: "xxx"
-  },
+  issuer: "xxx",
   mobilePhone: "3222222222222",
   name: aValidname
 };
@@ -80,9 +78,7 @@ const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
-  issuer: {
-    _: "xxx"
-  },
+  issuer: "xxx",
   mobilePhone: "3222222222222",
   name: aValidname
 };
