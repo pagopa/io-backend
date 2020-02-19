@@ -225,14 +225,14 @@ export function newApp(
         _.acsController.slo.bind(_.acsController)
       )
     )
-    .getOrElseL(err => {
-      log.error("Fatal error during Express initialization: %s", err);
-      process.exit(1);
-    })
     .map(_ => {
       const idpMetadataRefreshTimer = _.startIdpMetadataRefreshTimer();
       _.app.on("server:stop", () => clearInterval(idpMetadataRefreshTimer));
       return _.app;
+    })
+    .getOrElseL(err => {
+      log.error("Fatal error during Express initialization: %s", err);
+      process.exit(1);
     })
     .run();
 }
