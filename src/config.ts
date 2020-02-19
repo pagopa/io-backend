@@ -24,7 +24,6 @@ import { log } from "./utils/logger";
 import {
   IApplicationConfig,
   IServiceProviderConfig,
-  overrideCacheProvider,
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
@@ -148,7 +147,6 @@ export const samlConfig: SamlConfig = {
   attributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
   // this value is dynamic and taken from query string
   authnContext: "https://www.spid.gov.it/SpidL1",
-  cacheProvider: overrideCacheProvider(),
   callbackUrl: SAML_CALLBACK_URL,
   identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   issuer: SAML_ISSUER,

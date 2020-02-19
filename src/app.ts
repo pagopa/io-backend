@@ -218,8 +218,8 @@ export function newApp(
       withSpid(
         appConfig,
         samlConfig,
-        REDIS_CLIENT,
         serviceProviderConfig,
+        REDIS_CLIENT,
         _.app,
         _.acsController.acs.bind(_.acsController),
         _.acsController.slo.bind(_.acsController)
@@ -228,6 +228,11 @@ export function newApp(
     .getOrElseL(err => {
       log.error("Fatal error during Express initialization: %s", err);
       process.exit(1);
+    })
+    .map(_ => {
+      const idpMetadataRefreshTimer = _.startIdpMetadataRefreshTimer();
+      _.app.on("server:stop", () => clearInterval(idpMetadataRefreshTimer));
+      return _.app;
     })
     .run();
 }
