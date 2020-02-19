@@ -4,14 +4,14 @@
 module.exports = {
   git: {
     tagName: "v${version}",
-    addFiles: ["package.json", "CHANGELOG.md"],
     commitMessage: "chore: release ${version}",
     changelog:
       "npx auto-changelog --config .auto-changelog.json --stdout --commit-limit false --unreleased --template preview.hbs"
   },
   hooks: {
     "before:release": [
-      "npx auto-changelog --config .auto-changelog.json --package"
+      "npx auto-changelog --config .auto-changelog.json --package",
+      "git add CHANGELOG.md package.json"
     ]
   },
   github: {

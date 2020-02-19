@@ -5,7 +5,6 @@ RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-4.1
 WORKDIR /usr/src/app
 
 COPY /src /usr/src/app/src
-COPY /patches /usr/src/app/patches
 COPY /package.json /usr/src/app/package.json
 COPY /tsconfig.json /usr/src/app/tsconfig.json
 COPY /yarn.lock /usr/src/app/yarn.lock
@@ -21,7 +20,7 @@ RUN sudo chmod -R 777 /usr/src/app \
   && yarn build
 
 FROM node:10.14.2-alpine
-LABEL maintainer="https://teamdigitale.governo.it"
+LABEL maintainer="https://pagopa.gov.it"
 
 # Install major CA certificates to cover
 # https://github.com/SparebankenVest/azure-key-vault-to-kubernetes integration

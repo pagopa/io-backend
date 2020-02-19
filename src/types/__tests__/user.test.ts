@@ -20,7 +20,7 @@ import {
 
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "x@example.com" as EmailAddress;
-const anIssuer = { _: "onelogin_saml" } as Issuer;
+const anIssuer = "onelogin_saml" as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];

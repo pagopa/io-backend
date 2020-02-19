@@ -2,7 +2,6 @@
  * Defines services and register them to the Service Container.
  */
 import * as dotenv from "dotenv";
-import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
@@ -22,7 +21,12 @@ import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar, readFile } from "./utils/container";
 import { log } from "./utils/logger";
 
-import { SamlAttribute, SpidPassportBuilder } from "@pagopa/io-spid-commons";
+import {
+  IApplicationConfig,
+  IServiceProviderConfig,
+  SamlConfig
+} from "@pagopa/io-spid-commons";
+
 import RedisSessionStorage from "./services/redisSessionStorage";
 import {
   createClusterRedisClient,
@@ -74,68 +78,80 @@ export const SAML_CERT = samlCert();
 const SAML_CALLBACK_URL =
   process.env.SAML_CALLBACK_URL ||
   "http://italia-backend/assertionConsumerService";
+const SAML_LOGOUT_CALLBACK_URL =
+  process.env.SAML_LOGOUT_CALLBACK_URL || "http://italia-backend/slo";
 const SAML_ISSUER = process.env.SAML_ISSUER || "https://spid.agid.gov.it/cd";
 const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
-const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX: number = parseInt(
+const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
   process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
-    DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
-  10
-);
+  DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX;
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
     DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
   10
 );
-const DEFAULT_SPID_AUTOLOGIN = "";
-const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
+
+// tslint:disable-next-line: no-commented-code
+// const DEFAULT_SPID_AUTOLOGIN = "";
+// const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
+
 const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
 const SPID_TESTENV_URL =
   process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
 
-export const HAS_SPID_VALIDATOR_ENABLED = fromNullable(
-  process.env.HAS_SPID_VALIDATOR_ENABLED
-)
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
-
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 
-export const generateSpidStrategy = (app: express.Express) => {
-  return new SpidPassportBuilder(
-    app,
-    "/login",
-    "/slo",
-    "/metadata",
-    "/assertionConsumerService",
-    {
-      IDPMetadataUrl: IDP_METADATA_URL,
-      hasSpidValidatorEnabled: HAS_SPID_VALIDATOR_ENABLED,
-      organization: {
-        URL: "https://io.italia.it",
-        displayName:
-          "IO onboarding - il portale di onboarding degli enti del progetto IO",
-        name:
-          "Team per la Trasformazione Digitale - Presidenza Del Consiglio dei Ministri"
-      },
-      requiredAttributes: [
-        SamlAttribute.NAME,
-        SamlAttribute.FAMILY_NAME,
-        SamlAttribute.EMAIL,
-        SamlAttribute.FISCAL_NUMBER,
-        SamlAttribute.DATE_OF_BIRTH
-      ],
-      samlAcceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
-      samlAttributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
-      samlCallbackUrl: SAML_CALLBACK_URL,
-      samlCert: SAML_CERT,
-      samlIssuer: SAML_ISSUER,
-      samlKey: SAML_KEY,
-      spidAutologin: SPID_AUTOLOGIN || "",
-      spidTestEnvUrl: SPID_TESTENV_URL
-    }
-  );
+export const CLIENT_ERROR_REDIRECTION_URL =
+  process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
+
+export const CLIENT_REDIRECTION_URL =
+  process.env.CLIENT_REDIRECTION_URL || "/login";
+
+export const appConfig: IApplicationConfig = {
+  assertionConsumerServicePath: "/assertionConsumerService",
+  clientErrorRedirectionUrl: CLIENT_ERROR_REDIRECTION_URL,
+  clientLoginRedirectionUrl: CLIENT_REDIRECTION_URL,
+  loginPath: "/login",
+  metadataPath: "/metadata",
+  sloPath: "/slo"
+};
+
+export const serviceProviderConfig: IServiceProviderConfig = {
+  IDPMetadataUrl: IDP_METADATA_URL,
+  idpMetadataRefreshIntervalMillis: 120000,
+  organization: {
+    URL: "https://io.italia.it",
+    displayName: "IO - l'app dei servizi pubblici BETA",
+    name: "PagoPA S.p.A."
+  },
+  publicCert: samlCert(),
+  requiredAttributes: {
+    attributes: [
+      "address",
+      "email",
+      "name",
+      "familyName",
+      "fiscalNumber",
+      "mobilePhone"
+    ],
+    name: "Required attributes"
+  },
+  spidTestEnvUrl: SPID_TESTENV_URL,
+  spidValidatorUrl: process.env.SPID_VALIDATOR_URL
+};
+
+export const samlConfig: SamlConfig = {
+  acceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
+  attributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
+  // this value is dynamic and taken from query string
+  authnContext: "https://www.spid.gov.it/SpidL1",
+  callbackUrl: SAML_CALLBACK_URL,
+  identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+  issuer: SAML_ISSUER,
+  logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
+  privateCert: samlKey()
 };
 
 // Redirection urls
@@ -275,8 +291,3 @@ export const getClientProfileRedirectionUrl = (
     href: url
   };
 };
-
-export const CLIENT_ERROR_REDIRECTION_URL =
-  process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
-export const CLIENT_REDIRECTION_URL =
-  process.env.CLIENT_REDIRECTION_URL || "/login";

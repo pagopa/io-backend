@@ -1,6 +1,6 @@
 {
   "name": "io-backend",
-  "version": "3.1.0",
+  "version": "4.0.1",
   "min_app_version": {
     "ios": "0.0.0",
     "android": "0.0.0"
@@ -15,7 +15,6 @@
     "node": "10.14.2"
   },
   "scripts": {
-    "prepare": "patch-package",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon src/server.js",
@@ -46,7 +45,7 @@
   },
   "homepage": "https://github.com/teamdigitale/italia-backend#readme",
   "dependencies": {
-    "@pagopa/io-spid-commons": "1.1.0",
+    "@pagopa/io-spid-commons": "^2.2.1",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
     "azure-sb": "^0.10.6",
@@ -67,18 +66,14 @@
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
-    "passport-saml": "^0.34.0",
     "passport-strategy": "^1.0.0",
-    "patch-package": "^5.1.1",
     "range_check": "^1.4.0",
     "redis": "^2.8.0",
     "redis-clustr": "^1.6.0",
     "request-ip": "^2.1.1",
-    "spid-passport": "git://github.com/teamdigitale/spid-passport.git#v1.1.7",
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.0.0",
-    "x509": "^0.3.4",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
@@ -94,8 +89,9 @@
     "@types/morgan": "^1.7.35",
     "@types/node": "10.14.2",
     "@types/node-fetch": "^2.1.2",
-    "@types/passport": "^0.4.6",
-    "@types/passport-http-bearer": "^1.0.33",
+    "@types/passport": "^1.0.2",
+    "@types/passport-http-bearer": "^1.0.34",
+    "@types/passport-saml": "^1.1.1",
     "@types/passport-strategy": "^0.2.35",
     "@types/redis": "^2.8.13",
     "@types/request-ip": "^0.0.34",
@@ -151,7 +147,6 @@
     ]
   },
   "resolutions": {
-    "fp-ts": "1.17.4",
-    "passport-saml": "0.34.0"
+    "fp-ts": "1.17.4"
   }
 }
