@@ -56,11 +56,11 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/EmailAddress"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v1.6.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/FiscalCode"
   PagoPAUser:
     title: PagoPA user
     description: User data needed by PagaPA proxy.
