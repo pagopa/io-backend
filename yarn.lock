@@ -5645,6 +5645,11 @@ range_check@^1.4.0:
     ip6 "0.0.4"
     ipaddr.js "1.2"
 
+rate-limiter-flexible@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.0.0.tgz#6b193fe302a279f2460f5caa3276b9d0b59f1e02"
+  integrity sha512-DjLeci3BuHWNr9LVVm+YPJ+Lrki/J9iDb9cEJFZELpa/ZBhXmfnfR+eCI5jzmsPJtpYGYhw/vyRfjjQjTzVtRg==
+
 raw-body@2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/raw-body/-/raw-body-2.4.0.tgz#a1ce6fb9c9bc356ca52e89256ab59059e13d0332"
