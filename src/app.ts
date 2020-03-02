@@ -60,7 +60,7 @@ import {
 import { withSpid } from "@pagopa/io-spid-commons";
 import { toError } from "fp-ts/lib/Either";
 import { tryCatch } from "fp-ts/lib/TaskEither";
-import { RateLimiterRedis } from "rate-limiter-flexible";
+import { RateLimiterMemory, RateLimiterRedis } from "rate-limiter-flexible";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -86,15 +86,20 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
+const rateLimiterOpts = {
+  duration: RATE_LIMITER_DURATION_SECS,
+  keyPrefix: "rl-",
+  points: RATE_LIMITER_POINTS
+};
+
 const rateLimiterMiddleware = makeRateLimiterMiddleware(
-  new RateLimiterRedis({
-    // number of seconds before consumed points are reset (by IP)
-    duration: RATE_LIMITER_DURATION_SECS,
-    keyPrefix: "authrl",
-    // maximum number of points can be consumed over duration
-    points: RATE_LIMITER_POINTS,
-    storeClient: REDIS_CLIENT
-  })
+  REDIS_CLIENT
+    ? new RateLimiterRedis({
+        ...rateLimiterOpts,
+        storeClient: REDIS_CLIENT
+      })
+    : // useful for testing
+      new RateLimiterMemory(rateLimiterOpts)
 );
 
 export function newApp(
