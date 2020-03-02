@@ -1,0 +1,96 @@
+/**
+ * This service retrieves and updates the user profile from the API system using
+ * an API client.
+ */
+
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
+  ResponseErrorNotFound,
+  ResponseErrorTooManyRequests,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
+
+import { UserDataProcessing } from "generated/io-api/UserDataProcessing";
+import { UserDataProcessingChoice } from "generated/io-api/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
+import winston = require("winston");
+import { User } from "../types/user";
+import {
+  unhandledResponseStatus,
+  withCatchAsInternalError,
+  withValidatedOrInternalError
+} from "../utils/responses";
+import { IApiClientFactoryInterface } from "./IApiClientFactory";
+
+export default class UserDataProcessingService {
+  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
+
+  /**
+   * Create the user data processing of a specific user.
+   */
+  public readonly upsertUserDataProcessing = async (
+    user: User,
+    userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<UserDataProcessing>
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.upsertUserDataProcessing({
+        fiscalCode: user.fiscal_code,
+        userDataProcessingChoiceRequest
+      });
+
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? ResponseSuccessJson(response.value)
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
+      );
+    });
+  };
+
+  /**
+   * Get the user data processing of a specific user.
+   */
+  public readonly getUserDataProcessing = async (
+    user: User,
+    userDataProcessingChoiceParam: UserDataProcessingChoice
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<UserDataProcessing>
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.getUserDataProcessing({
+        fiscalCode: user.fiscal_code,
+        userDataProcessingChoiceParam
+      });
+      winston.info(`VALIDATE.VALUE => ${validated.value}`);
+
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 200
+          ? ResponseSuccessJson(response.value)
+          : response.status === 404
+          ? ResponseErrorNotFound(
+              "Not Found",
+              response.value.detail === undefined
+                ? "User data processing not found"
+                : response.value.detail
+            )
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
+      );
+    });
+  };
+}

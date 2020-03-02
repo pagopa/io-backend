@@ -27,11 +27,15 @@ import {
   getServicesByRecipientDefaultDecoder,
   GetServicesByRecipientT,
   GetServiceT,
+  getUserDataProcessingDefaultDecoder,
+  GetUserDataProcessingT,
   getVisibleServicesDefaultDecoder,
   GetVisibleServicesT,
   StartEmailValidationProcessT,
   updateProfileDefaultDecoder,
-  UpdateProfileT
+  UpdateProfileT,
+  upsertUserDataProcessingDefaultDecoder,
+  UpsertUserDataProcessingT
 } from "../../generated/io-api/requestTypes";
 
 // we want to authenticate against the platform APIs with the APIM header key or
@@ -56,11 +60,15 @@ export function APIClient(
   readonly getMessages: TypeofApiCall<typeof getMessagesT>;
   readonly getProfile: TypeofApiCall<typeof getProfileT>;
   readonly createProfile: TypeofApiCall<typeof createProfileT>;
+  readonly upsertUserDataProcessing: TypeofApiCall<
+    typeof upsertUserDataProcessingT
+  >;
   readonly emailValidationProcess: TypeofApiCall<
     typeof emailValidationProcessT
   >;
   readonly getService: TypeofApiCall<typeof getServiceT>;
   readonly getVisibleServices: TypeofApiCall<typeof getVisibleServicesT>;
+  readonly getUserDataProcessing: TypeofApiCall<typeof getUserDataProcessingT>;
   readonly getServicesByRecipient: TypeofApiCall<
     typeof getServicesByRecipientT
   >;
@@ -153,6 +161,18 @@ export function APIClient(
     url: params => `/profiles/${params.recipient}/sender-services`
   };
 
+  const getUserDataProcessingT: ReplaceRequestParams<
+    GetUserDataProcessingT,
+    Omit<RequestParams<GetUserDataProcessingT>, "SubscriptionKey">
+  > = {
+    headers: tokenHeaderProducer,
+    method: "get",
+    query: _ => ({}),
+    response_decoder: getUserDataProcessingDefaultDecoder(),
+    url: params =>
+      `/user-data-processing/${params.fiscalCode}/${params.userDataProcessingChoiceParam}`
+  };
+
   const getMessagesT: ReplaceRequestParams<
     GetMessagesByUserT,
     Omit<RequestParams<GetMessagesByUserT>, "SubscriptionKey">
@@ -197,6 +217,18 @@ export function APIClient(
     url: params => `/services/${params.service_id}`
   };
 
+  const upsertUserDataProcessingT: ReplaceRequestParams<
+    UpsertUserDataProcessingT,
+    Omit<RequestParams<UpsertUserDataProcessingT>, "SubscriptionKey">
+  > = {
+    body: params => JSON.stringify(params.userDataProcessingChoiceRequest),
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    method: "post",
+    query: _ => ({}),
+    response_decoder: upsertUserDataProcessingDefaultDecoder(),
+    url: params => `/user-data-processing/${params.fiscalCode}`
+  };
+
   return {
     createProfile: createFetchRequestForApi(createProfileT, options),
     emailValidationProcess: createFetchRequestForApi(
@@ -211,8 +243,16 @@ export function APIClient(
       getServicesByRecipientT,
       options
     ),
+    getUserDataProcessing: createFetchRequestForApi(
+      getUserDataProcessingT,
+      options
+    ),
     getVisibleServices: createFetchRequestForApi(getVisibleServicesT, options),
-    updateProfile: createFetchRequestForApi(updateProfileT, options)
+    updateProfile: createFetchRequestForApi(updateProfileT, options),
+    upsertUserDataProcessing: createFetchRequestForApi(
+      upsertUserDataProcessingT,
+      options
+    )
   };
 }
 
