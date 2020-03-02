@@ -55,6 +55,16 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
+// Rate limiter
+export const RATE_LIMITER_DURATION_SECS = parseInt(
+  process.env.RATE_LIMIT_DURATION_SECS || "3600",
+  10
+);
+export const RATE_LIMITER_POINTS = parseInt(
+  process.env.RATE_LIMIT_POINTS || "1000",
+  10
+);
+
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () => {
   return readFile(

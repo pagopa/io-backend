@@ -11,6 +11,8 @@ import {
   getClientProfileRedirectionUrl,
   hubName,
   PAGOPA_CLIENT,
+  RATE_LIMITER_DURATION_SECS,
+  RATE_LIMITER_POINTS,
   REDIS_CLIENT,
   samlConfig,
   serviceProviderConfig,
@@ -66,7 +68,6 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
-import { getRequiredENVVar } from "./utils/container";
 import { makeRateLimiterMiddleware } from "./utils/middleware/rateLimiter";
 
 const defaultModule = {
@@ -88,10 +89,10 @@ const cachingMiddleware = apicache.options({
 const rateLimiterMiddleware = makeRateLimiterMiddleware(
   new RateLimiterRedis({
     // number of seconds before consumed points are reset (by IP)
-    duration: parseInt(getRequiredENVVar("RATE_LIMIT_DURATION"), 10),
+    duration: RATE_LIMITER_DURATION_SECS,
     keyPrefix: "authrl",
     // maximum number of points can be consumed over duration
-    points: parseInt(getRequiredENVVar("RATE_LIMIT_POINTS"), 10),
+    points: RATE_LIMITER_POINTS,
     storeClient: REDIS_CLIENT
   })
 );
