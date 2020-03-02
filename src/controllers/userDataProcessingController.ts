@@ -1,5 +1,5 @@
 /**
- * This controller handles reading the user profile from the
+ * This controller handles reading/upserting the user data processing from the
  * app by forwarding the call to the API system.
  */
 

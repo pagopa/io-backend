@@ -16,7 +16,6 @@ import {
 import { UserDataProcessing } from "generated/io-api/UserDataProcessing";
 import { UserDataProcessingChoice } from "generated/io-api/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
-import winston = require("winston");
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -75,7 +74,6 @@ export default class UserDataProcessingService {
         fiscalCode: user.fiscal_code,
         userDataProcessingChoiceParam
       });
-      winston.info(`VALIDATE.VALUE => ${validated.value}`);
 
       return withValidatedOrInternalError(validated, response =>
         response.status === 200

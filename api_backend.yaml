@@ -651,7 +651,7 @@ paths:
     post:
       operationId: upsertUserDataProcessing
       summary: Set User's data processing choices
-      description: Upsert user data processing for the current authenticated user.
+      description: Let the authenticated user express his will to retrieve or delete his stored data.
       parameters:
         - in: body
           name: body
@@ -673,16 +673,18 @@ paths:
           description: Conflict.
           schema:
             $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too may requests
         "500":
           description: User Data processing choice cannot be taken in charge.
           schema:
             $ref: "#/definitions/ProblemJson"
   "/user-data-processing/{choice}":
     x-swagger-router-controller: UserDataProcessingController
-    post:
+    get:
       operationId: getUserDataProcessing
       summary: Get User's data processing 
-      description: Get user data processing for the current authenticated user and the given choice.
+      description: Get the user's request to delete or download his stored data by providing a kind of choice.
       parameters:
         - $ref: "#/parameters/UserDataProcessingChoiceParam"
       responses:

@@ -2,22 +2,21 @@
 /* tslint:disable:no-object-mutation */
 
 import {
-  ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { isRight } from "fp-ts/lib/Either";
-import {
-  UserDataProcessingChoice,
-  UserDataProcessingChoiceEnum
-} from "generated/io-api/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
-import UserDataProcessingService from "src/services/userDataProcessingService";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import {
+  UserDataProcessingChoice,
+  UserDataProcessingChoiceEnum
+} from "../../../generated/io-api/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "../../../generated/io-api/UserDataProcessingChoiceRequest";
+import UserDataProcessingService from "../../../src/services/userDataProcessingService";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
@@ -26,6 +25,8 @@ import { User } from "../../types/user";
 import UserDataProcessingController from "../userDataProcessingController";
 
 const aTimestamp = 1518010929530;
+const aUserDataProcessingChoice = "DOWNLOAD";
+
 const aUserDataProcessingResponse = {
   status: 200,
   value: {
@@ -33,7 +34,7 @@ const aUserDataProcessingResponse = {
     _rid: "AAAAAQAAAAgAAAAAAAAAAQ==",
     _self: "/dbs/AAAAAQ==/colls/AAAAAQAAAAg=/docs/AAAAAQAAAAgAAAAAAAAAAQ==/",
     _ts: 1582553174,
-    choice: "DOWNLOAD",
+    choice: aUserDataProcessingChoice,
     createdAt: "2020-02-24T14:06:14.513Z",
     fiscalCode: "SPNDNL80A13Y555X",
     id: "SPNDNL80A13Y555X-DOWNLOAD-0000000000000000",
@@ -49,8 +50,9 @@ const aValidName = "Giuseppe Maria";
 const aValidFamilyname = "Garibaldi";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
-const userDataProcessingMissingErrorResponse = ResponseErrorInternal(
-  "Not Found"
+const userDataProcessingMissingErrorResponse = ResponseErrorNotFound(
+  "Not Found",
+  "User data processing not found"
 );
 
 // mock for a valid User
@@ -96,7 +98,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getUserDataProcessing on the UserDataProcessingService with valid values", async () => {
+  it("should return a valid userDataProcessing by calling UserDataProcessingService with valid values", async () => {
     const req = mockReq();
 
     mockGetUserDataProcessing.mockReturnValue(
@@ -104,6 +106,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     );
 
     req.user = mockedUser;
+    req.params = { choice: aUserDataProcessingChoice };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const userDataProcessingService = new UserDataProcessingService(apiClient);
@@ -113,7 +116,10 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
 
     const response = await controller.getUserDataProcessing(req);
 
-    expect(mockGetUserDataProcessing).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetUserDataProcessing).toHaveBeenCalledWith(
+      mockedUser,
+      aUserDataProcessingChoice
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -121,7 +127,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     });
   });
 
-  it("calls the getUserDataProcessing on the UserDataProcessingService with empty user", async () => {
+  it("should return a BadRequestError response by calling UserDataProcessingService with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -145,17 +151,18 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
-  it("should return a ResponseErrorInternal if no user data processing was found", async () => {
+  it("should return a ResponseErrorNotFound if no user data processing was found", async () => {
     const req = mockReq();
     const res = mockRes();
 
     mockGetUserDataProcessing.mockReturnValue(
       Promise.resolve(
-        ResponseErrorNotFound("Not found", "User data processing not found")
+        ResponseErrorNotFound("Not Found", "User data processing not found")
       )
     );
 
     req.user = mockedUser;
+    req.params = { choice: aUserDataProcessingChoice };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const userDataProcessingService = new UserDataProcessingService(apiClient);
@@ -165,7 +172,10 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     const response = await controller.getUserDataProcessing(req);
     response.apply(res);
 
-    expect(mockGetUserDataProcessing).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetUserDataProcessing).toHaveBeenCalledWith(
+      mockedUser,
+      aUserDataProcessingChoice
+    );
     expect(response).toEqual({
       ...userDataProcessingMissingErrorResponse,
       apply: expect.any(Function)
@@ -178,7 +188,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the upsertUserDataProcessing on the UserDataProcessingService with valid values", async () => {
+  it("should return a valid upsertedUserDataProcessingby calling UserDataProcessingService with valid values", async () => {
     const req = mockReq();
 
     mockUpsertUserDataProcessing.mockReturnValue(
@@ -211,7 +221,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     });
   });
 
-  it("calls the upsertUserDataProcessing on the UserDataProcessingService with empty user and valid upsert user", async () => {
+  it("should return a BadRequestError response by calling upsertUserDataProcessing on the UserDataProcessingService with empty user and valid upsert user", async () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -234,7 +244,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
-  it("calls the upsertUserDataProcessing on the UserDataProcessingService with valid user and empty upsert profile", async () => {
+  it("should return a BadRequestError response by calling upsertUserDataProcessing on the UserDataProcessingService with valid user and empty upsert user data processing", async () => {
     const req = mockReq();
     const res = mockRes();
 
