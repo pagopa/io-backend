@@ -12,7 +12,19 @@ export const makeRateLimiterMiddleware = (
   const rateLimiterKey = req.ip;
   return rateLimiter
     .consume(rateLimiterKey)
-    .then(_ => next())
+    .then(_ => {
+      res
+        .set("X-RateLimit-Remaining", _.remainingPoints.toString())
+        .set(
+          "X-RateLimit-Reset",
+          new Date(Date.now() + Number(_.msBeforeNext)).toString()
+        )
+        .set(
+          "X-RateLimit-Limit",
+          (_.remainingPoints + _.consumedPoints).toString()
+        );
+      next();
+    })
     .catch((rateLimiterRes: RateLimiterRes) => {
       const retryAfter = Math.ceil(rateLimiterRes.msBeforeNext / 1000);
       log.debug("rate limiter blocking = %s", JSON.stringify(rateLimiterRes));
