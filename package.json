@@ -55,7 +55,7 @@
     "express": "^4.16.2",
     "express-enforces-ssl": "1.1.0",
     "fp-ts": "~1.17.0",
-    "helmet": "3.21.0",
+    "helmet": "3.21.1",
     "http-graceful-shutdown": "^2.3.2",
     "io-ts": "1.8.5",
     "io-ts-types": "^0.4.7",
@@ -148,6 +148,7 @@
     ]
   },
   "resolutions": {
-    "fp-ts": "1.17.4"
+    "fp-ts": "1.17.4",
+    "handlebars": "~4.5.3"
   }
 }
