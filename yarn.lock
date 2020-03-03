@@ -155,7 +155,7 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@pagopa/io-spid-commons@^2.4.0":
+"@pagopa/io-spid-commons@^2.5.0":
   version "2.5.0"
   resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/2.5.0/96a31352060eb5882f0a52e45b157eb13dc2001303beed13dbcddbf10fa57b8a#8805bdd8ce218c66e56ae8ba222d06d65bc0eb66"
   integrity sha512-hYItaXs9hSTYLugW3yOR02HVSjFYnKVJj5VsONTgTr7rY+yd6GQ197HPw9MIuUqqNvWQ8Y970hF2Bfcu+xisig==
