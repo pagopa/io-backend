@@ -127,7 +127,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     });
   });
 
-  it("should return a BadRequestError response by calling UserDataProcessingService with empty user", async () => {
+  it("should return an error by calling UserDataProcessingService with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -151,7 +151,7 @@ describe("UserDataProcessingController#getUserDataProcessing", () => {
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
-  it("should return a ResponseErrorNotFound if no user data processing was found", async () => {
+  it("should return a 404 error if no user data processing was found", async () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -188,7 +188,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     jest.clearAllMocks();
   });
 
-  it("should return a valid upsertedUserDataProcessingby calling UserDataProcessingService with valid values", async () => {
+  it("should return a valid upsertedUserDataProcessing by calling UserDataProcessingService with valid values", async () => {
     const req = mockReq();
 
     mockUpsertUserDataProcessing.mockReturnValue(
@@ -221,7 +221,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     });
   });
 
-  it("should return a BadRequestError response by calling upsertUserDataProcessing on the UserDataProcessingService with empty user and valid upsert user", async () => {
+  it("should return an error response by calling UserDataProcessingService with empty user and a valid choice", async () => {
     const req = mockReq();
     const res = mockRes();
 
@@ -244,7 +244,7 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
-  it("should return a BadRequestError response by calling upsertUserDataProcessing on the UserDataProcessingService with valid user and empty upsert user data processing", async () => {
+  it("should return an error by calling UserDataProcessingService with a valid user and empty choice", async () => {
     const req = mockReq();
     const res = mockRes();
 

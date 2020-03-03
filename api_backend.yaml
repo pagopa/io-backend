@@ -660,7 +660,7 @@ paths:
           required: true
       responses:
         '200':
-          description: User Data processing created.
+          description: User Data processing created / updated.
           schema:
             $ref: "#/definitions/UserDataProcessing"
         "400":
@@ -692,10 +692,6 @@ paths:
           description: User data processing retrieved
           schema:
             $ref: "#/definitions/UserDataProcessing"
-        "400":
-          description: Invalid request.
-          schema:
-            $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
         "404":

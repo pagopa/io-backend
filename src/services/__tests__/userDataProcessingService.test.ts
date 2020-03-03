@@ -92,7 +92,7 @@ jest.mock("../../services/apiClientFactory", () => {
 const api = new ApiClientFactory("", "");
 
 describe("UserDataProcessingService#getUserDataProcessing", () => {
-  it("should returns a user data processing from the API", async () => {
+  it("should return a user data processing from the API", async () => {
     mockGetUserDataProcessing.mockImplementation(() => {
       return t.success(validApiUserDataProcessingResponse);
     });
@@ -114,7 +114,7 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
     });
   });
 
-  it("returns an 429 HTTP error from getUserDataProcessing upstream API", async () => {
+  it("should return a 429 HTTP error from getUserDataProcessing upstream API", async () => {
     mockGetUserDataProcessing.mockImplementation(() =>
       t.success(tooManyReqApiUserDataProcessingResponse)
     );
@@ -129,7 +129,7 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 
-  it("returns an error if the getUserDataProcessing API returns an error", async () => {
+  it("should return an error if the getUserDataProcessing API returns an error", async () => {
     mockGetUserDataProcessing.mockImplementation(() => t.success(problemJson));
 
     const service = new UserDataProcessingService(api);
@@ -145,7 +145,7 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
-  it("returns a 500 response if the response from the getUserDataProcessing API returns something wrong", async () => {
+  it("should return an error if the getUserDataProcessing API returns invalid data", async () => {
     mockGetUserDataProcessing.mockImplementation(() =>
       t.success(invalidApiUserDataProcessingResponse)
     );
@@ -168,7 +168,7 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it("returns an upserted user data processing from the API", async () => {
+  it("should return an upserted user data processing from the API", async () => {
     mockUpsertUserDataProcessing.mockImplementation(() => {
       return t.success(validApiUserDataProcessingResponse);
     });
@@ -190,7 +190,7 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     });
   });
 
-  it("returns an 429 HTTP error from upsertUserDataProcessing upstream API", async () => {
+  it("should return an 429 HTTP error from upsertUserDataProcessing upstream API", async () => {
     mockUpsertUserDataProcessing.mockImplementation(() =>
       t.success(tooManyReqApiUserDataProcessingResponse)
     );
@@ -205,7 +205,7 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
 
-  it("returns an error if the upsertUserDataProcessing API returns an error", async () => {
+  it("should return an error if the upsertUserDataProcessing API returns an error", async () => {
     mockUpsertUserDataProcessing.mockImplementation(() =>
       t.success(problemJson)
     );
@@ -223,7 +223,7 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
-  it("should return a 500 response if the response from the upsertUserDataProcessing API returns something wrong", async () => {
+  it("should return an error if the upsertUserDataProcessing API returns invalid data", async () => {
     mockUpsertUserDataProcessing.mockImplementation(() =>
       t.success(invalidApiUserDataProcessingResponse)
     );
