@@ -30,7 +30,6 @@ export const makeRateLimiterMiddleware = (
       title: "Too Many requests"
     };
     log.warn("Rate limiter is blocking ip (%s)", ip);
-    log.warn("Rate limiter is blocking ip (%s) (%s)", ip, _);
     res
       .set("X-RateLimit-Remaining", _.remainingPoints.toString())
       .set(
