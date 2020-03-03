@@ -79,12 +79,7 @@ export default class UserDataProcessingService {
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 404
-          ? ResponseErrorNotFound(
-              "Not Found",
-              response.value.detail === undefined
-                ? "User data processing not found"
-                : response.value.detail
-            )
+          ? ResponseErrorNotFound("Not Found", "User data processing not found")
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status)
