@@ -1,21 +1,18 @@
+import * as spid from "@pagopa/io-spid-commons";
 import { Express } from "express";
+import { isRight } from "fp-ts/lib/Either";
+import { Task } from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
-
-import { isRight } from "fp-ts/lib/Either";
-import passport = require("passport");
 import { ServerInfo } from "../../generated/public/ServerInfo";
-import appModule from "../app";
-import container, {
-  DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS,
-  SPID_STRATEGY
-} from "../container";
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
+jest.mock("../utils/redis");
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
@@ -25,6 +22,8 @@ jest.mock("../controllers/notificationController", () => {
     }))
   };
 });
+
+import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
@@ -113,37 +112,6 @@ describe("Success app start", () => {
     });
   });
 
-  describe("Test refresh idp metadata", () => {
-    let spidStrategy: passport.Strategy;
-    beforeEach(async () => {
-      spidStrategy = await container.resolve<Promise<passport.Strategy>>(
-        SPID_STRATEGY
-      );
-      jest.useFakeTimers();
-    });
-
-    it("app#idpMetadataUpdater", done => {
-      const onRefresh = jest.fn();
-      appModule.startIdpMetadataUpdater(
-        app,
-        spidStrategy,
-        DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
-        onRefresh
-      );
-      expect(setInterval).toHaveBeenCalledTimes(1);
-      expect(setInterval).toHaveBeenLastCalledWith(
-        expect.any(Function),
-        DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
-      );
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-      setTimeout(() => {
-        expect(onRefresh).toBeCalledTimes(1);
-        done();
-      }, 1000);
-    });
-  });
-
   describe("GET /info", () => {
     it("Get info and verify ServerInfo format", async () => {
       const response = await request(app)
@@ -157,10 +125,15 @@ describe("Success app start", () => {
 
 describe("Failure app start", () => {
   it("Close app if download IDP metadata fails on startup", async () => {
-    jest.spyOn(appModule, "loadSpidStrategy").mockImplementation(() => {
-      return Promise.reject(new Error("Error download "));
+    // Override return value of generateSpidStrategy with a rejected promise.
+    jest.spyOn(spid, "withSpid").mockImplementation(() => {
+      return TE.left(
+        new Task(async () => new Error("Error download metadata"))
+      );
     });
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => true);
+    const mockExit = jest
+      .spyOn(process, "exit")
+      .mockImplementation(() => true as never);
     await appModule.newApp(
       NodeEnvironmentEnum.PRODUCTION,
       aValidCIDR,

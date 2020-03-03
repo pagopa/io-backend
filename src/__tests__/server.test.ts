@@ -26,9 +26,7 @@ describe("Server graceful shutdown", () => {
 
   const testApiUrl = `http://localhost:${port}${testRoutePath}`;
 
-  jest.spyOn(process, "exit").mockImplementation(() => {
-    return true;
-  });
+  jest.spyOn(process, "exit").mockImplementation(() => true as never);
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -59,6 +57,12 @@ describe("Server graceful shutdown", () => {
       signals: "SIGTERM SIGINT",
       timeout: gracefulShutdownTimeout
     });
+  });
+
+  afterAll(() => {
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    app.emit("server:stop");
   });
 
   it("should wait requests on test route to complete before shitting down the server", async () => {

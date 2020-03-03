@@ -20,8 +20,15 @@ import { Version } from "../../../generated/backend/Version";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 
+import { ResponseErrorNotFound } from "italia-ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
-import { toAuthenticatedProfile, toInitializedProfile } from "../profile";
+import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
+import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";
+import {
+  notFoundProfileToInternalServerError,
+  profileMissingErrorResponse,
+  toInitializedProfile
+} from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 
@@ -33,6 +40,8 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 ];
 const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
+const anIsEmailEnabled = true as IsEmailEnabled;
+const anIsEmailValidated = true as IsEmailValidated;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User extracted from SPID
@@ -52,7 +61,8 @@ const mockedUser: User = {
 const mockedExtendedProfile: ExtendedProfileApi = {
   accepted_tos_version: aTosVersion,
   email: anEmailAddress,
-  is_email_enabled: true,
+  is_email_enabled: anIsEmailEnabled,
+  is_email_validated: anIsEmailValidated,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
@@ -62,6 +72,8 @@ const mockedExtendedProfile: ExtendedProfileApi = {
 // mock for a valid ExtendedProfile profile used for ToS test
 const mockedExtendedProfileWithoutTos: ExtendedProfileApi = {
   email: anEmailAddress,
+  is_email_enabled: anIsEmailEnabled,
+  is_email_validated: anIsEmailValidated,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
@@ -84,6 +96,7 @@ describe("profile type", () => {
     expect(userData.family_name).toBe(mockedUser.family_name);
     expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
     expect(userData.has_profile).toBeTruthy();
+    expect(userData.is_email_enabled).toBe(anIsEmailEnabled);
     expect(userData.is_inbox_enabled).toBe(
       mockedExtendedProfile.is_inbox_enabled
     );
@@ -96,20 +109,6 @@ describe("profile type", () => {
       mockedExtendedProfile.preferred_languages
     );
     expect(userData.version).toBe(mockedExtendedProfile.version);
-  });
-
-  /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
-  it("should get an app Proxy profile without email from user data extracted from SPID", async () => {
-    // validate SpidUser. Return right.
-    const userData = toAuthenticatedProfile(
-      mockedUser // user
-    );
-
-    expect(userData.family_name).toBe(mockedUser.family_name);
-    expect(userData.fiscal_code).toBe(mockedUser.fiscal_code);
-    expect(userData.has_profile).toBeFalsy();
-
-    expect(userData.spid_email).toBe(mockedUser.spid_email);
   });
 
   /*test case: Extracts a user profile from the body of a request.*/
@@ -146,5 +145,19 @@ describe("profile type", () => {
     );
 
     expect(userData.accepted_tos_version).toBe(undefined);
+    expect(userData.is_email_enabled).toBe(anIsEmailEnabled);
+  });
+
+  /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/
+  it("should get an ResponseErrorInternal if profile is not found", async () => {
+    // validate SpidUser. Return right.
+    const response = notFoundProfileToInternalServerError(
+      ResponseErrorNotFound("Not found", "Profile not found")
+    );
+
+    expect(response).toEqual({
+      ...profileMissingErrorResponse,
+      apply: expect.any(Function)
+    });
   });
 });

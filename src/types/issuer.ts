@@ -3,10 +3,6 @@
  */
 
 import * as t from "io-ts";
-import { string } from "io-ts";
 
-export const Issuer = t.interface({
-  _: string
-});
-
+export const Issuer = t.string;
 export type Issuer = t.TypeOf<typeof Issuer>;

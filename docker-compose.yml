@@ -9,18 +9,19 @@ services:
     environment:
       - NODE_ENV=dev
       - REDIS_URL=redis://redis
+      - GITHUB_TOKEN
     expose:
       - "443"
     ports:
       - "443:443"
     image: node:10.14.2-alpine
     volumes:
-      - ".env:/usr/src/app/.env:delegated"
+      - ".env:/usr/src/app/.env"
       - "./certs:/usr/src/app/certs:delegated"
 
   spid-testenv2:
     container_name: spid-testenv2
-    image: italia/spid-testenv2:fix-c14n-issue-169
+    image: italia/spid-testenv2
     ports:
       - "8088:8088"
     volumes:

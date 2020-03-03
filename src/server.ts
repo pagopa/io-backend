@@ -7,27 +7,25 @@ import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
 import { newApp } from "./app";
-import container, { SAML_CERT, SAML_KEY } from "./container";
+import {
+  ALLOW_NOTIFY_IP_SOURCE_RANGE,
+  ALLOW_PAGOPA_IP_SOURCE_RANGE,
+  API_BASE_PATH,
+  AUTHENTICATION_BASE_PATH,
+  ENV,
+  PAGOPA_BASE_PATH,
+  SAML_CERT,
+  SAML_KEY,
+  SERVER_PORT
+} from "./config";
 import { initAppInsights } from "./utils/appinsights";
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 
-const port = container.resolve<number>("serverPort");
-const env = container.resolve<NodeEnvironmentEnum>("env");
-const allowNotifyIPSourceRange = container.resolve<CIDR>(
-  "allowNotifyIPSourceRange"
-);
-const allowPagoPAIPSourceRange = container.resolve<CIDR>(
-  "allowPagoPAIPSourceRange"
-);
-
-const authenticationBasePath = container.resolve<string>(
-  "AuthenticationBasePath"
-);
-const APIBasePath = container.resolve<string>("APIBasePath");
-const PagoPABasePath = container.resolve<string>("PagoPABasePath");
+const authenticationBasePath = AUTHENTICATION_BASE_PATH;
+const APIBasePath = API_BASE_PATH;
+const PagoPABasePath = PAGOPA_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -55,9 +53,9 @@ const maybeAppInsightsClient = fromNullable(
 ).map(initAppInsights);
 
 newApp(
-  env,
-  allowNotifyIPSourceRange,
-  allowPagoPAIPSourceRange,
+  ENV,
+  ALLOW_NOTIFY_IP_SOURCE_RANGE,
+  ALLOW_PAGOPA_IP_SOURCE_RANGE,
   authenticationBasePath,
   APIBasePath,
   PagoPABasePath
@@ -65,16 +63,14 @@ newApp(
   .then(app => {
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
-    if (env === NodeEnvironmentEnum.DEVELOPMENT) {
-      const samlKey = container.resolve<string>(SAML_KEY);
-      const samlCert = container.resolve<string>(SAML_CERT);
-      const options = { key: samlKey, cert: samlCert };
+    if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
+      const options = { key: SAML_KEY, cert: SAML_CERT };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
       });
     } else {
-      server = http.createServer(app).listen(port, () => {
-        log.info("Listening on port %d", port);
+      server = http.createServer(app).listen(SERVER_PORT, () => {
+        log.info("Listening on port %d", SERVER_PORT);
       });
     }
     server.on("close", () => {
@@ -89,7 +85,7 @@ newApp(
     });
 
     initHttpGracefulShutdown(server, app, {
-      development: env === NodeEnvironmentEnum.DEVELOPMENT,
+      development: ENV === NodeEnvironmentEnum.DEVELOPMENT,
       finally: () => {
         log.info("Server graceful shutdown complete.");
       },

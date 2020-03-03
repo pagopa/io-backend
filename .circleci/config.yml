@@ -14,6 +14,10 @@ save_node_cache: &save_node_cache
       - ~/.cache/yarn
     key: *node_cache_key
 
+# Init .npmrc file
+npmrc_init: &npmrc_init
+  run: bash ./scripts/init-npm.sh
+
 # Install yarn dependencies
 install_node_modules: &install_node_modules
   run: yarn install --cache-folder ~/.cache/yarn
@@ -40,6 +44,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
       - run: yarn lint
   danger:
@@ -49,6 +54,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
       - run: '[ -z "$DANGER_GITHUB_API_TOKEN" ] || yarn danger ci'
   build:
@@ -60,6 +66,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
       - *save_node_cache
 
@@ -80,6 +87,7 @@ jobs:
     steps:
       - checkout
       - *restore_node_cache
+      - *npmrc_init
       - *install_node_modules
 
       # Install required libraries
@@ -98,6 +106,8 @@ jobs:
           command: yarn test
           environment:
             PRE_SHARED_KEY: "12345"
+            API_KEY: "fake_api_key_here"
+            API_URL: "https://api.gateway.example.com/api/v1"
             ALLOW_NOTIFY_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             ALLOW_PAGOPA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             AZURE_NH_HUB_NAME: ""
@@ -108,6 +118,7 @@ jobs:
             PAGOPA_API_URL_TEST: "https://pagopa-proxy-test"
             PAGOPA_BASE_PATH: "/pagopa/api/v1"
             IDP_METADATA_URL: "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml"
+            REDIS_URL: redis://localhost
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
 workflows:

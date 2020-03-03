@@ -16,6 +16,9 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
+import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
+import { SpidUserIdentity } from "../../generated/backend/SpidUserIdentity";
+import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
@@ -30,16 +33,17 @@ export const User = t.intersection([
     fiscal_code: FiscalCode,
     name: t.string,
     session_token: SessionToken,
-    spid_email: EmailAddress,
     spid_level: SpidLevel,
-    spid_mobile_phone: NonEmptyString,
     wallet_token: WalletToken
   }),
   t.partial({
+    date_of_birth: t.string,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
-    spid_idp: t.string
+    spid_email: EmailAddress,
+    spid_idp: t.string,
+    spid_mobile_phone: NonEmptyString
   })
 ]);
 
@@ -49,15 +53,16 @@ export type User = t.TypeOf<typeof User>;
 export const SpidUser = t.intersection([
   t.interface({
     authnContextClassRef: SpidLevel,
-    email: EmailAddress,
     familyName: t.string,
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
     issuer: Issuer,
-    mobilePhone: NonEmptyString,
     name: t.string
   }),
   t.partial({
+    dateOfBirth: t.string,
+    email: EmailAddress,
+    mobilePhone: NonEmptyString,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string
@@ -76,6 +81,7 @@ export function toAppUser(
 ): User {
   return {
     created_at: new Date().getTime(),
+    date_of_birth: from.dateOfBirth,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,
@@ -85,6 +91,25 @@ export function toAppUser(
     spid_mobile_phone: from.mobilePhone,
     wallet_token: walletToken
   };
+}
+
+/**
+ * Discriminate from a CieUserIdentity and a SpidUserIdentity
+ * checking the spid_email property.
+ * @param user
+ */
+export function isSpidUserIdentity(
+  user: CieUserIdentity | SpidUserIdentity
+): user is SpidUserIdentity {
+  return (user as SpidUserIdentity).spid_email !== undefined;
+}
+
+export function exactUserIdentityDecode(
+  user: UserIdentity
+): Either<t.Errors, UserIdentity> {
+  return isSpidUserIdentity(user)
+    ? t.exact(SpidUserIdentity.type).decode(user)
+    : t.exact(CieUserIdentity.type).decode(user);
 }
 
 /**
@@ -134,7 +159,7 @@ export function validateSpidUser(value: any): Either<string, SpidUser> {
   if (!isSpidL(valueWithDefaultSPIDLevel.authnContextClassRef)) {
     log.warn(
       "Response from IDP: %s doesn't contain a valid SPID level: %s",
-      value.issuer._,
+      value.issuer,
       value.authnContextClassRef
     );
   }
@@ -181,18 +206,16 @@ export const extractUserFromJson = (from: string): Either<string, User> =>
 function getAuthnContextFromResponse(xml: string): Option<string> {
   return fromNullable(xml)
     .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
-    .chain(
-      xmlResponse =>
-        xmlResponse
-          ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
-          : none
+    .chain(xmlResponse =>
+      xmlResponse
+        ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
+        : none
     )
-    .chain(
-      responseAuthLevelEl =>
-        responseAuthLevelEl &&
-        responseAuthLevelEl[0] &&
-        responseAuthLevelEl[0].textContent
-          ? some(responseAuthLevelEl[0].textContent.trim())
-          : none
+    .chain(responseAuthLevelEl =>
+      responseAuthLevelEl &&
+      responseAuthLevelEl[0] &&
+      responseAuthLevelEl[0].textContent
+        ? some(responseAuthLevelEl[0].textContent.trim())
+        : none
     );
 }

@@ -226,7 +226,7 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/UserProfile"
+            $ref: "#/definitions/InitializedProfile"
           examples:
             application/json:
               email: "email@example.com"
@@ -255,14 +255,14 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
     post:
-      operationId: upsertProfile
-      summary: Set User's profile
-      description: Create or update the profile for the user identified by the provided fiscal code.
+      operationId: updateProfile
+      summary: Update the User's profile
+      description: Update the profile for the user identified by the provided fiscal code.
       parameters:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/ExtendedProfile"
+            $ref: "#/definitions/Profile"
           required: true
           x-examples:
             application/json:
@@ -329,6 +329,35 @@ paths:
               version: 1
               sender_allowed: true
         "400":
+            description: Bad request
+            schema:
+              $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Profile not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error in retrieving the user profile.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+  "/email-validation-process":
+    x-swagger-router-controller: ProfileController
+    post:
+      operationId: startEmailValidationProcess
+      summary: Start the Email Validation Process
+      description: |-
+        Start the email validation process that create the validation token
+        and send the validation email
+      responses:
+        "202":
+          description: Accepted
+        "400":
           description: Bad request
           schema:
             $ref: "#/definitions/ProblemJson"
@@ -342,6 +371,34 @@ paths:
           description: Too many requests
           schema:
             $ref: "#/definitions/ProblemJson"
+        "500":
+          description: There was an error starting email validation process
+          schema:
+            $ref: "#/definitions/ProblemJson"
+  "/user-identity":
+    x-swagger-router-controller: ProfileController
+    get:
+      operationId: getUserIdentity
+      summary: Get stored user identity
+      description: Returns the user identity stored during the login phase
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/UserIdentity"
+          examples:
+            application/json:
+              family_name: "Rossi"
+              fiscal_code: "TMMEXQ60A10Y526X"
+              name: "Mario"
+              spid_email: "preferred@example.com"
+              spid_mobile_phone: "1234567890"
+        "400":
+            description: Bad request
+            schema:
+              $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
         "500":
           description: There was an error in retrieving the user profile.
           schema:
@@ -591,100 +648,108 @@ paths:
 definitions:
   # Definitions from the digital citizenship APIs
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/AcceptedTosVersion"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/AcceptedTosVersion"
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/DepartmentName"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/EmailAddress"
+  Profile:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/Profile"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/FiscalCode"
   IsEmailEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/IsEmailEnabled"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/IsEmailEnabled"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/IsInboxEnabled"
+  IsEmailValidated:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/IsEmailValidated"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/LimitedProfile"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/MessageContent"
-  PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   NotificationChannelStatusValue:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+  NotificationChannel:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/NotificationChannel"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/MessageSubject"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/OrganizationName"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PaginationResponse"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ProblemJson"
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ServiceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ServiceId"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ServicePublic"
   ServiceTuple:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ServiceTuple"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ServiceTuple"
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PaymentNoticeNumber"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PaymentNoticeNumber"
   PaymentAmount:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PaymentAmount"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PaymentAmount"
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/PaymentData"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PaymentData"
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/TimeToLiveSeconds"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/CreatedMessageWithContent"
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+  CreatedMessageWithoutContentCollection:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+  PaginatedCreatedMessageWithoutContentCollection:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
   MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/MessageResponseWithContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/MessageResponseWithContent"
   # Definitions from pagopa-proxy
   PaymentProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentProblemJson"
   CodiceContestoPagamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
   EnteBeneficiario:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/EnteBeneficiario"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/EnteBeneficiario"
   Iban:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/Iban"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/Iban"
   ImportoEuroCents:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/ImportoEuroCents"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/ImportoEuroCents"
   PaymentActivationsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
   PaymentActivationsPostRequest:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
   PaymentActivationsPostResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
   PaymentRequestsGetResponse:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
   RptId:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/RptId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/RptId"
   SpezzoneStrutturatoCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
   SpezzoniCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   Installation:
     type: object
     title: Installation
@@ -712,6 +777,10 @@ definitions:
         $ref: "#/definitions/PreferredLanguages"
       is_inbox_enabled:
         $ref: "#/definitions/IsInboxEnabled"
+      is_email_validated:
+        $ref: "#/definitions/IsEmailValidated"
+      is_email_enabled:
+        $ref: "#/definitions/IsEmailEnabled"
       is_webhook_enabled:
         $ref: "#/definitions/IsWebhookEnabled"
       family_name:
@@ -727,6 +796,9 @@ definitions:
       spid_mobile_phone:
         type: string
         minLength: 1
+      date_of_birth:
+        type: string
+        format: date
       version:
         $ref: '#/definitions/Version'
     required:
@@ -734,36 +806,10 @@ definitions:
       - fiscal_code
       - has_profile
       - is_inbox_enabled
+      - is_email_enabled
       - is_webhook_enabled
       - name
-      - spid_email
-      - spid_mobile_phone
       - version
-  AuthenticatedProfile:
-    type: object
-    title: Temporary SPID profile
-    description: Describes the user's profile while it's authenticated but not yet stored in the Profile API.
-    properties:
-      family_name:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      has_profile:
-        $ref: "#/definitions/HasProfile"
-      name:
-        type: string
-      spid_email:
-        $ref: '#/definitions/EmailAddress'
-      spid_mobile_phone:
-        type: string
-        minLength: 1
-    required:
-      - family_name
-      - fiscal_code
-      - has_profile
-      - name
-      - spid_email
-      - spid_mobile_phone
   UserMetadata:
     type: object
     title: User Metadata information
@@ -850,11 +896,52 @@ definitions:
       - https://www.spid.gov.it/SpidL1
       - https://www.spid.gov.it/SpidL2
       - https://www.spid.gov.it/SpidL3
-  UserProfile:
+  SpidUserIdentity:
+    type: object
+    title: SPID User Identity
+    description: Describes the user's profile while it's authenticated with Spid.
+    properties:
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      name:
+        type: string
+      spid_email:
+        $ref: '#/definitions/EmailAddress'
+      spid_mobile_phone:
+        type: string
+        minLength: 1
+    required:
+      - family_name
+      - fiscal_code
+      - name
+      - spid_email
+      - spid_mobile_phone
+  CieUserIdentity:
+    type: object
+    title: CIE User Identity
+    description: Describes the user's profile while it's authenticated with CIE.
+    properties:
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      name:
+        type: string
+      date_of_birth:
+        type: string
+        format: date
+    required:
+      - family_name
+      - fiscal_code
+      - name
+      - date_of_birth
+  UserIdentity:
     x-one-of: true
     allOf:
-      - $ref: "#/definitions/InitializedProfile"
-      - $ref: "#/definitions/AuthenticatedProfile"
+      - $ref: "#/definitions/SpidUserIdentity"
+      - $ref: "#/definitions/CieUserIdentity"
   SuccessResponse:
     type: object
     properties:

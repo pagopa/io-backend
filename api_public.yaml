@@ -23,7 +23,8 @@ paths:
           examples:
             application/json:
               version: "0.0.1"
-              uptime_seconds: 12345
+              min_app_version: "0.0.0"
+              min_app_version_pagopa: "0.0.0"
 definitions:
   ServerInfo:
     type: object
@@ -31,11 +32,25 @@ definitions:
     properties:
       version:
         type: string
-      minAppVersion:
-        type: string
+      min_app_version:
+        $ref: "#/definitions/VersionPerPlatform"
+      min_app_version_pagopa:
+        $ref: "#/definitions/VersionPerPlatform"
     required:
       - version
-      - minAppVersion
+      - min_app_version
+      - min_app_version_pagopa
+  VersionPerPlatform:
+    type: object
+    title: Specify a version for ios and another for android
+    properties:
+      ios:
+        type: string
+      android:
+        type: string
+    required:
+      - ios
+      - android
 consumes:
   - application/json
 produces:

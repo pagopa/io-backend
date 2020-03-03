@@ -5,63 +5,110 @@
 import * as express from "express";
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+import { fromNullable } from "fp-ts/lib/Option";
+import { EmailAddress } from "../../generated/io-api/EmailAddress";
+import { ExtendedPagoPAUser } from "../../generated/pagopa/ExtendedPagoPAUser";
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
-
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";
 
-export default class PagoPAController {
-  constructor(private readonly profileService: ProfileService) {}
+const VALIDATION_ERROR_TITLE = "Validation Error";
 
+export default class PagoPAController {
+  constructor(readonly profileService: ProfileService) {}
   /**
    * Returns the profile for the user identified by the provided fiscal
    * code.
+   * @deprecated by https://www.pivotaltracker.com/story/show/170259398
    */
   public readonly getUser = (
     req: express.Request
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
+    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PagoPAUser>
+    | IResponseSuccessJson<PagoPAUser | ExtendedPagoPAUser>
   > =>
-    withUserFromRequest(req, async user => {
-      const response = await this.profileService.getProfile(user);
-      if (response.kind !== "IResponseSuccessJson") {
-        // if getProfile returns a failure, we just return it
-        return response;
-      }
+    withUserFromRequest(req, user =>
+      fromNullable(req.query.version).fold<
+        Promise<
+          // tslint:disable-next-line: max-union-size
+          | IResponseErrorValidation
+          | IResponseErrorNotFound
+          | IResponseErrorInternal
+          | IResponseErrorTooManyRequests
+          | IResponseSuccessJson<PagoPAUser | ExtendedPagoPAUser>
+        >
+      >(
+        PagoPAUser.decode({
+          email: user.spid_email,
+          family_name: user.family_name,
+          mobile_phone: user.spid_mobile_phone,
+          name: user.name
+        }).fold<
+          Promise<IResponseErrorValidation | IResponseSuccessJson<PagoPAUser>>
+        >(
+          _ =>
+            Promise.resolve(
+              ResponseErrorValidation(
+                VALIDATION_ERROR_TITLE,
+                "Invalid User Data"
+              )
+            ),
+          _ => Promise.resolve(ResponseSuccessJson(_))
+        ),
+        async _ => {
+          if (_ === "20200114") {
+            const response = await this.profileService.getProfile(user);
+            if (response.kind !== "IResponseSuccessJson") {
+              // if getProfile returns a failure, we just return it
+              return response;
+            }
+            const profile = response.value;
 
-      // getProfile may return an InitializedProfile or an AuthenticatedProfile
-      const profile = response.value;
+            // if no validated email is provided into InitializedProfile
+            // spid_email will be used for notice email
+            const maybeNoticeEmail: EmailAddress | undefined =
+              profile.email && profile.is_email_validated
+                ? profile.email
+                : user.spid_email;
 
-      // a custom email may have been set in the InitializedProfile, thus we
-      // have to check if the profile it's an InitializedProfile to be able to
-      // retrieve it
-      const maybeCustomEmail = InitializedProfile.is(profile)
-        ? profile.email
-        : undefined;
-
-      // if the profile is an AuthenticatedProfile or the profile is an
-      // InitializedProfile but an email has not been set, we fall back to
-      // the email from the SPID profile
-      const email = maybeCustomEmail ? maybeCustomEmail : profile.spid_email;
-
-      const pagopaUser: PagoPAUser = {
-        email,
-        family_name: user.family_name,
-        mobile_phone: user.spid_mobile_phone,
-        name: user.name
-      };
-
-      return ResponseSuccessJson(pagopaUser);
-    });
+            // If no valid notice_email is present a validation error is returned as response
+            return ExtendedPagoPAUser.decode({
+              family_name: user.family_name,
+              fiscal_code: profile.fiscal_code,
+              mobile_phone: user.spid_mobile_phone,
+              name: user.name,
+              notice_email: maybeNoticeEmail,
+              spid_email: user.spid_email
+            }).fold<
+              | IResponseSuccessJson<ExtendedPagoPAUser>
+              | IResponseErrorValidation
+            >(
+              _1 =>
+                ResponseErrorValidation(
+                  VALIDATION_ERROR_TITLE,
+                  "Invalid User Data"
+                ),
+              ResponseSuccessJson
+            );
+          } else {
+            return ResponseErrorValidation(
+              VALIDATION_ERROR_TITLE,
+              "Invalid Version number"
+            );
+          }
+        }
+      )
+    );
 }

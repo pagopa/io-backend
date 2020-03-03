@@ -15,12 +15,21 @@ paths:
     get:
       operationId: getUser
       summary: Get user's data
-      description: Returns the user data needed by PagaPA Wallet backend.
+      description: Returns the user data needed by PagoPA Wallet backend.
+      parameters:
+        - in: query
+          name: version
+          type: string
+          enum:
+            - "20200114"
       responses:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/PagoPAUser"
+            x-one-of: true
+            allOf:
+              - $ref: "#/definitions/PagoPAUser"
+              - $ref: "#/definitions/ExtendedPagoPAUser"
           examples:
             application/json:
               email: "email@example.com"
@@ -33,15 +42,25 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Token null or invalid.
+        "404":
+          description: User Profile not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too many requests
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: There was an error in retrieving the user data.
           schema:
             $ref: "#/definitions/ProblemJson"
 definitions:
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/EmailAddress"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/teamdigitale/io-functions-commons/v0.5.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/ProblemJson"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v1.8.0/openapi/definitions.yaml#/FiscalCode"
   PagoPAUser:
     title: PagoPA user
     description: User data needed by PagaPA proxy.
@@ -61,6 +80,29 @@ definitions:
       - family_name
       - email
       - mobile_phone
+  ExtendedPagoPAUser:
+    title: ExtendedPagoPA user
+    description: User data needed by PagoPA proxy with custom user email.
+    type: object
+    properties:
+      name:
+        type: string
+      family_name:
+        type: string
+      spid_email:
+        $ref: '#/definitions/EmailAddress'
+      notice_email:
+        $ref: '#/definitions/EmailAddress'
+      mobile_phone:
+        type: string
+        minLength: 1
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+    required:
+      - name
+      - family_name
+      - notice_email
+      - fiscal_code
 responses: {}
 parameters: {}
 consumes:

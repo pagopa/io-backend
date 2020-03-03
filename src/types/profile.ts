@@ -2,12 +2,18 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-
-import { AuthenticatedProfile } from "../../generated/backend/AuthenticatedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 
+import { fromNullable } from "fp-ts/lib/Option";
+import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
+  ResponseErrorInternal
+} from "italia-ts-commons/lib/responses";
 import { User } from "./user";
 
 /**
@@ -19,10 +25,13 @@ export const toInitializedProfile = (
 ): InitializedProfile => ({
   accepted_tos_version: profile.accepted_tos_version,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
+  date_of_birth: user.date_of_birth,
   email: profile.email,
   family_name: user.family_name,
   fiscal_code: user.fiscal_code,
   has_profile: true,
+  is_email_enabled: fromNullable(profile.is_email_enabled).getOrElse(true),
+  is_email_validated: profile.is_email_validated,
   is_inbox_enabled: profile.is_inbox_enabled,
   is_webhook_enabled: profile.is_webhook_enabled,
   name: user.name,
@@ -32,14 +41,19 @@ export const toInitializedProfile = (
   version: profile.version
 });
 
-/**
- * Converts an authenticated User to an AuthenticatedProfile.
- */
-export const toAuthenticatedProfile = (user: User): AuthenticatedProfile => ({
-  family_name: user.family_name,
-  fiscal_code: user.fiscal_code,
-  has_profile: false,
-  name: user.name,
-  spid_email: user.spid_email,
-  spid_mobile_phone: user.spid_mobile_phone
-});
+export const profileMissingErrorResponse = ResponseErrorInternal(
+  "Profile Missing"
+);
+
+export const notFoundProfileToInternalServerError = (
+  // tslint:disable-next-line: prettier
+  getProfileResponse:
+  // tslint:disable-next-line: max-union-size
+  | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<InitializedProfile>
+) =>
+  getProfileResponse.kind === "IResponseErrorNotFound"
+    ? profileMissingErrorResponse
+    : getProfileResponse;
