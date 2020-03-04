@@ -69,8 +69,8 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
-import { makeRateLimiterMiddleware } from "./utils/middleware/rateLimiter";
 import UserDataProcessingService from "./services/userDataProcessingService";
+import { makeRateLimiterMiddleware } from "./utils/middleware/rateLimiter";
 
 const defaultModule = {
   newApp
