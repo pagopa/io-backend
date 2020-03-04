@@ -62,6 +62,7 @@ import { toError } from "fp-ts/lib/Either";
 import { tryCatch } from "fp-ts/lib/TaskEither";
 import { RateLimiterMemory, RateLimiterRedis } from "rate-limiter-flexible";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
+import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
@@ -69,6 +70,7 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import { makeRateLimiterMiddleware } from "./utils/middleware/rateLimiter";
+import UserDataProcessingService from "./services/userDataProcessingService";
 
 const defaultModule = {
   newApp
@@ -195,6 +197,11 @@ export function newApp(
     // Create the profile service
     const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
+    // Create the user data processing service
+    const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
+      API_CLIENT
+    );
+
     const acsController: AuthenticationController = new AuthenticationController(
       SESSION_STORAGE,
       TOKEN_SERVICE,
@@ -224,7 +231,8 @@ export function newApp(
       NOTIFICATION_SERVICE,
       SESSION_STORAGE,
       PAGOPA_PROXY_SERVICE,
-      USER_METADATA_STORAGE
+      USER_METADATA_STORAGE,
+      USER_DATA_PROCESSING_SERVICE
     );
     registerPagoPARoutes(
       app,
@@ -288,7 +296,8 @@ function registerAPIRoutes(
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
-  userMetadataStorage: RedisUserMetadataStorage
+  userMetadataStorage: RedisUserMetadataStorage,
+  userDataProcessingService: UserDataProcessingService
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer", { session: false });
   const urlTokenAuth = passport.authenticate("authtoken", { session: false });
@@ -320,6 +329,10 @@ function registerAPIRoutes(
 
   const userMetadataController: UserMetadataController = new UserMetadataController(
     userMetadataStorage
+  );
+
+  const userDataProcessingController: UserDataProcessingController = new UserDataProcessingController(
+    userDataProcessingService
   );
 
   app.get(
@@ -364,6 +377,24 @@ function registerAPIRoutes(
     toExpressHandler(
       userMetadataController.upsertMetadata,
       userMetadataController
+    )
+  );
+
+  app.post(
+    `${basePath}/user-data-processing`,
+    bearerTokenAuth,
+    toExpressHandler(
+      userDataProcessingController.upsertUserDataProcessing,
+      userDataProcessingController
+    )
+  );
+
+  app.get(
+    `${basePath}/user-data-processing/:choice`,
+    bearerTokenAuth,
+    toExpressHandler(
+      userDataProcessingController.getUserDataProcessing,
+      userDataProcessingController
     )
   );
 
