@@ -133,9 +133,21 @@ const maybeSpidValidatorUrlOption = fromNullable(
   process.env.SPID_VALIDATOR_URL
 ).map(_ => ({ [_]: true }));
 
+// Set default idp metadata refresh time to 10 days
+export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
+export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env
+  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
+  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
+  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
+log.info(
+  "IDP metadata refresh interval set to %s seconds",
+  IDP_METADATA_REFRESH_INTERVAL_SECONDS
+);
+
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
-  idpMetadataRefreshIntervalMillis: 120000,
+  idpMetadataRefreshIntervalMillis:
+    IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
   organization: {
     URL: "https://io.italia.it",
     displayName: "IO - l'app dei servizi pubblici BETA",
@@ -257,17 +269,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 export const hubName = getRequiredENVVar("AZURE_NH_HUB_NAME");
 export const endpointOrConnectionString = getRequiredENVVar(
   "AZURE_NH_ENDPOINT"
-);
-
-// Set default idp metadata refresh time to 10 days
-export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
-export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env
-  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
-  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
-  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
-log.info(
-  "IDP metadata refresh interval set to %s seconds",
-  IDP_METADATA_REFRESH_INTERVAL_SECONDS
 );
 
 // Read ENV to allow multiple user's sessions functionality
