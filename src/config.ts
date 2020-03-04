@@ -102,6 +102,7 @@ const SPID_TESTENV_URL =
 
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
+const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
@@ -142,6 +143,7 @@ export const serviceProviderConfig: IServiceProviderConfig = {
     ],
     name: "Required attributes"
   },
+  spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,
   spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
   strictResponseValidation: {
