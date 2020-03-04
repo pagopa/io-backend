@@ -36,6 +36,10 @@ export const makeRateLimiterMiddleware = (
         "X-RateLimit-Reset",
         new Date(Date.now() + Number(_.msBeforeNext)).toString()
       )
+      .set(
+        "X-RateLimit-Limit",
+        (Number(_.remainingPoints) + Number(_.consumedPoints)).toString()
+      )
       .set("Retry-After", retryAfter.toString())
       .status(429)
       .json(problem);
