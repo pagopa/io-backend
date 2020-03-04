@@ -3,7 +3,7 @@
  */
 import * as dotenv from "dotenv";
 import { isLeft } from "fp-ts/lib/Either";
-import { fromNullable } from "fp-ts/lib/Option";
+import { fromNullable, isSome } from "fp-ts/lib/Option";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
@@ -128,6 +128,10 @@ export const appConfig: IApplicationConfig = {
   sloPath: "/slo"
 };
 
+const maybeSpidValidatorUrlOption = fromNullable(
+  process.env.SPID_VALIDATOR_URL
+).map(_ => ({ [_]: true }));
+
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
   idpMetadataRefreshIntervalMillis: 120000,
@@ -149,10 +153,17 @@ export const serviceProviderConfig: IServiceProviderConfig = {
     name: "Required attributes"
   },
   spidTestEnvUrl: SPID_TESTENV_URL,
-  spidValidatorUrl: process.env.SPID_VALIDATOR_URL
+  spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
+  strictResponseValidation: {
+    [SPID_TESTENV_URL]: true,
+    ...(isSome(maybeSpidValidatorUrlOption)
+      ? maybeSpidValidatorUrlOption.value
+      : {})
+  }
 };
 
 export const samlConfig: SamlConfig = {
+  RACComparison: "minimum",
   acceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
   attributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
   // this value is dynamic and taken from query string
