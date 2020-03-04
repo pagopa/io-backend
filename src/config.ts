@@ -3,7 +3,7 @@
  */
 import * as dotenv from "dotenv";
 import { isLeft } from "fp-ts/lib/Either";
-import { fromNullable } from "fp-ts/lib/Option";
+import { fromNullable, isSome } from "fp-ts/lib/Option";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
@@ -102,6 +102,7 @@ const SPID_TESTENV_URL =
 
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
+const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
@@ -117,6 +118,10 @@ export const appConfig: IApplicationConfig = {
   metadataPath: "/metadata",
   sloPath: "/slo"
 };
+
+const maybeSpidValidatorUrlOption = fromNullable(
+  process.env.SPID_VALIDATOR_URL
+).map(_ => ({ [_]: true }));
 
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
@@ -138,11 +143,19 @@ export const serviceProviderConfig: IServiceProviderConfig = {
     ],
     name: "Required attributes"
   },
+  spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,
-  spidValidatorUrl: process.env.SPID_VALIDATOR_URL
+  spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
+  strictResponseValidation: {
+    [SPID_TESTENV_URL]: true,
+    ...(isSome(maybeSpidValidatorUrlOption)
+      ? maybeSpidValidatorUrlOption.value
+      : {})
+  }
 };
 
 export const samlConfig: SamlConfig = {
+  RACComparison: "minimum",
   acceptedClockSkewMs: SAML_ACCEPTED_CLOCK_SKEW_MS,
   attributeConsumingServiceIndex: SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
   // this value is dynamic and taken from query string
