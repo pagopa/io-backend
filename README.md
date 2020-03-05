@@ -155,11 +155,13 @@ Those are all Environment variables needed by the application:
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download IDP metadata from                                                 | string |
-| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int |
-| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
+| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int    |
+| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int    |
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 | ALLOW_MULTIPLE_SESSIONS                | When is `true` allow multiple sessions for an user (default `false`)              | boolean |
-| GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase  | string |
+| GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase                             | string |
+| RATE_LIMIT_DURATION_SECS               | Rate limiter span (period) in seconds                                             | number |
+| RATE_LIMIT_POINTS                      | Maximum number of calls to a single API endpoint over RATE_LIMIT_DURATION_SECS    | number |
 
 ### Logs
 

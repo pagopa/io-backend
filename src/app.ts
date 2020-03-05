@@ -11,6 +11,8 @@ import {
   getClientProfileRedirectionUrl,
   hubName,
   PAGOPA_CLIENT,
+  RATE_LIMITER_DURATION_SECS,
+  RATE_LIMITER_POINTS,
   REDIS_CLIENT,
   samlConfig,
   serviceProviderConfig,
@@ -58,6 +60,7 @@ import {
 import { withSpid } from "@pagopa/io-spid-commons";
 import { toError } from "fp-ts/lib/Either";
 import { tryCatch } from "fp-ts/lib/TaskEither";
+import { RateLimiterMemory, RateLimiterRedis } from "rate-limiter-flexible";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
@@ -67,6 +70,7 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
+import { makeRateLimiterMiddleware } from "./utils/middleware/rateLimiter";
 
 const defaultModule = {
   newApp
@@ -83,6 +87,22 @@ const cachingMiddleware = apicache.options({
     include: [200]
   }
 }).middleware;
+
+const rateLimiterOpts = {
+  duration: RATE_LIMITER_DURATION_SECS,
+  keyPrefix: "rl-",
+  points: RATE_LIMITER_POINTS
+};
+
+const rateLimiterMiddleware = makeRateLimiterMiddleware(
+  REDIS_CLIENT
+    ? new RateLimiterRedis({
+        ...rateLimiterOpts,
+        storeClient: REDIS_CLIENT
+      })
+    : // useful for testing
+      new RateLimiterMemory(rateLimiterOpts)
+);
 
 export function newApp(
   env: NodeEnvironment,
@@ -329,12 +349,14 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/profile`,
+    rateLimiterMiddleware,
     bearerTokenAuth,
     toExpressHandler(profileController.updateProfile, profileController)
   );
 
   app.post(
     `${basePath}/email-validation-process`,
+    rateLimiterMiddleware,
     bearerTokenAuth,
     toExpressHandler(
       profileController.startEmailValidationProcess,
@@ -350,6 +372,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/user-metadata`,
+    rateLimiterMiddleware,
     bearerTokenAuth,
     toExpressHandler(
       userMetadataController.upsertMetadata,
@@ -412,6 +435,7 @@ function registerAPIRoutes(
 
   app.put(
     `${basePath}/installations/:id`,
+    rateLimiterMiddleware,
     bearerTokenAuth,
     toExpressHandler(
       notificationController.createOrUpdateInstallation,
@@ -449,6 +473,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/payment-activations`,
+    rateLimiterMiddleware,
     bearerTokenAuth,
     toExpressHandler(
       pagoPAProxyController.activatePayment,

@@ -68,6 +68,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-strategy": "^1.0.0",
     "range_check": "^1.4.0",
+    "rate-limiter-flexible": "^2.0.0",
     "redis": "^2.8.0",
     "redis-clustr": "^1.6.0",
     "request-ip": "^2.1.1",
