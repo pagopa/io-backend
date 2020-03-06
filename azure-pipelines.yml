@@ -1,0 +1,238 @@
+# Azure DevOps pipeline to build, check source codes, run tests, and deploy.
+#
+# To enable the check of source code with Danger JS you need to configure a valid
+# GitHub token by setting the following variable: 
+# - DANGER_GITHUB_API_TOKEN
+# To download build dependencies from GitHub package registry you also need to set
+# a GitHub token for the following variable:
+# - GITHUB_TOKEN
+#
+# To enable the deployment in any environment you need to configure the following 
+# variable otherwise all the deployment jobs will be always skipped:
+# - DO_DEPLOY = true
+# in case of a manual run, you also need to configure the following additional 
+# variables based on the environment to update:
+# - STAGING_ENABLE_MANUAL_DEPLOY = true
+# - PRODUCTION_ENABLE_MANUAL_DEPLOY = true
+#
+# The following variables are also used when running the deployment jobs:
+# - STAGING_DEPLOY_MODE: 'deploy_standard' || 'deploy_to_slots'
+# - STAGING_AZURE_SUBSCRIPTION
+# - STAGING_RESOURCE_GROUP_NAME
+# - STAGING_WEB_APP_NAME
+# 
+# - PRODUCTION_DEPLOY_MODE: 'deploy_standard' || 'deploy_to_slots'
+# - PRODUCTION_AZURE_SUBSCRIPTION
+# - PRODUCTION_RESOURCE_GROUP_NAME
+# - PRODUCTION_WEB_APP_NAME
+#
+
+variables:
+  NODE_VERSION: '10.14.2'
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+
+# This pipeline can be manually run or is automatically triggered whenever one 
+# of the following conditions is true:
+# - a push is made to any branch in the repository (not only 'master')
+# - a pull request is created
+# - a tag named 'latest' is pushed
+# Note. In the last case, the tag can be (re-)created using the Git CLI, e.g.:
+#    git push -f origin <abfb967>:refs/tags/latest
+trigger:
+  branches:
+    include:
+      - '*'
+      - refs/tags/latest
+
+# This pipeline has been implemented to be run on hosted agent pools based both
+# on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
+# in the package.json file. Since we are deploying on Azure Web app on Windows
+# runtime, the pipeline is currently configured to use a Windows hosted image.
+pool:
+  vmImage: 'windows-2019'
+
+stages:
+  # A) Build and code validation (always run)
+  - stage: Build
+    dependsOn: []
+    jobs:
+      # A1) Checkout, install module and build code
+      - job: make_build      
+        steps:
+        - template: azure-templates/make-build-steps.yml
+          parameters:
+            make: build
+            
+      # A2) Analyze source code to find errors with lint
+      - job: lint
+        steps:
+        - template: azure-templates/make-build-steps.yml
+          parameters:
+            make: install_dependencies
+
+        - script: |
+            node -v
+            yarn lint
+          displayName: 'Lint'
+
+      # A3) Validate API definition
+      - job: lint_api
+        steps:
+        - script: |
+            npx oval validate -p openapi/index.yaml
+          displayName: 'Validate openAPI'
+
+      # A4) Check source code with danger (ignore when master)
+      - job: danger
+        condition: and(succeeded(),
+            and(
+              variables['DANGER_GITHUB_API_TOKEN'], 
+              ne(variables['Build.SourceBranch'], 'refs/heads/master')
+            )
+          )
+        steps:
+        - template: azure-templates/make-build-steps.yml
+          parameters:
+            make: install_dependencies
+
+        - bash: |
+            yarn danger ci
+          displayName: 'Danger CI'
+
+
+  # B) Run unit tests (always run)
+  - stage: Test
+    dependsOn: []
+    jobs:
+      - job: unit_tests
+        steps:
+        - task: UseNode@1
+          inputs:
+            version: $(NODE_VERSION)
+          displayName: 'Set up Node.js'
+
+        - template: azure-templates/make-build-steps.yml
+          parameters:
+            make: build-noemit
+
+          # Generate test certificates and run unit tests with example env variables
+        - script: |        
+            yarn generate:test-certs  
+            yarn test:coverage
+          displayName: 'Unit tests exec'
+
+        - bash: |
+            bash <(curl -s https://codecov.io/bash)
+          displayName: 'Code coverage'
+
+
+  # C) Deploy to STAGE environment if the following conditions apply:
+  #    - continuos deployment (automatic):
+  #       - $DO_DEPLOY == true and
+  #       - there is a push on 'master' branch 
+  #    - manual deployment:
+  #       - $DO_DEPLOY == true and
+  #       - $STAGING_ENABLE_MANUAL_DEPLOY == true
+  # The following alternative deployment modes are supported:
+  #   a) $STAGING_DEPLOY_MODE == 'deploy_standard': deploy to 'prodution' slot
+  #   b) $STAGING_DEPLOY_MODE == 'deploy_to_slots': deploy to 'staging' slot and
+  #      then swap 'staging' slot with 'production' slot
+  - stage: Deploy_staging
+    condition: 
+      and(
+        succeeded(),
+        and (
+          eq(variables['DO_DEPLOY'], true),
+          or(
+            and(
+              eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+              ne(variables['Build.Reason'], 'Manual')
+            ),
+            and(
+              eq(variables['STAGING_ENABLE_MANUAL_DEPLOY'], true),
+              eq(variables['Build.Reason'], 'Manual')
+            )
+          )
+        )
+      )
+    dependsOn:
+    - Build
+    - Test
+    jobs:
+      # Option 1: deploy directly to 'production' slot
+      - job: deploy_standard
+        condition: and(succeeded(), eq(variables['STAGING_DEPLOY_MODE'], 'deploy_standard'))
+        steps:
+        - template: azure-templates/deploy-steps.yml
+          parameters:
+            deployType: 'deployToProductionSlot'
+            azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
+            resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
+            appName: '$(STAGING_WEB_APP_NAME)'
+
+      # Option 2: deploy to staging slot and then swap with 'production' slot
+      - job: deploy_to_slots
+        condition: and(succeeded(), eq(variables['STAGING_DEPLOY_MODE'], 'deploy_to_slots'))
+        steps:
+        - template: azure-templates/deploy-steps.yml
+          parameters:
+            deployType: 'deployToStagingSlotAndSwap'
+            azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
+            resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
+            appName: '$(STAGING_WEB_APP_NAME)'
+
+
+  # D) Deploy to PRODUCTION environment if one of the following conditions apply:
+  #    - continuos deployment (automatic):
+  #       - $DO_DEPLOY == true and
+  #       - the 'latest' tag is pushed 
+  #    - manual deployment:
+  #       - $DO_DEPLOY == true and
+  #       - $PRODUCTION_ENABLE_MANUAL_DEPLOY == true
+  # The following alternative deployment modes are supported:
+  #   a) $PRODUCTION_DEPLOY_MODE == 'deploy_standard': deploy to 'prodution' slot
+  #   b) $PRODUCTION_DEPLOY_MODE == 'deploy_to_slots': deploy to 'staging' slot and
+  #      then swap 'staging' slot with 'production' slot
+  - stage: Deploy_production
+    condition: 
+      and(
+        succeeded(),
+        and (
+          eq(variables['DO_DEPLOY'], true),
+          or(
+            and(
+              eq(variables['Build.SourceBranch'], 'refs/tags/latest'),
+              ne(variables['Build.Reason'], 'Manual')
+            ),
+            and(
+              eq(variables['PRODUCTION_ENABLE_MANUAL_DEPLOY'], true),
+              eq(variables['Build.Reason'], 'Manual')
+            )
+          )
+        )
+      )
+    dependsOn:
+    - Build
+    - Test
+    jobs:
+      # Option 1: deploy directly to 'production' slot
+      - job: deploy_standard
+        condition: and(succeeded(), eq(variables['PRODUCTION_DEPLOY_MODE'], 'deploy_standard'))
+        steps:
+        - template: azure-templates/deploy-steps.yml
+          parameters:
+            deployType: 'deployToProductionSlot'
+            azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+            resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+            appName: '$(PRODUCTION_WEB_APP_NAME)'
+
+      # Option 2: deploy to staging slot and then swap with 'production' slot
+      - job: deploy_to_slots
+        condition: and(succeeded(), eq(variables['PRODUCTION_DEPLOY_MODE'], 'deploy_to_slots'))
+        steps:
+        - template: azure-templates/deploy-steps.yml
+          parameters:
+            deployType: 'deployToStagingSlotAndSwap'
+            azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+            resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+            appName: '$(PRODUCTION_WEB_APP_NAME)'

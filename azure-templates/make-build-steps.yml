@@ -1,0 +1,49 @@
+# Azure DevOps pipeline template used to checkout, install node dependencies and build the code. 
+#
+# Note. The dependencies include packages from GitHub package registry that can be downloaded by  
+# configuring the .npmrc file and setting the following pipeline variable with a personal access 
+# token (with scope read:packages):
+# GITHUB_TOKEN
+
+parameters:
+- name: 'make'
+  type: string
+  default: install_dependencies
+  values:
+  - install_dependencies
+  - build
+  - build-noemit 
+  - predeploy_build
+
+steps:
+- checkout: self
+  displayName: 'Checkout'
+      
+- task: Cache@2
+  inputs:
+    key: 'yarn | "$(Agent.OS)" | yarn.lock'
+    restoreKeys: |
+      yarn | "$(Agent.OS)"
+      yarn
+    path: $(YARN_CACHE_FOLDER)
+  displayName: Cache yarn packages
+  
+- bash: |
+    ./scripts/init-npm.sh
+  displayName: 'Init .npmrc file'
+
+- script: |
+    yarn install --frozen-lockfile
+  displayName: 'Install yarn dependencies'
+
+- ${{ if eq(parameters.make, 'build') }}:
+  - bash: yarn build
+    displayName: 'Build code'
+
+- ${{ if eq(parameters.make, 'build-noemit') }}:
+  - bash: yarn build-noemit
+    displayName: 'Build-noemit code'
+
+- ${{ if eq(parameters.make, 'predeploy_build') }}:
+  - bash: yarn predeploy
+    displayName: 'Predeploy build code'
