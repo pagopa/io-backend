@@ -126,34 +126,6 @@ export default class MessagesService {
       );
     });
 
-  public readonly getServicesByRecipient = (
-    user: User
-  ): Promise<
-    // tslint:disable-next-line:max-union-size
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > =>
-    withCatchAsInternalError(async () => {
-      const client = this.apiClient.getClient();
-
-      const validated = await client.getServicesByRecipient({
-        recipient: user.fiscal_code
-      });
-
-      return withValidatedOrInternalError(validated, response =>
-        response.status === 200
-          ? withValidatedOrInternalError(
-              PaginatedServiceTupleCollection.decode(response.value),
-              ResponseSuccessJson
-            )
-          : response.status === 429
-          ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
-      );
-    });
-
   public readonly getVisibleServices = (): Promise<
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests

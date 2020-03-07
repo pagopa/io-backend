@@ -16,7 +16,6 @@ import { PaginatedServiceTupleCollection } from "../../generated/backend/Paginat
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import MessagesService from "../services/messagesService";
-import { withUserFromRequest } from "../types/user";
 
 export default class ServicesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -35,20 +34,6 @@ export default class ServicesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePublic>
   > => this.messagesService.getService(req.params.id);
-
-  public readonly getServicesByRecipient = (
-    req: express.Request
-  ): Promise<
-    // tslint:disable-next-line:max-union-size
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > =>
-    withUserFromRequest(req, user =>
-      this.messagesService.getServicesByRecipient(user)
-    );
 
   public readonly getVisibleServices = (
     _: express.Request

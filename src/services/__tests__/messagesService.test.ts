@@ -68,16 +68,6 @@ const validApiMessageResponse = {
     status: "PROCESSED"
   }
 };
-const validApiServicesResponse = {
-  status: 200,
-  value: {
-    items: [
-      { service_id: "5a563817fcc896087002ea46c49a", version: 1 },
-      { service_id: "5a563817fcc896087002ea46c49b", version: 1 }
-    ],
-    page_size: 2
-  }
-};
 const validApiServiceResponse = {
   status: 200,
   value: {
@@ -102,9 +92,6 @@ const invalidApiMessagesResponse = {
 const invalidApiMessageResponse = {
   status: 500
 };
-const invalidApiServicesResponse = {
-  status: 500
-};
 const invalidApiServiceResponse = {
   status: 500
 };
@@ -117,10 +104,6 @@ const proxyMessagesResponse = {
   page_size: validApiMessagesResponse.value.page_size
 };
 const proxyMessageResponse = validApiMessageResponse.value.message;
-const proxyServicesResponse = {
-  items: validApiServicesResponse.value.items,
-  page_size: validApiServicesResponse.value.page_size
-};
 const proxyServiceResponse = {
   department_name: aValidDepartmentName,
   organization_fiscal_code: aValidOrganizationFiscalCode,
@@ -144,7 +127,6 @@ const mockedUser: User = {
 };
 
 const mockGetMessages = jest.fn();
-const mockGetServicesByRecipient = jest.fn();
 const mockGetServices = jest.fn();
 const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
@@ -153,8 +135,7 @@ const mockGetClient = jest.fn().mockImplementation(() => {
     getMessage: mockGetMessage,
     getMessages: mockGetMessages,
     getService: mockGetService,
-    getServices: mockGetServices,
-    getServicesByRecipient: mockGetServicesByRecipient
+    getServices: mockGetServices
   };
 });
 
@@ -242,68 +223,6 @@ describe("MessageService#getMessagesByUser", () => {
       fiscalCode: mockedUser.fiscal_code
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-});
-
-describe("MessageService#getServicesByRecpient", () => {
-  it("returns a list of services from the API", async () => {
-    mockGetServicesByRecipient.mockImplementation(() =>
-      t.success(validApiServicesResponse)
-    );
-
-    const service = new MessageService(api);
-
-    const res = await service.getServicesByRecipient(mockedUser);
-
-    expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
-      recipient: mockedUser.fiscal_code
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: proxyServicesResponse
-    });
-  });
-
-  it("returns an error if the getServicesByRecpient API returns an error", () => {
-    mockGetServicesByRecipient.mockImplementation(() => t.success(problemJson));
-
-    const service = new MessageService(api);
-
-    expect.assertions(2);
-    return service.getServicesByRecipient(mockedUser).then(e => {
-      expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
-        recipient: aValidFiscalCode
-      });
-      expect(e.kind).toEqual("IResponseErrorInternal");
-    });
-  });
-
-  it("returns an 429 HTTP error from getServicesByRecipient upstream API", async () => {
-    mockGetServicesByRecipient.mockImplementation(() =>
-      t.success(tooManyReqApiMessagesResponse)
-    );
-
-    const service = new MessageService(api);
-
-    const res = await service.getServicesByRecipient(mockedUser);
-
-    expect(res.kind).toEqual("IResponseErrorTooManyRequests");
-  });
-
-  it("returns unknown response if the response from the getServicesByRecpient API returns something wrong", async () => {
-    mockGetServicesByRecipient.mockImplementation(() =>
-      t.success(invalidApiServicesResponse)
-    );
-
-    const service = new MessageService(api);
-
-    expect.assertions(2);
-    return service.getServicesByRecipient(mockedUser).then(e => {
-      expect(mockGetServicesByRecipient).toHaveBeenCalledWith({
-        recipient: aValidFiscalCode
-      });
-      expect(e.kind).toEqual("IResponseErrorInternal");
-    });
   });
 });
 
