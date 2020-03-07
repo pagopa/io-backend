@@ -17,7 +17,6 @@ import { ServicePublic } from "../../../generated/backend/ServicePublic";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { NotificationChannelEnum } from "../../../generated/io-api/NotificationChannel";
 import mockReq from "../../__mocks__/request";
-import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -41,11 +40,6 @@ const proxyService: ServicePublic = {
   version: 42 as NonNegativeInteger
 };
 
-const proxyServicesResponse = {
-  items: ["5a563817fcc896087002ea46c49a", "5a563817fcc896087002ea46c49b"],
-  page_size: 2
-};
-
 // mock for a valid User
 const mockedUser: User = {
   created_at: aTimestamp,
@@ -59,72 +53,13 @@ const mockedUser: User = {
   wallet_token: "123hexToken" as WalletToken
 };
 
-const badRequestErrorResponse = {
-  detail: expect.any(String),
-  status: 400,
-  title: expect.any(String),
-  type: undefined
-};
-
 const mockGetService = jest.fn();
-const mockGetServicesByRecipient = jest.fn();
 jest.mock("../../services/messagesService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getService: mockGetService,
-      getServicesByRecipient: mockGetServicesByRecipient
+      getService: mockGetService
     }))
   };
-});
-
-describe("ServicesController#getServicesByRecipient", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("calls the getServicesByRecipient on the ServicesController with valid values", async () => {
-    const req = mockReq();
-
-    mockGetServicesByRecipient.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyServicesResponse))
-    );
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new ServicesController(messageService);
-
-    const response = await controller.getServicesByRecipient(req);
-
-    expect(mockGetServicesByRecipient).toHaveBeenCalledWith(mockedUser);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyServicesResponse
-    });
-  });
-
-  it("calls the getServicesByRecipient on the ServicesController with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetServicesByRecipient.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyServicesResponse))
-    );
-
-    req.user = "";
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new ServicesController(messageService);
-
-    const response = await controller.getServicesByRecipient(req);
-    response.apply(res);
-
-    expect(mockGetServicesByRecipient).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
 });
 
 describe("serviceController#getService", () => {

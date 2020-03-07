@@ -401,15 +401,6 @@ function registerAPIRoutes(
     toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
-  app.get(
-    `${basePath}/profile/sender-services`,
-    bearerTokenAuth,
-    toExpressHandler(
-      servicesController.getServicesByRecipient,
-      servicesController
-    )
-  );
-
   app.put(
     `${basePath}/installations/:id`,
     bearerTokenAuth,
