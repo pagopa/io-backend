@@ -1,0 +1,106 @@
+# Azure DevOps template used to perform all the deploy steps including build. 
+#
+# Note. Deployment slots let you deploy different versions of your Web app
+# to different URLs. You can test a certain version and then swap content
+# and configuration between slots to have minimal impact to production and also 
+# make rollback easily.
+
+parameters:
+  - name: 'deployType'
+    type: string
+    default: deployToProductionSlot
+    values:
+      - deployToProductionSlot
+      - deployToStagingSlotAndSwap
+      - deployToStagingSlot  
+  
+  - name: 'azureSubscription'
+    type: string
+    default: ''
+  
+  - name: 'resourceGroupName'
+    type: string
+    default: ''
+  
+  - name: 'appName'
+    type: string
+    default: ''
+    
+steps:
+  - template: ./make-build-steps.yml
+    parameters:
+      make: predeploy_build
+  
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      Contents: |
+        **/*
+        !.git/**/*
+        !.vscode/**/*
+        ![.]*
+        !scripts/**/*
+        !**/*.js.map
+        !**/*.ts
+        !azure-templates/**/*
+        !azure-pipelines.yml
+        !*.md
+        !docker-compose.yml
+        !Dangerfile.ts
+        !jest.config.js
+        !local.settings.json
+        !test
+        !tslint.json
+        !tsconfig.json
+    displayName: 'Copy deploy files'
+  
+  # Option 1: standard deployment without slots (i.e. deploy directly to main slot)
+  - ${{ if eq(parameters.deployType, 'deployToProductionSlot') }}:
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        resourceGroupName: '${{ parameters.resourceGroupName }}'
+        appType: 'webApp'
+        appName: '${{ parameters.appName }}'
+        package: '$(Build.ArtifactStagingDirectory)/'
+        deploymentMethod: 'auto'
+      displayName: Direct deploy
+  
+  # Option 2: deployment to 'staging' slot only (not used)
+  - ${{ if eq(parameters.deployType, 'deployToStagingSlot') }}:
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        resourceGroupName: '${{ parameters.resourceGroupName }}'
+        appType: 'webApp'
+        appName: '${{ parameters.appName }}'
+        package: '$(Build.ArtifactStagingDirectory)/'
+        deploymentMethod: 'auto'
+        deployToSlotOrASE: true
+        slotName: 'staging'
+      displayName: Deploy to staging slot only
+  
+  # Option 3: deployment with two slots ('staging' and 'production')
+  - ${{ if eq(parameters.deployType, 'deployToStagingSlotAndSwap') }}:
+    - task: AzureWebApp@1  # First step: deploy to 'staging' slot 
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        resourceGroupName: '${{ parameters.resourceGroupName }}'
+        appType: 'webApp'
+        appName: '${{ parameters.appName }}'
+        package: '$(Build.ArtifactStagingDirectory)/'
+        deploymentMethod: 'auto'
+        deployToSlotOrASE: true
+        slotName: 'staging'
+      displayName: Deploy to staging slot
+      
+    - task: AzureAppServiceManage@0   # Second step: swap 'staging' with 'production' slot
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        resourceGroupName: '${{ parameters.resourceGroupName }}'
+        webAppName: '${{ parameters.appName }}'
+        sourceSlot: staging
+        swapWithProduction: true
+      displayName: Swap with production slot
+  
