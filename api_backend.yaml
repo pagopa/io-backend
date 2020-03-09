@@ -54,40 +54,6 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
       parameters: []
-  "/profile/sender-services":
-    x-swagger-router-controller: ServicesController
-    get:
-      operationId: getServicesByRecipient
-      summary: Get Services by recipient
-      description:  |-
-        Returns the service IDs of all the services that have contacted the recipient,
-        identified by the provided fiscal code, at least once.
-      responses:
-        "200":
-          description: Found.
-          schema:
-            $ref: "#/definitions/PaginatedServiceTupleCollection"
-          examples:
-            application/json:
-              items:
-                - service_id: 2b3e728c1a5d1efa035c
-              page_size: 1
-        "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
-          description: Bearer token null or expired.
-        "429":
-          description: Too many requests
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "500":
-          description: There was an error in retrieving the services.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-      parameters:
-        - $ref: "#/parameters/PaginationRequest"
   "/services":
     x-swagger-router-controller: ServicesController
     get:
