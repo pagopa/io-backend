@@ -6,44 +6,57 @@
 # GITHUB_TOKEN
 
 parameters:
-- name: 'make'
-  type: string
-  default: install_dependencies
-  values:
-  - install_dependencies
-  - build
-  - build-noemit 
-  - predeploy_build
-
-steps:
-- checkout: self
-  displayName: 'Checkout'
-      
-- task: Cache@2
-  inputs:
-    key: 'yarn | "$(Agent.OS)" | yarn.lock'
-    restoreKeys: |
-      yarn | "$(Agent.OS)"
-      yarn
-    path: $(YARN_CACHE_FOLDER)
-  displayName: Cache yarn packages
+  - name: 'make'
+    type: string
+    default: install_dependencies
+    values:
+      - install_dependencies
+      - build
+      - build-noemit 
+      - predeploy_build
   
-- bash: |
-    ./scripts/init-npm.sh
-  displayName: 'Init .npmrc file'
-
-- script: |
-    yarn install --frozen-lockfile
-  displayName: 'Install yarn dependencies'
-
-- ${{ if eq(parameters.make, 'build') }}:
-  - bash: yarn build
-    displayName: 'Build code'
-
-- ${{ if eq(parameters.make, 'build-noemit') }}:
-  - bash: yarn build-noemit
-    displayName: 'Build-noemit code'
-
-- ${{ if eq(parameters.make, 'predeploy_build') }}:
-  - bash: yarn predeploy
-    displayName: 'Predeploy build code'
+steps:
+  - checkout: self
+    displayName: 'Checkout'
+        
+  - task: Cache@2
+    inputs:
+      key: 'yarn | "$(Agent.OS)" | yarn.lock'
+      restoreKeys: |
+        yarn | "$(Agent.OS)"
+        yarn
+      path: $(YARN_CACHE_FOLDER)
+    displayName: Cache yarn packages
+  
+  - task: UseNode@1
+    inputs:
+      version: $(NODE_VERSION)
+    displayName: 'Set up Node.js'
+    
+  - bash: |
+      ./scripts/init-npm.sh
+    env:
+      GITHUB_TOKEN: $(GITHUB_TOKEN)    
+    displayName: 'Init .npmrc file'
+    
+  - script: |
+      yarn install --frozen-lockfile
+    displayName: 'Install yarn dependencies'
+  
+  - ${{ if eq(parameters.make, 'build') }}:
+    - bash: |
+        yarn generate:proxy-models
+        yarn build
+      displayName: 'Build code'
+  
+  - ${{ if eq(parameters.make, 'build-noemit') }}:
+    - bash: |
+        yarn generate:proxy-models
+        yarn build-noemit
+      displayName: 'Build-noemit code'
+  
+  - ${{ if eq(parameters.make, 'predeploy_build') }}:
+    - bash: |
+        yarn predeploy
+      displayName: 'Predeploy build code'
+  

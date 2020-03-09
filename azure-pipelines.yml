@@ -19,12 +19,12 @@
 # - STAGING_DEPLOY_MODE: 'deploy_standard' || 'deploy_to_slots'
 # - STAGING_AZURE_SUBSCRIPTION
 # - STAGING_RESOURCE_GROUP_NAME
-# - STAGING_WEB_APP_NAME
+# - STAGING_APP_NAME
 # 
 # - PRODUCTION_DEPLOY_MODE: 'deploy_standard' || 'deploy_to_slots'
 # - PRODUCTION_AZURE_SUBSCRIPTION
 # - PRODUCTION_RESOURCE_GROUP_NAME
-# - PRODUCTION_WEB_APP_NAME
+# - PRODUCTION_APP_NAME
 #
 
 variables:
@@ -47,40 +47,52 @@ trigger:
 # This pipeline has been implemented to be run on hosted agent pools based both
 # on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
 # in the package.json file. Since we are deploying on Azure Web app on Windows
-# runtime, the pipeline is currently configured to use a Windows hosted image.
+# runtime, the pipeline is currently configured to use a Windows hosted image for
+# verifying the build and deploying, and Linux OS for all other jobs for faster 
+# execution.
 pool:
-  vmImage: 'windows-2019'
+  vmImage: 'ubuntu-latest'
 
 stages:
   # A) Build and code validation (always run)
   - stage: Build
     dependsOn: []
     jobs:
-      # A1) Checkout, install module and build code
-      - job: make_build      
+      # A1) Checkout, install module and build code (use Windows OS)
+      - job: make_build
+        pool:
+          vmImage: 'windows-2019'
         steps:
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: build
+          - template: azure-templates/make-build-steps.yml
+            parameters:
+              make: build
             
       # A2) Analyze source code to find errors with lint
       - job: lint
         steps:
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: install_dependencies
+          - template: azure-templates/make-build-steps.yml
+            parameters:
+              make: install_dependencies
 
-        - script: |
-            node -v
-            yarn lint
-          displayName: 'Lint'
+          - script: |
+              yarn lint
+            displayName: 'Lint'
 
-      # A3) Validate API definition
+      # A3) Validate API definitions
       - job: lint_api
         steps:
-        - script: |
-            npx oval validate -p openapi/index.yaml
-          displayName: 'Validate openAPI'
+          - task: UseNode@1
+            inputs:
+              version: $(NODE_VERSION)
+            displayName: 'Set up Node.js'
+
+          - bash: |
+              yarn add oval --dev
+              npx oval validate -p api_notifications.yaml
+              npx oval validate -p api_pagopa.yaml
+              npx oval validate -p api_backend.yaml
+              npx oval validate -p api_public.yaml
+            displayName: 'Validate openAPI'
 
       # A4) Check source code with danger (ignore when master)
       - job: danger
@@ -91,42 +103,39 @@ stages:
             )
           )
         steps:
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: install_dependencies
+          - template: azure-templates/make-build-steps.yml
+            parameters:
+              make: install_dependencies
 
-        - bash: |
-            yarn danger ci
-          displayName: 'Danger CI'
+          - bash: |
+              yarn danger ci
+            displayName: 'Danger CI'
 
 
-  # B) Run unit tests (always run)
+  # B) Run unit tests (use Linux OS, also required to generate certificates)
   - stage: Test
     dependsOn: []
     jobs:
       - job: unit_tests
         steps:
-        - task: UseNode@1
-          inputs:
-            version: $(NODE_VERSION)
-          displayName: 'Set up Node.js'
+          - template: azure-templates/make-build-steps.yml
+            parameters:
+              make: build-noemit
 
-        - template: azure-templates/make-build-steps.yml
-          parameters:
-            make: build-noemit
+          - script: |
+              yarn generate:test-certs
+            displayName: 'Generate test certificates'
 
-          # Generate test certificates and run unit tests with example env variables
-        - script: |        
-            yarn generate:test-certs  
-            yarn test:coverage
-          displayName: 'Unit tests exec'
+          - script: |
+              yarn test:coverage
+            displayName: 'Unit tests exec'
 
-        - bash: |
-            bash <(curl -s https://codecov.io/bash)
-          displayName: 'Code coverage'
+          - bash: |
+              bash <(curl -s https://codecov.io/bash)
+            displayName: 'Code coverage'
 
 
-  # C) Deploy to STAGE environment if the following conditions apply:
+  # C) Deploy to STAGE environment if the following conditions apply (use Windows OS):
   #    - continuos deployment (automatic):
   #       - $DO_DEPLOY == true and
   #       - there is a push on 'master' branch 
@@ -138,6 +147,8 @@ stages:
   #   b) $STAGING_DEPLOY_MODE == 'deploy_to_slots': deploy to 'staging' slot and
   #      then swap 'staging' slot with 'production' slot
   - stage: Deploy_staging
+    pool:
+      vmImage: 'windows-2019'
     condition: 
       and(
         succeeded(),
@@ -156,33 +167,33 @@ stages:
         )
       )
     dependsOn:
-    - Build
-    - Test
+      - Build
+      - Test
     jobs:
       # Option 1: deploy directly to 'production' slot
       - job: deploy_standard
         condition: and(succeeded(), eq(variables['STAGING_DEPLOY_MODE'], 'deploy_standard'))
         steps:
-        - template: azure-templates/deploy-steps.yml
-          parameters:
-            deployType: 'deployToProductionSlot'
-            azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
-            resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
-            appName: '$(STAGING_WEB_APP_NAME)'
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: 'deployToProductionSlot'
+              azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
+              appName: '$(STAGING_APP_NAME)'
 
       # Option 2: deploy to staging slot and then swap with 'production' slot
       - job: deploy_to_slots
         condition: and(succeeded(), eq(variables['STAGING_DEPLOY_MODE'], 'deploy_to_slots'))
         steps:
-        - template: azure-templates/deploy-steps.yml
-          parameters:
-            deployType: 'deployToStagingSlotAndSwap'
-            azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
-            resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
-            appName: '$(STAGING_WEB_APP_NAME)'
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: 'deployToStagingSlotAndSwap'
+              azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
+              appName: '$(STAGING_APP_NAME)'
 
 
-  # D) Deploy to PRODUCTION environment if one of the following conditions apply:
+  # D) Deploy to PRODUCTION environment if the following conditions apply (use Windows OS):
   #    - continuos deployment (automatic):
   #       - $DO_DEPLOY == true and
   #       - the 'latest' tag is pushed 
@@ -194,6 +205,8 @@ stages:
   #   b) $PRODUCTION_DEPLOY_MODE == 'deploy_to_slots': deploy to 'staging' slot and
   #      then swap 'staging' slot with 'production' slot
   - stage: Deploy_production
+    pool:
+      vmImage: 'windows-2019'
     condition: 
       and(
         succeeded(),
@@ -212,27 +225,27 @@ stages:
         )
       )
     dependsOn:
-    - Build
-    - Test
+      - Build
+      - Test
     jobs:
       # Option 1: deploy directly to 'production' slot
       - job: deploy_standard
         condition: and(succeeded(), eq(variables['PRODUCTION_DEPLOY_MODE'], 'deploy_standard'))
         steps:
-        - template: azure-templates/deploy-steps.yml
-          parameters:
-            deployType: 'deployToProductionSlot'
-            azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-            resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
-            appName: '$(PRODUCTION_WEB_APP_NAME)'
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: 'deployToProductionSlot'
+              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+              appName: '$(PRODUCTION_APP_NAME)'
 
       # Option 2: deploy to staging slot and then swap with 'production' slot
       - job: deploy_to_slots
         condition: and(succeeded(), eq(variables['PRODUCTION_DEPLOY_MODE'], 'deploy_to_slots'))
         steps:
-        - template: azure-templates/deploy-steps.yml
-          parameters:
-            deployType: 'deployToStagingSlotAndSwap'
-            azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-            resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
-            appName: '$(PRODUCTION_WEB_APP_NAME)'
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: 'deployToStagingSlotAndSwap'
+              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+              appName: '$(PRODUCTION_APP_NAME)'

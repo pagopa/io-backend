@@ -15,8 +15,8 @@
     "node": "10.14.2"
   },
   "scripts": {
-    "build": "generate:proxy-models && tsc",
-    "build-noemit": "generate:proxy-models && tsc --noEmit",
+    "build": "tsc",
+    "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon src/server.js",
     "lint": "tslint -p . -c tslint.json -t verbose",
     "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
@@ -32,7 +32,9 @@
     "generate:api:io": "rimraf generated/io-api && shx mkdir -p generated/io-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app/v1.0.0/openapi/index.yaml --no-strict --out-dir generated/io-api --request-types --response-decoders",
     "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && shx mkdir -p generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "dist:modules": "modclean -r -n default:safe && npm prune --production",
+    "predeploy": "npm-run-all generate:proxy-models build dist:modules"
   },
   "repository": {
     "type": "git",
@@ -110,6 +112,7 @@
     "jest": "^23.6.0",
     "lolex": "4.2.0",
     "mock-redis-client": "^0.91.13",
+    "modclean": "^3.0.0-beta.1",
     "nodemon": "^1.19.2",
     "npm-run-all": "^4.1.3",
     "prettier": "^1.14.3",
