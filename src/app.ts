@@ -241,7 +241,7 @@ export function newApp(
     })
     .map(_ => {
       const spidStrategyOption = getSpidStrategyOption(_);
-      // If no one idp is configured the program execution will be stopped
+      // Process ends in case no IDP is configured
       if (
         !spidStrategyOption?.idp ||
         new StrMap(spidStrategyOption?.idp).reduce(true, () => false)
