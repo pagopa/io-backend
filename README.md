@@ -142,6 +142,8 @@ Those are all Environment variables needed by the application:
 | SAML_CALLBACK_URL                      | The absolute URL of the assertion consumer service endpoint                       | string |
 | SAML_ISSUER                            | The issuer id for this Service Provider                                           | string |
 | SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
+| SAML_KEY                               | Private Key used by SAML protocol                                                 | string |
+| SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
 | PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
 | AZURE_NH_HUB_NAME                      | The hub name configured in the Azure Notification HUB                             | string |
@@ -153,6 +155,7 @@ Those are all Environment variables needed by the application:
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
+| STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download IDP metadata from                                                 | string |
 | IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int |

@@ -56,8 +56,9 @@ import {
 } from "./utils/package";
 
 import { withSpid } from "@pagopa/io-spid-commons";
-import { toError } from "fp-ts/lib/Either";
-import { tryCatch } from "fp-ts/lib/TaskEither";
+import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
+import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
@@ -170,7 +171,7 @@ export function newApp(
   // Setup routes
   //
 
-  return tryCatch(async () => {
+  return new Task(async () => {
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
 
@@ -221,7 +222,7 @@ export function newApp(
       PROFILE_SERVICE
     );
     return { app, acsController };
-  }, toError)
+  })
     .chain(_ =>
       withSpid(
         appConfig,
@@ -238,9 +239,16 @@ export function newApp(
       _.app.on("server:stop", () => clearInterval(idpMetadataRefreshTimer));
       return _.app;
     })
-    .getOrElseL(err => {
-      log.error("Fatal error during Express initialization: %s", err);
-      process.exit(1);
+    .map(_ => {
+      const spidStrategyOption = getSpidStrategyOption(_);
+      // Process ends in case no IDP is configured
+      if (isEmpty(new StrMap(spidStrategyOption?.idp || {}))) {
+        log.error(
+          "Fatal error during application start. Cannot get IDPs metadata."
+        );
+        process.exit(1);
+      }
+      return _;
     })
     .run();
 }
