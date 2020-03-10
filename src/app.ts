@@ -56,8 +56,9 @@ import {
 } from "./utils/package";
 
 import { withSpid } from "@pagopa/io-spid-commons";
-import { toError } from "fp-ts/lib/Either";
-import { tryCatch } from "fp-ts/lib/TaskEither";
+import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import { StrMap } from "fp-ts/lib/StrMap";
+import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
@@ -170,7 +171,7 @@ export function newApp(
   // Setup routes
   //
 
-  return tryCatch(async () => {
+  return new Task(async () => {
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
 
@@ -221,20 +222,16 @@ export function newApp(
       PROFILE_SERVICE
     );
     return { app, acsController };
-  }, toError)
+  })
     .chain(_ =>
-      tryCatch(
-        async () =>
-          withSpid(
-            appConfig,
-            samlConfig,
-            serviceProviderConfig,
-            REDIS_CLIENT,
-            _.app,
-            _.acsController.acs.bind(_.acsController),
-            _.acsController.slo.bind(_.acsController)
-          ).run(),
-        toError
+      withSpid(
+        appConfig,
+        samlConfig,
+        serviceProviderConfig,
+        REDIS_CLIENT,
+        _.app,
+        _.acsController.acs.bind(_.acsController),
+        _.acsController.slo.bind(_.acsController)
       )
     )
     .map(_ => {
@@ -242,9 +239,19 @@ export function newApp(
       _.app.on("server:stop", () => clearInterval(idpMetadataRefreshTimer));
       return _.app;
     })
-    .getOrElseL(err => {
-      log.error("Fatal error during Express initialization: %s", err);
-      process.exit(1);
+    .map(_ => {
+      const spidStrategyOption = getSpidStrategyOption(_);
+      // If no one idp is configured the program execution will be stopped
+      if (
+        !spidStrategyOption?.idp ||
+        new StrMap(spidStrategyOption?.idp).reduce(true, () => false)
+      ) {
+        log.error(
+          "Fatal error during Express configuation. No one IDP available."
+        );
+        process.exit(1);
+      }
+      return _;
     })
     .run();
 }
