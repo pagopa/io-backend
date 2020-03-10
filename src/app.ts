@@ -57,7 +57,7 @@ import {
 
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
-import { StrMap } from "fp-ts/lib/StrMap";
+import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
@@ -242,7 +242,7 @@ export function newApp(
     .map(_ => {
       const spidStrategyOption = getSpidStrategyOption(_);
       // Process ends in case no IDP is configured
-      if (new StrMap(spidStrategyOption?.idp || {}).reduce(true, () => false)) {
+      if (isEmpty(new StrMap(spidStrategyOption?.idp || {}))) {
         log.error(
           "Fatal error during application start. Cannot get IDPs metadata."
         );
