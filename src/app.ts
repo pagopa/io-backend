@@ -247,7 +247,7 @@ export function newApp(
         new StrMap(spidStrategyOption?.idp).reduce(true, () => false)
       ) {
         log.error(
-          "Fatal error during Express configuation. No one IDP available."
+          "Fatal error during application start. Cannot get IDPs metadata."
         );
         process.exit(1);
       }
