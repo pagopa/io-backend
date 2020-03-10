@@ -9,3 +9,6 @@ export const SuccessResponse = t.interface({
 });
 
 export type SuccessResponse = t.TypeOf<typeof SuccessResponse>;
+
+export const STRINGS_RECORD = t.record(t.string, t.string);
+export type STRINGS_RECORD = t.TypeOf<typeof STRINGS_RECORD>;

@@ -2,13 +2,16 @@
  * Defines services and register them to the Service Container.
  */
 import * as dotenv from "dotenv";
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, parseJSON, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import {
+  errorsToReadableMessages,
+  ReadableReporter
+} from "italia-ts-commons/lib/reporters";
 import { CIDR } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
@@ -28,6 +31,7 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import RedisSessionStorage from "./services/redisSessionStorage";
+import { STRINGS_RECORD } from "./types/commons";
 import {
   createClusterRedisClient,
   createSimpleRedisClient
@@ -57,18 +61,19 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
 
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () => {
-  return readFile(
-    process.env.SAML_KEY_PATH || "./certs/key.pem",
-    "SAML private key"
+  return fromNullable(process.env.SAML_KEY).getOrElse(
+    readFile(process.env.SAML_KEY_PATH || "./certs/key.pem", "SAML private key")
   );
 };
 export const SAML_KEY = samlKey();
 
 // Public certificate used in SAML authentication to a SPID IDP.
 const samlCert = () => {
-  return readFile(
-    process.env.SAML_CERT_PATH || "./certs/cert.pem",
-    "SAML certificate"
+  return fromNullable(process.env.SAML_CERT).getOrElse(
+    readFile(
+      process.env.SAML_CERT_PATH || "./certs/cert.pem",
+      "SAML certificate"
+    )
   );
 };
 
@@ -104,6 +109,20 @@ const SPID_TESTENV_URL =
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 
+export const STARTUP_IDPS_METADATA:
+  | Record<string, string>
+  | undefined = fromNullable(process.env.STARTUP_IDPS_METADATA)
+  .map(_ =>
+    parseJSON(_, toError)
+      .chain<Record<string, string> | undefined>(_1 =>
+        STRINGS_RECORD.decode(_1).mapLeft(
+          err => new Error(errorsToReadableMessages(err).join(" / "))
+        )
+      )
+      .getOrElse(undefined)
+  )
+  .getOrElse(undefined);
+
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
 
@@ -116,7 +135,8 @@ export const appConfig: IApplicationConfig = {
   clientLoginRedirectionUrl: CLIENT_REDIRECTION_URL,
   loginPath: "/login",
   metadataPath: "/metadata",
-  sloPath: "/slo"
+  sloPath: "/slo",
+  startupIdpsMetadata: STARTUP_IDPS_METADATA
 };
 
 const maybeSpidValidatorUrlOption = fromNullable(

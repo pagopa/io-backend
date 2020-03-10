@@ -223,14 +223,18 @@ export function newApp(
     return { app, acsController };
   }, toError)
     .chain(_ =>
-      withSpid(
-        appConfig,
-        samlConfig,
-        serviceProviderConfig,
-        REDIS_CLIENT,
-        _.app,
-        _.acsController.acs.bind(_.acsController),
-        _.acsController.slo.bind(_.acsController)
+      tryCatch(
+        async () =>
+          withSpid(
+            appConfig,
+            samlConfig,
+            serviceProviderConfig,
+            REDIS_CLIENT,
+            _.app,
+            _.acsController.acs.bind(_.acsController),
+            _.acsController.slo.bind(_.acsController)
+          ).run(),
+        toError
       )
     )
     .map(_ => {

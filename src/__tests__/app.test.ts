@@ -1,8 +1,5 @@
-import * as spid from "@pagopa/io-spid-commons";
 import { Express } from "express";
 import { isRight } from "fp-ts/lib/Either";
-import { Task } from "fp-ts/lib/Task";
-import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { CIDR } from "italia-ts-commons/lib/strings";
@@ -120,28 +117,5 @@ describe("Success app start", () => {
         .expect(200);
       expect(isRight(ServerInfo.decode(response.body)));
     });
-  });
-});
-
-describe("Failure app start", () => {
-  it("Close app if download IDP metadata fails on startup", async () => {
-    // Override return value of generateSpidStrategy with a rejected promise.
-    jest.spyOn(spid, "withSpid").mockImplementation(() => {
-      return TE.left(
-        new Task(async () => new Error("Error download metadata"))
-      );
-    });
-    const mockExit = jest
-      .spyOn(process, "exit")
-      .mockImplementation(() => true as never);
-    await appModule.newApp(
-      NodeEnvironmentEnum.PRODUCTION,
-      aValidCIDR,
-      aValidCIDR,
-      "",
-      "/api/v1",
-      "/pagopa/api/v1"
-    );
-    expect(mockExit).toBeCalledWith(1);
   });
 });

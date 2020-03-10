@@ -142,6 +142,8 @@ Those are all Environment variables needed by the application:
 | SAML_CALLBACK_URL                      | The absolute URL of the assertion consumer service endpoint                       | string |
 | SAML_ISSUER                            | The issuer id for this Service Provider                                           | string |
 | SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
+| SAML_KEY                               | Private Key used by SAML protocol                                                 | string |
+| SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
 | PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
 | AZURE_NH_HUB_NAME                      | The hub name configured in the Azure Notification HUB                             | string |
