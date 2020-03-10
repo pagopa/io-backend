@@ -242,10 +242,7 @@ export function newApp(
     .map(_ => {
       const spidStrategyOption = getSpidStrategyOption(_);
       // If no one idp is configured the program execution will be stopped
-      if (
-        !spidStrategyOption?.idp ||
-        new StrMap(spidStrategyOption?.idp).reduce(true, () => false)
-      ) {
+      if (new StrMap(spidStrategyOption?.idp || {}).reduce(true, () => false)) {
         log.error(
           "Fatal error during Express configuation. No one IDP available."
         );
