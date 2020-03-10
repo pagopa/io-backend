@@ -241,10 +241,10 @@ export function newApp(
     })
     .map(_ => {
       const spidStrategyOption = getSpidStrategyOption(_);
-      // If no one idp is configured the program execution will be stopped
+      // Process ends in case no IDP is configured
       if (new StrMap(spidStrategyOption?.idp || {}).reduce(true, () => false)) {
         log.error(
-          "Fatal error during Express configuation. No one IDP available."
+          "Fatal error during application start. Cannot get IDPs metadata."
         );
         process.exit(1);
       }
