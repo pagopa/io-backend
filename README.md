@@ -36,6 +36,7 @@ This repository contains the code of the backend used by the [web](https://githu
     - [Generate SAML (SPID) certs](#generate-saml-spid-certs-development)
     - [SAML (SPID) certs with ENV vars](#saml-spid-certs-with-env-vars)
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
+    - [SPID Validator](#spid-validator)
 - [Troubleshooting](#troubleshooting)
 
 ---
