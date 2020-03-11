@@ -33,7 +33,9 @@ This repository contains the code of the backend used by the [web](https://githu
 - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies)
     - [Starting steps](#starting-steps)
-    - [Generate the API client](#generate-the-api-client)
+    - [Generate SAML (SPID) certs](#generate-saml-spid-certs-development)
+    - [SAML (SPID) certs with ENV vars](#saml-spid-certs-with-env-vars)
+    - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
 - [Troubleshooting](#troubleshooting)
 
 ---
