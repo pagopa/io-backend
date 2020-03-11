@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/teamdigitale/italia-backend.svg?style=svg)](https://circleci.com/gh/teamdigitale/italia-backend)
+[![Azure DevOps](https://dev.azure.com/pagopa-io/io-backend/_apis/build/status/pagopa.io-backend)](https://dev.azure.com/pagopa-io/io-backend/_build?definitionId=8&_a=summary)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/italia-backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=teamdigitale/italia-backend&amp;utm_campaign=Badge_Grade)
 
@@ -33,7 +33,10 @@ This repository contains the code of the backend used by the [web](https://githu
 - [How to contribute](#how-to-contribute)
     - [Dependencies](#dependencies)
     - [Starting steps](#starting-steps)
-    - [Generate the API client](#generate-the-api-client)
+    - [Generate SAML (SPID) certs](#generate-saml-spid-certs-development)
+    - [SAML (SPID) certs with ENV vars](#saml-spid-certs-with-env-vars)
+    - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
+    - [SPID Validator](#spid-validator)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -157,7 +160,8 @@ Those are all Environment variables needed by the application:
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
-| IDP_METADATA_URL                       | Url to download IDP metadata from                                                 | string |
+| IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
+| SPID_VALIDATOR_URL                     | Url to SPID Validator                                                             | string |
 | IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int |
 | CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
@@ -248,6 +252,43 @@ Kubernetes secrets:
 ```
 $ kubectl create secret generic spid-cert --from-file=./cert.pem --from-file=./key.pem
 ```
+
+### SAML (SPID) certs with ENV vars
+
+The certificate and the secret key could be provided to the backend with two ENV variables:
+- `SAML_KEY`
+- `SAML_CERT`
+
+if these variables are set `cert.pem` and `key.pem` are ignored.
+
+### SPID Identity Providers Metadata
+
+When backend starts, SPID login is configured with Identity Providers metadata fetched from remote URL. URLs are provided by the following Environment variables: `CIE_METADATA_URL` (CIE login) `IDP_METADATA_URL` (SPID login) and `SPID_TESTENV_URL` (SPID test environment). Before that the backend become ready a time consuming operation must be completed (fetching remote metadata).
+
+The default values are explained into the following table
+
+| ENV                                    | development                                                                 | production                                                       |
+|----------------------------------------|-----------------------------------------------------------------------------|------------------------------------------------------------------|
+| `IDP_METADATA_URL`                     | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml            | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml |
+| `CIE_METADATA_URL`                     | https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth              | https://idserver.servizicie.interno.gov.it/idp/shibboleth        |
+| `SPID_TESTENV_URL`                     | https://spid-testenv2:8088                                                  | -                                                                |
+
+For local development only, spid-testenv2 (executed with docker-compose) could be used to login with a (fake) SPID account.
+
+On production, in order to reduce the startup time, another Environment variable could be provided  `STARTUP_IDPS_METADATA`. To set its value run: 
+```bash
+export STARTUP_IDPS_METADATA=`npx startup-idps-metadata --idp-metadata-url-env IDP_METADATA_URL --cie-metadata-url-env CIE_METADATA_URL`
+```
+
+### SPID Validator
+
+If is needed SPID validation another available environment variable is `SPID_VALIDATOR_URL`. Valid values for `SPID_VALIDATOR_URL` are:
+
+| ENV                                    | development                            | production                    |
+|----------------------------------------|----------------------------------------|-------------------------------|
+| `IDP_METADATA_URL`                     | http://spid-saml-check:8080            | https://validator.spid.gov.it |
+
+Spid Validator is a tool that verify that the SPID implementation is compliant with the AGID specification.
 
 ### Architecture decision records
 
