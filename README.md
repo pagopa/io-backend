@@ -275,7 +275,7 @@ The default values are explained into the following table
 
 On local development only spid-testenv2, executed with docker-compose, could be used to complete a SPID login.
 
-On production in order to reduce the startup time could be provided another Environment varible `STARTUP_IDPS_METADATA`. The command that must be used to set the variable is: 
+On production, in order to reduce the startup time, another Environment variable could be provided  `STARTUP_IDPS_METADATA`. To set its value run: 
 ```bash
 export STARTUP_IDPS_METADATA=`npx startup-idps-metadata --idp-metadata-url-env IDP_METADATA_URL --cie-metadata-url-env CIE_METADATA_URL`
 ```
