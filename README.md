@@ -273,7 +273,7 @@ The default values are explained into the following table
 | `CIE_METADATA_URL`                     | https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth              | https://idserver.servizicie.interno.gov.it/idp/shibboleth        |
 | `SPID_TESTENV_URL`                     | https://spid-testenv2:8088                                                  | -                                                                |
 
-On local development only spid-testenv2, executed with docker-compose, could be used to complete a SPID login.
+For local development only, spid-testenv2 (executed with docker-compose) could be used to login with a (fake) SPID account.
 
 On production, in order to reduce the startup time, another Environment variable could be provided  `STARTUP_IDPS_METADATA`. To set its value run: 
 ```bash
