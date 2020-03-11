@@ -249,6 +249,23 @@ Kubernetes secrets:
 $ kubectl create secret generic spid-cert --from-file=./cert.pem --from-file=./key.pem
 ```
 
+### SAML (SPID) certs with ENV vars
+
+The certificate and the secret key could be provided to the backend with two ENV variables:
+- `SAML_KEY`
+- `SAML_CERT`
+
+if these variables are set `cert.pem` and `key.pem` are ignored.
+
+## SPID Identity Providers Metadata
+
+When backend starts, SPID login is configured with Identity Providers metadata fetched from remote URL. URLs are provided by the following Environment variables: `CIE_METADATA_URL` (CIE login) `IDP_METADATA_URL` (SPID login) and `SPID_TESTENV_URL` (SPID test environment). Before that the backend become ready a time consuming operation must be completed (fetching remote metadata).
+
+To reduce the startup time could be provided another Environment varible `STARTUP_IDPS_METADATA`. The command that must be used to set the variable is: 
+```bash
+export STARTUP_IDPS_METADATA=`npx startup-idps-metadata --idp-metadata-url-env IDP_METADATA_URL --cie-metadata-url-env CIE_METADATA_URL`
+```
+
 ### Architecture decision records
 
 In a world of evolutionary architecture, it's important to record certain design decisions for the benefit of future
