@@ -288,7 +288,7 @@ If is needed SPID validation another available environment variable is `SPID_VAL
 |----------------------------------------|----------------------------------------|-------------------------------|
 | `IDP_METADATA_URL`                     | http://spid-saml-check:8080            | https://validator.spid.gov.it |
 
-With Spid Validator could be validated that the SPID implementation is compliant with the AGID specifics.
+Spid Validator is a tool that verify that the SPID implementation is compliant with the AGID specification.
 
 ### Architecture decision records
 
