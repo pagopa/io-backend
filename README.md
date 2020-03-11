@@ -257,7 +257,7 @@ The certificate and the secret key could be provided to the backend with two ENV
 
 if these variables are set `cert.pem` and `key.pem` are ignored.
 
-## SPID Identity Providers Metadata
+### SPID Identity Providers Metadata
 
 When backend starts, SPID login is configured with Identity Providers metadata fetched from remote URL. URLs are provided by the following Environment variables: `CIE_METADATA_URL` (CIE login) `IDP_METADATA_URL` (SPID login) and `SPID_TESTENV_URL` (SPID test environment). Before that the backend become ready a time consuming operation must be completed (fetching remote metadata).
 
