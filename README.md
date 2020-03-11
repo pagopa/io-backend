@@ -159,7 +159,8 @@ Those are all Environment variables needed by the application:
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
-| IDP_METADATA_URL                       | Url to download IDP metadata from                                                 | string |
+| IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
+| SPID_VALIDATOR_URL                     | Url to SPID Validator                                                             | string |
 | IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int |
 | CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
@@ -265,16 +266,28 @@ When backend starts, SPID login is configured with Identity Providers metadata f
 
 The default values are explained into the following table
 
-| ENV                                    | stage                                                                             | production                                                       |
-|----------------------------------------|-----------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| `IDP_METADATA_URL`                       | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml                  | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml |
-| `CIE_METADATA_URL`                       | https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth                    | https://idserver.servizicie.interno.gov.it/idp/shibboleth        |
-| `SPID_TESTENV_URL`                       | https://spid-testenv.dev.io.italia.it                                             | -                                                                |
+| ENV                                    | development                                                                 | production                                                       |
+|----------------------------------------|-----------------------------------------------------------------------------|------------------------------------------------------------------|
+| `IDP_METADATA_URL`                     | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml            | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml |
+| `CIE_METADATA_URL`                     | https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth              | https://idserver.servizicie.interno.gov.it/idp/shibboleth        |
+| `SPID_TESTENV_URL`                     | https://spid-testenv2:8088                                                  | -                                                                |
 
-To reduce the startup time could be provided another Environment varible `STARTUP_IDPS_METADATA`. The command that must be used to set the variable is: 
+On local development only spid-testenv2, executed with docker-compose, could be used to complete a SPID login.
+
+On production in order to reduce the startup time could be provided another Environment varible `STARTUP_IDPS_METADATA`. The command that must be used to set the variable is: 
 ```bash
 export STARTUP_IDPS_METADATA=`npx startup-idps-metadata --idp-metadata-url-env IDP_METADATA_URL --cie-metadata-url-env CIE_METADATA_URL`
 ```
+
+### SPID Validator
+
+If is needed SPID validation another available environment variable is `SPID_VALIDATOR_URL`. Valid values for `SPID_VALIDATOR_URL` are:
+
+| ENV                                    | development                            | production                    |
+|----------------------------------------|----------------------------------------|-------------------------------|
+| `IDP_METADATA_URL`                     | http://spid-saml-check:8080            | https://validator.spid.gov.it |
+
+With Spid Validator could be validated that the SPID implementation is compliant with the AGID specifics.
 
 ### Architecture decision records
 
