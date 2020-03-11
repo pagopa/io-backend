@@ -261,6 +261,14 @@ if these variables are set `cert.pem` and `key.pem` are ignored.
 
 When backend starts, SPID login is configured with Identity Providers metadata fetched from remote URL. URLs are provided by the following Environment variables: `CIE_METADATA_URL` (CIE login) `IDP_METADATA_URL` (SPID login) and `SPID_TESTENV_URL` (SPID test environment). Before that the backend become ready a time consuming operation must be completed (fetching remote metadata).
 
+The default values are explained into the following table
+
+| ENV                                    | stage                                                                             | production                                                       |
+|----------------------------------------|-----------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| `IDP_METADATA_URL`                       | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml                  | https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml |
+| `CIE_METADATA_URL`                       | https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth                    | https://idserver.servizicie.interno.gov.it/idp/shibboleth        |
+| `SPID_TESTENV_URL`                       | https://spid-testenv.dev.io.italia.it                                             | -                                                                |
+
 To reduce the startup time could be provided another Environment varible `STARTUP_IDPS_METADATA`. The command that must be used to set the variable is: 
 ```bash
 export STARTUP_IDPS_METADATA=`npx startup-idps-metadata --idp-metadata-url-env IDP_METADATA_URL --cie-metadata-url-env CIE_METADATA_URL`
