@@ -61,7 +61,7 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
 
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () => {
-  return fromNullable(process.env.SAML_KEY).getOrElse(
+  return fromNullable(process.env.SAML_KEY).getOrElseL(() =>
     readFile(process.env.SAML_KEY_PATH || "./certs/key.pem", "SAML private key")
   );
 };
@@ -69,7 +69,7 @@ export const SAML_KEY = samlKey();
 
 // Public certificate used in SAML authentication to a SPID IDP.
 const samlCert = () => {
-  return fromNullable(process.env.SAML_CERT).getOrElse(
+  return fromNullable(process.env.SAML_CERT).getOrElseL(() =>
     readFile(
       process.env.SAML_CERT_PATH || "./certs/cert.pem",
       "SAML certificate"
