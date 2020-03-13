@@ -42,7 +42,7 @@ import {
 dotenv.config();
 
 // Server port.
-log.debug(`App service assigned port ${process.env.PORT}`);
+log.info(`App service assigned port ${process.env.PORT}`);
 const DEFAULT_SERVER_PORT = "80";
 export const SERVER_PORT: number = parseInt(
   process.env.PORT || DEFAULT_SERVER_PORT,
