@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
-    "@pagopa/io-spid-commons": "~2.9.1",
+    "@pagopa/io-spid-commons": "~3.0.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
     "azure-sb": "^0.10.6",

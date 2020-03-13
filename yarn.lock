@@ -155,10 +155,10 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@pagopa/io-spid-commons@~2.9.1":
-  version "2.9.1"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/2.9.1/11b42eb20456d58b1e2bb1551b7a50386c57025ee613e88225841c4d9b51e7b6#5c406a653806186a54b7f251ec4d5d6ec41529c5"
-  integrity sha512-JeP9iUxoSsDLtuVizJk1haGsEHfcKUP6+XhmSHwBBPHEWUIqcTaPSyxyG1iwZvzg28pF2OLKXVb450S4NtqTRw==
+"@pagopa/io-spid-commons@~3.0.0":
+  version "3.0.0"
+  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/3.0.0/c5d3903e2034ad03d94da2410a79dfbc5ed625900ee411014198ff0cf23a8280#2be777a3a1dad9f5b7f00fbfe52f5fa45e910be9"
+  integrity sha512-Kp8DIDTo4Kbj/1pB5ee5KOJ34mo9Zinv5+KQyD4eRl4CvKs38U7/NEzevj7nzC7VMubJejPGPwnmctmkpV603A==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
