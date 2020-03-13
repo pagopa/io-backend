@@ -44,10 +44,7 @@ dotenv.config();
 // Server port.
 log.info(`App service assigned port ${process.env.PORT}`);
 const DEFAULT_SERVER_PORT = "80";
-export const SERVER_PORT: number = parseInt(
-  process.env.PORT || DEFAULT_SERVER_PORT,
-  10
-);
+export const SERVER_PORT = process.env.PORT || DEFAULT_SERVER_PORT;
 
 export const ENV = getNodeEnvironmentFromProcessEnv(process.env);
 
