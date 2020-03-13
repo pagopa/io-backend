@@ -64,11 +64,13 @@ newApp(
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
+      log.info("Starting HTTPS server on port %d", SERVER_PORT);
       const options = { key: SAML_KEY, cert: SAML_CERT };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
       });
     } else {
+      log.info("Starting HTTP server on port %d", SERVER_PORT);
       server = http.createServer(app).listen(SERVER_PORT, () => {
         log.info("Listening on port %d", SERVER_PORT);
       });
