@@ -69,7 +69,6 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
-import { AuthenticateRet } from "./types/commons";
 
 const defaultModule = {
   newApp
@@ -170,7 +169,7 @@ export function newApp(
   app.use(passport.initialize());
 
   // Initiliaze Url Token Authenticator
-  const urlTokenAuth: AuthenticateRet = passport.authenticate("authtoken", {
+  const urlTokenAuth = passport.authenticate("authtoken", {
     session: false
   });
 
@@ -297,7 +296,8 @@ function registerAPIRoutes(
   app: Express,
   basePath: string,
   allowNotifyIPSourceRange: CIDR,
-  urlTokenAuth: AuthenticateRet,
+  // tslint:disable-next-line: no-any
+  urlTokenAuth: any,
   profileService: ProfileService,
   messagesService: MessagesService,
   notificationService: NotificationService,
@@ -306,7 +306,7 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService
 ): void {
-  const bearerTokenAuth: AuthenticateRet = passport.authenticate("bearer", {
+  const bearerTokenAuth = passport.authenticate("bearer", {
     session: false
   });
 

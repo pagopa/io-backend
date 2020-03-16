@@ -10,12 +10,12 @@ export default class IdpMetadataController {
   constructor(private readonly idpMetadataRefresher: () => Task<void>) {}
 
   public async refresh(): Promise<IResponseSuccessJson<SuccessResponse>> {
-    // tslint:disable-next-line: no-floating-promises
     this.idpMetadataRefresher()
       .run()
       .then(() => {
         log.info("Refreshing of IDPs Metadata completed.");
-      });
+      })
+      .catch(err => log.error("Error on idpMetadataRefresher: %s", err));
     return ResponseSuccessJson({ message: "Updating IDPs Metadata" });
   }
 }
