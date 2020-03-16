@@ -281,7 +281,7 @@ export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 
-// Notification URL pre shared key.
+// Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 
 // Create the Session Storage service
