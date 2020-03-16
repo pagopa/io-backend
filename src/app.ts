@@ -247,7 +247,7 @@ export function newApp(
         _.idpMetadataRefresher
       );
 
-      app.get(
+      app.post(
         `${APIBasePath}/idp-metadata-update`,
         urlTokenAuth,
         toExpressHandler(

@@ -131,14 +131,14 @@ describe("Success app start", () => {
     });
   });
 
-  describe(" GET /idp-metadata-update", () => {
+  describe(" POST /idp-metadata-update", () => {
     it("should update idp metadata", () => {
       const expectedSuccessResponse = { message: "ok" };
       mockRefresh.mockImplementation(() =>
         Promise.resolve(ResponseSuccessJson(expectedSuccessResponse))
       );
       return request(app)
-        .get("/api/v1/idp-metadata-update?token=12345")
+        .post("/api/v1/idp-metadata-update?token=12345")
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200, expectedSuccessResponse);
     });

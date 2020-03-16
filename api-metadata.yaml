@@ -12,11 +12,11 @@ security:
 paths:
   "/idp-metadata-update":
     x-swagger-router-controller: IdpMetadataController
-    get:
-      operationId: refresh
+    post:
+      operationId: refreshIdpMetadata
       summary: Update IDP Metadata
       description: |-
-        Fetch IDP Metadata from remote url and update SPID Strategy
+        Fetch IDP Metadata from remote registries then update the SPID Strategy
       responses:
         "200":
           description: Success.
