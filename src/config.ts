@@ -141,21 +141,8 @@ const maybeSpidValidatorUrlOption = fromNullable(
   process.env.SPID_VALIDATOR_URL
 ).map(_ => ({ [_]: true }));
 
-// Set default idp metadata refresh time to 10 days
-export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 10;
-export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env
-  .IDP_METADATA_REFRESH_INTERVAL_SECONDS
-  ? parseInt(process.env.IDP_METADATA_REFRESH_INTERVAL_SECONDS, 10)
-  : DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS;
-log.info(
-  "IDP metadata refresh interval set to %s seconds",
-  IDP_METADATA_REFRESH_INTERVAL_SECONDS
-);
-
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
-  idpMetadataRefreshIntervalMillis:
-    IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000,
   organization: {
     URL: "https://io.italia.it",
     displayName: "IO - l'app dei servizi pubblici BETA",
@@ -294,7 +281,7 @@ export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 
-// Notification URL pre shared key.
+// Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 
 // Create the Session Storage service

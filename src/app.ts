@@ -60,6 +60,7 @@ import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middle
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
+import IdpMetadataController from "./controllers/idpMetadataController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -167,6 +168,11 @@ export function newApp(
 
   app.use(passport.initialize());
 
+  // Initiliaze Url Token Authenticator
+  const urlTokenAuth = passport.authenticate("authtoken", {
+    session: false
+  });
+
   //
   // Setup routes
   //
@@ -207,6 +213,7 @@ export function newApp(
       app,
       APIBasePath,
       allowNotifyIPSourceRange,
+      urlTokenAuth,
       PROFILE_SERVICE,
       MESSAGES_SERVICE,
       NOTIFICATION_SERVICE,
@@ -235,8 +242,18 @@ export function newApp(
       )
     )
     .map(_ => {
-      const idpMetadataRefreshTimer = _.startIdpMetadataRefreshTimer();
-      _.app.on("server:stop", () => clearInterval(idpMetadataRefreshTimer));
+      const IDP_METADATA_CONTROLLER = new IdpMetadataController(
+        _.idpMetadataRefresher
+      );
+
+      app.post(
+        `${APIBasePath}/idp-metadata-update`,
+        urlTokenAuth,
+        toExpressHandler(
+          IDP_METADATA_CONTROLLER.refresh,
+          IDP_METADATA_CONTROLLER
+        )
+      );
       return _.app;
     })
     .map(_ => {
@@ -279,6 +296,8 @@ function registerAPIRoutes(
   app: Express,
   basePath: string,
   allowNotifyIPSourceRange: CIDR,
+  // tslint:disable-next-line: no-any
+  urlTokenAuth: any,
   profileService: ProfileService,
   messagesService: MessagesService,
   notificationService: NotificationService,
@@ -287,8 +306,9 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService
 ): void {
-  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
-  const urlTokenAuth = passport.authenticate("authtoken", { session: false });
+  const bearerTokenAuth = passport.authenticate("bearer", {
+    session: false
+  });
 
   const profileController: ProfileController = new ProfileController(
     profileService
