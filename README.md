@@ -144,6 +144,7 @@ Those are all Environment variables needed by the application:
 | TOKEN_DURATION_IN_SECONDS              | The number of seconds a session token is considered valid                         | int    |
 | SAML_CALLBACK_URL                      | The absolute URL of the assertion consumer service endpoint                       | string |
 | SAML_ISSUER                            | The issuer id for this Service Provider                                           | string |
+| SAML_ACCEPTED_CLOCK_SKEW_MS            | Maximum skew between SAML Client and Server (empty or -1 disable datetime checks) | int    |
 | SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
 | SAML_KEY                               | Private Key used by SAML protocol                                                 | string |
 | SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
