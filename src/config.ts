@@ -99,9 +99,7 @@ const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
 // const DEFAULT_SPID_AUTOLOGIN = "";
 // const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
 
-const DEFAULT_SPID_TESTENV_URL = "https://spid-testenv2:8088";
-const SPID_TESTENV_URL =
-  process.env.SPID_TESTENV_URL || DEFAULT_SPID_TESTENV_URL;
+const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
@@ -140,6 +138,9 @@ export const appConfig: IApplicationConfig = {
 const maybeSpidValidatorUrlOption = fromNullable(
   process.env.SPID_VALIDATOR_URL
 ).map(_ => ({ [_]: true }));
+const maybeSpidTestenvOption = fromNullable(SPID_TESTENV_URL).map(_ => ({
+  [_]: true
+}));
 
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
@@ -164,7 +165,7 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   spidTestEnvUrl: SPID_TESTENV_URL,
   spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
   strictResponseValidation: {
-    [SPID_TESTENV_URL]: true,
+    ...(isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
     ...(isSome(maybeSpidValidatorUrlOption)
       ? maybeSpidValidatorUrlOption.value
       : {})

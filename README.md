@@ -162,11 +162,12 @@ Those are all Environment variables needed by the application:
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
+| SPID_TESTENV_URL                       | Url to SPID Testenv 2                                                             | string |
 | SPID_VALIDATOR_URL                     | Url to SPID Validator                                                             | string |
-| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int |
+| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int    |
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 | ALLOW_MULTIPLE_SESSIONS                | When is `true` allow multiple sessions for an user (default `false`)              | boolean |
-| GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase  | string |
+| GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase                             | string |
 
 ### Logs
 
