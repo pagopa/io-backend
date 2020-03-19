@@ -23,15 +23,6 @@ jest.mock("../controllers/notificationController", () => {
   };
 });
 
-const mockRefresh = jest.fn();
-jest.mock("../controllers/idpMetadataController", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      refresh: mockRefresh
-    }))
-  };
-});
-
 import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
@@ -128,19 +119,6 @@ describe("Success app start", () => {
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200);
       expect(isRight(ServerInfo.decode(response.body)));
-    });
-  });
-
-  describe(" POST /idp-metadata-update", () => {
-    it("should update idp metadata", () => {
-      const expectedSuccessResponse = { message: "ok" };
-      mockRefresh.mockImplementation(() =>
-        Promise.resolve(ResponseSuccessJson(expectedSuccessResponse))
-      );
-      return request(app)
-        .post("/api/v1/idp-metadata-update?token=12345")
-        .set(X_FORWARDED_PROTO_HEADER, "https")
-        .expect(200, expectedSuccessResponse);
     });
   });
 });

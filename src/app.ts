@@ -61,7 +61,6 @@ import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middle
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
-import IdpMetadataController from "./controllers/idpMetadataController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -242,21 +241,6 @@ export function newApp(
         _.acsController.slo.bind(_.acsController)
       )
     )
-    .map(_ => {
-      const IDP_METADATA_CONTROLLER = new IdpMetadataController(
-        _.idpMetadataRefresher
-      );
-
-      app.post(
-        `${APIBasePath}/idp-metadata-update`,
-        urlTokenAuth,
-        toExpressHandler(
-          IDP_METADATA_CONTROLLER.refresh,
-          IDP_METADATA_CONTROLLER
-        )
-      );
-      return _;
-    })
     .map(_ => {
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
