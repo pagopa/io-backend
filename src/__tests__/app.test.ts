@@ -130,19 +130,6 @@ describe("Success app start", () => {
       expect(isRight(ServerInfo.decode(response.body)));
     });
   });
-
-  describe(" POST /idp-metadata-update", () => {
-    it("should update idp metadata", () => {
-      const expectedSuccessResponse = { message: "ok" };
-      mockRefresh.mockImplementation(() =>
-        Promise.resolve(ResponseSuccessJson(expectedSuccessResponse))
-      );
-      return request(app)
-        .post("/api/v1/idp-metadata-update?token=12345")
-        .set(X_FORWARDED_PROTO_HEADER, "https")
-        .expect(200, expectedSuccessResponse);
-    });
-  });
 });
 
 describe("Failure app start", () => {
