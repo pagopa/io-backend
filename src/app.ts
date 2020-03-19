@@ -266,7 +266,7 @@ export function newApp(
             .catch(e => {
               log.error("loadSpidStrategyOptions|error:%s", e);
             }),
-        IDP_METADATA_REFRESH_INTERVAL_SECONDS
+        IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
       );
       _.app.on("server:stop", () =>
         clearInterval(startIdpMetadataRefreshTimer)
