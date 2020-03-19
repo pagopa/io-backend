@@ -142,7 +142,7 @@ const maybeSpidTestenvOption = fromNullable(SPID_TESTENV_URL).map(_ => ({
   [_]: true
 }));
 
-// Set default idp metadata refresh time to 10 days
+// Set default idp metadata refresh time to 7 days
 export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 7;
 export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env
   .IDP_METADATA_REFRESH_INTERVAL_SECONDS
