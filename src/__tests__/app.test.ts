@@ -23,15 +23,6 @@ jest.mock("../controllers/notificationController", () => {
   };
 });
 
-const mockRefresh = jest.fn();
-jest.mock("../controllers/idpMetadataController", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      refresh: mockRefresh
-    }))
-  };
-});
-
 import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
