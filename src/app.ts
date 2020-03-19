@@ -10,6 +10,7 @@ import {
   endpointOrConnectionString,
   getClientProfileRedirectionUrl,
   hubName,
+  IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   PAGOPA_CLIENT,
   REDIS_CLIENT,
   samlConfig,
@@ -253,6 +254,22 @@ export function newApp(
           IDP_METADATA_CONTROLLER.refresh,
           IDP_METADATA_CONTROLLER
         )
+      );
+      return _;
+    })
+    .map(_ => {
+      // Schedule automatic idpMetadataRefresher
+      const startIdpMetadataRefreshTimer = setInterval(
+        () =>
+          _.idpMetadataRefresher()
+            .run()
+            .catch(e => {
+              log.error("loadSpidStrategyOptions|error:%s", e);
+            }),
+        IDP_METADATA_REFRESH_INTERVAL_SECONDS
+      );
+      _.app.on("server:stop", () =>
+        clearInterval(startIdpMetadataRefreshTimer)
       );
       return _.app;
     })
