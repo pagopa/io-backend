@@ -48,32 +48,36 @@ import UserMetadataController from "./controllers/userMetadataController";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
-import NotificationService from "./services/notificationService";
-import { User } from "./types/user";
-import { toExpressHandler } from "./utils/express";
-import {
-  getCurrentBackendVersion,
-  getObjectFromPackageJson
-} from "./utils/package";
-
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
 import { format as dateFnsFormat } from "date-fns";
-import { sequenceS } from "fp-ts/lib/Apply";
-import { either, fromOption, left, right } from "fp-ts/lib/Either";
-import { fromEither, fromNullable, Option } from "fp-ts/lib/Option";
+import {
+  fromEither,
+  fromNullable,
+  isNone,
+  Option,
+  tryCatch
+} from "fp-ts/lib/Option";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
+import { DOMParser } from "xmldom";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
+import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
+import { User } from "./types/user";
 import { getRequiredENVVar } from "./utils/container";
+import { toExpressHandler } from "./utils/express";
+import {
+  getCurrentBackendVersion,
+  getObjectFromPackageJson
+} from "./utils/package";
 
 const queueConnectionString = getRequiredENVVar("AzureWebJobsStorage");
 const spidQueueName = getRequiredENVVar("SPID_QUEUE_NAME");
@@ -100,21 +104,15 @@ const SAML_NAMESPACE = {
   XMLDSIG: "http://www.w3.org/2000/09/xmldsig#"
 };
 
-export const getFiscalNumberFromPayload = (
-  requestXML: string
-): Option<string> => {
-  const doc = new DOMParser().parseFromString(requestXML, "text/xml");
+const getFiscalNumberFromPayload = (doc: Document): Option<string> => {
   return fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "fiscalNumber").item(0)
   ).mapNullable(_ => _.textContent?.trim());
 };
 
-const getRequestIDFromPayload = (requestXML: string): Option<string> => {
-  const xmlRequest = new DOMParser().parseFromString(requestXML, "text/xml");
+const getRequestIDFromPayload = (doc: Document): Option<string> => {
   return fromNullable(
-    xmlRequest
-      .getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, "AuthnRequest")
-      .item(0)
+    doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, "AuthnRequest").item(0)
   ).chain(AuthnRequest =>
     fromEither(NonEmptyString.decode(AuthnRequest.getAttribute("ID")))
   );
@@ -123,56 +121,43 @@ const getRequestIDFromPayload = (requestXML: string): Option<string> => {
 const callback = (
   sourceIp: string | null,
   payload: string,
-  payloadtype: "REQUEST" | "RESPONSE"
+  payloadType: "REQUEST" | "RESPONSE"
 ): void => {
-  log.debug("dentro la callback SPID");
+  log.info("dentro la callback SPID");
   const { QueueClient } = require("@azure/storage-queue");
-  const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
-  const tId = fromOption(new Error("Missing Request ID into payload"))(
-    getRequestIDFromPayload(payload)
+
+  const maybeXmlPayload = tryCatch(() =>
+    new DOMParser().parseFromString(payload, "text/xml")
   );
-  const tFiscalCode = getFiscalNumberFromPayload(payload).foldL(
-    () => {
-      if (payloadtype === "RESPONSE") {
-        return left<Error, string | undefined>(
-          new Error("Missing fiscal code into payload")
-        );
-      } else {
-        return right<Error, string | undefined>(undefined);
-      }
-    },
-    (e: string) => right<Error, string | undefined>(e)
-  );
+  if (isNone(maybeXmlPayload)) {
+    log.error(`Spid Log callback| ERROR| Impossible to parse SPID XML Payload`);
+    return void 0;
+  }
+  const tId = getRequestIDFromPayload(maybeXmlPayload.value);
+  const tFiscalCode = getFiscalNumberFromPayload(maybeXmlPayload.value);
+  const item = {
+    fiscalCode: tFiscalCode.toUndefined(),
+    spidRequestId: tId.toUndefined()
+  };
+
   const sampleMsg = {
     createdAt: new Date(),
     createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
     ip: sourceIp,
     payload,
-    payloadtype
+    payloadType
   };
-  log.debug("dopo definizione sampleMsg");
 
-  return sequenceS(either)({
-    spidRequestId: tId,
-    // tslint:disable-next-line: object-literal-sort-keys
-    fiscalCode: tFiscalCode
-  })
-    .chain(chunk =>
-      right({
-        ...sampleMsg,
-        ...chunk
-      })
-    )
-    .map(msg => {
-      spidQueueClient.create();
-      const buffer1 = Buffer.from(JSON.stringify(msg));
-      spidQueueClient.sendMessage(buffer1.toString("base64"));
-      return void 0;
-    })
-    .fold(
-      _ => void 0,
-      _ => void 0
-    );
+  const spidMessage = {
+    ...sampleMsg,
+    ...item
+  };
+  log.info(`spidMessage => ${JSON.stringify(spidMessage)}`);
+  const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
+  spidQueueClient.create();
+  const buffer1 = Buffer.from(JSON.stringify(spidMessage));
+  spidQueueClient.sendMessage(buffer1.toString("base64"));
+  return void 0;
 };
 
 export function newApp(
@@ -184,7 +169,6 @@ export function newApp(
   PagoPABasePath: string
 ): Promise<Express> {
   // Setup Passport.
-
   // Add the strategy to authenticate proxy clients.
   passport.use(BEARER_TOKEN_STRATEGY);
   // Add the strategy to authenticate webhook calls.
@@ -192,7 +176,6 @@ export function newApp(
 
   // Create and setup the Express app.
   const app = express();
-  log.debug("express app initialized");
 
   //
   // Redirect unsecure connections.
