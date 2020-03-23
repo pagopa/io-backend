@@ -125,9 +125,9 @@ const callback = (
   payload: string,
   payloadtype: "REQUEST" | "RESPONSE"
 ): void => {
+  log.debug("dentro la callback SPID");
   const { QueueClient } = require("@azure/storage-queue");
   const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
-
   const tId = fromOption(new Error("Missing Request ID into payload"))(
     getRequestIDFromPayload(payload)
   );
@@ -143,7 +143,6 @@ const callback = (
     },
     (e: string) => right<Error, string | undefined>(e)
   );
-
   const sampleMsg = {
     createdAt: new Date(),
     createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
@@ -151,6 +150,7 @@ const callback = (
     payload,
     payloadtype
   };
+  log.debug("dopo definizione sampleMsg");
 
   return sequenceS(either)({
     spidRequestId: tId,
@@ -192,6 +192,7 @@ export function newApp(
 
   // Create and setup the Express app.
   const app = express();
+  log.debug("express app initialized");
 
   //
   // Redirect unsecure connections.
