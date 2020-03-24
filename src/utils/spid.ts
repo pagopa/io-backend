@@ -1,5 +1,6 @@
 import { QueueClient } from "@azure/storage-queue";
 import { format as dateFnsFormat } from "date-fns";
+import { isLeft } from "fp-ts/lib/Either";
 import {
   fromEither,
   fromNullable,
@@ -9,7 +10,9 @@ import {
 } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
+  FiscalCode,
   IPString,
   NonEmptyString,
   PatternString
@@ -21,7 +24,9 @@ const SAML_NAMESPACE = {
   PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol"
 };
 
-export const getFiscalNumberFromPayload = (doc: Document): Option<string> => {
+export const getFiscalNumberFromPayload = (
+  doc: Document
+): Option<FiscalCode> => {
   return fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
   )
@@ -33,7 +38,8 @@ export const getFiscalNumberFromPayload = (doc: Document): Option<string> => {
       });
     })
     .mapNullable(maybeElem => maybeElem.toNullable())
-    .mapNullable(_ => _.textContent?.trim());
+    .mapNullable(_ => _.textContent?.trim())
+    .chain(_ => fromEither(FiscalCode.decode(_)));
 };
 
 const getRequestIDFromPayload = (tagName: string, attrName: string) => (
@@ -55,12 +61,15 @@ export const getRequestIDFromResponse = getRequestIDFromPayload(
   "InResponseTo"
 );
 
-export const SpidBaseMsg = t.interface({
+const SpidMsg = t.interface({
   // Timestamp of Request/Response creation
   createdAt: UTCISODateFromString,
 
   // Date of the SPID request / response in YYYY-MM-DD format
   createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"),
+
+  // Fiscal code of the authenticating user
+  fiscalCode: t.union([t.undefined, FiscalCode]),
 
   // IP of the client that made a SPID login action
   ip: IPString,
@@ -69,10 +78,13 @@ export const SpidBaseMsg = t.interface({
   payload: t.string,
 
   // Payload type: REQUEST or RESPONSE
-  payloadType: t.keyof({ REQUEST: null, RESPONSE: null })
+  payloadType: t.keyof({ REQUEST: null, RESPONSE: null }),
+
+  // SPID request id
+  spidRequestId: t.union([t.undefined, t.string])
 });
 
-export type SpidBaseMsg = t.TypeOf<typeof SpidBaseMsg>;
+type SpidMsg = t.TypeOf<typeof SpidMsg>;
 
 export const makeSpidLogCallback = (queueClient: QueueClient) => (
   sourceIp: string | null,
@@ -108,29 +120,32 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
     return;
   }
 
-  const item = {
-    fiscalCode: maybeFiscalCode.toUndefined(),
-    spidRequestId: maybeRequestId.toUndefined()
-  };
-
-  const baseMsg: SpidBaseMsg = {
+  const errorOrSpidMsg = SpidMsg.decode({
     createdAt: new Date(),
     createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
+    fiscalCode: maybeFiscalCode.toUndefined(),
     ip: sourceIp as IPString,
     payload,
-    payloadType
-  };
+    payloadType,
+    spidRequestId: maybeRequestId.toUndefined()
+  });
 
-  const spidMessage = {
-    ...baseMsg,
-    ...item
-  };
+  if (isLeft(errorOrSpidMsg)) {
+    log.error(`SpidLogCallback|ERROR=Invalid format for SPID log payload`);
+    log.debug(
+      `SpidLogCallback|ERROR_DETAILS=${readableReport(errorOrSpidMsg.value)}`
+    );
+    return;
+  }
+  const spidMsg = errorOrSpidMsg.value;
 
-  const spidMsg = Buffer.from(JSON.stringify(spidMessage)).toString("base64");
+  // encode to base64 since the queue payload is an XML
+  // and cannot contain markup characters
+  const spidMsgBase64 = Buffer.from(JSON.stringify(spidMsg)).toString("base64");
 
   // we don't return the promise here
   // the call follows fire & forget pattern
-  queueClient.sendMessage(spidMsg).catch(err => {
+  queueClient.sendMessage(spidMsgBase64).catch(err => {
     log.error(`SpidLogCallback|ERROR=Cannot enqueue SPID payload`);
     log.debug(`SpidLogCallback|ERROR_DETAILS=${err}`);
   });
