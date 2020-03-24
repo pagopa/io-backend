@@ -32,7 +32,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { CIDR, IPString } from "italia-ts-commons/lib/strings";
+import { CIDR } from "italia-ts-commons/lib/strings";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import AuthenticationController from "./controllers/authenticationController";
@@ -51,11 +51,8 @@ import checkIP from "./utils/middleware/checkIP";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
-import { format as dateFnsFormat } from "date-fns";
-import { isNone, tryCatch } from "fp-ts/lib/Option";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
-import { DOMParser } from "xmldom";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
@@ -73,21 +70,17 @@ import {
   getCurrentBackendVersion,
   getObjectFromPackageJson
 } from "./utils/package";
-import {
-  getFiscalNumberFromPayload,
-  getRequestIDFromRequest,
-  getRequestIDFromResponse,
-  SpidBaseMsg
-} from "./utils/spid";
-
-const queueConnectionString = getRequiredENVVar("LogsStorageConnection");
-const spidQueueName = getRequiredENVVar("SPID_QUEUE_NAME");
+import { makeSpidLogCallback } from "./utils/spid";
 
 const defaultModule = {
   newApp
 };
 
+const queueConnectionString = getRequiredENVVar("LogsStorageConnection");
+const spidQueueName = getRequiredENVVar("SPID_QUEUE_NAME");
+
 const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
+const spidLogCallback = makeSpidLogCallback(spidQueueClient);
 
 const cacheDuration = `${CACHE_MAX_AGE_SECONDS} seconds`;
 
@@ -100,65 +93,6 @@ const cachingMiddleware = apicache.options({
     include: [200]
   }
 }).middleware;
-
-const callback = (
-  sourceIp: string | null,
-  payload: string,
-  payloadType: "REQUEST" | "RESPONSE"
-): void => {
-  const maybeXmlPayload = tryCatch(() =>
-    new DOMParser().parseFromString(payload, "text/xml")
-  );
-  if (isNone(maybeXmlPayload)) {
-    log.error(`SpidLogCallback|ERROR=Cannot parse SPID XML Payload`);
-    return;
-  }
-
-  const xmlPayload = maybeXmlPayload.value;
-  const maybeRequestId =
-    payloadType === "REQUEST"
-      ? getRequestIDFromRequest(xmlPayload)
-      : getRequestIDFromResponse(xmlPayload);
-  const maybeFiscalCode = getFiscalNumberFromPayload(xmlPayload);
-
-  if (isNone(maybeRequestId)) {
-    log.error(`SpidLogCallback|ERROR=Cannot get Request ID from XML Payload`);
-    return;
-  }
-
-  if (isNone(maybeFiscalCode) && payloadType === "RESPONSE") {
-    log.error(
-      `SpidLogCallback|ERROR=Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
-    );
-    return;
-  }
-  const item = {
-    fiscalCode: maybeFiscalCode.toUndefined(),
-    spidRequestId: maybeRequestId.toUndefined()
-  };
-
-  const baseMsg: SpidBaseMsg = {
-    createdAt: new Date(),
-    createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
-    ip: sourceIp as IPString,
-    payload,
-    payloadType
-  };
-
-  const spidMessage = {
-    ...baseMsg,
-    ...item
-  };
-
-  spidQueueClient.create().catch(_ => {
-    log.error(`SpidLogCallback| ERROR | Cannot recognize SpiD Queue`);
-  });
-  const spidMsg = Buffer.from(JSON.stringify(spidMessage)).toString("base64");
-  spidQueueClient.sendMessage(spidMsg).catch(err => {
-    log.error(`SpidLogCallback|ERROR=Cannot send SpiD Message`);
-    log.debug(`SpidLogCallback|ERROR_DETAILS=${err}`);
-  });
-};
 
 export function newApp(
   env: NodeEnvironment,
@@ -312,7 +246,7 @@ export function newApp(
         _.app,
         _.acsController.acs.bind(_.acsController),
         _.acsController.slo.bind(_.acsController),
-        callback
+        spidLogCallback
       )
     )
     .map(_ => {
