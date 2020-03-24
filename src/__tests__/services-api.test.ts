@@ -26,6 +26,8 @@ const expectedCacheDurationSeconds = 1;
 // tslint:disable-next-line: no-object-mutation
 process.env.CACHE_MAX_AGE_SECONDS = String(expectedCacheDurationSeconds);
 
+jest.mock("@azure/storage-queue");
+
 jest.mock("../services/apiClientFactory");
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");

@@ -9,6 +9,8 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 
+jest.mock("@azure/storage-queue");
+
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");

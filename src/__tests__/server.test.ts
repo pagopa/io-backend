@@ -9,6 +9,8 @@ import { initHttpGracefulShutdown } from "../utils/gracefulShutdown";
 
 import nodeFetch from "node-fetch";
 
+jest.mock("@azure/storage-queue");
+
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
 describe("Server graceful shutdown", () => {

@@ -17,6 +17,7 @@ import {
   NonEmptyString,
   PatternString
 } from "italia-ts-commons/lib/strings";
+import { DOMParser } from "xmldom";
 import { log } from "./logger";
 
 const SAML_NAMESPACE = {
@@ -38,7 +39,7 @@ export const getFiscalNumberFromPayload = (
       });
     })
     .mapNullable(maybeElem => maybeElem.toNullable())
-    .mapNullable(_ => _.textContent?.trim())
+    .mapNullable(_ => _.textContent?.trim().replace("TINIT-", ""))
     .chain(_ => fromEither(FiscalCode.decode(_)));
 };
 
@@ -92,62 +93,62 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
   payload: string,
   payloadType: "REQUEST" | "RESPONSE"
 ): void => {
-  const maybeXmlPayload = tryCatch(() =>
-    new DOMParser().parseFromString(payload, "text/xml")
-  );
-  if (isNone(maybeXmlPayload)) {
-    log.error(`SpidLogCallback|ERROR=Cannot parse SPID XML Payload`);
-    return;
-  }
+  tryCatch(() => {
+    const xmlPayload = new DOMParser().parseFromString(payload, "text/xml");
+    if (!xmlPayload) {
+      log.error(`SpidLogCallback|ERROR=Cannot parse SPID XML Payload`);
+      return;
+    }
 
-  const xmlPayload = maybeXmlPayload.value;
+    const maybeRequestId =
+      payloadType === "REQUEST"
+        ? getRequestIDFromRequest(xmlPayload)
+        : getRequestIDFromResponse(xmlPayload);
 
-  const maybeRequestId =
-    payloadType === "REQUEST"
-      ? getRequestIDFromRequest(xmlPayload)
-      : getRequestIDFromResponse(xmlPayload);
+    const maybeFiscalCode = getFiscalNumberFromPayload(xmlPayload);
 
-  const maybeFiscalCode = getFiscalNumberFromPayload(xmlPayload);
+    if (isNone(maybeRequestId)) {
+      log.error(`SpidLogCallback|ERROR=Cannot get Request ID from XML Payload`);
+      return;
+    }
 
-  if (isNone(maybeRequestId)) {
-    log.error(`SpidLogCallback|ERROR=Cannot get Request ID from XML Payload`);
-    return;
-  }
+    if (isNone(maybeFiscalCode) && payloadType === "RESPONSE") {
+      log.error(
+        `SpidLogCallback|ERROR=Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
+      );
+      return;
+    }
 
-  if (isNone(maybeFiscalCode) && payloadType === "RESPONSE") {
-    log.error(
-      `SpidLogCallback|ERROR=Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
+    const errorOrSpidMsg = SpidMsg.decode({
+      createdAt: new Date(),
+      createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
+      fiscalCode: maybeFiscalCode.toUndefined(),
+      ip: sourceIp as IPString,
+      payload,
+      payloadType,
+      spidRequestId: maybeRequestId.toUndefined()
+    });
+
+    if (isLeft(errorOrSpidMsg)) {
+      log.error(`SpidLogCallback|ERROR=Invalid format for SPID log payload`);
+      log.debug(
+        `SpidLogCallback|ERROR_DETAILS=${readableReport(errorOrSpidMsg.value)}`
+      );
+      return;
+    }
+    const spidMsg = errorOrSpidMsg.value;
+
+    // encode to base64 since the queue payload is an XML
+    // and cannot contain markup characters
+    const spidMsgBase64 = Buffer.from(JSON.stringify(spidMsg)).toString(
+      "base64"
     );
-    return;
-  }
 
-  const errorOrSpidMsg = SpidMsg.decode({
-    createdAt: new Date(),
-    createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
-    fiscalCode: maybeFiscalCode.toUndefined(),
-    ip: sourceIp as IPString,
-    payload,
-    payloadType,
-    spidRequestId: maybeRequestId.toUndefined()
-  });
-
-  if (isLeft(errorOrSpidMsg)) {
-    log.error(`SpidLogCallback|ERROR=Invalid format for SPID log payload`);
-    log.debug(
-      `SpidLogCallback|ERROR_DETAILS=${readableReport(errorOrSpidMsg.value)}`
-    );
-    return;
-  }
-  const spidMsg = errorOrSpidMsg.value;
-
-  // encode to base64 since the queue payload is an XML
-  // and cannot contain markup characters
-  const spidMsgBase64 = Buffer.from(JSON.stringify(spidMsg)).toString("base64");
-
-  // we don't return the promise here
-  // the call follows fire & forget pattern
-  queueClient.sendMessage(spidMsgBase64).catch(err => {
-    log.error(`SpidLogCallback|ERROR=Cannot enqueue SPID payload`);
-    log.debug(`SpidLogCallback|ERROR_DETAILS=${err}`);
+    // we don't return the promise here
+    // the call follows fire & forget pattern
+    queueClient.sendMessage(spidMsgBase64).catch(err => {
+      log.error(`SpidLogCallback|ERROR=Cannot enqueue SPID payload`);
+      log.debug(`SpidLogCallback|ERROR_DETAILS=${err}`);
+    });
   });
 };
