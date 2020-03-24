@@ -32,7 +32,12 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { CIDR, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  CIDR,
+  IPString,
+  NonEmptyString,
+  PatternString
+} from "italia-ts-commons/lib/strings";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import AuthenticationController from "./controllers/authenticationController";
@@ -48,9 +53,11 @@ import UserMetadataController from "./controllers/userMetadataController";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
+import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
 import { format as dateFnsFormat } from "date-fns";
+import { isLeft } from "fp-ts/lib/Either";
 import {
   fromEither,
   fromNullable,
@@ -60,6 +67,8 @@ import {
 } from "fp-ts/lib/Option";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
+import * as t from "io-ts";
+import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import { DOMParser } from "xmldom";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
@@ -79,12 +88,14 @@ import {
   getObjectFromPackageJson
 } from "./utils/package";
 
-const queueConnectionString = getRequiredENVVar("AzureWebJobsStorage");
+const queueConnectionString = getRequiredENVVar("LogsStorageConnection");
 const spidQueueName = getRequiredENVVar("SPID_QUEUE_NAME");
 
 const defaultModule = {
   newApp
 };
+
+const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
 
 const cacheDuration = `${CACHE_MAX_AGE_SECONDS} seconds`;
 
@@ -100,27 +111,26 @@ const cachingMiddleware = apicache.options({
 
 const SAML_NAMESPACE = {
   ASSERTION: "urn:oasis:names:tc:SAML:2.0:assertion",
-  PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol",
-  XMLDSIG: "http://www.w3.org/2000/09/xmldsig#"
+  PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol"
 };
 
 const getFiscalNumberFromPayload = (doc: Document): Option<string> => {
   return fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
   )
-    .mapNullable(
-      collection =>
-        Array.from(collection).filter(
+    .mapNullable(collection => {
+      return tryCatch(() => {
+        return Array.from(collection).filter(
           elem => elem.getAttribute("Name") === "fiscalNumber"
-        )[0]
-    )
+        )[0];
+      });
+    })
+    .mapNullable(maybeElem => maybeElem.toNullable())
     .mapNullable(_ => _.textContent?.trim());
 };
 
-const getRequestIDFromPayload = (
-  doc: Document,
-  tagName: string,
-  attrName: string
+const getRequestIDFromPayload = (tagName: string, attrName: string) => (
+  doc: Document
 ): Option<string> => {
   return fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
@@ -129,68 +139,100 @@ const getRequestIDFromPayload = (
   );
 };
 
+const getRequestIDFromRequest = getRequestIDFromPayload("AuthnRequest", "ID");
+const getRequestIDFromResponse = getRequestIDFromPayload(
+  "Response",
+  "InResponseTo"
+);
+
+const SpidBaseMsg = t.interface({
+  // Timestamp of Request/Response creation
+  createdAt: UTCISODateFromString,
+
+  // Date of the SPID request / response in YYYY-MM-DD format
+  createdAtDay: PatternString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"),
+
+  // IP of the client that made a SPID login action
+  ip: IPString,
+
+  // XML payload of the SPID Request/Response
+  payload: t.string,
+
+  // Payload type: REQUEST or RESPONSE
+  payloadType: t.keyof({ REQUEST: null, RESPONSE: null })
+});
+
+export type SpidBaseMsg = t.TypeOf<typeof SpidBaseMsg>;
+
 const callback = (
   sourceIp: string | null,
   payload: string,
   payloadType: "REQUEST" | "RESPONSE"
 ): void => {
-  const { QueueClient } = require("@azure/storage-queue");
   const maybeXmlPayload = tryCatch(() =>
     new DOMParser().parseFromString(payload, "text/xml")
   );
   if (isNone(maybeXmlPayload)) {
-    log.error(
-      `Spid Log callback| ERROR | Impossible to parse SPID XML Payload`
-    );
-    return void 0;
+    log.error(`SpidLogCallback|ERROR=Cannot parse SPID XML Payload`);
+    return;
   }
-  const idParams =
-    payloadType === "REQUEST"
-      ? { tagName: "AuthnRequest", attrName: "ID" }
-      : { tagName: "Response", attrName: "InResponseTo" };
-  const tId = getRequestIDFromPayload(
-    maybeXmlPayload.value,
-    idParams.tagName,
-    idParams.attrName
-  );
-  const tFiscalCode = getFiscalNumberFromPayload(maybeXmlPayload.value);
-  const item = {
-    fiscalCode: tFiscalCode.toUndefined(),
-    spidRequestId: tId.toUndefined()
-  };
 
-  if (tId.isNone()) {
+  const doc = maybeXmlPayload.value;
+  const requestId =
+    payloadType === "REQUEST"
+      ? getRequestIDFromRequest(doc)
+      : getRequestIDFromResponse(doc);
+  const tFiscalCode = getFiscalNumberFromPayload(doc);
+
+  if (requestId.isNone()) {
     log.error(
-      `Spid Log callback| ERROR | Cannot recognize Request ID on XML Payload`
+      `SpidLogCallback| ERROR | Cannot recognize Request ID on XML Payload`
     );
-    return void 0;
+    return;
   }
 
   if (tFiscalCode.isNone() && payloadType === "RESPONSE") {
     log.error(
-      `Spid Log callback| ERROR | Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
+      `SpidLogCallback| ERROR | Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
     );
-    return void 0;
+    return;
   }
-
-  const sampleMsg = {
-    createdAt: new Date(),
-    createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
-    ip: sourceIp,
-    payload,
-    payloadType
+  const item = {
+    fiscalCode: tFiscalCode.toUndefined(),
+    spidRequestId: requestId.toUndefined()
   };
 
+  const maybeBaseMsg = SpidBaseMsg.decode({
+    createdAt: new Date(),
+    createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
+    ip: sourceIp as IPString,
+    payload,
+    payloadType
+  });
+
+  if (isLeft(maybeBaseMsg)) {
+    log.error(`SpidLogCallback| ERROR | Cannot decode SpiD base message`);
+    return;
+  }
+  const baseMsg = maybeBaseMsg.value;
   const spidMessage = {
-    ...sampleMsg,
+    ...baseMsg,
     ...item
   };
 
-  const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
-  spidQueueClient.create();
-  const buffer1 = Buffer.from(JSON.stringify(spidMessage));
-  spidQueueClient.sendMessage(buffer1.toString("base64"));
-  return void 0;
+  spidQueueClient
+    .create()
+    .then()
+    .catch(_ => {
+      log.error(`SpidLogCallback| ERROR | Cannot recognize SpiD Queue`);
+    });
+  const spidMsg = Buffer.from(JSON.stringify(spidMessage)).toString("base64");
+  spidQueueClient
+    .sendMessage(spidMsg)
+    .then()
+    .catch(_ => {
+      log.error(`SpidLogCallback| ERROR | Cannot send SpiD Message`);
+    });
 };
 
 export function newApp(
@@ -640,26 +682,6 @@ function registerPublicRoutes(app: Express): void {
       version
     };
     res.status(200).json(serverInfo);
-  });
-
-  app.post("/spidMsgPost", (req, res) => {
-    const { QueueClient } = require("@azure/storage-queue");
-    const spidQueueClient = new QueueClient(
-      queueConnectionString,
-      spidQueueName
-    );
-
-    spidQueueClient.create();
-
-    const sampleMsg = {
-      ...req.body
-    };
-
-    const buffer1 = Buffer.from(JSON.stringify(sampleMsg));
-    const sendMessageResponse = spidQueueClient.sendMessage(
-      buffer1.toString("base64")
-    );
-    res.status(200).json(sendMessageResponse.requestId);
   });
 
   // Liveness probe for Kubernetes.
