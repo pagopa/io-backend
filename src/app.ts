@@ -106,15 +106,25 @@ const SAML_NAMESPACE = {
 
 const getFiscalNumberFromPayload = (doc: Document): Option<string> => {
   return fromNullable(
-    doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "fiscalNumber").item(0)
-  ).mapNullable(_ => _.textContent?.trim());
+    doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
+  )
+    .mapNullable(
+      collection =>
+        Array.from(collection).filter(
+          elem => elem.getAttribute("Name") === "fiscalNumber"
+        )[0]
+    )
+    .mapNullable(_ => _.textContent?.trim());
 };
 
-const getRequestIDFromPayload = (doc: Document): Option<string> => {
+const getRequestIDFromPayload = (
+  doc: Document,
+  tagName: string
+): Option<string> => {
   return fromNullable(
-    doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, "AuthnRequest").item(0)
-  ).chain(AuthnRequest =>
-    fromEither(NonEmptyString.decode(AuthnRequest.getAttribute("ID")))
+    doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
+  ).chain(element =>
+    fromEither(NonEmptyString.decode(element.getAttribute("ID")))
   );
 };
 
@@ -123,22 +133,37 @@ const callback = (
   payload: string,
   payloadType: "REQUEST" | "RESPONSE"
 ): void => {
-  log.info("dentro la callback SPID");
   const { QueueClient } = require("@azure/storage-queue");
-
   const maybeXmlPayload = tryCatch(() =>
     new DOMParser().parseFromString(payload, "text/xml")
   );
   if (isNone(maybeXmlPayload)) {
-    log.error(`Spid Log callback| ERROR| Impossible to parse SPID XML Payload`);
+    log.error(
+      `Spid Log callback| ERROR | Impossible to parse SPID XML Payload`
+    );
     return void 0;
   }
-  const tId = getRequestIDFromPayload(maybeXmlPayload.value);
+  const idTagName = payloadType === "REQUEST" ? "AuthNRequest" : "Response";
+  const tId = getRequestIDFromPayload(maybeXmlPayload.value, idTagName);
   const tFiscalCode = getFiscalNumberFromPayload(maybeXmlPayload.value);
   const item = {
     fiscalCode: tFiscalCode.toUndefined(),
     spidRequestId: tId.toUndefined()
   };
+
+  if (tId.isNone()) {
+    log.error(
+      `Spid Log callback| ERROR | Cannot recognize Request ID on XML Payload`
+    );
+    return void 0;
+  }
+
+  if (tFiscalCode.isNone() && payloadType === "RESPONSE") {
+    log.error(
+      `Spid Log callback| ERROR | Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
+    );
+    return void 0;
+  }
 
   const sampleMsg = {
     createdAt: new Date(),
@@ -152,7 +177,7 @@ const callback = (
     ...sampleMsg,
     ...item
   };
-  log.info(`spidMessage => ${JSON.stringify(spidMessage)}`);
+
   const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
   spidQueueClient.create();
   const buffer1 = Buffer.from(JSON.stringify(spidMessage));
