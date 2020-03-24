@@ -119,12 +119,13 @@ const getFiscalNumberFromPayload = (doc: Document): Option<string> => {
 
 const getRequestIDFromPayload = (
   doc: Document,
-  tagName: string
+  tagName: string,
+  attrName: string
 ): Option<string> => {
   return fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
   ).chain(element =>
-    fromEither(NonEmptyString.decode(element.getAttribute("ID")))
+    fromEither(NonEmptyString.decode(element.getAttribute(attrName)))
   );
 };
 
@@ -143,8 +144,15 @@ const callback = (
     );
     return void 0;
   }
-  const idTagName = payloadType === "REQUEST" ? "AuthNRequest" : "Response";
-  const tId = getRequestIDFromPayload(maybeXmlPayload.value, idTagName);
+  const idParams =
+    payloadType === "REQUEST"
+      ? { tagName: "AuthnRequest", attrName: "ID" }
+      : { tagName: "Response", attrName: "InResponseTo" };
+  const tId = getRequestIDFromPayload(
+    maybeXmlPayload.value,
+    idParams.tagName,
+    idParams.attrName
+  );
   const tFiscalCode = getFiscalNumberFromPayload(maybeXmlPayload.value);
   const item = {
     fiscalCode: tFiscalCode.toUndefined(),
