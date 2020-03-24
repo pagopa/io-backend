@@ -76,8 +76,10 @@ const defaultModule = {
   newApp
 };
 
-const queueConnectionString = getRequiredENVVar("LogsStorageConnection");
-const spidQueueName = getRequiredENVVar("SPID_QUEUE_NAME");
+const queueConnectionString = getRequiredENVVar(
+  "SPID_LOG_STORAGE_CONNECTION_STRING"
+);
+const spidQueueName = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
 
 const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
 const spidLogCallback = makeSpidLogCallback(spidQueueClient);
