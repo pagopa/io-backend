@@ -56,6 +56,7 @@ export const getRequestIDFromRequest = getRequestIDFromPayload(
   "AuthnRequest",
   "ID"
 );
+
 export const getRequestIDFromResponse = getRequestIDFromPayload(
   "Response",
   "InResponseTo"
