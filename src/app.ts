@@ -16,6 +16,8 @@ import {
   samlConfig,
   serviceProviderConfig,
   SESSION_STORAGE,
+  SPID_LOG_QUEUE_NAME,
+  SPID_LOG_STORAGE_CONNECTION_STRING,
   URL_TOKEN_STRATEGY
 } from "./config";
 
@@ -48,14 +50,7 @@ import UserMetadataController from "./controllers/userMetadataController";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
-import NotificationService from "./services/notificationService";
-import { User } from "./types/user";
-import { toExpressHandler } from "./utils/express";
-import {
-  getCurrentBackendVersion,
-  getObjectFromPackageJson
-} from "./utils/package";
-
+import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
@@ -63,12 +58,20 @@ import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import MessagesService from "./services/messagesService";
+import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
+import { User } from "./types/user";
+import { toExpressHandler } from "./utils/express";
+import {
+  getCurrentBackendVersion,
+  getObjectFromPackageJson
+} from "./utils/package";
+import { makeSpidLogCallback } from "./utils/spid";
 
 const defaultModule = {
   newApp
@@ -95,7 +98,6 @@ export function newApp(
   PagoPABasePath: string
 ): Promise<Express> {
   // Setup Passport.
-
   // Add the strategy to authenticate proxy clients.
   passport.use(BEARER_TOKEN_STRATEGY);
   // Add the strategy to authenticate webhook calls.
@@ -176,7 +178,6 @@ export function newApp(
   //
   // Setup routes
   //
-
   return new Task(async () => {
     // Ceate the Token Service
     const TOKEN_SERVICE = new TokenService();
@@ -195,6 +196,7 @@ export function newApp(
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE
     );
+
     registerPublicRoutes(app);
 
     registerAuthenticationRoutes(app, authenticationBasePath, acsController);
@@ -230,17 +232,23 @@ export function newApp(
     );
     return { app, acsController };
   })
-    .chain(_ =>
-      withSpid(
+    .chain(_ => {
+      const spidQueueClient = new QueueClient(
+        SPID_LOG_STORAGE_CONNECTION_STRING,
+        SPID_LOG_QUEUE_NAME
+      );
+      const spidLogCallback = makeSpidLogCallback(spidQueueClient);
+      return withSpid(
         appConfig,
         samlConfig,
         serviceProviderConfig,
         REDIS_CLIENT,
         _.app,
         _.acsController.acs.bind(_.acsController),
-        _.acsController.slo.bind(_.acsController)
-      )
-    )
+        _.acsController.slo.bind(_.acsController),
+        spidLogCallback
+      );
+    })
     .map(_ => {
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
