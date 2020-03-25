@@ -1,13 +1,7 @@
 import { QueueClient } from "@azure/storage-queue";
 import { format as dateFnsFormat } from "date-fns";
 import { isLeft, tryCatch2v } from "fp-ts/lib/Either";
-import {
-  fromEither,
-  fromNullable,
-  isNone,
-  Option,
-  tryCatch
-} from "fp-ts/lib/Option";
+import { fromEither, fromNullable, isNone, Option } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -31,14 +25,11 @@ export const getFiscalNumberFromPayload = (
   return fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
   )
-    .mapNullable(collection => {
-      return tryCatch(() => {
-        return Array.from(collection).find(
-          elem => elem.getAttribute("Name") === "fiscalNumber"
-        );
-      });
-    })
-    .mapNullable(maybeElem => maybeElem.toNullable())
+    .mapNullable(collection =>
+      Array.from(collection).find(
+        elem => elem.getAttribute("Name") === "fiscalNumber"
+      )
+    )
     .mapNullable(_ => _.textContent?.trim().replace("TINIT-", ""))
     .chain(_ => fromEither(FiscalCode.decode(_)));
 };
