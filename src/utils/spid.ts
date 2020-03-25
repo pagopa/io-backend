@@ -119,7 +119,7 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
         ip: sourceIp as IPString,
         payload,
         payloadType,
-        spidRequestId: maybeRequestId.toUndefined()
+        spidRequestId: maybeRequestId.value
       });
 
       if (isLeft(errorOrSpidMsg)) {
