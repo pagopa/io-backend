@@ -93,11 +93,12 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
   payload: string,
   payloadType: "REQUEST" | "RESPONSE"
 ): void => {
+  const logPrefix = `SpidLogCallback`;
   tryCatch2v(
     () => {
       const xmlPayload = new DOMParser().parseFromString(payload, "text/xml");
       if (!xmlPayload) {
-        log.error(`SpidLogCallback|ERROR=Cannot parse SPID XML Payload`);
+        log.error(`${logPrefix}|ERROR=Cannot parse SPID XML Payload`);
         return;
       }
 
@@ -106,18 +107,16 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
           ? getRequestIDFromRequest(xmlPayload)
           : getRequestIDFromResponse(xmlPayload);
 
-      const maybeFiscalCode = getFiscalNumberFromPayload(xmlPayload);
-
       if (isNone(maybeRequestId)) {
-        log.error(
-          `SpidLogCallback|ERROR=Cannot get Request ID from XML Payload`
-        );
+        log.error(`${logPrefix}|ERROR=Cannot get Request ID from XML Payload`);
         return;
       }
 
+      const maybeFiscalCode = getFiscalNumberFromPayload(xmlPayload);
+
       if (isNone(maybeFiscalCode) && payloadType === "RESPONSE") {
         log.error(
-          `SpidLogCallback|ERROR=Cannot recognize fiscal Code on XML Payload provided by SAMLResponse`
+          `${logPrefix}|ERROR=Cannot get user's fiscal Code from response XML`
         );
         return;
       }
@@ -133,11 +132,9 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
       });
 
       if (isLeft(errorOrSpidMsg)) {
-        log.error(`SpidLogCallback|ERROR=Invalid format for SPID log payload`);
+        log.error(`${logPrefix}|ERROR=Invalid format for SPID log payload`);
         log.debug(
-          `SpidLogCallback|ERROR_DETAILS=${readableReport(
-            errorOrSpidMsg.value
-          )}`
+          `${logPrefix}|ERROR_DETAILS=${readableReport(errorOrSpidMsg.value)}`
         );
         return;
       }
@@ -152,12 +149,12 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
       // we don't return the promise here
       // the call follows fire & forget pattern
       queueClient.sendMessage(spidMsgBase64).catch(err => {
-        log.error(`SpidLogCallback|ERROR=Cannot enqueue SPID payload`);
-        log.debug(`SpidLogCallback|ERROR_DETAILS=${err}`);
+        log.error(`${logPrefix}|ERROR=Cannot enqueue SPID log`);
+        log.debug(`${logPrefix}|ERROR_DETAILS=${err}`);
       });
     },
     err => {
-      log.error(`SpidLogCallback|ERROR=${err}`);
+      log.error(`${logPrefix}|ERROR=${err}`);
     }
   );
 };
