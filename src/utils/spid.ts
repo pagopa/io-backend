@@ -33,9 +33,9 @@ export const getFiscalNumberFromPayload = (
   )
     .mapNullable(collection => {
       return tryCatch(() => {
-        return Array.from(collection).filter(
+        return Array.from(collection).find(
           elem => elem.getAttribute("Name") === "fiscalNumber"
-        )[0];
+        );
       });
     })
     .mapNullable(maybeElem => maybeElem.toNullable())

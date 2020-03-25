@@ -16,6 +16,8 @@ import {
   samlConfig,
   serviceProviderConfig,
   SESSION_STORAGE,
+  SPID_LOG_QUEUE_NAME,
+  SPID_LOG_STORAGE_CONNECTION_STRING,
   URL_TOKEN_STRATEGY
 } from "./config";
 
@@ -64,7 +66,6 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import { User } from "./types/user";
-import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
 import {
   getCurrentBackendVersion,
@@ -75,14 +76,6 @@ import { makeSpidLogCallback } from "./utils/spid";
 const defaultModule = {
   newApp
 };
-
-const queueConnectionString = getRequiredENVVar(
-  "SPID_LOG_STORAGE_CONNECTION_STRING"
-);
-const spidQueueName = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
-
-const spidQueueClient = new QueueClient(queueConnectionString, spidQueueName);
-const spidLogCallback = makeSpidLogCallback(spidQueueClient);
 
 const cacheDuration = `${CACHE_MAX_AGE_SECONDS} seconds`;
 
@@ -239,8 +232,13 @@ export function newApp(
     );
     return { app, acsController };
   })
-    .chain(_ =>
-      withSpid(
+    .chain(_ => {
+      const spidQueueClient = new QueueClient(
+        SPID_LOG_STORAGE_CONNECTION_STRING,
+        SPID_LOG_QUEUE_NAME
+      );
+      const spidLogCallback = makeSpidLogCallback(spidQueueClient);
+      return withSpid(
         appConfig,
         samlConfig,
         serviceProviderConfig,
@@ -249,8 +247,8 @@ export function newApp(
         _.acsController.acs.bind(_.acsController),
         _.acsController.slo.bind(_.acsController),
         spidLogCallback
-      )
-    )
+      );
+    })
     .map(_ => {
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
