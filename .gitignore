@@ -1,5 +1,7 @@
 # Exclude IDE folders.
-.vscode
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea
 
 # Exclude Yarn managed depencencies.
