@@ -15,10 +15,13 @@ services:
       - "443"
     ports:
       - "443:443"
+      - "5858:5858"
     image: node:10.14.2-alpine
+    command: ["yarn", "hot-reload"]
     volumes:
-      - ".env:/usr/src/app/.env"
-      - "./certs:/usr/src/app/certs:delegated"
+      - ".:/usr/src/app"
+    networks:
+      - io-be
 
   spid-testenv2:
     container_name: spid-testenv2
@@ -27,6 +30,8 @@ services:
       - "8088:8088"
     volumes:
       - "./testenv2/conf:/app/conf"
+    networks:
+      - io-be
 
   redis:
     container_name: redis
@@ -35,3 +40,24 @@ services:
       REDIS_TIMEOUT: 300
       REDIS_TCP_KEEPALIVE: 60
       REDIS_MAXMEMORY: 182m
+    networks:
+      - io-be
+
+  storage:
+    image: azurite
+    build:
+      context: ./
+      dockerfile: docker/images/azurite/Dockerfile
+    command: ["sh", "-c", "node bin/azurite -l /opt/azurite/folder --blobPort 10003 --queuePort 10004 --tablePort 10005"]
+    ports:
+      - "10000:10003"
+      - "10001:10004"
+      - "10002:10005"
+    networks:
+      - io-be
+
+networks:
+  io-be:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
