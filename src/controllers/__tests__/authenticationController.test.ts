@@ -25,6 +25,7 @@ import { UserIdentity } from "../../../generated/backend/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClientFactory from "../../services/apiClientFactory";
+import NotificationService from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
@@ -148,6 +149,15 @@ jest.mock("../../services/profileService", () => {
   };
 });
 
+jest.mock("../../services/notificationService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      deleteInstallation: () =>
+        Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    }))
+  };
+});
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -170,13 +180,15 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
 let controller: AuthenticationController;
 beforeAll(async () => {
   const api = new ApiClientFactory("", "");
-  const service = new ProfileService(api);
+  const profileService = new ProfileService(api);
+  const notificationService = new NotificationService("", "", false);
 
   controller = new AuthenticationController(
     redisSessionStorage,
     tokenService,
     getClientProfileRedirectionUrl,
-    service
+    profileService,
+    notificationService
   );
 });
 

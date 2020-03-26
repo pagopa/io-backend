@@ -134,7 +134,7 @@ const redisSessionStorage = new RedisSessionStorage(
   false
 );
 
-const notificationService = new NotificationService("", "");
+const notificationService = new NotificationService("", "", false);
 const controller = new NotificationController(
   notificationService,
   redisSessionStorage

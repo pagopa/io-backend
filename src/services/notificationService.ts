@@ -24,7 +24,7 @@ import {
   INotificationTemplate,
   toFiscalCodeHash
 } from "../types/notification";
-import { withCatchAsInternalError } from "../utils/responses";
+import { log } from "../utils/logger";
 
 /**
  * A template suitable for Apple's APNs.
@@ -47,24 +47,29 @@ const GCMTemplate: INotificationTemplate = {
 };
 
 export default class NotificationService {
+  private notificationHubService: azure.NotificationHubService;
   constructor(
     private readonly hubName: string,
-    private readonly endpointOrConnectionString: string
-  ) {}
+    private readonly endpointOrConnectionString: string,
+    private readonly allowMultipleSessions: boolean
+  ) {
+    try {
+      this.notificationHubService = azure.createNotificationHubService(
+        this.hubName,
+        this.endpointOrConnectionString
+      );
+    } catch (err) {
+      log.error("Error initializing NotificationHub Service: %s", err);
+      throw new Error(err);
+    }
+  }
 
   public readonly notify = (
     notification: Notification,
     notificationTitle?: string
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> =>
-    withCatchAsInternalError(() => {
-      const notificationHubService = azure.createNotificationHubService(
-        this.hubName,
-        this.endpointOrConnectionString
-      );
-
-      return new Promise<
-        IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
-      >(resolve => {
+    new Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>(
+      resolve => {
         const payload = {
           message: notification.message.content.subject,
           message_id: notification.message.id,
@@ -72,7 +77,7 @@ export default class NotificationService {
             `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
           )
         };
-        notificationHubService.send(
+        this.notificationHubService.send(
           toFiscalCodeHash(notification.message.fiscal_code),
           payload,
           {
@@ -93,48 +98,78 @@ export default class NotificationService {
             );
           }
         );
-      });
-    });
+      }
+    );
 
   public readonly createOrUpdateInstallation = (
     fiscalCode: FiscalCode,
     installationID: InstallationID,
     installation: Installation
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> =>
-    withCatchAsInternalError(() => {
-      const notificationHubService = azure.createNotificationHubService(
-        this.hubName,
-        this.endpointOrConnectionString
+  ): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
+  > => {
+    const azureInstallation: IInstallation = {
+      installationId: this.allowMultipleSessions
+        ? toFiscalCodeHash(fiscalCode)
+        : installationID,
+      platform: installation.platform,
+      pushChannel: installation.pushChannel,
+      tags: [toFiscalCodeHash(fiscalCode)],
+      templates: {
+        template:
+          installation.platform === PlatformEnum.apns
+            ? APNSTemplate
+            : GCMTemplate
+      }
+    };
+    return new Promise<
+      IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
+    >(resolve => {
+      this.notificationHubService.createOrUpdateInstallation(
+        { ...azureInstallation, tags: [...azureInstallation.tags] },
+        (error, _) =>
+          resolve(
+            error !== null
+              ? ResponseErrorInternal(
+                  `Error while creating or updating installation on NotificationHub [${JSON.stringify(
+                    azureInstallation
+                  )}] [${error.message}]`
+                )
+              : ResponseSuccessJson({ message: "ok" })
+          )
       );
-
-      const azureInstallation: IInstallation = {
-        installationId: installationID,
-        platform: installation.platform,
-        pushChannel: installation.pushChannel,
-        tags: [toFiscalCodeHash(fiscalCode)],
-        templates: {
-          template:
-            installation.platform === PlatformEnum.apns
-              ? APNSTemplate
-              : GCMTemplate
-        }
-      };
-      return new Promise<
-        IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
-      >(resolve => {
-        notificationHubService.createOrUpdateInstallation(
-          { ...azureInstallation, tags: [...azureInstallation.tags] },
-          (error, _) =>
-            resolve(
-              error !== null
-                ? ResponseErrorInternal(
-                    `Error while creating or updating installation on NotificationHub [${JSON.stringify(
-                      azureInstallation
-                    )}] [${error.message}]`
-                  )
-                : ResponseSuccessJson({ message: "ok" })
-            )
-        );
-      });
     });
+  };
+
+  public readonly deleteInstallation = (
+    fiscalCode: FiscalCode,
+    installationID?: InstallationID
+  ): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
+  > => {
+    return fromNullable(
+      this.allowMultipleSessions ? toFiscalCodeHash(fiscalCode) : installationID
+    )
+      .map<
+        Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>
+      >(
+        _ =>
+          new Promise(resolve => {
+            this.notificationHubService.deleteInstallation(_, (error, _1) => {
+              resolve(
+                error !== null
+                  ? ResponseErrorInternal(
+                      `Error while deleting installation on NotificationHub [${error.message}]`
+                    )
+                  : ResponseSuccessJson({ message: "ok" })
+              );
+            });
+          })
+      )
+      .getOrElse(
+        Promise.resolve(
+          ResponseSuccessJson({ message: "Installation deletion skipped" })
+        )
+      );
+  };
 }

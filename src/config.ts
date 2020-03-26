@@ -280,7 +280,7 @@ export const endpointOrConnectionString = getRequiredENVVar(
 
 // Read ENV to allow multiple user's sessions functionality
 // Default value is false when the ENV var is not provided
-const ALLOW_MULTIPLE_SESSIONS = fromNullable(
+export const ALLOW_MULTIPLE_SESSIONS = fromNullable(
   process.env.ALLOW_MULTIPLE_SESSIONS
 )
   .map(_ => _.toLowerCase() === "true")

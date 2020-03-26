@@ -3,6 +3,7 @@
  */
 
 import {
+  ALLOW_MULTIPLE_SESSIONS,
   API_CLIENT,
   appConfig,
   BEARER_TOKEN_STRATEGY,
@@ -190,22 +191,25 @@ export function newApp(
       API_CLIENT
     );
 
+    // Create the Notification Service
+    // TODO: This call may throw an error
+    const NOTIFICATION_SERVICE = new NotificationService(
+      hubName,
+      endpointOrConnectionString,
+      ALLOW_MULTIPLE_SESSIONS
+    );
+
     const acsController: AuthenticationController = new AuthenticationController(
       SESSION_STORAGE,
       TOKEN_SERVICE,
       getClientProfileRedirectionUrl,
-      PROFILE_SERVICE
+      PROFILE_SERVICE,
+      NOTIFICATION_SERVICE
     );
 
     registerPublicRoutes(app);
 
     registerAuthenticationRoutes(app, authenticationBasePath, acsController);
-
-    // Create the Notification Service
-    const NOTIFICATION_SERVICE = new NotificationService(
-      hubName,
-      endpointOrConnectionString
-    );
     // Create the messages service.
     const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
     const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);

@@ -98,7 +98,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", false);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -122,7 +122,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", false);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -146,7 +146,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", false);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -176,7 +176,7 @@ describe("NotificationService#notify", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", false);
 
     const res = await service.notify(aValidNotification);
 
@@ -202,7 +202,7 @@ describe("NotificationService#notify", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", false);
 
     const res = await service.notify(aValidNotification);
 
