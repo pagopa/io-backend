@@ -24,6 +24,11 @@ jest.mock("../controllers/notificationController", () => {
     }))
   };
 });
+jest.mock("../services/notificationService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({}))
+  };
+});
 
 import appModule from "../app";
 

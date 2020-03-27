@@ -40,6 +40,11 @@ jest.mock("../services/messagesService", () => {
     }))
   };
 });
+jest.mock("../services/notificationService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({}))
+  };
+});
 jest.mock("../utils/redis");
 
 import appModule from "../app";
