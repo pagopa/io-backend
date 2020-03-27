@@ -3,7 +3,7 @@
  */
 import * as dotenv from "dotenv";
 import { isLeft, parseJSON, toError } from "fp-ts/lib/Either";
-import { fromNullable, isSome, none, Option, some } from "fp-ts/lib/Option";
+import { fromNullable, isSome } from "fp-ts/lib/Option";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
@@ -31,7 +31,10 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import RedisSessionStorage from "./services/redisSessionStorage";
-import { STRINGS_RECORD } from "./types/commons";
+import {
+  ALLOW_MULTIPLE_SESSIONS_OPTION,
+  STRINGS_RECORD
+} from "./types/commons";
 import {
   createClusterRedisClient,
   createSimpleRedisClient
@@ -280,13 +283,11 @@ export const endpointOrConnectionString = getRequiredENVVar(
 
 // Read ENV to allow multiple user's sessions functionality
 // Default value is false when the ENV var is not provided
-export const ALLOW_MULTIPLE_SESSIONS: Option<true> = fromNullable(
+export const ALLOW_MULTIPLE_SESSIONS: ALLOW_MULTIPLE_SESSIONS_OPTION = fromNullable(
   process.env.ALLOW_MULTIPLE_SESSIONS
 )
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false)
-  ? some(true)
-  : none;
+  .map(_ => ({ allowMultipleSessions: _.toLowerCase() === "true" }))
+  .getOrElse({ allowMultipleSessions: false });
 
 // API endpoint mount.
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(

@@ -16,7 +16,6 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 
-import { none } from "fp-ts/lib/Option";
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
@@ -30,6 +29,7 @@ import NotificationService from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
+import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../../types/commons";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
@@ -162,12 +162,14 @@ jest.mock("../../services/notificationService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
-const allowMultipleSessions = none;
+const notAllowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION = {
+  allowMultipleSessions: false
+};
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
   tokenDurationSecs,
-  allowMultipleSessions
+  notAllowMultipleSessions
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
@@ -182,7 +184,11 @@ let controller: AuthenticationController;
 beforeAll(async () => {
   const api = new ApiClientFactory("", "");
   const profileService = new ProfileService(api);
-  const notificationService = new NotificationService("", "", none);
+  const notificationService = new NotificationService(
+    "",
+    "",
+    notAllowMultipleSessions
+  );
 
   controller = new AuthenticationController(
     redisSessionStorage,

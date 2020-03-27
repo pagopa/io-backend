@@ -2,12 +2,12 @@
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { none, some } from "fp-ts/lib/Option";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { InstallationID } from "../../../generated/backend/InstallationID";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
 import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
+import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../../types/commons";
 import { APNSPushType } from "../../types/notification";
 import NotificationService from "../notificationService";
 
@@ -67,6 +67,13 @@ const aValidNotification = {
   }
 };
 
+const allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION = {
+  allowMultipleSessions: true
+};
+const notAllowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION = {
+  allowMultipleSessions: false
+};
+
 const mockCreateOrUpdateInstallation = jest.fn();
 const mockSend = jest.fn();
 jest.mock("azure-sb", () => {
@@ -99,7 +106,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", some(true));
+    const service = new NotificationService("", "", allowMultipleSessions);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -123,7 +130,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", some(true));
+    const service = new NotificationService("", "", allowMultipleSessions);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -147,7 +154,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "", some(true));
+    const service = new NotificationService("", "", allowMultipleSessions);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -177,7 +184,7 @@ describe("NotificationService#notify", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", none);
+    const service = new NotificationService("", "", notAllowMultipleSessions);
 
     const res = await service.notify(aValidNotification);
 
@@ -203,7 +210,7 @@ describe("NotificationService#notify", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "", none);
+    const service = new NotificationService("", "", notAllowMultipleSessions);
 
     const res = await service.notify(aValidNotification);
 

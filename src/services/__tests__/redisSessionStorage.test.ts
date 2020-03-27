@@ -18,6 +18,7 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../../types/commons";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
@@ -25,7 +26,9 @@ import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
 
-const allowMultipleSessions = none;
+const allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION = {
+  allowMultipleSessions: false
+};
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
 
@@ -280,7 +283,7 @@ describe("RedisSessionStorage#set", () => {
     const multipleSessionsStorage = new RedisSessionStorage(
       mockRedisClient,
       aTokenDurationSecs,
-      some(true)
+      { allowMultipleSessions: true }
     );
 
     mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {

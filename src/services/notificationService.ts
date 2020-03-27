@@ -17,7 +17,8 @@ import { PlatformEnum } from "../../generated/backend/Platform";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
-import { fromNullable, isNone, Option } from "fp-ts/lib/Option";
+import { fromNullable } from "fp-ts/lib/Option";
+import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../types/commons";
 import {
   APNSPushType,
   IInstallation,
@@ -50,7 +51,7 @@ export default class NotificationService {
   constructor(
     private readonly hubName: string,
     private readonly endpointOrConnectionString: string,
-    private readonly allowMultipleSessions: Option<true>
+    private readonly allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION
   ) {
     this.notificationHubService = azure.createNotificationHubService(
       this.hubName,
@@ -103,7 +104,7 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     const azureInstallation: IInstallation = {
-      installationId: isNone(this.allowMultipleSessions)
+      installationId: !this.allowMultipleSessions.allowMultipleSessions
         ? toFiscalCodeHash(fiscalCode)
         : installationID,
       platform: installation.platform,
@@ -142,7 +143,7 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     return fromNullable(
-      isNone(this.allowMultipleSessions)
+      !this.allowMultipleSessions.allowMultipleSessions
         ? toFiscalCodeHash(fiscalCode)
         : installationID
     )

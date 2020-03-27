@@ -19,8 +19,8 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import { right } from "fp-ts/lib/Either";
-import { none } from "fp-ts/lib/Option";
 import * as redis from "redis";
+import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../../types/commons";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -29,6 +29,10 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidInstallationID = "550e8400e29b41d4a716446655440000" as InstallationID;
 const anInvalidInstallationID = "" as InstallationID;
+
+const notAllowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION = {
+  allowMultipleSessions: false
+};
 
 const mockedUser: User = {
   created_at: aTimestamp,
@@ -132,10 +136,14 @@ const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
   tokenDurationSecs,
-  none
+  notAllowMultipleSessions
 );
 
-const notificationService = new NotificationService("", "", none);
+const notificationService = new NotificationService(
+  "",
+  "",
+  notAllowMultipleSessions
+);
 const controller = new NotificationController(
   notificationService,
   redisSessionStorage
