@@ -113,7 +113,7 @@ export default class NotificationService {
     const azureInstallation: IInstallation = {
       // When a single active session per user is allowed, the installation that must be created or updated
       // will have an unique installationId referred to that user.
-      // Otherwise will be used the installationId provided by the client.
+      // Otherwise the installationId provided by the client will be used.
       installationId: !this.notificationServiceOptions.allowMultipleSessions
         ? toFiscalCodeHash(fiscalCode)
         : installationID,
