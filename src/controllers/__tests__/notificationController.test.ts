@@ -19,6 +19,7 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import { right } from "fp-ts/lib/Either";
+import { none } from "fp-ts/lib/Option";
 import * as redis from "redis";
 
 const aTimestamp = 1518010929530;
@@ -131,10 +132,10 @@ const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
   tokenDurationSecs,
-  false
+  none
 );
 
-const notificationService = new NotificationService("", "", false);
+const notificationService = new NotificationService("", "", none);
 const controller = new NotificationController(
   notificationService,
   redisSessionStorage

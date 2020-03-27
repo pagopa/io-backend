@@ -2,6 +2,7 @@
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
+import { none, some } from "fp-ts/lib/Option";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { InstallationID } from "../../../generated/backend/InstallationID";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
@@ -98,7 +99,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", false);
+    const service = new NotificationService("", "", some(true));
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -122,7 +123,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", false);
+    const service = new NotificationService("", "", some(true));
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -146,7 +147,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "", false);
+    const service = new NotificationService("", "", some(true));
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -176,7 +177,7 @@ describe("NotificationService#notify", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", false);
+    const service = new NotificationService("", "", none);
 
     const res = await service.notify(aValidNotification);
 
@@ -202,7 +203,7 @@ describe("NotificationService#notify", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "", false);
+    const service = new NotificationService("", "", none);
 
     const res = await service.notify(aValidNotification);
 

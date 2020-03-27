@@ -16,6 +16,7 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 
+import { none } from "fp-ts/lib/Option";
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
@@ -161,7 +162,7 @@ jest.mock("../../services/notificationService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
-const allowMultipleSessions = false;
+const allowMultipleSessions = none;
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
@@ -181,7 +182,7 @@ let controller: AuthenticationController;
 beforeAll(async () => {
   const api = new ApiClientFactory("", "");
   const profileService = new ProfileService(api);
-  const notificationService = new NotificationService("", "", false);
+  const notificationService = new NotificationService("", "", none);
 
   controller = new AuthenticationController(
     redisSessionStorage,

@@ -3,7 +3,7 @@
  */
 import * as dotenv from "dotenv";
 import { isLeft, parseJSON, toError } from "fp-ts/lib/Either";
-import { fromNullable, isSome } from "fp-ts/lib/Option";
+import { fromNullable, isSome, none, Option, some } from "fp-ts/lib/Option";
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
@@ -280,11 +280,13 @@ export const endpointOrConnectionString = getRequiredENVVar(
 
 // Read ENV to allow multiple user's sessions functionality
 // Default value is false when the ENV var is not provided
-export const ALLOW_MULTIPLE_SESSIONS = fromNullable(
+export const ALLOW_MULTIPLE_SESSIONS: Option<true> = fromNullable(
   process.env.ALLOW_MULTIPLE_SESSIONS
 )
   .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
+  .getOrElse(false)
+  ? some(true)
+  : none;
 
 // API endpoint mount.
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(

@@ -7,6 +7,7 @@
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
+import { none } from "fp-ts/lib/Option";
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -46,7 +47,7 @@ const mockedUser: User = {
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
-const allowMultipleSessions = false;
+const allowMultipleSessions = none;
 const aTokenDurationSecs = 3600;
 const mockGet = jest.fn();
 const mockMget = jest.fn();

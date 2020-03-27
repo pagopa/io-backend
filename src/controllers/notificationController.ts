@@ -71,7 +71,7 @@ export default class NotificationController {
   > {
     return withUserFromRequest(req, async user =>
       withValidatedOrValidationError(
-        InstallationID.decode(req.params.id), // An installation could be overwritten from any client passing an existing installationID
+        InstallationID.decode(req.params.id),
         installationID =>
           withValidatedOrValidationError(
             Installation.decode(req.body),

@@ -54,6 +54,7 @@ import checkIP from "./utils/middleware/checkIP";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import { isLeft, tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -192,19 +193,30 @@ export function newApp(
     );
 
     // Create the Notification Service
-    // TODO: This call may throw an error
-    const NOTIFICATION_SERVICE = new NotificationService(
-      hubName,
-      endpointOrConnectionString,
-      ALLOW_MULTIPLE_SESSIONS
+    const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
+      () => {
+        return new NotificationService(
+          hubName,
+          endpointOrConnectionString,
+          ALLOW_MULTIPLE_SESSIONS
+        );
+      },
+      err => {
+        log.error("Error initializing NotificationHub Service: %s", err);
+        return new Error(String(err));
+      }
     );
+
+    if (isLeft(ERROR_OR_NOTIFICATION_SERVICE)) {
+      process.exit(1);
+    }
 
     const acsController: AuthenticationController = new AuthenticationController(
       SESSION_STORAGE,
       TOKEN_SERVICE,
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE,
-      NOTIFICATION_SERVICE
+      ERROR_OR_NOTIFICATION_SERVICE.value
     );
 
     registerPublicRoutes(app);
@@ -222,7 +234,7 @@ export function newApp(
       urlTokenAuth,
       PROFILE_SERVICE,
       MESSAGES_SERVICE,
-      NOTIFICATION_SERVICE,
+      ERROR_OR_NOTIFICATION_SERVICE.value,
       SESSION_STORAGE,
       PAGOPA_PROXY_SERVICE,
       USER_METADATA_STORAGE,

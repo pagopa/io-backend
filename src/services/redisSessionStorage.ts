@@ -40,7 +40,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number,
-    private readonly allowMultipleSessions: boolean
+    private readonly allowMultipleSessions: Option<true>
   ) {
     super();
     this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
@@ -94,7 +94,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    const removeOtherUserSessionsOrNopPromise = this.allowMultipleSessions
+    const removeOtherUserSessionsOrNopPromise = isSome(
+      this.allowMultipleSessions
+    )
       ? Promise.resolve(right<Error, boolean>(true))
       : this.removeOtherUserSessions(user);
 

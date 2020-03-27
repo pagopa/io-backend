@@ -17,14 +17,13 @@ import { PlatformEnum } from "../../generated/backend/Platform";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
-import { fromNullable } from "fp-ts/lib/Option";
+import { fromNullable, isNone, Option } from "fp-ts/lib/Option";
 import {
   APNSPushType,
   IInstallation,
   INotificationTemplate,
   toFiscalCodeHash
 } from "../types/notification";
-import { log } from "../utils/logger";
 
 /**
  * A template suitable for Apple's APNs.
@@ -51,17 +50,12 @@ export default class NotificationService {
   constructor(
     private readonly hubName: string,
     private readonly endpointOrConnectionString: string,
-    private readonly allowMultipleSessions: boolean
+    private readonly allowMultipleSessions: Option<true>
   ) {
-    try {
-      this.notificationHubService = azure.createNotificationHubService(
-        this.hubName,
-        this.endpointOrConnectionString
-      );
-    } catch (err) {
-      log.error("Error initializing NotificationHub Service: %s", err);
-      throw new Error(err);
-    }
+    this.notificationHubService = azure.createNotificationHubService(
+      this.hubName,
+      this.endpointOrConnectionString
+    );
   }
 
   public readonly notify = (
@@ -109,7 +103,7 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     const azureInstallation: IInstallation = {
-      installationId: this.allowMultipleSessions
+      installationId: isNone(this.allowMultipleSessions)
         ? toFiscalCodeHash(fiscalCode)
         : installationID,
       platform: installation.platform,
@@ -148,7 +142,9 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     return fromNullable(
-      this.allowMultipleSessions ? toFiscalCodeHash(fiscalCode) : installationID
+      isNone(this.allowMultipleSessions)
+        ? toFiscalCodeHash(fiscalCode)
+        : installationID
     )
       .map<
         Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>

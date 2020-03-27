@@ -119,7 +119,7 @@ export default class AuthenticationController {
       user.fiscal_code
     );
     if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
-      log.error(
+      log.debug(
         "Error cleaning Notification Hub Installation [%s]",
         deleteInstallationResponse.detail
       );
