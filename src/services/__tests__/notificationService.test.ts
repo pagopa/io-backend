@@ -8,7 +8,9 @@ import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkd
 import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import { APNSPushType } from "../../types/notification";
-import NotificationService from "../notificationService";
+import NotificationService, {
+  NotificationServiceOptions
+} from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const aFiscalCodeHash =
@@ -66,6 +68,10 @@ const aValidNotification = {
   }
 };
 
+const notificationServiceOptions: NotificationServiceOptions = {
+  allowMultipleSessions: true
+};
+
 const mockCreateOrUpdateInstallation = jest.fn();
 const mockSend = jest.fn();
 jest.mock("azure-sb", () => {
@@ -98,7 +104,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", notificationServiceOptions);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -122,7 +128,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", notificationServiceOptions);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -146,7 +152,7 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", notificationServiceOptions);
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
@@ -175,8 +181,9 @@ describe("NotificationService#notify", () => {
     mockSend.mockImplementation((_, __, ___, callback) => {
       callback(null);
     });
-
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", {
+      allowMultipleSessions: false
+    });
 
     const res = await service.notify(aValidNotification);
 
@@ -202,7 +209,9 @@ describe("NotificationService#notify", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "");
+    const service = new NotificationService("", "", {
+      allowMultipleSessions: false
+    });
 
     const res = await service.notify(aValidNotification);
 

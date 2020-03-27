@@ -12,6 +12,11 @@ import nodeFetch from "node-fetch";
 jest.mock("@azure/storage-queue");
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
+jest.mock("../services/notificationService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({}))
+  };
+});
 
 describe("Server graceful shutdown", () => {
   // tslint:disable:no-let

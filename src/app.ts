@@ -3,6 +3,7 @@
  */
 
 import {
+  ALLOW_MULTIPLE_SESSIONS,
   API_CLIENT,
   appConfig,
   BEARER_TOKEN_STRATEGY,
@@ -53,6 +54,7 @@ import checkIP from "./utils/middleware/checkIP";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -190,22 +192,32 @@ export function newApp(
       API_CLIENT
     );
 
+    // Create the Notification Service
+    const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
+      () => {
+        return new NotificationService(hubName, endpointOrConnectionString, {
+          allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS
+        });
+      },
+      err => {
+        log.error("Error initializing NotificationHub Service: %s", err);
+        process.exit(1);
+      }
+    );
+
+    const NOTIFICATION_SERVICE = ERROR_OR_NOTIFICATION_SERVICE.value;
+
     const acsController: AuthenticationController = new AuthenticationController(
       SESSION_STORAGE,
       TOKEN_SERVICE,
       getClientProfileRedirectionUrl,
-      PROFILE_SERVICE
+      PROFILE_SERVICE,
+      NOTIFICATION_SERVICE
     );
 
     registerPublicRoutes(app);
 
     registerAuthenticationRoutes(app, authenticationBasePath, acsController);
-
-    // Create the Notification Service
-    const NOTIFICATION_SERVICE = new NotificationService(
-      hubName,
-      endpointOrConnectionString
-    );
     // Create the messages service.
     const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
     const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);

@@ -23,6 +23,7 @@ import { NewProfile } from "generated/io-api/NewProfile";
 
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
+import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
 import { SuccessResponse } from "../types/commons";
@@ -43,7 +44,8 @@ export default class AuthenticationController {
     private readonly getClientProfileRedirectionUrl: (
       token: string
     ) => UrlFromString,
-    private readonly profileService: ProfileService
+    private readonly profileService: ProfileService,
+    private readonly notificationService: NotificationService
   ) {}
 
   /**
@@ -111,6 +113,16 @@ export default class AuthenticationController {
       return getProfileResponse.kind === "IResponseErrorTooManyRequests"
         ? ResponseErrorInternal("Too many requests")
         : getProfileResponse;
+    }
+
+    const deleteInstallationResponse = await this.notificationService.deleteInstallation(
+      user.fiscal_code
+    );
+    if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
+      log.debug(
+        "Error cleaning Notification Hub Installation [%s]",
+        deleteInstallationResponse.detail
+      );
     }
 
     const urlWithToken = this.getClientProfileRedirectionUrl(
