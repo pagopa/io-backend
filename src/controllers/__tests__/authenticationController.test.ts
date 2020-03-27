@@ -25,11 +25,12 @@ import { UserIdentity } from "../../../generated/backend/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClientFactory from "../../services/apiClientFactory";
-import NotificationService from "../../services/notificationService";
+import NotificationService, {
+  NotificationServiceOptions
+} from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
-import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../../types/commons";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
@@ -162,14 +163,16 @@ jest.mock("../../services/notificationService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
-const notAllowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION = {
-  allowMultipleSessions: false
+
+const allowMultipleSessions = false;
+const notificationServiceOptions: NotificationServiceOptions = {
+  allowMultipleSessions
 };
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
   tokenDurationSecs,
-  notAllowMultipleSessions
+  allowMultipleSessions
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
@@ -187,7 +190,7 @@ beforeAll(async () => {
   const notificationService = new NotificationService(
     "",
     "",
-    notAllowMultipleSessions
+    notificationServiceOptions
   );
 
   controller = new AuthenticationController(

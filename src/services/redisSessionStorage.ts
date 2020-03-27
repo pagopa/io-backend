@@ -19,7 +19,6 @@ import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
-import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../types/commons";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
@@ -41,7 +40,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number,
-    private readonly allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION
+    private readonly allowMultipleSessions: boolean
   ) {
     super();
     this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
@@ -96,7 +95,6 @@ export default class RedisSessionStorage extends RedisStorageUtils
     );
 
     const removeOtherUserSessionsOrNopPromise = this.allowMultipleSessions
-      .allowMultipleSessions
       ? Promise.resolve(right<Error, boolean>(true))
       : this.removeOtherUserSessions(user);
 

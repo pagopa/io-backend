@@ -18,7 +18,7 @@ import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import { ALLOW_MULTIPLE_SESSIONS_OPTION } from "../types/commons";
+import * as t from "io-ts";
 import {
   APNSPushType,
   IInstallation,
@@ -46,12 +46,19 @@ const GCMTemplate: INotificationTemplate = {
     '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)", "smallIcon": "ic_notification", "largeIcon": "ic_notification"}}'
 };
 
+export const NotificationServiceOptions = t.interface({
+  allowMultipleSessions: t.boolean
+});
+export type NotificationServiceOptions = t.TypeOf<
+  typeof NotificationServiceOptions
+>;
+
 export default class NotificationService {
   private notificationHubService: azure.NotificationHubService;
   constructor(
     private readonly hubName: string,
     private readonly endpointOrConnectionString: string,
-    private readonly allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS_OPTION
+    private readonly notificationServiceOptions: NotificationServiceOptions
   ) {
     this.notificationHubService = azure.createNotificationHubService(
       this.hubName,
@@ -104,7 +111,10 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     const azureInstallation: IInstallation = {
-      installationId: !this.allowMultipleSessions.allowMultipleSessions
+      // When a single active session per user is allowed, the installation that must be created or updated
+      // will have an unique installationId referred to that user.
+      // Otherwise will be used the installationId provided by the client.
+      installationId: !this.notificationServiceOptions.allowMultipleSessions
         ? toFiscalCodeHash(fiscalCode)
         : installationID,
       platform: installation.platform,
@@ -143,7 +153,7 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     return fromNullable(
-      !this.allowMultipleSessions.allowMultipleSessions
+      !this.notificationServiceOptions.allowMultipleSessions
         ? toFiscalCodeHash(fiscalCode)
         : installationID
     )
