@@ -6,7 +6,8 @@ import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
 
 import { Installation } from "../../generated/backend/Installation";
@@ -15,8 +16,12 @@ import { InstallationID } from "../../generated/backend/InstallationID";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
-import { isRight } from "fp-ts/lib/Either";
-import { IWithinRangeStringTag } from "italia-ts-commons/lib/strings";
+import { toError } from "fp-ts/lib/Either";
+import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
+import {
+  NOTIFICATION_DEFAULT_SUBJECT,
+  NOTIFICATION_DEFAULT_TITLE
+} from "../config";
 import NotificationService from "../services/notificationService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
@@ -37,29 +42,38 @@ export default class NotificationController {
   > =>
     withValidatedOrValidationError(
       Notification.decode(req.body),
-      async (data: Notification) => {
-        const errorOrHasSession = await this.sessionStorage.userHasActiveSessions(
-          data.message.fiscal_code
-        );
-        if (isRight(errorOrHasSession) && errorOrHasSession.value) {
-          return this.notificationService.notify(data);
-        }
-        const newData = {
-          ...data,
-          message: {
-            ...data.message,
-            content: {
-              ...data.message.content,
-              subject: "Entra nell'app per leggere il contenuto" as string &
-                IWithinRangeStringTag<10, 121>
-            }
-          }
-        };
-        return await this.notificationService.notify(
-          newData,
-          "Hai un nuovo messaggio su IO"
-        );
-      }
+      (data: Notification) =>
+        tryCatch(
+          async () =>
+            await this.sessionStorage.userHasActiveSessions(
+              data.message.fiscal_code
+            ),
+          toError
+        )
+          .chain(fromEither)
+          .map(userHasActiveSessions =>
+            userHasActiveSessions && "content" in data.message
+              ? // send the full message only if the user has an
+                // active session and the message content is defined
+                this.notificationService.notify(
+                  data,
+                  data.message.content.subject
+                )
+              : // send a generic message
+                // if the user does not have an active session
+                // or the message content is not defined
+                this.notificationService.notify(
+                  data,
+                  NOTIFICATION_DEFAULT_SUBJECT,
+                  NOTIFICATION_DEFAULT_TITLE
+                )
+          )
+          .getOrElseL(async error =>
+            ResponseErrorInternal(
+              `Unexpected error sending push notification: ${error}.`
+            )
+          )
+          .run()
     );
 
   public async createOrUpdateInstallation(

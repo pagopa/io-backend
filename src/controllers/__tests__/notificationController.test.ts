@@ -21,7 +21,12 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import { right } from "fp-ts/lib/Either";
+import { MessageSubject } from "generated/notifications/MessageSubject";
 import * as redis from "redis";
+import {
+  NOTIFICATION_DEFAULT_SUBJECT,
+  NOTIFICATION_DEFAULT_TITLE
+} from "../../config";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -60,12 +65,10 @@ const mockedInvalidUser: User = {
   wallet_token: "123hexToken" as WalletToken
 };
 
-const aValidNotification = {
+const aNotificationSubject = "this is a notification subject" as MessageSubject;
+
+const aValidNotificationWithoutContent = {
   message: {
-    content: {
-      markdown: "test".repeat(80),
-      subject: "this is a message"
-    },
     created_at: new Date(),
     fiscal_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
@@ -78,11 +81,22 @@ const aValidNotification = {
   }
 };
 
+const aValidNotification = {
+  ...aValidNotificationWithoutContent,
+  message: {
+    ...aValidNotificationWithoutContent.message,
+    content: {
+      markdown: "test".repeat(80),
+      subject: aNotificationSubject
+    }
+  }
+};
+
 const anInvalidNotification = {
   message: {
     content: {
       markdown: "invalid",
-      subject: "this is a message"
+      subject: aNotificationSubject
     },
     created_at: new Date(),
     fiscal_code: anInvalidFiscalNumber,
@@ -112,25 +126,8 @@ const badRequestErrorResponse = {
   type: undefined
 };
 
-const mockCreateOrUpdateInstallation = jest.fn();
-const mockNotify = jest.fn();
-jest.mock("../../services/notificationService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      createOrUpdateInstallation: mockCreateOrUpdateInstallation,
-      notify: mockNotify
-    }))
-  };
-});
-
-const mockUserHasActiveSessions = jest.fn();
-jest.mock("../../services/redisSessionStorage", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      userHasActiveSessions: mockUserHasActiveSessions
-    }))
-  };
-});
+jest.mock("../../services/notificationService");
+jest.mock("../../services/redisSessionStorage");
 
 const redisClient = {} as redis.RedisClient;
 
@@ -141,11 +138,19 @@ const redisSessionStorage = new RedisSessionStorage(
   allowMultipleSessions
 );
 
+const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = jest.fn());
+
 const notificationService = new NotificationService(
   "",
   "",
   notificationServiceOptions
 );
+
+// tslint:disable-next-line: no-any
+const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpdateInstallation = jest.fn());
+// tslint:disable-next-line: no-any
+const mockNotify = ((notificationService as any).notify = jest.fn());
+
 const controller = new NotificationController(
   notificationService,
   redisSessionStorage
@@ -186,25 +191,43 @@ describe("NotificationController#notify", () => {
     );
 
     req.body = aValidNotification;
-    const expectedNotification = {
-      ...aValidNotification,
-      message: {
-        ...aValidNotification.message,
-        content: {
-          ...aValidNotification.message.content,
-          subject: "Entra nell'app per leggere il contenuto"
-        }
-      }
-    };
+    const expectedNotificationOrError = Notification.decode(aValidNotification);
+    const res = await controller.notify(req);
+
+    expect(expectedNotificationOrError.isRight()).toBeTruthy();
+    expect(mockNotify).toBeCalledWith(
+      expectedNotificationOrError.value,
+      NOTIFICATION_DEFAULT_SUBJECT,
+      NOTIFICATION_DEFAULT_TITLE
+    );
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+  });
+
+  it("should send generic notification if message content is not defined", async () => {
+    const req = mockReq();
+
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+
+    mockNotify.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    );
+
+    req.body = aValidNotificationWithoutContent;
     const expectedNotificationOrError = Notification.decode(
-      expectedNotification
+      aValidNotificationWithoutContent
     );
     const res = await controller.notify(req);
 
     expect(expectedNotificationOrError.isRight()).toBeTruthy();
     expect(mockNotify).toBeCalledWith(
       expectedNotificationOrError.value,
-      "Hai un nuovo messaggio su IO"
+      NOTIFICATION_DEFAULT_SUBJECT,
+      NOTIFICATION_DEFAULT_TITLE
     );
 
     expect(res).toEqual({

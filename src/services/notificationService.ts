@@ -68,12 +68,13 @@ export default class NotificationService {
 
   public readonly notify = (
     notification: Notification,
+    notificationSubject: string,
     notificationTitle?: string
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> =>
     new Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>(
       resolve => {
         const payload = {
-          message: notification.message.content.subject,
+          message: notificationSubject,
           message_id: notification.message.id,
           title: fromNullable(notificationTitle).getOrElse(
             `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
@@ -131,7 +132,10 @@ export default class NotificationService {
       IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
     >(resolve => {
       this.notificationHubService.createOrUpdateInstallation(
-        { ...azureInstallation, tags: [...azureInstallation.tags] },
+        {
+          ...azureInstallation,
+          tags: [...azureInstallation.tags]
+        },
         (error, _) =>
           resolve(
             error !== null
@@ -175,7 +179,9 @@ export default class NotificationService {
       )
       .getOrElse(
         Promise.resolve(
-          ResponseSuccessJson({ message: "Installation deletion skipped" })
+          ResponseSuccessJson({
+            message: "Installation deletion skipped"
+          })
         )
       );
   };

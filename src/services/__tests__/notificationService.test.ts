@@ -50,11 +50,14 @@ const aGoogleInstallation = {
     }
   }
 };
+
+const aNotificationSubject = "this is a message" as MessageSubject;
+
 const aValidNotification = {
   message: {
     content: {
       markdown: "test".repeat(80) as MessageBodyMarkdown,
-      subject: "this is a message" as MessageSubject
+      subject: aNotificationSubject
     },
     created_at: new Date(),
     fiscal_code: aFiscalCode,
@@ -185,7 +188,7 @@ describe("NotificationService#notify", () => {
       allowMultipleSessions: false
     });
 
-    const res = await service.notify(aValidNotification);
+    const res = await service.notify(aValidNotification, aNotificationSubject);
 
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -213,7 +216,7 @@ describe("NotificationService#notify", () => {
       allowMultipleSessions: false
     });
 
-    const res = await service.notify(aValidNotification);
+    const res = await service.notify(aValidNotification, aNotificationSubject);
 
     expect(res).toEqual({
       apply: expect.any(Function),

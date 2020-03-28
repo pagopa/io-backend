@@ -328,3 +328,8 @@ export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
   "SPID_LOG_STORAGE_CONNECTION_STRING"
 );
 export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
+
+// Push notifications
+export const NOTIFICATION_DEFAULT_SUBJECT =
+  "Entra nell'app per leggere il contenuto";
+export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
