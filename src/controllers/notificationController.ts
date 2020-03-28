@@ -53,24 +53,28 @@ export default class NotificationController {
           toError
         )
           .chain(fromEither)
-          .map(userHasActiveSessions =>
-            userHasActiveSessions && "content" in data.message
-              ? // send the full message only if the user has an
-                // active session and the message content is defined
-                this.notificationService.notify(
-                  data,
-                  data.message.content.subject
-                )
-              : // send a generic message
-                // if the user does not have an active session
-                // or the message content is not defined
-                this.notificationService.notify(
-                  data,
-                  this.opts.notificationDefaultSubject,
-                  this.opts.notificationDefaultTitle
-                )
+          .chain(userHasActiveSessions =>
+            tryCatch(
+              async () =>
+                userHasActiveSessions && "content" in data.message
+                  ? // send the full message only if the user has an
+                    // active session and the message content is defined
+                    await this.notificationService.notify(
+                      data,
+                      data.message.content.subject
+                    )
+                  : // send a generic message
+                    // if the user does not have an active session
+                    // or the message content is not defined
+                    await this.notificationService.notify(
+                      data,
+                      this.opts.notificationDefaultSubject,
+                      this.opts.notificationDefaultTitle
+                    ),
+              toError
+            )
           )
-          .getOrElseL(async error =>
+          .getOrElseL(error =>
             ResponseErrorInternal(
               `Unexpected error sending push notification: ${error}.`
             )
