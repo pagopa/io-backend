@@ -23,10 +23,6 @@ import NotificationController from "../notificationController";
 import { right } from "fp-ts/lib/Either";
 import { MessageSubject } from "generated/notifications/MessageSubject";
 import * as redis from "redis";
-import {
-  NOTIFICATION_DEFAULT_SUBJECT,
-  NOTIFICATION_DEFAULT_TITLE
-} from "../../config";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -151,9 +147,17 @@ const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpd
 // tslint:disable-next-line: no-any
 const mockNotify = ((notificationService as any).notify = jest.fn());
 
+// do not import these from config as the module has side effects
+const NOTIFICATION_DEFAULT_SUBJECT = "default subject";
+const NOTIFICATION_DEFAULT_TITLE = "default title";
+
 const controller = new NotificationController(
   notificationService,
-  redisSessionStorage
+  redisSessionStorage,
+  {
+    notificationDefaultSubject: "default subject",
+    notificationDefaultTitle: "default title"
+  }
 );
 
 describe("NotificationController#notify", () => {

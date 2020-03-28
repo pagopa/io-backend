@@ -18,19 +18,21 @@ import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import { toError } from "fp-ts/lib/Either";
 import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
-import {
-  NOTIFICATION_DEFAULT_SUBJECT,
-  NOTIFICATION_DEFAULT_TITLE
-} from "../config";
 import NotificationService from "../services/notificationService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
+export interface INotificationControllerOptions {
+  notificationDefaultSubject: string;
+  notificationDefaultTitle: string;
+}
+
 export default class NotificationController {
   constructor(
     private readonly notificationService: NotificationService,
-    private readonly sessionStorage: RedisSessionStorage
+    private readonly sessionStorage: RedisSessionStorage,
+    private readonly opts: INotificationControllerOptions
   ) {}
 
   public readonly notify = async (
@@ -64,8 +66,8 @@ export default class NotificationController {
                 // or the message content is not defined
                 this.notificationService.notify(
                   data,
-                  NOTIFICATION_DEFAULT_SUBJECT,
-                  NOTIFICATION_DEFAULT_TITLE
+                  this.opts.notificationDefaultSubject,
+                  this.opts.notificationDefaultTitle
                 )
           )
           .getOrElseL(async error =>
