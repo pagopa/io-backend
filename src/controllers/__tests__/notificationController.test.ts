@@ -256,6 +256,65 @@ describe("NotificationController#notify", () => {
 
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
+
+  it("should return an error in case an exception is thrown getting user session", async () => {
+    const req = mockReq();
+
+    mockUserHasActiveSessions.mockImplementation(() => {
+      throw new Error("error");
+    });
+
+    req.body = aValidNotificationWithoutContent;
+    const res = await controller.notify(req);
+
+    expect(mockNotify).not.toHaveBeenCalled();
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      detail: expect.stringContaining("Exception"),
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error in case an exception is thrown notifying the user", async () => {
+    const req = mockReq();
+
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+
+    mockNotify.mockImplementation(() => {
+      throw new Error("error");
+    });
+
+    req.body = aValidNotificationWithoutContent;
+    const res = await controller.notify(req);
+
+    expect(mockNotify).toHaveBeenCalled();
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      detail: expect.stringContaining("Exception"),
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error in case notify call fails", async () => {
+    const req = mockReq();
+
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+
+    mockNotify.mockReturnValue(Promise.reject());
+
+    req.body = aValidNotificationWithoutContent;
+    const res = await controller.notify(req);
+
+    expect(mockNotify).toHaveBeenCalled();
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      detail: expect.stringContaining("Exception"),
+      kind: "IResponseErrorInternal"
+    });
+  });
 });
 
 describe("NotificationController#createOrUpdateInstallation", () => {
