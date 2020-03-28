@@ -271,7 +271,7 @@ describe("NotificationController#notify", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
-      detail: expect.stringContaining("Unexpected"),
+      detail: expect.stringContaining("Exception"),
       kind: "IResponseErrorInternal"
     });
   });
@@ -292,7 +292,26 @@ describe("NotificationController#notify", () => {
 
     expect(res).toEqual({
       apply: expect.any(Function),
-      detail: expect.stringContaining("Unexpected"),
+      detail: expect.stringContaining("Exception"),
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error in case notify call fails", async () => {
+    const req = mockReq();
+
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+
+    mockNotify.mockReturnValue(Promise.reject());
+
+    req.body = aValidNotificationWithoutContent;
+    const res = await controller.notify(req);
+
+    expect(mockNotify).toHaveBeenCalled();
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      detail: expect.stringContaining("Exception"),
       kind: "IResponseErrorInternal"
     });
   });
