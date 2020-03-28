@@ -12,6 +12,8 @@ import {
   getClientProfileRedirectionUrl,
   hubName,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
+  NOTIFICATION_DEFAULT_SUBJECT,
+  NOTIFICATION_DEFAULT_TITLE,
   PAGOPA_CLIENT,
   REDIS_CLIENT,
   samlConfig,
@@ -345,7 +347,11 @@ function registerAPIRoutes(
 
   const notificationController: NotificationController = new NotificationController(
     notificationService,
-    sessionStorage
+    sessionStorage,
+    {
+      notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
+      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
+    }
   );
 
   const sessionController: SessionController = new SessionController(
