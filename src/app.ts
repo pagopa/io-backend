@@ -525,7 +525,9 @@ function registerAuthenticationRoutes(
   basePath: string,
   acsController: AuthenticationController
 ): void {
-  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+  const bearerTokenAuth = passport.authenticate("bearer.session", {
+    session: false
+  });
 
   app.post(
     `${basePath}/logout`,
