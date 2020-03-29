@@ -104,6 +104,7 @@ export function newApp(
 ): Promise<Express> {
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
+  // tslint:disable-next-line: no-duplicate-string
   passport.use("bearer.session", BEARER_SESSION_TOKEN_STRATEGY);
 
   // Add the strategy to authenticate proxy clients.
