@@ -2,7 +2,7 @@
  * Defines services and register them to the Service Container.
  */
 import * as dotenv from "dotenv";
-import { isLeft, parseJSON, toError } from "fp-ts/lib/Either";
+import { parseJSON, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import {
   getNodeEnvironmentFromProcessEnv,
@@ -10,9 +10,8 @@ import {
 } from "italia-ts-commons/lib/environment";
 import {
   errorsToReadableMessages,
-  ReadableReporter
+  readableReport
 } from "italia-ts-commons/lib/reporters";
-import { CIDR } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import ApiClientFactory from "./services/apiClientFactory";
@@ -33,6 +32,7 @@ import {
 import RedisSessionStorage from "./services/redisSessionStorage";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { STRINGS_RECORD } from "./types/commons";
+import { decodeCIDRs } from "./utils/cidrs";
 import {
   createClusterRedisClient,
   createSimpleRedisClient
@@ -205,39 +205,29 @@ if (!clientProfileRedirectionUrl.includes("{token}")) {
   log.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
 }
 
-// Range IP allowed for notification.
-function decodeNotifyCIDR(): CIDR {
-  const errorOrNotifyCIDR = CIDR.decode(
-    process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE
+// IP(s) or CIDR(s) allowed for notification
+export const ALLOW_NOTIFY_IP_SOURCE_RANGE = decodeCIDRs(
+  process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
+      errs
+    )}`
   );
-  if (isLeft(errorOrNotifyCIDR)) {
-    log.error(
-      "Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: %s",
-      ReadableReporter.report(errorOrNotifyCIDR)
-    );
-    return process.exit(1);
-  } else {
-    return errorOrNotifyCIDR.value;
-  }
-}
-export const ALLOW_NOTIFY_IP_SOURCE_RANGE = decodeNotifyCIDR();
+  return process.exit(1);
+});
 
-// Range IP allowed for PagoPA proxy.
-function decodePagoPACIDR(): CIDR {
-  const errorOrPagoPACIDR = CIDR.decode(
-    process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE
+// IP(s) or CIDR(s) allowed for payment manager endpoint
+export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodeCIDRs(
+  process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
+      errs
+    )}`
   );
-  if (isLeft(errorOrPagoPACIDR)) {
-    log.error(
-      "Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: %s",
-      ReadableReporter.report(errorOrPagoPACIDR)
-    );
-    return process.exit(1);
-  } else {
-    return errorOrPagoPACIDR.value;
-  }
-}
-export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodePagoPACIDR();
+  return process.exit(1);
+});
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");

@@ -58,8 +58,8 @@ describe("Success app start", () => {
   beforeAll(async () => {
     app = await appModule.newApp(
       NodeEnvironmentEnum.PRODUCTION,
-      aValidCIDR,
-      aValidCIDR,
+      [aValidCIDR],
+      [aValidCIDR],
       "",
       "/api/v1",
       "/pagopa/api/v1"
@@ -151,8 +151,8 @@ describe("Failure app start", () => {
       .mockImplementation(() => true as never);
     app = await appModule.newApp(
       NodeEnvironmentEnum.PRODUCTION,
-      aValidCIDR,
-      aValidCIDR,
+      [aValidCIDR],
+      [aValidCIDR],
       "",
       "/api/v1",
       "/pagopa/api/v1"

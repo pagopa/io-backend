@@ -96,8 +96,8 @@ const cachingMiddleware = apicache.options({
 
 export function newApp(
   env: NodeEnvironment,
-  allowNotifyIPSourceRange: CIDR,
-  allowPagoPAIPSourceRange: CIDR,
+  allowNotifyIPSourceRange: readonly CIDR[],
+  allowPagoPAIPSourceRange: readonly CIDR[],
   authenticationBasePath: string,
   APIBasePath: string,
   PagoPABasePath: string
@@ -301,7 +301,7 @@ export function newApp(
 function registerPagoPARoutes(
   app: Express,
   basePath: string,
-  allowPagoPAIPSourceRange: CIDR,
+  allowPagoPAIPSourceRange: readonly CIDR[],
   profileService: ProfileService
 ): void {
   const bearerWalletTokenAuth = passport.authenticate("bearer.wallet", {
@@ -325,7 +325,7 @@ function registerPagoPARoutes(
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  allowNotifyIPSourceRange: CIDR,
+  allowNotifyIPSourceRange: readonly CIDR[],
   // tslint:disable-next-line: no-any
   urlTokenAuth: any,
   profileService: ProfileService,

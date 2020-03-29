@@ -40,8 +40,8 @@ describe("Server graceful shutdown", () => {
     jest.useRealTimers();
     app = await newApp(
       NodeEnvironmentEnum.DEVELOPMENT,
-      aValidCIDR,
-      aValidCIDR,
+      [aValidCIDR],
+      [aValidCIDR],
       "",
       "/api/v1",
       "/pagopa/api/v1"
