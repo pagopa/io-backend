@@ -6,7 +6,8 @@ import {
   ALLOW_MULTIPLE_SESSIONS,
   API_CLIENT,
   appConfig,
-  BEARER_TOKEN_STRATEGY,
+  BEARER_SESSION_TOKEN_STRATEGY,
+  BEARER_WALLET_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
   endpointOrConnectionString,
   getClientProfileRedirectionUrl,
@@ -103,7 +104,11 @@ export function newApp(
 ): Promise<Express> {
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
-  passport.use(BEARER_TOKEN_STRATEGY);
+  passport.use("bearer.session", BEARER_SESSION_TOKEN_STRATEGY);
+
+  // Add the strategy to authenticate proxy clients.
+  passport.use("bearer.wallet", BEARER_WALLET_TOKEN_STRATEGY);
+
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
@@ -299,7 +304,9 @@ function registerPagoPARoutes(
   allowPagoPAIPSourceRange: CIDR,
   profileService: ProfileService
 ): void {
-  const bearerTokenAuth = passport.authenticate("bearer", { session: false });
+  const bearerWalletTokenAuth = passport.authenticate("bearer.wallet", {
+    session: false
+  });
 
   const pagopaController: PagoPAController = new PagoPAController(
     profileService
@@ -308,7 +315,7 @@ function registerPagoPARoutes(
   app.get(
     `${basePath}/user`,
     checkIP(allowPagoPAIPSourceRange),
-    bearerTokenAuth,
+    bearerWalletTokenAuth,
     toExpressHandler(pagopaController.getUser, pagopaController)
   );
 }
@@ -329,7 +336,7 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService
 ): void {
-  const bearerTokenAuth = passport.authenticate("bearer", {
+  const bearerSessionTokenAuth = passport.authenticate("bearer.session", {
     session: false
   });
 
@@ -372,25 +379,25 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/profile`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(profileController.getProfile, profileController)
   );
 
   app.get(
     `${basePath}/api-profile`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(profileController.getApiProfile, profileController)
   );
 
   app.post(
     `${basePath}/profile`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(profileController.updateProfile, profileController)
   );
 
   app.post(
     `${basePath}/email-validation-process`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       profileController.startEmailValidationProcess,
       profileController
@@ -399,13 +406,13 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/user-metadata`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(userMetadataController.getMetadata, userMetadataController)
   );
 
   app.post(
     `${basePath}/user-metadata`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       userMetadataController.upsertMetadata,
       userMetadataController
@@ -414,7 +421,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/user-data-processing`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       userDataProcessingController.upsertUserDataProcessing,
       userDataProcessingController
@@ -423,7 +430,7 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/user-data-processing/:choice`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       userDataProcessingController.getUserDataProcessing,
       userDataProcessingController
@@ -432,33 +439,33 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/messages`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(messagesController.getMessagesByUser, messagesController)
   );
 
   app.get(
     `${basePath}/messages/:id`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(messagesController.getMessage, messagesController)
   );
 
   app.get(
     `${basePath}/services/:id`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     cachingMiddleware(),
     toExpressHandler(servicesController.getService, servicesController)
   );
 
   app.get(
     `${basePath}/services`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     cachingMiddleware(),
     toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
   app.put(
     `${basePath}/installations/:id`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       notificationController.createOrUpdateInstallation,
       notificationController
@@ -474,19 +481,19 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/session`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(sessionController.getSessionState, sessionController)
   );
 
   app.get(
     `${basePath}/sessions`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(sessionController.listSessions, sessionController)
   );
 
   app.get(
     `${basePath}/payment-requests/:rptId`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.getPaymentInfo,
       pagoPAProxyController
@@ -495,7 +502,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/payment-activations`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.activatePayment,
       pagoPAProxyController
@@ -504,7 +511,7 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/payment-activations/:codiceContestoPagamento`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(
       pagoPAProxyController.getActivationStatus,
       pagoPAProxyController

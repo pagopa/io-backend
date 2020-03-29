@@ -18,7 +18,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 import ApiClientFactory from "./services/apiClientFactory";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 
-import bearerTokenStrategy from "./strategies/bearerTokenStrategy";
+import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 
 import { getRequiredENVVar, readFile } from "./utils/container";
@@ -31,6 +31,7 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import RedisSessionStorage from "./services/redisSessionStorage";
+import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { STRINGS_RECORD } from "./types/commons";
 import {
   createClusterRedisClient,
@@ -303,11 +304,13 @@ export const SESSION_STORAGE = new RedisSessionStorage(
   ALLOW_MULTIPLE_SESSIONS
 );
 
-// Register the bearerTokenStrategy.
-export const BEARER_TOKEN_STRATEGY = bearerTokenStrategy(
-  AUTHENTICATION_BASE_PATH,
-  API_BASE_PATH,
-  PAGOPA_BASE_PATH,
+// Register the bearerSessionTokenStrategy.
+export const BEARER_SESSION_TOKEN_STRATEGY = bearerSessionTokenStrategy(
+  SESSION_STORAGE
+);
+
+// Register the bearerSessionTokenStrategy.
+export const BEARER_WALLET_TOKEN_STRATEGY = bearerWalletTokenStrategy(
   SESSION_STORAGE
 );
 
