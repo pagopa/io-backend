@@ -9,7 +9,7 @@ import * as rangeCheck from "range_check";
 import * as requestIp from "request-ip";
 
 export default function checkIP(
-  range: CIDR
+  range: readonly CIDR[]
 ): (
   req: express.Request,
   res: express.Response,
@@ -27,7 +27,8 @@ export default function checkIP(
       res.status(400).send("Bad request");
     } else {
       const IP = errorOrIPString.value;
-      if (!rangeCheck.inRange(IP, range)) {
+      // tslint:disable-next-line: readonly-array
+      if (!rangeCheck.inRange(IP, range as CIDR[])) {
         res.status(401).send("Unauthorized");
       } else {
         next();
