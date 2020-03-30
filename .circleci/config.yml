@@ -114,7 +114,7 @@ jobs:
             AZURE_NH_ENDPOINT: ""
             AUTHENTICATION_BASE_PATH: ""
             API_BASE_PATH: "/api/v1"
-            PAGOPA_API_URL: "https://pagopa-proxy"
+            PAGOPA_API_URL_PROD: "https://pagopa-proxy-prod"
             PAGOPA_API_URL_TEST: "https://pagopa-proxy-test"
             PAGOPA_BASE_PATH: "/pagopa/api/v1"
             CIE_METADATA_URL: https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth
