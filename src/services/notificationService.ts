@@ -12,13 +12,11 @@ import {
 
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
-import { InstallationID } from "../../generated/backend/InstallationID";
 import { PlatformEnum } from "../../generated/backend/Platform";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import * as t from "io-ts";
 import {
   APNSPushType,
   IInstallation,
@@ -46,13 +44,6 @@ const GCMTemplate: INotificationTemplate = {
     '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)", "smallIcon": "ic_notification", "largeIcon": "ic_notification"}}'
 };
 
-export const NotificationServiceOptions = t.interface({
-  allowMultipleSessions: t.boolean
-});
-export type NotificationServiceOptions = t.TypeOf<
-  typeof NotificationServiceOptions
->;
-
 // send the push notification only to the last
 // device that set the installationId
 // see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management#installations
@@ -63,8 +54,7 @@ export default class NotificationService {
   private notificationHubService: azure.NotificationHubService;
   constructor(
     private readonly hubName: string,
-    private readonly endpointOrConnectionString: string,
-    private readonly notificationServiceOptions: NotificationServiceOptions
+    private readonly endpointOrConnectionString: string
   ) {
     this.notificationHubService = azure.createNotificationHubService(
       this.hubName,
@@ -112,7 +102,6 @@ export default class NotificationService {
 
   public readonly createOrUpdateInstallation = (
     fiscalCode: FiscalCode,
-    installationID: InstallationID,
     installation: Installation
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
@@ -121,9 +110,7 @@ export default class NotificationService {
       // When a single active session per user is allowed, the installation that must be created or updated
       // will have an unique installationId referred to that user.
       // Otherwise the installationId provided by the client will be used.
-      installationId: !this.notificationServiceOptions.allowMultipleSessions
-        ? toFiscalCodeHash(fiscalCode)
-        : installationID,
+      installationId: toFiscalCodeHash(fiscalCode),
       platform: installation.platform,
       pushChannel: installation.pushChannel,
       tags: [toFiscalCodeHash(fiscalCode)],
@@ -157,38 +144,23 @@ export default class NotificationService {
   };
 
   public readonly deleteInstallation = (
-    fiscalCode: FiscalCode,
-    installationID?: InstallationID
+    fiscalCode: FiscalCode
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    return fromNullable(
-      !this.notificationServiceOptions.allowMultipleSessions
-        ? toFiscalCodeHash(fiscalCode)
-        : installationID
-    )
-      .map<
-        Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>
-      >(
-        _ =>
-          new Promise(resolve => {
-            this.notificationHubService.deleteInstallation(_, (error, _1) => {
-              resolve(
-                error !== null
-                  ? ResponseErrorInternal(
-                      `Error while deleting installation on NotificationHub [${error.message}]`
-                    )
-                  : ResponseSuccessJson({ message: "ok" })
-              );
-            });
-          })
-      )
-      .getOrElse(
-        Promise.resolve(
-          ResponseSuccessJson({
-            message: "Installation deletion skipped"
-          })
-        )
+    return new Promise(resolve => {
+      this.notificationHubService.deleteInstallation(
+        toFiscalCodeHash(fiscalCode),
+        (error, _) => {
+          resolve(
+            error !== null
+              ? ResponseErrorInternal(
+                  `Error while deleting installation on NotificationHub [${error.message}]`
+                )
+              : ResponseSuccessJson({ message: "ok" })
+          );
+        }
       );
+    });
   };
 }

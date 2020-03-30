@@ -39,8 +39,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ) => TaskEither<Error, ReadonlyArray<string>>;
   constructor(
     private readonly redisClient: redis.RedisClient,
-    private readonly tokenDurationSecs: number,
-    private readonly allowMultipleSessions: boolean
+    private readonly tokenDurationSecs: number
   ) {
     super();
     this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
@@ -94,15 +93,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
       user.fiscal_code
     );
 
-    const removeOtherUserSessionsOrNopPromise = this.allowMultipleSessions
-      ? Promise.resolve(right<Error, boolean>(true))
-      : this.removeOtherUserSessions(user);
+    const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
 
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
       saveSessionInfoPromise,
-      removeOtherUserSessionsOrNopPromise
+      removeOtherUserSessionsPromise
     ]);
     const isSetFailed = setPromisesResult.some(isLeft);
     if (isSetFailed) {

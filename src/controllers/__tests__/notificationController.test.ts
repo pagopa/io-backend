@@ -12,9 +12,7 @@ import { Notification } from "../../../generated/notifications/Notification";
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import NotificationService, {
-  NotificationServiceOptions
-} from "../../services/notificationService";
+import NotificationService from "../../services/notificationService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
@@ -31,11 +29,6 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidInstallationID = "550e8400e29b41d4a716446655440000" as InstallationID;
 const anInvalidInstallationID = "" as InstallationID;
-
-const allowMultipleSessions = false;
-const notificationServiceOptions: NotificationServiceOptions = {
-  allowMultipleSessions
-};
 
 const mockedUser: User = {
   created_at: aTimestamp,
@@ -130,17 +123,12 @@ const redisClient = {} as redis.RedisClient;
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs,
-  allowMultipleSessions
+  tokenDurationSecs
 );
 
 const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = jest.fn());
 
-const notificationService = new NotificationService(
-  "",
-  "",
-  notificationServiceOptions
-);
+const notificationService = new NotificationService("", "");
 
 // tslint:disable-next-line: no-any
 const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpdateInstallation = jest.fn());

@@ -3,21 +3,16 @@
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { InstallationID } from "../../../generated/backend/InstallationID";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
 import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
-import { APNSPushType } from "../../types/notification";
-import NotificationService, {
-  NotificationServiceOptions,
-  toNotificationTag
-} from "../notificationService";
+import { APNSPushType, toFiscalCodeHash } from "../../types/notification";
+import NotificationService, { toNotificationTag } from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const aFiscalCodeHash =
   "d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52";
 const aNotificationTag = toNotificationTag(aFiscalCode);
-const anInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationID;
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
@@ -25,7 +20,7 @@ const anAppleDevice = {
   pushChannel: aPushChannel
 };
 const anAppleInstallation = {
-  installationId: anInstallationID,
+  installationId: toFiscalCodeHash(aFiscalCode),
   platform: PlatformEnum.apns,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
@@ -41,7 +36,7 @@ const aGoogleDevice = {
   pushChannel: aPushChannel
 };
 const aGoogleInstallation = {
-  installationId: anInstallationID,
+  installationId: toFiscalCodeHash(aFiscalCode),
   platform: PlatformEnum.gcm,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash], // This is the sha256 of "GRBGPP87L04L741X"
@@ -71,10 +66,6 @@ const aValidNotification = {
     organization_name: "test organization" as NonEmptyString,
     service_name: "test service" as NonEmptyString
   }
-};
-
-const notificationServiceOptions: NotificationServiceOptions = {
-  allowMultipleSessions: true
 };
 
 const mockCreateOrUpdateInstallation = jest.fn();
@@ -109,11 +100,10 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", notificationServiceOptions);
+    const service = new NotificationService("", "");
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
-      anInstallationID,
       anAppleDevice
     );
 
@@ -133,11 +123,10 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(null);
     });
 
-    const service = new NotificationService("", "", notificationServiceOptions);
+    const service = new NotificationService("", "");
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
-      anInstallationID,
       aGoogleDevice
     );
 
@@ -157,11 +146,10 @@ describe("NotificationService#createOrUpdateInstallation", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "", notificationServiceOptions);
+    const service = new NotificationService("", "");
 
     const res = await service.createOrUpdateInstallation(
       aFiscalCode,
-      anInstallationID,
       anAppleDevice
     );
 
@@ -186,9 +174,7 @@ describe("NotificationService#notify", () => {
     mockSend.mockImplementation((_, __, ___, callback) => {
       callback(null);
     });
-    const service = new NotificationService("", "", {
-      allowMultipleSessions: false
-    });
+    const service = new NotificationService("", "");
 
     const res = await service.notify(aValidNotification, aNotificationSubject);
 
@@ -214,9 +200,7 @@ describe("NotificationService#notify", () => {
       callback(new Error(aGenericError));
     });
 
-    const service = new NotificationService("", "", {
-      allowMultipleSessions: false
-    });
+    const service = new NotificationService("", "");
 
     const res = await service.notify(aValidNotification, aNotificationSubject);
 

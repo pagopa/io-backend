@@ -25,9 +25,7 @@ import { UserIdentity } from "../../../generated/backend/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClientFactory from "../../services/apiClientFactory";
-import NotificationService, {
-  NotificationServiceOptions
-} from "../../services/notificationService";
+import NotificationService from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
@@ -164,15 +162,10 @@ const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
 
-const allowMultipleSessions = false;
-const notificationServiceOptions: NotificationServiceOptions = {
-  allowMultipleSessions
-};
 const tokenDurationSecs = 0;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs,
-  allowMultipleSessions
+  tokenDurationSecs
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
@@ -187,11 +180,7 @@ let controller: AuthenticationController;
 beforeAll(async () => {
   const api = new ApiClientFactory("", "");
   const profileService = new ProfileService(api);
-  const notificationService = new NotificationService(
-    "",
-    "",
-    notificationServiceOptions
-  );
+  const notificationService = new NotificationService("", "");
 
   controller = new AuthenticationController(
     redisSessionStorage,

@@ -46,7 +46,7 @@ const mockedUser: User = {
   spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
-const allowMultipleSessions = false;
+
 const aTokenDurationSecs = 3600;
 const mockGet = jest.fn();
 const mockMget = jest.fn();
@@ -56,11 +56,7 @@ mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers;
 const controller = new SessionController(
-  new RedisSessionStorage(
-    mockRedisClient,
-    aTokenDurationSecs,
-    allowMultipleSessions
-  )
+  new RedisSessionStorage(mockRedisClient, aTokenDurationSecs)
 );
 
 const res = mockRes();

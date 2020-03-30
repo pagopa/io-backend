@@ -88,18 +88,15 @@ export default class NotificationController {
     | IResponseSuccessJson<SuccessResponse>
   > {
     return withUserFromRequest(req, async user =>
-      withValidatedOrValidationError(
-        InstallationID.decode(req.params.id),
-        installationID =>
-          withValidatedOrValidationError(
-            Installation.decode(req.body),
-            installation =>
-              this.notificationService.createOrUpdateInstallation(
-                user.fiscal_code,
-                installationID,
-                installation
-              )
-          )
+      withValidatedOrValidationError(InstallationID.decode(req.params.id), _ =>
+        withValidatedOrValidationError(
+          Installation.decode(req.body),
+          installation =>
+            this.notificationService.createOrUpdateInstallation(
+              user.fiscal_code,
+              installation
+            )
+        )
       )
     );
   }

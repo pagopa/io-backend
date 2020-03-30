@@ -269,14 +269,6 @@ export const endpointOrConnectionString = getRequiredENVVar(
   "AZURE_NH_ENDPOINT"
 );
 
-// Read ENV to allow multiple user's sessions functionality
-// Default value is false when the ENV var is not provided
-export const ALLOW_MULTIPLE_SESSIONS = fromNullable(
-  process.env.ALLOW_MULTIPLE_SESSIONS
-)
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
-
 // API endpoint mount.
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
   "AUTHENTICATION_BASE_PATH"
@@ -290,8 +282,7 @@ export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 // Create the Session Storage service
 export const SESSION_STORAGE = new RedisSessionStorage(
   REDIS_CLIENT,
-  tokenDurationSecs,
-  ALLOW_MULTIPLE_SESSIONS
+  tokenDurationSecs
 );
 
 // Register the bearerSessionTokenStrategy.
