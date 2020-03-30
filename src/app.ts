@@ -3,7 +3,6 @@
  */
 
 import {
-  ALLOW_MULTIPLE_SESSIONS,
   API_CLIENT,
   appConfig,
   BEARER_SESSION_TOKEN_STRATEGY,
@@ -203,9 +202,7 @@ export function newApp(
     // Create the Notification Service
     const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
       () => {
-        return new NotificationService(hubName, endpointOrConnectionString, {
-          allowMultipleSessions: ALLOW_MULTIPLE_SESSIONS
-        });
+        return new NotificationService(hubName, endpointOrConnectionString);
       },
       err => {
         log.error("Error initializing NotificationHub Service: %s", err);
