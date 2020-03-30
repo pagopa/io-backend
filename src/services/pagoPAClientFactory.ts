@@ -12,7 +12,7 @@ import { PagoPAClient } from "../clients/pagopa";
 export default class PagoPAClientFactory
   implements IPagoPAClientFactoryInterface {
   constructor(
-    public readonly pagoPAApiUrl: string,
+    public readonly pagoPAApiUrlProd: string,
     public readonly pagoPAApiUrlTest: string
   ) {}
 
@@ -23,7 +23,7 @@ export default class PagoPAClientFactory
     return PagoPAClient(
       environment === PagoPAEnvironment.TEST
         ? this.pagoPAApiUrlTest
-        : this.pagoPAApiUrl
+        : this.pagoPAApiUrlProd
     );
   }
 }
