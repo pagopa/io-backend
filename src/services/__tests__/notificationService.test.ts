@@ -9,12 +9,14 @@ import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import { APNSPushType } from "../../types/notification";
 import NotificationService, {
-  NotificationServiceOptions
+  NotificationServiceOptions,
+  toNotificationTag
 } from "../notificationService";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const aFiscalCodeHash =
   "d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52";
+const aNotificationTag = toNotificationTag(aFiscalCode);
 const anInstallationID = "550e8400-e29b-41d4-a716-446655440000" as InstallationID;
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
@@ -196,7 +198,7 @@ describe("NotificationService#notify", () => {
       value: { message: "ok" }
     });
     expect(mockSend).toBeCalledWith(
-      aFiscalCodeHash,
+      aNotificationTag,
       {
         message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,
@@ -224,7 +226,7 @@ describe("NotificationService#notify", () => {
       kind: "IResponseErrorInternal"
     });
     expect(mockSend).toBeCalledWith(
-      aFiscalCodeHash,
+      aNotificationTag,
       {
         message: aValidNotification.message.content.subject,
         message_id: aValidNotification.message.id,

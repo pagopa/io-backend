@@ -53,6 +53,12 @@ export type NotificationServiceOptions = t.TypeOf<
   typeof NotificationServiceOptions
 >;
 
+// send the push notification only to the last
+// device that set the installationId
+// see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management#installations
+export const toNotificationTag = (fiscalCode: FiscalCode) =>
+  `$InstallationId:{${toFiscalCodeHash(fiscalCode)}}`;
+
 export default class NotificationService {
   private notificationHubService: azure.NotificationHubService;
   constructor(
@@ -81,7 +87,7 @@ export default class NotificationService {
           )
         };
         this.notificationHubService.send(
-          toFiscalCodeHash(notification.message.fiscal_code),
+          toNotificationTag(notification.message.fiscal_code),
           payload,
           {
             // Add required headers for APNS notification to iOS 13
