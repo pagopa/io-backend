@@ -36,6 +36,8 @@ services:
   redis:
     container_name: redis
     image: wodby/redis:3.2-2.1.5
+    ports:
+      - "6379:6379"
     environment:
       REDIS_TIMEOUT: 300
       REDIS_TCP_KEEPALIVE: 60
