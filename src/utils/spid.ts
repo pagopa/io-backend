@@ -67,11 +67,11 @@ const SpidMsg = t.interface({
   // IP of the client that made a SPID login action
   ip: IPString,
 
-  // XML payload of the SPID Request/Response
-  payload: t.string,
+  // XML payload of the SPID Request
+  requestPayload: t.string,
 
-  // Payload type: REQUEST or RESPONSE
-  payloadType: t.keyof({ REQUEST: null, RESPONSE: null }),
+  // XML payload of the SPID Response
+  responsePayload: t.string,
 
   // SPID request id
   spidRequestId: t.union([t.undefined, t.string])
@@ -81,46 +81,46 @@ type SpidMsg = t.TypeOf<typeof SpidMsg>;
 
 export const makeSpidLogCallback = (queueClient: QueueClient) => (
   sourceIp: string | null,
-  payload: string,
-  payloadType: "REQUEST" | "RESPONSE"
+  requestPayload: string,
+  responsePayload: string
 ): void => {
   const logPrefix = `SpidLogCallback`;
   tryCatch2v(
     () => {
-      const xmlPayload = new DOMParser().parseFromString(payload, "text/xml");
-      if (!xmlPayload) {
-        log.error(`${logPrefix}|ERROR=Cannot parse SPID XML Payload`);
+      const responseXML = new DOMParser().parseFromString(
+        responsePayload,
+        "text/xml"
+      );
+      if (!responseXML) {
+        log.error(`${logPrefix}|ERROR=Cannot parse SPID XML`);
         return;
       }
 
-      const maybeRequestId =
-        payloadType === "REQUEST"
-          ? getRequestIDFromRequest(xmlPayload)
-          : getRequestIDFromResponse(xmlPayload);
-
+      const maybeRequestId = getRequestIDFromResponse(responseXML);
       if (isNone(maybeRequestId)) {
-        log.error(`${logPrefix}|ERROR=Cannot get Request ID from XML Payload`);
+        log.error(`${logPrefix}|ERROR=Cannot get Request ID from SPID XML`);
         return;
       }
+      const requestId = maybeRequestId.value;
 
-      const maybeFiscalCode = getFiscalNumberFromPayload(xmlPayload);
-
-      if (isNone(maybeFiscalCode) && payloadType === "RESPONSE") {
+      const maybeFiscalCode = getFiscalNumberFromPayload(responseXML);
+      if (isNone(maybeFiscalCode)) {
         log.error(
-          `${logPrefix}|ERROR=Cannot get user's fiscal Code from response XML`
+          `${logPrefix}|ERROR=Cannot get user's fiscal Code from SPID XML`
         );
         return;
       }
+      const fiscalCode = maybeFiscalCode.value;
 
       const errorOrSpidMsg = SpidMsg.decode({
         createdAt: new Date(),
         createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
-        fiscalCode: maybeFiscalCode.toUndefined(),
+        fiscalCode,
         ip: sourceIp as IPString,
-        payload,
-        payloadType,
-        spidRequestId: maybeRequestId.value
-      });
+        requestPayload,
+        responsePayload,
+        spidRequestId: requestId
+      } as SpidMsg);
 
       if (isLeft(errorOrSpidMsg)) {
         log.error(`${logPrefix}|ERROR=Invalid format for SPID log payload`);

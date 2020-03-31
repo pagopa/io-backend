@@ -255,16 +255,16 @@ export function newApp(
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
-      return withSpid(
+      return withSpid({
+        acs: _.acsController.acs.bind(_.acsController),
+        app: _.app,
         appConfig,
+        doneCb: spidLogCallback,
+        logout: _.acsController.slo.bind(_.acsController),
+        redisClient: REDIS_CLIENT,
         samlConfig,
-        serviceProviderConfig,
-        REDIS_CLIENT,
-        _.app,
-        _.acsController.acs.bind(_.acsController),
-        _.acsController.slo.bind(_.acsController),
-        spidLogCallback
-      );
+        serviceProviderConfig
+      });
     })
     .map(_ => {
       // Schedule automatic idpMetadataRefresher

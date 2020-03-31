@@ -34,26 +34,14 @@ describe("SPID logs", () => {
     expect(fiscalCode).toEqual(some("GDASDV00A01H501J"));
   });
 
-  it("should enqueue valid payload on SPID request", () => {
-    const mockQueueClient = {
-      sendMessage: jest.fn().mockImplementation(() => Promise.resolve())
-    };
-    makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
-      "1.1.1.1",
-      aSAMLRequest,
-      "REQUEST"
-    );
-    expect(mockQueueClient.sendMessage).toHaveBeenCalled();
-  });
-
   it("should enqueue valid payload on SPID response", () => {
     const mockQueueClient = {
       sendMessage: jest.fn().mockImplementation(() => Promise.resolve())
     };
     makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
       "1.1.1.1",
-      aSAMLResponse,
-      "RESPONSE"
+      aSAMLRequest,
+      aSAMLResponse
     );
     expect(mockQueueClient.sendMessage).toHaveBeenCalled();
   });
@@ -64,8 +52,21 @@ describe("SPID logs", () => {
     };
     makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
       "X",
-      aSAMLResponse,
-      "RESPONSE"
+      aSAMLRequest,
+      aSAMLResponse
+    );
+    expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("should NOT enqueue undefined payload on SPID request", () => {
+    const mockQueueClient = {
+      sendMessage: jest.fn().mockImplementation(() => Promise.resolve())
+    };
+    makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
+      "1.1.1.1",
+      // tslint:disable-next-line: no-any
+      undefined as any,
+      aSAMLResponse
     );
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
   });
@@ -76,9 +77,9 @@ describe("SPID logs", () => {
     };
     makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
       "1.1.1.1",
+      aSAMLRequest,
       // tslint:disable-next-line: no-any
-      undefined as any,
-      "RESPONSE"
+      undefined as any
     );
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
   });
@@ -89,7 +90,7 @@ describe("SPID logs", () => {
     };
     makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
       "1.1.1.1",
-      "foo",
+      aSAMLRequest,
       "RESPONSE"
     );
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();
