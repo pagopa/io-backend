@@ -4,12 +4,6 @@
 
 [![codecov](https://codecov.io/gh/pagopa/io-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-backend)
 
-[![dependencies](https://david-dm.org/pagopa/io-backend/status.svg)](https://david-dm.org/pagopa/io-backend)
-
-[![Docker Build Status](https://img.shields.io/docker/build/pagopa/io-backend.svg)](https://hub.docker.com/r/pagopa/io-backend/)
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/pagopa/io-backend/maintainability)
-
 # Digital citizenship web and mobile backend
 
 This repository contains the code of the backend used by the
