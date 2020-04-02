@@ -47,7 +47,6 @@ This repository contains the code of the backend used by the [web](https://githu
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
-  - [| 6   | Backend is deployed on more than one instance |                    |](#6--backend-is-deployed-on-more-than-one-instance)
   - [Troubleshooting](#troubleshooting)
   - [License](#license)
 
