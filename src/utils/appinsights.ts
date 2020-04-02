@@ -26,7 +26,10 @@ interface IInsightsRequestData {
  * - Realtime API metrics
  */
 export function initAppInsights(
-  instrumentationKey: string
+  instrumentationKey: string,
+  config: Partial<
+    Pick<appInsights.TelemetryClient["config"], "httpAgent" | "httpsAgent">
+  > = {}
 ): appInsights.TelemetryClient {
   appInsights
     .setup(instrumentationKey)
@@ -53,6 +56,16 @@ export function initAppInsights(
   appInsights.defaultClient.context.tags[
     appInsights.defaultClient.context.keys.cloudRole
   ] = getValueFromPackageJson("name");
+
+  if (config.httpAgent !== undefined) {
+    // tslint:disable-next-line: no-object-mutation
+    appInsights.defaultClient.config.httpAgent = config.httpAgent;
+  }
+
+  if (config.httpsAgent !== undefined) {
+    // tslint:disable-next-line: no-object-mutation
+    appInsights.defaultClient.config.httpAgent = config.httpsAgent;
+  }
 
   return appInsights.defaultClient;
 }
