@@ -232,10 +232,10 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
 // Register a factory service to create PagoPA client.
-const pagoPAApiUrl = getRequiredENVVar("PAGOPA_API_URL");
+const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
 const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
 export const PAGOPA_CLIENT = new PagoPAClientFactory(
-  pagoPAApiUrl,
+  pagoPAApiUrlProd,
   pagoPAApiUrlTest
 );
 

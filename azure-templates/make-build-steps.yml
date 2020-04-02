@@ -14,19 +14,22 @@ parameters:
       - build
       - build-noemit 
       - predeploy_build
+
+  - name: 'cache_version_id'
+    type: string
+    default: $(CACHE_VERSION_ID)
   
 steps:
   - checkout: self
     displayName: 'Checkout'
-        
+
   - task: Cache@2
     inputs:
-      key: 'yarn | "$(Agent.OS)" | yarn.lock'
+      key: 'yarn-${{ parameters.cache_version_id }} | "$(Agent.OS)" | yarn.lock'
       restoreKeys: |
-        yarn | "$(Agent.OS)"
-        yarn
+        yarn-${{ parameters.cache_version_id }} | "$(Agent.OS)"
       path: $(YARN_CACHE_FOLDER)
-    displayName: Cache yarn packages
+    displayName: 'Cache yarn packages'
   
   - task: UseNode@1
     inputs:

@@ -19,25 +19,36 @@ This repository contains the code of the backend used by the [web](https://githu
 
 ## Table of content
 
-- [What is this?](#what-is-this?)
-- [How to run the application](#how-to-run-the-application)
+- [Digital citizenship web and mobile backend](#digital-citizenship-web-and-mobile-backend)
+  - [Table of content](#table-of-content)
+  - [What is this?](#what-is-this)
+  - [Authentication process](#authentication-process)
+    - [User authentication](#user-authentication)
+    - [Token authentication](#token-authentication)
+  - [How to run the application](#how-to-run-the-application)
     - [Dependencies](#dependencies)
     - [Installation steps](#installation-steps)
-    - [Containers description](#container-description)
+    - [Container description](#container-description)
     - [Environment variables](#environment-variables)
     - [Logs](#logs)
     - [SPID user management](#spid-user-management)
-- [Redis Database](#redis-database)
+  - [API Monitoring](#api-monitoring)
+  - [Redis Database](#redis-database)
     - [Data Structure](#data-structure)
-- [Mobile App compatibility](#mobile-app-compatibility)
-- [How to contribute](#how-to-contribute)
-    - [Dependencies](#dependencies)
+  - [Mobile App compatibility](#mobile-app-compatibility)
+    - [Backend](#backend)
+    - [PagoPa](#pagopa)
+  - [How to contribute](#how-to-contribute)
+    - [Dependencies](#dependencies-1)
     - [Starting steps](#starting-steps)
-    - [Generate SAML (SPID) certs](#generate-saml-spid-certs-development)
+    - [Generate SAML (SPID) certs (development)](#generate-saml-spid-certs-development)
+    - [Generate SAML (SPID) certs (production)](#generate-saml-spid-certs-production)
     - [SAML (SPID) certs with ENV vars](#saml-spid-certs-with-env-vars)
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
     - [SPID Validator](#spid-validator)
-- [Troubleshooting](#troubleshooting)
+    - [Architecture decision records](#architecture-decision-records)
+  - [Troubleshooting](#troubleshooting)
+  - [License](#license)
 
 ---
 
@@ -155,7 +166,7 @@ Those are all Environment variables needed by the application:
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | API_BASE_PATH                          | The root path for the api endpoints                                               | string |
-| PAGOPA_API_URL                         | The url for the PagoPA api endpoints                                              | string |
+| PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |

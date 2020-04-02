@@ -84,7 +84,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -111,7 +111,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     req.query = { test: "true" };
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -138,7 +138,7 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -167,7 +167,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -198,7 +198,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     req.query = { test: "true" };
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -228,7 +228,7 @@ describe("PagoPAProxyController#activatePayment", () => {
     req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -260,7 +260,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -290,7 +290,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     req.query = { test: "true" };
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
@@ -320,7 +320,7 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     req.query = {};
 
     const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL as string,
+      process.env.PAGOPA_API_URL_PROD as string,
       process.env.PAGOPA_API_URL_TEST as string
     );
     const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
