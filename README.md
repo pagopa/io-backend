@@ -1,25 +1,25 @@
 [![Azure DevOps](https://dev.azure.com/pagopa-io/io-backend/_apis/build/status/pagopa.io-backend)](https://dev.azure.com/pagopa-io/io-backend/_build?definitionId=8&_a=summary)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/italia-backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=teamdigitale/italia-backend&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/455c43c16c574e248e68c7e4effaf614)](https://www.codacy.com/app/cloudify/io-backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pagopa/io-backend&amp;utm_campaign=Badge_Grade)
 
-[![codecov](https://codecov.io/gh/teamdigitale/italia-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/teamdigitale/italia-backend)
+[![codecov](https://codecov.io/gh/pagopa/io-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-backend)
 
-[![dependencies](https://david-dm.org/teamdigitale/italia-backend/status.svg)](https://david-dm.org/teamdigitale/italia-backend)
+[![dependencies](https://david-dm.org/pagopa/io-backend/status.svg)](https://david-dm.org/pagopa/io-backend)
 
-[![Docker Build Status](https://img.shields.io/docker/build/teamdigitale/italia-backend.svg)](https://hub.docker.com/r/teamdigitale/italia-backend/)
+[![Docker Build Status](https://img.shields.io/docker/build/pagopa/io-backend.svg)](https://hub.docker.com/r/pagopa/io-backend/)
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/teamdigitale/italia-backend/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/pagopa/io-backend/maintainability)
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend?ref=badge_shield)
 
 # Digital citizenship web and mobile backend
 
-This repository contains the code of the backend used by the [web](https://github.com/teamdigitale/italia-web) and
-[mobile](https://github.com/teamdigitale/italia-app) applications of the Digital citizenship project.
+This repository contains the code of the backend used by the
+[mobile](https://github.com/pagopa/io-app) applications of the [IO project](https://io.italia.it).
 
 ## Table of content
 
-- [Digital citizenship web and mobile backend](#digital-citizenship-web-and-mobile-backend)
+- [IO mobile backend](#io-mobile-backend)
   - [Table of content](#table-of-content)
   - [What is this?](#what-is-this)
   - [Authentication process](#authentication-process)
@@ -54,15 +54,15 @@ This repository contains the code of the backend used by the [web](https://githu
 
 ## What is this?
 
-This is the backend that supports the [italia-app](https://github.com/teamdigitale/italia-app)
+This is the backend that supports the [io-app](https://github.com/pagopa/io-app)
 mobile application.
 
 This project is part of the Italian Digital Citizenship initiative, see the
-[main repository](https://github.com/teamdigitale/digital-citizenship) for further information.
+[main repository](https://github.com/pagopa/io) for further information.
 
 ## Authentication process
 
-The `italia-app` application will authenticate to the backend in two steps:
+The `io-app` application will authenticate to the backend in two steps:
 
   1. an initial user initiated SPID authentication process (SAML2 based)
      that identifies the user and, on success, triggers the creation of a new
@@ -83,8 +83,8 @@ unique alphanumeric string as token and saves an User object to the `SessionStor
 Finally the backend will redirect the client to the value of the environment variable `CLIENT_REDIRECTION_URL` with the
 token in the query string. The client must saves the token and use it in all API request.
 
-The code that manage this flow are in the `spid-passport` package (more info
-[here](https://github.com/italia/spid-passport)), and in the `src/strategies/spidStrategy.ts` and
+The code that manage this flow are in the `io-spid-commons` package (more info
+[here](https://github.com/pagopa/io-spid-commons)), and in the `src/strategies/spidStrategy.ts` and
 `src/controllers/authenticationController.ts` files.
 
 ### Token authentication
@@ -108,26 +108,28 @@ A Linux/macOS environment is required at the moment.
 
 ### Installation steps
 
-1. clone the project in a folder called `italia-backend`
-2. go to the project's folder
-3. run `scripts/build-tools.sh` to build the `tools` Docker image
-4. run `scripts/yarn.sh` to install backend dependencies
-5. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
-6. run `scripts/build.sh` to compile the Typescript files
-7. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
-8. run `docker-compose up -d` to start the containers
-9. edit your `/etc/hosts` file by adding:
+1. clone the project in a folder called `io-backend`
+1. go to the project's folder
+1. copy `.nprm.example` to `.npmrc` and replace the `TOKEN` planceholder with
+   your GitHub token (must have repo and packages scopes)
+1. run `scripts/build-tools.sh` to build the `tools` Docker image
+1. run `scripts/yarn.sh` to install backend dependencies
+1. run `scripts/generate-proxy-api-models.sh` to generate the models defined in api_proxy.yaml and api_notifications.yaml
+1. run `scripts/build.sh` to compile the Typescript files
+1. run `scripts/generate-test-certs-task.sh` to create SAML (SPID) certificates
+1. edit your `/etc/hosts` file by adding:
 
     ```
     127.0.0.1    spid-testenv2
-    127.0.0.1    italia-backend
+    127.0.0.1    io-backend
     ```
 
-12. copy `.env.example` to `.env` and fill the variables with your values
-13. point your browser to [https://italia-backend/metadata](https://italia-backend/metadata) and copy the source of the
+1. copy `.env.example` to `.env` and fill the variables with your values
+1. run `docker-compose up -d` to start the containers
+1. point your browser to [https://io-backend/metadata](https://io-backend/metadata) and copy the source of the
     page to a new `testenv2/conf/sp_metadata.xml` file
-15. run `docker-compose up -d` to restart the containers
-16. point your browser to [https://italia-backend](https://italia-backend)
+1. run `docker-compose up -d` again to restart the containers
+1. point your browser to [https://io-backend](https://io-backend)
 
 If you are using Docker with a Docker Machine replace `localhost` with the IP of the Docker Machine
 ([More details here](https://docs.docker.com/machine/reference/ip/)).
@@ -137,7 +139,7 @@ If you are using Docker with a Docker Machine replace `localhost` with the IP of
 * `backend`: the backend Node application that serves the web and mobile applications
 * `spid-testenv2`: the test IDP server
 
-Nginx is reachable at [https://italia-backend:80]() \
+Nginx is reachable at [https://io-backend]() \
 IDP is reachable at [https://spid-testenv2:8088]() \
 
 ### Environment variables
@@ -329,17 +331,17 @@ Here's the decisions we taken so far:
 
 ## Troubleshooting
 
-**I installed on my mac but seems that https://italia-backend:80 is not working (ping italia-backend return a host error)**
+**I installed on my mac but seems that https://io-backend:80 is not working (ping io-backend return a host error)**
 
 Check out /etc/hosts
 Remember that in some cases you need to use your docker-machine ip (get it from >docker-machine ip) instead of
 localhost.
 
-**I followed all the steps but when i go to https://italia-backend it shows me the same as https://italia-backend:8080**
+**I followed all the steps but when i go to https://io-backend it shows me the same as https://io-backend:8080**
 
 This problem seems to be dependent on how Docker for Mac (doesn't) manage well the /etc/hosts file. If you install
 Docker Toolbox it works fine (and can [coexist](https://docs.docker.com/docker-for-mac/docker-toolbox/#setting-up-to-run-docker-for-mac))
 (Read more at [https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448](https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448))
 
 ## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteamdigitale%2Fitalia-backend?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend?ref=badge_large)
