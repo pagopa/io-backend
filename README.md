@@ -10,8 +10,6 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/cf23057136cac233c8b6/maintainability)](https://codeclimate.com/github/pagopa/io-backend/maintainability)
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend?ref=badge_shield)
-
 # Digital citizenship web and mobile backend
 
 This repository contains the code of the backend used by the
@@ -331,7 +329,7 @@ Here's the decisions we taken so far:
 
 ## Troubleshooting
 
-**I installed on my mac but seems that https://io-backend:80 is not working (ping io-backend return a host error)**
+**I installed on my mac but seems that https://io-backend is not working (ping io-backend return a host error)**
 
 Check out /etc/hosts
 Remember that in some cases you need to use your docker-machine ip (get it from >docker-machine ip) instead of
@@ -342,6 +340,3 @@ localhost.
 This problem seems to be dependent on how Docker for Mac (doesn't) manage well the /etc/hosts file. If you install
 Docker Toolbox it works fine (and can [coexist](https://docs.docker.com/docker-for-mac/docker-toolbox/#setting-up-to-run-docker-for-mac))
 (Read more at [https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448](https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448))
-
-## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fpagopa%2Fio-backend?ref=badge_large)
