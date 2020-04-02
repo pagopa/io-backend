@@ -4,10 +4,7 @@
 import * as dotenv from "dotenv";
 import { parseJSON, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
-import {
-  getNodeEnvironmentFromProcessEnv,
-  NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
+import { getNodeEnvironmentFromProcessEnv } from "italia-ts-commons/lib/environment";
 import {
   errorsToReadableMessages,
   readableReport
@@ -17,7 +14,6 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 import ApiClientFactory from "./services/apiClientFactory";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 
-import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 
 import { getRequiredENVVar, readFile } from "./utils/container";
@@ -29,14 +25,8 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
-import RedisSessionStorage from "./services/redisSessionStorage";
-import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
-import {
-  createClusterRedisClient,
-  createSimpleRedisClient
-} from "./utils/redis";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -234,20 +224,6 @@ export const API_URL = getRequiredENVVar("API_URL");
 
 export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL);
 
-//
-// Register a session storage service backed by Redis.
-//
-
-// Redis server settings.
-export const REDIS_CLIENT =
-  ENV === NodeEnvironmentEnum.DEVELOPMENT
-    ? createSimpleRedisClient(process.env.REDIS_URL)
-    : createClusterRedisClient(
-        getRequiredENVVar("REDIS_URL"),
-        process.env.REDIS_PASSWORD,
-        process.env.REDIS_PORT
-      );
-
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
 export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
@@ -278,22 +254,6 @@ export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
-
-// Create the Session Storage service
-export const SESSION_STORAGE = new RedisSessionStorage(
-  REDIS_CLIENT,
-  tokenDurationSecs
-);
-
-// Register the bearerSessionTokenStrategy.
-export const BEARER_SESSION_TOKEN_STRATEGY = bearerSessionTokenStrategy(
-  SESSION_STORAGE
-);
-
-// Register the bearerSessionTokenStrategy.
-export const BEARER_WALLET_TOKEN_STRATEGY = bearerWalletTokenStrategy(
-  SESSION_STORAGE
-);
 
 // Register the urlTokenStrategy.
 export const URL_TOKEN_STRATEGY = urlTokenStrategy(PRE_SHARED_KEY);

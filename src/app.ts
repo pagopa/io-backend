@@ -5,22 +5,20 @@
 import {
   API_CLIENT,
   appConfig,
-  BEARER_SESSION_TOKEN_STRATEGY,
-  BEARER_WALLET_TOKEN_STRATEGY,
   CACHE_MAX_AGE_SECONDS,
   endpointOrConnectionString,
+  ENV,
   getClientProfileRedirectionUrl,
   hubName,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   NOTIFICATION_DEFAULT_SUBJECT,
   NOTIFICATION_DEFAULT_TITLE,
   PAGOPA_CLIENT,
-  REDIS_CLIENT,
   samlConfig,
   serviceProviderConfig,
-  SESSION_STORAGE,
   SPID_LOG_QUEUE_NAME,
   SPID_LOG_STORAGE_CONNECTION_STRING,
+  tokenDurationSecs,
   URL_TOKEN_STRATEGY
 } from "./config";
 
@@ -69,12 +67,19 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
+import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
+import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { User } from "./types/user";
+import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
 import {
   getCurrentBackendVersion,
   getObjectFromPackageJson
 } from "./utils/package";
+import {
+  createClusterRedisClient,
+  createSimpleRedisClient
+} from "./utils/redis";
 import { makeSpidLogCallback } from "./utils/spid";
 
 const defaultModule = {
@@ -93,6 +98,7 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
+// tslint:disable-next-line: no-big-function
 export function newApp(
   env: NodeEnvironment,
   allowNotifyIPSourceRange: readonly CIDR[],
@@ -101,13 +107,26 @@ export function newApp(
   APIBasePath: string,
   PagoPABasePath: string
 ): Promise<Express> {
+  const REDIS_CLIENT =
+    ENV === NodeEnvironmentEnum.DEVELOPMENT
+      ? createSimpleRedisClient(process.env.REDIS_URL)
+      : createClusterRedisClient(
+          getRequiredENVVar("REDIS_URL"),
+          process.env.REDIS_PASSWORD,
+          process.env.REDIS_PORT
+        );
+  // Create the Session Storage service
+  const SESSION_STORAGE = new RedisSessionStorage(
+    REDIS_CLIENT,
+    tokenDurationSecs
+  );
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
   // tslint:disable-next-line: no-duplicate-string
-  passport.use("bearer.session", BEARER_SESSION_TOKEN_STRATEGY);
+  passport.use("bearer.session", bearerSessionTokenStrategy(SESSION_STORAGE));
 
   // Add the strategy to authenticate proxy clients.
-  passport.use("bearer.wallet", BEARER_WALLET_TOKEN_STRATEGY);
+  passport.use("bearer.wallet", bearerWalletTokenStrategy(SESSION_STORAGE));
 
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
