@@ -12,12 +12,12 @@ export default class ApiClientFactory implements IApiClientFactoryInterface {
   private apiClient!: ReturnType<APIClient>;
 
   constructor(
-    private readonly apiKey: string,
-    private readonly apiUrl: string,
+    apiKey: string,
+    apiUrl: string,
     // tslint:disable-next-line: no-any
-    private readonly fetchApi: typeof fetch = nodeFetch as any
+    fetchApi: typeof fetch = nodeFetch as any
   ) {
-    this.apiClient = APIClient(this.apiUrl, this.apiKey, this.fetchApi);
+    this.apiClient = APIClient(apiUrl, apiKey, fetchApi);
   }
 
   /**

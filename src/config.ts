@@ -231,42 +231,48 @@ export const API_URL = getRequiredENVVar("API_URL");
 // see https://blog.botframework.com/2018/03/05/fix-snat-exhaustion-node-js-bots/
 const isFetchKeepaliveEnabled = process.env.FETCH_KEEPALIVE_ENABLED === "true";
 
+export const keepAliveAgentOptions = isFetchKeepaliveEnabled
+  ? {
+      freeSocketTimeout:
+        process.env.FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT === undefined
+          ? undefined
+          : parseInt(process.env.FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT, 10),
+      keepAlive: true,
+      keepAliveMsecs:
+        process.env.FETCH_KEEPALIVE_KEEPALIVE_MSECS === undefined
+          ? undefined
+          : parseInt(process.env.FETCH_KEEPALIVE_KEEPALIVE_MSECS, 10),
+      maxFreeSockets:
+        process.env.FETCH_KEEPALIVE_MAX_FREE_SOCKETS === undefined
+          ? undefined
+          : parseInt(process.env.FETCH_KEEPALIVE_MAX_FREE_SOCKETS, 10),
+      maxSockets:
+        process.env.FETCH_KEEPALIVE_MAX_SOCKETS === undefined
+          ? undefined
+          : parseInt(process.env.FETCH_KEEPALIVE_MAX_SOCKETS, 10),
+      socketActiveTTL:
+        process.env.FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL === undefined
+          ? undefined
+          : parseInt(process.env.FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL, 10),
+      timeout:
+        process.env.FETCH_KEEPALIVE_TIMEOUT === undefined
+          ? undefined
+          : parseInt(process.env.FETCH_KEEPALIVE_TIMEOUT, 10)
+    }
+  : undefined;
+
 // Returns a fetch instance backed by a keepalive-enabled HTTP agent
-const getKeepaliveFetch: () => typeof fetch = () => {
+const getKeepaliveHttpFetch: (
+  _: agentkeepalive.HttpOptions
+) => typeof fetch = httpOptions => {
   // custom HTTP agent that will reuse sockets
   // see https://github.com/node-modules/agentkeepalive#new-agentoptions
-  const keepaliveAgent = new agentkeepalive.default({
-    freeSocketTimeout:
-      process.env.FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT === undefined
-        ? undefined
-        : parseInt(process.env.FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT, 10),
-    keepAlive: true,
-    keepAliveMsecs:
-      process.env.FETCH_KEEPALIVE_KEEPALIVE_MSECS === undefined
-        ? undefined
-        : parseInt(process.env.FETCH_KEEPALIVE_KEEPALIVE_MSECS, 10),
-    maxFreeSockets:
-      process.env.FETCH_KEEPALIVE_MAX_FREE_SOCKETS === undefined
-        ? undefined
-        : parseInt(process.env.FETCH_KEEPALIVE_MAX_FREE_SOCKETS, 10),
-    maxSockets:
-      process.env.FETCH_KEEPALIVE_MAX_SOCKETS === undefined
-        ? undefined
-        : parseInt(process.env.FETCH_KEEPALIVE_MAX_SOCKETS, 10),
-    socketActiveTTL:
-      process.env.FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL === undefined
-        ? undefined
-        : parseInt(process.env.FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL, 10),
-    timeout:
-      process.env.FETCH_KEEPALIVE_TIMEOUT === undefined
-        ? undefined
-        : parseInt(process.env.FETCH_KEEPALIVE_TIMEOUT, 10)
-  });
+  const httpAgent = new agentkeepalive.default(httpOptions);
 
   return (input, init) => {
     const initWithKeepalive = {
       ...(init === undefined ? {} : init),
-      agent: keepaliveAgent
+      agent: httpAgent
     };
     // need to cast to any since node-fetch has a slightly different type
     // signature that DOM's fetch
@@ -276,12 +282,14 @@ const getKeepaliveFetch: () => typeof fetch = () => {
   };
 };
 
-const apiFetch: typeof fetch = isFetchKeepaliveEnabled
-  ? getKeepaliveFetch()
-  : // tslint:disable-next-line: no-any
-    (nodeFetch as any);
+// HTTP-only fetch with keepalive agent
+const httpApiFetch: typeof fetch =
+  keepAliveAgentOptions !== undefined
+    ? getKeepaliveHttpFetch(keepAliveAgentOptions)
+    : // tslint:disable-next-line: no-any
+      (nodeFetch as any);
 
-export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, apiFetch);
+export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
@@ -295,7 +303,8 @@ const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
 const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
 export const PAGOPA_CLIENT = new PagoPAClientFactory(
   pagoPAApiUrlProd,
-  pagoPAApiUrlTest
+  pagoPAApiUrlTest,
+  httpApiFetch
 );
 
 // Azure Notification Hub credentials.
