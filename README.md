@@ -173,6 +173,19 @@ Those are all Environment variables needed by the application:
 | CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int    |
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 | GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase                             | string |
+| FETCH_KEEPALIVE_ENABLED                | When is `true` enables `keepalive` agent in the API client (defaults to `false`)  | boolean |
+| FETCH_KEEPALIVE_MAX_SOCKETS            | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+| FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT_MS | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+| FETCH_KEEPALIVE_KEEPALIVE_MSECS        | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+| FETCH_KEEPALIVE_MAX_FREE_SOCKETS       | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+| FETCH_KEEPALIVE_TIMEOUT                | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+| FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL      | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+
+Notes:
+
+ * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)
+ * `FETCH_KEEPALIVE_MAX_SOCKETS` depends on the number of `node` processes running on the VM, see [this article](https://docs.microsoft.com/en-us/azure/app-service/app-service-web-nodejs-best-practices-and-troubleshoot-guide#my-node-application-is-making-excessive-outbound-calls) and [this issue](https://github.com/MicrosoftDocs/azure-docs/issues/8013)
+ * `FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL` should be set at around 100 seconds when deploying on Azure, see [this comment](https://github.com/MicrosoftDocs/azure-docs/issues/29600#issuecomment-490354812)
 
 ### Logs
 
@@ -281,7 +294,7 @@ The default values are explained into the following table
 
 For local development only, spid-testenv2 (executed with docker-compose) could be used to login with a (fake) SPID account.
 
-On production, in order to reduce the startup time, another Environment variable could be provided  `STARTUP_IDPS_METADATA`. To set its value run: 
+On production, in order to reduce the startup time, another Environment variable could be provided  `STARTUP_IDPS_METADATA`. To set its value run:
 ```bash
 export STARTUP_IDPS_METADATA=`npx startup-idps-metadata --idp-metadata-url-env IDP_METADATA_URL --cie-metadata-url-env CIE_METADATA_URL`
 ```
