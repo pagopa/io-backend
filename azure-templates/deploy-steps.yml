@@ -12,7 +12,8 @@ parameters:
     values:
       - deployToProductionSlot
       - deployToStagingSlotAndSwap
-      - deployToStagingSlot  
+      - deployToStagingSlot
+      - deployToTestSlot
   
   - name: 'azureSubscription'
     type: string
@@ -65,9 +66,9 @@ steps:
         appName: '${{ parameters.appName }}'
         package: '$(Build.ArtifactStagingDirectory)/'
         deploymentMethod: 'auto'
-      displayName: Direct deploy
+      displayName: Deploy to production slot
   
-  # Option 2: deployment to 'staging' slot only (not used)
+  # Option 2: deployment to 'staging' slot only
   - ${{ if eq(parameters.deployType, 'deployToStagingSlot') }}:
     - task: AzureWebApp@1
       inputs:
@@ -103,4 +104,19 @@ steps:
         sourceSlot: staging
         swapWithProduction: true
       displayName: Swap with production slot
+
+  # Option 4: deployment to 'test' slot only
+  - ${{ if eq(parameters.deployType, 'deployToTestSlot') }}:
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        resourceGroupName: '${{ parameters.resourceGroupName }}'
+        appType: 'webApp'
+        appName: '${{ parameters.appName }}'
+        package: '$(Build.ArtifactStagingDirectory)/'
+        deploymentMethod: 'auto'
+        deployToSlotOrASE: true
+        slotName: 'test'
+      displayName: Deploy to test slot
+
   
