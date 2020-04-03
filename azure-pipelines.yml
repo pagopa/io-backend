@@ -10,28 +10,68 @@
 # - GITHUB_TOKEN
 #
 # To enable the deployment in any environment you need to configure the following 
-# variable otherwise all the deployment jobs will be always skipped:
+# global variable otherwise all the deployment jobs will be always skipped:
 # - DO_DEPLOY = true
-# in case of a manual run, you also need to configure the following additional 
-# variables based on the environment to update:
-# - STAGING_ENABLE_MANUAL_DEPLOY = true
-# - PRODUCTION_ENABLE_MANUAL_DEPLOY = true
+# you also need to configure the following additional parameters based on the 
+# environment(s) to update when running the pipeline:
+# - PRODUCTION_ENABLE_DEPLOY = true
+# - TEST_ENABLE_DEPLOY = true
 #
-# The following variables are also used when running the deployment jobs:
-# - STAGING_DEPLOY_MODE: 'deploy_standard' || 'deploy_to_slots'
-# - STAGING_AZURE_SUBSCRIPTION
-# - STAGING_RESOURCE_GROUP_NAME
-# - STAGING_APP_NAME
-# 
-# - PRODUCTION_DEPLOY_MODE: 'deploy_standard' || 'deploy_to_slots'
+# The following parameter and variables must also be set to run the deployment:
+# - PRODUCTION_DEPLOY_TYPE:
+#    -- 'deployToStagingSlot': deploy to 'staging' slot 
+#    -- 'deployToProductionSlot' (default): deploy to 'production' slot
+#    -- 'deployToStagingSlotAndSwap': deploy to 'staging' slot and then swap 
 # - PRODUCTION_AZURE_SUBSCRIPTION
 # - PRODUCTION_RESOURCE_GROUP_NAME
 # - PRODUCTION_APP_NAME
+#
+# - TEST_DEPLOY_TYPE:
+#      -- 'deployToTestSlot' (default): deploy to 'test' slot 
+#      -- 'deployToProductionSlot': deploy to 'production' slot (TEST env)
+# - TEST_AZURE_SUBSCRIPTION
+# - TEST_RESOURCE_GROUP_NAME
+# - TEST_APP_NAME
+# 
+# Please note that the deployment to a slot (e.g. 'staging') could automatically
+# trigger the swapping with 'production' slot if "auto swap" has been enabled in
+# the App service configuration. This also means that if the "auto swap" is on and 
+# you select 'deployToStagingSlotAndSwap' to swap 'staging' and 'production' slots
+# after deploying to 'staging', the swap task in this pipeline will probably fail
+# because conflicting with another (automatic) swap operation in progress.
 #
 
 variables:
   NODE_VERSION: '10.14.2'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+
+parameters:
+  - name: 'TEST_ENABLE_DEPLOY'
+    displayName: 'Enable deploy in test environment'
+    type: boolean
+    default: false
+
+  - name: 'TEST_DEPLOY_TYPE'
+    displayName: 'Method to achieve deployment in Test (if enabled):'
+    type: string
+    default: deployToTestSlot
+    values:
+      - deployToTestSlot  
+      - deployToProductionSlot
+
+  - name: 'PRODUCTION_ENABLE_DEPLOY'
+    displayName: 'Enable deploy in production environment'
+    type: boolean
+    default: true
+
+  - name: 'PRODUCTION_DEPLOY_TYPE'
+    displayName: 'Method to achieve deployment in Production (if enabled):'
+    type: string
+    default: deployToProductionSlot
+    values:
+      - deployToStagingSlot  
+      - deployToProductionSlot
+      - deployToStagingSlotAndSwap
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
@@ -53,7 +93,7 @@ trigger:
 # verifying the build and deploying, and Linux OS for all other jobs for faster 
 # execution.
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-2019'
 
 stages:
   # A) Build and code validation (always run)
@@ -62,8 +102,6 @@ stages:
     jobs:
       # A1) Checkout, install module and build code (use Windows OS)
       - job: make_build
-        pool:
-          vmImage: 'windows-2019'
         steps:
           - template: azure-templates/make-build-steps.yml
             parameters:
@@ -71,6 +109,8 @@ stages:
             
       # A2) Analyze source code to find errors with lint
       - job: lint
+        pool:
+          vmImage: 'ubuntu-latest'
         steps:
           - template: azure-templates/make-build-steps.yml
             parameters:
@@ -82,6 +122,8 @@ stages:
 
       # A3) Validate API definitions
       - job: lint_api
+        pool:
+          vmImage: 'ubuntu-latest'
         steps:
           - task: UseNode@1
             inputs:
@@ -98,6 +140,8 @@ stages:
 
       # A4) Run Danger (skipping if not executing on a PR)
       - job: danger
+        pool:
+          vmImage: 'ubuntu-latest'
         condition: 
           and(
             succeeded(), 
@@ -121,6 +165,8 @@ stages:
   # B) Run unit tests (use Linux OS, also required to generate certificates)
   - stage: Test
     dependsOn: []
+    pool:
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: unit_tests
         steps:
@@ -141,117 +187,67 @@ stages:
             displayName: 'Code coverage'
 
 
-  # C) Deploy to STAGE environment if the following conditions apply (use Windows OS):
+  # C) Deploy to TEST environment if the following conditions apply:
   #    - continuos deployment (automatic):
-  #       - $DO_DEPLOY == true and
+  #       - $DO_DEPLOY == true and TEST_ENABLE_DEPLOY == true
   #       - there is a push on 'master' branch 
   #    - manual deployment:
-  #       - $DO_DEPLOY == true and
-  #       - $STAGING_ENABLE_MANUAL_DEPLOY == true
-  # The following alternative deployment modes are supported:
-  #   a) $STAGING_DEPLOY_MODE == 'deploy_standard': deploy to 'prodution' slot
-  #   b) $STAGING_DEPLOY_MODE == 'deploy_to_slots': deploy to 'staging' slot and
-  #      then swap 'staging' slot with 'production' slot
-  - stage: Deploy_staging
-    pool:
-      vmImage: 'windows-2019'
-    condition: 
-      and(
-        succeeded(),
-        and (
-          eq(variables['DO_DEPLOY'], true),
-          or(
-            and(
+  #       - $DO_DEPLOY == true and TEST_ENABLE_DEPLOY == true
+  - ${{ if eq(parameters.TEST_ENABLE_DEPLOY, true) }}:
+    - stage: Deploy_test
+      condition: 
+        and(
+          succeeded(),
+          and (
+            eq(variables['DO_DEPLOY'], true),
+            or(
               eq(variables['Build.SourceBranch'], 'refs/heads/master'),
-              ne(variables['Build.Reason'], 'Manual')
-            ),
-            and(
-              eq(variables['STAGING_ENABLE_MANUAL_DEPLOY'], true),
               eq(variables['Build.Reason'], 'Manual')
             )
           )
-        )
-      )
-    dependsOn:
-      - Build
-      - Test
-    jobs:
-      # Option 1: deploy directly to 'production' slot
-      - job: deploy_standard
-        condition: and(succeeded(), eq(variables['STAGING_DEPLOY_MODE'], 'deploy_standard'))
-        steps:
+        )    
+      dependsOn:
+        - Build
+        - Test
+      jobs:
+        - job: '${{ parameters.TEST_DEPLOY_TYPE }}'
+          steps:
           - template: azure-templates/deploy-steps.yml
             parameters:
-              deployType: 'deployToProductionSlot'
-              azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
-              resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
-              appName: '$(STAGING_APP_NAME)'
-
-      # Option 2: deploy to staging slot and then swap with 'production' slot
-      - job: deploy_to_slots
-        condition: and(succeeded(), eq(variables['STAGING_DEPLOY_MODE'], 'deploy_to_slots'))
-        steps:
-          - template: azure-templates/deploy-steps.yml
-            parameters:
-              deployType: 'deployToStagingSlotAndSwap'
-              azureSubscription: '$(STAGING_AZURE_SUBSCRIPTION)'
-              resourceGroupName: '$(STAGING_RESOURCE_GROUP_NAME)'
-              appName: '$(STAGING_APP_NAME)'
+              deployType: '${{ parameters.TEST_DEPLOY_TYPE }}'
+              azureSubscription: '$(TEST_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(TEST_RESOURCE_GROUP_NAME)'
+              appName: '$(TEST_APP_NAME)'
 
 
-  # D) Deploy to PRODUCTION environment if the following conditions apply (use Windows OS):
+  # D) Deploy to PRODUCTION environment if one of the following conditions apply:
   #    - continuos deployment (automatic):
-  #       - $DO_DEPLOY == true and
+  #       - $DO_DEPLOY == true and PRODUCTION_ENABLE_DEPLOY == true
   #       - the 'latest' tag is pushed 
   #    - manual deployment:
-  #       - $DO_DEPLOY == true and
-  #       - $PRODUCTION_ENABLE_MANUAL_DEPLOY == true
-  # The following alternative deployment modes are supported:
-  #   a) $PRODUCTION_DEPLOY_MODE == 'deploy_standard': deploy to 'prodution' slot
-  #   b) $PRODUCTION_DEPLOY_MODE == 'deploy_to_slots': deploy to 'staging' slot and
-  #      then swap 'staging' slot with 'production' slot
-  - stage: Deploy_production
-    pool:
-      vmImage: 'windows-2019'
-    condition: 
-      and(
-        succeeded(),
-        and (
-          eq(variables['DO_DEPLOY'], true),
-          or(
-            and(
+  #       - $DO_DEPLOY == true and PRODUCTION_ENABLE_DEPLOY == true
+  - ${{ if eq(parameters.PRODUCTION_ENABLE_DEPLOY, true) }}:
+    - stage: Deploy_production
+      condition: 
+        and(
+          succeeded(),
+          and (
+            eq(variables['DO_DEPLOY'], true),
+            or(
               eq(variables['Build.SourceBranch'], 'refs/tags/latest'),
-              ne(variables['Build.Reason'], 'Manual')
-            ),
-            and(
-              eq(variables['PRODUCTION_ENABLE_MANUAL_DEPLOY'], true),
               eq(variables['Build.Reason'], 'Manual')
             )
           )
         )
-      )
-    dependsOn:
-      - Build
-      - Test
-    jobs:
-      # Option 1: deploy directly to 'production' slot
-      - job: deploy_standard
-        condition: and(succeeded(), eq(variables['PRODUCTION_DEPLOY_MODE'], 'deploy_standard'))
-        steps:
+      dependsOn:
+        - Build
+        - Test
+      jobs:
+        - job: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+          steps:
           - template: azure-templates/deploy-steps.yml
             parameters:
-              deployType: 'deployToProductionSlot'
-              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
-              appName: '$(PRODUCTION_APP_NAME)'
-
-      # Option 2: deploy to staging slot and then swap with 'production' slot
-      - job: deploy_to_slots
-        condition: and(succeeded(), eq(variables['PRODUCTION_DEPLOY_MODE'], 'deploy_to_slots'))
-        steps:
-          - template: azure-templates/deploy-steps.yml
-            parameters:
-              deployType: 'deployToStagingSlotAndSwap'
+              deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
               appName: '$(PRODUCTION_APP_NAME)'
