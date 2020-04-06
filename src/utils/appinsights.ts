@@ -64,7 +64,7 @@ export function initAppInsights(
 
   if (config.httpsAgent !== undefined) {
     // tslint:disable-next-line: no-object-mutation
-    appInsights.defaultClient.config.httpAgent = config.httpsAgent;
+    appInsights.defaultClient.config.httpsAgent = config.httpsAgent;
   }
 
   return appInsights.defaultClient;
