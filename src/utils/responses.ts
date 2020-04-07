@@ -1,5 +1,4 @@
 import * as express from "express";
-import { NextFunction, Request, Response } from "express";
 import * as t from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import {
@@ -69,19 +68,3 @@ export const withValidatedOrValidationError = <T, U>(
         errorsToReadableMessages(response.value).join(" / ")
       )
     : f(response.value);
-
-export function middlewareCatchAsInternalError(
-  f: (req: Request, res: Response, next: NextFunction) => unknown,
-  message: string = "Exception while calling express middleware"
-): (req: Request, res: Response, next: NextFunction) => void {
-  return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      f(req, res, next);
-    } catch (_) {
-      // Send a ResponseErrorInternal only if a response was not already sent to the client
-      if (!res.headersSent) {
-        return ResponseErrorInternal(`${message} [${_}]`).apply(res);
-      }
-    }
-  };
-}

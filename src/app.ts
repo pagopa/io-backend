@@ -81,7 +81,6 @@ import {
   createClusterRedisClient,
   createSimpleRedisClient
 } from "./utils/redis";
-import { middlewareCatchAsInternalError } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 
 const defaultModule = {
@@ -201,12 +200,9 @@ export function newApp(
   app.use(passport.initialize());
 
   // Initiliaze Url Token Authenticator
-  const urlTokenAuth = middlewareCatchAsInternalError(
-    passport.authenticate("authtoken", {
-      session: false
-    }),
-    "An exception occurred authenticating with Auth Token"
-  );
+  const urlTokenAuth = passport.authenticate("authtoken", {
+    session: false
+  });
 
   //
   // Setup routes
@@ -328,12 +324,9 @@ function registerPagoPARoutes(
   allowPagoPAIPSourceRange: readonly CIDR[],
   profileService: ProfileService
 ): void {
-  const bearerWalletTokenAuth = middlewareCatchAsInternalError(
-    passport.authenticate("bearer.wallet", {
-      session: false
-    }),
-    "An exception occurred authenticating with Bearer Wallet Token"
-  );
+  const bearerWalletTokenAuth = passport.authenticate("bearer.wallet", {
+    session: false
+  });
 
   const pagopaController: PagoPAController = new PagoPAController(
     profileService
@@ -362,12 +355,9 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService
 ): void {
-  const bearerSessionTokenAuth = middlewareCatchAsInternalError(
-    passport.authenticate("bearer.session", {
-      session: false
-    }),
-    "An exception occurred authenticating with Bearer Session Token"
-  );
+  const bearerSessionTokenAuth = passport.authenticate("bearer.session", {
+    session: false
+  });
 
   const profileController: ProfileController = new ProfileController(
     profileService
@@ -553,12 +543,9 @@ function registerAuthenticationRoutes(
   basePath: string,
   acsController: AuthenticationController
 ): void {
-  const bearerTokenAuth = middlewareCatchAsInternalError(
-    passport.authenticate("bearer.session", {
-      session: false
-    }),
-    "An exception occurred authenticating with Bearer Session Token"
-  );
+  const bearerTokenAuth = passport.authenticate("bearer.session", {
+    session: false
+  });
 
   app.post(
     `${basePath}/logout`,
