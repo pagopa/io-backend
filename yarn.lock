@@ -259,10 +259,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/types/-/types-0.2.0.tgz#2a0afd40fa7026e39ea56a454642bda72b172f80"
   integrity sha512-GtwNB6BNDdsIPAYEdpp3JnOGO/3AJxjPvny53s3HERBdXSJTGQw8IRhiaTEX0b3w9P8+FwFZde4k+qkjn67aVw==
 
-"@pagopa/io-spid-commons@^4.0.0":
-  version "4.0.0"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.0.0/49f5343e47dec0092149617305d3e82bc17e202a7278bf8e9abc83e1e2220614#46265c7d49fe9935c6a3e736b078683f5fc31655"
-  integrity sha512-vLiBA3DkRGo+xKJbs21BYjaPi6fvxW9c+OegiWUEt1EOLQDI/yPAfnqOWm6cEH0i4lt6JL8awAs5i9bD6MdMBA==
+"@pagopa/io-spid-commons@^4.1.0":
+  version "4.1.0"
+  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.1.0/4cc7f0805f81befa6b4479c9b42a2f5b3c171cbce3d537c52bc56afecd5e5a5c#3f68be4d01c2458defac0a2fa6cc836522e9e49f"
+  integrity sha512-1gCf6l5bAmJVHE+2tCN2eBlm3vyFmAE0LfomKYUD3M6qs16w/DmzRf9GFyBDkvfzgMxTTDIb7rMWxDw2rJAMSA==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
@@ -623,10 +623,9 @@ agent-base@4, agent-base@^4.3.0:
   dependencies:
     es6-promisify "^5.0.0"
 
-agentkeepalive@^4.1.0:
+"agentkeepalive@git+https://github.com/pagopa/agentkeepalive.git#v4.1.1":
   version "4.1.0"
-  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.0.tgz#a48e040ed16745dd29ce923675f60c9c90f39ee0"
-  integrity sha512-CW/n1wxF8RpEuuiq6Vbn9S8m0VSYDMnZESqaJ6F2cWN9fY8rei2qaxweIaRgq+ek8TqfoFIsUjaGNKGGEHElSg==
+  resolved "git+https://github.com/pagopa/agentkeepalive.git#91309bcab216dccbd08631e227a974afbfe807fb"
   dependencies:
     debug "^4.1.0"
     depd "^1.1.2"
@@ -3916,11 +3915,22 @@ istanbul-reports@^1.5.1:
   dependencies:
     handlebars "^4.0.3"
 
-italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.12, italia-ts-commons@^5.1.4:
+italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.4:
   version "5.1.13"
   resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.13.tgz#7ae919374f9c03c04e38603b7f7e9681ebee79b7"
   integrity sha512-mXtrNG/HR6lRCOTtBrEzsxGmkHccoDXKqoc9i+J2+yGhhxcznASu+0KMC05ZR1yJP4bWliC9rXJ3hnCw0rMSnQ==
   dependencies:
+    fp-ts "1.12.0"
+    io-ts "1.8.5"
+    json-set-map "^1.0.2"
+    validator "^10.1.0"
+
+italia-ts-commons@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-6.3.0.tgz#6353bd2bf71978ac75c7c8f656e847c7fc64eec1"
+  integrity sha512-m2Yq7ohoSqP+c5LTOahpRWBuJW/11YIQbvCxDQoakQ7RlMsNW+UQCACNw+Z400KCA8Iq8J7OJo3EFEgAq+9glg==
+  dependencies:
+    agentkeepalive "https://github.com/pagopa/agentkeepalive#v4.1.1"
     fp-ts "1.12.0"
     io-ts "1.8.5"
     json-set-map "^1.0.2"

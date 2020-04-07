@@ -1,12 +1,16 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-
-import * as agentkeepalive from "agentkeepalive";
 import * as appInsights from "applicationinsights";
 import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
+import {
+  getKeepAliveAgentOptions,
+  isFetchKeepaliveEnabled,
+  newHttpAgent,
+  newHttpsAgent
+} from "italia-ts-commons/lib/agent";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
 import {
@@ -15,7 +19,6 @@ import {
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
   ENV,
-  keepAliveAgentOptions,
   PAGOPA_BASE_PATH,
   SAML_CERT,
   SAML_KEY,
@@ -53,11 +56,11 @@ let server: http.Server | https.Server;
 const maybeAppInsightsClient = fromNullable(
   process.env.APPINSIGHTS_INSTRUMENTATIONKEY
 ).map(k =>
-  keepAliveAgentOptions !== undefined
+  isFetchKeepaliveEnabled(process.env)
     ? initAppInsights(k)
     : initAppInsights(k, {
-        httpAgent: new agentkeepalive.default(keepAliveAgentOptions),
-        httpsAgent: new agentkeepalive.HttpsAgent(keepAliveAgentOptions)
+        httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
+        httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
       })
 );
 
