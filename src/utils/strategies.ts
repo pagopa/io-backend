@@ -22,6 +22,6 @@ export function fulfill(
 ): void {
   errorOrUser.fold(
     error => done(undefined, false, error.message),
-    user => done(undefined, user.getOrElse(false))
+    user => done(undefined, user.isNone() ? false : user.value)
   );
 }
