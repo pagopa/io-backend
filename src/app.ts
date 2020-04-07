@@ -167,7 +167,7 @@ export function newApp(
   );
 
   const obfuscateToken = (originalUrl: string) =>
-    originalUrl.replace(/([?&]token=)[^&]*(&?.*)/, "$1REDACTED$2");
+    originalUrl.replace(/([?&]token=|[?&]access_token=)([^&]*)/g, "$1REDACTED");
 
   // Obfuscate token in url on morgan logs
   morgan.token("obfuscated_url", (req, _) => obfuscateToken(req.originalUrl));
