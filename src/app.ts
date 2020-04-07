@@ -332,7 +332,7 @@ function registerPagoPARoutes(
     passport.authenticate("bearer.wallet", {
       session: false
     }),
-    "An Exception occurs on Bearer Wallet Token Strategy"
+    "An exception occurred authenticating with Bearer Wallet Token"
   );
 
   const pagopaController: PagoPAController = new PagoPAController(
