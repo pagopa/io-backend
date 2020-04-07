@@ -13,7 +13,7 @@ export function expressErrorMiddleware(
   res: Response,
   __: NextFunction
 ): void {
-  log.error("Errors middleware catchs an error: %s", err.message);
+  log.error("An exception occurred during http request: %s", err.message);
   // Send a ResponseErrorInternal only if a response was not already sent to the client
   if (!res.headersSent) {
     ResponseErrorInternal(err.message).apply(res);
