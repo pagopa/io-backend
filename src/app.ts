@@ -205,7 +205,7 @@ export function newApp(
     passport.authenticate("authtoken", {
       session: false
     }),
-    "An expection occurs on Auth Token Strategy"
+    "An exception occurred authenticating with Auth Token"
   );
 
   //
