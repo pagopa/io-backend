@@ -11,6 +11,11 @@ export type StrategyDoneFunction = (
   options?: IVerifyOptions | string
 ) => void;
 
+/**
+ * This method invokes Passport Strategy done function
+ * with proper parameters depending on the response of
+ * methods getBySessionToken or getByWalletToken.
+ */
 export function fulfill(
   errorOrUser: Either<Error, Option<User>>,
   done: StrategyDoneFunction
