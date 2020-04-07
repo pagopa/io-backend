@@ -32,6 +32,7 @@ const bearerSessionTokenStrategy = (
           try {
             fulfill(errorOrUser, done);
           } catch (e) {
+            // The error is forwarded to the express error middleware
             done(e);
           }
         },
@@ -39,6 +40,7 @@ const bearerSessionTokenStrategy = (
           try {
             done(undefined, false);
           } catch (e) {
+            // The error is forwarded to the express error middleware
             done(e);
           }
         }
