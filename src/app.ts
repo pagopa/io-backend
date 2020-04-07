@@ -267,8 +267,6 @@ export function newApp(
       allowPagoPAIPSourceRange,
       PROFILE_SERVICE
     );
-    // Register the express error handler
-    app.use(expressErrorMiddleware);
     return { app, acsController };
   })
     .chain(_ => {
@@ -313,6 +311,13 @@ export function newApp(
         );
         process.exit(1);
       }
+      return _;
+    })
+    .map(_ => {
+      // Register the express error handler
+      // This middleware must be the last in order to catch all the errors
+      // forwarded with express next function.
+      _.use(expressErrorMiddleware);
       return _;
     })
     .run();
