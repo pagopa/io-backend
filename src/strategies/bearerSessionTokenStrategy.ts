@@ -29,10 +29,18 @@ const bearerSessionTokenStrategy = (
     ) => {
       sessionStorage.getBySessionToken(token as SessionToken).then(
         (errorOrUser: Either<Error, Option<User>>) => {
-          fulfill(errorOrUser, done);
+          try {
+            fulfill(errorOrUser, done);
+          } catch (e) {
+            done(e);
+          }
         },
         () => {
-          done(undefined, false);
+          try {
+            done(undefined, false);
+          } catch (e) {
+            done(e);
+          }
         }
       );
     }

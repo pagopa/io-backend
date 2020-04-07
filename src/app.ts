@@ -72,6 +72,7 @@ import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { User } from "./types/user";
 import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
+import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
   getObjectFromPackageJson
@@ -80,6 +81,7 @@ import {
   createClusterRedisClient,
   createSimpleRedisClient
 } from "./utils/redis";
+import { middlewareCatchAsInternalError } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 
 const defaultModule = {
@@ -199,9 +201,12 @@ export function newApp(
   app.use(passport.initialize());
 
   // Initiliaze Url Token Authenticator
-  const urlTokenAuth = passport.authenticate("authtoken", {
-    session: false
-  });
+  const urlTokenAuth = middlewareCatchAsInternalError(
+    passport.authenticate("authtoken", {
+      session: false
+    }),
+    "An expection occurs on Auth Token Strategy"
+  );
 
   //
   // Setup routes
@@ -266,6 +271,8 @@ export function newApp(
       allowPagoPAIPSourceRange,
       PROFILE_SERVICE
     );
+    // Register the express error handler
+    app.use(expressErrorMiddleware);
     return { app, acsController };
   })
     .chain(_ => {
@@ -321,9 +328,12 @@ function registerPagoPARoutes(
   allowPagoPAIPSourceRange: readonly CIDR[],
   profileService: ProfileService
 ): void {
-  const bearerWalletTokenAuth = passport.authenticate("bearer.wallet", {
-    session: false
-  });
+  const bearerWalletTokenAuth = middlewareCatchAsInternalError(
+    passport.authenticate("bearer.wallet", {
+      session: false
+    }),
+    "An Exception occurs on Bearer Wallet Token Strategy"
+  );
 
   const pagopaController: PagoPAController = new PagoPAController(
     profileService
@@ -337,7 +347,6 @@ function registerPagoPARoutes(
   );
 }
 
-// tslint:disable-next-line: no-big-function
 // tslint:disable-next-line: parameters-max-number
 function registerAPIRoutes(
   app: Express,
@@ -353,9 +362,12 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService
 ): void {
-  const bearerSessionTokenAuth = passport.authenticate("bearer.session", {
-    session: false
-  });
+  const bearerSessionTokenAuth = middlewareCatchAsInternalError(
+    passport.authenticate("bearer.session", {
+      session: false
+    }),
+    "An Exception occurs on Bearer Session Strategy"
+  );
 
   const profileController: ProfileController = new ProfileController(
     profileService
@@ -536,15 +548,17 @@ function registerAPIRoutes(
   );
 }
 
-// tslint:disable-next-line: parameters-max-number
 function registerAuthenticationRoutes(
   app: Express,
   basePath: string,
   acsController: AuthenticationController
 ): void {
-  const bearerTokenAuth = passport.authenticate("bearer.session", {
-    session: false
-  });
+  const bearerTokenAuth = middlewareCatchAsInternalError(
+    passport.authenticate("bearer.session", {
+      session: false
+    }),
+    "An Exception occurs on Bearer Token Strategy"
+  );
 
   app.post(
     `${basePath}/logout`,
