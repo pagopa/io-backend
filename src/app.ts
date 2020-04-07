@@ -366,7 +366,7 @@ function registerAPIRoutes(
     passport.authenticate("bearer.session", {
       session: false
     }),
-    "An Exception occurs on Bearer Session Strategy"
+    "An exception occurred authenticating with Bearer Session Token"
   );
 
   const profileController: ProfileController = new ProfileController(
