@@ -557,7 +557,7 @@ function registerAuthenticationRoutes(
     passport.authenticate("bearer.session", {
       session: false
     }),
-    "An Exception occurs on Bearer Token Strategy"
+    "An exception occurred authenticating with Bearer Session Token"
   );
 
   app.post(
