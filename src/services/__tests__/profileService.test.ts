@@ -88,6 +88,10 @@ const tooManyReqApiMessagesResponse = {
   status: 429
 };
 
+const conflictApiMessagesResponse = {
+  status: 409
+};
+
 // mock for a valid User
 const mockedUser: User = {
   created_at: 1183518855,
@@ -300,6 +304,18 @@ describe("ProfileService#updateProfile", () => {
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
+
+  it("returns an 409 HTTP error from updateProfile upstream API", async () => {
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(conflictApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.updateProfile(mockedUser, updateProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorConflict");
+  });
 });
 
 describe("ProfileService#createProfile", () => {
@@ -346,6 +362,18 @@ describe("ProfileService#createProfile", () => {
     const res = await service.createProfile(mockedUser, createProfileRequest);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+
+  it("returns an 409 HTTP error from createProfile upstream API", async () => {
+    mockCreateProfile.mockImplementation(() =>
+      t.success(conflictApiMessagesResponse)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.createProfile(mockedUser, updateProfileRequest);
+
+    expect(res.kind).toEqual("IResponseErrorConflict");
   });
 });
 

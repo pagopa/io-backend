@@ -4,11 +4,13 @@
  */
 
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
@@ -128,8 +130,10 @@ export default class ProfileService {
     user: User,
     newProfile: NewProfile
   ): Promise<
+    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
+    | IResponseErrorConflict
     | IResponseSuccessJson<InitializedProfile>
   > => {
     const client = this.apiClient.getClient();
@@ -142,6 +146,11 @@ export default class ProfileService {
       return withValidatedOrInternalError(validated, response =>
         response.status === 200
           ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+          : response.status === 409
+          ? ResponseErrorConflict(
+              response.value ||
+                "An user with the provided fiscal code already exists"
+            )
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status)
@@ -159,6 +168,7 @@ export default class ProfileService {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
+    | IResponseErrorConflict
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > => {
@@ -180,6 +190,10 @@ export default class ProfileService {
               ? ResponseSuccessJson(toInitializedProfile(response.value, user))
               : response.status === 404
               ? ResponseErrorNotFound("Not found", "User not found")
+              : response.status === 409
+              ? ResponseErrorConflict(
+                  response.value || "Cannot update profile with wrong version"
+                )
               : response.status === 429
               ? ResponseErrorTooManyRequests()
               : unhandledResponseStatus(response.status)
