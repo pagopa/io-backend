@@ -19,7 +19,7 @@ services:
     image: node:10.14.2-alpine
     command: ["yarn", "hot-reload"]
     volumes:
-      - ".:/usr/src/app"
+      - ".:/usr/src/app:cached"
     networks:
       - io-be
 
@@ -29,7 +29,7 @@ services:
     ports:
       - "8088:8088"
     volumes:
-      - "./testenv2/conf:/app/conf"
+      - "./testenv2/conf:/app/conf:cached"
     networks:
       - io-be
 
