@@ -72,6 +72,7 @@ import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { User } from "./types/user";
 import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
+import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
   getObjectFromPackageJson
@@ -166,7 +167,7 @@ export function newApp(
   );
 
   const obfuscateToken = (originalUrl: string) =>
-    originalUrl.replace(/([?&]token=)[^&]*(&?.*)/, "$1REDACTED$2");
+    originalUrl.replace(/([?&]token=|[?&]access_token=)([^&]*)/g, "$1REDACTED");
 
   // Obfuscate token in url on morgan logs
   morgan.token("obfuscated_url", (req, _) => obfuscateToken(req.originalUrl));
@@ -312,6 +313,13 @@ export function newApp(
       }
       return _;
     })
+    .map(_ => {
+      // Register the express error handler
+      // This middleware must be the last in order to catch all the errors
+      // forwarded with express next function.
+      _.use(expressErrorMiddleware);
+      return _;
+    })
     .run();
 }
 
@@ -337,7 +345,6 @@ function registerPagoPARoutes(
   );
 }
 
-// tslint:disable-next-line: no-big-function
 // tslint:disable-next-line: parameters-max-number
 function registerAPIRoutes(
   app: Express,
@@ -536,7 +543,6 @@ function registerAPIRoutes(
   );
 }
 
-// tslint:disable-next-line: parameters-max-number
 function registerAuthenticationRoutes(
   app: Express,
   basePath: string,
