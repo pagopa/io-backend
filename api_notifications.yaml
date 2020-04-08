@@ -20,6 +20,7 @@ paths:
       parameters:
         - in: body
           name: body
+          required: true
           schema:
             $ref: "#/definitions/Notification"
           x-examples:
