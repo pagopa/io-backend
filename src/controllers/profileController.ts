@@ -5,6 +5,7 @@
 
 import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
@@ -72,6 +73,7 @@ export default class ProfileController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
+    | IResponseErrorConflict
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > =>

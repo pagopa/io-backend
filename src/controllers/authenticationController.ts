@@ -103,16 +103,22 @@ export default class AuthenticationController {
         newProfile
       );
       if (createProfileResponse.kind !== "IResponseSuccessJson") {
-        // TODO: Must be extended IAuthenticationController to support IResponseErrorTooManyRequests?
-        return createProfileResponse.kind === "IResponseErrorTooManyRequests"
-          ? ResponseErrorInternal("Too many requests")
-          : createProfileResponse;
+        log.error(
+          "Error creating new user's profile: %s",
+          createProfileResponse.detail
+        );
+        // we switch to a generic error since the acs definition
+        // in io-spid-commons does not support 429 / 409 errors
+        return ResponseErrorInternal(createProfileResponse.kind);
       }
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
-      // TODO: IAuthenticationController type needs to support IResponseErrorTooManyRequests
-      return getProfileResponse.kind === "IResponseErrorTooManyRequests"
-        ? ResponseErrorInternal("Too many requests")
-        : getProfileResponse;
+      log.error(
+        "Error retrieving user's profile: %s",
+        getProfileResponse.detail
+      );
+      // we switch to a generic error since the acs definition
+      // in io-spid-commons does not support 429 errors
+      return ResponseErrorInternal(getProfileResponse.kind);
     }
 
     const deleteInstallationResponse = await this.notificationService.deleteInstallation(
@@ -120,7 +126,7 @@ export default class AuthenticationController {
     );
     if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
       log.debug(
-        "Error cleaning Notification Hub Installation [%s]",
+        "Cannot delete Notification Hub Installation: %s",
         deleteInstallationResponse.detail
       );
     }

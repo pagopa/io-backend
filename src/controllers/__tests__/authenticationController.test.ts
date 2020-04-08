@@ -296,7 +296,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error creating new user profile"
+      detail: "IResponseErrorInternal"
     });
   });
 
@@ -323,7 +323,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error reading the user profile"
+      detail: "IResponseErrorInternal"
     });
   });
 
