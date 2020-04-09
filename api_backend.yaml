@@ -265,6 +265,10 @@ paths:
           description: User not found
           schema:
             $ref: "#/definitions/ProblemJson"
+        "409":
+          description: Conflict.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "429":
           description: Too many requests
           schema:
