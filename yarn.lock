@@ -623,18 +623,17 @@ agent-base@4, agent-base@^4.3.0:
   dependencies:
     es6-promisify "^5.0.0"
 
-agentkeepalive@^4.1.0:
+"agentkeepalive@https://github.com/pagopa/agentkeepalive#v4.1.1":
   version "4.1.0"
-  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.0.tgz#a48e040ed16745dd29ce923675f60c9c90f39ee0"
-  integrity sha512-CW/n1wxF8RpEuuiq6Vbn9S8m0VSYDMnZESqaJ6F2cWN9fY8rei2qaxweIaRgq+ek8TqfoFIsUjaGNKGGEHElSg==
+  resolved "https://github.com/pagopa/agentkeepalive#91309bcab216dccbd08631e227a974afbfe807fb"
   dependencies:
     debug "^4.1.0"
     depd "^1.1.2"
     humanize-ms "^1.2.1"
 
-"agentkeepalive@https://github.com/pagopa/agentkeepalive#v4.1.1":
+"agentkeepalive@https://github.com/pagopa/agentkeepalive.git#v4.1.1":
   version "4.1.0"
-  resolved "https://github.com/pagopa/agentkeepalive#91309bcab216dccbd08631e227a974afbfe807fb"
+  resolved "https://github.com/pagopa/agentkeepalive.git#91309bcab216dccbd08631e227a974afbfe807fb"
   dependencies:
     debug "^4.1.0"
     depd "^1.1.2"

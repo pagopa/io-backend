@@ -51,7 +51,7 @@
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-spid-commons": "^4.1.0",
-    "agentkeepalive": "^4.1.0",
+    "agentkeepalive": "https://github.com/pagopa/agentkeepalive.git#v4.1.1",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
     "azure-sb": "^0.10.6",
