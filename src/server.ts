@@ -57,11 +57,11 @@ const maybeAppInsightsClient = fromNullable(
   process.env.APPINSIGHTS_INSTRUMENTATIONKEY
 ).map(k =>
   isFetchKeepaliveEnabled(process.env)
-    ? initAppInsights(k)
-    : initAppInsights(k, {
+    ? initAppInsights(k, {
         httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
         httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
       })
+    : initAppInsights(k)
 );
 
 newApp(
