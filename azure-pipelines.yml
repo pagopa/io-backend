@@ -19,8 +19,8 @@
 #
 # The following parameter and variables must also be set to run the deployment:
 # - PRODUCTION_DEPLOY_TYPE:
-#    -- 'deployToStagingSlot': deploy to 'staging' slot 
-#    -- 'deployToProductionSlot' (default): deploy to 'production' slot
+#    -- 'deployToStagingSlot': deploy to 'staging' slot (default)
+#    -- 'deployToProductionSlot': deploy to 'production' slot
 #    -- 'deployToStagingSlotAndSwap': deploy to 'staging' slot and then swap 
 # - PRODUCTION_AZURE_SUBSCRIPTION
 # - PRODUCTION_RESOURCE_GROUP_NAME
@@ -67,7 +67,7 @@ parameters:
   - name: 'PRODUCTION_DEPLOY_TYPE'
     displayName: 'Method to achieve deployment in Production (if enabled):'
     type: string
-    default: deployToProductionSlot
+    default: deployToStagingSlot
     values:
       - deployToStagingSlot  
       - deployToProductionSlot
