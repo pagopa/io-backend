@@ -34,7 +34,7 @@
     "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && shx mkdir -p generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
-    "dist:modules": "modclean -r -n default:safe && npm prune --production",
+    "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all generate:proxy-models build dist:modules"
   },
   "repository": {
@@ -51,7 +51,6 @@
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-spid-commons": "^4.1.0",
-    "agentkeepalive": "^4.1.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.4.2",
     "azure-sb": "^0.10.6",
