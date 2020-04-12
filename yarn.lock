@@ -3925,15 +3925,16 @@ italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.4:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
-italia-ts-commons@^6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-6.3.0.tgz#6353bd2bf71978ac75c7c8f656e847c7fc64eec1"
-  integrity sha512-m2Yq7ohoSqP+c5LTOahpRWBuJW/11YIQbvCxDQoakQ7RlMsNW+UQCACNw+Z400KCA8Iq8J7OJo3EFEgAq+9glg==
+italia-ts-commons@^6.3.1:
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-6.3.1.tgz#02e4ea62f35a8034f2b7f48ade10680cf0d1b995"
+  integrity sha512-yr5ctv2Uqh4dcZpuRfj1RS0gQ0+T8mYGWxDf4PVxP1CuQS9UYUmY3uQe0nLlJ6WpzfoijPaC9pnMu2Khcy4Xlw==
   dependencies:
     agentkeepalive "https://github.com/pagopa/agentkeepalive#v4.1.1"
     fp-ts "1.12.0"
     io-ts "1.8.5"
     json-set-map "^1.0.2"
+    node-fetch "^2.6.0"
     validator "^10.1.0"
 
 italia-tslint-rules@^1.1.3:
