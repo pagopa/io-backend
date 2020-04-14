@@ -70,6 +70,7 @@ import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { User } from "./types/user";
+import { attachSessionTrackingId } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
@@ -123,8 +124,11 @@ export function newApp(
   );
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
-  // tslint:disable-next-line: no-duplicate-string
-  passport.use("bearer.session", bearerSessionTokenStrategy(SESSION_STORAGE));
+  passport.use(
+    // tslint:disable-next-line: no-duplicate-string
+    "bearer.session",
+    bearerSessionTokenStrategy(SESSION_STORAGE, attachSessionTrackingId)
+  );
 
   // Add the strategy to authenticate proxy clients.
   passport.use("bearer.wallet", bearerWalletTokenStrategy(SESSION_STORAGE));

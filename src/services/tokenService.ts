@@ -4,13 +4,14 @@
 
 import * as crypto from "crypto";
 
+const DEFAULT_TOKEN_LENGTH_BYTES = 48;
+
 export default class TokenService {
   /**
    * Generates a new random token.
    */
-  public getNewToken(): string {
+  public getNewToken(length: number = DEFAULT_TOKEN_LENGTH_BYTES): string {
     // Use the crypto.randomBytes as token.
-    const SESSION_TOKEN_LENGTH_BYTES = 48;
-    return crypto.randomBytes(SESSION_TOKEN_LENGTH_BYTES).toString("hex");
+    return crypto.randomBytes(length).toString("hex");
   }
 }
