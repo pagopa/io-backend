@@ -41,7 +41,7 @@ export const User = t.intersection([
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
-    session_tracking_id: t.string, // unique ID user for tracking in appinsights
+    session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
     spid_idp: t.string,
     spid_mobile_phone: NonEmptyString
