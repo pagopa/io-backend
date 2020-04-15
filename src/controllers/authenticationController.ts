@@ -72,9 +72,22 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
+
+    // authentication token for app backend
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
+
+    // authentication token for pagoPA
     const walletToken = this.tokenService.getNewToken() as WalletToken;
-    const user = toAppUser(spidUser, sessionToken, walletToken);
+
+    // unique ID for tracking the user session
+    const sessionTrackingId = this.tokenService.getNewToken(32);
+
+    const user = toAppUser(
+      spidUser,
+      sessionToken,
+      walletToken,
+      sessionTrackingId
+    );
 
     const errorOrResponse = await this.sessionStorage.set(user);
 

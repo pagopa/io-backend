@@ -41,6 +41,7 @@ export const User = t.intersection([
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
+    session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
     spid_idp: t.string,
     spid_mobile_phone: NonEmptyString
@@ -77,7 +78,8 @@ export type SpidUser = t.TypeOf<typeof SpidUser>;
 export function toAppUser(
   from: SpidUser,
   sessionToken: SessionToken,
-  walletToken: WalletToken
+  walletToken: WalletToken,
+  sessionTrackingId: string
 ): User {
   return {
     created_at: new Date().getTime(),
@@ -86,6 +88,7 @@ export function toAppUser(
     fiscal_code: from.fiscalNumber,
     name: from.name,
     session_token: sessionToken,
+    session_tracking_id: sessionTrackingId,
     spid_email: from.email,
     spid_level: from.authnContextClassRef,
     spid_mobile_phone: from.mobilePhone,

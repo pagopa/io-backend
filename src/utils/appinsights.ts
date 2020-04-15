@@ -1,5 +1,8 @@
 import * as appInsights from "applicationinsights";
+
 import { getCurrentBackendVersion, getValueFromPackageJson } from "./package";
+
+import { User } from "src/types/user";
 
 interface IInsightsRequestData {
   baseType: "RequestData";
@@ -46,6 +49,7 @@ export function initAppInsights(
   appInsights.defaultClient.addTelemetryProcessor(
     removeQueryParamsPreprocessor
   );
+  appInsights.defaultClient.addTelemetryProcessor(sessionIdPreprocessor);
   // Configure the data context of the telemetry client
   // refering to the current beckend version with a specific CloudRole
   // tslint:disable-next-line: no-object-mutation
@@ -82,6 +86,56 @@ export function removeQueryParamsPreprocessor(
     (envelope.data as IInsightsRequestData).baseData.url = originalUrl.split(
       "?"
     )[0];
+  }
+  return true;
+}
+
+const SESSION_TRACKING_ID_KEY = "session_tracking_id";
+
+/**
+ * If the user objects provides the session_tracking_id property, attach it to
+ * the current correlation context and propagate it to outgoing requests.
+ * Note that getCorrelationContext() returns an Application Insights context
+ * that is scoped on the Express request being handled, thus this function can
+ * be safely called within an Express authentication strategy.
+ *
+ * @see https://github.com/microsoft/ApplicationInsights-node.js/issues/392#issuecomment-387532917
+ */
+export function attachSessionTrackingId(user: User): void {
+  if (user.session_tracking_id !== undefined) {
+    // if we stored a session tracking ID in the user object, attach it to
+    // the current appinsights context and propagate it to the outgoing
+    // HTTP requests
+    appInsights
+      .getCorrelationContext()
+      .customProperties.setProperty(
+        SESSION_TRACKING_ID_KEY,
+        user.session_tracking_id
+      );
+  }
+}
+
+export function sessionIdPreprocessor(
+  envelope: appInsights.Contracts.Envelope,
+  context?: {
+    // tslint:disable-next-line: no-any
+    [name: string]: any;
+  }
+): boolean {
+  if (context !== undefined) {
+    try {
+      const sessionTrackingId = context.customProperties.getProperty(
+        SESSION_TRACKING_ID_KEY
+      );
+      if (sessionTrackingId !== undefined) {
+        // tslint:disable-next-line: no-object-mutation
+        envelope.tags[
+          appInsights.defaultClient.context.keys.sessionId
+        ] = sessionTrackingId;
+      }
+    } catch (e) {
+      // ignore errors caused by missing properties
+    }
   }
   return true;
 }
