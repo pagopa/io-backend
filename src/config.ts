@@ -238,13 +238,17 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
+// HTTPs-only fetch with optional keepalive agent
+// @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
+const httpsApiFetch = agent.getHttpsFetch(process.env);
+
 // Register a factory service to create PagoPA client.
 const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
 const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
 export const PAGOPA_CLIENT = new PagoPAClientFactory(
   pagoPAApiUrlProd,
   pagoPAApiUrlTest,
-  httpApiFetch
+  httpsApiFetch
 );
 
 // Azure Notification Hub credentials.
