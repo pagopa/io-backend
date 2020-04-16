@@ -124,7 +124,7 @@ export function sessionIdPreprocessor(
 ): boolean {
   if (context !== undefined) {
     try {
-      const sessionTrackingId = context.customProperties.getProperty(
+      const sessionTrackingId = context.correlationContext.customProperties.getProperty(
         SESSION_TRACKING_ID_KEY
       );
       if (sessionTrackingId !== undefined) {
