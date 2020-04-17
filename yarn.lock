@@ -740,10 +740,10 @@ append-transform@^0.4.0:
   dependencies:
     default-require-extensions "^1.0.0"
 
-applicationinsights@^1.4.2:
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-1.7.3.tgz#13dc9bc2ae9c467659c6816c52c0fb72ee2d804e"
-  integrity sha512-4O0oHAwJOjMlbxfStdpZM9i+kIj8uiqc72okMDJmcXPuHfj41cFCRiNxrq/V5zPnhT3RWJTEeWRxrXWuBkiLXg==
+applicationinsights@^1.7.4:
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-1.7.4.tgz#e7d96435594d893b00cf49f70a5927105dbb8749"
+  integrity sha512-XFLsNlcanpjFhHNvVWEfcm6hr7lu9znnb6Le1Lk5RE03YUV9X2B2n2MfM4kJZRrUdV+C0hdHxvWyv+vWoLfY7A==
   dependencies:
     cls-hooked "^4.2.2"
     continuation-local-storage "^3.2.1"
