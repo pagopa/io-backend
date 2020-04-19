@@ -1,25 +1,10 @@
 import * as appInsights from "applicationinsights";
-
-import { getCurrentBackendVersion, getValueFromPackageJson } from "./package";
-
+import {
+  ApplicationInsightsConfig,
+  initAppInsights as startAppInsights
+} from "italia-ts-commons/lib/appinsights";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
-
-interface IInsightsRequestData {
-  baseType: "RequestData";
-  baseData: {
-    ver: number;
-    properties: {};
-    measurements: {};
-    id: string;
-    name: string;
-    url: string;
-    source?: string;
-    duration: string;
-    responseCode: string;
-    success: boolean;
-  };
-}
 
 /**
  * App Insights is initialized to collect the following informations:
@@ -31,64 +16,11 @@ interface IInsightsRequestData {
  */
 export function initAppInsights(
   instrumentationKey: string,
-  config: Partial<
-    Pick<appInsights.TelemetryClient["config"], "httpAgent" | "httpsAgent">
-  > = {}
+  config: ApplicationInsightsConfig = {}
 ): appInsights.TelemetryClient {
-  appInsights
-    .setup(instrumentationKey)
-    .setAutoDependencyCorrelation(true)
-    .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true)
-    .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true)
-    .setAutoCollectConsole(false)
-    // see https://stackoverflow.com/questions/49438235/application-insights-metric-in-aws-lambda/49441135#49441135
-    .setUseDiskRetryCaching(false)
-    .setSendLiveMetrics(true)
-    .start();
-  appInsights.defaultClient.addTelemetryProcessor(
-    removeQueryParamsPreprocessor
-  );
+  startAppInsights(instrumentationKey, config);
   appInsights.defaultClient.addTelemetryProcessor(sessionIdPreprocessor);
-  // Configure the data context of the telemetry client
-  // refering to the current beckend version with a specific CloudRole
-  // tslint:disable-next-line: no-object-mutation
-  appInsights.defaultClient.context.tags[
-    appInsights.defaultClient.context.keys.applicationVersion
-  ] = getCurrentBackendVersion();
-  // tslint:disable-next-line: no-object-mutation
-  appInsights.defaultClient.context.tags[
-    appInsights.defaultClient.context.keys.cloudRole
-  ] = getValueFromPackageJson("name");
-
-  if (config.httpAgent !== undefined) {
-    // tslint:disable-next-line: no-object-mutation
-    appInsights.defaultClient.config.httpAgent = config.httpAgent;
-  }
-
-  if (config.httpsAgent !== undefined) {
-    // tslint:disable-next-line: no-object-mutation
-    appInsights.defaultClient.config.httpsAgent = config.httpsAgent;
-  }
-
   return appInsights.defaultClient;
-}
-
-export function removeQueryParamsPreprocessor(
-  envelope: appInsights.Contracts.Envelope,
-  _?: {
-    [name: string]: unknown;
-  }
-): boolean {
-  if (envelope.data.baseType === "RequestData") {
-    const originalUrl = (envelope.data as IInsightsRequestData).baseData.url;
-    // tslint:disable-next-line: no-object-mutation
-    (envelope.data as IInsightsRequestData).baseData.url = originalUrl.split(
-      "?"
-    )[0];
-  }
-  return true;
 }
 
 const SESSION_TRACKING_ID_KEY = "session_tracking_id";
