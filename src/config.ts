@@ -289,3 +289,6 @@ export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
 export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";
 export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
+
+// Application insights sampling percentage
+export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
