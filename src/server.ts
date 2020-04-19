@@ -5,12 +5,6 @@ import * as appInsights from "applicationinsights";
 import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
-import {
-  getKeepAliveAgentOptions,
-  isFetchKeepaliveEnabled,
-  newHttpAgent,
-  newHttpsAgent
-} from "italia-ts-commons/lib/agent";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
 import {
