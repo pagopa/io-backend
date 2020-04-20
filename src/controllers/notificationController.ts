@@ -18,10 +18,10 @@ import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import { toError } from "fp-ts/lib/Either";
 import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { log } from "src/utils/logger";
 import NotificationService from "../services/notificationService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
+import { log } from "../utils/logger";
 import {
   withCatchAsInternalError,
   withValidatedOrValidationError
@@ -99,7 +99,7 @@ export default class NotificationController {
                   JSON.stringify(err)
                 );
               });
-            return ResponseSuccessJson({ messages: "ok" });
+            return ResponseSuccessJson({ message: "ok" });
           }
         )
       )
