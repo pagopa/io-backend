@@ -2,7 +2,6 @@
  * This service post a notification to the Notification hub.
  */
 
-import * as azure from "azure-sb";
 import {
   IResponseErrorInternal,
   IResponseSuccessJson,
@@ -12,53 +11,36 @@ import {
 
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
-import { PlatformEnum } from "../../generated/backend/Platform";
+import {
+  KindEnum as CreateOrUpdateKind,
+  NotificationHubCreateOrUpdateMessage
+} from "../../generated/messages/NotificationHubCreateOrUpdateMessage";
+import {
+  KindEnum as DeleteKind,
+  NotificationHubDeleteMessage
+} from "../../generated/messages/NotificationHubDeleteMessage";
+import { NotificationHubMessageKindEnum } from "../../generated/messages/NotificationHubMessageKind";
+import {
+  KindEnum as NotifyKind,
+  NotificationHubNotifyMessage
+} from "../../generated/messages/NotificationHubNotifyMessage";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
+import { QueueClient } from "@azure/storage-queue";
 import { fromNullable } from "fp-ts/lib/Option";
-import {
-  APNSPushType,
-  IInstallation,
-  INotificationTemplate,
-  toFiscalCodeHash
-} from "../types/notification";
-
-/**
- * A template suitable for Apple's APNs.
- *
- * @see https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CreatingtheNotificationPayload.html
- */
-const APNSTemplate: INotificationTemplate = {
-  body:
-    '{"aps": {"alert": {"title": "$(title)", "body": "$(message)"}}, "message_id": "$(message_id)"}'
-};
-
-/**
- * Build a template suitable for Google's GCM.
- *
- * @see https://developers.google.com/cloud-messaging/concept-options
- */
-const GCMTemplate: INotificationTemplate = {
-  body:
-    '{"data": {"title": "$(title)", "message": "$(message)", "message_id": "$(message_id)", "smallIcon": "ic_notification", "largeIcon": "ic_notification"}}'
-};
-
-// send the push notification only to the last
-// device that set the installationId
-// see https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management#installations
-export const toNotificationTag = (fiscalCode: FiscalCode) =>
-  `$InstallationId:{${toFiscalCodeHash(fiscalCode)}}`;
+import { toFiscalCodeHash } from "../types/notification";
+import { base64EncodeObject } from "../utils/messages";
 
 export default class NotificationService {
-  private notificationHubService: azure.NotificationHubService;
+  private notificationHubQueueClient: QueueClient;
   constructor(
-    private readonly hubName: string,
-    private readonly endpointOrConnectionString: string
+    private readonly queueStorageConnectionString: string,
+    private readonly queueName: string
   ) {
-    this.notificationHubService = azure.createNotificationHubService(
-      this.hubName,
-      this.endpointOrConnectionString
+    this.notificationHubQueueClient = new QueueClient(
+      this.queueStorageConnectionString,
+      this.queueName
     );
   }
 
@@ -69,34 +51,27 @@ export default class NotificationService {
   ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> =>
     new Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>(
       resolve => {
-        const payload = {
-          message: notificationSubject,
-          message_id: notification.message.id,
-          title: fromNullable(notificationTitle).getOrElse(
-            `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
-          )
-        };
-        this.notificationHubService.send(
-          toNotificationTag(notification.message.fiscal_code),
-          payload,
-          {
-            // Add required headers for APNS notification to iOS 13
-            // https://azure.microsoft.com/en-us/updates/azure-notification-hubs-updates-ios13/
-            headers: {
-              ["apns-push-type"]: APNSPushType.ALERT,
-              ["apns-priority"]: 10
-            }
-          },
-          (error, _) => {
-            return resolve(
-              error !== null
-                ? ResponseErrorInternal(
-                    `Error while sending notification to NotificationHub [${error.message}]`
-                  )
-                : ResponseSuccessJson({ message: "ok" })
-            );
+        const notificationHubMessage: NotificationHubNotifyMessage = {
+          installationId: toFiscalCodeHash(notification.message.fiscal_code),
+          kind: NotifyKind[NotificationHubMessageKindEnum.NotifyKind],
+          payload: {
+            message: notificationSubject,
+            message_id: notification.message.id,
+            title: fromNullable(notificationTitle).getOrElse(
+              `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
+            )
           }
-        );
+        };
+        this.notificationHubQueueClient
+          .sendMessage(base64EncodeObject(notificationHubMessage))
+          .then(() => resolve(ResponseSuccessJson({ message: "ok" })))
+          .catch(error =>
+            resolve(
+              ResponseErrorInternal(
+                `Error while sending notify message to the queue [${error.message}]`
+              )
+            )
+          );
       }
     );
 
@@ -106,40 +81,30 @@ export default class NotificationService {
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    const azureInstallation: IInstallation = {
+    const azureInstallation: NotificationHubCreateOrUpdateMessage = {
       // When a single active session per user is allowed, the installation that must be created or updated
       // will have an unique installationId referred to that user.
-      // Otherwise the installationId provided by the client will be used.
+      // The installationId provided by the client is ignored.
       installationId: toFiscalCodeHash(fiscalCode),
+      kind:
+        CreateOrUpdateKind[NotificationHubMessageKindEnum.CreateOrUpdateKind],
       platform: installation.platform,
       pushChannel: installation.pushChannel,
-      tags: [toFiscalCodeHash(fiscalCode)],
-      templates: {
-        template:
-          installation.platform === PlatformEnum.apns
-            ? APNSTemplate
-            : GCMTemplate
-      }
+      tags: [toFiscalCodeHash(fiscalCode)]
     };
     return new Promise<
       IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
     >(resolve => {
-      this.notificationHubService.createOrUpdateInstallation(
-        {
-          ...azureInstallation,
-          tags: [...azureInstallation.tags]
-        },
-        (error, _) =>
+      this.notificationHubQueueClient
+        .sendMessage(base64EncodeObject(azureInstallation))
+        .then(() => resolve(ResponseSuccessJson({ message: "ok" })))
+        .catch(error =>
           resolve(
-            error !== null
-              ? ResponseErrorInternal(
-                  `Error while creating or updating installation on NotificationHub [${JSON.stringify(
-                    azureInstallation
-                  )}] [${error.message}]`
-                )
-              : ResponseSuccessJson({ message: "ok" })
+            ResponseErrorInternal(
+              `Error while sending create or update installation message to the queue [${error.message}]`
+            )
           )
-      );
+        );
     });
   };
 
@@ -149,18 +114,20 @@ export default class NotificationService {
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
     return new Promise(resolve => {
-      this.notificationHubService.deleteInstallation(
-        toFiscalCodeHash(fiscalCode),
-        (error, _) => {
+      const deleteMessage: NotificationHubDeleteMessage = {
+        installationId: toFiscalCodeHash(fiscalCode),
+        kind: DeleteKind[NotificationHubMessageKindEnum.DeleteKind]
+      };
+      this.notificationHubQueueClient
+        .sendMessage(base64EncodeObject(deleteMessage))
+        .then(() => resolve(ResponseSuccessJson({ message: "ok" })))
+        .catch(error =>
           resolve(
-            error !== null
-              ? ResponseErrorInternal(
-                  `Error while deleting installation on NotificationHub [${error.message}]`
-                )
-              : ResponseSuccessJson({ message: "ok" })
-          );
-        }
-      );
+            ResponseErrorInternal(
+              `Error while sending delete installation message to the queue [${error.message}]`
+            )
+          )
+        );
     });
   };
 }

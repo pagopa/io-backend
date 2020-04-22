@@ -6,13 +6,13 @@ import {
   API_CLIENT,
   appConfig,
   CACHE_MAX_AGE_SECONDS,
-  endpointOrConnectionString,
   ENV,
   getClientProfileRedirectionUrl,
-  hubName,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   NOTIFICATION_DEFAULT_SUBJECT,
   NOTIFICATION_DEFAULT_TITLE,
+  NOTIFICATION_HUB_QUEUE_NAME,
+  NOTIFICATION_HUB_STORAGE_CONNECTION_STRING,
   PAGOPA_CLIENT,
   samlConfig,
   serviceProviderConfig,
@@ -226,7 +226,10 @@ export function newApp(
     // Create the Notification Service
     const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
       () => {
-        return new NotificationService(hubName, endpointOrConnectionString);
+        return new NotificationService(
+          NOTIFICATION_HUB_STORAGE_CONNECTION_STRING,
+          NOTIFICATION_HUB_QUEUE_NAME
+        );
       },
       err => {
         log.error("Error initializing NotificationHub Service: %s", err);

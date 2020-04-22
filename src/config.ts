@@ -251,12 +251,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
   httpsApiFetch
 );
 
-// Azure Notification Hub credentials.
-export const hubName = getRequiredENVVar("AZURE_NH_HUB_NAME");
-export const endpointOrConnectionString = getRequiredENVVar(
-  "AZURE_NH_ENDPOINT"
-);
-
 // API endpoint mount.
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
   "AUTHENTICATION_BASE_PATH"
@@ -284,6 +278,14 @@ export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
   "SPID_LOG_STORAGE_CONNECTION_STRING"
 );
 export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
+
+// Needed to forward Notification Hub actions events
+export const NOTIFICATION_HUB_STORAGE_CONNECTION_STRING = getRequiredENVVar(
+  "NOTIFICATION_HUB_STORAGE_CONNECTION_STRING"
+);
+export const NOTIFICATION_HUB_QUEUE_NAME = getRequiredENVVar(
+  "NOTIFICATION_HUB_QUEUE_NAME"
+);
 
 // Push notifications
 export const NOTIFICATION_DEFAULT_SUBJECT =
