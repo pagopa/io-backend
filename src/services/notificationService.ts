@@ -48,32 +48,29 @@ export default class NotificationService {
     notification: Notification,
     notificationSubject: string,
     notificationTitle?: string
-  ): Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>> =>
-    new Promise<IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>>(
-      resolve => {
-        const notificationHubMessage: NotificationHubNotifyMessage = {
-          installationId: toFiscalCodeHash(notification.message.fiscal_code),
-          kind: NotifyKind[NotificationHubMessageKindEnum.NotifyKind],
-          payload: {
-            message: notificationSubject,
-            message_id: notification.message.id,
-            title: fromNullable(notificationTitle).getOrElse(
-              `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
-            )
-          }
-        };
-        this.notificationHubQueueClient
-          .sendMessage(base64EncodeObject(notificationHubMessage))
-          .then(() => resolve(ResponseSuccessJson({ message: "ok" })))
-          .catch(error =>
-            resolve(
-              ResponseErrorInternal(
-                `Error while sending notify message to the queue [${error.message}]`
-              )
-            )
-          );
+  ): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
+  > => {
+    const notificationHubMessage: NotificationHubNotifyMessage = {
+      installationId: toFiscalCodeHash(notification.message.fiscal_code),
+      kind: NotifyKind[NotificationHubMessageKindEnum.Notify],
+      payload: {
+        message: notificationSubject,
+        message_id: notification.message.id,
+        title: fromNullable(notificationTitle).getOrElse(
+          `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
+        )
       }
-    );
+    };
+    return this.notificationHubQueueClient
+      .sendMessage(base64EncodeObject(notificationHubMessage))
+      .then(() => ResponseSuccessJson({ message: "ok" }))
+      .catch(error =>
+        ResponseErrorInternal(
+          `Error while sending notify message to the queue [${error.message}]`
+        )
+      );
+  };
 
   public readonly createOrUpdateInstallation = (
     fiscalCode: FiscalCode,
@@ -87,25 +84,21 @@ export default class NotificationService {
       // The installationId provided by the client is ignored.
       installationId: toFiscalCodeHash(fiscalCode),
       kind:
-        CreateOrUpdateKind[NotificationHubMessageKindEnum.CreateOrUpdateKind],
+        CreateOrUpdateKind[
+          NotificationHubMessageKindEnum.CreateOrUpdateInstallation
+        ],
       platform: installation.platform,
       pushChannel: installation.pushChannel,
       tags: [toFiscalCodeHash(fiscalCode)]
     };
-    return new Promise<
-      IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
-    >(resolve => {
-      this.notificationHubQueueClient
-        .sendMessage(base64EncodeObject(azureInstallation))
-        .then(() => resolve(ResponseSuccessJson({ message: "ok" })))
-        .catch(error =>
-          resolve(
-            ResponseErrorInternal(
-              `Error while sending create or update installation message to the queue [${error.message}]`
-            )
-          )
-        );
-    });
+    return this.notificationHubQueueClient
+      .sendMessage(base64EncodeObject(azureInstallation))
+      .then(() => ResponseSuccessJson({ message: "ok" }))
+      .catch(error =>
+        ResponseErrorInternal(
+          `Error while sending create or update installation message to the queue [${error.message}]`
+        )
+      );
   };
 
   public readonly deleteInstallation = (
@@ -113,21 +106,17 @@ export default class NotificationService {
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    return new Promise(resolve => {
-      const deleteMessage: NotificationHubDeleteMessage = {
-        installationId: toFiscalCodeHash(fiscalCode),
-        kind: DeleteKind[NotificationHubMessageKindEnum.DeleteKind]
-      };
-      this.notificationHubQueueClient
-        .sendMessage(base64EncodeObject(deleteMessage))
-        .then(() => resolve(ResponseSuccessJson({ message: "ok" })))
-        .catch(error =>
-          resolve(
-            ResponseErrorInternal(
-              `Error while sending delete installation message to the queue [${error.message}]`
-            )
-          )
-        );
-    });
+    const deleteMessage: NotificationHubDeleteMessage = {
+      installationId: toFiscalCodeHash(fiscalCode),
+      kind: DeleteKind[NotificationHubMessageKindEnum.DeleteInstallation]
+    };
+    return this.notificationHubQueueClient
+      .sendMessage(base64EncodeObject(deleteMessage))
+      .then(() => ResponseSuccessJson({ message: "ok" }))
+      .catch(error =>
+        ResponseErrorInternal(
+          `Error while sending delete installation message to the queue [${error.message}]`
+        )
+      );
   };
 }

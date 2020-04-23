@@ -30,7 +30,7 @@ const anAppleDevice = {
 };
 const anAppleInstallation: NotificationHubCreateOrUpdateMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
-  kind: CreateOrUpdateKind.CreateOrUpdateKind,
+  kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.apns,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash] // This is the sha256 of "GRBGPP87L04L741X"
@@ -41,7 +41,7 @@ const aGoogleDevice = {
 };
 const aGoogleInstallation: NotificationHubCreateOrUpdateMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
-  kind: CreateOrUpdateKind.CreateOrUpdateKind,
+  kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.gcm,
   pushChannel: aPushChannel,
   tags: [aFiscalCodeHash] // This is the sha256 of "GRBGPP87L04L741X"
@@ -197,7 +197,7 @@ describe("NotificationService#deleteInstallation", () => {
 
   const expectedDeleteInstallationMessage: NotificationHubDeleteMessage = {
     installationId: aFiscalCodeHash as NonEmptyString,
-    kind: DeleteKind.DeleteKind
+    kind: DeleteKind.DeleteInstallation
   };
 
   it("should submit a delete installation message to the Queue Storage", async () => {

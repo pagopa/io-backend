@@ -14,9 +14,9 @@ definitions:
   NotificationHubMessageKind:
     type: string
     enum:
-      - "NotifyKind"
-      - "CreateOrUpdateKind"
-      - "DeleteKind"
+      - "Notify"
+      - "CreateOrUpdateInstallation"
+      - "DeleteInstallation"
   NotificationHubMessage:
     type: object
     properties:
@@ -52,7 +52,7 @@ definitions:
           kind:
             type: string
             enum:
-              - "NotifyKind"
+              - "Notify"
         required:
           - payload
           - kind
@@ -66,7 +66,7 @@ definitions:
           kind:
             type: string
             enum:
-              - "CreateOrUpdateKind"
+              - "CreateOrUpdateInstallation"
           platform:
             $ref: '#/definitions/Platform'
           pushChannel:
@@ -90,7 +90,7 @@ definitions:
           kind:
             type: string
             enum:
-              - DeleteKind
+              - DeleteInstallation
         required:
           - kind
 responses: {}
