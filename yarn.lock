@@ -316,6 +316,13 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/bwip-js@^1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@types/bwip-js/-/bwip-js-1.7.0.tgz#fa34fbb567487eea862a34366dc1478ee88869fe"
+  integrity sha512-WJpXV9BctE+lYVnI/k2iRRp/onEKY3krxT53wFq1F2VGgd7vcB9KMckgMXEf5+y6NRcr7SLNHCr77oinvJBLcA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -1297,6 +1304,11 @@ builtin-modules@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
   integrity sha1-Jw8HbFpywC9bZaR9+Uxf46J4iS8=
+
+bwip-js@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/bwip-js/-/bwip-js-2.0.6.tgz#2189bf1ae9518974a5d73513605939989a98a17e"
+  integrity sha512-25zupM+tgx6NGmrg0kFhdkddeQ5+QnUMvHbb7cPNVbBdFDd0SOG3xRZ1ocGDEamhmM+fStglCLEkH21OpD4Y/w==
 
 bytes@3.1.0:
   version "3.1.0"
