@@ -1,7 +1,7 @@
 import * as bwipjs from "bwip-js";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { Either } from "fp-ts/lib/Either";
-import { taskEither, tryCatch, taskify } from "fp-ts/lib/TaskEither";
+import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import * as JsBarcode from "jsbarcode";
 import { DOMImplementation, XMLSerializer } from "xmldom";
 
