@@ -20,7 +20,8 @@ interface IBwipOptions {
 
 const toBase64Png = (options: IBwipOptions) =>
   tryCatch(
-    () =>  new Promise<string>((resolve, reject) =>
+    () =>
+      new Promise<string>((resolve, reject) =>
         bwipjs.toBuffer(options, (err, png) => {
           if (err == null) {
             return resolve(png.toString("base64"));
