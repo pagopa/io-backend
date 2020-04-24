@@ -1,5 +1,7 @@
 import * as bwipjs from "bwip-js";
-import { tryCatch } from "fp-ts/lib/TaskEither";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { Either } from "fp-ts/lib/Either";
+import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import * as JsBarcode from "jsbarcode";
 import { DOMImplementation, XMLSerializer } from "xmldom";
 
@@ -16,25 +18,24 @@ interface IBwipOptions {
   includetext: boolean;
 }
 
-const toBase64Png = (options: IBwipOptions) => {
-  return tryCatch(
+const toBase64Png = (options: IBwipOptions) =>
+  tryCatch(
     () => {
       return new Promise<string>((resolve, reject) =>
         bwipjs.toBuffer(options, (err, png) => {
           if (err == null) {
             return resolve(png.toString("base64"));
           } else {
-            return reject(new Error("Cannot generate png barcode"));
+            return reject(new Error(`Cannot generate png barcode|${err}`));
           }
         })
       );
     },
     errs => new Error(`Cannot generate png barcode|${errs}`)
   );
-};
 
-const toBase64Svg = (text: string) => {
-  return tryCatch(
+const toBase64Svg = (text: string) =>
+  tryCatch(
     () => {
       return new Promise<string>(resolve => {
         const xmlSerializer = new XMLSerializer();
@@ -61,21 +62,27 @@ const toBase64Svg = (text: string) => {
     },
     errs => new Error(`Cannot generate svg barcode|${errs}`)
   );
-};
 
-export async function toBarcode(text: string): Promise<Error | IBarcodeOutput> {
+export const toBarcode = (
+  text: string
+): Promise<Either<Error, IBarcodeOutput>> => {
   const options = {
     bcid: "code128",
     includetext: true,
     text
   };
 
-  const errorOrSvg = await toBase64Svg(text).run();
-  const errorOrPng = await toBase64Png(options).run();
-  return {
-    png: errorOrPng.getOrElse(""),
-    pngMimeType: "image/png",
-    svg: errorOrSvg.getOrElse(""),
-    svgMimeType: "image/svg+xml"
-  };
-}
+  return sequenceS(taskEither)({
+    png: toBase64Png(options),
+    svg: toBase64Svg(text)
+  })
+    .map(
+      images =>
+        ({
+          ...images,
+          pngMimeType: "image/png",
+          svgMimeType: "image/svg+xml"
+        } as IBarcodeOutput)
+    )
+    .run();
+};

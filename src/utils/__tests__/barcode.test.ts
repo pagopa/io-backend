@@ -1,3 +1,4 @@
+import { isRight } from "fp-ts/lib/Either";
 import { IBarcodeOutput, toBarcode } from "../barcode";
 const aText = "aText";
 
@@ -11,7 +12,8 @@ const aBarcodeOutput: IBarcodeOutput = {
 };
 describe("Barcode generator", () => {
   it("should return a valid svg", async () => {
-    const output = await toBarcode(aText);
-    expect(output).toEqual(aBarcodeOutput);
+    const errorOrBarcodes = await toBarcode(aText);
+    expect(isRight(errorOrBarcodes)).toBeTruthy();
+    expect(errorOrBarcodes.value).toEqual(aBarcodeOutput);
   });
 });
