@@ -1,3 +1,9 @@
+// tslint:disable-next-line: no-object-mutation
+process.env = {
+  ...process.env,
+  BARCODE_ALGO_ID: "code128"
+};
+
 import { IBarcodeOutput, toBarcode } from "../barcode";
 const aText = "FRLFRC74E04B157I";
 
