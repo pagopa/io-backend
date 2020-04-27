@@ -166,7 +166,7 @@ paths:
                 sender_service_id: "5a25abf4fcc89605c082f042c49a",
                 time_to_live: 3600
               },
-              attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}]
+              attachments: [{name:"attachment", base64_content:"aBase64Encoding", mime_type: "image/png"}]
         "400":
           description: Bad request
           schema:
