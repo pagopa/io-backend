@@ -152,18 +152,21 @@ paths:
         "200":
           description: Found.
           schema:
-            $ref: "#/definitions/CreatedMessageWithContent"
+            $ref: "#/definitions/CreatedMessageWithContentAndAttachments"
           examples:
             application/json: |
-              content: {
-                markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
-                subject: "my subject ............"
+              message: {
+                content: {
+                  markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                  subject: "my subject ............"
+                },
+                created_at: "2018-06-06T12:22:24.523Z",
+                fiscal_code: "LSSLCU79B24L219P",
+                id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+                sender_service_id: "5a25abf4fcc89605c082f042c49a",
+                time_to_live: 3600
               },
-              created_at: "2018-06-06T12:22:24.523Z",
-              fiscal_code: "LSSLCU79B24L219P",
-              id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
-              sender_service_id: "5a25abf4fcc89605c082f042c49a",
-              time_to_live: 3600
+              attachments: [{name:"attachment", content:"aBase64Encoding", mimeType: "image/png"}]
         "400":
           description: Bad request
           schema:
@@ -786,6 +789,31 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+  CreatedMessageWithContentAndAttachments:
+    type: object
+    title: CreatedMessageWithContentAndAttachments
+    description: Wraps a CreatedMessageWithContent with Attachments
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithContent'
+      attachments:
+        type: array
+        items:
+          $ref: '#/definitions/MessageAttachment' 
+    required:
+      - message
+  MessageAttachment:
+    type: object
+    title: MessageAttachment
+    description: Describes a message's attachment
+    properties:
+      name: string
+      content: string
+      mimeType: string
+    required:
+      - name
+      - content
+      - mimeType
   Installation:
     type: object
     title: Installation
