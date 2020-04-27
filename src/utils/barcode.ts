@@ -1,7 +1,13 @@
 import * as bwipjs from "bwip-js";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { tryCatch2v } from "fp-ts/lib/Either";
+import { fromNullable } from "fp-ts/lib/Option";
 import { fromEither, taskEither, taskify } from "fp-ts/lib/TaskEither";
+import { getRequiredENVVar } from "./container";
+
+const BCID = fromNullable(getRequiredENVVar("BARCODE_ALGO_ID")).getOrElse(
+  "code128"
+);
 
 export interface IBarcodeOutput {
   png: string;
@@ -21,6 +27,7 @@ const toBase64Svg = (options: IBwipOptions) =>
       const drawsvg = require("bwip-js/examples/drawing-svg");
       // tslint:disable-next-line: no-any
       const anyBwipJs = bwipjs as any;
+      // see wiki for further informations about fixupOptions https://github.com/metafloor/bwip-js/wiki/Methods-Reference#bwipjsfixupoptions
       anyBwipJs.fixupOptions(options);
       const svg = anyBwipJs.render(
         options,
@@ -35,7 +42,7 @@ const toBase64Png = taskify(bwipjs.toBuffer);
 
 export const toBarcode = (text: string) => {
   const options = {
-    bcid: "code128",
+    bcid: BCID,
     text
   };
 
