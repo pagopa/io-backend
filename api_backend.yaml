@@ -789,6 +789,19 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+
+  MessageAttachment:
+    type: object
+    title: MessageAttachment
+    description: Describes a message's attachment
+    properties:
+      name: string
+      base64_content: string
+      mime_type: string
+    required:
+      - name
+      - base64_content
+      - mime_type
   CreatedMessageWithContentAndAttachments:
     type: object
     title: CreatedMessageWithContentAndAttachments
@@ -802,18 +815,6 @@ definitions:
           $ref: '#/definitions/MessageAttachment' 
     required:
       - message
-  MessageAttachment:
-    type: object
-    title: MessageAttachment
-    description: Describes a message's attachment
-    properties:
-      name: string
-      content: string
-      mime_type: string
-    required:
-      - name
-      - content
-      - mime_type
   Installation:
     type: object
     title: Installation
