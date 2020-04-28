@@ -815,15 +815,15 @@ definitions:
     type: object
     properties:
       subject:
-        $ref: "#/MessageSubject"
+        $ref: "#/definitions/MessageSubject"
       markdown:
-        $ref: "#/MessageBodyMarkdown"
+        $ref: "#/definitions/MessageBodyMarkdown"
       payment_data:
-        $ref: "#/PaymentData"
+        $ref: "#/definitions/PaymentData"
       prescription_data:
-        $ref: "#/PrescriptionData"
+        $ref: "#/definitions/PrescriptionData"
       due_date:
-        $ref: "#/Timestamp"
+        $ref: "#/definitions/Timestamp"
       attachments:
         type: array
         items:
