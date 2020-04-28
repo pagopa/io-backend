@@ -814,25 +814,14 @@ definitions:
       - content
       - sender_service_id
   MessageContentWithAttachments:
-    type: object
-    properties:
-      subject:
-        $ref: "#/definitions/MessageSubject"
-      markdown:
-        $ref: "#/definitions/MessageBodyMarkdown"
-      payment_data:
-        $ref: "#/definitions/PaymentData"
-      prescription_data:
-        $ref: "#/definitions/PrescriptionData"
-      due_date:
-        $ref: "#/definitions/Timestamp"
-      attachments:
-        type: array
-        items:
-          $ref: '#/definitions/MessageAttachment'
-    required:
-      - subject
-      - markdown
+    allOf:
+      - type: object
+        properties:
+          attachments:
+            type: array
+            items:
+              $ref: "#/definitions/MessageAttachment"
+      - $ref: "#/definitions/MessageContent"
   MessageAttachment:
     type: object
     title: MessageAttachment
