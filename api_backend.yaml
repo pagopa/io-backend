@@ -719,6 +719,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v9.0.0/openapi/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v9.0.0/openapi/definitions.yaml#/PreferredLanguages"
+  PrescriptionData:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v9.0.0/openapi/definitions.yaml#/PrescriptionData"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v9.0.0/openapi/definitions.yaml#/ProblemJson"
   ServiceId:
