@@ -142,7 +142,6 @@ const proxyMessagesResponse = {
 };
 const proxyMessageResponse = validApiMessageResponse.value.message;
 const proxyMessageResponseWithAttachments =
- 
   validApiWithAttachmentsMessageResponse.value.message;
 const proxyServiceResponse = {
   department_name: aValidDepartmentName,
