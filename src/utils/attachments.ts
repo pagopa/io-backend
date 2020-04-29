@@ -1,5 +1,4 @@
 import { flatten } from "fp-ts/lib/Array";
-import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import { PrescriptionData } from "generated/backend/PrescriptionData";
 import { CreatedMessageWithContent } from "generated/io-api/CreatedMessageWithContent";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
@@ -27,13 +26,11 @@ export const fillMessageAttachmentsPayload = async (
     prescriptionData.prescriber_fiscal_code as string
   );
   const attachments = flatten([nreArrays, iupArrays, prescriberArrays]);
-  return ResponseSuccessJson(
-    CreatedMessageWithContentAndAttachments.encode({
-      ...message,
-      content: {
-        ...message.content,
-        attachments
-      }
-    })
-  );
+  return ResponseSuccessJson({
+    ...message,
+    content: {
+      ...message.content,
+      attachments
+    }
+  });
 };

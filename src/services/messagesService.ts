@@ -89,6 +89,7 @@ export default class MessagesService {
           const maybePrescriptionData = fromNullable(
             response.value.content.prescription_data
           );
+
           return maybePrescriptionData.isNone()
             ? ResponseSuccessJson(response.value)
             : fillMessageAttachmentsPayload(
