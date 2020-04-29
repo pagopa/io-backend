@@ -155,18 +155,16 @@ paths:
             $ref: "#/definitions/CreatedMessageWithContentAndAttachments"
           examples:
             application/json: |
-              message: {
-                content: {
-                  markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
-                  subject: "my subject ............",
-                  attachments: [{name:"attachment", encoded_content:"aBase64Encoding", mime_type: "image/png"}]
-                },
-                created_at: "2018-06-06T12:22:24.523Z",
-                fiscal_code: "LSSLCU79B24L219P",
-                id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
-                sender_service_id: "5a25abf4fcc89605c082f042c49a",
-                time_to_live: 3600
-              }
+              content: {
+                markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                subject: "my subject ............",
+                attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}]
+              },
+              created_at: "2018-06-06T12:22:24.523Z",
+              fiscal_code: "LSSLCU79B24L219P",
+              id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+              sender_service_id: "5a25abf4fcc89605c082f042c49a",
+              time_to_live: 3600
         "400":
           description: Bad request
           schema:
@@ -792,27 +790,6 @@ definitions:
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   
-  CreatedMessageWithContentAndAttachments:
-    type: object
-    properties:
-      id:
-        type: string
-      fiscal_code:
-        $ref: "#/definitions/FiscalCode"
-      time_to_live:
-        $ref: "#/definitions/TimeToLiveSeconds"
-      created_at:
-        $ref: "#/definitions/Timestamp"
-      content:
-        $ref: "#/definitions/MessageContentWithAttachments"
-      sender_service_id:
-        type: string
-    required:
-      - id
-      - fiscal_code
-      - created_at
-      - content
-      - sender_service_id
   MessageContentWithAttachments:
     allOf:
       - type: object
@@ -837,6 +814,15 @@ definitions:
       - name
       - content
       - mime_type
+  CreatedMessageWithContentAndAttachments:
+    allOf:
+      - type: object
+        properties:
+          content:
+            $ref: "#/definitions/MessageContentWithAttachments"
+        required:
+          - content
+      - $ref: "#/definitions/CreatedMessageWithoutContent"
   Installation:
     type: object
     title: Installation

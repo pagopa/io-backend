@@ -1,19 +1,16 @@
 import * as bwipjs from "bwip-js";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { Either, left, right, tryCatch2v } from "fp-ts/lib/Either";
-import { fromNullable } from "fp-ts/lib/Option";
 import { fromEither, taskEither, taskify } from "fp-ts/lib/TaskEither";
-import { getRequiredENVVar } from "./container";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-const BCID = fromNullable(getRequiredENVVar("BARCODE_ALGO_ID")).getOrElse(
-  "code128"
+const BCID = NonEmptyString.decode(process.env.BARCODE_ALGO_ID).getOrElse(
+  "code128" as NonEmptyString
 );
 
 export interface IBarcodeOutput {
   png: string;
-  pngMimeType: string;
   svg: string;
-  svgMimeType: string;
 }
 
 interface IBwipOptions {
@@ -38,7 +35,7 @@ const toBase64Svg = (options: IBwipOptions) =>
     errs => new Error(`Cannot generate svg barcode|${errs}`) as Error | string
   );
 
-const toBase64Png = taskify(bwipjs.toBuffer);
+const toBufferPng = taskify(bwipjs.toBuffer);
 
 export const toBarcode = (text: string) => {
   const options = {
@@ -47,7 +44,7 @@ export const toBarcode = (text: string) => {
   };
 
   return sequenceS(taskEither)({
-    png: toBase64Png(options),
+    png: toBufferPng(options),
     svg: fromEither(toBase64Svg(options))
   })
     .fold<Either<Error, IBarcodeOutput>>(
@@ -60,9 +57,7 @@ export const toBarcode = (text: string) => {
       images =>
         right({
           png: images.png.toString("base64"),
-          pngMimeType: "image/png",
-          svg: images.svg,
-          svgMimeType: "image/svg+xml"
+          svg: images.svg
         } as IBarcodeOutput)
     )
     .run();

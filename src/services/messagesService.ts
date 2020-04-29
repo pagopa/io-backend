@@ -18,7 +18,7 @@ import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import { fillMessageAttachmentsPayload } from "src/utils/attachments";
+import { getMessageWithAttachments } from "src/utils/attachments";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -84,7 +84,7 @@ export default class MessagesService {
         _.status === 200 ? { ..._, value: _.value.message } : _
       );
 
-      return withValidatedOrInternalError(resMessageContent, response => {
+      return withValidatedOrInternalError(resMessageContent, async response => {
         if (response.status === 200) {
           const maybePrescriptionData = fromNullable(
             response.value.content.prescription_data
@@ -92,9 +92,11 @@ export default class MessagesService {
 
           return maybePrescriptionData.isNone()
             ? ResponseSuccessJson(response.value)
-            : fillMessageAttachmentsPayload(
-                response.value,
-                maybePrescriptionData.value
+            : ResponseSuccessJson(
+                await getMessageWithAttachments(
+                  response.value,
+                  maybePrescriptionData.value
+                )
               );
         }
 
