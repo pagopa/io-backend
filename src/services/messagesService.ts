@@ -92,9 +92,9 @@ export default class MessagesService {
           return maybePrescriptionData.isNone()
             ? ResponseSuccessJson(response.value)
             : fillMessageAttachmentsPayload(
-                  response.value,
-                  maybePrescriptionData.value
-                );
+                response.value,
+                maybePrescriptionData.value
+              );
         }
 
         return response.status === 404

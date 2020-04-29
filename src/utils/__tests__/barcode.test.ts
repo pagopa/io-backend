@@ -4,8 +4,8 @@ process.env = {
   BARCODE_ALGO_ID: "code128"
 };
 
-import { IBarcodeOutput, toBarcode } from "../barcode";
 import { isRight } from "fp-ts/lib/Either";
+import { IBarcodeOutput, toBarcode } from "../barcode";
 const aText = "FRLFRC74E04B157I";
 
 const aBarcodeOutput: IBarcodeOutput = {
