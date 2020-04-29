@@ -1,6 +1,6 @@
 import * as bwipjs from "bwip-js";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { tryCatch2v } from "fp-ts/lib/Either";
+import { Either, left, right, tryCatch2v } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import { fromEither, taskEither, taskify } from "fp-ts/lib/TaskEither";
 import { getRequiredENVVar } from "./container";
@@ -50,13 +50,15 @@ export const toBarcode = (text: string) => {
     png: toBase64Png(options),
     svg: fromEither(toBase64Svg(options))
   })
-    .fold<Error | IBarcodeOutput>(
+    .fold<Either<Error, IBarcodeOutput>>(
       errorOrString =>
-        typeof errorOrString === "string"
-          ? new Error(errorOrString)
-          : errorOrString,
+        left(
+          typeof errorOrString === "string"
+            ? new Error(errorOrString)
+            : errorOrString
+        ),
       images =>
-        ({
+        right({
           png: images.png.toString("base64"),
           pngMimeType: "image/png",
           svg: images.svg,

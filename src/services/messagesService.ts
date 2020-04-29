@@ -12,11 +12,13 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { CreatedMessageWithContent } from "../../generated/backend/CreatedMessageWithContent";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 
+import { fromNullable } from "fp-ts/lib/Option";
+import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
+import { fillMessageAttachmentsPayload } from "src/utils/attachments";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -68,7 +70,7 @@ export default class MessagesService {
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<CreatedMessageWithContent>
+    | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
@@ -82,15 +84,25 @@ export default class MessagesService {
         _.status === 200 ? { ..._, value: _.value.message } : _
       );
 
-      return withValidatedOrInternalError(resMessageContent, response =>
-        response.status === 200
-          ? ResponseSuccessJson(response.value)
-          : response.status === 404
+      return withValidatedOrInternalError(resMessageContent, response => {
+        if (response.status === 200) {
+          const maybePrescriptionData = fromNullable(
+            response.value.content.prescription_data
+          );
+          return maybePrescriptionData.isNone()
+            ? ResponseSuccessJson(response.value)
+            : fillMessageAttachmentsPayload(
+                  response.value,
+                  maybePrescriptionData.value
+                );
+        }
+
+        return response.status === 404
           ? ResponseErrorNotFound("Not found", "Message not found")
           : response.status === 429
           ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status)
-      );
+          : unhandledResponseStatus(response.status);
+      });
     });
 
   /**
