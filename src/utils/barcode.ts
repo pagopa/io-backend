@@ -7,7 +7,7 @@ import {
   TaskEither,
   taskify
 } from "fp-ts/lib/TaskEither";
-import { BARCODE_ALGORITHM } from "src/config";
+import { BARCODE_ALGORITHM } from "../../src/config";
 
 export interface IBarcodeOutput {
   png: string;

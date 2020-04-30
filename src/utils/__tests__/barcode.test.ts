@@ -1,7 +1,7 @@
 // tslint:disable-next-line: no-object-mutation
 process.env = {
   ...process.env,
-  BARCODE_ALGO_ID: "code128"
+  BARCODE_ALGORITHM: "code128"
 };
 
 import { isRight } from "fp-ts/lib/Either";
