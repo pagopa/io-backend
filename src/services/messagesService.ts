@@ -18,7 +18,7 @@ import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
-import { getMessageWithAttachments } from "../../src/utils/attachments";
+import { getAttachments } from "../../src/utils/attachments";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -92,12 +92,16 @@ export default class MessagesService {
 
           return maybePrescriptionData.isNone()
             ? ResponseSuccessJson(response.value)
-            : ResponseSuccessJson(
-                await getMessageWithAttachments(
-                  response.value,
-                  maybePrescriptionData.value
-                )
-              );
+            : getAttachments(maybePrescriptionData.value)
+                .map(attachments => ({
+                  ...response.value,
+                  content: {
+                    ...response.value.content,
+                    attachments
+                  }
+                }))
+                .map(ResponseSuccessJson)
+                .run();
         }
 
         return response.status === 404

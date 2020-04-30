@@ -1,7 +1,12 @@
 import * as bwipjs from "bwip-js";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { Either, left, right, tryCatch2v } from "fp-ts/lib/Either";
-import { fromEither, taskEither, taskify } from "fp-ts/lib/TaskEither";
+import { left, right, tryCatch2v } from "fp-ts/lib/Either";
+import {
+  fromEither,
+  taskEither,
+  TaskEither,
+  taskify
+} from "fp-ts/lib/TaskEither";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 const BCID = NonEmptyString.decode(process.env.BARCODE_ALGO_ID).getOrElse(
@@ -39,7 +44,7 @@ const toBase64Svg = (options: IBwipOptions) =>
 
 const toBufferPng = taskify(bwipjs.toBuffer);
 
-export const toBarcode = (text: string) => {
+export function toBarcode(text: string): TaskEither<Error, IBarcodeOutput> {
   const options = {
     bcid: BCID,
     text
@@ -48,19 +53,21 @@ export const toBarcode = (text: string) => {
   return sequenceS(taskEither)({
     png: toBufferPng(options),
     svg: fromEither(toBase64Svg(options))
-  })
-    .fold<Either<Error, IBarcodeOutput>>(
-      errorOrString =>
+  }).foldTaskEither<Error, IBarcodeOutput>(
+    errorOrString =>
+      fromEither(
         left(
           typeof errorOrString === "string"
             ? new Error(errorOrString)
             : errorOrString
-        ),
-      images =>
+        )
+      ),
+    images =>
+      fromEither(
         right({
           png: images.png.toString("base64"),
           svg: images.svg
         } as IBarcodeOutput)
-    )
-    .run();
-};
+      )
+  );
+}

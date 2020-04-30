@@ -16,7 +16,7 @@ const aBarcodeOutput: IBarcodeOutput = {
 };
 describe("Barcode generator", () => {
   it("should return a valid svg and png", async () => {
-    const errorOrBarcodes = await toBarcode(aText);
+    const errorOrBarcodes = await toBarcode(aText).run();
     expect(isRight(errorOrBarcodes)).toBeTruthy();
     expect(errorOrBarcodes.value).toEqual(aBarcodeOutput);
   });

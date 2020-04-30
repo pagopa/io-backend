@@ -1,6 +1,7 @@
-import { flatten } from "fp-ts/lib/Array";
+import { array, flatten } from "fp-ts/lib/Array";
+import { task, Task } from "fp-ts/lib/Task";
+import { MessageAttachment } from "generated/backend/MessageAttachment";
 import { PrescriptionData } from "generated/backend/PrescriptionData";
-import { CreatedMessageWithContent } from "generated/io-api/CreatedMessageWithContent";
 import { toBarcode } from "./barcode";
 
 const MIME_TYPES = {
@@ -8,8 +9,8 @@ const MIME_TYPES = {
   svg: "image/svg+xml"
 };
 
-const toBarcodeAttachments = async (name: string, value: string) => {
-  const errorOrBarcodes = await toBarcode(value);
+const toBarcodeAttachments = (name: string, value: string) => {
+  const errorOrBarcodes = toBarcode(value);
   return errorOrBarcodes.fold(
     () => [],
     barcodes => [
@@ -19,22 +20,18 @@ const toBarcodeAttachments = async (name: string, value: string) => {
   );
 };
 
-export const getMessageWithAttachments = async (
-  message: CreatedMessageWithContent,
+export function getAttachments(
   prescriptionData: PrescriptionData
-) => {
-  const nreArrays = await toBarcodeAttachments("nre", prescriptionData.nre);
-  const iupArrays = await toBarcodeAttachments("iup", prescriptionData.iup);
-  const prescriberArrays = await toBarcodeAttachments(
-    "prescriber_fiscal_code",
-    prescriptionData.prescriber_fiscal_code as string
-  );
-  const attachments = flatten([nreArrays, iupArrays, prescriberArrays]);
-  return {
-    ...message,
-    content: {
-      ...message.content,
-      attachments
-    }
-  };
-};
+  // tslint:disable-next-line: readonly-array
+): Task<MessageAttachment[]> {
+  return array
+    .sequence(task)([
+      toBarcodeAttachments("iup", prescriptionData.iup),
+      toBarcodeAttachments("nre", prescriptionData.nre),
+      toBarcodeAttachments(
+        "prescriber_fiscal_code",
+        prescriptionData.prescriber_fiscal_code as string
+      )
+    ])
+    .map(flatten);
+}
