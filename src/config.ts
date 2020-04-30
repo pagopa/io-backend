@@ -28,6 +28,7 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -289,3 +290,7 @@ export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
 export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";
 export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
+
+export const BARCODE_ALGORITHM = NonEmptyString.decode(
+  process.env.BARCODE_ALGORITHM
+).getOrElse("code128" as NonEmptyString);

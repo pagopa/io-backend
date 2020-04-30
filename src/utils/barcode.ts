@@ -7,11 +7,7 @@ import {
   TaskEither,
   taskify
 } from "fp-ts/lib/TaskEither";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-
-const BCID = NonEmptyString.decode(process.env.BARCODE_ALGO_ID).getOrElse(
-  "code128" as NonEmptyString
-);
+import { BARCODE_ALGORITHM } from "src/config";
 
 export interface IBarcodeOutput {
   png: string;
@@ -26,7 +22,7 @@ interface IBwipOptions {
 // tslint:disable-next-line: no-var-requires
 const drawsvg = require("bwip-js/examples/drawing-svg");
 
-const toBase64Svg = (options: IBwipOptions) =>
+const toBufferSvg = (options: IBwipOptions) =>
   tryCatch2v(
     () => {
       // tslint:disable-next-line: no-any
@@ -37,7 +33,7 @@ const toBase64Svg = (options: IBwipOptions) =>
         options,
         drawsvg(options, anyBwipJs.FontLib)
       );
-      return Buffer.from(svg).toString("base64");
+      return Buffer.from(svg);
     },
     errs => new Error(`Cannot generate svg barcode|${errs}`) as Error | string
   );
@@ -46,13 +42,13 @@ const toBufferPng = taskify(bwipjs.toBuffer);
 
 export function toBarcode(text: string): TaskEither<Error, IBarcodeOutput> {
   const options = {
-    bcid: BCID,
+    bcid: BARCODE_ALGORITHM,
     text
   };
 
   return sequenceS(taskEither)({
     png: toBufferPng(options),
-    svg: fromEither(toBase64Svg(options))
+    svg: fromEither(toBufferSvg(options))
   }).foldTaskEither<Error, IBarcodeOutput>(
     errorOrString =>
       fromEither(
@@ -66,7 +62,7 @@ export function toBarcode(text: string): TaskEither<Error, IBarcodeOutput> {
       fromEither(
         right({
           png: images.png.toString("base64"),
-          svg: images.svg
+          svg: images.svg.toString("base64")
         } as IBarcodeOutput)
       )
   );

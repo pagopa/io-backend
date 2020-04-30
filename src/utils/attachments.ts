@@ -9,18 +9,27 @@ const MIME_TYPES = {
   svg: "image/svg+xml"
 };
 
-const toBarcodeAttachments = (name: string, value: string) => {
-  const errorOrBarcodes = toBarcode(value);
-  return errorOrBarcodes.fold(
+/**
+ * For a given field name and value, it returns MessageAttachment[] containing
+ * both PNG and SVG barcode's representation.
+ * @param name: The name of the field that must be encoded in barcode format
+ * @param value: The string value of the field that must be encoded in barcode format
+ */
+const toBarcodeAttachments = (name: string, value: string) =>
+  toBarcode(value).fold(
     () => [],
     barcodes => [
       { name, content: barcodes.png, mime_type: MIME_TYPES.png },
       { name, content: barcodes.svg, mime_type: MIME_TYPES.svg }
     ]
   );
-};
 
-export function getAttachments(
+/**
+ * It returns an array of MessageAttachment, containing
+ * the barcode representation of each PrescriptionData field.
+ * @param prescriptionData: The receipt prescription data.
+ */
+export function getPrescriptionAttachments(
   prescriptionData: PrescriptionData
   // tslint:disable-next-line: readonly-array
 ): Task<MessageAttachment[]> {
