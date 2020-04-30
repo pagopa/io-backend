@@ -1,6 +1,6 @@
 {
   "name": "io-backend",
-  "version": "5.16.0",
+  "version": "5.20.0",
   "min_app_version": {
     "ios": "0.0.0",
     "android": "0.0.0"
@@ -50,7 +50,7 @@
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
-    "@pagopa/io-spid-commons": "^4.1.0",
+    "@pagopa/io-spid-commons": "^4.3.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.7.4",
     "azure-sb": "^0.10.6",
@@ -64,7 +64,7 @@
     "http-graceful-shutdown": "^2.3.2",
     "io-ts": "1.8.5",
     "io-ts-types": "^0.4.7",
-    "italia-ts-commons": "^6.3.1",
+    "italia-ts-commons": "^7.0.1",
     "json-set-map": "^1.0.2",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.0",

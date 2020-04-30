@@ -259,10 +259,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/types/-/types-0.2.0.tgz#2a0afd40fa7026e39ea56a454642bda72b172f80"
   integrity sha512-GtwNB6BNDdsIPAYEdpp3JnOGO/3AJxjPvny53s3HERBdXSJTGQw8IRhiaTEX0b3w9P8+FwFZde4k+qkjn67aVw==
 
-"@pagopa/io-spid-commons@^4.1.0":
-  version "4.1.0"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.1.0/4cc7f0805f81befa6b4479c9b42a2f5b3c171cbce3d537c52bc56afecd5e5a5c#3f68be4d01c2458defac0a2fa6cc836522e9e49f"
-  integrity sha512-1gCf6l5bAmJVHE+2tCN2eBlm3vyFmAE0LfomKYUD3M6qs16w/DmzRf9GFyBDkvfzgMxTTDIb7rMWxDw2rJAMSA==
+"@pagopa/io-spid-commons@^4.3.0":
+  version "4.3.0"
+  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.3.0/d6276e8476d931f851504d6faa371c0bae5e2450cadf5f9af57bc7e6d64f40a2#dc3b4d2c23ba859bfede6d57a0dfce3155c33bf3"
+  integrity sha512-iJY3/WdwQL16PHFeYystIEMgaGL3Lw+LzYR/CD+ZCxUZ71W3sOdfZtUYIOm7b5gGcxHMlm10hx6iGbhaybRb1A==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
@@ -3937,13 +3937,14 @@ italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.4:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
-italia-ts-commons@^6.3.1:
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-6.3.1.tgz#02e4ea62f35a8034f2b7f48ade10680cf0d1b995"
-  integrity sha512-yr5ctv2Uqh4dcZpuRfj1RS0gQ0+T8mYGWxDf4PVxP1CuQS9UYUmY3uQe0nLlJ6WpzfoijPaC9pnMu2Khcy4Xlw==
+italia-ts-commons@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-7.0.1.tgz#7068643b09f069f4c96627e609d5dc578a64a04a"
+  integrity sha512-IIZYim8LydSA3nbeCxbR23marXhx3Z/FLUh7cV6XxNrB5OpKeVMmQhXV42oErP+g/vsrCQ/LRSrLX8cpi1Nghg==
   dependencies:
     agentkeepalive "https://github.com/pagopa/agentkeepalive#v4.1.1"
-    fp-ts "1.12.0"
+    applicationinsights "^1.7.4"
+    fp-ts "1.17.4"
     io-ts "1.8.5"
     json-set-map "^1.0.2"
     node-fetch "^2.6.0"

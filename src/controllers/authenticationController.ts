@@ -134,15 +134,23 @@ export default class AuthenticationController {
       return ResponseErrorInternal(getProfileResponse.kind);
     }
 
-    const deleteInstallationResponse = await this.notificationService.deleteInstallation(
-      user.fiscal_code
-    );
-    if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
-      log.debug(
-        "Cannot delete Notification Hub Installation: %s",
-        deleteInstallationResponse.detail
-      );
-    }
+    // async fire & forget
+    this.notificationService
+      .deleteInstallation(user.fiscal_code)
+      .then(deleteInstallationResponse => {
+        if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
+          log.debug(
+            "Cannot delete Notification Hub Installation: %s",
+            deleteInstallationResponse.detail
+          );
+        }
+      })
+      .catch(err => {
+        log.error(
+          "Cannot delete Notification Hub Installation: %s",
+          JSON.stringify(err)
+        );
+      });
 
     const urlWithToken = this.getClientProfileRedirectionUrl(
       user.session_token

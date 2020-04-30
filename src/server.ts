@@ -5,12 +5,6 @@ import * as appInsights from "applicationinsights";
 import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
-import {
-  getKeepAliveAgentOptions,
-  isFetchKeepaliveEnabled,
-  newHttpAgent,
-  newHttpsAgent
-} from "italia-ts-commons/lib/agent";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
 import {
@@ -18,6 +12,7 @@ import {
   ALLOW_PAGOPA_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
+  DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   PAGOPA_BASE_PATH,
   SAML_CERT,
@@ -27,6 +22,10 @@ import {
 import { initAppInsights } from "./utils/appinsights";
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
+import {
+  getCurrentBackendVersion,
+  getValueFromPackageJson
+} from "./utils/package";
 
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
@@ -56,12 +55,14 @@ let server: http.Server | https.Server;
 const maybeAppInsightsClient = fromNullable(
   process.env.APPINSIGHTS_INSTRUMENTATIONKEY
 ).map(k =>
-  isFetchKeepaliveEnabled(process.env)
-    ? initAppInsights(k, {
-        httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
-        httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
-      })
-    : initAppInsights(k)
+  initAppInsights(k, {
+    applicationVersion: getCurrentBackendVersion(),
+    cloudRole: getValueFromPackageJson("name"),
+    disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
+    samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
+      ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
+      : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
+  })
 );
 
 newApp(
