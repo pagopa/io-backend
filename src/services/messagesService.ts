@@ -17,8 +17,8 @@ import { PaginatedServiceTupleCollection } from "../../generated/backend/Paginat
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import { getMessageWithAttachments } from "src/utils/attachments";
+import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
+import { getMessageWithAttachments } from "../../src/utils/attachments";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
