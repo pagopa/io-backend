@@ -18,10 +18,12 @@ interface IBwipOptions {
   text: string;
 }
 
+// tslint:disable-next-line: no-var-requires
+const drawsvg = require("bwip-js/examples/drawing-svg");
+
 const toBase64Svg = (options: IBwipOptions) =>
   tryCatch2v(
     () => {
-      const drawsvg = require("bwip-js/examples/drawing-svg");
       // tslint:disable-next-line: no-any
       const anyBwipJs = bwipjs as any;
       // see wiki for further informations about fixupOptions https://github.com/metafloor/bwip-js/wiki/Methods-Reference#bwipjsfixupoptions
