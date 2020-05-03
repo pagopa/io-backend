@@ -77,7 +77,7 @@ const validApiMessageResponseWithPrescriptionMetadata = {
       content: {
         markdown: aValidMarkdown,
         prescription_data: {
-          ipe: "12345678",
+          iup: "12345678",
           nre: "12345678",
           prescriber_fiscal_code: "SPNDNL80R13C600R"
         },
