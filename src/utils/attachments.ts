@@ -10,10 +10,11 @@ const MIME_TYPES = {
 };
 
 /**
- * For a given field name and value, it returns MessageAttachment[] containing
- * both PNG and SVG barcode's representation.
- * @param name: The name of the field that must be encoded in barcode format
- * @param value: The string value of the field that must be encoded in barcode format
+ * Map a (name, value) tuple from message content prescription data,
+ * into an array of "attachments" (named encoded base64 data)
+ * containing both the PNG and SVG barcode's representation.
+ *
+ * @see https://github.com/pagopa/io-functions-commons/blob/master/openapi/definitions.yaml#L91
  */
 const toBarcodeAttachments = (name: string, value: string) =>
   toBarcode(value).fold(
@@ -25,9 +26,9 @@ const toBarcodeAttachments = (name: string, value: string) =>
   );
 
 /**
- * It returns an array of MessageAttachment, containing
- * the barcode representation of each PrescriptionData field.
- * @param prescriptionData: The receipt prescription data.
+ * Map prescription data embedded into message content
+ * into an array of image attachments, containing
+ * the rendered barcode (svg and png) for each field.
  */
 export function getPrescriptionAttachments(
   prescriptionData: PrescriptionData
