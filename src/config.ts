@@ -294,5 +294,6 @@ export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
 export const BARCODE_ALGORITHM = NonEmptyString.decode(
   process.env.BARCODE_ALGORITHM
 ).getOrElse("code128" as NonEmptyString);
+
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
