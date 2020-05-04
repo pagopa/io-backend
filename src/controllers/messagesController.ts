@@ -15,7 +15,7 @@ import {
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
-import { CreatedMessageWithContent } from "../../generated/backend/CreatedMessageWithContent";
+import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 
 export default class MessagesController {
@@ -46,7 +46,7 @@ export default class MessagesController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<CreatedMessageWithContent>
+    | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
     withUserFromRequest(req, user =>
       this.messagesService.getMessage(user, req.params.id)

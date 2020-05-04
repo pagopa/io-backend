@@ -10,6 +10,7 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
+import { APIClient } from "../../clients/api";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
@@ -68,6 +69,33 @@ const validApiMessageResponse = {
     status: "PROCESSED"
   }
 };
+
+const validApiMessageResponseWithPrescriptionMetadata = {
+  status: 200,
+  value: {
+    message: {
+      content: {
+        markdown: aValidMarkdown,
+        prescription_data: {
+          iup: "12345678",
+          nre: "12345678",
+          prescriber_fiscal_code: "SPNDNL80R13C600R"
+        },
+        subject: aValidSubject
+      },
+      created_at: "2018-06-12T09:45:06.771Z",
+      fiscal_code: "LSSLCU79B24L219P",
+      id: "01CFSP4XYK3Y0VZTKHW9FKS1XM",
+      sender_service_id: "5a563817fcc896087002ea46c49a"
+    },
+    notification: {
+      email: "SENT",
+      webhook: "SENT"
+    },
+    status: "PROCESSED"
+  }
+};
+
 const validApiServiceResponse = {
   status: 200,
   value: {
@@ -104,6 +132,7 @@ const proxyMessagesResponse = {
   page_size: validApiMessagesResponse.value.page_size
 };
 const proxyMessageResponse = validApiMessageResponse.value.message;
+
 const proxyServiceResponse = {
   department_name: aValidDepartmentName,
   organization_fiscal_code: aValidOrganizationFiscalCode,
@@ -130,25 +159,19 @@ const mockGetMessages = jest.fn();
 const mockGetServices = jest.fn();
 const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
-const mockGetClient = jest.fn().mockImplementation(() => {
-  return {
-    getMessage: mockGetMessage,
-    getMessages: mockGetMessages,
-    getService: mockGetService,
-    getServices: mockGetServices
-  };
-});
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-jest.mock("../../services/apiClientFactory", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      getClient: mockGetClient
-    }))
-  };
+jest.mock("../apiClientFactory");
+jest.spyOn(ApiClientFactory.prototype, "getClient").mockImplementation(() => {
+  return ({
+    getMessage: mockGetMessage,
+    getMessages: mockGetMessages,
+    getService: mockGetService,
+    getServices: mockGetServices
+  } as unknown) as ReturnType<APIClient>;
 });
 
 const api = new ApiClientFactory("", "");
@@ -244,6 +267,21 @@ describe("MessageService#getMessage", () => {
     });
   });
 
+  it("returns a message with attachments from the API", async () => {
+    mockGetMessage.mockImplementation(() =>
+      t.success(validApiMessageResponseWithPrescriptionMetadata)
+    );
+
+    const service = new MessageService(api);
+
+    const res = await service.getMessage(mockedUser, aValidMessageId);
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscalCode: aValidFiscalCode,
+      id: aValidMessageId
+    });
+    expect(res).toMatchSnapshot();
+  });
   it("returns an error if the getMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(() => t.success(problemJson));
 
