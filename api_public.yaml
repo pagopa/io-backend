@@ -28,7 +28,7 @@ paths:
   "password-login":
     x-swagger-router-controller: AuthenticationController
     post:
-      operationId: acs
+      operationId: testLogin
       summary: Login Test User with password
       description: Login Test User with password and Fiscal Code
       parameters:
