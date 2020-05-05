@@ -18,7 +18,7 @@ import {
   serviceProviderConfig,
   SPID_LOG_QUEUE_NAME,
   SPID_LOG_STORAGE_CONNECTION_STRING,
-  TEST_LOGIN_FISCAL_CODE,
+  TEST_LOGIN_FISCAL_CODES,
   TEST_LOGIN_PASSWORD,
   tokenDurationSecs,
   URL_TOKEN_STRATEGY
@@ -139,7 +139,7 @@ export function newApp(
   // Add the strategy for reviewers login.
   passport.use(
     "local",
-    localStrategy(TEST_LOGIN_FISCAL_CODE, TEST_LOGIN_PASSWORD)
+    localStrategy(TEST_LOGIN_FISCAL_CODES, TEST_LOGIN_PASSWORD)
   );
 
   // Add the strategy to authenticate webhook calls.
@@ -568,7 +568,7 @@ function registerAuthenticationRoutes(
   const localAuth = passport.authenticate("local");
 
   app.post(
-    `${basePath}/password-login`,
+    `${basePath}/test-login`,
     localAuth,
     toExpressHandler(acsController.acs, acsController)
   );

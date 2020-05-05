@@ -13,11 +13,11 @@ export const localStrategy = (
     ) {
       // Fake test user for password based logins
       const testUser = {
-        familyName: "User",
+        familyName: "Rossi",
         fiscalNumber: username as FiscalCode,
         getAssertionXml: () => "",
         issuer: "IO",
-        name: "Test"
+        name: "Mario"
       };
       return done(null, testUser);
     }

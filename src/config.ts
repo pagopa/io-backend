@@ -300,8 +300,8 @@ export const BARCODE_ALGORITHM = NonEmptyString.decode(
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
 
 // Reviewer static login params
-export const TEST_LOGIN_FISCAL_CODE: ReadonlyArray<FiscalCode> = getRequiredENVVar(
-  "TEST_LOGIN_FISCAL_CODE"
+export const TEST_LOGIN_FISCAL_CODES: ReadonlyArray<FiscalCode> = getRequiredENVVar(
+  "TEST_LOGIN_FISCAL_CODES"
 )
   .split(",")
   .map(FiscalCode.decode)
