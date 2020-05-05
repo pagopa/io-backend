@@ -616,7 +616,6 @@ paths:
           description: Unavailable service
           schema:
             $ref: "#/definitions/ProblemJson"
-
   "/user-data-processing":
     x-swagger-router-controller: UserDataProcessingController
     post:

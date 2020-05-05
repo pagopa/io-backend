@@ -18,6 +18,8 @@ import {
   serviceProviderConfig,
   SPID_LOG_QUEUE_NAME,
   SPID_LOG_STORAGE_CONNECTION_STRING,
+  TEST_LOGIN_FISCAL_CODE,
+  TEST_LOGIN_PASSWORD,
   tokenDurationSecs,
   URL_TOKEN_STRATEGY
 } from "./config";
@@ -69,6 +71,7 @@ import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
+import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
@@ -132,6 +135,12 @@ export function newApp(
 
   // Add the strategy to authenticate proxy clients.
   passport.use("bearer.wallet", bearerWalletTokenStrategy(SESSION_STORAGE));
+
+  // Add the strategy for reviewers login.
+  passport.use(
+    "local",
+    localStrategy(TEST_LOGIN_FISCAL_CODE, TEST_LOGIN_PASSWORD)
+  );
 
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
@@ -555,6 +564,14 @@ function registerAuthenticationRoutes(
   const bearerTokenAuth = passport.authenticate("bearer.session", {
     session: false
   });
+
+  const localAuth = passport.authenticate("local");
+
+  app.post(
+    `${basePath}/password-login`,
+    localAuth,
+    toExpressHandler(acsController.acs, acsController)
+  );
 
   app.post(
     `${basePath}/logout`,

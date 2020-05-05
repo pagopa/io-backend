@@ -3,7 +3,7 @@
  */
 
 import * as dotenv from "dotenv";
-import { parseJSON, toError } from "fp-ts/lib/Either";
+import { isRight, parseJSON, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import { agent } from "italia-ts-commons";
 
@@ -29,6 +29,7 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -297,3 +298,13 @@ export const BARCODE_ALGORITHM = NonEmptyString.decode(
 
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
+
+// Reviewer static login params
+export const TEST_LOGIN_FISCAL_CODE: ReadonlyArray<FiscalCode> = getRequiredENVVar(
+  "TEST_LOGIN_FISCAL_CODE"
+)
+  .split(",")
+  .map(FiscalCode.decode)
+  .filter(isRight)
+  .map(_ => _.value);
+export const TEST_LOGIN_PASSWORD = getRequiredENVVar("TEST_LOGIN_PASSWORD");
