@@ -4,7 +4,7 @@
 
 import * as dotenv from "dotenv";
 import { isRight, parseJSON, toError } from "fp-ts/lib/Either";
-import { fromNullable, isSome } from "fp-ts/lib/Option";
+import { fromNullable, isSome, Option } from "fp-ts/lib/Option";
 import { agent } from "italia-ts-commons";
 
 import { getNodeEnvironmentFromProcessEnv } from "italia-ts-commons/lib/environment";
@@ -300,11 +300,13 @@ export const BARCODE_ALGORITHM = NonEmptyString.decode(
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
 
 // Reviewer static login params
-export const TEST_LOGIN_FISCAL_CODES: ReadonlyArray<FiscalCode> = getRequiredENVVar(
-  "TEST_LOGIN_FISCAL_CODES"
-)
-  .split(",")
-  .map(FiscalCode.decode)
-  .filter(isRight)
-  .map(_ => _.value);
+export const TEST_LOGIN_FISCAL_CODES: Option<ReadonlyArray<
+  FiscalCode
+>> = fromNullable(process.env.TEST_LOGIN_FISCAL_CODES)
+  .map(_ => _.split(","))
+  .map(_ =>
+    _.map(FiscalCode.decode)
+      .filter(isRight)
+      .map(fiscalCodeEither => fiscalCodeEither.value)
+  );
 export const TEST_LOGIN_PASSWORD = getRequiredENVVar("TEST_LOGIN_PASSWORD");
