@@ -5,6 +5,7 @@
 
 import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
@@ -36,6 +37,7 @@ export default class UserDataProcessingController {
     | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
+    | IResponseErrorConflict
     | IResponseSuccessJson<UserDataProcessing>
   > =>
     withUserFromRequest(req, async user =>
