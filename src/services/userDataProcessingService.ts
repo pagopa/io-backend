@@ -15,6 +15,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { fromNullable } from "fp-ts/lib/Option";
 import { UserDataProcessing } from "generated/io-api/UserDataProcessing";
 import { UserDataProcessingChoice } from "generated/io-api/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
@@ -55,7 +56,9 @@ export default class UserDataProcessingService {
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : response.status === 409
-          ? ResponseErrorConflict("Conflict")
+          ? ResponseErrorConflict(
+              fromNullable(response.value.detail).getOrElse("Conflict")
+            )
           : unhandledResponseStatus(response.status)
       );
     });
