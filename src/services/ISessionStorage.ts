@@ -4,6 +4,7 @@
 
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { SessionToken, WalletToken } from "../types/token";
 import { User } from "../types/user";
 
@@ -33,5 +34,9 @@ export interface ISessionStorage {
   readonly del: (
     sessionToken: SessionToken,
     walletToken: WalletToken
+  ) => Promise<Either<Error, boolean>>;
+
+  readonly userHasLoginBlocked: (
+    fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 }

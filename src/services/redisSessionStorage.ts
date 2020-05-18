@@ -9,10 +9,11 @@ import {
   left,
   parseJSON,
   right,
-  toError
+  toError,
+  tryCatch
 } from "fp-ts/lib/Either";
 import { isSome, none, Option, some } from "fp-ts/lib/Option";
-import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import { fromEither, TaskEither, taskify } from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
@@ -305,6 +306,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
     return this.mgetTask(...errorOrSessionTokens.value)
       .map(_ => _.length > 0)
       .run();
+  }
+
+  public async userHasLoginBlocked(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return fromEither(
+      tryCatch(() => this.redisClient.exists(`USER-BLOCKED-${fiscalCode}`))
+    ).run();
   }
 
   /*

@@ -8,10 +8,12 @@ import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
+  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponsePermanentRedirect,
@@ -58,6 +60,7 @@ export default class AuthenticationController {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
     | IResponsePermanentRedirect
   > {
     const errorOrUser = validateSpidUser(userPayload);
@@ -72,7 +75,31 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
+    const errorOrUserLoginBlocked = await this.sessionStorage.userHasLoginBlocked(
+      spidUser.fiscalNumber
+    );
+    const loginBlockResult = errorOrUserLoginBlocked.fold<
+      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized | boolean
+    >(
+      err => {
+        log.error(
+          "Error getting informations about login block for user",
+          err.message
+        );
+        return ResponseErrorInternal(err.message);
+      },
+      isLoginBlocked => {
+        if (isLoginBlocked) {
+          return ResponseErrorForbiddenNotAuthorized;
+        } else {
+          return isLoginBlocked;
+        }
+      }
+    );
 
+    if (typeof loginBlockResult !== "boolean") {
+      return loginBlockResult;
+    }
     // authentication token for app backend
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
 
