@@ -79,7 +79,7 @@ export default class AuthenticationController {
       spidUser.fiscalNumber
     );
     const loginBlockResult = errorOrUserLoginBlocked.fold<
-      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized | boolean
+      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized | number
     >(
       err => {
         log.error(
@@ -88,16 +88,16 @@ export default class AuthenticationController {
         );
         return ResponseErrorInternal(err.message);
       },
-      isLoginBlocked => {
-        if (isLoginBlocked) {
+      result => {
+        if (result === 1) {
           return ResponseErrorForbiddenNotAuthorized;
         } else {
-          return isLoginBlocked;
+          return result;
         }
       }
     );
 
-    if (typeof loginBlockResult !== "boolean") {
+    if (typeof loginBlockResult !== "number") {
       return loginBlockResult;
     }
     // authentication token for app backend
