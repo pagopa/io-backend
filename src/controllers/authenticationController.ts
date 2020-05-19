@@ -5,7 +5,7 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -75,32 +75,24 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
-    const errorOrUserLoginBlocked = await this.sessionStorage.userHasLoginBlocked(
+    const errorOrIsBlockedUser = await this.sessionStorage.isBlockedUser(
       spidUser.fiscalNumber
     );
-    const loginBlockResult = errorOrUserLoginBlocked.fold<
-      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized | boolean
-    >(
-      err => {
-        log.error(
-          "Error getting informations about login block for user",
-          err.message
-        );
-        return ResponseErrorInternal(err.message);
-      },
-      result => {
-        // if result === true an entry on blocked fiscalCode was found on Redis
-        if (result) {
-          return ResponseErrorForbiddenNotAuthorized;
-        } else {
-          return result;
-        }
-      }
-    );
 
-    if (typeof loginBlockResult !== "boolean") {
-      return loginBlockResult;
+    if (isRight(errorOrIsBlockedUser)) {
+      const isBlockedUser = errorOrIsBlockedUser.value;
+      if (isBlockedUser) {
+        return ResponseErrorForbiddenNotAuthorized;
+      }
+    } else {
+      const err = errorOrIsBlockedUser.value;
+      log.error(
+        "Error getting informations about login block for user",
+        err.message
+      );
+      return ResponseErrorInternal(err.message);
     }
+
     // authentication token for app backend
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
 

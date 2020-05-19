@@ -11,13 +11,8 @@ import {
   right,
   toError
 } from "fp-ts/lib/Either";
-import { fromNullable, isSome, none, Option, some } from "fp-ts/lib/Option";
-import {
-  TaskEither,
-  taskify,
-  tryCatch as tryCatchT
-} from "fp-ts/lib/TaskEither";
-import { identity } from "io-ts";
+import { isSome, none, Option, some } from "fp-ts/lib/Option";
+import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
@@ -42,12 +37,18 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private mgetTask: (
     ...args: ReadonlyArray<string>
   ) => TaskEither<Error, ReadonlyArray<string>>;
+  private sismemberTask: (
+    ...args: ReadonlyArray<string>
+  ) => TaskEither<Error, number>;
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
   ) {
     super();
     this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
+    this.sismemberTask = taskify(
+      this.redisClient.sismember.bind(this.redisClient)
+    );
   }
 
   /**
@@ -312,28 +313,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
       .run();
   }
 
-  public async userHasLoginBlocked(
+  public async isBlockedUser(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
-    return tryCatchT(
-      () =>
-        new Promise<ReadonlyArray<string>>((resolve, reject) => {
-          this.redisClient.smembers(`BLOCKED-USERS`, (err, response) => {
-            if (err) {
-              const error = fromNullable(err).getOrElse(
-                new Error("Cannot get info about blocked users from Redis")
-              );
-              return reject(error.message);
-            }
-            return resolve(response);
-          });
-        }),
-      errs =>
-        new Error(
-          `Error while accessing info about block login for user [${errs}]`
-        )
-    )
-      .bimap(identity, _ => _.includes(fiscalCode))
+    return this.sismemberTask("BLOCKED-USERS", fiscalCode)
+      .bimap(
+        err => new Error(`Error accessing blocked users collection: ${err}`),
+        result => result === 1
+      )
       .run();
   }
 
