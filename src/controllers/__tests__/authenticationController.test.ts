@@ -117,7 +117,7 @@ const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
 const mockGetByWalletToken = jest.fn();
 const mockDel = jest.fn();
-const mockUserHasLoginBlocked = jest.fn();
+const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -125,7 +125,7 @@ jest.mock("../../services/redisSessionStorage", () => {
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
       set: mockSet,
-      userHasLoginBlocked: mockUserHasLoginBlocked
+      isBlockedUser: mockIsBlockedUser
     }))
   };
 });
@@ -213,7 +213,7 @@ describe("AuthenticationController#acs", () => {
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -244,7 +244,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -273,7 +273,7 @@ describe("AuthenticationController#acs", () => {
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -306,7 +306,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -331,7 +331,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if userPayload is invalid", async () => {
     const res = mockRes();
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     const response = await controller.acs(invalidUserPayload);
     response.apply(res);
 
@@ -344,7 +344,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if the session can not be saved", async () => {
     mockSet.mockReturnValue(Promise.resolve(right(false)));
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
@@ -359,7 +359,7 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("should return Unathorized if user is blocked", async () => {
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(true)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
@@ -370,7 +370,7 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("should fail if Redis Client returns an error while getting info on user blocked", async () => {
-    mockUserHasLoginBlocked.mockReturnValue(
+    mockIsBlockedUser.mockReturnValue(
       Promise.resolve(left(new Error("Redis error")))
     );
     const res = mockRes();
@@ -388,7 +388,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if Redis client returns an error", async () => {
     mockSet.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
-    mockUserHasLoginBlocked.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
