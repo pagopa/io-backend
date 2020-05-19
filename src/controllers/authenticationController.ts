@@ -86,10 +86,7 @@ export default class AuthenticationController {
       }
     } else {
       const err = errorOrIsBlockedUser.value;
-      log.error(
-        "Error getting informations about login block for user",
-        err.message
-      );
+      log.error(err.message);
       return ResponseErrorInternal(err.message);
     }
 
