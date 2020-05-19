@@ -333,8 +333,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
           `Error while accessing info about block login for user [${errs}]`
         )
     )
-      .bimap(identity, _ => _.find(entry => entry === fiscalCode))
-      .map(result => fromNullable(result).isSome())
+      .bimap(identity, _ => _.includes(fiscalCode))
       .run();
   }
 
