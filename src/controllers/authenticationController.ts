@@ -89,7 +89,7 @@ export default class AuthenticationController {
         return ResponseErrorInternal(err.message);
       },
       result => {
-        // if result === 1 an entry on blocked fiscalCode was found on Redis
+        // if result === true an entry on blocked fiscalCode was found on Redis
         if (result) {
           return ResponseErrorForbiddenNotAuthorized;
         } else {
