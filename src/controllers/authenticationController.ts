@@ -79,7 +79,7 @@ export default class AuthenticationController {
       spidUser.fiscalNumber
     );
     const loginBlockResult = errorOrUserLoginBlocked.fold<
-      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized | number
+      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized | boolean
     >(
       err => {
         log.error(
@@ -90,7 +90,7 @@ export default class AuthenticationController {
       },
       result => {
         // if result === 1 an entry on blocked fiscalCode was found on Redis
-        if (result === 1) {
+        if (result) {
           return ResponseErrorForbiddenNotAuthorized;
         } else {
           return result;
@@ -98,7 +98,7 @@ export default class AuthenticationController {
       }
     );
 
-    if (typeof loginBlockResult !== "number") {
+    if (typeof loginBlockResult !== "boolean") {
       return loginBlockResult;
     }
     // authentication token for app backend

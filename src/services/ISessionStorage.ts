@@ -38,5 +38,5 @@ export interface ISessionStorage {
 
   readonly userHasLoginBlocked: (
     fiscalCode: FiscalCode
-  ) => Promise<Either<Error, number>>;
+  ) => Promise<Either<Error, boolean>>;
 }

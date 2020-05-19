@@ -17,6 +17,7 @@ import {
   taskify,
   tryCatch as tryCatchT
 } from "fp-ts/lib/TaskEither";
+import { identity } from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
@@ -313,28 +314,28 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   public async userHasLoginBlocked(
     fiscalCode: FiscalCode
-  ): Promise<Either<Error, number>> {
+  ): Promise<Either<Error, boolean>> {
     return tryCatchT(
       () =>
-        new Promise<number>((resolve, reject) => {
-          this.redisClient.exists(
-            `USER-BLOCKED-${fiscalCode}`,
-            (err, response) => {
-              if (err || !response) {
-                const error = fromNullable(err).getOrElse(
-                  new Error("Cannot get info about login blocked from Redis")
-                );
-                return reject(error.message);
-              }
-              return resolve(response);
+        new Promise<ReadonlyArray<string>>((resolve, reject) => {
+          this.redisClient.smembers(`BLOCKED-USERS`, (err, response) => {
+            if (err) {
+              const error = fromNullable(err).getOrElse(
+                new Error("Cannot get info about blocked users from Redis")
+              );
+              return reject(error.message);
             }
-          );
+            return resolve(response);
+          });
         }),
       errs =>
         new Error(
           `Error while accessing info about block login for user [${errs}]`
         )
-    ).run();
+    )
+      .bimap(identity, _ => _.find(entry => entry === fiscalCode))
+      .map(result => fromNullable(result).isSome())
+      .run();
   }
 
   /*
