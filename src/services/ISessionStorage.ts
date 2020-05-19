@@ -36,7 +36,7 @@ export interface ISessionStorage {
     walletToken: WalletToken
   ) => Promise<Either<Error, boolean>>;
 
-  readonly userHasLoginBlocked: (
+  readonly isBlockedUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 }
