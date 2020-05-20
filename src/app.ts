@@ -566,8 +566,11 @@ function registerAuthenticationRoutes(
     );
     app.post(
       `${basePath}/test-login`,
-      passport.authenticate("local"),
-      toExpressHandler(acsController.acs, acsController)
+      passport.authenticate("local", {
+        passReqToCallback: false,
+        session: false
+      }),
+      toExpressHandler(req => acsController.acs(req.user), acsController)
     );
   });
 
