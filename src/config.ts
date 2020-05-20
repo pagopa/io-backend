@@ -3,7 +3,7 @@
  */
 
 import * as dotenv from "dotenv";
-import { isRight, parseJSON, toError } from "fp-ts/lib/Either";
+import { parseJSON, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import { agent } from "italia-ts-commons";
 
@@ -28,6 +28,7 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
+import { rights } from "fp-ts/lib/Array";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { STRINGS_RECORD } from "./types/commons";
@@ -299,16 +300,12 @@ export const BARCODE_ALGORITHM = NonEmptyString.decode(
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
 
-// Reviewer static login params
+// Password login params
 export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
   process.env.TEST_LOGIN_FISCAL_CODES
 )
   .map(_ => _.split(","))
-  .map(_ =>
-    _.map(FiscalCode.decode)
-      .filter(isRight)
-      .map(fiscalCodeEither => fiscalCodeEither.value)
-  )
+  .map(_ => rights(_.map(FiscalCode.decode)))
   .getOrElse([]);
 
 export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
