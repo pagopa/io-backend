@@ -244,7 +244,8 @@ export function newApp(
       TOKEN_SERVICE,
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE,
-      NOTIFICATION_SERVICE
+      NOTIFICATION_SERVICE,
+      TEST_LOGIN_FISCAL_CODES
     );
 
     registerPublicRoutes(app);

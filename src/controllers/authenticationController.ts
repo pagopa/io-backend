@@ -23,6 +23,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
@@ -47,7 +48,8 @@ export default class AuthenticationController {
       token: string
     ) => UrlFromString,
     private readonly profileService: ProfileService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
   ) {}
 
   /**
@@ -126,7 +128,8 @@ export default class AuthenticationController {
         email: spidUser.email,
         is_email_validated: fromNullable(spidUser.email)
           .map(() => true)
-          .getOrElse(false)
+          .getOrElse(false),
+        is_test_profile: this.testLoginFiscalCodes.includes(user.fiscal_code)
       };
       const createProfileResponse = await this.profileService.createProfile(
         user,
