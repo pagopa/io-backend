@@ -27,5 +27,5 @@ export const localStrategy = (
       };
       return done(null, testUser);
     }
-    return done(undefined, false);
+    return done(null, false);
   });
