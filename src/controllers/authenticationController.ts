@@ -21,9 +21,10 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
-import { NewProfile } from "generated/io-api/NewProfile";
+import { NewProfile } from "../../generated/io-api/NewProfile";
 
 import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { TEST_LOGIN_FISCAL_CODES } from "../../src/config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
@@ -126,7 +127,8 @@ export default class AuthenticationController {
         email: spidUser.email,
         is_email_validated: fromNullable(spidUser.email)
           .map(() => true)
-          .getOrElse(false)
+          .getOrElse(false),
+        is_test_profile: TEST_LOGIN_FISCAL_CODES.includes(user.fiscal_code)
       };
       const createProfileResponse = await this.profileService.createProfile(
         user,

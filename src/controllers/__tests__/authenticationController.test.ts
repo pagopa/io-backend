@@ -209,7 +209,8 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true
+      is_email_validated: true,
+      is_test_profile: false
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
@@ -269,7 +270,8 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true
+      is_email_validated: true,
+      is_test_profile: false
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
