@@ -51,10 +51,12 @@ const aTokenDurationSecs = 3600;
 const mockGet = jest.fn();
 const mockMget = jest.fn();
 const mockSmembers = jest.fn();
+const mockSismember = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers;
+mockRedisClient.sismember = mockSismember;
 const controller = new SessionController(
   new RedisSessionStorage(mockRedisClient, aTokenDurationSecs)
 );
