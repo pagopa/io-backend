@@ -4,15 +4,18 @@
  */
 
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { fromNullable } from "fp-ts/lib/Option";
 import { UserDataProcessing } from "generated/io-api/UserDataProcessing";
 import { UserDataProcessingChoice } from "generated/io-api/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
@@ -34,8 +37,10 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
   ): Promise<
+    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
+    | IResponseErrorConflict
     | IResponseSuccessJson<UserDataProcessing>
   > => {
     const client = this.apiClient.getClient();
@@ -50,6 +55,10 @@ export default class UserDataProcessingService {
           ? ResponseSuccessJson(response.value)
           : response.status === 429
           ? ResponseErrorTooManyRequests()
+          : response.status === 409
+          ? ResponseErrorConflict(
+              fromNullable(response.value.detail).getOrElse("Conflict")
+            )
           : unhandledResponseStatus(response.status)
       );
     });
