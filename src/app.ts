@@ -136,12 +136,6 @@ export function newApp(
   // Add the strategy to authenticate proxy clients.
   passport.use("bearer.wallet", bearerWalletTokenStrategy(SESSION_STORAGE));
 
-  // Add the strategy for reviewers login.
-  passport.use(
-    "local",
-    localStrategy(TEST_LOGIN_FISCAL_CODES, TEST_LOGIN_PASSWORD)
-  );
-
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
@@ -565,13 +559,17 @@ function registerAuthenticationRoutes(
     session: false
   });
 
-  const localAuth = passport.authenticate("local");
-
-  app.post(
-    `${basePath}/test-login`,
-    localAuth,
-    toExpressHandler(acsController.acs, acsController)
-  );
+  TEST_LOGIN_PASSWORD.map(testLoginPassword => {
+    passport.use(
+      "local",
+      localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
+    );
+    app.post(
+      `${basePath}/test-login`,
+      passport.authenticate("local"),
+      toExpressHandler(acsController.acs, acsController)
+    );
+  });
 
   app.post(
     `${basePath}/logout`,

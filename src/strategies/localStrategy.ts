@@ -1,27 +1,26 @@
-import { Option } from "fp-ts/lib/Option";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as passport from "passport";
 import { Strategy } from "passport-local";
 
 /**
- * Create a new Local Strategy with provided authorized usernames and password
- * If validUsernameList value is none the Strategy returns unauthorized.
+ * Create a new Local Strategy with provided authorized fiscal code (user names)
+ * and a fixed password. Returns unauthorized if validUsernameList does not contain
+ * the fiscal code (user name) provided during login.
  */
 export const localStrategy = (
-  validUsernameList: Option<ReadonlyArray<FiscalCode>>,
+  validUsernameList: ReadonlyArray<FiscalCode>,
   validPassword: string
 ): passport.Strategy =>
   new Strategy((username, password, done) => {
     if (
-      validUsernameList
-        .map(_ => _.some(fiscalCode => fiscalCode === username))
-        .getOrElse(false) &&
+      FiscalCode.is(username) &&
+      validUsernameList.includes(username) &&
       validPassword === password
     ) {
       // Fake test user for password based logins
       const testUser = {
         familyName: "Rossi",
-        fiscalNumber: username as FiscalCode,
+        fiscalNumber: username,
         getAssertionXml: () => "",
         issuer: "IO",
         name: "Mario"
