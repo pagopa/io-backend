@@ -124,8 +124,8 @@ jest.mock("../../services/redisSessionStorage", () => {
       del: mockDel,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
-      set: mockSet,
-      isBlockedUser: mockIsBlockedUser
+      isBlockedUser: mockIsBlockedUser,
+      set: mockSet
     }))
   };
 });
@@ -189,7 +189,8 @@ beforeAll(async () => {
     tokenService,
     getClientProfileRedirectionUrl,
     profileService,
-    notificationService
+    notificationService,
+    []
   );
 });
 
@@ -209,7 +210,8 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true
+      is_email_validated: true,
+      is_test_profile: false
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
@@ -269,7 +271,8 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true
+      is_email_validated: true,
+      is_test_profile: false
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));

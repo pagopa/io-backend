@@ -28,7 +28,9 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
+import { rights } from "fp-ts/lib/Array";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -293,3 +295,15 @@ export const BARCODE_ALGORITHM = NonEmptyString.decode(
 
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
+
+// Password login params
+export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
+  process.env.TEST_LOGIN_FISCAL_CODES
+)
+  .map(_ => _.split(","))
+  .map(_ => rights(_.map(FiscalCode.decode)))
+  .getOrElse([]);
+
+export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
+  process.env.TEST_LOGIN_PASSWORD
+);

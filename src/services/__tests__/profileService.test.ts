@@ -64,6 +64,7 @@ const updateProfileRequest: ExtendedProfile = {
   is_email_enabled: true,
   is_email_validated: true,
   is_inbox_enabled: anIsInboxEnabled,
+  is_test_profile: false,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 42

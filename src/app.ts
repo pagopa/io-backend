@@ -18,6 +18,8 @@ import {
   serviceProviderConfig,
   SPID_LOG_QUEUE_NAME,
   SPID_LOG_STORAGE_CONNECTION_STRING,
+  TEST_LOGIN_FISCAL_CODES,
+  TEST_LOGIN_PASSWORD,
   tokenDurationSecs,
   URL_TOKEN_STRATEGY
 } from "./config";
@@ -69,6 +71,7 @@ import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
+import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
@@ -241,7 +244,8 @@ export function newApp(
       TOKEN_SERVICE,
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE,
-      NOTIFICATION_SERVICE
+      NOTIFICATION_SERVICE,
+      TEST_LOGIN_FISCAL_CODES
     );
 
     registerPublicRoutes(app);
@@ -554,6 +558,20 @@ function registerAuthenticationRoutes(
 ): void {
   const bearerTokenAuth = passport.authenticate("bearer.session", {
     session: false
+  });
+
+  TEST_LOGIN_PASSWORD.map(testLoginPassword => {
+    passport.use(
+      "local",
+      localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
+    );
+    app.post(
+      `${basePath}/test-login`,
+      passport.authenticate("local", {
+        session: false
+      }),
+      toExpressHandler(req => acsController.acs(req.user), acsController)
+    );
   });
 
   app.post(

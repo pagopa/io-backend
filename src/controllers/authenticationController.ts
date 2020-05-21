@@ -23,6 +23,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
@@ -47,7 +48,8 @@ export default class AuthenticationController {
       token: string
     ) => UrlFromString,
     private readonly profileService: ProfileService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
   ) {}
 
   /**
@@ -122,11 +124,15 @@ export default class AuthenticationController {
     // Check if a Profile for the user exists into the API
     const getProfileResponse = await this.profileService.getProfile(user);
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
+      const isTestProfile = this.testLoginFiscalCodes.includes(
+        user.fiscal_code
+      );
       const newProfile: NewProfile = {
         email: spidUser.email,
         is_email_validated: fromNullable(spidUser.email)
           .map(() => true)
-          .getOrElse(false)
+          .getOrElse(false),
+        is_test_profile: isTestProfile
       };
       const createProfileResponse = await this.profileService.createProfile(
         user,
