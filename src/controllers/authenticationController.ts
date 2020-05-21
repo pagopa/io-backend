@@ -5,13 +5,15 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
+  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponsePermanentRedirect,
@@ -58,6 +60,7 @@ export default class AuthenticationController {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
     | IResponsePermanentRedirect
   > {
     const errorOrUser = validateSpidUser(userPayload);
@@ -72,6 +75,20 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
+    const errorOrIsBlockedUser = await this.sessionStorage.isBlockedUser(
+      spidUser.fiscalNumber
+    );
+
+    if (isRight(errorOrIsBlockedUser)) {
+      const isBlockedUser = errorOrIsBlockedUser.value;
+      if (isBlockedUser) {
+        return ResponseErrorForbiddenNotAuthorized;
+      }
+    } else {
+      const err = errorOrIsBlockedUser.value;
+      log.error(err.message);
+      return ResponseErrorInternal(err.message);
+    }
 
     // authentication token for app backend
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
