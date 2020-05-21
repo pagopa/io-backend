@@ -1,6 +1,8 @@
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as passport from "passport";
 import { Strategy } from "passport-local";
+import { SpidUser } from "src/types/user";
+import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
 /**
  * Create a new Local Strategy with provided authorized fiscal code (user names)
@@ -18,7 +20,8 @@ export const localStrategy = (
       validPassword === password
     ) {
       // Fake test user for password based logins
-      const testUser = {
+      const testUser: SpidUser = {
+        authnContextClassRef: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
         familyName: "Rossi",
         fiscalNumber: username,
         getAssertionXml: () => "",

@@ -124,12 +124,15 @@ export default class AuthenticationController {
     // Check if a Profile for the user exists into the API
     const getProfileResponse = await this.profileService.getProfile(user);
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
+      const isTestProfile = this.testLoginFiscalCodes.includes(
+        user.fiscal_code
+      );
       const newProfile: NewProfile = {
         email: spidUser.email,
         is_email_validated: fromNullable(spidUser.email)
           .map(() => true)
           .getOrElse(false),
-        is_test_profile: this.testLoginFiscalCodes.includes(user.fiscal_code)
+        is_test_profile: isTestProfile
       };
       const createProfileResponse = await this.profileService.createProfile(
         user,
