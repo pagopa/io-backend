@@ -18,7 +18,7 @@
     "watch": "tsc -w",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
-    "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5858 --nolazy src/server.js",
+    "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5859 --nolazy src/server.js",
     "lint": "tslint -p . -c tslint.json -t verbose",
     "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
     "prettify": "prettier --write \"./**/*.ts\"",

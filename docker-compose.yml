@@ -15,7 +15,7 @@ services:
       - "443"
     ports:
       - "443:443"
-      - "5858:5858"
+      - "5859:5859"
     image: node:10.14.2-alpine
     command: ["yarn", "hot-reload"]
     volumes:
@@ -52,9 +52,9 @@ services:
       dockerfile: docker/images/azurite/Dockerfile
     command: ["sh", "-c", "node bin/azurite -l /opt/azurite/folder --blobPort 10003 --queuePort 10004 --tablePort 10005"]
     ports:
-      - "10000:10003"
-      - "10001:10004"
-      - "10002:10005"
+      - "20000:20003"
+      - "20001:20004"
+      - "20002:20005"
     networks:
       - io-be
 
