@@ -37,12 +37,18 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private mgetTask: (
     ...args: ReadonlyArray<string>
   ) => TaskEither<Error, ReadonlyArray<string>>;
+  private sismemberTask: (
+    ...args: ReadonlyArray<string>
+  ) => TaskEither<Error, number>;
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
   ) {
     super();
     this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
+    this.sismemberTask = taskify(
+      this.redisClient.sismember.bind(this.redisClient)
+    );
   }
 
   /**
@@ -304,6 +310,17 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     return this.mgetTask(...errorOrSessionTokens.value)
       .map(_ => _.length > 0)
+      .run();
+  }
+
+  public async isBlockedUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return this.sismemberTask("BLOCKED-USERS", fiscalCode)
+      .bimap(
+        err => new Error(`Error accessing blocked users collection: ${err}`),
+        result => result === 1
+      )
       .run();
   }
 
