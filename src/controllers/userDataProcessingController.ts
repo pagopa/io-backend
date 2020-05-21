@@ -34,7 +34,6 @@ export default class UserDataProcessingController {
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict

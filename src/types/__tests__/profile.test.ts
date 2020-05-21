@@ -64,6 +64,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   is_email_enabled: anIsEmailEnabled,
   is_email_validated: anIsEmailValidated,
   is_inbox_enabled: anIsInboxEnabled,
+  is_test_profile: false,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 1 as Version
