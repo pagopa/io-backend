@@ -90,10 +90,6 @@ const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   10
 );
 
-// tslint:disable-next-line: no-commented-code
-// const DEFAULT_SPID_AUTOLOGIN = "";
-// const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
-
 const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 
 // Register the spidStrategy.
