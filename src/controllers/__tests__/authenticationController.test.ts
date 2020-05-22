@@ -117,12 +117,14 @@ const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
 const mockGetByWalletToken = jest.fn();
 const mockDel = jest.fn();
+const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
+      isBlockedUser: mockIsBlockedUser,
       set: mockSet
     }))
   };
@@ -187,7 +189,8 @@ beforeAll(async () => {
     tokenService,
     getClientProfileRedirectionUrl,
     profileService,
-    notificationService
+    notificationService,
+    []
   );
 });
 
@@ -207,11 +210,12 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true
+      is_email_validated: true,
+      is_test_profile: false
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -242,7 +246,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -267,11 +271,12 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
-      is_email_validated: true
+      is_email_validated: true,
+      is_test_profile: false
     };
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -304,7 +309,7 @@ describe("AuthenticationController#acs", () => {
     const res = mockRes();
 
     mockSet.mockReturnValue(Promise.resolve(right(true)));
-
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken);
@@ -329,7 +334,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if userPayload is invalid", async () => {
     const res = mockRes();
-
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     const response = await controller.acs(invalidUserPayload);
     response.apply(res);
 
@@ -342,6 +347,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if the session can not be saved", async () => {
     mockSet.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
@@ -355,8 +361,37 @@ describe("AuthenticationController#acs", () => {
     });
   });
 
+  it("should return Unathorized if user is blocked", async () => {
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(true)));
+    const res = mockRes();
+
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it("should fail if Redis Client returns an error while getting info on user blocked", async () => {
+    mockIsBlockedUser.mockReturnValue(
+      Promise.resolve(left(new Error("Redis error")))
+    );
+    const res = mockRes();
+
+    const response = await controller.acs(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Redis error"
+    });
+  });
+
   it("should fail if Redis client returns an error", async () => {
     mockSet.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);

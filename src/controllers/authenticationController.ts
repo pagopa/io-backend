@@ -5,13 +5,15 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponsePermanentRedirect,
   IResponseSuccessJson,
+  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponsePermanentRedirect,
@@ -21,6 +23,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
@@ -45,7 +48,8 @@ export default class AuthenticationController {
       token: string
     ) => UrlFromString,
     private readonly profileService: ProfileService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
   ) {}
 
   /**
@@ -58,6 +62,7 @@ export default class AuthenticationController {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
     | IResponsePermanentRedirect
   > {
     const errorOrUser = validateSpidUser(userPayload);
@@ -72,6 +77,20 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
+    const errorOrIsBlockedUser = await this.sessionStorage.isBlockedUser(
+      spidUser.fiscalNumber
+    );
+
+    if (isRight(errorOrIsBlockedUser)) {
+      const isBlockedUser = errorOrIsBlockedUser.value;
+      if (isBlockedUser) {
+        return ResponseErrorForbiddenNotAuthorized;
+      }
+    } else {
+      const err = errorOrIsBlockedUser.value;
+      log.error(err.message);
+      return ResponseErrorInternal(err.message);
+    }
 
     // authentication token for app backend
     const sessionToken = this.tokenService.getNewToken() as SessionToken;
@@ -105,11 +124,15 @@ export default class AuthenticationController {
     // Check if a Profile for the user exists into the API
     const getProfileResponse = await this.profileService.getProfile(user);
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
+      const isTestProfile = this.testLoginFiscalCodes.includes(
+        user.fiscal_code
+      );
       const newProfile: NewProfile = {
         email: spidUser.email,
         is_email_validated: fromNullable(spidUser.email)
           .map(() => true)
-          .getOrElse(false)
+          .getOrElse(false),
+        is_test_profile: isTestProfile
       };
       const createProfileResponse = await this.profileService.createProfile(
         user,

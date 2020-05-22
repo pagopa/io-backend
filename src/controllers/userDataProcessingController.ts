@@ -5,6 +5,7 @@
 
 import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
@@ -33,9 +34,9 @@ export default class UserDataProcessingController {
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
+    | IResponseErrorConflict
     | IResponseSuccessJson<UserDataProcessing>
   > =>
     withUserFromRequest(req, async user =>

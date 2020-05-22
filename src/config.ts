@@ -28,6 +28,9 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
+import { rights } from "fp-ts/lib/Array";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -88,10 +91,6 @@ const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
     DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
   10
 );
-
-// tslint:disable-next-line: no-commented-code
-// const DEFAULT_SPID_AUTOLOGIN = "";
-// const SPID_AUTOLOGIN = process.env.SPID_AUTOLOGIN || DEFAULT_SPID_AUTOLOGIN;
 
 const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 
@@ -292,5 +291,21 @@ export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";
 export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
 
+export const BARCODE_ALGORITHM = NonEmptyString.decode(
+  process.env.BARCODE_ALGORITHM
+).getOrElse("code128" as NonEmptyString);
+
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
+
+// Password login params
+export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
+  process.env.TEST_LOGIN_FISCAL_CODES
+)
+  .map(_ => _.split(","))
+  .map(_ => rights(_.map(FiscalCode.decode)))
+  .getOrElse([]);
+
+export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
+  process.env.TEST_LOGIN_PASSWORD
+);

@@ -259,10 +259,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/types/-/types-0.2.0.tgz#2a0afd40fa7026e39ea56a454642bda72b172f80"
   integrity sha512-GtwNB6BNDdsIPAYEdpp3JnOGO/3AJxjPvny53s3HERBdXSJTGQw8IRhiaTEX0b3w9P8+FwFZde4k+qkjn67aVw==
 
-"@pagopa/io-spid-commons@^4.3.0":
-  version "4.3.0"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.3.0/d6276e8476d931f851504d6faa371c0bae5e2450cadf5f9af57bc7e6d64f40a2#dc3b4d2c23ba859bfede6d57a0dfce3155c33bf3"
-  integrity sha512-iJY3/WdwQL16PHFeYystIEMgaGL3Lw+LzYR/CD+ZCxUZ71W3sOdfZtUYIOm7b5gGcxHMlm10hx6iGbhaybRb1A==
+"@pagopa/io-spid-commons@^4.4.0":
+  version "4.4.0"
+  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.4.0/a301fd059eeb3d3be94b7320799089ca62a434beb8bf8015f965f8699fcb1990#eb120de879e5fe7cf206a55d96193e6fb1343981"
+  integrity sha512-Z9fd7eF1cPfSlPr1qTFF+YlG78KOJPnjYJ0Ts9gyQnjvYDvOBlQc6rzep+EzfwQQAWzYv1XxDH9sfU9PUG16Hw==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
@@ -449,6 +449,15 @@
     "@types/express" "*"
     "@types/passport" "*"
 
+"@types/passport-local@^1.0.33":
+  version "1.0.33"
+  resolved "https://registry.yarnpkg.com/@types/passport-local/-/passport-local-1.0.33.tgz#d245b60c5b801cb3aeca1ffab557d5fe1534260d"
+  integrity sha512-+rn6ZIxje0jZ2+DAiWFI8vGG7ZFKB0hXx2cUdMmudSWsigSq6ES7Emso46r4HJk0qCgrZVfI8sJiM7HIYf4SbA==
+  dependencies:
+    "@types/express" "*"
+    "@types/passport" "*"
+    "@types/passport-strategy" "*"
+
 "@types/passport-saml@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/passport-saml/-/passport-saml-1.1.1.tgz#f48db668ac3cd144be7c09a5a632807ce047931d"
@@ -457,7 +466,7 @@
     "@types/express" "*"
     "@types/passport" "*"
 
-"@types/passport-strategy@^0.2.35":
+"@types/passport-strategy@*", "@types/passport-strategy@^0.2.35":
   version "0.2.35"
   resolved "https://registry.yarnpkg.com/@types/passport-strategy/-/passport-strategy-0.2.35.tgz#e52f5212279ea73f02d9b06af67efe9cefce2d0c"
   integrity sha512-o5D19Jy2XPFoX2rKApykY15et3Apgax00RRLf0RUotPDUsYrQa7x4howLYr9El2mlUApHmCMv5CZ1IXqKFQ2+g==
@@ -578,6 +587,13 @@ abbrev@1:
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
   integrity sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
 
+abort-controller@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"
+  integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
+  dependencies:
+    event-target-shim "^5.0.0"
+
 accepts@~1.3.7:
   version "1.3.7"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.7.tgz#531bc726517a3b2b41f850021c6cc15eaab507cd"
@@ -616,9 +632,10 @@ agent-base@4, agent-base@^4.3.0:
   dependencies:
     es6-promisify "^5.0.0"
 
-"agentkeepalive@https://github.com/pagopa/agentkeepalive#v4.1.1":
-  version "4.1.0"
-  resolved "https://github.com/pagopa/agentkeepalive#91309bcab216dccbd08631e227a974afbfe807fb"
+agentkeepalive@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.2.tgz#d7bc3bafd7ea88032f6be22b6f1389b3d42c9c91"
+  integrity sha512-waNHE7tQBBn+2qXucI8HY0o2Y0OBPWldWOWsZwY71JcCm4SvrPnWdceFfB5NIXSqE8Ewq6VR/Qt5b1i69P6KCQ==
   dependencies:
     debug "^4.1.0"
     depd "^1.1.2"
@@ -1251,6 +1268,11 @@ builtin-modules@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
   integrity sha1-Jw8HbFpywC9bZaR9+Uxf46J4iS8=
+
+bwip-js@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/bwip-js/-/bwip-js-2.0.6.tgz#2189bf1ae9518974a5d73513605939989a98a17e"
+  integrity sha512-25zupM+tgx6NGmrg0kFhdkddeQ5+QnUMvHbb7cPNVbBdFDd0SOG3xRZ1ocGDEamhmM+fStglCLEkH21OpD4Y/w==
 
 bytes@3.1.0:
   version "3.1.0"
@@ -2329,6 +2351,11 @@ etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
+
+event-target-shim@^5.0.0:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
+  integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
 
 exec-sh@^0.2.0:
   version "0.2.2"
@@ -3877,12 +3904,13 @@ italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.4:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
-italia-ts-commons@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-7.0.1.tgz#7068643b09f069f4c96627e609d5dc578a64a04a"
-  integrity sha512-IIZYim8LydSA3nbeCxbR23marXhx3Z/FLUh7cV6XxNrB5OpKeVMmQhXV42oErP+g/vsrCQ/LRSrLX8cpi1Nghg==
+italia-ts-commons@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.1.0.tgz#929c805a7d9e8877fef26436946bf3ee76a76c82"
+  integrity sha512-d03UKxjeIX+4otNgZaDoS8t1l+gVEHD/q/JsQox1CC3nAiKHQ9TFNv4BdHIiUIswgpx1szjT6lzeJQUCUL++YA==
   dependencies:
-    agentkeepalive "https://github.com/pagopa/agentkeepalive#v4.1.1"
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.2"
     applicationinsights "^1.7.4"
     fp-ts "1.17.4"
     io-ts "1.8.5"
@@ -5567,6 +5595,13 @@ passport-http-bearer@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/passport-http-bearer/-/passport-http-bearer-1.0.1.tgz#147469ea3669e2a84c6167ef99dbb77e1f0098a8"
   integrity sha1-FHRp6jZp4qhMYWfvmdu3fh8AmKg=
+  dependencies:
+    passport-strategy "1.x.x"
+
+passport-local@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/passport-local/-/passport-local-1.0.0.tgz#1fe63268c92e75606626437e3b906662c15ba6ee"
+  integrity sha1-H+YyaMkudWBmJkN+O5BmYsFbpu4=
   dependencies:
     passport-strategy "1.x.x"
 

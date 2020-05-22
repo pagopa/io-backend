@@ -163,7 +163,6 @@ Those are all Environment variables needed by the application:
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
-| SPID_AUTOLOGIN                         | The user used in the autologin feature, omit this to disable autologin            | string |
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
@@ -174,6 +173,8 @@ Those are all Environment variables needed by the application:
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 | GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase                             | string |
 | FETCH_KEEPALIVE_ENABLED                | When is `true` enables `keepalive` agent in the API client (defaults to `false`)  | boolean |
+| TEST_LOGIN_FISCAL_CODES                | (Optional) Enabled username for password based login (coma separated Fiscal Code) | string |
+| TEST_LOGIN_PASSWORD                    | (Optional) Password for password based login                                      | string |
 | FETCH_KEEPALIVE_MAX_SOCKETS            | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT_MS | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_KEEPALIVE_MSECS        | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |

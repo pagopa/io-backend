@@ -45,6 +45,13 @@ const tooManyReqApiUserDataProcessingResponse = {
 const invalidApiUserDataProcessingResponse = {
   status: 500
 };
+
+const conflictApiUserDataProcessingResponse = {
+  status: 409,
+  value: {
+    detail: "Another request is already WIP or PENDING for this User"
+  }
+};
 const problemJson = {
   status: 500
 };
@@ -203,6 +210,21 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     );
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+
+  it("should return a 409 HTTP conflict error from upsertUserDataProcessing upstream API", async () => {
+    mockUpsertUserDataProcessing.mockImplementation(() =>
+      t.success(conflictApiUserDataProcessingResponse)
+    );
+
+    const service = new UserDataProcessingService(api);
+
+    const res = await service.upsertUserDataProcessing(
+      mockedUser,
+      mockedUserDataProcessingChoiceRequest
+    );
+
+    expect(res.kind).toEqual("IResponseErrorConflict");
   });
 
   it("should return an error if the upsertUserDataProcessing API returns an error", async () => {

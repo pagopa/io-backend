@@ -40,7 +40,14 @@ const USER_TRACKING_ID_KEY = "user_tracking_id";
  * @see https://github.com/microsoft/ApplicationInsights-node.js/issues/392#issuecomment-387532917
  */
 export function attachTrackingData(user: User): void {
-  const customProperties = appInsights.getCorrelationContext().customProperties;
+  const correlationContext = appInsights.getCorrelationContext();
+
+  // may happen when developing locally
+  if (!correlationContext) {
+    return;
+  }
+
+  const customProperties = correlationContext.customProperties;
 
   customProperties.setProperty(
     USER_TRACKING_ID_KEY,

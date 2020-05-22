@@ -69,6 +69,7 @@ const mockSadd = jest.fn();
 const mockSrem = jest.fn();
 const mockSmembers = jest.fn();
 const mockExists = jest.fn();
+const mockSismember = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
@@ -78,6 +79,7 @@ mockRedisClient.sadd = mockSadd;
 mockRedisClient.srem = mockSrem;
 mockRedisClient.smembers = mockSmembers;
 mockRedisClient.exists = mockExists;
+mockRedisClient.sismember = mockSismember;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
