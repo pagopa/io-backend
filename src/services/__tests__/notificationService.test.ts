@@ -7,14 +7,14 @@ import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkd
 import { MessageSubject } from "../../../generated/backend/MessageSubject";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import {
-  KindEnum as CreateOrUpdateKind,
-  NotificationHubCreateOrUpdateMessage
-} from "../../../generated/messages/NotificationHubCreateOrUpdateMessage";
+  CreateOrUpdateInstallationMessage,
+  KindEnum as CreateOrUpdateKind
+} from "../../../generated/messages/CreateOrUpdateInstallationMessage";
 import {
-  KindEnum as DeleteKind,
-  NotificationHubDeleteMessage
-} from "../../../generated/messages/NotificationHubDeleteMessage";
-import { NotificationHubNotifyMessage } from "../../../generated/messages/NotificationHubNotifyMessage";
+  DeleteInstallationMessage,
+  KindEnum as DeleteKind
+} from "../../../generated/messages/DeleteInstallationMessage";
+import { NotifyMessage } from "../../../generated/messages/NotifyMessage";
 import { toFiscalCodeHash } from "../../types/notification";
 import { base64EncodeObject } from "../../utils/messages";
 import NotificationService from "../notificationService";
@@ -28,7 +28,7 @@ const anAppleDevice = {
   platform: PlatformEnum.apns,
   pushChannel: aPushChannel
 };
-const anAppleInstallation: NotificationHubCreateOrUpdateMessage = {
+const anAppleInstallation: CreateOrUpdateInstallationMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
   kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.apns,
@@ -39,7 +39,7 @@ const aGoogleDevice = {
   platform: PlatformEnum.gcm,
   pushChannel: aPushChannel
 };
-const aGoogleInstallation: NotificationHubCreateOrUpdateMessage = {
+const aGoogleInstallation: CreateOrUpdateInstallationMessage = {
   installationId: toFiscalCodeHash(aFiscalCode),
   kind: CreateOrUpdateKind.CreateOrUpdateInstallation,
   platform: PlatformEnum.gcm,
@@ -163,9 +163,7 @@ describe("NotificationService#notify", () => {
     const decodedMessage = JSON.parse(
       Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
     );
-    expect(
-      NotificationHubNotifyMessage.decode(decodedMessage).isRight()
-    ).toBeTruthy();
+    expect(NotifyMessage.decode(decodedMessage).isRight()).toBeTruthy();
   });
 
   it("should fail if the Queue Storage fails on notify", async () => {
@@ -184,9 +182,7 @@ describe("NotificationService#notify", () => {
     const decodedMessage = JSON.parse(
       Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
     );
-    expect(
-      NotificationHubNotifyMessage.decode(decodedMessage).isRight()
-    ).toBeTruthy();
+    expect(NotifyMessage.decode(decodedMessage).isRight()).toBeTruthy();
   });
 });
 
@@ -195,7 +191,7 @@ describe("NotificationService#deleteInstallation", () => {
     jest.clearAllMocks();
   });
 
-  const expectedDeleteInstallationMessage: NotificationHubDeleteMessage = {
+  const expectedDeleteInstallationMessage: DeleteInstallationMessage = {
     installationId: aFiscalCodeHash as NonEmptyString,
     kind: DeleteKind.DeleteInstallation
   };

@@ -40,7 +40,7 @@ definitions:
       - message
       - message_id
       - title
-  NotificationHubNotifyMessage:
+  NotifyMessage:
     title: Notify message
     description: Message sent to the queue for a new notify event
     allOf:
@@ -56,7 +56,7 @@ definitions:
         required:
           - payload
           - kind
-  NotificationHubCreateOrUpdateMessage:
+  CreateOrUpdateInstallationMessage:
     title: CreateOrUpdate message
     description: Message sent to the queue for a new CreateOrUpdate event
     allOf:
@@ -80,7 +80,7 @@ definitions:
           - pushChannel
           - tags
           - kind
-  NotificationHubDeleteMessage:
+  DeleteInstallationMessage:
     title: Delete Installation message
     description: Message sent to the queue for a new Delete Installation event
     allOf:

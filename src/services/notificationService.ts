@@ -12,18 +12,18 @@ import {
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
-  KindEnum as CreateOrUpdateKind,
-  NotificationHubCreateOrUpdateMessage
-} from "../../generated/messages/NotificationHubCreateOrUpdateMessage";
+  CreateOrUpdateInstallationMessage,
+  KindEnum as CreateOrUpdateKind
+} from "../../generated/messages/CreateOrUpdateInstallationMessage";
 import {
-  KindEnum as DeleteKind,
-  NotificationHubDeleteMessage
-} from "../../generated/messages/NotificationHubDeleteMessage";
+  DeleteInstallationMessage,
+  KindEnum as DeleteKind
+} from "../../generated/messages/DeleteInstallationMessage";
 import { NotificationHubMessageKindEnum } from "../../generated/messages/NotificationHubMessageKind";
 import {
   KindEnum as NotifyKind,
-  NotificationHubNotifyMessage
-} from "../../generated/messages/NotificationHubNotifyMessage";
+  NotifyMessage
+} from "../../generated/messages/NotifyMessage";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
@@ -51,7 +51,7 @@ export default class NotificationService {
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    const notificationHubMessage: NotificationHubNotifyMessage = {
+    const notifybMessage: NotifyMessage = {
       installationId: toFiscalCodeHash(notification.message.fiscal_code),
       kind: NotifyKind[NotificationHubMessageKindEnum.Notify],
       payload: {
@@ -63,7 +63,7 @@ export default class NotificationService {
       }
     };
     return this.notificationHubQueueClient
-      .sendMessage(base64EncodeObject(notificationHubMessage))
+      .sendMessage(base64EncodeObject(notifybMessage))
       .then(() => ResponseSuccessJson({ message: "ok" }))
       .catch(error =>
         ResponseErrorInternal(
@@ -78,7 +78,7 @@ export default class NotificationService {
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    const azureInstallation: NotificationHubCreateOrUpdateMessage = {
+    const azureInstallation: CreateOrUpdateInstallationMessage = {
       // When a single active session per user is allowed, the installation that must be created or updated
       // will have an unique installationId referred to that user.
       // The installationId provided by the client is ignored.
@@ -106,7 +106,7 @@ export default class NotificationService {
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    const deleteMessage: NotificationHubDeleteMessage = {
+    const deleteMessage: DeleteInstallationMessage = {
       installationId: toFiscalCodeHash(fiscalCode),
       kind: DeleteKind[NotificationHubMessageKindEnum.DeleteInstallation]
     };
