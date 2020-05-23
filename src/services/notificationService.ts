@@ -33,12 +33,12 @@ import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 
 export default class NotificationService {
-  private notificationHubQueueClient: QueueClient;
+  private notificationQueueClient: QueueClient;
   constructor(
     private readonly queueStorageConnectionString: string,
     private readonly queueName: string
   ) {
-    this.notificationHubQueueClient = new QueueClient(
+    this.notificationQueueClient = new QueueClient(
       this.queueStorageConnectionString,
       this.queueName
     );
@@ -51,7 +51,7 @@ export default class NotificationService {
   ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
   > => {
-    const notifybMessage: NotifyMessage = {
+    const notifyMessage: NotifyMessage = {
       installationId: toFiscalCodeHash(notification.message.fiscal_code),
       kind: NotifyKind[NotificationHubMessageKindEnum.Notify],
       payload: {
@@ -62,8 +62,8 @@ export default class NotificationService {
         )
       }
     };
-    return this.notificationHubQueueClient
-      .sendMessage(base64EncodeObject(notifybMessage))
+    return this.notificationQueueClient
+      .sendMessage(base64EncodeObject(notifyMessage))
       .then(() => ResponseSuccessJson({ message: "ok" }))
       .catch(error =>
         ResponseErrorInternal(
@@ -91,7 +91,7 @@ export default class NotificationService {
       pushChannel: installation.pushChannel,
       tags: [toFiscalCodeHash(fiscalCode)]
     };
-    return this.notificationHubQueueClient
+    return this.notificationQueueClient
       .sendMessage(base64EncodeObject(azureInstallation))
       .then(() => ResponseSuccessJson({ message: "ok" }))
       .catch(error =>
@@ -110,7 +110,7 @@ export default class NotificationService {
       installationId: toFiscalCodeHash(fiscalCode),
       kind: DeleteKind[NotificationHubMessageKindEnum.DeleteInstallation]
     };
-    return this.notificationHubQueueClient
+    return this.notificationQueueClient
       .sendMessage(base64EncodeObject(deleteMessage))
       .then(() => ResponseSuccessJson({ message: "ok" }))
       .catch(error =>
