@@ -278,12 +278,12 @@ export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
 );
 export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
 
-// Needed to forward Notification Hub actions events
-export const NOTIFICATION_HUB_STORAGE_CONNECTION_STRING = getRequiredENVVar(
-  "NOTIFICATION_HUB_STORAGE_CONNECTION_STRING"
+// Needed to forward push notifications actions events
+export const NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
+  "NOTIFICATIONS_STORAGE_CONNECTION_STRING"
 );
-export const NOTIFICATION_HUB_QUEUE_NAME = getRequiredENVVar(
-  "NOTIFICATION_HUB_QUEUE_NAME"
+export const NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
+  "NOTIFICATIONS_QUEUE_NAME"
 );
 
 // Push notifications

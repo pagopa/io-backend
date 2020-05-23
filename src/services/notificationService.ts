@@ -1,5 +1,5 @@
 /**
- * This service post a notification to the Notification hub.
+ * This service post a notification to the Notification queue.
  */
 
 import {

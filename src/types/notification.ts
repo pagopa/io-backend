@@ -12,8 +12,8 @@ import { FiscalCode } from "../../generated/backend/FiscalCode";
 /**
  * An hashed fiscal code.
  *
- * The fiscal code is used as a tag in the Notification Hub installation, to avoid expose the fiscal code to a third
- * party system we use an hash instead.
+ * The fiscal code is used as a tag in the Notification Hub installation,
+ * to avoid expose the fiscal code to a third party system we use an hash instead.
  */
 interface IFiscalCodeHashTag {
   readonly kind: "IFiscalCodeHashTag";
