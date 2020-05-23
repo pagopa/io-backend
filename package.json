@@ -28,7 +28,7 @@
     "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
     "generate:proxy:api-models": "rimraf generated/backend && shx mkdir -p generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
     "generate:proxy:notification-models": "rimraf generated/notifications && shx mkdir -p generated/notifications && gen-api-models --api-spec api_notifications.yaml --out-dir generated/notifications",
-    "generate:messages:notifications": "rimraf generated/messages && shx mkdir -p generated/messages && gen-api-models --api-spec api_notificationhub_messages.yaml --out-dir generated/messages",
+    "generate:messages:notifications": "rimraf generated/messages && shx mkdir -p generated/messages && gen-api-models --api-spec notification_queue_messages.yaml --out-dir generated/messages",
     "generate:proxy:pagopa-models": "rimraf generated/pagopa && shx mkdir -p generated/pagopa && gen-api-models --api-spec api_pagopa.yaml --out-dir generated/pagopa",
     "generate:proxy:public-models": "rimraf generated/public && shx mkdir -p generated/public && gen-api-models --api-spec api_public.yaml --out-dir generated/public",
     "generate:api:io": "rimraf generated/io-api && shx mkdir -p generated/io-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app/master/openapi/index.yaml --no-strict --out-dir generated/io-api --request-types --response-decoders",

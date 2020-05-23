@@ -19,7 +19,7 @@ import {
   DeleteInstallationMessage,
   KindEnum as DeleteKind
 } from "../../generated/messages/DeleteInstallationMessage";
-import { NotificationHubMessageKindEnum } from "../../generated/messages/NotificationHubMessageKind";
+import { NotificationMessageKindEnum } from "../../generated/messages/NotificationMessageKind";
 import {
   KindEnum as NotifyKind,
   NotifyMessage
@@ -53,7 +53,7 @@ export default class NotificationService {
   > => {
     const notifyMessage: NotifyMessage = {
       installationId: toFiscalCodeHash(notification.message.fiscal_code),
-      kind: NotifyKind[NotificationHubMessageKindEnum.Notify],
+      kind: NotifyKind[NotificationMessageKindEnum.Notify],
       payload: {
         message: notificationSubject,
         message_id: notification.message.id,
@@ -85,7 +85,7 @@ export default class NotificationService {
       installationId: toFiscalCodeHash(fiscalCode),
       kind:
         CreateOrUpdateKind[
-          NotificationHubMessageKindEnum.CreateOrUpdateInstallation
+          NotificationMessageKindEnum.CreateOrUpdateInstallation
         ],
       platform: installation.platform,
       pushChannel: installation.pushChannel,
@@ -108,7 +108,7 @@ export default class NotificationService {
   > => {
     const deleteMessage: DeleteInstallationMessage = {
       installationId: toFiscalCodeHash(fiscalCode),
-      kind: DeleteKind[NotificationHubMessageKindEnum.DeleteInstallation]
+      kind: DeleteKind[NotificationMessageKindEnum.DeleteInstallation]
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(deleteMessage))

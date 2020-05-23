@@ -235,7 +235,7 @@ export function newApp(
         );
       },
       err => {
-        log.error("Error initializing NotificationHub Service: %s", err);
+        log.error("Error initializing Notification Service: %s", err);
         process.exit(1);
       }
     );

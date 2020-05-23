@@ -1,23 +1,22 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Proxy API
-  description: Mobile and web proxy API gateway.
-host: localhost
-basePath: /pagopa/api/v1
-schemes:
-  - https
-paths:
+  title: Push notifcation types
+paths: []
 definitions:
   Platform:
-    $ref: 'https://raw.githubusercontent.com/pagopa/io-backend/v5.19.1/api_backend.yaml#/definitions/Platform'
-  NotificationHubMessageKind:
+    type: string
+    description: The platform type where the installation happened.
+    x-extensible-enum:
+      - apns
+      - gcm
+  NotificationMessageKind:
     type: string
     enum:
       - "Notify"
       - "CreateOrUpdateInstallation"
       - "DeleteInstallation"
-  NotificationHubMessage:
+  BaseNotificationMessage:
     type: object
     properties:
       installationId:
@@ -25,7 +24,7 @@ definitions:
         minLenght: 1
     required:
       - installationId
-  NotificationHubNotifyMessagePayload:
+  NotifyMessagePayload:
     title: Notification payload
     description: Push notification payload
     type: object
@@ -44,11 +43,11 @@ definitions:
     title: Notify message
     description: Message sent to the queue for a new notify event
     allOf:
-      - $ref: "#/definitions/NotificationHubMessage"
+      - $ref: "#/definitions/BaseNotificationMessage"
       - type: object
         properties:
           payload:
-            $ref: '#/definitions/NotificationHubNotifyMessagePayload'
+            $ref: '#/definitions/NotifyMessagePayload'
           kind:
             type: string
             enum:
@@ -60,7 +59,7 @@ definitions:
     title: CreateOrUpdate message
     description: Message sent to the queue for a new CreateOrUpdate event
     allOf:
-      - $ref: "#/definitions/NotificationHubMessage"
+      - $ref: "#/definitions/BaseNotificationMessage"
       - type: object
         properties:
           kind:
@@ -84,7 +83,7 @@ definitions:
     title: Delete Installation message
     description: Message sent to the queue for a new Delete Installation event
     allOf:
-      - $ref: "#/definitions/NotificationHubMessage"
+      - $ref: "#/definitions/BaseNotificationMessage"
       - type: object
         properties:
           kind:
@@ -93,9 +92,3 @@ definitions:
               - DeleteInstallation
         required:
           - kind
-responses: {}
-parameters: {}
-consumes:
-  - application/json
-produces:
-  - application/json
