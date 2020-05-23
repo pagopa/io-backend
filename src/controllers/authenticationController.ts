@@ -163,14 +163,14 @@ export default class AuthenticationController {
       .then(deleteInstallationResponse => {
         if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
           log.debug(
-            "Cannot delete Notification Hub Installation: %s",
+            "Cannot delete Notification Installation: %s",
             deleteInstallationResponse.detail
           );
         }
       })
       .catch(err => {
         log.error(
-          "Cannot delete Notification Hub Installation: %s",
+          "Cannot delete Notification Installation: %s",
           JSON.stringify(err)
         );
       });

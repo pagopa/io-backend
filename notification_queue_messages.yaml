@@ -1,0 +1,92 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Push notifcation types
+paths: []
+definitions:
+  Platform:
+    type: string
+    description: The platform type where the installation happened.
+    x-extensible-enum:
+      - apns
+      - gcm
+  NotificationMessageKind:
+    type: string
+    enum:
+      - "Notify"
+      - "CreateOrUpdateInstallation"
+      - "DeleteInstallation"
+  InstallationId:
+    type: string
+    minLength: 1
+  NotifyMessagePayload:
+    title: Notification payload
+    description: Push notification payload
+    type: object
+    properties:
+      message:
+        type: string
+      message_id:
+        type: string
+      title:
+        type: string
+    required:
+      - message
+      - message_id
+      - title
+  NotifyMessage:
+    title: Notify message
+    description: Message sent to the queue for a new notify event
+    type: object
+    properties:
+      installationId:
+        $ref: '#/definitions/InstallationId'
+      payload:
+        $ref: '#/definitions/NotifyMessagePayload'
+      kind:
+        type: string
+        enum:
+          - "Notify"
+    required:
+      - installationId
+      - payload
+      - kind
+  CreateOrUpdateInstallationMessage:
+    title: CreateOrUpdate message
+    description: Message sent to the queue for a new CreateOrUpdate event
+    type: object
+    properties:
+      installationId:
+        $ref: '#/definitions/InstallationId'
+      kind:
+        type: string
+        enum:
+          - "CreateOrUpdateInstallation"
+      platform:
+        $ref: '#/definitions/Platform'
+      pushChannel:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+    required:
+      - installationId
+      - platform
+      - pushChannel
+      - tags
+      - kind
+  DeleteInstallationMessage:
+    title: Delete Installation message
+    description: Message sent to the queue for a new Delete Installation event
+    type: object
+    properties:
+      installationId:
+        $ref: '#/definitions/InstallationId'
+      kind:
+        type: string
+        enum:
+          - DeleteInstallation
+    required:
+      - installationId
+      - kind

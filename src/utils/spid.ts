@@ -13,6 +13,7 @@ import {
 } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 import { log } from "./logger";
+import { base64EncodeObject } from "./messages";
 
 const SAML_NAMESPACE = {
   ASSERTION: "urn:oasis:names:tc:SAML:2.0:assertion",
@@ -133,9 +134,7 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
 
       // encode to base64 since the queue payload is an XML
       // and cannot contain markup characters
-      const spidMsgBase64 = Buffer.from(JSON.stringify(spidMsg)).toString(
-        "base64"
-      );
+      const spidMsgBase64 = base64EncodeObject(spidMsg);
 
       // we don't return the promise here
       // the call follows fire & forget pattern
