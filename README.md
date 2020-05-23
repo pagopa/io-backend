@@ -155,8 +155,8 @@ Those are all Environment variables needed by the application:
 | SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
 | PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
-| NOTIFICATION_HUB_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages        | string |
-| NOTIFICATION_HUB_QUEUE_NAME            | Queue name of Azure queue storage for notification hub messages                   | string |
+| NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages        | string |
+| NOTIFICATIONS_QUEUE_NAME                | Queue name of Azure queue storage for notification hub messages                   | string |
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | API_BASE_PATH                          | The root path for the api endpoints                                               | string |
