@@ -16,14 +16,9 @@ definitions:
       - "Notify"
       - "CreateOrUpdateInstallation"
       - "DeleteInstallation"
-  BaseNotificationMessage:
-    type: object
-    properties:
-      installationId:
-        type: string
-        minLenght: 1
-    required:
-      - installationId
+  InstallationId:
+    type: string
+    minLength: 1
   NotifyMessagePayload:
     title: Notification payload
     description: Push notification payload
@@ -42,53 +37,56 @@ definitions:
   NotifyMessage:
     title: Notify message
     description: Message sent to the queue for a new notify event
-    allOf:
-      - $ref: "#/definitions/BaseNotificationMessage"
-      - type: object
-        properties:
-          payload:
-            $ref: '#/definitions/NotifyMessagePayload'
-          kind:
-            type: string
-            enum:
-              - "Notify"
-        required:
-          - payload
-          - kind
+    type: object
+    properties:
+      installationId:
+        $ref: '#/definitions/InstallationId'
+      payload:
+        $ref: '#/definitions/NotifyMessagePayload'
+      kind:
+        type: string
+        enum:
+          - "Notify"
+    required:
+      - installationId
+      - payload
+      - kind
   CreateOrUpdateInstallationMessage:
     title: CreateOrUpdate message
     description: Message sent to the queue for a new CreateOrUpdate event
-    allOf:
-      - $ref: "#/definitions/BaseNotificationMessage"
-      - type: object
-        properties:
-          kind:
-            type: string
-            enum:
-              - "CreateOrUpdateInstallation"
-          platform:
-            $ref: '#/definitions/Platform'
-          pushChannel:
-            type: string
-          tags:
-            type: array
-            items:
-              type: string
-        required:
-          - platform
-          - pushChannel
-          - tags
-          - kind
+    type: object
+    properties:
+      installationId:
+        $ref: '#/definitions/InstallationId'
+      kind:
+        type: string
+        enum:
+          - "CreateOrUpdateInstallation"
+      platform:
+        $ref: '#/definitions/Platform'
+      pushChannel:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+    required:
+      - installationId
+      - platform
+      - pushChannel
+      - tags
+      - kind
   DeleteInstallationMessage:
     title: Delete Installation message
     description: Message sent to the queue for a new Delete Installation event
-    allOf:
-      - $ref: "#/definitions/BaseNotificationMessage"
-      - type: object
-        properties:
-          kind:
-            type: string
-            enum:
-              - DeleteInstallation
-        required:
-          - kind
+    type: object
+    properties:
+      installationId:
+        $ref: '#/definitions/InstallationId'
+      kind:
+        type: string
+        enum:
+          - DeleteInstallation
+    required:
+      - installationId
+      - kind
