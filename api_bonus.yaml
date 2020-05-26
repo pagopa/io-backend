@@ -85,7 +85,7 @@ paths:
             application/json:
               id: 01BX9NSMKVXXS5PSP2FATZMYYY
 
-  "/bonus/vacanze":
+  "/bonus/vacanze/activation":
     post:
       operationId: startBonusActivationProcedure
       summary: Start bonus activation procedure
