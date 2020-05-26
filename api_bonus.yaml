@@ -1,0 +1,144 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Bonus API
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/bonus/vacanze/request":
+    post:
+      operationId: startBonusEligibilityCheck
+      summary: Start bonus eligibility check
+      responses:
+        '202':
+          description: Request accepted.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the created request.
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+          examples:
+            application/json:
+              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+
+    get:
+      operationId: getBonusEligibilityCheck
+      summary: Get eligibility check information for user's bonus
+      responses:
+        '202':
+          description: Processing request.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the created request.
+          examples:
+            application/json:
+              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+        '200':
+          description: Request processed.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the created request.
+          examples:
+            application/json:
+              # REQUEST (isee): PROCESSING, NO_DATA, ELIGIBLE, INELIGIBLE, NOT_FOUND
+              status: ELIGIBLE
+              members:
+                - name: "Mario"
+                  surname: "Rossi"
+                - name: "Piero"
+                  surname: "Rossi"
+                - name: "Giulia"
+                  surname: "Rossi"
+              max_amount: 50000
+              tax_benefit: 3000
+
+    delete:
+      operationId: cancelBonusEligibilityProcedure
+      summary: Cancel bonus eligibility check procedure
+      responses:
+        '200':
+          description: Request canceled.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the canceled request.
+          examples:
+            application/json:
+              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+
+  "/bonus/vacanze":
+    post:
+      operationId: startBonusActivationProcedure
+      summary: Start bonus activation procedure
+      responses:
+        '202':
+          description: Request accepted.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the created request.
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created activation resource.
+                A GET request to this URL returns the request status and details.
+          examples:
+            application/json:
+              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+
+    get:
+      operationId: getLatestBonus
+      summary: Get latest bonus activation details
+      responses:
+        '202':
+          description: Processing request.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the created request.
+          examples:
+            application/json:
+              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+        '200':
+          description: Bonus activation details.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the created request.
+          examples:
+            application/json:
+              id: "ABCDE123XYZ"
+              qr_code:
+                mime_type: "svg+xml"
+                base64_content: "sadsadadadasdads"
+              max_amount: 50000
+              tax_benefit: 3000
+              activate_at: "2020-07-04T12:20:00.000Z"
+              # ACTIVABLE, PROCESSING, ACTIVE, ABORTED, FAILED, CONSUMED
+              status: ACTIVE
