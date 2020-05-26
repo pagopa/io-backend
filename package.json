@@ -36,7 +36,9 @@
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all generate:proxy-models build dist:modules"
+    "predeploy": "npm-run-all generate:proxy-models build dist:modules",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -81,7 +83,8 @@
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.0.0",
-    "xmldom": "^0.1.27"
+    "xmldom": "^0.1.27",
+    "snyk": "^1.328.0"
   },
   "devDependencies": {
     "@types/apicache": "^1.2.0",
@@ -160,5 +163,6 @@
   "resolutions": {
     "fp-ts": "1.17.4",
     "handlebars": "~4.5.3"
-  }
+  },
+  "snyk": true
 }
