@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Bonus API
+  title: Bonus vacanze API
 host: localhost
 basePath: /api/v1
 schemes:
@@ -9,7 +9,7 @@ schemes:
 security:
   - Bearer: []
 paths:
-  "/bonus/vacanze/request":
+  "/bonus/vacanze/eligibility":
     post:
       operationId: startBonusEligibilityCheck
       summary: Start bonus eligibility check (ISEE)
@@ -59,9 +59,9 @@ paths:
             application/json:
               # REQUEST (isee): NO_DATA, ELIGIBLE, INELIGIBLE, NOT_FOUND
               status: ELIGIBLE
-              members:
+              family_members:
                 - name: "Mario"
-                  surname: "Rossi"
+                  surname: "Rossi"                  
                 - name: "Piero"
                   surname: "Rossi"
                 - name: "Giulia"
