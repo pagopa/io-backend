@@ -12,7 +12,7 @@ paths:
   "/bonus/vacanze/request":
     post:
       operationId: startBonusEligibilityCheck
-      summary: Start bonus eligibility check
+      summary: Start bonus eligibility check (ISEE)
       responses:
         '202':
           description: Request accepted.
@@ -34,7 +34,7 @@ paths:
 
     get:
       operationId: getBonusEligibilityCheck
-      summary: Get eligibility check information for user's bonus
+      summary: Get eligibility (ISEE) check information for user's bonus
       responses:
         '202':
           description: Processing request.
@@ -57,7 +57,7 @@ paths:
                 description: The identifier of the created request.
           examples:
             application/json:
-              # REQUEST (isee): PROCESSING, NO_DATA, ELIGIBLE, INELIGIBLE, NOT_FOUND
+              # REQUEST (isee): NO_DATA, ELIGIBLE, INELIGIBLE, NOT_FOUND
               status: ELIGIBLE
               members:
                 - name: "Mario"
@@ -71,7 +71,7 @@ paths:
 
     delete:
       operationId: cancelBonusEligibilityProcedure
-      summary: Cancel bonus eligibility check procedure
+      summary: Cancel bonus eligibility check procedure (avoids sending a push notification when done)
       responses:
         '200':
           description: Request canceled.
@@ -140,5 +140,5 @@ paths:
               max_amount: 50000
               tax_benefit: 3000
               activate_at: "2020-07-04T12:20:00.000Z"
-              # ACTIVABLE, PROCESSING, ACTIVE, ABORTED, FAILED, CONSUMED
+              # ACTIVABLE, ACTIVE, ABORTED, FAILED, CONSUMED
               status: ACTIVE
