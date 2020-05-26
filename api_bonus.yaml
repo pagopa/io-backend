@@ -14,7 +14,7 @@ paths:
       operationId: startBonusEligibilityCheck
       summary: Start bonus eligibility check (ISEE)
       responses:
-        '202':
+        "202":
           description: Request accepted.
           schema:
             type: object
@@ -30,13 +30,23 @@ paths:
                 A GET request to this URL returns the request status and details.
           examples:
             application/json:
-              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+              id: SPNDNL80R11C522K
+        "401":
+          description: Bearer token null or expired.
+        "409":
+          description: "Conflict: pending request found."
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
     get:
       operationId: getBonusEligibilityCheck
       summary: Get eligibility (ISEE) check information for user's bonus
       responses:
-        '202':
+        "202":
           description: Processing request.
           schema:
             type: object
@@ -46,18 +56,14 @@ paths:
                 description: The identifier of the created request.
           examples:
             application/json:
-              id: 01BX9NSMKVXXS5PSP2FATZMYYY
-        '200':
+              id: SPNDNL80R11C522K
+        "200":
           description: Request processed.
           schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the created request.
+            $ref: "#/definitions/EligibilityCheck"
           examples:
             application/json:
-              # REQUEST (isee): NO_DATA, ELIGIBLE, INELIGIBLE, NOT_FOUND
+              id: SPNDNL80R11C522K
               status: ELIGIBLE
               family_members:
                 - name: "Mario"
@@ -68,12 +74,23 @@ paths:
                   surname: "Rossi"
               max_amount: 50000
               tax_benefit: 3000
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Request not found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
+  "/bonus/vacanze/eligibility/notifications":
     delete:
       operationId: cancelBonusEligibilityProcedure
-      summary: Cancel bonus eligibility check procedure (avoids sending a push notification when done)
+      summary: |
+        Stop the bonus eligibility check procedure to avoid
+        sending a push notification when done.
       responses:
-        '200':
+        "200":
           description: Request canceled.
           schema:
             type: object
@@ -83,14 +100,26 @@ paths:
                 description: The identifier of the canceled request.
           examples:
             application/json:
-              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+              id: SPNDNL80R11C522K
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Not found.
+        "409":
+          description: "Conflict: pending request found."
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
   "/bonus/vacanze/activation":
     post:
       operationId: startBonusActivationProcedure
       summary: Start bonus activation procedure
       responses:
-        '202':
+        "202":
           description: Request accepted.
           schema:
             type: object
@@ -106,13 +135,19 @@ paths:
                 A GET request to this URL returns the request status and details.
           examples:
             application/json:
-              id: 01BX9NSMKVXXS5PSP2FATZMYYY
+              id: SPNDNL80R11C522K
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
     get:
       operationId: getLatestBonus
       summary: Get latest bonus activation details
       responses:
-        '202':
+        "202":
           description: Processing request.
           schema:
             type: object
@@ -122,23 +157,167 @@ paths:
                 description: The identifier of the created request.
           examples:
             application/json:
-              id: 01BX9NSMKVXXS5PSP2FATZMYYY
-        '200':
+              id: SPNDNL80R11C522K
+        "200":
           description: Bonus activation details.
           schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the created request.
+            $ref: "#/definitions/BonusActivation"
           examples:
             application/json:
-              id: "ABCDE123XYZ"
+              id: SPNDNL80R11C522K
               qr_code:
                 mime_type: "svg+xml"
                 base64_content: "sadsadadadasdads"
               max_amount: 50000
               tax_benefit: 3000
               activate_at: "2020-07-04T12:20:00.000Z"
-              # ACTIVABLE, ACTIVE, ABORTED, FAILED, CONSUMED
               status: ACTIVE
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: No bonus found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/bonus/vacanze/activation/by-family-member":
+    get:
+      operationId: getLatestBonus
+      summary: Get bonus activation status if already requested by a family member
+      responses:
+        "200":
+          description: Another family member has an active or consumed bonus
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                x-extensible-enum:
+                  - ACTIVE
+                  - CONSUMED
+            required:
+              - status
+        "404":
+          description: No family member has another active or consumed bonus
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+definitions:
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/ProblemJson"
+  EligibilityCheckStatus:
+    type: string
+    description: |
+      Eligibility check status.
+      - NO_DATA       User not found in INPS database
+      - NOT_FOUND     User found but there's no ISEE data 
+      - ELIGIBILE     The user is eligible for the bonus
+      - INELIGIBLE    The user is not eligible for the bonus
+    x-extensible-enum:
+      - NO_DATA
+      - NOT_FOUND
+      - ELIGIBILE
+      - INELIGIBLE
+  FamilyMember:
+    type: object
+    properties:
+      name:
+        type: string
+        minLength: 1 
+      surname:
+        type: string
+        minLength: 1
+    required:
+      - name
+      - surname
+
+  EligibilityCheck:
+    type: object
+    title: Eligibility check
+    description: Eligibility check
+    properties:
+      id:
+        type: string
+        minLength: 1
+      status:
+        $ref: "#/definitions/EligibilityCheckStatus"
+      family_members:
+        type: array
+        default: []
+        items:
+          $ref: "#/definitions/FamilyMember"
+      max_amount:
+        type: number
+        minimum: 0
+        maximum: 500
+      tax_benefit:
+        type: number
+        minimum: 0
+        maximum: 500
+    required:
+      - id
+      - status
+      - max_amount
+      - tax_benefit
+      - family_members
+
+  QrCode:
+    type: object
+    properties:
+      content:
+        type: string
+      mime_type:
+        type: string
+    required:
+      - content
+      - mime_type
+
+  BonusActivationStatus:
+    type: string
+    description: |
+      Bonus activation status.
+      - ACTIVE      The bonus has been successfully activated by this user
+      - CANCELLED   The bonus activation was cancelled on purpose and can be resumed
+      - FAILED      The bonus activation failed as the user is currently ineligible
+      - CONSUMED    The bonus is comsumed by this user or any member of the family 
+                    and cannot be activated anymore
+    x-extensible-enum:
+      - ACTIVE
+      - CANCELLED
+      - FAILED
+      - CONSUMED
+
+  BonusActivation:
+    type: object
+    title: Bonus activation
+    description: Bonus activation
+    properties:
+      id:
+        type: string
+        minLength: 1
+      status:
+        $ref: "#/definitions/BonusActivationStatus"
+      qr_code:
+        $ref: "#/definitions/QrCode"
+      max_amount:
+        type: number
+        minimum: 0
+        maximum: 500
+      tax_benefit:
+        type: number
+        minimum: 0
+        maximum: 500
+      updated_at:
+        $ref: "https://github.com/pagopa/io-functions-commons/blob/master/openapi/definitions.yaml#/Timestamp"
+    required:
+      - id
+      - status
+      - qr_code
+      - max_amount
+      - tax_benefit
+      - updated_at
