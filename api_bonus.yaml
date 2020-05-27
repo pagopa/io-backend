@@ -258,17 +258,18 @@ definitions:
         $ref: "#/definitions/EligibilityCheckStatus"
       family_members:
         type: array
-        default: []
         items:
           $ref: "#/definitions/FamilyMember"
       max_amount:
-        type: number
+        description: Max bonus amount in euro cents
+        type: integer
         minimum: 0
-        maximum: 500
+        maximum: 50000
       tax_benefit:
-        type: number
+        description: Max bonus tax benefit in euro cents
+        type: integer
         minimum: 0
-        maximum: 500
+        maximum: 50000
     required:
       - id
       - status
@@ -315,13 +316,17 @@ definitions:
       qr_code:
         $ref: "#/definitions/QrCode"
       max_amount:
-        type: number
-        maximum: 500
+        description: Max bonus amount in euro cents
+        type: integer
+        minimum: 0
+        maximum: 50000
       tax_benefit:
-        type: number
-        maximum: 500
+        description: Max bonus tax benefit in euro cents
+        type: integer
+        minimum: 0
+        maximum: 50000
       updated_at:
-        $ref: "https://github.com/pagopa/io-functions-commons/blob/master/openapi/definitions.yaml#/Timestamp"
+        $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
     required:
       - id
       - status
