@@ -117,10 +117,12 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
-  "/bonus/vacanze/activation":
+  ## BONUS ACTIVATIONS
+
+  "/bonus/vacanze/activations":
     post:
       operationId: startBonusActivationProcedure
-      summary: Start bonus activation procedure
+      summary: Start bonus activation request procedure
       responses:
         "202":
           description: Request accepted.
@@ -138,7 +140,7 @@ paths:
                 A GET request to this URL returns the request status and details.
           examples:
             application/json:
-              id: SPNDNL80R11C522K
+              id: SOMEBONUSID
         "401":
           description: Bearer token null or expired.
         "500":
@@ -147,8 +149,38 @@ paths:
             $ref: "#/definitions/ProblemJson"
 
     get:
-      operationId: getLatestBonus
-      summary: Get latest bonus activation details
+      operationId: getAllBonusActivations
+      summary: |
+        Get all IDs of the bonus activations requested by
+        the authenticated user or by any between his family member
+      responses:
+        "200":
+          description: |
+            List of bonus activations ID activated by the authenticated user 
+            or any between his family member (former and actual)
+          schema:
+            $ref: "#/PaginatedBonusActivationsCollection"
+        "404":
+          description: No activation found.
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/bonus/vacanze/activations/{bonus_id}":
+    get:
+      operationId: getLatestBonusActivationById
+      summary: |
+        Get the activation details for the latest version
+        of the bonus entity identified by the provided id
+      parameters:
+        - name: bonus_id
+          in: path
+          required: true
+          description: Bonus activation ID.
+          type: string
       responses:
         "202":
           description: Processing request.
@@ -160,14 +192,15 @@ paths:
                 description: The identifier of the created request.
           examples:
             application/json:
-              id: SPNDNL80R11C522K
+              id: SOMEBONUSID
         "200":
           description: Bonus activation details.
           schema:
             $ref: "#/definitions/BonusActivation"
           examples:
             application/json:
-              id: SPNDNL80R11C522K
+              id: SOMEBONUSID
+              appliant_fiscal_code: SPNDNL80R11C522K
               code: MYSECRETCODE
               qr_code:
                 mime_type: "svg+xml"
@@ -180,35 +213,6 @@ paths:
           description: Bearer token null or expired.
         "404":
           description: No bonus found.
-        "500":
-          description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-
-  "/bonus/vacanze/activation/by-family-member":
-    get:
-      operationId: getLatestBonus
-      summary: Get bonus activation status if already requested by a family member
-      responses:
-        "200":
-          description: Another family member has an active or consumed bonus
-          schema:
-            type: object
-            properties:
-              family_member:
-                $ref: "#/definitions/FamilyMember"
-              status:
-                type: string
-                x-extensible-enum:
-                  - ACTIVE
-                  - CONSUMED
-            required:
-              - status
-              - family_member
-        "404":
-          description: No family member has another active or consumed bonus
-        "401":
-          description: Bearer token null or expired.
         "500":
           description: Service unavailable.
           schema:
@@ -308,6 +312,8 @@ definitions:
       id:
         type: string
         minLength: 1
+      appliant_fiscal_code:
+        $ref: '#/definitions/FiscalCode'
       status:
         $ref: "#/definitions/BonusActivationStatus"
       code:
@@ -329,9 +335,33 @@ definitions:
         $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
     required:
       - id
+      - appliant_fiscal_code
       - status
       - code
       - qr_code
       - max_amount
       - max_tax_benefit
       - updated_at
+
+  BonusActivationItem:
+    type: object
+    properties:
+      id:
+        type: string
+        minLength: 1
+      is_applicant:
+        type: boolean
+    required:
+      - id
+      - is_applicant
+  BonusActivationCollection:
+    items:
+      type: array
+      items:
+        $ref: "#/definitions/BonusActivationItem"
+    required:
+      - items
+  PaginatedBonusActivationCollection:
+    allOf: 
+      - $ref: "#/definitions/BonusActivationCollection"
+      - $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/PaginationResponse"            
