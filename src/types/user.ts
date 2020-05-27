@@ -4,10 +4,13 @@
  */
 
 import * as express from "express";
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import {
+  errorsToReadableMessages,
+  readableReport
+} from "italia-ts-commons/lib/reporters";
 import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
@@ -115,14 +118,27 @@ export function exactUserIdentityDecode(
     : t.exact(CieUserIdentity.type).decode(user);
 }
 
+const SpidObject = t.intersection([
+  t.interface({
+    fiscalNumber: t.string,
+    getAssertionXml: t.any
+  }),
+  t.partial({
+    authnContextClassRef: t.any,
+    issuer: t.any
+  })
+]);
+
 /**
  * Validates a SPID User extracted from a SAML response.
  */
-// tslint:disable-next-line:no-any
-export function validateSpidUser(value: any): Either<string, SpidUser> {
-  if (!value.hasOwnProperty("fiscalNumber")) {
-    return left("Cannot decode a user without a fiscalNumber");
+export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
+  const validated = SpidObject.decode(rawValue);
+  if (isLeft(validated)) {
+    return left(`validateSpidUser: ${readableReport(validated.value)}`);
   }
+
+  const value = validated.value;
 
   // Remove the international prefix from fiscal number.
   const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
