@@ -167,10 +167,10 @@ paths:
               id: SPNDNL80R11C522K
               qr_code:
                 mime_type: "svg+xml"
-                base64_content: "sadsadadadasdads"
+                base64_content: "foobar"
               max_amount: 50000
               tax_benefit: 3000
-              activate_at: "2020-07-04T12:20:00.000Z"
+              updated_at: "2020-07-04T12:20:00.000Z"
               status: ACTIVE
         "401":
           description: Bearer token null or expired.
@@ -214,10 +214,10 @@ definitions:
     type: string
     description: |
       Eligibility check status.
-      - NO_DATA       User not found in INPS database
-      - NOT_FOUND     User found but there's no ISEE data 
-      - ELIGIBILE     The user is eligible for the bonus
-      - INELIGIBLE    The user is not eligible for the bonus
+      - USER_NOT_FOUND    User not found in INPS database
+      - ISEE_NOT_FOUND    User found but there's no ISEE data 
+      - ELIGIBILE         The user is eligible for the bonus
+      - INELIGIBLE        The user is not eligible for the bonus
     x-extensible-enum:
       - NO_DATA
       - NOT_FOUND
@@ -235,7 +235,6 @@ definitions:
     required:
       - name
       - surname
-
   EligibilityCheck:
     type: object
     title: Eligibility check
@@ -265,7 +264,6 @@ definitions:
       - max_amount
       - tax_benefit
       - family_members
-
   QrCode:
     type: object
     properties:
@@ -276,7 +274,6 @@ definitions:
     required:
       - content
       - mime_type
-
   BonusActivationStatus:
     type: string
     description: |
@@ -291,7 +288,6 @@ definitions:
       - CANCELLED
       - FAILED
       - CONSUMED
-
   BonusActivation:
     type: object
     title: Bonus activation
@@ -302,6 +298,9 @@ definitions:
         minLength: 1
       status:
         $ref: "#/definitions/BonusActivationStatus"
+      code:
+        type: string
+        minLength: 1
       qr_code:
         $ref: "#/definitions/QrCode"
       max_amount:
@@ -317,6 +316,7 @@ definitions:
     required:
       - id
       - status
+      - code
       - qr_code
       - max_amount
       - tax_benefit
