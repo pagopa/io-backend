@@ -76,7 +76,7 @@ paths:
                   surname: "Rossi"
                   fiscal_code: "WWWYYY80R13C555Y"
               max_amount: 50000
-              tax_benefit: 3000
+              max_tax_benefit: 3000
         "401":
           description: Bearer token null or expired.
         "404":
@@ -173,7 +173,7 @@ paths:
                 mime_type: "svg+xml"
                 base64_content: "foobar"
               max_amount: 50000
-              tax_benefit: 3000
+              max_tax_benefit: 3000
               updated_at: "2020-07-04T12:20:00.000Z"
               status: ACTIVE
         "401":
@@ -265,7 +265,7 @@ definitions:
         type: integer
         minimum: 0
         maximum: 50000
-      tax_benefit:
+      max_tax_benefit:
         description: Max bonus tax benefit in euro cents
         type: integer
         minimum: 0
@@ -320,7 +320,7 @@ definitions:
         type: integer
         minimum: 0
         maximum: 50000
-      tax_benefit:
+      max_tax_benefit:
         description: Max bonus tax benefit in euro cents
         type: integer
         minimum: 0
