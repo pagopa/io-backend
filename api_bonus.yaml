@@ -295,13 +295,13 @@ definitions:
     description: |
       Bonus activation status.
       - ACTIVE      The bonus has been successfully activated by this user
-      - CANCELLED   The bonus activation was cancelled on purpose and can be resumed
+      - VOIDED      The bonus activation was cancelled on purpose and can be resumed
       - FAILED      The bonus activation failed as the user is currently ineligible
       - CONSUMED    The bonus is comsumed by this user or any member of the family
                     and cannot be activated anymore
     x-extensible-enum:
       - ACTIVE
-      - CANCELLED
+      - VOIDED
       - FAILED
       - CONSUMED
   BonusActivation:
