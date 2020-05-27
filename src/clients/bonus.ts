@@ -15,8 +15,8 @@ import {
   StartBonusEligibilityCheckT
 } from "../../generated/io-bonus-api/requestTypes";
 
-// we want to authenticate against the platform APIs with the APIM header key or
-// the Azure Functions header key, so we send both headers
+// we want to authenticate against the platform APIs with
+// the Azure Functions header key
 function SubscriptionKeyHeaderProducer<P>(
   token: string
 ): RequestHeaderProducer<P, "Ocp-Apim-Subscription-Key"> {
