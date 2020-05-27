@@ -333,5 +333,5 @@ definitions:
       - code
       - qr_code
       - max_amount
-      - tax_benefit
+      - max_tax_benefit
       - updated_at
