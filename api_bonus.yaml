@@ -67,11 +67,14 @@ paths:
               status: ELIGIBLE
               family_members:
                 - name: "Mario"
-                  surname: "Rossi"                  
+                  surname: "Rossi"
+                  fiscal_code: "XXXYYY80R13C555Y"
                 - name: "Piero"
                   surname: "Rossi"
+                  fiscal_code: "ZZZYYY80R13C555Y"
                 - name: "Giulia"
                   surname: "Rossi"
+                  fiscal_code: "WWWYYY80R13C555Y"
               max_amount: 50000
               tax_benefit: 3000
         "401":
@@ -165,6 +168,7 @@ paths:
           examples:
             application/json:
               id: SPNDNL80R11C522K
+              code: MYSECRETCODE
               qr_code:
                 mime_type: "svg+xml"
                 base64_content: "foobar"
@@ -191,6 +195,8 @@ paths:
           schema:
             type: object
             properties:
+              family_member:
+                $ref: "#/definitions/FamilyMember"
               status:
                 type: string
                 x-extensible-enum:
@@ -198,6 +204,7 @@ paths:
                   - CONSUMED
             required:
               - status
+              - family_member
         "404":
           description: No family member has another active or consumed bonus
         "401":
@@ -208,6 +215,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
 
 definitions:
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/ProblemJson"
   EligibilityCheckStatus:
@@ -215,20 +224,22 @@ definitions:
     description: |
       Eligibility check status.
       - USER_NOT_FOUND    User not found in INPS database
-      - ISEE_NOT_FOUND    User found but there's no ISEE data 
+      - ISEE_NOT_FOUND    User found but there's no ISEE data
       - ELIGIBILE         The user is eligible for the bonus
       - INELIGIBLE        The user is not eligible for the bonus
     x-extensible-enum:
-      - NO_DATA
-      - NOT_FOUND
+      - USER_NOT_FOUND
+      - ISEE_NOT_FOUND
       - ELIGIBILE
       - INELIGIBLE
   FamilyMember:
     type: object
     properties:
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
       name:
         type: string
-        minLength: 1 
+        minLength: 1
       surname:
         type: string
         minLength: 1
@@ -281,7 +292,7 @@ definitions:
       - ACTIVE      The bonus has been successfully activated by this user
       - CANCELLED   The bonus activation was cancelled on purpose and can be resumed
       - FAILED      The bonus activation failed as the user is currently ineligible
-      - CONSUMED    The bonus is comsumed by this user or any member of the family 
+      - CONSUMED    The bonus is comsumed by this user or any member of the family
                     and cannot be activated anymore
     x-extensible-enum:
       - ACTIVE
@@ -305,11 +316,9 @@ definitions:
         $ref: "#/definitions/QrCode"
       max_amount:
         type: number
-        minimum: 0
         maximum: 500
       tax_benefit:
         type: number
-        minimum: 0
         maximum: 500
       updated_at:
         $ref: "https://github.com/pagopa/io-functions-commons/blob/master/openapi/definitions.yaml#/Timestamp"
