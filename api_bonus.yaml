@@ -159,7 +159,7 @@ paths:
             List of bonus activations ID activated by the authenticated user 
             or any between his family member (former and actual)
           schema:
-            $ref: "#/PaginatedBonusActivationsCollection"
+            $ref: "#/definitions/PaginatedBonusActivationsCollection"
         "404":
           description: No activation found.
         "401":
@@ -361,7 +361,7 @@ definitions:
         $ref: "#/definitions/BonusActivationItem"
     required:
       - items
-  PaginatedBonusActivationCollection:
+  PaginatedBonusActivationsCollection:
     allOf: 
       - $ref: "#/definitions/BonusActivationCollection"
       - $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/PaginationResponse"            
