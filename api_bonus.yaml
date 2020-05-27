@@ -200,7 +200,7 @@ paths:
           examples:
             application/json:
               id: SOMEBONUSID
-              appliant_fiscal_code: SPNDNL80R11C522K
+              applicant_fiscal_code: SPNDNL80R11C522K
               code: MYSECRETCODE
               qr_code:
                 mime_type: "svg+xml"
@@ -312,7 +312,7 @@ definitions:
       id:
         type: string
         minLength: 1
-      appliant_fiscal_code:
+      applicant_fiscal_code:
         $ref: '#/definitions/FiscalCode'
       status:
         $ref: "#/definitions/BonusActivationStatus"
@@ -335,7 +335,7 @@ definitions:
         $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
     required:
       - id
-      - appliant_fiscal_code
+      - applicant_fiscal_code
       - status
       - code
       - qr_code
