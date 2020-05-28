@@ -19,9 +19,8 @@ import {
 // the Azure Functions header key
 function SubscriptionKeyHeaderProducer<P>(
   token: string
-): RequestHeaderProducer<P, "X-Functions-Key" | "Ocp-Apim-Subscription-Key"> {
+): RequestHeaderProducer<P, "X-Functions-Key"> {
   return () => ({
-    "Ocp-Apim-Subscription-Key": token,
     "X-Functions-Key": token
   });
 }
@@ -44,7 +43,7 @@ export function BonusAPIClient(
 
   const startBonusEligibilityCheckT: ReplaceRequestParams<
     StartBonusEligibilityCheckT,
-    Omit<RequestParams<StartBonusEligibilityCheckT>, "SubscriptionKey">
+    Omit<RequestParams<StartBonusEligibilityCheckT>, "ApiKey">
   > = {
     body: _ => "",
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
