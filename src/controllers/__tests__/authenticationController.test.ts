@@ -386,7 +386,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Error while validating user"
     });
   });
 
@@ -402,7 +402,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Error while creating the user session"
     });
   });
 });
