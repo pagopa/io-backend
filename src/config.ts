@@ -14,8 +14,8 @@ import {
 } from "italia-ts-commons/lib/reporters";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
+import { BonusAPIClient } from "./clients/bonus";
 import ApiClientFactory from "./services/apiClientFactory";
-import BonusApiClientFactory from "./services/bonusApiClientFactory";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -89,7 +89,7 @@ const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
-    DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
+  DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
   10
 );
 
@@ -102,16 +102,16 @@ const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 export const STARTUP_IDPS_METADATA:
   | Record<string, string>
   | undefined = fromNullable(process.env.STARTUP_IDPS_METADATA)
-  .map(_ =>
-    parseJSON(_, toError)
-      .chain<Record<string, string> | undefined>(_1 =>
-        STRINGS_RECORD.decode(_1).mapLeft(
-          err => new Error(errorsToReadableMessages(err).join(" / "))
+    .map(_ =>
+      parseJSON(_, toError)
+        .chain<Record<string, string> | undefined>(_1 =>
+          STRINGS_RECORD.decode(_1).mapLeft(
+            err => new Error(errorsToReadableMessages(err).join(" / "))
+          )
         )
-      )
-      .getOrElse(undefined)
-  )
-  .getOrElse(undefined);
+        .getOrElse(undefined)
+    )
+    .getOrElse(undefined);
 
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
@@ -232,7 +232,7 @@ export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
 
 export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
 export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");
-export const BONUS_API_CLIENT = new BonusApiClientFactory(
+export const BONUS_API_CLIENT = BonusAPIClient(
   BONUS_API_KEY,
   BONUS_API_URL,
   httpApiFetch
