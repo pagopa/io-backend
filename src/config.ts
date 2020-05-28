@@ -15,6 +15,7 @@ import {
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import ApiClientFactory from "./services/apiClientFactory";
+import BonusApiClientFactory from "./services/bonusApiClientFactory";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -221,14 +222,21 @@ export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodeCIDRs(
   return process.exit(1);
 });
 
-export const API_KEY = getRequiredENVVar("API_KEY");
-export const API_URL = getRequiredENVVar("API_URL");
-
 // HTTP-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
 const httpApiFetch = agent.getHttpFetch(process.env);
 
+export const API_KEY = getRequiredENVVar("API_KEY");
+export const API_URL = getRequiredENVVar("API_URL");
 export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
+
+export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
+export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");
+export const BONUS_API_CLIENT = new BonusApiClientFactory(
+  BONUS_API_KEY,
+  BONUS_API_URL,
+  httpApiFetch
+);
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
