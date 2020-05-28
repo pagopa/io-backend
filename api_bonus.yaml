@@ -141,6 +141,14 @@ paths:
           examples:
             application/json:
               id: SOMEBONUSID
+        "409":
+          description: |
+            Cannot activate a new bonus because another bonus related to this user was found.
+        "403":
+          description: |
+            Cannot activate a new bonus because the eligibility data has expired.
+            The user must re-initiate the eligibility procedure to refresh her data
+            and retry to activate the bonus within 24h since her got the result.
         "401":
           description: Bearer token null or expired.
         "500":
@@ -156,8 +164,8 @@ paths:
       responses:
         "200":
           description: |
-            List of bonus activations ID activated by the authenticated user 
-            or any between his family member (former and actual)
+            List of bonus activations ID activated or consumed by the authenticated user 
+            or by any between his family members (former and actual)
           schema:
             $ref: "#/definitions/PaginatedBonusActivationsCollection"
         "404":
