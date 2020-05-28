@@ -5,6 +5,7 @@
 import {
   API_CLIENT,
   appConfig,
+  BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
   ENV,
   getClientProfileRedirectionUrl,
@@ -60,7 +61,9 @@ import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
+import BonusController from "./controllers/bonusController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
+import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -103,23 +106,34 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
+export interface IAppFactoryParameters {
+  env: NodeEnvironment;
+  allowNotifyIPSourceRange: readonly CIDR[];
+  allowPagoPAIPSourceRange: readonly CIDR[];
+  authenticationBasePath: string;
+  APIBasePath: string;
+  BonusAPIBasePath: string;
+  PagoPABasePath: string;
+}
+
 // tslint:disable-next-line: no-big-function
-export function newApp(
-  env: NodeEnvironment,
-  allowNotifyIPSourceRange: readonly CIDR[],
-  allowPagoPAIPSourceRange: readonly CIDR[],
-  authenticationBasePath: string,
-  APIBasePath: string,
-  PagoPABasePath: string
-): Promise<Express> {
+export function newApp({
+  env,
+  allowNotifyIPSourceRange,
+  allowPagoPAIPSourceRange,
+  authenticationBasePath,
+  APIBasePath,
+  BonusAPIBasePath,
+  PagoPABasePath
+}: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
       ? createSimpleRedisClient(process.env.REDIS_URL)
       : createClusterRedisClient(
-          getRequiredENVVar("REDIS_URL"),
-          process.env.REDIS_PASSWORD,
-          process.env.REDIS_PORT
-        );
+        getRequiredENVVar("REDIS_URL"),
+        process.env.REDIS_PASSWORD,
+        process.env.REDIS_PORT
+      );
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
     REDIS_CLIENT,
@@ -221,6 +235,9 @@ export function newApp(
     // Create the profile service
     const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
+    // Create the bonus service
+    const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
+
     // Create the user data processing service
     const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
       API_CLIENT
@@ -272,6 +289,7 @@ export function newApp(
       USER_METADATA_STORAGE,
       USER_DATA_PROCESSING_SERVICE
     );
+    registerBonusAPIRoutes(app, BonusAPIBasePath, BONUS_SERVICE);
     registerPagoPARoutes(
       app,
       PagoPABasePath,
@@ -550,6 +568,27 @@ function registerAPIRoutes(
     toExpressHandler(
       pagoPAProxyController.getActivationStatus,
       pagoPAProxyController
+    )
+  );
+}
+
+function registerBonusAPIRoutes(
+  app: Express,
+  basePath: string,
+  bonusService: BonusService
+): void {
+  const bearerSessionTokenAuth = passport.authenticate("bearer.session", {
+    session: false
+  });
+
+  const bonusController: BonusController = new BonusController(bonusService);
+
+  app.post(
+    `${basePath}/bonus/eligibility`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      bonusController.startBonusEligibilityCheck,
+      bonusController
     )
   );
 }

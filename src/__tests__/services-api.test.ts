@@ -76,14 +76,15 @@ describe("GET /services/:id", () => {
   // tslint:disable:no-let
   let app: Express;
   beforeAll(async () => {
-    app = await appModule.newApp(
-      NodeEnvironmentEnum.PRODUCTION,
-      [aValidCIDR],
-      [aValidCIDR],
-      "",
-      "/api/v1",
-      "/pagopa/api/v1"
-    );
+    app = await appModule.newApp({
+      APIBasePath: "/api/v1",
+      BonusAPIBasePath: "/bonus/api/v1",
+      PagoPABasePath: "/pagopa/api/v1",
+      allowNotifyIPSourceRange: [aValidCIDR],
+      allowPagoPAIPSourceRange: [aValidCIDR],
+      authenticationBasePath: "",
+      env: NodeEnvironmentEnum.PRODUCTION
+    });
   });
 
   beforeEach(() => {

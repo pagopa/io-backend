@@ -89,7 +89,7 @@ const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
-    DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
+  DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS,
   10
 );
 
@@ -102,16 +102,16 @@ const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 export const STARTUP_IDPS_METADATA:
   | Record<string, string>
   | undefined = fromNullable(process.env.STARTUP_IDPS_METADATA)
-  .map(_ =>
-    parseJSON(_, toError)
-      .chain<Record<string, string> | undefined>(_1 =>
-        STRINGS_RECORD.decode(_1).mapLeft(
-          err => new Error(errorsToReadableMessages(err).join(" / "))
+    .map(_ =>
+      parseJSON(_, toError)
+        .chain<Record<string, string> | undefined>(_1 =>
+          STRINGS_RECORD.decode(_1).mapLeft(
+            err => new Error(errorsToReadableMessages(err).join(" / "))
+          )
         )
-      )
-      .getOrElse(undefined)
-  )
-  .getOrElse(undefined);
+        .getOrElse(undefined)
+    )
+    .getOrElse(undefined);
 
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
@@ -228,10 +228,12 @@ const httpApiFetch = agent.getHttpFetch(process.env);
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
+export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
 
 export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
 export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");
+export const BONUS_API_BASE_PATH = getRequiredENVVar("BONUS_API_BASE_PATH");
 export const BONUS_API_CLIENT = new BonusApiClientFactory(
   BONUS_API_KEY,
   BONUS_API_URL,
@@ -262,7 +264,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
   "AUTHENTICATION_BASE_PATH"
 );
-export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services
