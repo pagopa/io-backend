@@ -19,7 +19,7 @@ import {
 // the Azure Functions header key, so we send both headers
 function SubscriptionKeyHeaderProducer<P>(
   token: string
-): RequestHeaderProducer<P, "Ocp-Apim-Subscription-Key"> {
+): RequestHeaderProducer<P, "X-Functions-Key" | "Ocp-Apim-Subscription-Key"> {
   return () => ({
     "Ocp-Apim-Subscription-Key": token,
     "X-Functions-Key": token
@@ -30,7 +30,7 @@ export function APIClient(
   baseUrl: string,
   token: string,
   // tslint:disable-next-line:no-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch // TODO: customize fetch with timeout
+  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
   readonly startBonusEligibilityCheck: TypeofApiCall<
     typeof startBonusEligibilityCheckT
@@ -51,7 +51,7 @@ export function APIClient(
     method: "post",
     query: _ => ({}),
     response_decoder: startBonusEligibilityCheckDefaultDecoder(),
-    url: params => `/profiles/${params.fiscalCode}`
+    url: params => `/bonus/vacanze/eligibility/${params.fiscalCode}`
   };
 
   return {
