@@ -28,7 +28,7 @@ const readableProblem = (problem: ProblemJson) =>
 export default class BonusService {
   constructor(
     private readonly bonusApiClient: IBonusAPIClientFactoryInterface
-  ) { }
+  ) {}
 
   /**
    * Starts the procedure to check if the current user is eligible for the bonus.
