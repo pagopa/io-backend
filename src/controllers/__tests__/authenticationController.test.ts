@@ -134,7 +134,8 @@ const mockGetNewToken = jest.fn();
 jest.mock("../../services/tokenService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getNewToken: mockGetNewToken
+      getNewToken: mockGetNewToken,
+      getNewTokenAsync: () => Promise.resolve(mockGetNewToken())
     }))
   };
 });
