@@ -40,6 +40,12 @@ import {
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 
+// how many random bytes to generate for each session token
+const SESSION_TOKEN_LENGTH_BYTES = 48;
+
+// how many random bytes to generate for each session ID
+const SESSION_ID_LENGTH_BYTES = 32;
+
 export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
@@ -77,6 +83,7 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrUser.value;
+
     const errorOrIsBlockedUser = await this.sessionStorage.isBlockedUser(
       spidUser.fiscalNumber
     );
@@ -92,19 +99,19 @@ export default class AuthenticationController {
       return ResponseErrorInternal(err.message);
     }
 
-    // authentication token for app backend
-    const sessionToken = this.tokenService.getNewToken() as SessionToken;
-
-    // authentication token for pagoPA
-    const walletToken = this.tokenService.getNewToken() as WalletToken;
-
-    // unique ID for tracking the user session
-    const sessionTrackingId = this.tokenService.getNewToken(32);
+    const [sessionToken, walletToken, sessionTrackingId] = await Promise.all([
+      // authentication token for app backend
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for pagoPA
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // unique ID for tracking the user session
+      this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
+    ]);
 
     const user = toAppUser(
       spidUser,
-      sessionToken,
-      walletToken,
+      sessionToken as SessionToken,
+      walletToken as WalletToken,
       sessionTrackingId
     );
 
@@ -121,6 +128,7 @@ export default class AuthenticationController {
       log.error("Error storing the user in the session");
       return ResponseErrorInternal("Error creating the user session");
     }
+
     // Check if a Profile for the user exists into the API
     const getProfileResponse = await this.profileService.getProfile(user);
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
