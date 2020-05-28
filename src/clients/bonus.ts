@@ -26,7 +26,7 @@ function SubscriptionKeyHeaderProducer<P>(
   });
 }
 
-export function APIClient(
+export function BonusAPIClient(
   baseUrl: string,
   token: string,
   // tslint:disable-next-line:no-any
@@ -62,4 +62,4 @@ export function APIClient(
   };
 }
 
-export type APIClient = typeof APIClient;
+export type BonusAPIClient = typeof BonusAPIClient;
