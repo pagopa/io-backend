@@ -130,10 +130,10 @@ export function newApp({
     ENV === NodeEnvironmentEnum.DEVELOPMENT
       ? createSimpleRedisClient(process.env.REDIS_URL)
       : createClusterRedisClient(
-        getRequiredENVVar("REDIS_URL"),
-        process.env.REDIS_PASSWORD,
-        process.env.REDIS_PORT
-      );
+          getRequiredENVVar("REDIS_URL"),
+          process.env.REDIS_PASSWORD,
+          process.env.REDIS_PORT
+        );
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
     REDIS_CLIENT,

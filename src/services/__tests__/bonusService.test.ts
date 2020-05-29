@@ -6,9 +6,9 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
+import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
-import BonusApiClientFactory from "../bonusApiClientFactory";
 import BonusService from "../bonusService";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
@@ -37,20 +37,11 @@ const mockedUser: User = {
 
 const mockStartBonusEligibilityCheck = jest.fn();
 
-const mockGetClient = jest.fn().mockImplementation(() => {
-  return {
-    startBonusEligibilityCheck: mockStartBonusEligibilityCheck
-  };
-});
-jest.mock("../../services/bonusApiClientFactory", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      getClient: mockGetClient
-    }))
-  };
-});
+const mockBonusAPIClient = {
+  startBonusEligibilityCheck: mockStartBonusEligibilityCheck
+} as ReturnType<BonusAPIClient>;
 
-const api = new BonusApiClientFactory("", "");
+const api = mockBonusAPIClient;
 
 describe("BonusService#startBonusEligibilityCheck", () => {
   beforeEach(() => {

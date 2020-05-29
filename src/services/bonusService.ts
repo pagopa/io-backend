@@ -14,21 +14,19 @@ import {
 
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
+import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { IBonusAPIClientFactoryInterface } from "./IBonusApiClientFactory";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
 
 export default class BonusService {
-  constructor(
-    private readonly bonusApiClient: IBonusAPIClientFactoryInterface
-  ) {}
+  constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
 
   /**
    * Starts the procedure to check if the current user is eligible for the bonus.
@@ -41,11 +39,9 @@ export default class BonusService {
     | IResponseSuccessJson<InstanceId>
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.bonusApiClient
-        .getClient()
-        .startBonusEligibilityCheck({
-          fiscalCode: user.fiscal_code
-        });
+      const validated = await this.bonusApiClient.startBonusEligibilityCheck({
+        fiscalCode: user.fiscal_code
+      });
 
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {

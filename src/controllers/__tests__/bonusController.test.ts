@@ -10,7 +10,7 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import BonusApiClient from "../../services/bonusApiClientFactory";
+import { BonusAPIClient } from "../../clients/bonus";
 import BonusService from "../../services/bonusService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
@@ -71,8 +71,8 @@ describe("BonusController#startEligibilityCheck", () => {
   it("should make the correct service method call", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    const apiClient = new BonusApiClient(API_KEY, API_URL);
-    const bonusService = new BonusService(apiClient);
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
     const controller = new BonusController(bonusService);
     await controller.startBonusEligibilityCheck(req);
 
@@ -86,8 +86,8 @@ describe("BonusController#startEligibilityCheck", () => {
       Promise.resolve(ResponseSuccessJson(aInstanceId))
     );
 
-    const apiClient = new BonusApiClient(API_KEY, API_URL);
-    const bonusService = new BonusService(apiClient);
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
     const controller = new BonusController(bonusService);
     const response = await controller.startBonusEligibilityCheck(req);
 
@@ -102,8 +102,8 @@ describe("BonusController#startEligibilityCheck", () => {
     const req = { ...mockReq(), user: undefined };
     const res = mockRes();
 
-    const apiClient = new BonusApiClient(API_KEY, API_URL);
-    const bonusService = new BonusService(apiClient);
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
     const controller = new BonusController(bonusService);
     const response = await controller.startBonusEligibilityCheck(req);
 

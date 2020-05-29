@@ -68,13 +68,13 @@ const maybeAppInsightsClient = fromNullable(
 );
 
 newApp({
-  env: ENV,
+  APIBasePath,
+  BonusAPIBasePath,
+  PagoPABasePath,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
   authenticationBasePath,
-  APIBasePath,
-  BonusAPIBasePath,
-  PagoPABasePath
+  env: ENV
 })
   .then(app => {
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
