@@ -288,7 +288,7 @@ definitions:
       - max_amount
       - tax_benefit
       - family_members
-  QrCode:
+  QrCodeImage:
     type: object
     properties:
       content:
@@ -298,10 +298,10 @@ definitions:
     required:
       - content
       - mime_type
-  QrCodes:
+  QrCode:
     type: array
     items:
-        $ref: '#/definitions/QrCodes'
+        $ref: '#/definitions/QrCodeImage'
   BonusActivationStatus:
     type: string
     description: |
