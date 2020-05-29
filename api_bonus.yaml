@@ -298,6 +298,10 @@ definitions:
     required:
       - content
       - mime_type
+  QrCodes:
+    type: array
+    items:
+        $ref: '#/definitions/QrCodes'
   BonusActivationStatus:
     type: string
     description: |
