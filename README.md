@@ -140,8 +140,10 @@ Those are all Environment variables needed by the application:
 
 | Variable name                          | Description                                                                       | type   |
 |----------------------------------------|-----------------------------------------------------------------------------------|--------|
-| API_KEY                                | The key used to authenticate to the API backend                                   | string |
-| API_URL                                | The API backend URL                                                               | string |
+| API_KEY                                | The key used to authenticate to the io-functions-app API                          | string |
+| API_URL                                | The io-functions-app URL                                                          | string |
+| BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
+| BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
 | CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
 | CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
 | PORT                                   | The HTTP port the Express server is listening to                                  | int    |
