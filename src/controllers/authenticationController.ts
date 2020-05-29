@@ -5,7 +5,7 @@
  */
 
 import * as express from "express";
-import { isLeft, isRight } from "fp-ts/lib/Either";
+import { isLeft } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -40,6 +40,12 @@ import {
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 
+// how many random bytes to generate for each session token
+const SESSION_TOKEN_LENGTH_BYTES = 48;
+
+// how many random bytes to generate for each session ID
+const SESSION_ID_LENGTH_BYTES = 32;
+
 export default class AuthenticationController {
   constructor(
     private readonly sessionStorage: ISessionStorage,
@@ -56,7 +62,6 @@ export default class AuthenticationController {
    * The Assertion consumer service.
    */
   public async acs(
-    // tslint:disable-next-line:no-any
     userPayload: unknown
   ): Promise<
     // tslint:disable-next-line: max-union-size
@@ -65,65 +70,89 @@ export default class AuthenticationController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponsePermanentRedirect
   > {
-    const errorOrUser = validateSpidUser(userPayload);
+    //
+    // decode the SPID assertion into a SPID user
+    //
 
-    if (isLeft(errorOrUser)) {
+    const errorOrSpidUser = validateSpidUser(userPayload);
+
+    if (isLeft(errorOrSpidUser)) {
       log.error(
-        "Error validating the SPID user %O: %s",
+        "acs: error validating the SPID user [%O] [%s]",
         userPayload,
-        errorOrUser.value
+        errorOrSpidUser.value
       );
-      return ResponseErrorValidation("Bad request", errorOrUser.value);
+      return ResponseErrorValidation("Bad request", errorOrSpidUser.value);
     }
 
-    const spidUser = errorOrUser.value;
-    const errorOrIsBlockedUser = await this.sessionStorage.isBlockedUser(
-      spidUser.fiscalNumber
-    );
+    const spidUser = errorOrSpidUser.value;
 
-    if (isRight(errorOrIsBlockedUser)) {
-      const isBlockedUser = errorOrIsBlockedUser.value;
-      if (isBlockedUser) {
-        return ResponseErrorForbiddenNotAuthorized;
-      }
-    } else {
-      const err = errorOrIsBlockedUser.value;
-      log.error(err.message);
-      return ResponseErrorInternal(err.message);
-    }
+    //
+    // create a new user object
+    //
 
-    // authentication token for app backend
-    const sessionToken = this.tokenService.getNewToken() as SessionToken;
-
-    // authentication token for pagoPA
-    const walletToken = this.tokenService.getNewToken() as WalletToken;
-
-    // unique ID for tracking the user session
-    const sessionTrackingId = this.tokenService.getNewToken(32);
-
-    const user = toAppUser(
-      spidUser,
+    // note: since we have a bunch of async operations that don't depend on
+    //       each other, we can run them in parallel
+    const [
+      errorOrIsBlockedUser,
       sessionToken,
       walletToken,
       sessionTrackingId
+    ] = await Promise.all([
+      // ask the session storage whether this user is blocked
+      this.sessionStorage.isBlockedUser(spidUser.fiscalNumber),
+      // authentication token for app backend
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for pagoPA
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // unique ID for tracking the user session
+      this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
+    ]);
+
+    if (isLeft(errorOrIsBlockedUser)) {
+      // the query to the session store failed
+      const err = errorOrIsBlockedUser.value;
+      log.error(`acs: error checking blocked user [${err.message}]`);
+      return ResponseErrorInternal("Error while validating user");
+    }
+
+    const isBlockedUser = errorOrIsBlockedUser.value;
+    if (isBlockedUser) {
+      return ResponseErrorForbiddenNotAuthorized;
+    }
+
+    const user = toAppUser(
+      spidUser,
+      sessionToken as SessionToken,
+      walletToken as WalletToken,
+      sessionTrackingId
     );
 
-    const errorOrResponse = await this.sessionStorage.set(user);
+    // Attempt to create a new session object while we fetch an existing profile
+    // for the user
+    const [errorOrIsSessionCreated, getProfileResponse] = await Promise.all([
+      this.sessionStorage.set(user),
+      this.profileService.getProfile(user)
+    ]);
 
-    if (isLeft(errorOrResponse)) {
-      const error = errorOrResponse.value;
-      log.error("Error storing the user in the session: %s", error.message);
-      return ResponseErrorInternal(error.message);
+    if (isLeft(errorOrIsSessionCreated)) {
+      const error = errorOrIsSessionCreated.value;
+      log.error(
+        `acs: error while creating the user session [${error.message}]`
+      );
+      return ResponseErrorInternal("Error while creating the user session");
     }
-    const response = errorOrResponse.value;
 
-    if (!response) {
-      log.error("Error storing the user in the session");
+    const isSessionCreated = errorOrIsSessionCreated.value;
+
+    if (isSessionCreated === false) {
+      log.error("Error creating the user session");
       return ResponseErrorInternal("Error creating the user session");
     }
-    // Check if a Profile for the user exists into the API
-    const getProfileResponse = await this.profileService.getProfile(user);
+
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
+      // a profile for the user does not yet exist, we attempt to create a new
+      // one
       const isTestProfile = this.testLoginFiscalCodes.includes(
         user.fiscal_code
       );

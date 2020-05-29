@@ -134,7 +134,8 @@ const mockGetNewToken = jest.fn();
 jest.mock("../../services/tokenService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getNewToken: mockGetNewToken
+      getNewToken: mockGetNewToken,
+      getNewTokenAsync: () => Promise.resolve(mockGetNewToken())
     }))
   };
 });
@@ -385,7 +386,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Error while validating user"
     });
   });
 
@@ -401,7 +402,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Error while creating the user session"
     });
   });
 });
