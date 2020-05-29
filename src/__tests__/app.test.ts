@@ -56,14 +56,15 @@ describe("Success app start", () => {
   // tslint:disable:no-let
   let app: Express;
   beforeAll(async () => {
-    app = await appModule.newApp(
-      NodeEnvironmentEnum.PRODUCTION,
-      [aValidCIDR],
-      [aValidCIDR],
-      "",
-      "/api/v1",
-      "/pagopa/api/v1"
-    );
+    app = await appModule.newApp({
+      APIBasePath: "/api/v1",
+      BonusAPIBasePath: "/bonus/api/v1",
+      PagoPABasePath: "/pagopa/api/v1",
+      allowNotifyIPSourceRange: [aValidCIDR],
+      allowPagoPAIPSourceRange: [aValidCIDR],
+      authenticationBasePath: "",
+      env: NodeEnvironmentEnum.PRODUCTION
+    });
   });
 
   afterAll(() => {
@@ -149,14 +150,15 @@ describe("Failure app start", () => {
     const mockExit = jest
       .spyOn(process, "exit")
       .mockImplementation(() => true as never);
-    app = await appModule.newApp(
-      NodeEnvironmentEnum.PRODUCTION,
-      [aValidCIDR],
-      [aValidCIDR],
-      "",
-      "/api/v1",
-      "/pagopa/api/v1"
-    );
+    app = await appModule.newApp({
+      APIBasePath: "/api/v1",
+      BonusAPIBasePath: "/bonus/api/v1",
+      PagoPABasePath: "/pagopa/api/v1",
+      allowNotifyIPSourceRange: [aValidCIDR],
+      allowPagoPAIPSourceRange: [aValidCIDR],
+      authenticationBasePath: "",
+      env: NodeEnvironmentEnum.PRODUCTION
+    });
     expect(mockFetchIdpsMetadata).toBeCalledTimes(3);
     expect(mockExit).toBeCalledWith(1);
   });

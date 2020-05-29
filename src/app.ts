@@ -5,6 +5,7 @@
 import {
   API_CLIENT,
   appConfig,
+  BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
   ENV,
   getClientProfileRedirectionUrl,
@@ -60,7 +61,9 @@ import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
+import BonusController from "./controllers/bonusController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
+import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -103,15 +106,26 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
+export interface IAppFactoryParameters {
+  env: NodeEnvironment;
+  allowNotifyIPSourceRange: readonly CIDR[];
+  allowPagoPAIPSourceRange: readonly CIDR[];
+  authenticationBasePath: string;
+  APIBasePath: string;
+  BonusAPIBasePath: string;
+  PagoPABasePath: string;
+}
+
 // tslint:disable-next-line: no-big-function
-export function newApp(
-  env: NodeEnvironment,
-  allowNotifyIPSourceRange: readonly CIDR[],
-  allowPagoPAIPSourceRange: readonly CIDR[],
-  authenticationBasePath: string,
-  APIBasePath: string,
-  PagoPABasePath: string
-): Promise<Express> {
+export function newApp({
+  env,
+  allowNotifyIPSourceRange,
+  allowPagoPAIPSourceRange,
+  authenticationBasePath,
+  APIBasePath,
+  BonusAPIBasePath,
+  PagoPABasePath
+}: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
       ? createSimpleRedisClient(process.env.REDIS_URL)
@@ -138,6 +152,22 @@ export function newApp(
 
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
+
+  // Creates middlewares for each implemented strategy
+  const authMiddlewares = {
+    bearerSession: passport.authenticate("bearer.session", {
+      session: false
+    }),
+    bearerWallet: passport.authenticate("bearer.wallet", {
+      session: false
+    }),
+    local: passport.authenticate("local", {
+      session: false
+    }),
+    urlToken: passport.authenticate("authtoken", {
+      session: false
+    })
+  };
 
   // Create and setup the Express app.
   const app = express();
@@ -206,11 +236,6 @@ export function newApp(
 
   app.use(passport.initialize());
 
-  // Initiliaze Url Token Authenticator
-  const urlTokenAuth = passport.authenticate("authtoken", {
-    session: false
-  });
-
   //
   // Setup routes
   //
@@ -220,6 +245,9 @@ export function newApp(
 
     // Create the profile service
     const PROFILE_SERVICE = new ProfileService(API_CLIENT);
+
+    // Create the bonus service
+    const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
 
     // Create the user data processing service
     const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
@@ -253,7 +281,13 @@ export function newApp(
 
     registerPublicRoutes(app);
 
-    registerAuthenticationRoutes(app, authenticationBasePath, acsController);
+    registerAuthenticationRoutes(
+      app,
+      authenticationBasePath,
+      acsController,
+      authMiddlewares.bearerSession,
+      authMiddlewares.local
+    );
     // Create the messages service.
     const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
     const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
@@ -263,20 +297,28 @@ export function newApp(
       app,
       APIBasePath,
       allowNotifyIPSourceRange,
-      urlTokenAuth,
+      authMiddlewares.urlToken,
       PROFILE_SERVICE,
       MESSAGES_SERVICE,
       NOTIFICATION_SERVICE,
       SESSION_STORAGE,
       PAGOPA_PROXY_SERVICE,
       USER_METADATA_STORAGE,
-      USER_DATA_PROCESSING_SERVICE
+      USER_DATA_PROCESSING_SERVICE,
+      authMiddlewares.bearerSession
+    );
+    registerBonusAPIRoutes(
+      app,
+      BonusAPIBasePath,
+      BONUS_SERVICE,
+      authMiddlewares.bearerSession
     );
     registerPagoPARoutes(
       app,
       PagoPABasePath,
       allowPagoPAIPSourceRange,
-      PROFILE_SERVICE
+      PROFILE_SERVICE,
+      authMiddlewares.bearerWallet
     );
     return { app, acsController };
   })
@@ -338,12 +380,10 @@ function registerPagoPARoutes(
   app: Express,
   basePath: string,
   allowPagoPAIPSourceRange: readonly CIDR[],
-  profileService: ProfileService
+  profileService: ProfileService,
+  // tslint:disable-next-line: no-any
+  bearerWalletTokenAuth: any
 ): void {
-  const bearerWalletTokenAuth = passport.authenticate("bearer.wallet", {
-    session: false
-  });
-
   const pagopaController: PagoPAController = new PagoPAController(
     profileService
   );
@@ -369,12 +409,10 @@ function registerAPIRoutes(
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
   userMetadataStorage: RedisUserMetadataStorage,
-  userDataProcessingService: UserDataProcessingService
+  userDataProcessingService: UserDataProcessingService,
+  // tslint:disable-next-line: no-any
+  bearerSessionTokenAuth: any
 ): void {
-  const bearerSessionTokenAuth = passport.authenticate("bearer.session", {
-    session: false
-  });
-
   const profileController: ProfileController = new ProfileController(
     profileService
   );
@@ -554,15 +592,34 @@ function registerAPIRoutes(
   );
 }
 
+function registerBonusAPIRoutes(
+  app: Express,
+  basePath: string,
+  bonusService: BonusService,
+  // tslint:disable-next-line: no-any
+  bearerSessionTokenAuth: any
+): void {
+  const bonusController: BonusController = new BonusController(bonusService);
+
+  app.post(
+    `${basePath}/bonus/eligibility`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      bonusController.startBonusEligibilityCheck,
+      bonusController
+    )
+  );
+}
+
 function registerAuthenticationRoutes(
   app: Express,
   basePath: string,
-  acsController: AuthenticationController
+  acsController: AuthenticationController,
+  // tslint:disable-next-line: no-any
+  bearerSessionTokenAuth: any,
+  // tslint:disable-next-line: no-any
+  localAuth: any
 ): void {
-  const bearerTokenAuth = passport.authenticate("bearer.session", {
-    session: false
-  });
-
   TEST_LOGIN_PASSWORD.map(testLoginPassword => {
     passport.use(
       "local",
@@ -570,22 +627,20 @@ function registerAuthenticationRoutes(
     );
     app.post(
       `${basePath}/test-login`,
-      passport.authenticate("local", {
-        session: false
-      }),
+      localAuth,
       toExpressHandler(req => acsController.acs(req.user), acsController)
     );
   });
 
   app.post(
     `${basePath}/logout`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(acsController.logout, acsController)
   );
 
   app.get(
     `${basePath}/user-identity`,
-    bearerTokenAuth,
+    bearerSessionTokenAuth,
     toExpressHandler(acsController.getUserIdentity, acsController)
   );
 }

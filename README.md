@@ -142,8 +142,10 @@ Those are all Environment variables needed by the application:
 |----------------------------------------|-----------------------------------------------------------------------------------|--------|
 | API_KEY                                | The key used to authenticate to the io-functions-app API                          | string |
 | API_URL                                | The io-functions-app URL                                                          | string |
+| API_BASE_PATH                          | The root path for the function app api endpoints                                  | string |
 | BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
 | BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
+| BONUS_API_BASE_PATH                    | The root path for the function bonus api endpoints                                | string |
 | CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
 | CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
 | PORT                                   | The HTTP port the Express server is listening to                                  | int    |
@@ -161,7 +163,6 @@ Those are all Environment variables needed by the application:
 | NOTIFICATIONS_QUEUE_NAME                | Queue name of Azure queue storage for notification hub messages                   | string |
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
-| API_BASE_PATH                          | The root path for the api endpoints                                               | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |

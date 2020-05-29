@@ -228,10 +228,12 @@ const httpApiFetch = agent.getHttpFetch(process.env);
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
+export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
 
 export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
 export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");
+export const BONUS_API_BASE_PATH = getRequiredENVVar("BONUS_API_BASE_PATH");
 export const BONUS_API_CLIENT = BonusAPIClient(
   BONUS_API_KEY,
   BONUS_API_URL,
@@ -262,7 +264,6 @@ export const PAGOPA_CLIENT = new PagoPAClientFactory(
 export const AUTHENTICATION_BASE_PATH = getRequiredENVVar(
   "AUTHENTICATION_BASE_PATH"
 );
-export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const PAGOPA_BASE_PATH = getRequiredENVVar("PAGOPA_BASE_PATH");
 
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services

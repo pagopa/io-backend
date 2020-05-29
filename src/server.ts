@@ -12,6 +12,7 @@ import {
   ALLOW_PAGOPA_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
+  BONUS_API_BASE_PATH,
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   PAGOPA_BASE_PATH,
@@ -29,6 +30,7 @@ import {
 
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
+const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const PagoPABasePath = PAGOPA_BASE_PATH;
 
 // Set default for graceful-shutdown
@@ -65,14 +67,15 @@ const maybeAppInsightsClient = fromNullable(
   })
 );
 
-newApp(
-  ENV,
-  ALLOW_NOTIFY_IP_SOURCE_RANGE,
-  ALLOW_PAGOPA_IP_SOURCE_RANGE,
-  authenticationBasePath,
+newApp({
   APIBasePath,
-  PagoPABasePath
-)
+  BonusAPIBasePath,
+  PagoPABasePath,
+  allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
+  allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
+  authenticationBasePath,
+  env: ENV
+})
   .then(app => {
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
