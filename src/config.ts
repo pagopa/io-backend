@@ -318,3 +318,6 @@ export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
 export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
   process.env.TEST_LOGIN_PASSWORD
 );
+
+// Feature flags
+export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";

@@ -142,10 +142,10 @@ Those are all Environment variables needed by the application:
 |----------------------------------------|-----------------------------------------------------------------------------------|--------|
 | API_KEY                                | The key used to authenticate to the io-functions-app API                          | string |
 | API_URL                                | The io-functions-app URL                                                          | string |
-| API_BASE_PATH                          | The root path for the function app api endpoints                                  | string |
+| API_BASE_PATH                          | The root path for the backend api endpoints                                       | string |
 | BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
 | BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
-| BONUS_API_BASE_PATH                    | The root path for the function bonus api endpoints                                | string |
+| BONUS_API_BASE_PATH                    | The root path for the backend bonus api endpoints                                 | string |
 | CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
 | CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
 | PORT                                   | The HTTP port the Express server is listening to                                  | int    |
@@ -159,8 +159,8 @@ Those are all Environment variables needed by the application:
 | SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
 | PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
-| NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages        | string |
-| NOTIFICATIONS_QUEUE_NAME                | Queue name of Azure queue storage for notification hub messages                   | string |
+| NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages           | string |
+| NOTIFICATIONS_QUEUE_NAME                | Queue name of Azure queue storage for notification hub messages                  | string |
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
