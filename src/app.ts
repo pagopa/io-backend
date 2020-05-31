@@ -8,6 +8,7 @@ import {
   BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
   ENV,
+  FF_BONUS_ENABLED,
   getClientProfileRedirectionUrl,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   NOTIFICATION_DEFAULT_SUBJECT,
@@ -307,12 +308,14 @@ export function newApp({
       USER_DATA_PROCESSING_SERVICE,
       authMiddlewares.bearerSession
     );
-    registerBonusAPIRoutes(
-      app,
-      BonusAPIBasePath,
-      BONUS_SERVICE,
-      authMiddlewares.bearerSession
-    );
+    if (FF_BONUS_ENABLED) {
+      registerBonusAPIRoutes(
+        app,
+        BonusAPIBasePath,
+        BONUS_SERVICE,
+        authMiddlewares.bearerSession
+      );
+    }
     registerPagoPARoutes(
       app,
       PagoPABasePath,
