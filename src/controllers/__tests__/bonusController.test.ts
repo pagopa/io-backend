@@ -7,6 +7,8 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
+import { EligibilityCheckStatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckStatus";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -54,10 +56,20 @@ const aInstanceId: InstanceId = {
   terminatePostUri: "fake_terminatePostUri" as NonEmptyString
 };
 
+const aEligibilityCheck: EligibilityCheck = {
+  family_members: [],
+  id: "aEligibilityCheck.id" as NonEmptyString,
+  max_amount: 1000,
+  max_tax_benefit: 1000,
+  status: EligibilityCheckStatusEnum.ELIGIBILE
+};
+
 const mockStartBonusEligibilityCheck = jest.fn();
+const mockGetBonusEligibilityCheck = jest.fn();
 jest.mock("../../services/bonusService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
+      getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
       startBonusEligibilityCheck: mockStartBonusEligibilityCheck
     }))
   };
@@ -111,6 +123,59 @@ describe("BonusController#startEligibilityCheck", () => {
 
     // service method is not called
     expect(mockStartBonusEligibilityCheck).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("BonusController#getEligibilityCheck", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    await controller.getBonusEligibilityCheck(req);
+
+    expect(mockGetBonusEligibilityCheck).toHaveBeenCalledWith(mockedUser);
+  });
+
+  it("should call getBonusEligibilityCheck method on the BonusService with valid values", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    mockGetBonusEligibilityCheck.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aEligibilityCheck))
+    );
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getBonusEligibilityCheck(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aEligibilityCheck
+    });
+  });
+
+  it("should not call getBonusEligibilityCheck method on the BonusService with empty user", async () => {
+    const req = { ...mockReq(), user: undefined };
+    const res = mockRes();
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getBonusEligibilityCheck(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGetBonusEligibilityCheck).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });

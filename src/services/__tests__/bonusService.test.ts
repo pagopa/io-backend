@@ -5,6 +5,8 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
+import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
+import { EligibilityCheckStatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckStatus";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -22,6 +24,14 @@ const aInstanceId: InstanceId = {
   terminatePostUri: "fake_terminatePostUri" as NonEmptyString
 };
 
+const aEligibilityCheck: EligibilityCheck = {
+  family_members: [],
+  id: "aEligibilityCheck.id" as NonEmptyString,
+  max_amount: 1000,
+  max_tax_benefit: 1000,
+  status: EligibilityCheckStatusEnum.ELIGIBILE
+};
+
 // mock for a valid User
 const mockedUser: User = {
   created_at: 1183518855,
@@ -35,9 +45,11 @@ const mockedUser: User = {
   wallet_token: "HexToKen" as WalletToken
 };
 
+const mockGetBonusEligibilityCheck = jest.fn();
 const mockStartBonusEligibilityCheck = jest.fn();
 
 const mockBonusAPIClient = {
+  getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
   startBonusEligibilityCheck: mockStartBonusEligibilityCheck
 } as ReturnType<BonusAPIClient>;
 
@@ -118,6 +130,92 @@ describe("BonusService#startBonusEligibilityCheck", () => {
 
   it("should return an error if the api call thows", async () => {
     mockStartBonusEligibilityCheck.mockImplementation(() => {
+      throw new Error();
+    });
+    const service = new BonusService(api);
+
+    const res = await service.startBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("BonusService#getBonusEligibilityCheck", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new BonusService(api);
+
+    await service.getBonusEligibilityCheck(mockedUser);
+
+    expect(mockGetBonusEligibilityCheck).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a successful request", async () => {
+    mockGetBonusEligibilityCheck.mockImplementation(() =>
+      t.success({ status: 200, value: aEligibilityCheck })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aEligibilityCheck
+    });
+  });
+
+  it("should handle an accepted request", async () => {
+    mockGetBonusEligibilityCheck.mockImplementation(() =>
+      t.success({ status: 202 })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessAccepted"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGetBonusEligibilityCheck.mockImplementation(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.startBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetBonusEligibilityCheck.mockImplementation(() =>
+      t.success({ status: 123 })
+    );
+    const service = new BonusService(api);
+
+    const res = await service.startBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetBonusEligibilityCheck.mockImplementation(() => {
       throw new Error();
     });
     const service = new BonusService(api);
