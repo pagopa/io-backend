@@ -165,7 +165,7 @@ paths:
         "200":
           description: |
             List of bonus activations ID belonging to the authenticated user
-            or to any between his family members (former and actual)
+            or to any member of her family (former and actual)
           schema:
             $ref: "#/definitions/PaginatedBonusActivationsCollection"
         "404":
@@ -365,7 +365,7 @@ definitions:
     description: |
       Bonus activation status.
       - PROCESSING  The bonus activation has started;
-                    this status is needed only when listing bonus id
+                    this status is only needed when listing bonus id
                     and does not appear in the bonus details
                     since the request will return HTTP 202 in case
       - ACTIVE      The bonus has been successfully activated;
