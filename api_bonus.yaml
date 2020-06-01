@@ -367,7 +367,7 @@ definitions:
       - PROCESSING  The bonus activation has started;
                     this status is only needed when listing bonus id
                     and does not appear in the bonus details
-                    since the request will return HTTP 202 in case
+                    since the request will return HTTP 202 in that case
       - ACTIVE      The bonus has been successfully activated;
                     the bonus activtion procedure can't be restarted anymore
       - FAILED      The bonus activation procedure failed and can be restarted
