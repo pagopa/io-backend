@@ -8,11 +8,10 @@ import {
   IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
 
 import BonusService from "src/services/bonusService";
-import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
 
 export default class BonusController {
@@ -30,7 +29,7 @@ export default class BonusController {
     | IResponseErrorValidation
     | IResponseErrorConflict
     | IResponseErrorInternal
-    | IResponseSuccessJson<InstanceId>
+    | IResponseSuccessAccepted
   > =>
     withUserFromRequest(req, user =>
       this.bonusService.startBonusEligibilityCheck(user)
