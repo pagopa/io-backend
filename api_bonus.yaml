@@ -86,37 +86,6 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
-  "/bonus/vacanze/eligibility/notifications":
-    delete:
-      operationId: cancelBonusEligibilityProcedure
-      summary: |
-        Stop the bonus eligibility check procedure to avoid
-        sending a push notification when done.
-      responses:
-        "200":
-          description: Request canceled.
-          schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the canceled request.
-          examples:
-            application/json:
-              id: SPNDNL80R11C522K
-        "401":
-          description: Bearer token null or expired.
-        "404":
-          description: Not found.
-        "409":
-          description: "Conflict: pending request found."
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "500":
-          description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
-
   ## BONUS ACTIVATIONS
 
   "/bonus/vacanze/activations":
