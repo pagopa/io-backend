@@ -8,7 +8,6 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
-import { EligibilityCheckStatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckStatus";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -56,9 +55,9 @@ const aInstanceId: InstanceId = {
 const aEligibilityCheck: EligibilityCheck = {
   family_members: [],
   id: "aEligibilityCheck.id" as NonEmptyString,
-  max_amount: 1000,
-  max_tax_benefit: 1000,
-  status: EligibilityCheckStatusEnum.ELIGIBILE
+  max_amount: 1000 as any,
+  max_tax_benefit: 1000 as any,
+  status: "ELIGIBILE" as any
 };
 
 const mockStartBonusEligibilityCheck = jest.fn();
