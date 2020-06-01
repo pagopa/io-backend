@@ -45,7 +45,7 @@ export default class BonusService {
 
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
-          case 200:
+          case 202:
             return ResponseSuccessJson(response.value);
           case 409:
             return ResponseErrorConflict(readableProblem(response.value));
