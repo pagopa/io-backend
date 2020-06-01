@@ -612,6 +612,12 @@ function registerBonusAPIRoutes(
       bonusController
     )
   );
+
+  app.get(
+    `${basePath}/bonus/eligibility`,
+    bearerSessionTokenAuth,
+    toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
+  );
 }
 
 function registerAuthenticationRoutes(
