@@ -164,8 +164,8 @@ paths:
       responses:
         "200":
           description: |
-            List of bonus activations ID activated or consumed by the authenticated user 
-            or by any between his family members (former and actual)
+            List of bonus activations ID belonging to the authenticated user
+            or to any between his family members (former and actual)
           schema:
             $ref: "#/definitions/PaginatedBonusActivationsCollection"
         "404":
@@ -211,8 +211,10 @@ paths:
               applicant_fiscal_code: SPNDNL80R11C522K
               code: MYSECRETCODE
               qr_code:
-                mime_type: "svg+xml"
-                base64_content: "foobar"
+                - mime_type: "svg+xml"
+                  base64_content: "foobar"
+                - mime_type: "image/png"
+                  base64_content: "foobar"
               max_amount: 50000
               max_tax_benefit: 3000
               updated_at: "2020-07-04T12:20:00.000Z"
@@ -231,18 +233,25 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/ProblemJson"
+
+  MaxBonusAmount:
+    description: Max bonus amount in euro cents
+    type: integer
+    minimum: 0
+    maximum: 50000
+  MaxBonusTaxBenefit:
+    description: Max bonus tax benefit in euro cents
+    type: integer
+    minimum: 0
+    maximum: 50000
   EligibilityCheckStatus:
     type: string
     description: |
       Eligibility check status.
-      - USER_NOT_FOUND    User not found in INPS database
-      - ISEE_NOT_FOUND    User found but there's no ISEE data
-      - ELIGIBILE         The user is eligible for the bonus
-      - INELIGIBLE        The user is not eligible for the bonus
+      - ELIGIBLE     The user is eligible for the bonus
+      - INELIGIBLE   The user is not eligible for the bonus
     x-extensible-enum:
-      - USER_NOT_FOUND
-      - ISEE_NOT_FOUND
-      - ELIGIBILE
+      - ELIGIBLE
       - INELIGIBLE
   FamilyMember:
     type: object
@@ -258,10 +267,35 @@ definitions:
     required:
       - name
       - surname
-  EligibilityCheck:
+  FamilyMembers:
+    type: array
+    items:
+      $ref: "#/definitions/FamilyMember"
+
+  # According to UX prototype it looks like the following fields,
+  # which are anyway stored into the entity, aren't needed by the IO frontend
+  EligibilityCheckExtra:
     type: object
-    title: Eligibility check
-    description: Eligibility check
+    properties:
+      request_id:
+        type: string
+        minLength: 1
+        description: Internal id for the ISEE request
+      isee_type:
+        type: string
+      dsu_protocol_id:
+        type: string
+        minLength: 1
+      dsu_created_at:
+        type: string
+        format: date
+      has_discrepancies:
+        type: boolean
+
+  EligibilityCheckSuccess:
+    type: object
+    title: Eligibility check success
+    description: Eligibility check succeeded, we can proceed and send the eligibility status
     properties:
       id:
         type: string
@@ -269,25 +303,49 @@ definitions:
       status:
         $ref: "#/definitions/EligibilityCheckStatus"
       family_members:
-        type: array
-        items:
-          $ref: "#/definitions/FamilyMember"
+        $ref: "#/definitions/FamilyMembers"
       max_amount:
-        description: Max bonus amount in euro cents
-        type: integer
-        minimum: 0
-        maximum: 50000
+        $ref: "#/definitions/MaxBonusAmount"
       max_tax_benefit:
-        description: Max bonus tax benefit in euro cents
-        type: integer
-        minimum: 0
-        maximum: 50000
+        $ref: "#/definitions/MaxBonusTaxBenefit"
     required:
       - id
       - status
-      - max_amount
-      - tax_benefit
       - family_members
+
+  EligibilityCheckFailure:
+    type: object
+    title: Eligibility check failure
+    description: Eligibility check failed because of some INPS internal error
+    properties:
+      id:
+        type: string
+        minLength: 1
+      error:
+        type: string
+        description: |
+          - INVALID_REQUEST
+          - INTERNAL_ERROR
+          - DATA_NOT_FOUND  ISEE data not found in INPS database
+        x-extensible-enum:
+          - INVALID_REQUEST
+          - INTERNAL_ERROR
+          - DATA_NOT_FOUND
+      error_description:
+        type: string
+    required:
+      - id
+      - error
+      - error_description
+
+  EligibilityCheck:
+    title: Eligibility check
+    description: Eligibility check
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/EligibilityCheckSuccess'
+      - $ref: '#/definitions/EligibilityCheckFailure'
+
   QrCodeImage:
     type: object
     properties:
@@ -306,14 +364,18 @@ definitions:
     type: string
     description: |
       Bonus activation status.
-      - ACTIVE      The bonus has been successfully activated by this user
-      - VOIDED      The bonus activation was cancelled on purpose and can be resumed
-      - FAILED      The bonus activation failed as the user is currently ineligible
-      - CONSUMED    The bonus is comsumed by this user or any member of the family
-                    and cannot be activated anymore
+      - PROCESSING  The bonus activation has started;
+                    this status is needed only when listing bonus id
+                    and does not appear in the bonus details
+                    since the request will return HTTP 202 in case
+      - ACTIVE      The bonus has been successfully activated;
+                    the bonus activtion procedure can't be restarted anymore
+      - FAILED      The bonus activation procedure failed and can be restarted
+      - CONSUMED    The bonus is redeemed by the user or by any member of the family;
+                    the bonus activtion procedure can't be restarted anymore
     x-extensible-enum:
+      - PROCESSING
       - ACTIVE
-      - VOIDED
       - FAILED
       - CONSUMED
   BonusActivation:
@@ -333,27 +395,24 @@ definitions:
         minLength: 1
       qr_code:
         $ref: "#/definitions/QrCode"
-      max_amount:
-        description: Max bonus amount in euro cents
-        type: integer
-        minimum: 0
-        maximum: 50000
-      max_tax_benefit:
-        description: Max bonus tax benefit in euro cents
-        type: integer
-        minimum: 0
-        maximum: 50000
       updated_at:
         $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
+      family_members:
+        $ref: "#/definitions/FamilyMembers"
+      max_amount:
+        $ref: "#/definitions/MaxBonusAmount"
+      max_tax_benefit:
+        $ref: "#/definitions/MaxBonusTaxBenefit"
     required:
       - id
       - applicant_fiscal_code
       - status
       - code
       - qr_code
+      - updated_at
+      - family_members
       - max_amount
       - max_tax_benefit
-      - updated_at
 
   BonusActivationItem:
     type: object
@@ -361,10 +420,16 @@ definitions:
       id:
         type: string
         minLength: 1
+      status:
+        $ref: "#/definitions/BonusActivationStatus"
       is_applicant:
         type: boolean
+        description: |
+          True in case the authenticated user is the applicant for
+          the bonus activation identified by the id
     required:
       - id
+      - status
       - is_applicant
   BonusActivationCollection:
     items:
@@ -374,6 +439,6 @@ definitions:
     required:
       - items
   PaginatedBonusActivationsCollection:
-    allOf: 
+    allOf:
       - $ref: "#/definitions/BonusActivationCollection"
-      - $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/PaginationResponse"            
+      - $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/PaginationResponse"
