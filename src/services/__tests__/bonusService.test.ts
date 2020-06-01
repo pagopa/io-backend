@@ -7,7 +7,6 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
-import { EligibilityCheckStatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckStatus";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -30,7 +29,8 @@ const aEligibilityCheck: EligibilityCheck = {
   id: "aEligibilityCheck.id" as NonEmptyString,
   max_amount: aNumberInRange,
   max_tax_benefit: aNumberInRange,
-  status: EligibilityCheckStatusEnum.ELIGIBLE
+  // tslint:disable-next-line: no-any
+  status: "ELIGIBLE" as any
 };
 
 // mock for a valid User

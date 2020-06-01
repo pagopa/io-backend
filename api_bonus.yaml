@@ -17,20 +17,7 @@ paths:
         "202":
           description: Request accepted.
           schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the created request.
-          headers:
-            Location:
-              type: string
-              description: |-
-                Location (URL) of created request resource.
-                A GET request to this URL returns the request status and details.
-          examples:
-            application/json:
-              id: SPNDNL80R11C522K
+            $ref: "#/definitions/InstanceId"
         "401":
           description: Bearer token null or expired.
         "409":
@@ -46,37 +33,14 @@ paths:
       operationId: getBonusEligibilityCheck
       summary: Get eligibility (ISEE) check information for user's bonus
       responses:
-        "202":
-          description: Processing request.
-          schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the created request.
-          examples:
-            application/json:
-              id: SPNDNL80R11C522K
         "200":
           description: Request processed.
           schema:
             $ref: "#/definitions/EligibilityCheck"
-          examples:
-            application/json:
-              id: SPNDNL80R11C522K
-              status: ELIGIBLE
-              family_members:
-                - name: "Mario"
-                  surname: "Rossi"
-                  fiscal_code: "XXXYYY80R13C555Y"
-                - name: "Piero"
-                  surname: "Rossi"
-                  fiscal_code: "ZZZYYY80R13C555Y"
-                - name: "Giulia"
-                  surname: "Rossi"
-                  fiscal_code: "WWWYYY80R13C555Y"
-              max_amount: 50000
-              max_tax_benefit: 3000
+        "202":
+          description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -96,20 +60,7 @@ paths:
         "202":
           description: Request accepted.
           schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the created request.
-          headers:
-            Location:
-              type: string
-              description: |-
-                Location (URL) of created activation resource.
-                A GET request to this URL returns the request status and details.
-          examples:
-            application/json:
-              id: SOMEBONUSID
+            $ref: "#/definitions/InstanceId"
         "409":
           description: |
             Cannot activate a new bonus because another bonus related to this user was found.
@@ -124,7 +75,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
     get:
       operationId: getAllBonusActivations
       summary: |
@@ -162,32 +112,11 @@ paths:
         "202":
           description: Processing request.
           schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The identifier of the created request.
-          examples:
-            application/json:
-              id: SOMEBONUSID
+            $ref: "#/definitions/InstanceId"
         "200":
           description: Bonus activation details.
           schema:
             $ref: "#/definitions/BonusActivation"
-          examples:
-            application/json:
-              id: SOMEBONUSID
-              applicant_fiscal_code: SPNDNL80R11C522K
-              code: MYSECRETCODE
-              qr_code:
-                - mime_type: "svg+xml"
-                  base64_content: "foobar"
-                - mime_type: "image/png"
-                  base64_content: "foobar"
-              max_amount: 50000
-              max_tax_benefit: 3000
-              updated_at: "2020-07-04T12:20:00.000Z"
-              status: ACTIVE
         "401":
           description: Bearer token null or expired.
         "404":
@@ -200,122 +129,40 @@ paths:
 definitions:
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/FiscalCode"
+  InstanceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/InstanceId"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/ProblemJson"
-
   MaxBonusAmount:
-    description: Max bonus amount in euro cents
-    type: integer
-    minimum: 0
-    maximum: 50000
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/MaxBonusAmount"
   MaxBonusTaxBenefit:
-    description: Max bonus tax benefit in euro cents
-    type: integer
-    minimum: 0
-    maximum: 50000
-  EligibilityCheckStatus:
-    type: string
-    description: |
-      Eligibility check status.
-      - ELIGIBLE     The user is eligible for the bonus
-      - INELIGIBLE   The user is not eligible for the bonus
-    x-extensible-enum:
-      - ELIGIBLE
-      - INELIGIBLE
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/MaxBonusTaxBenefit"
   FamilyMember:
-    type: object
-    properties:
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      name:
-        type: string
-        minLength: 1
-      surname:
-        type: string
-        minLength: 1
-    required:
-      - name
-      - surname
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMember"
   FamilyMembers:
-    type: array
-    items:
-      $ref: "#/definitions/FamilyMember"
-
-  # According to UX prototype it looks like the following fields,
-  # which are anyway stored into the entity, aren't needed by the IO frontend
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMembers"
   EligibilityCheckExtra:
-    type: object
-    properties:
-      request_id:
-        type: string
-        minLength: 1
-        description: Internal id for the ISEE request
-      isee_type:
-        type: string
-      dsu_protocol_id:
-        type: string
-        minLength: 1
-      dsu_created_at:
-        type: string
-        format: date
-      has_discrepancies:
-        type: boolean
-
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckExtra"
   EligibilityCheckSuccess:
-    type: object
-    title: Eligibility check success
-    description: |
-      Eligibility check succeeded, we can proceed and send the eligibility status.
-      Amounts are left undefined when status is INELIGIBLE
-    properties:
-      id:
-        type: string
-        minLength: 1
-      status:
-        $ref: "#/definitions/EligibilityCheckStatus"
-      family_members:
-        $ref: "#/definitions/FamilyMembers"
-      max_amount:
-        $ref: "#/definitions/MaxBonusAmount"
-      max_tax_benefit:
-        $ref: "#/definitions/MaxBonusTaxBenefit"
-    required:
-      - id
-      - status
-      - family_members
-
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccess"
   EligibilityCheckFailure:
-    type: object
-    title: Eligibility check failure
-    description: Eligibility check failed because of some INPS internal error
-    properties:
-      id:
-        type: string
-        minLength: 1
-      error:
-        type: string
-        description: |
-          - INVALID_REQUEST
-          - INTERNAL_ERROR
-          - DATA_NOT_FOUND  ISEE data not found in INPS database
-        x-extensible-enum:
-          - INVALID_REQUEST
-          - INTERNAL_ERROR
-          - DATA_NOT_FOUND
-      error_description:
-        type: string
-    required:
-      - id
-      - error
-      - error_description
-
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckFailure"
   EligibilityCheck:
-    title: Eligibility check
-    description: Eligibility check
-    x-one-of: true
-    allOf:
-      - $ref: '#/definitions/EligibilityCheckSuccess'
-      - $ref: '#/definitions/EligibilityCheckFailure'
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheck"
+  BonusActivationStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationStatus"
+  BonusActivation:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivation"
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/definitions/Timestamp"
+  BonusActivationItem:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationItem"
+  BonusActivationCollection:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationCollection"
+  PaginationResponse:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/definitions/PaginationResponse"
+  PaginatedBonusActivationsCollection:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/PaginatedBonusActivationsCollection"
 
   QrCodeImage:
     type: object
@@ -328,88 +175,18 @@ definitions:
       - content
       - mime_type
   QrCode:
-    type: array
-    items:
-        $ref: '#/definitions/QrCodeImage'
-  BonusActivationStatus:
-    type: string
-    description: |
-      Bonus activation status.
-      - PROCESSING  The bonus activation has started;
-                    this status is only needed when listing bonus id
-                    and does not appear in the bonus details
-                    since the request will return HTTP 202 in that case
-      - ACTIVE      The bonus has been successfully activated;
-                    the bonus activtion procedure can't be restarted anymore
-      - FAILED      The bonus activation procedure failed and can be restarted
-      - CONSUMED    The bonus is redeemed by the user or by any member of the family;
-                    the bonus activtion procedure can't be restarted anymore
-    x-extensible-enum:
-      - PROCESSING
-      - ACTIVE
-      - FAILED
-      - CONSUMED
-  BonusActivation:
     type: object
-    title: Bonus activation
-    description: Bonus activation
     properties:
-      id:
-        type: string
-        minLength: 1
-      applicant_fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-      status:
-        $ref: "#/definitions/BonusActivationStatus"
-      code:
-        type: string
-        minLength: 1
       qr_code:
-        $ref: "#/definitions/QrCode"
-      updated_at:
-        $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
-      family_members:
-        $ref: "#/definitions/FamilyMembers"
-      max_amount:
-        $ref: "#/definitions/MaxBonusAmount"
-      max_tax_benefit:
-        $ref: "#/definitions/MaxBonusTaxBenefit"
+        type: array
+        items:
+          $ref: '#/definitions/QrCodeImage'
+        required:
+          - items
     required:
-      - id
-      - applicant_fiscal_code
-      - status
-      - code
       - qr_code
-      - updated_at
-      - family_members
-      - max_amount
-      - max_tax_benefit
 
-  BonusActivationItem:
-    type: object
-    properties:
-      id:
-        type: string
-        minLength: 1
-      status:
-        $ref: "#/definitions/BonusActivationStatus"
-      is_applicant:
-        type: boolean
-        description: |
-          True in case the authenticated user is the applicant for
-          the bonus activation identified by the id
-    required:
-      - id
-      - status
-      - is_applicant
-  BonusActivationCollection:
-    items:
-      type: array
-      items:
-        $ref: "#/definitions/BonusActivationItem"
-    required:
-      - items
-  PaginatedBonusActivationsCollection:
+  BonusActivationWithQrCode:
     allOf:
-      - $ref: "#/definitions/BonusActivationCollection"
-      - $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/PaginationResponse"
+      - $ref: '#/definitions/BonusActivation'
+      - $ref: '#/definitions/QrCode'

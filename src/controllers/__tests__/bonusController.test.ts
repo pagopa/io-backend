@@ -50,10 +50,7 @@ const mockedUser: User = {
 };
 
 const aInstanceId: InstanceId = {
-  id: "aInstanceId.id" as NonEmptyString,
-  sendEventPostUri: "fake_sendEventPostUri" as NonEmptyString,
-  statusQueryGetUri: "fake_statusQueryGetUri" as NonEmptyString,
-  terminatePostUri: "fake_terminatePostUri" as NonEmptyString
+  id: "aInstanceId.id" as NonEmptyString
 };
 
 const aEligibilityCheck: EligibilityCheck = {
