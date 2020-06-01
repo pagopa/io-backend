@@ -264,7 +264,9 @@ definitions:
   EligibilityCheckSuccess:
     type: object
     title: Eligibility check success
-    description: Eligibility check succeeded, we can proceed and send the eligibility status
+    description: |
+      Eligibility check succeeded, we can proceed and send the eligibility status.
+      Amounts are left undefined when status is INELIGIBLE
     properties:
       id:
         type: string
