@@ -15,6 +15,7 @@ import {
 import { Omit } from "italia-ts-commons/lib/types";
 import nodeFetch from "node-fetch";
 
+import { ProblemJson } from "italia-ts-commons/lib/responses";
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import {
   startBonusEligibilityCheckDefaultDecoder,
@@ -82,7 +83,11 @@ export function BonusAPIClient(
         ),
         constantResponseDecoder<undefined, 404>(404, undefined)
       ),
-      constantResponseDecoder<undefined, 500>(500, undefined)
+      ioResponseDecoder<
+        500,
+        typeof ProblemJson["_A"],
+        typeof ProblemJson["_O"]
+      >(500, ProblemJson)
     );
   }
 
@@ -95,7 +100,7 @@ export function BonusAPIClient(
     | IResponseType<202, undefined>
     | IResponseType<401, undefined>
     | IResponseType<404, undefined>
-    | IResponseType<500, undefined>
+    | IResponseType<500, ProblemJson>
   > = {
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "get",

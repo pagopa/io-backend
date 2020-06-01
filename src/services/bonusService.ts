@@ -63,8 +63,10 @@ export default class BonusService {
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // should not happen, thus is an error
-            return unhandledResponseStatus(response.status);
+            // This case can only happen because of misconfiguration, thus it might me considered an error
+            return ResponseErrorInternal(
+              "Underlying API fails with an unexpected 401"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -100,10 +102,12 @@ export default class BonusService {
               `Could not find an eligibility check for fiscal code ${user.fiscal_code}`
             );
           case 500:
-            return ResponseErrorInternal("Internal server error");
+            return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // should not happen, thus is an error
-            return unhandledResponseStatus(response.status);
+            // This case can only happen because of misconfiguration, thus it might me considered an error
+            return ResponseErrorInternal(
+              "Underlying API fails with an unexpected 401"
+            );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
