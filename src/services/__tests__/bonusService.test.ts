@@ -16,10 +16,7 @@ const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const aInstanceId: InstanceId = {
-  id: "aInstanceId.id" as NonEmptyString,
-  sendEventPostUri: "fake_sendEventPostUri" as NonEmptyString,
-  statusQueryGetUri: "fake_statusQueryGetUri" as NonEmptyString,
-  terminatePostUri: "fake_terminatePostUri" as NonEmptyString
+  id: "aInstanceId.id" as NonEmptyString
 };
 
 // mock for a valid User
@@ -60,7 +57,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
 
   it("should handle a successful request", async () => {
     mockStartBonusEligibilityCheck.mockImplementation(() =>
-      t.success({ status: 200, value: aInstanceId })
+      t.success({ status: 202, value: aInstanceId })
     );
 
     const service = new BonusService(api);
@@ -68,8 +65,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     const res = await service.startBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: aInstanceId
+      kind: "IResponseSuccessAccepted"
     });
   });
 

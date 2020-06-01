@@ -5,14 +5,12 @@
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
-  IResponseSuccessJson,
+  IResponseSuccessAccepted,
   ProblemJson,
   ResponseErrorConflict,
   ResponseErrorInternal,
-  ResponseSuccessJson
+  ResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
-
-import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
@@ -34,9 +32,7 @@ export default class BonusService {
   public readonly startBonusEligibilityCheck = (
     user: User
   ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorConflict
-    | IResponseSuccessJson<InstanceId>
+    IResponseErrorInternal | IResponseErrorConflict | IResponseSuccessAccepted
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({
@@ -45,8 +41,8 @@ export default class BonusService {
 
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
+          case 202:
+            return ResponseSuccessAccepted();
           case 409:
             return ResponseErrorConflict(readableProblem(response.value));
           case 500:
