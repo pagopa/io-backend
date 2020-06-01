@@ -8,12 +8,14 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
+  IResponseSuccessRedirectToResource,
   ProblemJson,
   ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
-  ResponseSuccessJson
+  ResponseSuccessJson,
+  ResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
@@ -45,9 +47,11 @@ export default class BonusService {
   public readonly startBonusEligibilityCheck = (
     user: User
   ): Promise<
+    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorConflict
-    | IResponseSuccessJson<InstanceId>
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({
@@ -56,8 +60,14 @@ export default class BonusService {
 
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              response.headers.Location || "",
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
           case 409:
             return ResponseErrorConflict(readableProblem(response.value));
           case 500:

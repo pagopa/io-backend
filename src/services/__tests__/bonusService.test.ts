@@ -5,6 +5,7 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
+import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { EligibilityCheckStatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckStatus";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
@@ -18,18 +19,18 @@ const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const aInstanceId: InstanceId = {
-  id: "aInstanceId.id" as NonEmptyString,
-  sendEventPostUri: "fake_sendEventPostUri" as NonEmptyString,
-  statusQueryGetUri: "fake_statusQueryGetUri" as NonEmptyString,
-  terminatePostUri: "fake_terminatePostUri" as NonEmptyString
+  id: "aInstanceId.id" as NonEmptyString
 };
+
+// tslint:disable-next-line: no-any
+const aNumberInRange = (1000 as any) as number & WithinRangeInteger<0, 50000>;
 
 const aEligibilityCheck: EligibilityCheck = {
   family_members: [],
   id: "aEligibilityCheck.id" as NonEmptyString,
-  max_amount: 1000,
-  max_tax_benefit: 1000,
-  status: EligibilityCheckStatusEnum.ELIGIBILE
+  max_amount: aNumberInRange,
+  max_tax_benefit: aNumberInRange,
+  status: EligibilityCheckStatusEnum.ELIGIBLE
 };
 
 // mock for a valid User
@@ -70,9 +71,13 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     });
   });
 
-  it("should handle a successful request", async () => {
+  it("should handle a successful new request", async () => {
     mockStartBonusEligibilityCheck.mockImplementation(() =>
-      t.success({ status: 200, value: aInstanceId })
+      t.success({
+        headers: { Location: "resource-url" },
+        status: 201,
+        value: aInstanceId
+      })
     );
 
     const service = new BonusService(api);
@@ -80,15 +85,13 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     const res = await service.startBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: aInstanceId
+      kind: "IResponseSuccessRedirectToResource"
     });
   });
 
   it("should handle a pending check response", async () => {
-    const aPendingCheckProblem = {};
     mockStartBonusEligibilityCheck.mockImplementation(() =>
-      t.success({ status: 409, value: aPendingCheckProblem })
+      t.success({ status: 202 })
     );
 
     const service = new BonusService(api);
@@ -96,7 +99,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     const res = await service.startBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorConflict"
+      kind: "IResponseSuccessAccepted"
     });
   });
 

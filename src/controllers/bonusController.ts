@@ -10,7 +10,8 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
 import BonusService from "src/services/bonusService";
@@ -33,7 +34,8 @@ export default class BonusController {
     | IResponseErrorValidation
     | IResponseErrorConflict
     | IResponseErrorInternal
-    | IResponseSuccessJson<InstanceId>
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withUserFromRequest(req, user =>
       this.bonusService.startBonusEligibilityCheck(user)

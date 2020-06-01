@@ -4,8 +4,8 @@ import {
   composeResponseDecoders,
   constantResponseDecoder,
   createFetchRequestForApi,
-  IGetApiRequestType,
   ioResponseDecoder,
+  IPostApiRequestType,
   IResponseType,
   ReplaceRequestParams,
   RequestHeaderProducer,
@@ -15,11 +15,12 @@ import {
 import { Omit } from "italia-ts-commons/lib/types";
 import nodeFetch from "node-fetch";
 
+import { InstanceId } from "generated/io-bonus-api/InstanceId";
 import { ProblemJson } from "italia-ts-commons/lib/responses";
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import {
-  startBonusEligibilityCheckDefaultDecoder,
-  StartBonusEligibilityCheckT
+  GetBonusEligibilityCheckT,
+  startBonusEligibilityCheckDefaultDecoder
 } from "../../generated/io-bonus-api/requestTypes";
 
 // we want to authenticate against the platform APIs with
@@ -52,9 +53,17 @@ export function BonusAPIClient(
   };
   const tokenHeaderProducer = SubscriptionKeyHeaderProducer(token);
 
-  const startBonusEligibilityCheckT: ReplaceRequestParams<
-    StartBonusEligibilityCheckT,
-    Omit<RequestParams<StartBonusEligibilityCheckT>, "ApiKey">
+  // This request type need to be rewritten because the code generator doesn't handle custom response header values
+  const startBonusEligibilityCheckT: IPostApiRequestType<
+    { readonly fiscalCode: string },
+    "Content-Type" | "X-Functions-Key",
+    never,
+    // tslint:disable-next-line: max-union-size
+    | IResponseType<201, InstanceId, "Location">
+    | IResponseType<202, undefined>
+    | IResponseType<401, undefined>
+    | IResponseType<409, ProblemJson>
+    | IResponseType<500, ProblemJson>
   > = {
     body: _ => "",
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
@@ -91,16 +100,9 @@ export function BonusAPIClient(
     );
   }
 
-  const getBonusEligibilityCheckT: IGetApiRequestType<
-    { fiscalCode: string },
-    "Content-Type" | "X-Functions-Key",
-    never,
-    // tslint:disable-next-line: max-union-size
-    | IResponseType<200, EligibilityCheck>
-    | IResponseType<202, undefined>
-    | IResponseType<401, undefined>
-    | IResponseType<404, undefined>
-    | IResponseType<500, ProblemJson>
+  const getBonusEligibilityCheckT: ReplaceRequestParams<
+    GetBonusEligibilityCheckT,
+    Omit<RequestParams<GetBonusEligibilityCheckT>, "ApiKey">
   > = {
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "get",
