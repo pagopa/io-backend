@@ -73,7 +73,7 @@ export default class BonusService {
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // This case can only happen because of misconfiguration, thus it might me considered an error
+            // This case can only happen because of misconfiguration, thus it might be considered an error
             return ResponseErrorInternal(
               "Underlying API fails with an unexpected 401"
             );
@@ -114,7 +114,7 @@ export default class BonusService {
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // This case can only happen because of misconfiguration, thus it might me considered an error
+            // This case can only happen because of misconfiguration, thus it might be considered an error
             return ResponseErrorInternal(
               "Underlying API fails with an unexpected 401"
             );
