@@ -1,5 +1,4 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
+/* tslint:disable no-any no-duplicate-string */
 
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -11,6 +10,7 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
+import { StatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckSuccessEligible";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -68,12 +68,21 @@ const aEligibilityCheck: EligibilityCheck = {
 const aBonusActivation: BonusActivation = {
   applicant_fiscal_code: aFiscalCode,
   code: "bonuscode" as NonEmptyString,
-  family_members: [
-    { fiscal_code: aFiscalCode, name: aValidName, surname: aValidFamilyname }
-  ],
+  dsu_request: {
+    dsu_created_at: "",
+    dsu_protocol_id: "dsuprotid" as NonEmptyString,
+    family_members: [
+      { fiscal_code: aFiscalCode, name: aValidName, surname: aValidFamilyname }
+    ],
+    has_discrepancies: false,
+    id: "dsuid" as NonEmptyString,
+    isee_type: "iseetype",
+    max_amount: aNumberInRange,
+    max_tax_benefit: aNumberInRange,
+    request_id: "dsureqid" as NonEmptyString,
+    status: StatusEnum.ELIGIBLE
+  },
   id: aBonusId,
-  max_amount: aNumberInRange,
-  max_tax_benefit: aNumberInRange,
   status: BonusActivationStatusEnum.ACTIVE,
   updated_at: aDate
 };
@@ -198,22 +207,19 @@ describe("BonusController#getEligibilityCheck", () => {
 });
 
 describe("BonusController#getLatestBonusActivationById", () => {
-  const req = {
-    ...mockReq(),
-    param: jest
-      .fn()
-      .mockImplementation(paramName =>
-        paramName === "bonus_id" ? aBonusId : undefined
-      ),
-    user: mockedUser
-  };
-  const res = mockRes();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should make the correct service method call", async () => {
+    const req = {
+      ...mockReq({
+        params: {
+          bonus_id: aBonusId
+        }
+      }),
+      user: mockedUser
+    };
     const client = BonusAPIClient(API_KEY, API_URL);
     const bonusService = new BonusService(client);
     const controller = new BonusController(bonusService);
@@ -226,6 +232,14 @@ describe("BonusController#getLatestBonusActivationById", () => {
   });
 
   it("should call getLatestBonusActivationById method on the BonusService with valid values", async () => {
+    const req = {
+      ...mockReq({
+        params: {
+          bonus_id: aBonusId
+        }
+      }),
+      user: mockedUser
+    };
     mockGetLatestBonusActivationById.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(aBonusActivation))
     );
@@ -243,13 +257,19 @@ describe("BonusController#getLatestBonusActivationById", () => {
   });
 
   it("should not call getBonusEligibilityCheck method on the BonusService with empty user", async () => {
+    const req = {
+      ...mockReq({
+        params: {
+          bonus_id: aBonusId
+        }
+      }),
+      user: undefined
+    };
+    const res = mockRes();
     const client = BonusAPIClient(API_KEY, API_URL);
     const bonusService = new BonusService(client);
     const controller = new BonusController(bonusService);
-    const response = await controller.getLatestBonusActivationById({
-      ...req,
-      user: undefined
-    });
+    const response = await controller.getLatestBonusActivationById(req);
 
     response.apply(res);
 
@@ -260,13 +280,19 @@ describe("BonusController#getLatestBonusActivationById", () => {
   });
 
   it("should not call getBonusEligibilityCheck method on the BonusService with empty bonus id", async () => {
+    const req = {
+      ...mockReq({
+        params: {
+          bonus_id: undefined
+        }
+      }),
+      user: mockedUser
+    };
+    const res = mockRes();
     const client = BonusAPIClient(API_KEY, API_URL);
     const bonusService = new BonusService(client);
     const controller = new BonusController(bonusService);
-    const response = await controller.getLatestBonusActivationById({
-      ...req,
-      param: () => undefined
-    });
+    const response = await controller.getLatestBonusActivationById(req);
 
     response.apply(res);
 
