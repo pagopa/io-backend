@@ -5,7 +5,11 @@
  * @returns {{header, accepts, acceptsEncodings, acceptsEncoding, acceptsCharsets, acceptsCharset, acceptsLanguages, acceptsLanguage, range, param, is, reset: resetMock}}
  */
 
-export default function mockReq(): any {
+export default function mockReq({
+  params = {},
+  body = {},
+  query = {}
+}: any = {}): any {
   const request = {
     accepts: jest.fn(),
     acceptsCharset: jest.fn(),
@@ -14,10 +18,12 @@ export default function mockReq(): any {
     acceptsEncodings: jest.fn(),
     acceptsLanguage: jest.fn(),
     acceptsLanguages: jest.fn(),
+    body,
     header: jest.fn(),
     is: jest.fn(),
     param: jest.fn(),
-    query: {},
+    params,
+    query,
     range: jest.fn(),
     reset: resetMock
   };
@@ -31,7 +37,9 @@ export default function mockReq(): any {
   request.acceptsLanguages.mockImplementation(() => request);
   request.acceptsLanguage.mockImplementation(() => request);
   request.range.mockImplementation(() => request);
-  request.param.mockImplementation(() => request);
+  request.param.mockImplementation(name => {
+    return { ...params, ...body, ...query }[name];
+  });
   request.is.mockImplementation(() => request);
 
   return request;
