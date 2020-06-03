@@ -6,6 +6,7 @@ import {
   IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
@@ -13,6 +14,7 @@ import {
   ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorValidation,
   ResponseSuccessAccepted,
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
@@ -21,6 +23,8 @@ import {
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
+import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import {
@@ -38,6 +42,10 @@ const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
   // tslint:disable-next-line: no-any
   unhandledResponseStatus((response as any).status);
 
+const ResponseErrorUnexpectedAuthProblem = () =>
+  // This case can only happen because of misconfiguration, thus it might be considered an error
+  ResponseErrorInternal("Underlying API fails with an unexpected 401");
+
 export default class BonusService {
   constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
 
@@ -50,6 +58,7 @@ export default class BonusService {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorConflict
+    | IResponseErrorValidation
     | IResponseSuccessAccepted
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
@@ -70,13 +79,15 @@ export default class BonusService {
             return ResponseSuccessAccepted();
           case 409:
             return ResponseErrorConflict(readableProblem(response.value));
+          case 403:
+            return ResponseErrorValidation(
+              "Bad Request",
+              "Already an active bonus related to this user"
+            );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // This case can only happen because of misconfiguration, thus it might be considered an error
-            return ResponseErrorInternal(
-              "Underlying API fails with an unexpected 401"
-            );
+            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -114,10 +125,47 @@ export default class BonusService {
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // This case can only happen because of misconfiguration, thus it might be considered an error
-            return ResponseErrorInternal(
-              "Underlying API fails with an unexpected 401"
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Retrieve a bonus activation detail decorated with its qr-code images generated at runtime.
+   */
+  public readonly getLatestBonusActivationById = (
+    user: User,
+    bonusId: NonEmptyString
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<BonusActivation>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.getLatestBonusActivationById({
+        bonus_id: bonusId,
+        fiscalCode: user.fiscal_code
+      });
+
+      // tslint:disable-next-line: no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            // TODO: aggiungere qr code
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              "BonusActivation not found",
+              `Could not find a bonus activation for fiscal code: ${user.fiscal_code} and bonus id ${bonusId}`
             );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }

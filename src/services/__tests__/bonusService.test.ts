@@ -1,3 +1,5 @@
+// tslint:disable: no-duplicate-string
+
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
@@ -24,6 +26,8 @@ const aInstanceId: InstanceId = {
 // tslint:disable-next-line: no-any
 const aNumberInRange = (1000 as any) as number & WithinRangeInteger<0, 50000>;
 
+const aBonusId = "aBonusId" as NonEmptyString;
+
 const aEligibilityCheck: EligibilityCheck = {
   family_members: [],
   id: "aEligibilityCheck.id" as NonEmptyString,
@@ -47,10 +51,12 @@ const mockedUser: User = {
 };
 
 const mockGetBonusEligibilityCheck = jest.fn();
+const mockGetLatestBonusActivationById = jest.fn();
 const mockStartBonusEligibilityCheck = jest.fn();
 
 const mockBonusAPIClient = {
   getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
+  getLatestBonusActivationById: mockGetLatestBonusActivationById,
   startBonusEligibilityCheck: mockStartBonusEligibilityCheck
 } as ReturnType<BonusAPIClient>;
 
@@ -100,6 +106,20 @@ describe("BonusService#startBonusEligibilityCheck", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessAccepted"
+    });
+  });
+
+  it("should handle an validation error when the user already has a bonus", async () => {
+    mockStartBonusEligibilityCheck.mockImplementation(() =>
+      t.success({ status: 403 })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.startBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorValidation"
     });
   });
 
@@ -175,20 +195,6 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     });
   });
 
-  it("should handle an accepted request", async () => {
-    mockGetBonusEligibilityCheck.mockImplementation(() =>
-      t.success({ status: 202 })
-    );
-
-    const service = new BonusService(api);
-
-    const res = await service.getBonusEligibilityCheck(mockedUser);
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessAccepted"
-    });
-  });
-
   it("should handle an internal error response", async () => {
     const aGenericProblem = {};
     mockGetBonusEligibilityCheck.mockImplementation(() =>
@@ -224,6 +230,91 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     const service = new BonusService(api);
 
     const res = await service.getBonusEligibilityCheck(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("BonusService#getLatestBonusActivationById", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new BonusService(api);
+
+    await service.getLatestBonusActivationById(mockedUser, aBonusId);
+
+    expect(mockGetLatestBonusActivationById).toHaveBeenCalledWith({
+      bonus_id: aBonusId,
+      fiscalCode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a successful request", async () => {
+    mockGetLatestBonusActivationById.mockImplementation(() =>
+      t.success({ status: 200, value: aEligibilityCheck })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getLatestBonusActivationById(
+      mockedUser,
+      aBonusId
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aEligibilityCheck
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGetLatestBonusActivationById.mockImplementation(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getLatestBonusActivationById(
+      mockedUser,
+      aBonusId
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetLatestBonusActivationById.mockImplementation(() =>
+      t.success({ status: 123 })
+    );
+    const service = new BonusService(api);
+
+    const res = await service.getLatestBonusActivationById(
+      mockedUser,
+      aBonusId
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetLatestBonusActivationById.mockImplementation(() => {
+      throw new Error();
+    });
+    const service = new BonusService(api);
+
+    const res = await service.getLatestBonusActivationById(
+      mockedUser,
+      aBonusId
+    );
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

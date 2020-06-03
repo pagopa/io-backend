@@ -4,9 +4,12 @@
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
+import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
+import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import mockReq from "../../__mocks__/request";
@@ -21,11 +24,13 @@ const API_KEY = "";
 const API_URL = "";
 
 const aTimestamp = 1518010929530;
-
+const aDate = new Date();
+const aNumberInRange = (1000 as any) as number & WithinRangeInteger<0, 50000>;
+const aBonusId = "aBonusId" as NonEmptyString;
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidName = "Giuseppe Maria";
-const aValidFamilyname = "Garibaldi";
+const aValidName = "Giuseppe Maria" as NonEmptyString;
+const aValidFamilyname = "Garibaldi" as NonEmptyString;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const badRequestErrorResponse = {
@@ -60,12 +65,27 @@ const aEligibilityCheck: EligibilityCheck = {
   status: "ELIGIBILE" as any
 };
 
+const aBonusActivation: BonusActivation = {
+  applicant_fiscal_code: aFiscalCode,
+  code: "bonuscode" as NonEmptyString,
+  family_members: [
+    { fiscal_code: aFiscalCode, name: aValidName, surname: aValidFamilyname }
+  ],
+  id: aBonusId,
+  max_amount: aNumberInRange,
+  max_tax_benefit: aNumberInRange,
+  status: BonusActivationStatusEnum.ACTIVE,
+  updated_at: aDate
+};
+
 const mockStartBonusEligibilityCheck = jest.fn();
+const mockGetLatestBonusActivationById = jest.fn();
 const mockGetBonusEligibilityCheck = jest.fn();
 jest.mock("../../services/bonusService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
+      getLatestBonusActivationById: mockGetLatestBonusActivationById,
       startBonusEligibilityCheck: mockStartBonusEligibilityCheck
     }))
   };
@@ -172,6 +192,86 @@ describe("BonusController#getEligibilityCheck", () => {
 
     // service method is not called
     expect(mockGetBonusEligibilityCheck).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("BonusController#getLatestBonusActivationById", () => {
+  const req = {
+    ...mockReq(),
+    param: jest
+      .fn()
+      .mockImplementation(paramName =>
+        paramName === "bonus_id" ? aBonusId : undefined
+      ),
+    user: mockedUser
+  };
+  const res = mockRes();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    await controller.getLatestBonusActivationById(req);
+
+    expect(mockGetLatestBonusActivationById).toHaveBeenCalledWith(
+      mockedUser,
+      aBonusId
+    );
+  });
+
+  it("should call getLatestBonusActivationById method on the BonusService with valid values", async () => {
+    mockGetLatestBonusActivationById.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aBonusActivation))
+    );
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getLatestBonusActivationById(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aBonusActivation
+    });
+  });
+
+  it("should not call getBonusEligibilityCheck method on the BonusService with empty user", async () => {
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getLatestBonusActivationById({
+      ...req,
+      user: undefined
+    });
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGetLatestBonusActivationById).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should not call getBonusEligibilityCheck method on the BonusService with empty bonus id", async () => {
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getLatestBonusActivationById({
+      ...req,
+      param: () => undefined
+    });
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGetLatestBonusActivationById).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });

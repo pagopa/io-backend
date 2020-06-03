@@ -14,10 +14,22 @@ import {
   IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
+import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import BonusService from "src/services/bonusService";
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
+import { withValidatedOrValidationError } from "../utils/responses";
+
+export const withBonusIdFromRequest = async <T>(
+  req: express.Request,
+  f: (bonusId: NonEmptyString) => Promise<T>
+): Promise<IResponseErrorValidation | T> =>
+  withValidatedOrValidationError(
+    NonEmptyString.decode(req.param("bonus_id")),
+    f
+  );
 
 export default class BonusController {
   constructor(private readonly bonusService: BonusService) {}
@@ -58,5 +70,26 @@ export default class BonusController {
   > =>
     withUserFromRequest(req, user =>
       this.bonusService.getBonusEligibilityCheck(user)
+    );
+
+  /**
+   * Get the activation details for the latest version
+   * of the bonus entity identified by the provided id
+   *
+   */
+  public readonly getLatestBonusActivationById = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseSuccessJson<BonusActivation>
+  > =>
+    withUserFromRequest(req, user =>
+      withBonusIdFromRequest(req, bonusId =>
+        this.bonusService.getLatestBonusActivationById(user, bonusId)
+      )
     );
 }
