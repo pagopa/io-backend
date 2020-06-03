@@ -98,8 +98,8 @@ const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection =
   ]
 };
 
-const mockStartBonusEligibilityCheck = jest.fn();
 const mockGetAllBonusActivations = jest.fn();
+const mockStartBonusEligibilityCheck = jest.fn();
 const mockGetLatestBonusActivationById = jest.fn();
 const mockGetBonusEligibilityCheck = jest.fn();
 jest.mock("../../services/bonusService", () => {

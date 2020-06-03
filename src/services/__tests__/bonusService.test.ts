@@ -8,14 +8,14 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
+import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
+import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import BonusService from "../bonusService";
-import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
-import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
