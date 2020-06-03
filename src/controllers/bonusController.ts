@@ -92,4 +92,23 @@ export default class BonusController {
         this.bonusService.getLatestBonusActivationById(user, bonusId)
       )
     );
+
+  /**
+   * Start bonus activation request procedure
+   * Returns either an error or a reference to the request
+   *
+   */
+  public readonly startBonusActivationProcedure = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorConflict
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+  > =>
+    withUserFromRequest(req, user =>
+      this.bonusService.startBonusActivationProcedure(user)
+    );
 }

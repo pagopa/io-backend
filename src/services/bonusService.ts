@@ -171,4 +171,53 @@ export default class BonusService {
         }
       });
     });
+
+  /**
+   * Start bonus activation request procedure
+   */
+  public readonly startBonusActivationProcedure = (
+    user: User
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorConflict
+    | IResponseErrorValidation
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.startBonusActivationProcedure(
+        {
+          fiscalCode: user.fiscal_code
+        }
+      );
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              response.headers.Location || "",
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot activate a new bonus because another active or consumed bonus related to this user was found."
+            );
+          case 403:
+            return ResponseErrorValidation(
+              "Bad Request",
+              "Cannot activate a new bonus because the eligibility data has expired or the user is ineligible to get the bonus. She must re-initiate the eligibility procedure to refresh her data and retry to activate the bonus within 24h since she got the result."
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
 }

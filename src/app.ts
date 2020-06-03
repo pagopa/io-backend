@@ -627,6 +627,15 @@ function registerBonusAPIRoutes(
       bonusController
     )
   );
+
+  app.post(
+    `${basePath}/bonus/vacanze/activations`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      bonusController.startBonusActivationProcedure,
+      bonusController
+    )
+  );
 }
 
 function registerAuthenticationRoutes(
