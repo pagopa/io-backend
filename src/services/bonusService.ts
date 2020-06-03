@@ -26,6 +26,7 @@ import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck"
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
 import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
@@ -164,6 +165,44 @@ export default class BonusService {
             return ResponseErrorNotFound(
               "BonusActivation not found",
               `Could not find a bonus activation for fiscal code: ${user.fiscal_code} and bonus id ${bonusId}`
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   *  Get all IDs of the bonus activations requested by
+   *  the authenticated user or by any between his family member
+   */
+  public readonly getAllBonusActivations = (
+    user: User
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.getAllBonusActivations({
+        fiscalCode: user.fiscal_code
+      });
+
+      // tslint:disable-next-line: no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              "BonusActivation not found",
+              `Could not find a bonus activation for fiscal code: ${user.fiscal_code}`
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));

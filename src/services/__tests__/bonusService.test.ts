@@ -8,8 +8,10 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
+import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
+import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
@@ -37,6 +39,16 @@ const aEligibilityCheck: EligibilityCheck = {
   status: "ELIGIBLE" as any
 };
 
+const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
+  items: [
+    {
+      id: "itemid" as NonEmptyString,
+      is_applicant: true,
+      status: BonusActivationStatusEnum.ACTIVE
+    }
+  ]
+};
+
 // mock for a valid User
 const mockedUser: User = {
   created_at: 1183518855,
@@ -50,12 +62,14 @@ const mockedUser: User = {
   wallet_token: "HexToKen" as WalletToken
 };
 
+const mockGetAllBonusActivations = jest.fn();
 const mockGetBonusEligibilityCheck = jest.fn();
 const mockGetLatestBonusActivationById = jest.fn();
 const mockStartBonusActivationProcedure = jest.fn();
 const mockStartBonusEligibilityCheck = jest.fn();
 
 const mockBonusAPIClient = {
+  getAllBonusActivations: mockGetAllBonusActivations,
   getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
   getLatestBonusActivationById: mockGetLatestBonusActivationById,
   startBonusActivationProcedure: mockStartBonusActivationProcedure,
@@ -317,6 +331,94 @@ describe("BonusService#getLatestBonusActivationById", () => {
       mockedUser,
       aBonusId
     );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("BonusService#getAllBonusActivations", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new BonusService(api);
+
+    await service.getAllBonusActivations(mockedUser);
+
+    expect(mockGetAllBonusActivations).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a successful request", async () => {
+    mockGetAllBonusActivations.mockImplementation(() =>
+      t.success({
+        status: 200,
+        value: aPaginatedBonusActivationCollection
+      })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getAllBonusActivations(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle no found bonus", async () => {
+    mockGetAllBonusActivations.mockImplementation(() =>
+      t.success({ status: 404 })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getAllBonusActivations(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGetAllBonusActivations.mockImplementation(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.getAllBonusActivations(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetAllBonusActivations.mockImplementation(() =>
+      t.success({ status: 123 })
+    );
+    const service = new BonusService(api);
+
+    const res = await service.getAllBonusActivations(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetAllBonusActivations.mockImplementation(() => {
+      throw new Error();
+    });
+    const service = new BonusService(api);
+
+    const res = await service.getAllBonusActivations(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

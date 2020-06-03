@@ -628,6 +628,12 @@ function registerBonusAPIRoutes(
     )
   );
 
+  app.get(
+    `${basePath}/bonus/vacanze/activations`,
+    bearerSessionTokenAuth,
+    toExpressHandler(bonusController.getAllBonusActivations, bonusController)
+  );
+
   app.post(
     `${basePath}/bonus/vacanze/activations`,
     bearerSessionTokenAuth,

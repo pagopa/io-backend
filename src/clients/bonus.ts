@@ -15,6 +15,8 @@ import nodeFetch from "node-fetch";
 import { InstanceId } from "generated/io-bonus-api/InstanceId";
 import { ProblemJson } from "italia-ts-commons/lib/responses";
 import {
+  getAllBonusActivationsDefaultDecoder,
+  GetAllBonusActivationsT,
   getBonusEligibilityCheckDefaultDecoder,
   GetBonusEligibilityCheckT,
   getLatestBonusActivationByIdDefaultDecoder,
@@ -40,6 +42,9 @@ export function BonusAPIClient(
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
+  readonly getAllBonusActivations: TypeofApiCall<
+    typeof getAllBonusActivationsT
+  >;
   readonly getBonusEligibilityCheck: TypeofApiCall<
     typeof getBonusEligibilityCheckT
   >;
@@ -103,6 +108,17 @@ export function BonusAPIClient(
       `/bonus/vacanze/activations/${params.fiscalCode}/${params.bonus_id}`
   };
 
+  const getAllBonusActivationsT: ReplaceRequestParams<
+    GetAllBonusActivationsT,
+    Omit<RequestParams<GetAllBonusActivationsT>, "ApiKey">
+  > = {
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    method: "get",
+    query: _ => ({}),
+    response_decoder: getAllBonusActivationsDefaultDecoder(),
+    url: params => `/bonus/vacanze/activations/${params.fiscalCode}`
+  };
+
   // This request type need to be rewritten because the code generator doesn't handle custom response header values
   const startBonusActivationProcedureT: IPostApiRequestType<
     { readonly fiscalCode: string },
@@ -125,6 +141,10 @@ export function BonusAPIClient(
   };
 
   return {
+    getAllBonusActivations: createFetchRequestForApi(
+      getAllBonusActivationsT,
+      options
+    ),
     getBonusEligibilityCheck: createFetchRequestForApi(
       getBonusEligibilityCheckT,
       options
