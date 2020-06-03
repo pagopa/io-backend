@@ -155,7 +155,8 @@ export default class BonusService {
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
-            // TODO: aggiungere qr code
+            // TODO: add qr code
+            // https://www.pivotaltracker.com/story/show/173079501
             return ResponseSuccessJson(response.value);
           case 404:
             return ResponseErrorNotFound(
