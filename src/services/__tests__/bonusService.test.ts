@@ -1,4 +1,4 @@
-// tslint:disable: no-duplicate-string
+// tslint:disable: no-duplicate-string no-identical-functions
 
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
@@ -52,11 +52,13 @@ const mockedUser: User = {
 
 const mockGetBonusEligibilityCheck = jest.fn();
 const mockGetLatestBonusActivationById = jest.fn();
+const mockStartBonusActivationProcedure = jest.fn();
 const mockStartBonusEligibilityCheck = jest.fn();
 
 const mockBonusAPIClient = {
   getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
   getLatestBonusActivationById: mockGetLatestBonusActivationById,
+  startBonusActivationProcedure: mockStartBonusActivationProcedure,
   startBonusEligibilityCheck: mockStartBonusEligibilityCheck
 } as ReturnType<BonusAPIClient>;
 
@@ -315,6 +317,110 @@ describe("BonusService#getLatestBonusActivationById", () => {
       mockedUser,
       aBonusId
     );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("BonusService#startBonusActivationProcedure", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new BonusService(api);
+
+    await service.startBonusActivationProcedure(mockedUser);
+
+    expect(mockStartBonusActivationProcedure).toHaveBeenCalledWith({
+      fiscalCode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a successful new request", async () => {
+    mockStartBonusActivationProcedure.mockImplementation(() =>
+      t.success({
+        headers: { Location: "resource-url" },
+        status: 201,
+        value: aInstanceId
+      })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.startBonusActivationProcedure(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessRedirectToResource"
+    });
+  });
+
+  it("should handle a pending check response", async () => {
+    mockStartBonusActivationProcedure.mockImplementation(() =>
+      t.success({ status: 202 })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.startBonusActivationProcedure(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessAccepted"
+    });
+  });
+
+  it("should handle an error when the user already has a bonus", async () => {
+    mockStartBonusActivationProcedure.mockImplementation(() =>
+      t.success({ status: 403 })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.startBonusActivationProcedure(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorForbiddenNotAuthorized"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockStartBonusActivationProcedure.mockImplementation(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new BonusService(api);
+
+    const res = await service.startBonusActivationProcedure(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  // tslint:disable-next-line: no-identical-functions
+  it("should return an error for unhandled response status code", async () => {
+    mockStartBonusActivationProcedure.mockImplementation(() =>
+      t.success({ status: 123 })
+    );
+    const service = new BonusService(api);
+
+    const res = await service.startBonusActivationProcedure(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockStartBonusActivationProcedure.mockImplementation(() => {
+      throw new Error();
+    });
+    const service = new BonusService(api);
+
+    const res = await service.startBonusActivationProcedure(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

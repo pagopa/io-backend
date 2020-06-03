@@ -4,6 +4,7 @@
 
 import {
   IResponseErrorConflict,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -12,6 +13,7 @@ import {
   IResponseSuccessRedirectToResource,
   ProblemJson,
   ResponseErrorConflict,
+  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
@@ -163,6 +165,53 @@ export default class BonusService {
               "BonusActivation not found",
               `Could not find a bonus activation for fiscal code: ${user.fiscal_code} and bonus id ${bonusId}`
             );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Start bonus activation request procedure
+   */
+  public readonly startBonusActivationProcedure = (
+    user: User
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorConflict
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.startBonusActivationProcedure(
+        {
+          fiscalCode: user.fiscal_code
+        }
+      );
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              response.headers.Location || "",
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot activate a new bonus because another active or consumed bonus related to this user was found."
+            );
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
