@@ -21,6 +21,7 @@ import {
   GetBonusEligibilityCheckT,
   getLatestBonusActivationByIdDefaultDecoder,
   GetLatestBonusActivationByIdT,
+  startBonusActivationProcedureDefaultDecoder,
   startBonusEligibilityCheckDefaultDecoder
 } from "../../generated/io-bonus-api/requestTypes";
 
@@ -49,6 +50,9 @@ export function BonusAPIClient(
   >;
   readonly getLatestBonusActivationById: TypeofApiCall<
     typeof getLatestBonusActivationByIdT
+  >;
+  readonly startBonusActivationProcedure: TypeofApiCall<
+    typeof startBonusActivationProcedureT
   >;
   readonly startBonusEligibilityCheck: TypeofApiCall<
     typeof startBonusEligibilityCheckT
@@ -115,6 +119,27 @@ export function BonusAPIClient(
     url: params => `/bonus/vacanze/activations/${params.fiscalCode}`
   };
 
+  // This request type need to be rewritten because the code generator doesn't handle custom response header values
+  const startBonusActivationProcedureT: IPostApiRequestType<
+    { readonly fiscalCode: string },
+    "Content-Type" | "X-Functions-Key",
+    never,
+    // tslint:disable-next-line: max-union-size
+    | IResponseType<201, InstanceId, "Location">
+    | IResponseType<202, undefined>
+    | IResponseType<401, undefined>
+    | IResponseType<403, undefined>
+    | IResponseType<409, undefined>
+    | IResponseType<500, ProblemJson>
+  > = {
+    body: _ => "",
+    headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
+    method: "post",
+    query: _ => ({}),
+    response_decoder: startBonusActivationProcedureDefaultDecoder(),
+    url: params => `/bonus/vacanze/activations/${params.fiscalCode}`
+  };
+
   return {
     getAllBonusActivations: createFetchRequestForApi(
       getAllBonusActivationsT,
@@ -126,6 +151,10 @@ export function BonusAPIClient(
     ),
     getLatestBonusActivationById: createFetchRequestForApi(
       getLatestBonusActivationByIdT,
+      options
+    ),
+    startBonusActivationProcedure: createFetchRequestForApi(
+      startBonusActivationProcedureT,
       options
     ),
     startBonusEligibilityCheck: createFetchRequestForApi(

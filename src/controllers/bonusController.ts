@@ -6,6 +6,7 @@
 import * as express from "express";
 import {
   IResponseErrorConflict,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -110,5 +111,25 @@ export default class BonusController {
   > =>
     withUserFromRequest(req, user =>
       this.bonusService.getAllBonusActivations(user)
+    );
+
+  /**
+   * Start bonus activation request procedure
+   * Returns either an error or a reference to the request
+   *
+   */
+  public readonly startBonusActivationProcedure = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorConflict
+    | IResponseErrorInternal
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+  > =>
+    withUserFromRequest(req, user =>
+      this.bonusService.startBonusActivationProcedure(user)
     );
 }
