@@ -197,7 +197,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
 
     const service = new BonusService(api);
 
-    const res = await service.startBonusEligibilityCheck(mockedUser);
+    const res = await service.getBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -210,7 +210,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     );
     const service = new BonusService(api);
 
-    const res = await service.startBonusEligibilityCheck(mockedUser);
+    const res = await service.getBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -223,7 +223,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     });
     const service = new BonusService(api);
 
-    const res = await service.startBonusEligibilityCheck(mockedUser);
+    const res = await service.getBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
