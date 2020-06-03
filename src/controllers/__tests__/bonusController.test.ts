@@ -19,6 +19,7 @@ import BonusService from "../../services/bonusService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import BonusController from "../bonusController";
+import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 
 const API_KEY = "";
 const API_URL = "";
@@ -87,12 +88,24 @@ const aBonusActivation: BonusActivation = {
   updated_at: aDate
 };
 
+const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
+  items: [
+    {
+      id: "itemid" as NonEmptyString,
+      is_applicant: true,
+      status: BonusActivationStatusEnum.ACTIVE
+    }
+  ]
+};
+
 const mockStartBonusEligibilityCheck = jest.fn();
+const mockGetAllBonusActivations = jest.fn();
 const mockGetLatestBonusActivationById = jest.fn();
 const mockGetBonusEligibilityCheck = jest.fn();
 jest.mock("../../services/bonusService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
+      getAllBonusActivations: mockGetAllBonusActivations,
       getBonusEligibilityCheck: mockGetBonusEligibilityCheck,
       getLatestBonusActivationById: mockGetLatestBonusActivationById,
       startBonusEligibilityCheck: mockStartBonusEligibilityCheck
@@ -298,6 +311,59 @@ describe("BonusController#getLatestBonusActivationById", () => {
 
     // service method is not called
     expect(mockGetLatestBonusActivationById).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("BonusController#getAllBonusActivations", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    await controller.getAllBonusActivations(req);
+
+    expect(mockGetAllBonusActivations).toHaveBeenCalledWith(mockedUser);
+  });
+
+  it("should call getAllBonusActivations method on the BonusService with valid values", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    mockGetAllBonusActivations.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aPaginatedBonusActivationCollection))
+    );
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getAllBonusActivations(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aPaginatedBonusActivationCollection
+    });
+  });
+
+  it("should not call getAllBonusActivations method on the BonusService with empty user", async () => {
+    const req = { ...mockReq(), user: undefined };
+    const res = mockRes();
+
+    const client = BonusAPIClient(API_KEY, API_URL);
+    const bonusService = new BonusService(client);
+    const controller = new BonusController(bonusService);
+    const response = await controller.getAllBonusActivations(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGetAllBonusActivations).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });

@@ -15,6 +15,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import BonusService from "src/services/bonusService";
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
@@ -91,5 +92,23 @@ export default class BonusController {
       withBonusIdFromRequest(req, bonusId =>
         this.bonusService.getLatestBonusActivationById(user, bonusId)
       )
+    );
+
+  /**
+   * Get all IDs of the bonus activations requested by
+   * the authenticated user or by any between his family member
+   */
+  public readonly getAllBonusActivations = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
+  > =>
+    withUserFromRequest(req, user =>
+      this.bonusService.getAllBonusActivations(user)
     );
 }
