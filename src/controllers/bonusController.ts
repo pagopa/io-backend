@@ -6,6 +6,7 @@
 import * as express from "express";
 import {
   IResponseErrorConflict,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -105,6 +106,7 @@ export default class BonusController {
     | IResponseErrorValidation
     | IResponseErrorConflict
     | IResponseErrorInternal
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessAccepted
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
