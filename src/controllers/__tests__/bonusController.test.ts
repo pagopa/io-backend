@@ -81,7 +81,8 @@ const aBonusActivation: BonusActivation = {
     max_amount: aNumberInRange,
     max_tax_benefit: aNumberInRange,
     request_id: "dsureqid" as NonEmptyString,
-    status: StatusEnum.ELIGIBLE
+    status: StatusEnum.ELIGIBLE,
+    valid_before: new Date()
   },
   id: aBonusId,
   status: BonusActivationStatusEnum.ACTIVE,
