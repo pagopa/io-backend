@@ -7,7 +7,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseSuccessJson
+  ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
 
 import { Installation } from "../../generated/backend/Installation";
@@ -84,23 +84,23 @@ export default class NotificationController {
 
   public async createOrUpdateInstallation(
     req: express.Request
-  ): Promise<IResponseErrorValidation | IResponseSuccessJson<SuccessResponse>> {
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseSuccessJson<SuccessResponse>
+  > {
     return withUserFromRequest(req, async user =>
       withValidatedOrValidationError(InstallationID.decode(req.params.id), _ =>
         withValidatedOrValidationError(
           Installation.decode(req.body),
-          installation => {
-            // async fire & forget
+          installation =>
             this.notificationService
               .createOrUpdateInstallation(user.fiscal_code, installation)
-              .catch(err => {
-                log.error(
-                  "Cannot create installation: %s",
-                  JSON.stringify(err)
-                );
-              });
-            return ResponseSuccessJson({ message: "ok" });
-          }
+              .catch(error => {
+                const msg = `Error upserting installation [${error.message}]`;
+                log.error(msg);
+                return ResponseErrorInternal(msg);
+              })
         )
       )
     );

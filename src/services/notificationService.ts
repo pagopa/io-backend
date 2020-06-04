@@ -75,9 +75,7 @@ export default class NotificationService {
   public readonly createOrUpdateInstallation = (
     fiscalCode: FiscalCode,
     installation: Installation
-  ): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<SuccessResponse>
-  > => {
+  ): Promise<IResponseSuccessJson<SuccessResponse>> => {
     const azureInstallation: CreateOrUpdateInstallationMessage = {
       // When a single active session per user is allowed, the installation that must be created or updated
       // will have an unique installationId referred to that user.
@@ -93,12 +91,7 @@ export default class NotificationService {
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(azureInstallation))
-      .then(() => ResponseSuccessJson({ message: "ok" }))
-      .catch(error =>
-        ResponseErrorInternal(
-          `Error while sending create or update installation message to the queue [${error.message}]`
-        )
-      );
+      .then(() => ResponseSuccessJson({ message: "ok" }));
   };
 
   public readonly deleteInstallation = (
