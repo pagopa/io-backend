@@ -4,15 +4,19 @@
 
 import {
   IResponseErrorConflict,
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
+  IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
   ProblemJson,
   ResponseErrorConflict,
+  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorValidation,
   ResponseSuccessAccepted,
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
@@ -21,6 +25,9 @@ import {
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
+import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import {
@@ -38,6 +45,10 @@ const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
   // tslint:disable-next-line: no-any
   unhandledResponseStatus((response as any).status);
 
+const ResponseErrorUnexpectedAuthProblem = () =>
+  // This case can only happen because of misconfiguration, thus it might be considered an error
+  ResponseErrorInternal("Underlying API fails with an unexpected 401");
+
 export default class BonusService {
   constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
 
@@ -50,6 +61,7 @@ export default class BonusService {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorConflict
+    | IResponseErrorValidation
     | IResponseSuccessAccepted
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
@@ -70,13 +82,15 @@ export default class BonusService {
             return ResponseSuccessAccepted();
           case 409:
             return ResponseErrorConflict(readableProblem(response.value));
+          case 403:
+            return ResponseErrorValidation(
+              "Bad Request",
+              "Already an active bonus related to this user"
+            );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // This case can only happen because of misconfiguration, thus it might be considered an error
-            return ResponseErrorInternal(
-              "Underlying API fails with an unexpected 401"
-            );
+            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -114,10 +128,133 @@ export default class BonusService {
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 401:
-            // This case can only happen because of misconfiguration, thus it might be considered an error
-            return ResponseErrorInternal(
-              "Underlying API fails with an unexpected 401"
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Retrieve a bonus activation detail decorated with its qr-code images generated at runtime.
+   */
+  public readonly getLatestBonusActivationById = (
+    user: User,
+    bonusId: NonEmptyString
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<BonusActivation>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.getLatestBonusActivationById({
+        bonus_id: bonusId,
+        fiscalCode: user.fiscal_code
+      });
+
+      // tslint:disable-next-line: no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            // TODO: add qr code
+            // https://www.pivotaltracker.com/story/show/173079501
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              "BonusActivation not found",
+              `Could not find a bonus activation for fiscal code: ${user.fiscal_code} and bonus id ${bonusId}`
             );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   *  Get all IDs of the bonus activations requested by
+   *  the authenticated user or by any between his family member
+   */
+  public readonly getAllBonusActivations = (
+    user: User
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseSuccessAccepted
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PaginatedBonusActivationsCollection>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.getAllBonusActivations({
+        fiscalCode: user.fiscal_code
+      });
+
+      // tslint:disable-next-line: no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              "BonusActivation not found",
+              `Could not find a bonus activation for fiscal code: ${user.fiscal_code}`
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Start bonus activation request procedure
+   */
+  public readonly startBonusActivationProcedure = (
+    user: User
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorConflict
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessAccepted
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.bonusApiClient.startBonusActivationProcedure(
+        {
+          fiscalCode: user.fiscal_code
+        }
+      );
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              response.headers.Location || "",
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot activate a new bonus because another active or consumed bonus related to this user was found."
+            );
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }

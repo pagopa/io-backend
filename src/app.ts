@@ -618,6 +618,30 @@ function registerBonusAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
   );
+
+  app.get(
+    `${basePath}/bonus/vacanze/activations/:bonus_id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      bonusController.getLatestBonusActivationById,
+      bonusController
+    )
+  );
+
+  app.get(
+    `${basePath}/bonus/vacanze/activations`,
+    bearerSessionTokenAuth,
+    toExpressHandler(bonusController.getAllBonusActivations, bonusController)
+  );
+
+  app.post(
+    `${basePath}/bonus/vacanze/activations`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      bonusController.startBonusActivationProcedure,
+      bonusController
+    )
+  );
 }
 
 function registerAuthenticationRoutes(
