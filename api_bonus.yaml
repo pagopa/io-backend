@@ -116,7 +116,7 @@ paths:
         "200":
           description: Bonus activation details.
           schema:
-            $ref: "#/definitions/BonusActivation"
+            $ref: "#/definitions/BonusActivationWithQrCode"
         "401":
           description: Bearer token null or expired.
         "404":
