@@ -145,6 +145,10 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckExtra"
   EligibilityCheckSuccess:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccess"
+  EligibilityCheckSuccessEligible:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccessEligible"
+  EligibilityCheckSuccessIneligible:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccessIneligible"
   EligibilityCheckFailure:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckFailure"
   EligibilityCheck:
@@ -153,6 +157,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationStatus"
   BonusActivation:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivation"
+  BonusActivationDsu:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationDsu"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
   BonusActivationItem:
