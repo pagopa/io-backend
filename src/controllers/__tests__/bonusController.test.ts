@@ -3,7 +3,6 @@
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -12,6 +11,8 @@ import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/Bonus
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { StatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckSuccessEligible";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
+import { MaxBonusAmount } from "../../../generated/io-bonus-api/MaxBonusAmount";
+import { MaxBonusTaxBenefit } from "../../../generated/io-bonus-api/MaxBonusTaxBenefit";
 import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -26,7 +27,6 @@ const API_URL = "";
 
 const aTimestamp = 1518010929530;
 const aDate = new Date();
-const aNumberInRange = (1000 as any) as number & WithinRangeInteger<0, 50000>;
 const aBonusId = "aBonusId" as NonEmptyString;
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
@@ -78,8 +78,8 @@ const aBonusActivation: BonusActivation = {
     has_discrepancies: false,
     id: "dsuid" as NonEmptyString,
     isee_type: "iseetype",
-    max_amount: aNumberInRange,
-    max_tax_benefit: aNumberInRange,
+    max_amount: 150 as MaxBonusAmount,
+    max_tax_benefit: 30 as MaxBonusTaxBenefit,
     request_id: "dsureqid" as NonEmptyString,
     status: StatusEnum.ELIGIBLE,
     valid_before: new Date()

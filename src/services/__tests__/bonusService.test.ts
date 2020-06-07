@@ -7,10 +7,11 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
-import { WithinRangeInteger } from "italia-ts-commons/lib/numbers";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
+import { MaxBonusAmount } from "../../../generated/io-bonus-api/MaxBonusAmount";
+import { MaxBonusTaxBenefit } from "../../../generated/io-bonus-api/MaxBonusTaxBenefit";
 import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -25,16 +26,13 @@ const aInstanceId: InstanceId = {
   id: "aInstanceId.id" as NonEmptyString
 };
 
-// tslint:disable-next-line: no-any
-const aNumberInRange = (1000 as any) as number & WithinRangeInteger<0, 50000>;
-
 const aBonusId = "aBonusId" as NonEmptyString;
 
 const aEligibilityCheck: EligibilityCheck = {
   family_members: [],
   id: "aEligibilityCheck.id" as NonEmptyString,
-  max_amount: aNumberInRange,
-  max_tax_benefit: aNumberInRange,
+  max_amount: 150 as MaxBonusAmount,
+  max_tax_benefit: 30 as MaxBonusTaxBenefit,
   // tslint:disable-next-line: no-any
   status: "ELIGIBLE" as any
 };

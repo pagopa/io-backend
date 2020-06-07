@@ -3931,10 +3931,10 @@ italia-tslint-rules@^1.1.3:
     tslint-sonarts "^1.9.0"
     typestrict "^1.0.2"
 
-italia-utils@^4.0.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-4.1.0.tgz#1f610776cfbdc56651b6e7c2b36bcb3a6666e5de"
-  integrity sha512-Qg3ydl2DnGwRp+4JahflkyfPD35oXtUh3y/R54qjNV7xQ2FJEwDnXyG743F71KTG1LF8Gw2hTSqo6yAf336iwA==
+italia-utils@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-4.2.0.tgz#dffcbb66c896c06f6b4d17bf6090a478736c7736"
+  integrity sha512-C6Pbyz7AUdFIMQ85+vxyRu/lfkG7trVrf6U6YzScnLeHssJCWCpf7OffQ33qCtp78B6roQr5Tdl+SyGDCD/4/w==
   dependencies:
     fs-extra "^6.0.0"
     italia-ts-commons "^5.0.1"
