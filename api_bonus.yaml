@@ -196,3 +196,8 @@ definitions:
     allOf:
       - $ref: '#/definitions/BonusActivation'
       - $ref: '#/definitions/QrCode'
+securityDefinitions:
+  Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
