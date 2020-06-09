@@ -129,14 +129,14 @@ paths:
           description: Bonus activation ID.
           type: string
       responses:
-        "202":
-          description: Processing request.
-          schema:
-            $ref: "#/definitions/InstanceId"
         "200":
           description: Bonus activation details.
           schema:
             $ref: "#/definitions/BonusActivationWithQrCode"
+        "202":
+          description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
         "401":
           description: Bearer token null or expired.
         "404":

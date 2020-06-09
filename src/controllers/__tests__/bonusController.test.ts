@@ -9,7 +9,6 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
-import { StatusEnum } from "../../../generated/io-bonus-api/EligibilityCheckSuccessEligible";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import { MaxBonusAmount } from "../../../generated/io-bonus-api/MaxBonusAmount";
 import { MaxBonusTaxBenefit } from "../../../generated/io-bonus-api/MaxBonusTaxBenefit";
@@ -76,13 +75,10 @@ const aBonusActivation: BonusActivation = {
       { fiscal_code: aFiscalCode, name: aValidName, surname: aValidFamilyname }
     ],
     has_discrepancies: false,
-    id: "dsuid" as NonEmptyString,
     isee_type: "iseetype",
     max_amount: 150 as MaxBonusAmount,
     max_tax_benefit: 30 as MaxBonusTaxBenefit,
-    request_id: "dsureqid" as NonEmptyString,
-    status: StatusEnum.ELIGIBLE,
-    valid_before: new Date()
+    request_id: "dsureqid" as NonEmptyString
   },
   id: aBonusId,
   status: BonusActivationStatusEnum.ACTIVE,
