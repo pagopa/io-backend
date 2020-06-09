@@ -57,10 +57,12 @@ paths:
       operationId: startBonusActivationProcedure
       summary: Start bonus activation request procedure
       responses:
-        "202":
-          description: Request accepted.
+        "201":
+          description: Request created.
           schema:
             $ref: "#/definitions/InstanceId"
+        "202":
+          description: Processing request.
         "409":
           description: |
             Cannot activate a new bonus because another bonus related to this user was found.
