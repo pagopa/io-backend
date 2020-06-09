@@ -14,12 +14,24 @@ paths:
       operationId: startBonusEligibilityCheck
       summary: Start bonus eligibility check (ISEE)
       responses:
-        "202":
-          description: Request accepted.
+        "201":
+          description: Request created.
           schema:
             $ref: "#/definitions/InstanceId"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+        "202":
+          description: Processing request.
         "401":
           description: Bearer token null or expired.
+        "403":
+          description: |
+            Cannot request a new check since there's already
+            an active bonus related to this user
         "409":
           description: "Conflict: pending request found."
           schema:
@@ -34,13 +46,11 @@ paths:
       summary: Get eligibility (ISEE) check information for user's bonus
       responses:
         "200":
-          description: Request processed.
+          description: Eligibility (ISEE) check information for user's bonus
           schema:
             $ref: "#/definitions/EligibilityCheck"
         "202":
           description: Processing request.
-          schema:
-            $ref: "#/definitions/InstanceId"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -61,18 +71,26 @@ paths:
           description: Request created.
           schema:
             $ref: "#/definitions/InstanceId"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
         "202":
           description: Processing request.
-        "409":
-          description: |
-            Cannot activate a new bonus because another bonus related to this user was found.
-        "403":
-          description: |
-            Cannot activate a new bonus because the eligibility data has expired.
-            The user must re-initiate the eligibility procedure to refresh her data
-            and retry to activate the bonus within 24h since her got the result.
         "401":
           description: Bearer token null or expired.
+        "403":
+          description: |
+            Cannot activate a new bonus because the eligibility data has expired
+            or the user is ineligible to get the bonus.
+            She must re-initiate the eligibility procedure to refresh her data
+            and retry to activate the bonus within 24h since she got the result.
+        "409":
+          description: |
+            Cannot activate a new bonus because another active or redeemed
+            bonus related to this user was found.
         "500":
           description: Service unavailable.
           schema:
@@ -89,10 +107,10 @@ paths:
             or to any member of her family (former and actual)
           schema:
             $ref: "#/definitions/PaginatedBonusActivationsCollection"
-        "404":
-          description: No activation found.
         "401":
           description: Bearer token null or expired.
+        "404":
+          description: No activation found.
         "500":
           description: Service unavailable.
           schema:
@@ -111,14 +129,14 @@ paths:
           description: Bonus activation ID.
           type: string
       responses:
-        "202":
-          description: Processing request.
-          schema:
-            $ref: "#/definitions/InstanceId"
         "200":
           description: Bonus activation details.
           schema:
             $ref: "#/definitions/BonusActivationWithQrCode"
+        "202":
+          description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -143,8 +161,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMember"
   FamilyMembers:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMembers"
-  EligibilityCheckExtra:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckExtra"
+  Dsu:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/Dsu"
   EligibilityCheckSuccess:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccess"
   EligibilityCheckSuccessEligible:
@@ -159,8 +177,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationStatus"
   BonusActivation:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivation"
-  BonusActivationDsu:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationDsu"
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/master/openapi/definitions.yaml#/Timestamp"
   BonusActivationItem:
