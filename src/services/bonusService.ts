@@ -16,7 +16,6 @@ import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
   ResponseErrorNotFound,
-  ResponseErrorValidation,
   ResponseSuccessAccepted,
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
@@ -63,6 +62,7 @@ export default class BonusService {
     | IResponseErrorConflict
     | IResponseErrorValidation
     | IResponseSuccessAccepted
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
@@ -80,17 +80,14 @@ export default class BonusService {
             );
           case 202:
             return ResponseSuccessAccepted();
-          case 409:
-            return ResponseErrorConflict(readableProblem(response.value));
-          case 403:
-            return ResponseErrorValidation(
-              "Bad Request",
-              "Already an active bonus related to this user"
-            );
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
+          case 409:
+            return ResponseErrorConflict(readableProblem(response.value));
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -120,6 +117,8 @@ export default class BonusService {
             return ResponseSuccessJson(response.value);
           case 202:
             return ResponseSuccessAccepted();
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
           case 404:
             return ResponseErrorNotFound(
               "EligibilityCheck not found",
@@ -127,8 +126,6 @@ export default class BonusService {
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -161,6 +158,10 @@ export default class BonusService {
             // TODO: add qr code
             // https://www.pivotaltracker.com/story/show/173079501
             return ResponseSuccessJson(response.value);
+          case 202:
+            return ResponseSuccessAccepted();
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
           case 404:
             return ResponseErrorNotFound(
               "BonusActivation not found",
@@ -168,8 +169,6 @@ export default class BonusService {
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -199,6 +198,8 @@ export default class BonusService {
         switch (response.status) {
           case 200:
             return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
           case 404:
             return ResponseErrorNotFound(
               "BonusActivation not found",
@@ -206,8 +207,6 @@ export default class BonusService {
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
@@ -245,16 +244,16 @@ export default class BonusService {
             );
           case 202:
             return ResponseSuccessAccepted();
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
           case 409:
             return ResponseErrorConflict(
               "Cannot activate a new bonus because another active or consumed bonus related to this user was found."
             );
-          case 403:
-            return ResponseErrorForbiddenNotAuthorized;
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }

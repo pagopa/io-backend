@@ -49,6 +49,7 @@ export default class BonusController {
     | IResponseErrorConflict
     | IResponseErrorInternal
     | IResponseSuccessAccepted
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withUserFromRequest(req, user =>
