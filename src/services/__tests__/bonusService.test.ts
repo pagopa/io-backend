@@ -123,7 +123,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     });
   });
 
-  it("should handle an validation error when the user already has a bonus", async () => {
+  it("should handle a forbidden error when the user already has a bonus", async () => {
     mockStartBonusEligibilityCheck.mockImplementation(() =>
       t.success({ status: 403 })
     );
@@ -133,7 +133,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     const res = await service.startBonusEligibilityCheck(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorValidation"
+      kind: "IResponseErrorForbiddenNotAuthorized"
     });
   });
 
