@@ -26,9 +26,10 @@ import {
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
-import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { withQrcode } from "src/utils/qrcode";
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import {
@@ -36,6 +37,8 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+
+import { toString } from "fp-ts/lib/function";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
@@ -152,7 +155,7 @@ export default class BonusService {
     | IResponseErrorInternal
     | IResponseSuccessAccepted
     | IResponseErrorNotFound
-    | IResponseSuccessJson<BonusActivation>
+    | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getLatestBonusActivationById({
@@ -164,9 +167,18 @@ export default class BonusService {
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
-            // TODO: add qr code
-            // https://www.pivotaltracker.com/story/show/173079501
-            return ResponseSuccessJson(response.value);
+            return withQrcode(response.value)
+              .fold<
+                | IResponseErrorInternal
+                | IResponseSuccessJson<BonusActivationWithQrCode>
+              >(
+                err =>
+                  ResponseErrorInternal(
+                    `Cannot encode qrcode: ${toString(err)}`
+                  ),
+                bonus => ResponseSuccessJson(bonus)
+              )
+              .run();
           case 202:
             return ResponseSuccessAccepted();
           case 401:
