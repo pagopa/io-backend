@@ -7,6 +7,7 @@ import * as express from "express";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
+  IResponseErrorGone,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -50,6 +51,7 @@ export default class BonusController {
     | IResponseErrorInternal
     | IResponseSuccessAccepted
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorGone
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withUserFromRequest(req, user =>
@@ -69,6 +71,7 @@ export default class BonusController {
     | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseSuccessAccepted
+    | IResponseErrorGone
     | IResponseSuccessJson<EligibilityCheck>
   > =>
     withUserFromRequest(req, user =>
