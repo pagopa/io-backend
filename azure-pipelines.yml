@@ -250,4 +250,13 @@ stages:
               deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
-              appName: '$(PRODUCTION_APP_NAME)'
+              appName: '$(PRODUCTION_BACKEND_APP_NAME)'
+
+        - job: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+          steps:
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+              appName: '$(PRODUCTION_BACKENDBONUS_APP_NAME)'
