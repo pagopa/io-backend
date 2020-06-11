@@ -8,6 +8,7 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
+import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import { MaxBonusAmount } from "../../../generated/io-bonus-api/MaxBonusAmount";
@@ -26,7 +27,7 @@ const API_URL = "";
 
 const aTimestamp = 1518010929530;
 const aDate = new Date();
-const aBonusId = "aBonusId" as NonEmptyString;
+const aBonusId = "aBonusId" as BonusCode & NonEmptyString;
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidName = "Giuseppe Maria" as NonEmptyString;
@@ -58,16 +59,24 @@ const aInstanceId: InstanceId = {
 };
 
 const aEligibilityCheck: EligibilityCheck = {
-  family_members: [],
+  dsu_request: {
+    dsu_created_at: new Date().toString(),
+    dsu_protocol_id: "123" as NonEmptyString,
+    family_members: [],
+    has_discrepancies: false,
+    isee_type: "123" as NonEmptyString,
+    max_amount: 150 as MaxBonusAmount,
+    max_tax_benefit: 30 as MaxBonusTaxBenefit,
+    // tslint:disable-next-line: no-any
+    request_id: "123" as NonEmptyString
+  },
   id: "aEligibilityCheck.id" as NonEmptyString,
-  max_amount: 1000 as any,
-  max_tax_benefit: 1000 as any,
   status: "ELIGIBILE" as any
 };
 
 const aBonusActivation: BonusActivation = {
   applicant_fiscal_code: aFiscalCode,
-  code: "bonuscode" as NonEmptyString,
+  created_at: aDate,
   dsu_request: {
     dsu_created_at: "",
     dsu_protocol_id: "dsuprotid" as NonEmptyString,
@@ -81,16 +90,14 @@ const aBonusActivation: BonusActivation = {
     request_id: "dsureqid" as NonEmptyString
   },
   id: aBonusId,
-  status: BonusActivationStatusEnum.ACTIVE,
-  updated_at: aDate
+  status: BonusActivationStatusEnum.ACTIVE
 };
 
 const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
   items: [
     {
-      id: "itemid" as NonEmptyString,
-      is_applicant: true,
-      status: BonusActivationStatusEnum.ACTIVE
+      id: aBonusId,
+      is_applicant: true
     }
   ]
 };
