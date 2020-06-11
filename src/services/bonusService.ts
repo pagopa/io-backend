@@ -206,7 +206,6 @@ export default class BonusService {
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseSuccessAccepted
-    | IResponseErrorNotFound
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
   > =>
     withCatchAsInternalError(async () => {
@@ -221,11 +220,6 @@ export default class BonusService {
             return ResponseSuccessJson(response.value);
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
-          case 404:
-            return ResponseErrorNotFound(
-              "BonusActivation not found",
-              `Could not find a bonus activation for fiscal code: ${user.fiscal_code}`
-            );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
@@ -246,6 +240,7 @@ export default class BonusService {
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessAccepted
+    | IResponseErrorGone
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
@@ -273,6 +268,8 @@ export default class BonusService {
             return ResponseErrorConflict(
               "Cannot activate a new bonus because another active or consumed bonus related to this user was found."
             );
+          case 410:
+            return ResponseErrorGone("DSU request expired.");
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
