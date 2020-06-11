@@ -27,9 +27,9 @@ import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { withQrcode } from "src/utils/qrcode";
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
+import { withQrcode } from "../utils/qrcode";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
