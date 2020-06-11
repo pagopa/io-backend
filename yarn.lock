@@ -3911,10 +3911,10 @@ italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.4:
     json-set-map "^1.0.2"
     validator "^10.1.0"
 
-italia-ts-commons@^8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.1.0.tgz#929c805a7d9e8877fef26436946bf3ee76a76c82"
-  integrity sha512-d03UKxjeIX+4otNgZaDoS8t1l+gVEHD/q/JsQox1CC3nAiKHQ9TFNv4BdHIiUIswgpx1szjT6lzeJQUCUL++YA==
+italia-ts-commons@^8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.3.0.tgz#4b84b69ff69810f19d45c96dfed350ce812f13ca"
+  integrity sha512-iBVTvhBrRNjSWb1irk/BzPZZodSsZJpTOl7Sl9eUJNOFFjhObOki2mRIy+MgawKc5HR03Ec15vBHPHtEayswpg==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.2"

@@ -5,6 +5,7 @@
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
+  IResponseErrorGone,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -14,6 +15,7 @@ import {
   ProblemJson,
   ResponseErrorConflict,
   ResponseErrorForbiddenNotAuthorized,
+  ResponseErrorGone,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
@@ -66,6 +68,7 @@ export default class BonusService {
     | IResponseErrorValidation
     | IResponseSuccessAccepted
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorGone
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
@@ -89,6 +92,9 @@ export default class BonusService {
             return ResponseErrorForbiddenNotAuthorized;
           case 409:
             return ResponseErrorConflict(readableProblem(response.value));
+          // TODO: uncomment when done intro API
+          // case 410:
+          //   return ResponseErrorGone("EligibilityCheck expired");
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
@@ -107,6 +113,7 @@ export default class BonusService {
     | IResponseErrorInternal
     | IResponseSuccessAccepted
     | IResponseErrorNotFound
+    | IResponseErrorGone
     | IResponseSuccessJson<EligibilityCheck>
   > =>
     withCatchAsInternalError(async () => {
@@ -127,6 +134,8 @@ export default class BonusService {
               "EligibilityCheck not found",
               `Could not find an eligibility check for fiscal code ${user.fiscal_code}`
             );
+          case 410:
+            return ResponseErrorGone("EligibilityCheck expired");
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
