@@ -130,6 +130,7 @@ export function BonusAPIClient(
     | IResponseType<401, undefined>
     | IResponseType<403, undefined>
     | IResponseType<409, undefined>
+    | IResponseType<410, undefined>
     | IResponseType<500, ProblemJson>
   > = {
     body: _ => "",

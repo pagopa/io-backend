@@ -9,6 +9,7 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
+import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
 import { MaxBonusAmount } from "../../../generated/io-bonus-api/MaxBonusAmount";
@@ -27,20 +28,28 @@ const aInstanceId: InstanceId = {
   id: "aInstanceId.id" as NonEmptyString
 };
 
-const aBonusId = "aBonusId" as NonEmptyString;
+const aBonusId = "aBonusId" as NonEmptyString & BonusCode;
 
 const aEligibilityCheck: EligibilityCheck = {
-  family_members: [],
+  dsu_request: {
+    dsu_created_at: new Date().toString(),
+    dsu_protocol_id: "123" as NonEmptyString,
+    family_members: [],
+    has_discrepancies: false,
+    isee_type: "123" as NonEmptyString,
+    max_amount: 150 as MaxBonusAmount,
+    max_tax_benefit: 30 as MaxBonusTaxBenefit,
+    // tslint:disable-next-line: no-any
+    request_id: "123" as NonEmptyString
+  },
   id: "aEligibilityCheck.id" as NonEmptyString,
-  max_amount: 150 as MaxBonusAmount,
-  max_tax_benefit: 30 as MaxBonusTaxBenefit,
   // tslint:disable-next-line: no-any
   status: "ELIGIBLE" as any
 };
 
 const aBonusActivation: BonusActivation = {
   applicant_fiscal_code: "SPNDNL80R14C522K" as FiscalCode,
-  code: "bonuscode" as NonEmptyString,
+  created_at: new Date(),
   dsu_request: {
     dsu_created_at: "",
     dsu_protocol_id: "dsuprotid" as NonEmptyString,
@@ -58,16 +67,14 @@ const aBonusActivation: BonusActivation = {
     request_id: "dsureqid" as NonEmptyString
   },
   id: aBonusId,
-  status: BonusActivationStatusEnum.ACTIVE,
-  updated_at: new Date()
+  status: BonusActivationStatusEnum.ACTIVE
 };
 
 const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
   items: [
     {
-      id: "itemid" as NonEmptyString,
-      is_applicant: true,
-      status: BonusActivationStatusEnum.ACTIVE
+      id: aBonusId,
+      is_applicant: true
     }
   ]
 };
@@ -401,7 +408,7 @@ describe("BonusService#getAllBonusActivations", () => {
 
   it("should handle no found bonus", async () => {
     mockGetAllBonusActivations.mockImplementation(() =>
-      t.success({ status: 404 })
+      t.success({ status: 200, value: { items: [], page_size: 0 } })
     );
 
     const service = new BonusService(api);
@@ -409,7 +416,8 @@ describe("BonusService#getAllBonusActivations", () => {
     const res = await service.getAllBonusActivations(mockedUser);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorNotFound"
+      kind: "IResponseSuccessJson",
+      value: { items: [], page_size: 0 }
     });
   });
 

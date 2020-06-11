@@ -108,7 +108,6 @@ export default class BonusController {
   ): Promise<
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
-    | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseSuccessAccepted
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
@@ -131,6 +130,7 @@ export default class BonusController {
     | IResponseErrorInternal
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessAccepted
+    | IResponseErrorGone
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withUserFromRequest(req, user =>
