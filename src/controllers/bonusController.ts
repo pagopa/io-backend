@@ -16,7 +16,7 @@ import {
   IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
-import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import BonusService from "src/services/bonusService";
@@ -91,7 +91,7 @@ export default class BonusController {
     | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseSuccessAccepted
-    | IResponseSuccessJson<BonusActivation>
+    | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
     withUserFromRequest(req, user =>
       withBonusIdFromRequest(req, bonusId =>

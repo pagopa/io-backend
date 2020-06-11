@@ -7,6 +7,7 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
+import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
@@ -35,6 +36,30 @@ const aEligibilityCheck: EligibilityCheck = {
   max_tax_benefit: 30 as MaxBonusTaxBenefit,
   // tslint:disable-next-line: no-any
   status: "ELIGIBLE" as any
+};
+
+const aBonusActivation: BonusActivation = {
+  applicant_fiscal_code: "SPNDNL80R14C522K" as FiscalCode,
+  code: "bonuscode" as NonEmptyString,
+  dsu_request: {
+    dsu_created_at: "",
+    dsu_protocol_id: "dsuprotid" as NonEmptyString,
+    family_members: [
+      {
+        fiscal_code: "SPNDNL80R14C522K" as FiscalCode,
+        name: "mario" as NonEmptyString,
+        surname: "rossi" as NonEmptyString
+      }
+    ],
+    has_discrepancies: false,
+    isee_type: "iseetype",
+    max_amount: 150 as MaxBonusAmount,
+    max_tax_benefit: 30 as MaxBonusTaxBenefit,
+    request_id: "dsureqid" as NonEmptyString
+  },
+  id: aBonusId,
+  status: BonusActivationStatusEnum.ACTIVE,
+  updated_at: new Date()
 };
 
 const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
@@ -269,7 +294,7 @@ describe("BonusService#getLatestBonusActivationById", () => {
 
   it("should handle a successful request", async () => {
     mockGetLatestBonusActivationById.mockImplementation(() =>
-      t.success({ status: 200, value: aEligibilityCheck })
+      t.success({ status: 200, value: aBonusActivation })
     );
 
     const service = new BonusService(api);
@@ -281,7 +306,13 @@ describe("BonusService#getLatestBonusActivationById", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aEligibilityCheck
+      value: {
+        ...aBonusActivation,
+        qr_code: [
+          { content: expect.any(String), mime_type: "image/png" },
+          { content: expect.any(String), mime_type: "image/svg+xml" }
+        ]
+      }
     });
   });
 

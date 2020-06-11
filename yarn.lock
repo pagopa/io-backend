@@ -481,6 +481,13 @@
   dependencies:
     "@types/express" "*"
 
+"@types/qr-image@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@types/qr-image/-/qr-image-3.2.2.tgz#963346a18f0203f5a4cae767d7cdb78bb3601895"
+  integrity sha512-15nILh26cosGRYs5i9gemowO263cAKdIuLR1bwn2oKHL3vxqKyCoT0wXk41Lg6T3eIwo0go1jaGPZbejwMocZA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/range-parser@*":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
@@ -5890,6 +5897,11 @@ q@^1.5.0:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
   integrity sha1-fjL3W0E4EpHQRhHxvxQQmsAGUdc=
+
+qr-image@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/qr-image/-/qr-image-3.2.0.tgz#9fa8295beae50c4a149cf9f909a1db464a8672e8"
+  integrity sha1-n6gpW+rlDEoUnPn5CaHbRkqGcug=
 
 qs@6.7.0:
   version "6.7.0"
