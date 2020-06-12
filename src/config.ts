@@ -30,8 +30,14 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import { rights } from "fp-ts/lib/Array";
+import {
+  AbortableFetch,
+  setFetchTimeout,
+  toFetch
+} from "italia-ts-commons/lib/fetch";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { Millisecond } from "italia-ts-commons/lib/units";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -222,9 +228,16 @@ export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodeCIDRs(
   return process.exit(1);
 });
 
+const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
+
 // HTTP-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const httpApiFetch = agent.getHttpFetch(process.env);
+const abortableFetch = AbortableFetch(agent.getHttpFetch(process.env));
+const fetchWithTimeout = setFetchTimeout(
+  DEFAULT_REQUEST_TIMEOUT_MS,
+  abortableFetch
+);
+const httpApiFetch = toFetch(fetchWithTimeout);
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
