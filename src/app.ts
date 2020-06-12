@@ -605,7 +605,7 @@ function registerBonusAPIRoutes(
   const bonusController: BonusController = new BonusController(bonusService);
 
   app.post(
-    `${basePath}/bonus/eligibility`,
+    `${basePath}/bonus/vacanze/eligibility`,
     bearerSessionTokenAuth,
     toExpressHandler(
       bonusController.startBonusEligibilityCheck,
@@ -614,7 +614,7 @@ function registerBonusAPIRoutes(
   );
 
   app.get(
-    `${basePath}/bonus/eligibility`,
+    `${basePath}/bonus/vacanze/eligibility`,
     bearerSessionTokenAuth,
     toExpressHandler(bonusController.getBonusEligibilityCheck, bonusController)
   );

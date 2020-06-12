@@ -37,8 +37,8 @@ function SubscriptionKeyHeaderProducer<P>(
 }
 
 export function BonusAPIClient(
-  baseUrl: string,
   token: string,
+  baseUrl: string,
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): {
