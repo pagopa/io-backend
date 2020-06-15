@@ -11,8 +11,6 @@ import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/Bonus
 import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
-import { MaxBonusAmount } from "../../../generated/io-bonus-api/MaxBonusAmount";
-import { MaxBonusTaxBenefit } from "../../../generated/io-bonus-api/MaxBonusTaxBenefit";
 import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -65,10 +63,9 @@ const aEligibilityCheck: EligibilityCheck = {
     family_members: [],
     has_discrepancies: false,
     isee_type: "123" as NonEmptyString,
-    max_amount: 150 as MaxBonusAmount,
-    max_tax_benefit: 30 as MaxBonusTaxBenefit,
-    // tslint:disable-next-line: no-any
-    request_id: "123" as NonEmptyString
+    max_amount: 150,
+    max_tax_benefit: 30,
+    request_id: 1
   },
   id: "aEligibilityCheck.id" as NonEmptyString,
   status: "ELIGIBILE" as any
@@ -85,9 +82,9 @@ const aBonusActivation: BonusActivation = {
     ],
     has_discrepancies: false,
     isee_type: "iseetype",
-    max_amount: 150 as MaxBonusAmount,
-    max_tax_benefit: 30 as MaxBonusTaxBenefit,
-    request_id: "dsureqid" as NonEmptyString
+    max_amount: 150,
+    max_tax_benefit: 30,
+    request_id: 1
   },
   id: aBonusId,
   status: BonusActivationStatusEnum.ACTIVE
