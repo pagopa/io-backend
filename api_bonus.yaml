@@ -151,10 +151,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/InstanceId"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/ProblemJson"
-  MaxBonusAmount:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/MaxBonusAmount"
-  MaxBonusTaxBenefit:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/MaxBonusTaxBenefit"
   FamilyMember:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMember"
   FamilyMembers:
@@ -206,7 +202,7 @@ definitions:
       qr_code:
         type: array
         items:
-          $ref: '#/definitions/QrCodeImage'
+          $ref: "#/definitions/QrCodeImage"
         required:
           - items
     required:
@@ -214,10 +210,10 @@ definitions:
 
   BonusActivationWithQrCode:
     allOf:
-      - $ref: '#/definitions/BonusActivation'
-      - $ref: '#/definitions/QrCode'
+      - $ref: "#/definitions/BonusActivation"
+      - $ref: "#/definitions/QrCode"
 securityDefinitions:
   Bearer:
-      type: apiKey
-      name: Authorization
-      in: header
+    type: apiKey
+    name: Authorization
+    in: header
