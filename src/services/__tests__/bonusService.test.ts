@@ -308,9 +308,16 @@ describe("BonusService#getLatestBonusActivationById", () => {
       aBonusId
     );
 
-    expect(res).toMatchSnapshot();
-    expect(res.kind).toEqual("IResponseSuccessJson");
-
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...aBonusActivation,
+        qr_code: [
+          { content: expect.any(String), mime_type: "image/png" },
+          { content: expect.any(String), mime_type: "image/svg+xml" }
+        ]
+      }
+    });
     if (res.kind === "IResponseSuccessJson") {
       const svg = new Buffer(res.value.qr_code[1].content, "base64");
       expect(svg.toString()).toContain(`fill=\"black\"`);
