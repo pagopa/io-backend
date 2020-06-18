@@ -318,6 +318,10 @@ describe("BonusService#getLatestBonusActivationById", () => {
         ]
       }
     });
+    if (res.kind === "IResponseSuccessJson") {
+      const svg = new Buffer(res.value.qr_code[1].content, "base64");
+      expect(svg.toString()).toContain(`fill=\"black\"`);
+    }
   });
 
   it("should handle an internal error response", async () => {

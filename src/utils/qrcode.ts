@@ -13,6 +13,10 @@ const MIME_TYPES = {
 
 const base64 = (s: string) => Buffer.from(s).toString("base64");
 
+// Needed to display the SVG into the mobile App
+const fixQrcodeFill = (svgStr: string) =>
+  svgStr.replace("<path", '<path fill="black"');
+
 function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   // tslint:disable-next-line: readonly-array no-any
   const chunks: any[] = [];
@@ -40,7 +44,7 @@ export function withQrcode(
         mime_type: MIME_TYPES.png
       },
       {
-        content: base64(svg),
+        content: base64(fixQrcodeFill(svg)),
         mime_type: MIME_TYPES.svg
       }
     ]
