@@ -55,6 +55,8 @@ paths:
           description: Bearer token null or expired.
         "404":
           description: Request not found.
+        "410":
+          description: Request expired
         "500":
           description: Service unavailable.
           schema:
@@ -91,6 +93,9 @@ paths:
           description: |
             Cannot activate a new bonus because another active or redeemed
             bonus related to this user was found.
+        "410":
+          description: |
+            Cannot activate a new bonus because DSU request is expired.
         "500":
           description: Service unavailable.
           schema:
