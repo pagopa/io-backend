@@ -126,7 +126,7 @@ export function BonusAPIClient(
     never,
     // tslint:disable-next-line: max-union-size
     | IResponseType<201, InstanceId, "Location">
-    | IResponseType<202, undefined>
+    | IResponseType<202, InstanceId>
     | IResponseType<401, undefined>
     | IResponseType<403, undefined>
     | IResponseType<409, undefined>

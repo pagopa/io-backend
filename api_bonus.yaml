@@ -81,6 +81,8 @@ paths:
                 A GET request to this URL returns the request status and details.
         "202":
           description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
         "401":
           description: Bearer token null or expired.
         "403":
