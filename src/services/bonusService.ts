@@ -153,7 +153,7 @@ export default class BonusService {
   ): Promise<
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
-    | IResponseSuccessAccepted
+    | IResponseSuccessAccepted<InstanceId>
     | IResponseErrorNotFound
     | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
@@ -205,7 +205,6 @@ export default class BonusService {
   ): Promise<
     // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
-    | IResponseSuccessAccepted
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
   > =>
     withCatchAsInternalError(async () => {
@@ -239,7 +238,7 @@ export default class BonusService {
     | IResponseErrorConflict
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessAccepted
+    | IResponseSuccessAccepted<InstanceId>
     | IResponseErrorGone
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>

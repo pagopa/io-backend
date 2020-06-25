@@ -90,7 +90,7 @@ export default class BonusController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
-    | IResponseSuccessAccepted
+    | IResponseSuccessAccepted<InstanceId>
     | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
     withUserFromRequest(req, user =>
@@ -109,7 +109,6 @@ export default class BonusController {
     // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
-    | IResponseSuccessAccepted
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
   > =>
     withUserFromRequest(req, user =>
@@ -129,7 +128,7 @@ export default class BonusController {
     | IResponseErrorConflict
     | IResponseErrorInternal
     | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessAccepted
+    | IResponseSuccessAccepted<InstanceId>
     | IResponseErrorGone
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
