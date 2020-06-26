@@ -89,6 +89,20 @@ const mockedUser: User = {
   wallet_token: "HexToKen" as WalletToken
 };
 
+// mock for a not adult User
+const mockedNotAdultUser: User = {
+  created_at: 1183518855,
+  date_of_birth: "2020-01-01",
+  family_name: "Lusso",
+  fiscal_code: aValidFiscalCode,
+  name: "Luca",
+  session_token: "HexToKen" as SessionToken,
+  spid_email: aValidSPIDEmail,
+  spid_level: aValidSpidLevel,
+  spid_mobile_phone: "3222222222222" as NonEmptyString,
+  wallet_token: "HexToKen" as WalletToken
+};
+
 const mockGetAllBonusActivations = jest.fn();
 const mockGetBonusEligibilityCheck = jest.fn();
 const mockGetLatestBonusActivationById = jest.fn();
@@ -205,6 +219,19 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
     });
+  });
+});
+
+it("should return an error if logged user is not adult", async () => {
+  mockStartBonusEligibilityCheck.mockImplementation(() =>
+    t.success({ status: 123 })
+  );
+  const service = new BonusService(api);
+
+  const res = await service.startBonusEligibilityCheck(mockedNotAdultUser);
+
+  expect(res).toMatchObject({
+    kind: "IResponseErrorInternal"
   });
 });
 

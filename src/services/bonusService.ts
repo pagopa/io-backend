@@ -40,6 +40,9 @@ import {
 
 import { toString } from "fp-ts/lib/function";
 
+import { fromNullable } from "fp-ts/lib/Option";
+import { isOlderThan } from "../utils/date";
+
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
 
@@ -72,6 +75,15 @@ export default class BonusService {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
+      // check if current logged user is enabled to start a bonus request
+      if (
+        fromNullable(user.date_of_birth).exists(
+          _ => !isOlderThan(18)(new Date(_), new Date())
+        )
+      ) {
+        return ResponseErrorUnexpectedAuthProblem();
+      }
+
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({
         fiscalCode: user.fiscal_code
       });
