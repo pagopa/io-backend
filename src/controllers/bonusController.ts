@@ -24,8 +24,8 @@ import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck"
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
 import {
-  withValidatedOrValidationError,
-  IResponseErrorUnauthorized
+  IResponseErrorUnauthorized,
+  withValidatedOrValidationError
 } from "../utils/responses";
 
 export const withBonusIdFromRequest = async <T>(
