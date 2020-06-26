@@ -42,8 +42,9 @@ import {
 
 import { toString } from "fp-ts/lib/function";
 
-import { fromNullable } from "fp-ts/lib/Option";
+import { isRight } from "fp-ts/lib/Either";
 import { isOlderThan } from "../utils/date";
+import { extractDateOfBirthFromFiscalCodeData } from "../utils/user";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
@@ -79,10 +80,12 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       // check if the current logged in user can start a bonus request
+      const maybeDateOfBirth = extractDateOfBirthFromFiscalCodeData(
+        user.fiscal_code
+      );
       if (
-        fromNullable(user.date_of_birth).exists(
-          _ => !isOlderThan(18)(new Date(_), new Date())
-        )
+        isRight(maybeDateOfBirth) &&
+        !isOlderThan(18)(new Date(maybeDateOfBirth.value), new Date())
       ) {
         return ResponseErrorUnauthorized(
           "Unauthorized",

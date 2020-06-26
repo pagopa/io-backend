@@ -10,3 +10,7 @@ export const isOlderThan = (years: number) => (
 ) => {
   return !isAfter(addYears(dateOfBirth, years), when);
 };
+
+export const isValidDate = (d: Date) => {
+  return d instanceof Date && !isNaN(d.getTime());
+};

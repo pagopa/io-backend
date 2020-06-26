@@ -19,6 +19,7 @@ import { User } from "../../types/user";
 import BonusService from "../bonusService";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
+const aNotAdultFiscalCode = "DROLSS02S20H501F" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
@@ -94,7 +95,7 @@ const mockedNotAdultUser: User = {
   created_at: 1183518855,
   date_of_birth: "2020-01-01",
   family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
+  fiscal_code: aNotAdultFiscalCode,
   name: "Luca",
   session_token: "HexToKen" as SessionToken,
   spid_email: aValidSPIDEmail,
@@ -222,7 +223,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
   });
 });
 
-it("should return an error if the logged in user is not adult", async () => {
+it("should return an Unauthorized error if the logged in user is not adult", async () => {
   mockStartBonusEligibilityCheck.mockImplementation(() =>
     t.success({ status: 123 })
   );
