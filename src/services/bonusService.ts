@@ -33,6 +33,8 @@ import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import { withQrcode } from "../utils/qrcode";
 import {
+  IResponseErrorUnauthorized,
+  ResponseErrorUnauthorized,
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
@@ -72,6 +74,7 @@ export default class BonusService {
     | IResponseSuccessAccepted
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorGone
+    | IResponseErrorUnauthorized
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
@@ -81,7 +84,10 @@ export default class BonusService {
           _ => !isOlderThan(18)(new Date(_), new Date())
         )
       ) {
-        return ResponseErrorUnexpectedAuthProblem();
+        return ResponseErrorUnauthorized(
+          "Unauthorized",
+          "The user must be an adult"
+        );
       }
 
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({

@@ -231,7 +231,7 @@ it("should return an error if logged user is not adult", async () => {
   const res = await service.startBonusEligibilityCheck(mockedNotAdultUser);
 
   expect(res).toMatchObject({
-    kind: "IResponseErrorInternal"
+    kind: "IResponseErrorUnauthorized"
   });
 });
 

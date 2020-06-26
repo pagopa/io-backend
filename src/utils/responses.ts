@@ -2,7 +2,9 @@ import * as express from "express";
 import * as t from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import {
+  HttpStatusCodeEnum,
   IResponse,
+  ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorValidation
 } from "italia-ts-commons/lib/responses";
@@ -68,3 +70,23 @@ export const withValidatedOrValidationError = <T, U>(
         errorsToReadableMessages(response.value).join(" / ")
       )
     : f(response.value);
+
+/**
+ * Interface for a forbidden error response.
+ */
+export interface IResponseErrorUnauthorized
+  extends IResponse<"IResponseErrorUnauthorized"> {
+  readonly detail: string;
+}
+/**
+ * Returns a forbidden error response with status code 403.
+ */
+export function ResponseErrorUnauthorized(
+  title: string,
+  detail: string
+): IResponseErrorUnauthorized {
+  return {
+    ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_401, title, detail),
+    ...{ detail: `${title}: ${detail}`, kind: "IResponseErrorUnauthorized" }
+  };
+}
