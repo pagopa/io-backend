@@ -78,7 +78,7 @@ export default class BonusService {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
-      // check if current logged user is enabled to start a bonus request
+      // check if the current logged in user can start a bonus request
       if (
         fromNullable(user.date_of_birth).exists(
           _ => !isOlderThan(18)(new Date(_), new Date())

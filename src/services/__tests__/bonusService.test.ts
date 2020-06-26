@@ -222,7 +222,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
   });
 });
 
-it("should return an error if logged user is not adult", async () => {
+it("should return an error if the logged in user is not adult", async () => {
   mockStartBonusEligibilityCheck.mockImplementation(() =>
     t.success({ status: 123 })
   );

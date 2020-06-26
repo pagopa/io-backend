@@ -72,14 +72,14 @@ export const withValidatedOrValidationError = <T, U>(
     : f(response.value);
 
 /**
- * Interface for a forbidden error response.
+ * Interface for unauthorized error response.
  */
 export interface IResponseErrorUnauthorized
   extends IResponse<"IResponseErrorUnauthorized"> {
   readonly detail: string;
 }
 /**
- * Returns a forbidden error response with status code 403.
+ * Returns an unauthorized error response with status code 401.
  */
 export function ResponseErrorUnauthorized(
   title: string,
