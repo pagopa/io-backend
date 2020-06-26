@@ -33,12 +33,17 @@ import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import { withQrcode } from "../utils/qrcode";
 import {
+  IResponseErrorUnauthorized,
+  ResponseErrorUnauthorized,
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
 
 import { toString } from "fp-ts/lib/function";
+
+import { fromNullable } from "fp-ts/lib/Option";
+import { isOlderThan } from "../utils/date";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
@@ -69,9 +74,22 @@ export default class BonusService {
     | IResponseSuccessAccepted
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorGone
+    | IResponseErrorUnauthorized
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
+      // check if the current logged in user can start a bonus request
+      if (
+        fromNullable(user.date_of_birth).exists(
+          _ => !isOlderThan(18)(new Date(_), new Date())
+        )
+      ) {
+        return ResponseErrorUnauthorized(
+          "Unauthorized",
+          "The user must be an adult"
+        );
+      }
+
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({
         fiscalCode: user.fiscal_code
       });
