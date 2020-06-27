@@ -1,7 +1,13 @@
-import { isOlderThan } from "../date";
+import { isNone, isSome } from "fp-ts/lib/Option";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { isOlderThan, toBirthDate } from "../date";
 
 const toDate = new Date("2020-01-01");
 const olderThanValue = 18;
+
+const aFiscalCode = "DROLSS85S20H501F" as FiscalCode;
+const aWrongFiscalCode = "DROLSS85Z20H501F" as FiscalCode;
+const aDateOfBirth = new Date(1985, 10, 20);
 
 describe("Check if a birthdate is for an adult user", () => {
   it("should return true if the user is over 18 years old", () => {
@@ -18,5 +24,23 @@ describe("Check if a birthdate is for an adult user", () => {
     expect(
       isOlderThan(olderThanValue)(new Date("2002-01-02"), toDate)
     ).toBeFalsy();
+  });
+});
+
+describe("User utility", () => {
+  it("should extract the correct date of birth from fiscalCode", async () => {
+    const extractedDateOfBirthOrError = toBirthDate(aFiscalCode);
+    expect(isSome(extractedDateOfBirthOrError)).toBeTruthy();
+    if (isSome(extractedDateOfBirthOrError)) {
+      const birthDate = extractedDateOfBirthOrError.value;
+      expect(birthDate.getFullYear()).toEqual(aDateOfBirth.getFullYear());
+      expect(birthDate.getDay()).toEqual(aDateOfBirth.getDay());
+      expect(birthDate.getMonth()).toEqual(aDateOfBirth.getMonth());
+    }
+  });
+
+  it("should return none if fiscalCode is not recognized", async () => {
+    const extractedDateOfBirthOrError = toBirthDate(aWrongFiscalCode);
+    expect(isNone(extractedDateOfBirthOrError)).toBeTruthy();
   });
 });
