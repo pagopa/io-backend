@@ -42,8 +42,8 @@ import {
 
 import { toString } from "fp-ts/lib/function";
 
-import { isOlderThan, toBirthDate } from "../utils/date";
 import { isSome } from "fp-ts/lib/Option";
+import { isOlderThan, toBirthDate } from "../utils/date";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
