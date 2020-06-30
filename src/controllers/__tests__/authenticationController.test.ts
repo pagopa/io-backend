@@ -491,12 +491,17 @@ describe("AuthenticationController#logout", () => {
     req.user = mockedUser;
 
     mockDel.mockReturnValue(Promise.resolve(right(true)));
+    const mockDeleteInstallationAsync = jest.spyOn<any, string>(
+      controller,
+      "deleteInstallationAsync"
+    );
 
     const response = await controller.logout(req);
     response.apply(res);
 
     expect(controller).toBeTruthy();
     expect(mockDel).toHaveBeenCalledWith(mockSessionToken, mockWalletToken);
+    expect(mockDeleteInstallationAsync).toBeCalledWith(mockedUser.fiscal_code);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",

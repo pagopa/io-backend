@@ -186,23 +186,7 @@ export default class AuthenticationController {
       return ResponseErrorInternal(getProfileResponse.kind);
     }
 
-    // async fire & forget
-    this.notificationService
-      .deleteInstallation(user.fiscal_code)
-      .then(deleteInstallationResponse => {
-        if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
-          log.debug(
-            "Cannot delete Notification Installation: %s",
-            deleteInstallationResponse.detail
-          );
-        }
-      })
-      .catch(err => {
-        log.error(
-          "Cannot delete Notification Installation: %s",
-          JSON.stringify(err)
-        );
-      });
+    this.deleteInstallationAsync(user.fiscal_code);
 
     const urlWithToken = this.getClientProfileRedirectionUrl(
       user.session_token
@@ -237,6 +221,8 @@ export default class AuthenticationController {
         if (!response) {
           return ResponseErrorInternal("Error destroying the user session");
         }
+
+        this.deleteInstallationAsync(user.fiscal_code);
 
         return ResponseSuccessJson({ message: "ok" });
       })
@@ -278,4 +264,24 @@ export default class AuthenticationController {
           )
       );
     });
+
+  private readonly deleteInstallationAsync = (fiscalCode: FiscalCode): void => {
+    // async fire & forget
+    this.notificationService
+      .deleteInstallation(fiscalCode)
+      .then(deleteInstallationResponse => {
+        if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
+          log.debug(
+            "Cannot delete Notification Installation: %s",
+            deleteInstallationResponse.detail
+          );
+        }
+      })
+      .catch(err => {
+        log.error(
+          "Cannot delete Notification Installation: %s",
+          JSON.stringify(err)
+        );
+      });
+  };
 }
