@@ -227,6 +227,10 @@ describe("AuthenticationController#acs", () => {
     mockCreateProfile.mockReturnValue(
       ResponseSuccessJson(proxyInitializedProfileResponse)
     );
+    const mockDeleteInstallationAsync = jest.spyOn<any, string>(
+      controller,
+      "deleteInstallationAsync"
+    );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
@@ -240,6 +244,9 @@ describe("AuthenticationController#acs", () => {
     expect(mockCreateProfile).toHaveBeenCalledWith(
       mockedUser,
       expectedNewProfile
+    );
+    expect(mockDeleteInstallationAsync).toBeCalledWith(
+      validUserPayload.fiscalNumber
     );
   });
 
@@ -255,6 +262,10 @@ describe("AuthenticationController#acs", () => {
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(proxyInitializedProfileResponse)
     );
+    const mockDeleteInstallationAsync = jest.spyOn<any, string>(
+      controller,
+      "deleteInstallationAsync"
+    );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
@@ -266,6 +277,9 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
+    expect(mockDeleteInstallationAsync).toBeCalledWith(
+      validUserPayload.fiscalNumber
+    );
   });
 
   it("should fail if a profile cannot be created", async () => {
