@@ -11,8 +11,6 @@ const MIME_TYPES = {
   svg: "image/svg+xml"
 };
 
-const base64 = (s: string) => Buffer.from(s).toString("base64");
-
 // Needed to display the SVG into the mobile App
 const fixQrcodeFill = (svgStr: string) =>
   svgStr.replace("<path", '<path fill="black"');
@@ -27,6 +25,19 @@ function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   });
 }
 
+function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+  // tslint:disable-next-line: readonly-array no-any
+  const chunks: any[] = [];
+  return new Promise((resolve, reject) => {
+    stream.on("data", chunk => chunks.push(chunk));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+  });
+}
+
+const streamToBufferTask = (stream: NodeJS.ReadableStream) =>
+  tryCatch(() => streamToBuffer(stream), toError);
+
 const streamToStringTask = (stream: NodeJS.ReadableStream) =>
   tryCatch(() => streamToString(stream), toError);
 
@@ -34,17 +45,17 @@ export function withQrcode(
   bonus: BonusActivation
 ): TaskEither<Error, BonusActivationWithQrCode> {
   return sequenceS(taskEither)({
-    png: streamToStringTask(image(bonus.id, { type: "png" })),
-    svg: streamToStringTask(image(bonus.id, { type: "svg" }))
-  }).map(({ png, svg }) => ({
+    pngBuffer: streamToBufferTask(image(bonus.id, { type: "png" })),
+    svgString: streamToStringTask(image(bonus.id, { type: "svg" }))
+  }).map(({ pngBuffer, svgString }) => ({
     ...bonus,
     qr_code: [
       {
-        content: base64(png),
+        content: pngBuffer.toString("base64"),
         mime_type: MIME_TYPES.png
       },
       {
-        content: base64(fixQrcodeFill(svg)),
+        content: Buffer.from(fixQrcodeFill(svgString)).toString("base64"),
         mime_type: MIME_TYPES.svg
       }
     ]
