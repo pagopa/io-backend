@@ -4,9 +4,14 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import PagoPAClientFactory from "../../services/pagoPAClientFactory";
 import PagoPAProxyService from "../../services/pagoPAProxyService";
+import { SessionToken, WalletToken } from "../../types/token";
+import { User } from "../../types/user";
 import PagoPAProxyController from "../pagoPAProxyController";
 
 const aRptId = "123456";
@@ -152,12 +157,35 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
 });
 
 describe("PagoPAProxyController#activatePayment", () => {
+  const aTimestamp = 1518010929530;
+  const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
+  const anEmailAddress = "garibaldi@example.com" as EmailAddress;
+  const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
+
+  const mockedUser: User = {
+    created_at: aTimestamp,
+    family_name: "Garibaldi",
+    fiscal_code: aFiscalNumber,
+    name: "Giuseppe Maria",
+    session_token: "123hexToken" as SessionToken,
+    spid_email: anEmailAddress,
+    spid_level: aValidSpidLevel,
+    spid_mobile_phone: "3222222222222" as NonEmptyString,
+    wallet_token: "123hexToken" as WalletToken
+  };
+  const expectedSoggettoPagatore = {
+    anagrafica: `${mockedUser.name} ${mockedUser.family_name}`,
+    fiscal_code: mockedUser.fiscal_code,
+    tipo: "F"
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("calls the activatePayment on the PagoPAProxyService with valid values", async () => {
     const req = mockReq();
+    req.user = mockedUser;
 
     mockActivatePayment.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyPaymentActivationsPostResponse))
@@ -176,7 +204,10 @@ describe("PagoPAProxyController#activatePayment", () => {
     const response = await controller.activatePayment(req);
 
     expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest,
+      {
+        ...paymentActivationsPostRequest,
+        soggettoPagatore: expectedSoggettoPagatore
+      },
       false
     );
 
@@ -189,6 +220,7 @@ describe("PagoPAProxyController#activatePayment", () => {
 
   it("[TEST env] calls the activatePayment on the PagoPAProxyService with valid values", async () => {
     const req = mockReq();
+    req.user = mockedUser;
 
     mockActivatePayment.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyPaymentActivationsPostResponse))
@@ -207,7 +239,10 @@ describe("PagoPAProxyController#activatePayment", () => {
     const response = await controller.activatePayment(req);
 
     expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest,
+      {
+        ...paymentActivationsPostRequest,
+        soggettoPagatore: expectedSoggettoPagatore
+      },
       true
     );
     expect(response).toEqual({
@@ -219,6 +254,7 @@ describe("PagoPAProxyController#activatePayment", () => {
 
   it("fails if the call to activatePayment fails", async () => {
     const req = mockReq();
+    req.user = mockedUser;
 
     mockActivatePayment.mockReturnValue(
       Promise.resolve(ResponseErrorInternal(internalErrorMessage))
@@ -237,7 +273,10 @@ describe("PagoPAProxyController#activatePayment", () => {
     const response = await controller.activatePayment(req);
 
     expect(mockActivatePayment).toHaveBeenCalledWith(
-      paymentActivationsPostRequest,
+      {
+        ...paymentActivationsPostRequest,
+        soggettoPagatore: expectedSoggettoPagatore
+      },
       false
     );
     expect(response).toEqual(aResponseErrorInternal);
