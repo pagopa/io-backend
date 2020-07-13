@@ -19,7 +19,6 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import SessionController from "../sessionController";
-import RedisUserMetadataStorage from "../../services/redisUserMetadataStorage";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -59,8 +58,7 @@ mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers;
 mockRedisClient.sismember = mockSismember;
 const controller = new SessionController(
-  new RedisSessionStorage(mockRedisClient, aTokenDurationSecs),
-  new RedisUserMetadataStorage(mockRedisClient)
+  new RedisSessionStorage(mockRedisClient, aTokenDurationSecs)
 );
 
 const res = mockRes();
