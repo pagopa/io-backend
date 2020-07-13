@@ -2,6 +2,7 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
+import { array } from "fp-ts/lib/Array";
 import {
   Either,
   isLeft,
@@ -12,7 +13,13 @@ import {
   toError
 } from "fp-ts/lib/Either";
 import { isSome, none, Option, some } from "fp-ts/lib/Option";
-import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import {
+  fromEither,
+  TaskEither,
+  taskEither,
+  taskify,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
@@ -30,6 +37,7 @@ const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
+const blockedUserSetKey = "BLOCKEDUSERS";
 export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
@@ -313,15 +321,133 @@ export default class RedisSessionStorage extends RedisStorageUtils
       .run();
   }
 
+  /**
+   * Insert a user in the list of blocked account
+   *
+   * @param fiscalCode id of the user
+   *
+   * @returns a promise with either an error or true
+   */
+  public setBlockedUser(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(`Adding ${fiscalCode} to ${blockedUserSetKey} set`);
+      this.redisClient.sadd(blockedUserSetKey, fiscalCode, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
+  }
+
+  /**
+   * Remove a user from the list of blocked account
+   *
+   * @param fiscalCode id of the user
+   *
+   * @returns a promise with either an error or true
+   */
+  public unsetBlockedUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return new Promise<Either<Error, boolean>>(resolve => {
+      log.info(`Removing ${fiscalCode} from ${blockedUserSetKey} set`);
+      this.redisClient.srem(blockedUserSetKey, fiscalCode, (err, response) =>
+        resolve(
+          this.falsyResponseToError(
+            this.integerReply(err, response, 1),
+            new Error(
+              "Unexpected response from redis client deleting blockedUserKey"
+            )
+          )
+        )
+      );
+    });
+  }
+
+  /**
+   * Check if a user is blocked
+   *
+   * @param fiscalCode id of the user
+   *
+   * @returns a promise with either an error or a boolean indicating if the user is blocked
+   */
   public async isBlockedUser(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
-    return this.sismemberTask("BLOCKED-USERS", fiscalCode)
+    return this.sismemberTask(blockedUserSetKey, fiscalCode)
       .bimap(
         err => new Error(`Error accessing blocked users collection: ${err}`),
         result => result === 1
       )
       .run();
+  }
+
+  /**
+   * Delete all user session data
+   * @param fiscalCode
+   */
+  public async delUserAllSessions(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const sessionsOrError = await this.readSessionInfoKeys(fiscalCode);
+
+    const delSingleSession = (
+      token: SessionToken
+    ): Promise<Either<Error, boolean>> =>
+      this.loadSessionBySessionToken(token)
+        .then(e => {
+          const user: User = e.getOrElseL(err => {
+            throw err;
+          });
+          return this.del(user.session_token, user.wallet_token);
+        })
+        .catch(_ => {
+          // if I didn't find a user by it's token, I assume there's nothing about that user, so its data is deleted already
+          return right<Error, boolean>(true);
+        });
+
+    const delEverySession = (sessionTokens: readonly SessionToken[]) =>
+      array
+        .sequence(taskEither)<Error, boolean>(
+          sessionTokens.map(sessionInfoKey =>
+            fromEither<Error, SessionToken>(
+              SessionToken.decode(sessionInfoKey).mapLeft(
+                _ => new Error("Error decoding token")
+              )
+            ).chain<boolean>((token: SessionToken) =>
+              tryCatch(() => delSingleSession(token), toError).chain(fromEither)
+            )
+          )
+        )
+        .chain(_ =>
+          tryCatch(() => this.delSessionInfoKeys(fiscalCode), toError).chain(
+            fromEither
+          )
+        );
+
+    return fromEither(sessionsOrError)
+      .foldTaskEither<Error, boolean>(
+        _ => fromEither(right(true)),
+        sessionInfoKeys =>
+          delEverySession(
+            sessionInfoKeys.map(
+              sessionInfoKey =>
+                sessionInfoKey.replace(sessionInfoKeyPrefix, "") as SessionToken
+            )
+          )
+      )
+      .run();
+  }
+
+  private delSessionInfoKeys(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, true>> {
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(
+        `Deleting session info ${userSessionsSetKeyPrefix}${fiscalCode}`
+      );
+      this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
   }
 
   /*

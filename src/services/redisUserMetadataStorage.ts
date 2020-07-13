@@ -2,6 +2,7 @@ import * as redis from "redis";
 
 import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 import { ReadableReporter } from "italia-ts-commons/lib/reporters";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
@@ -62,6 +63,24 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
    */
   public async get(user: User): Promise<Either<Error, UserMetadata>> {
     return this.loadUserMetadataByFiscalCode(user.fiscal_code);
+  }
+
+  /**
+   * Delete all user metdata
+   *
+   * {@inheritDoc}
+   */
+  public del(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(`Deleting metadata for ${fiscalCode}`);
+      this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`, err => {
+        if (err) {
+          resolve(left(err));
+        } else {
+          resolve(right(true));
+        }
+      });
+    });
   }
 
   private loadUserMetadataByFiscalCode(

@@ -10,6 +10,7 @@ import { newApp } from "./app";
 import {
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
   ALLOW_PAGOPA_IP_SOURCE_RANGE,
+  ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
   BONUS_API_BASE_PATH,
@@ -73,6 +74,7 @@ newApp({
   PagoPABasePath,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
+  allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   authenticationBasePath,
   env: ENV
 })

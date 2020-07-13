@@ -111,6 +111,7 @@ export interface IAppFactoryParameters {
   env: NodeEnvironment;
   allowNotifyIPSourceRange: readonly CIDR[];
   allowPagoPAIPSourceRange: readonly CIDR[];
+  allowSessionHandleIPSourceRange: readonly CIDR[];
   authenticationBasePath: string;
   APIBasePath: string;
   BonusAPIBasePath: string;
@@ -122,6 +123,7 @@ export function newApp({
   env,
   allowNotifyIPSourceRange,
   allowPagoPAIPSourceRange,
+  allowSessionHandleIPSourceRange,
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
@@ -308,6 +310,14 @@ export function newApp({
       USER_DATA_PROCESSING_SERVICE,
       authMiddlewares.bearerSession
     );
+    registerSessionAPIRoutes(
+      app,
+      APIBasePath,
+      allowSessionHandleIPSourceRange,
+      authMiddlewares.urlToken,
+      SESSION_STORAGE,
+      USER_METADATA_STORAGE
+    );
     if (FF_BONUS_ENABLED) {
       registerBonusAPIRoutes(
         app,
@@ -438,7 +448,8 @@ function registerAPIRoutes(
   );
 
   const sessionController: SessionController = new SessionController(
-    sessionStorage
+    sessionStorage,
+    userMetadataStorage
   );
 
   const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(
@@ -592,6 +603,36 @@ function registerAPIRoutes(
       pagoPAProxyController.getActivationStatus,
       pagoPAProxyController
     )
+  );
+}
+
+// tslint:disable-next-line: parameters-max-number
+function registerSessionAPIRoutes(
+  app: Express,
+  basePath: string,
+  allowSessionHandleIPSourceRange: readonly CIDR[],
+  // tslint:disable-next-line: no-any
+  urlTokenAuth: any,
+  sessionStorage: RedisSessionStorage,
+  userMetadataStorage: RedisUserMetadataStorage
+): void {
+  const sessionController: SessionController = new SessionController(
+    sessionStorage,
+    userMetadataStorage
+  );
+
+  app.post(
+    `${basePath}/session/:fiscal_code/lock`,
+    checkIP(allowSessionHandleIPSourceRange),
+    urlTokenAuth,
+    toExpressHandler(sessionController.lockUserSession, sessionController)
+  );
+
+  app.delete(
+    `${basePath}/session/:fiscal_code/lock`,
+    checkIP(allowSessionHandleIPSourceRange),
+    urlTokenAuth,
+    toExpressHandler(sessionController.lockUserSession, sessionController)
   );
 }
 
