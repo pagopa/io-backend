@@ -33,11 +33,11 @@ import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import { withQrcode } from "../utils/qrcode";
 import {
-  IResponseErrorUnauthorized,
-  ResponseErrorUnauthorized,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
+  IResponseErrorUnauthorizedForLegalReasons,
+  ResponseErrorUnauthorizedForLegalReasons
 } from "../utils/responses";
 
 import { toString } from "fp-ts/lib/function";
@@ -74,7 +74,7 @@ export default class BonusService {
     | IResponseSuccessAccepted
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorGone
-    | IResponseErrorUnauthorized
+    | IResponseErrorUnauthorizedForLegalReasons
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withCatchAsInternalError(async () => {
@@ -84,7 +84,7 @@ export default class BonusService {
         isSome(maybeBirthDate) &&
         !isOlderThan(18)(maybeBirthDate.value, new Date())
       ) {
-        return ResponseErrorUnauthorized(
+        return ResponseErrorUnauthorizedForLegalReasons(
           "Unauthorized",
           "The user must be an adult"
         );

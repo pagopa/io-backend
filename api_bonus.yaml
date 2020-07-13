@@ -36,6 +36,8 @@ paths:
           description: "Conflict: pending request found."
           schema:
             $ref: "#/definitions/ProblemJson"
+        "451":
+          description: Unauthorized for legal reason.
         "500":
           description: Service unavailable.
           schema:
