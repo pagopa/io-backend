@@ -63,6 +63,7 @@ import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
+import SessionLockController from "./controllers/sessionLockController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
@@ -448,8 +449,7 @@ function registerAPIRoutes(
   );
 
   const sessionController: SessionController = new SessionController(
-    sessionStorage,
-    userMetadataStorage
+    sessionStorage
   );
 
   const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(
@@ -616,7 +616,7 @@ function registerSessionAPIRoutes(
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage
 ): void {
-  const sessionController: SessionController = new SessionController(
+  const sessionLockController: SessionLockController = new SessionLockController(
     sessionStorage,
     userMetadataStorage
   );
@@ -625,14 +625,20 @@ function registerSessionAPIRoutes(
     `${basePath}/session/:fiscal_code/lock`,
     checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
-    toExpressHandler(sessionController.lockUserSession, sessionController)
+    toExpressHandler(
+      sessionLockController.lockUserSession,
+      sessionLockController
+    )
   );
 
   app.delete(
     `${basePath}/session/:fiscal_code/lock`,
     checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
-    toExpressHandler(sessionController.lockUserSession, sessionController)
+    toExpressHandler(
+      sessionLockController.lockUserSession,
+      sessionLockController
+    )
   );
 }
 
