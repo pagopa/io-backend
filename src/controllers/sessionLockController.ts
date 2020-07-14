@@ -124,7 +124,6 @@ export default class SessionLockController {
           toError
         )
           .chain(fromEither)
-
           .mapLeft(err => ResponseErrorInternal(err.message))
       )
       .fold<ResponseUnockUserSessionT>(identity, _ =>
