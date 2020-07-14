@@ -5,11 +5,9 @@
 import * as express from "express";
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
@@ -23,17 +21,6 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { SuccessResponse } from "src/types/commons";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
-
-type ResponseLockUserSessionT =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseErrorNotFound
-  | IResponseSuccessJson<SuccessResponse>;
-
-type ResponseUnockUserSessionT =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseSuccessJson<SuccessResponse>;
 
 export default class SessionLockController {
   constructor(
@@ -49,31 +36,19 @@ export default class SessionLockController {
    */
   public readonly lockUserSession = (
     req: express.Request
-  ): Promise<ResponseLockUserSessionT> => {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<SuccessResponse>
+  > => {
     return taskEither
-      .of<
-        | IResponseErrorInternal
-        | IResponseErrorValidation
-        | IResponseErrorNotFound,
-        void
-      >(void 0)
+      .of<IResponseErrorInternal | IResponseErrorValidation, void>(void 0)
       .chain(_ =>
         fromEither(
           FiscalCode.decode(req.params.fiscal_code).mapLeft(err =>
             ResponseErrorValidation("Invalid fiscal code", readableReport(err))
           )
         )
-      )
-      .chain(fiscalCode =>
-        // TODO: check if the user exists
-        taskEither
-          .of(fiscalCode)
-          .mapLeft(() =>
-            ResponseErrorNotFound(
-              `User not found`,
-              `Cannot find a user for fiscalCode: ${fiscalCode}`
-            )
-          )
       )
       .chain(fiscalCode =>
         sequenceT(taskEither)(
@@ -93,9 +68,11 @@ export default class SessionLockController {
           )
         ).mapLeft(err => ResponseErrorInternal(err.message))
       )
-      .fold<ResponseLockUserSessionT>(identity, _ =>
-        ResponseSuccessJson({ message: "ok" })
-      )
+      .fold<
+        | IResponseErrorInternal
+        | IResponseErrorValidation
+        | IResponseSuccessJson<SuccessResponse>
+      >(identity, _ => ResponseSuccessJson({ message: "ok" }))
       .run();
   };
 
@@ -107,7 +84,11 @@ export default class SessionLockController {
    */
   public readonly unlockUserSession = (
     req: express.Request
-  ): Promise<ResponseUnockUserSessionT> => {
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<SuccessResponse>
+  > => {
     return taskEither
       .of<IResponseErrorInternal | IResponseErrorValidation, void>(void 0)
       .chain(_ =>
@@ -126,9 +107,11 @@ export default class SessionLockController {
           .chain(fromEither)
           .mapLeft(err => ResponseErrorInternal(err.message))
       )
-      .fold<ResponseUnockUserSessionT>(identity, _ =>
-        ResponseSuccessJson({ message: "ok" })
-      )
+      .fold<
+        | IResponseErrorInternal
+        | IResponseErrorValidation
+        | IResponseSuccessJson<SuccessResponse>
+      >(identity, _ => ResponseSuccessJson({ message: "ok" }))
       .run();
   };
 }

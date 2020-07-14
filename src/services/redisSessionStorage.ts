@@ -15,6 +15,7 @@ import {
 import { isSome, none, Option, some } from "fp-ts/lib/Option";
 import {
   fromEither,
+  fromLeft,
   TaskEither,
   taskEither,
   taskify,
@@ -401,7 +402,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
         })
         .catch(_ => {
           // if I didn't find a user by it's token, I assume there's nothing about that user, so its data is deleted already
-          return right<Error, boolean>(true);
+          return _ === sessionNotFoundError
+            ? right<Error, boolean>(true)
+            : left(_);
         });
 
     const delEverySession = (sessionTokens: readonly SessionToken[]) =>
@@ -417,15 +420,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
             )
           )
         )
-        .chain(_ =>
-          tryCatch(() => this.delSessionInfoKeys(fiscalCode), toError).chain(
-            fromEither
-          )
-        );
+        .map(() => true);
 
     return fromEither(sessionsOrError)
       .foldTaskEither<Error, boolean>(
-        _ => fromEither(right(true)),
+        _ => (_ === sessionNotFoundError ? taskEither.of(true) : fromLeft(_)),
         sessionInfoKeys =>
           delEverySession(
             sessionInfoKeys.map(
@@ -433,6 +432,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
                 sessionInfoKey.replace(sessionInfoKeyPrefix, "") as SessionToken
             )
           )
+      )
+      .chain(_ =>
+        tryCatch(() => this.delSessionInfoKeys(fiscalCode), toError).chain(
+          fromEither
+        )
       )
       .run();
   }
