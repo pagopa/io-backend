@@ -4,7 +4,7 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../../services/redisUserMetadataStorage";
-import SessionLockController from "../SessionLockController";
+import SessionLockController from "../sessionLockController";
 
 const aFiscalCode = FiscalCode.decode("AAABBB80A01C123D").getOrElseL(() => {
   throw new Error("invalid mock FiscalCode");
