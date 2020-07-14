@@ -75,7 +75,7 @@ export const withValidatedOrValidationError = <T, U>(
  * Interface for unauthorized error response.
  */
 export interface IResponseErrorUnauthorizedForLegalReasons
-  extends IResponse<"IResponseErrorUnauthorized"> {
+  extends IResponse<"IResponseErrorUnauthorizedForLegalReasons"> {
   readonly detail: string;
 }
 /**
@@ -87,6 +87,9 @@ export function ResponseErrorUnauthorizedForLegalReasons(
 ): IResponseErrorUnauthorizedForLegalReasons {
   return {
     ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_451, title, detail),
-    ...{ detail: `${title}: ${detail}`, kind: "IResponseErrorUnauthorized" }
+    ...{
+      detail: `${title}: ${detail}`,
+      kind: "IResponseErrorUnauthorizedForLegalReasons"
+    }
   };
 }
