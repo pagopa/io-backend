@@ -899,3 +899,60 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     expect(userHasActiveSessionsResult.value).toEqual(expectedRedisError);
   });
 });
+
+describe("RedisSessionStorage#setBlockedUser", () => {
+  it("should return right(true) if the user is correctly locked", async () => {
+    mockSadd.mockImplementationOnce((_, __, callback) => callback(null));
+
+    const result = await sessionStorage.setBlockedUser(aFiscalNumber);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
+  });
+
+  it("should return left if the user is not correctly locked", async () => {
+    const aError = new Error("any error");
+    mockSadd.mockImplementationOnce((_, __, callback) => callback(aError));
+
+    const result = await sessionStorage.setBlockedUser(aFiscalNumber);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value).toBe(aError);
+  });
+});
+
+describe("RedisSessionStorage#unsetBlockedUser", () => {
+  it("should return right(true) if the user is correctly unlocked", async () => {
+    const sremSuccess = 1;
+    mockSrem.mockImplementationOnce((_, __, callback) =>
+      callback(null, sremSuccess)
+    );
+
+    const result = await sessionStorage.unsetBlockedUser(aFiscalNumber);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
+  });
+
+  it("should return left(Error) if the user is not correctly unlocked", async () => {
+    const sremFailure = 0;
+    mockSrem.mockImplementationOnce((_, __, callback) =>
+      callback(null, sremFailure)
+    );
+
+    const result = await sessionStorage.unsetBlockedUser(aFiscalNumber);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value instanceof Error).toBe(true);
+  });
+
+  it("should return left if for any unhandled failures", async () => {
+    const aError = new Error("any error");
+    mockSadd.mockImplementationOnce((_, __, callback) => callback(aError));
+
+    const result = await sessionStorage.setBlockedUser(aFiscalNumber);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value).toBe(aError);
+  });
+});
