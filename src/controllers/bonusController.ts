@@ -24,7 +24,7 @@ import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck"
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
 import {
-  IResponseErrorUnauthorized,
+  IResponseErrorUnauthorizedForLegalReasons,
   withValidatedOrValidationError
 } from "../utils/responses";
 
@@ -55,7 +55,7 @@ export default class BonusController {
     | IResponseSuccessAccepted
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorGone
-    | IResponseErrorUnauthorized
+    | IResponseErrorUnauthorizedForLegalReasons
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
   > =>
     withUserFromRequest(req, user =>

@@ -74,19 +74,22 @@ export const withValidatedOrValidationError = <T, U>(
 /**
  * Interface for unauthorized error response.
  */
-export interface IResponseErrorUnauthorized
-  extends IResponse<"IResponseErrorUnauthorized"> {
+export interface IResponseErrorUnauthorizedForLegalReasons
+  extends IResponse<"IResponseErrorUnauthorizedForLegalReasons"> {
   readonly detail: string;
 }
 /**
  * Returns an unauthorized error response with status code 401.
  */
-export function ResponseErrorUnauthorized(
+export function ResponseErrorUnauthorizedForLegalReasons(
   title: string,
   detail: string
-): IResponseErrorUnauthorized {
+): IResponseErrorUnauthorizedForLegalReasons {
   return {
-    ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_401, title, detail),
-    ...{ detail: `${title}: ${detail}`, kind: "IResponseErrorUnauthorized" }
+    ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_451, title, detail),
+    ...{
+      detail: `${title}: ${detail}`,
+      kind: "IResponseErrorUnauthorizedForLegalReasons"
+    }
   };
 }
