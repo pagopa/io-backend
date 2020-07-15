@@ -10,18 +10,14 @@ schemes:
 security:
   - Token: []
 paths:
-  "/session/:fiscal_code/lock"
+  "/session/{fiscalcode}/lock":
     post:
       operationId: lockUserSession
       summary: Lock a user session and delete session data
       description: |-
         Use this operation if you want to block a user to log in. The operation succeed if the user is already blocked
       parameters:
-        - in: path
-          name: fiscal_code
-          required: true
-          schema:
-            $ref: '#/definitions/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
       responses:
         "200":
           description: Success.
@@ -48,11 +44,7 @@ paths:
       description: |-
         Use this operation if you want to unblock a user and re-allow to login. The operation succeed if the user wasn't blocked
       parameters:
-        - in: path
-          name: fiscal_code
-          required: true
-          schema:
-            $ref: '#/definitions/FiscalCode'
+        - $ref: "#/parameters/FiscalCode"
       responses:
         "200":
           description: Success.
@@ -71,6 +63,16 @@ paths:
           description: There was an error
           schema:
             $ref: "#/definitions/ProblemJson"
+parameters:
+  FiscalCode:
+    name: fiscalcode
+    in: path
+    type: string
+    maxLength: 16
+    minLength: 16
+    required: true
+    description: The fiscal code of the user, all upper case.
+    x-example: SPNDNL80R13C555X
 definitions:
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
@@ -82,7 +84,6 @@ definitions:
       message:
         type: string
 responses: {}
-parameters: {}
 consumes:
   - application/json
 produces:
