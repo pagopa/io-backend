@@ -33,11 +33,11 @@ import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import { withQrcode } from "../utils/qrcode";
 import {
+  IResponseErrorUnauthorizedForLegalReasons,
+  ResponseErrorUnauthorizedForLegalReasons,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError,
-  IResponseErrorUnauthorizedForLegalReasons,
-  ResponseErrorUnauthorizedForLegalReasons
+  withValidatedOrInternalError
 } from "../utils/responses";
 
 import { toString } from "fp-ts/lib/function";
