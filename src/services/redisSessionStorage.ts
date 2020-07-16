@@ -410,14 +410,23 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const delEverySession = (sessionTokens: readonly SessionToken[]) =>
       array
         .sequence(taskEither)<Error, boolean>(
-          sessionTokens.map(sessionInfoKey =>
+          sessionTokens.map(sessionToken =>
             fromEither<Error, SessionToken>(
-              SessionToken.decode(sessionInfoKey).mapLeft(
+              SessionToken.decode(sessionToken).mapLeft(
                 _ => new Error("Error decoding token")
               )
-            ).chain<boolean>((token: SessionToken) =>
-              tryCatch(() => delSingleSession(token), toError).chain(fromEither)
             )
+              .chain<boolean>((token: SessionToken) =>
+                tryCatch(() => delSingleSession(token), toError).chain(
+                  fromEither
+                )
+              )
+              .chain(_ =>
+                tryCatch(
+                  () => this.delSessionInfo(sessionToken),
+                  toError
+                ).chain(fromEither)
+              )
           )
         )
         .map(() => true);
@@ -434,21 +443,29 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
       )
       .chain(_ =>
-        tryCatch(() => this.delSessionInfoKeys(fiscalCode), toError).chain(
+        tryCatch(() => this.delSessionsSet(fiscalCode), toError).chain(
           fromEither
         )
       )
       .run();
   }
 
-  private delSessionInfoKeys(
-    fiscalCode: FiscalCode
-  ): Promise<Either<Error, true>> {
+  private delSessionsSet(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
     return new Promise<Either<Error, true>>(resolve => {
       log.info(
-        `Deleting session info ${userSessionsSetKeyPrefix}${fiscalCode}`
+        `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
       );
       this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
+  }
+
+  private delSessionInfo(token: SessionToken): Promise<Either<Error, true>> {
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${token}`;
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(`Deleting session info ${sessionInfoKey}`);
+      this.redisClient.del(`${sessionInfoKey}`, err =>
         resolve(err ? left(err) : right(true))
       );
     });
