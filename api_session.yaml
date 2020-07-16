@@ -8,7 +8,7 @@ basePath: /api/v1
 schemes:
   - https
 security:
-  - Token: []
+  - ApiKey: []
 paths:
   "/session/{fiscalcode}/lock":
     post:
@@ -89,7 +89,8 @@ consumes:
 produces:
   - application/json
 securityDefinitions:
-  Token:
+  ApiKey:
     type: apiKey
-    name: token
-    in: query
+    name: X-Functions-Key
+    in: header
+    description: The API key to access this function app.
