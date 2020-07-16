@@ -10,7 +10,7 @@ schemes:
 security:
   - ApiKey: []
 paths:
-  "/session/{fiscalcode}/lock":
+  "/sessions/{fiscalcode}/lock":
     post:
       operationId: lockUserSession
       summary: Lock a user session and delete session data
