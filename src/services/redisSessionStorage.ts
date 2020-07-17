@@ -431,7 +431,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         )
         .map(() => true);
 
-    return fromEither(sessionsOrError)
+    return fromEither(errorOrSessions)
       .foldTaskEither<Error, boolean>(
         _ => (_ === sessionNotFoundError ? taskEither.of(true) : fromLeft(_)),
         sessionInfoKeys =>
