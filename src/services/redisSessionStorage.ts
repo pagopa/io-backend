@@ -388,7 +388,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async delUserAllSessions(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
-    const sessionsOrError = await this.readSessionInfoKeys(fiscalCode);
+    const errorOrSessions = await this.readSessionInfoKeys(fiscalCode);
 
     const delSingleSession = (
       token: SessionToken
