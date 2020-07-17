@@ -390,23 +390,6 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, boolean>> {
     const errorOrSessions = await this.readSessionInfoKeys(fiscalCode);
 
-    const delSingleSession = (
-      token: SessionToken
-    ): Promise<Either<Error, boolean>> =>
-      this.loadSessionBySessionToken(token)
-        .then(e => {
-          const user: User = e.getOrElseL(err => {
-            throw err;
-          });
-          return this.del(user.session_token, user.wallet_token);
-        })
-        .catch(_ => {
-          // if I didn't find a user by it's token, I assume there's nothing about that user, so its data is deleted already
-          return _ === sessionNotFoundError
-            ? right<Error, boolean>(true)
-            : left(_);
-        });
-
     const delEverySession = (sessionTokens: readonly SessionToken[]) =>
       array
         .sequence(taskEither)<Error, boolean>(
@@ -417,7 +400,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
               )
             )
               .chain<boolean>((token: SessionToken) =>
-                tryCatch(() => delSingleSession(token), toError).chain(
+                tryCatch(() => this.delSingleSession(token), toError).chain(
                   fromEither
                 )
               )
@@ -449,6 +432,27 @@ export default class RedisSessionStorage extends RedisStorageUtils
         )
       )
       .run();
+  }
+
+  /**
+   * Given a token, it removes user session token and wallet token
+   * @param token
+   */
+  private async delSingleSession(
+    token: SessionToken
+  ): Promise<Either<Error, boolean>> {
+    try {
+      const errorOrUser = await this.loadSessionBySessionToken(token);
+      const user: User = errorOrUser.getOrElseL(err => {
+        throw err;
+      });
+      return this.del(user.session_token, user.wallet_token);
+    } catch (error) {
+      // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
+      return error === sessionNotFoundError
+        ? right<Error, boolean>(true)
+        : left(error);
+    }
   }
 
   private delSessionsSet(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
