@@ -433,6 +433,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     return fromEither(errorOrSessions)
       .foldTaskEither<Error, boolean>(
+        // as we're deleting stuff, a NotFound error can be considered as a success
         _ => (_ === sessionNotFoundError ? taskEither.of(true) : fromLeft(_)),
         sessionInfoKeys =>
           delEverySession(
