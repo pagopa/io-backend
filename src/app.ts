@@ -622,7 +622,7 @@ function registerSessionAPIRoutes(
   );
 
   app.post(
-    `${basePath}/session/:fiscal_code/lock`,
+    `${basePath}/sessions/:fiscal_code/lock`,
     checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
@@ -632,7 +632,7 @@ function registerSessionAPIRoutes(
   );
 
   app.delete(
-    `${basePath}/session/:fiscal_code/lock`,
+    `${basePath}/sessions/:fiscal_code/lock`,
     checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
