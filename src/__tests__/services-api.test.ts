@@ -82,6 +82,7 @@ describe("GET /services/:id", () => {
       PagoPABasePath: "/pagopa/api/v1",
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
+      allowSessionHandleIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });

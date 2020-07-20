@@ -63,6 +63,7 @@ import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { Task } from "fp-ts/lib/Task";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
+import SessionLockController from "./controllers/sessionLockController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
@@ -111,6 +112,7 @@ export interface IAppFactoryParameters {
   env: NodeEnvironment;
   allowNotifyIPSourceRange: readonly CIDR[];
   allowPagoPAIPSourceRange: readonly CIDR[];
+  allowSessionHandleIPSourceRange: readonly CIDR[];
   authenticationBasePath: string;
   APIBasePath: string;
   BonusAPIBasePath: string;
@@ -122,6 +124,7 @@ export function newApp({
   env,
   allowNotifyIPSourceRange,
   allowPagoPAIPSourceRange,
+  allowSessionHandleIPSourceRange,
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
@@ -307,6 +310,14 @@ export function newApp({
       USER_METADATA_STORAGE,
       USER_DATA_PROCESSING_SERVICE,
       authMiddlewares.bearerSession
+    );
+    registerSessionAPIRoutes(
+      app,
+      APIBasePath,
+      allowSessionHandleIPSourceRange,
+      authMiddlewares.urlToken,
+      SESSION_STORAGE,
+      USER_METADATA_STORAGE
     );
     if (FF_BONUS_ENABLED) {
       registerBonusAPIRoutes(
@@ -591,6 +602,42 @@ function registerAPIRoutes(
     toExpressHandler(
       pagoPAProxyController.getActivationStatus,
       pagoPAProxyController
+    )
+  );
+}
+
+// tslint:disable-next-line: parameters-max-number
+function registerSessionAPIRoutes(
+  app: Express,
+  basePath: string,
+  allowSessionHandleIPSourceRange: readonly CIDR[],
+  // tslint:disable-next-line: no-any
+  urlTokenAuth: any,
+  sessionStorage: RedisSessionStorage,
+  userMetadataStorage: RedisUserMetadataStorage
+): void {
+  const sessionLockController: SessionLockController = new SessionLockController(
+    sessionStorage,
+    userMetadataStorage
+  );
+
+  app.post(
+    `${basePath}/sessions/:fiscal_code/lock`,
+    checkIP(allowSessionHandleIPSourceRange),
+    urlTokenAuth,
+    toExpressHandler(
+      sessionLockController.lockUserSession,
+      sessionLockController
+    )
+  );
+
+  app.delete(
+    `${basePath}/sessions/:fiscal_code/lock`,
+    checkIP(allowSessionHandleIPSourceRange),
+    urlTokenAuth,
+    toExpressHandler(
+      sessionLockController.lockUserSession,
+      sessionLockController
     )
   );
 }

@@ -136,6 +136,8 @@ stages:
               npx oval validate -p api_pagopa.yaml
               npx oval validate -p api_backend.yaml
               npx oval validate -p api_public.yaml
+              npx oval validate -p api_bonus.yaml
+              npx oval validate -p api_session.yaml
             displayName: 'Validate openAPI'
 
       # A4) Run Danger (skipping if not executing on a PR)

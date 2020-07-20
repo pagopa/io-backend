@@ -25,31 +25,38 @@ import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
 
+// utils that extracts the last argument as callback and calls it
+const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
+  const callback = args[args.length - 1];
+  return callback(err, value);
+};
+
 const aTokenDurationSecs = 3600;
 const theCurrentTimestampMillis = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anInvalidFiscalNumber = "INVALID-FC" as FiscalCode;
+const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
+const anInvalidFiscalCode = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
+const aSessionToken = "HexToKen" as SessionToken;
+const aWalletToken = "HexToKen" as WalletToken;
 // mock for a valid User
 const aValidUser: User = {
   created_at: 1183518855,
   family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
+  fiscal_code: aFiscalCode,
   name: "Giuseppe Maria",
-  session_token: "HexToKen" as SessionToken,
+  session_token: aSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
   spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "HexToKen" as WalletToken
+  wallet_token: aWalletToken
 };
 
 // mock for a invalid User
 const anInvalidUser: User = {
   ...aValidUser,
-  fiscal_code: anInvalidFiscalNumber
+  fiscal_code: anInvalidFiscalCode
 };
 
 const mockGetNewToken = jest.fn();
@@ -62,12 +69,20 @@ jest.mock("../../services/tokenService", () => {
 });
 
 const mockSet = jest.fn();
-const mockGet = jest.fn();
+const mockGet = jest.fn().mockImplementation((_, callback) => {
+  callback(undefined, JSON.stringify(aValidUser));
+});
 const mockMget = jest.fn();
-const mockDel = jest.fn();
+const mockDel = jest.fn().mockImplementation(
+  // as del() can be can be called with variable arguments number, we extract the last as callback
+  callCallback(undefined, 1)
+);
+
 const mockSadd = jest.fn();
 const mockSrem = jest.fn();
-const mockSmembers = jest.fn();
+const mockSmembers = jest
+  .fn()
+  .mockImplementation((_, callback) => callback(null, [aSessionToken]));
 const mockExists = jest.fn();
 const mockSismember = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
@@ -252,7 +267,7 @@ describe("RedisSessionStorage#set", () => {
         callback(undefined, 1);
       });
 
-      mockSmembers.mockImplementation((_, callback) => {
+      mockSmembers.mockImplementationOnce((_, callback) => {
         callback(undefined, []);
       });
 
@@ -291,7 +306,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       session_token: `${oldSessionToken}2` as SessionToken,
       wallet_token: `${oldWalletToken}2` as WalletToken
     };
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${oldUserPayload.session_token}`,
         `SESSIONINFO-${oldUserPayload2.session_token}`,
@@ -303,9 +318,6 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
         JSON.stringify(oldUserPayload),
         JSON.stringify(oldUserPayload2)
       ]);
-    });
-    mockDel.mockImplementation((_, __, ___, ____, callback) => {
-      callback(undefined, 1);
     });
 
     const response: Either<Error, boolean> = await sessionStorage[
@@ -335,7 +347,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
 
 describe("RedisSessionStorage#getBySessionToken", () => {
   it("should fail getting a session for an inexistent token", async () => {
-    mockGet.mockImplementation((_, callback) => {
+    mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, null);
     });
     const response = await sessionStorage.getBySessionToken(
@@ -345,7 +357,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
   });
 
   it("should fail getting a session with invalid value", async () => {
-    mockGet.mockImplementation((_, callback) => {
+    mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
     const expectedDecodedError = User.decode(anInvalidUser) as Left<
@@ -367,7 +379,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
   });
 
   it("should fail parse of user payload", async () => {
-    mockGet.mockImplementation((_, callback) => {
+    mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, "Invalid JSON");
     });
 
@@ -385,7 +397,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
   });
 
   it("should return error if the session is expired", async () => {
-    mockGet.mockImplementation((_, callback) => {
+    mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, null);
     });
     const response = await sessionStorage.getBySessionToken(
@@ -397,7 +409,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
   });
 
   it("should get a session with valid values", async () => {
-    mockGet.mockImplementation((_, callback) => {
+    mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(aValidUser));
     });
 
@@ -623,7 +635,7 @@ describe("RedisSessionStorage#del", () => {
 
 describe("RedisSessionStorage#listUserSessions", () => {
   it("should re-init session info and session info set for a user", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, []);
     });
     mockSet.mockImplementation((_, __, ___, ____, callback) => {
@@ -651,7 +663,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should fails if re-init session info and session info set don't complete", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, []);
     });
     mockSet.mockImplementation((_, __, ___, ____, callback) => {
@@ -663,7 +675,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should skip a session with invalid value", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
     });
 
@@ -682,7 +694,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should skip a session with unparseble value", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
     });
 
@@ -701,7 +713,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should handle expired keys on user tokens set", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
@@ -732,7 +744,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
 describe("RedisSessionStorage#clearExpiredSetValues", () => {
   it("error reading set members", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(new Error("smembers error"), undefined);
     });
     // tslint:disable-next-line: no-string-literal
@@ -742,7 +754,7 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
     expect(clearResults).toEqual([]);
   });
   it("delete expired session key reference from user token set", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
@@ -784,7 +796,7 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
 
 describe("RedisSessionStorage#userHasActiveSessions", () => {
   it("should return true if exists an active user session", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
@@ -813,7 +825,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   });
 
   it("should return false if doens't exists an active user session", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
@@ -842,7 +854,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   });
 
   it("should return false if doens't exists any session info for the user", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, []);
     });
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
@@ -853,7 +865,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   });
 
   it("should return false if sessions info for a user are missing", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
@@ -870,7 +882,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   });
 
   it("should return a left value if a redis call fail", async () => {
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
@@ -889,7 +901,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
 
   it("should return left value if a redis error occurs searching session info", async () => {
     const expectedRedisError = new Error("Generic Redis Error");
-    mockSmembers.mockImplementation((_, callback) => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
       callback(expectedRedisError, undefined);
     });
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
@@ -897,5 +909,109 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     );
     expect(isRight(userHasActiveSessionsResult)).toBeFalsy();
     expect(userHasActiveSessionsResult.value).toEqual(expectedRedisError);
+  });
+});
+
+describe("RedisSessionStorage#setBlockedUser", () => {
+  it("should return right(true) if the user is correctly locked", async () => {
+    mockSadd.mockImplementationOnce((_, __, callback) => callback(null));
+
+    const result = await sessionStorage.setBlockedUser(aFiscalCode);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
+  });
+
+  it("should return left if the user is not correctly locked", async () => {
+    const aError = new Error("any error");
+    mockSadd.mockImplementationOnce((_, __, callback) => callback(aError));
+
+    const result = await sessionStorage.setBlockedUser(aFiscalCode);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value).toBe(aError);
+  });
+});
+
+describe("RedisSessionStorage#unsetBlockedUser", () => {
+  it("should return right(true) if the user is correctly unlocked", async () => {
+    const sremSuccess = 1;
+    mockSrem.mockImplementation((_, __, callback) =>
+      callback(null, sremSuccess)
+    );
+
+    const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
+  });
+
+  it("should return left(Error) if the user is not correctly unlocked", async () => {
+    const sremFailure = 0;
+    mockSrem.mockImplementationOnce((_, __, callback) =>
+      callback(null, sremFailure)
+    );
+
+    const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value instanceof Error).toBe(true);
+  });
+
+  it("should return left if for any unhandled failures", async () => {
+    const aError = new Error("any error");
+    mockSadd.mockImplementationOnce((_, __, callback) => callback(aError));
+
+    const result = await sessionStorage.setBlockedUser(aFiscalCode);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value).toBe(aError);
+  });
+});
+
+describe("RedisSessionStorage#delUserAllSessions", () => {
+  it("should succeed if user has no session", async () => {
+    mockSmembers.mockImplementationOnce((_, callback) => callback(null, []));
+    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
+  });
+
+  it("should fail if there's an error retrieving user's sessions", async () => {
+    const aError = new Error("any error");
+    mockSmembers.mockImplementationOnce((_, callback) => callback(aError));
+    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value).toBe(aError);
+  });
+
+  it("should fail if the stored user profile is not valid", async () => {
+    const invalidProfile = { foo: "bar" };
+    mockGet.mockImplementationOnce((_, callback) =>
+      callback(null, invalidProfile)
+    );
+
+    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
+
+    expect(result.isLeft()).toBeTruthy();
+    expect(result.value instanceof Error).toBe(true);
+  });
+
+  it("should succeed if there's no user stored", async () => {
+    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+
+    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
+  });
+
+  it("should succeed if everything is fine", async () => {
+    const result = await sessionStorage.delUserAllSessions(aFiscalCode);
+
+    expect(result.isRight()).toBeTruthy();
+    expect(result.value).toBe(true);
   });
 });

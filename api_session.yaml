@@ -1,0 +1,96 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Proxy API
+  description: Collection of enpoints to interact with user session.
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+security:
+  - ApiKey: []
+paths:
+  "/sessions/{fiscalcode}/lock":
+    post:
+      operationId: lockUserSession
+      summary: Lock a user session and delete session data
+      description: |-
+        Use this operation if you want to block a user to log in. The operation succeed if the user is already blocked
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+          examples:
+            application/json:
+              "message": "ok"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Token null or invalid.
+        "404":
+          description: User not found.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+    delete:
+      operationId: unlockUserSession
+      summary: Remove a lock to a user session
+      description: |-
+        Use this operation if you want to unblock a user and re-allow to login. The operation succeed if the user wasn't blocked
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+          examples:
+            application/json:
+              "message": "ok"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Token null or invalid.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+parameters:
+  FiscalCode:
+    name: fiscalcode
+    in: path
+    type: string
+    maxLength: 16
+    minLength: 16
+    required: true
+    description: The fiscal code of the user, all upper case.
+    x-example: SPNDNL80R13C555X
+definitions:
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
+responses: {}
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  ApiKey:
+    type: apiKey
+    name: X-Functions-Key
+    in: header
+    description: The API key to access this function app.

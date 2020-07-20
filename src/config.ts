@@ -228,6 +228,18 @@ export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodeCIDRs(
   return process.exit(1);
 });
 
+// IP(s) or CIDR(s) allowed for handling sessions
+export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = decodeCIDRs(
+  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
 // HTTP-only fetch with optional keepalive agent

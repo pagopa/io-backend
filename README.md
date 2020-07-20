@@ -162,6 +162,7 @@ Those are all Environment variables needed by the application:
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages           | string |
 | NOTIFICATIONS_QUEUE_NAME                | Queue name of Azure queue storage for notification hub messages                  | string |
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
+| ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE  | The range in CIDR form of IPs of service allowed to handle user sessions          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |

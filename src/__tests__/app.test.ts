@@ -62,6 +62,7 @@ describe("Success app start", () => {
       PagoPABasePath: "/pagopa/api/v1",
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
+      allowSessionHandleIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });
@@ -156,6 +157,7 @@ describe("Failure app start", () => {
       PagoPABasePath: "/pagopa/api/v1",
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
+      allowSessionHandleIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });

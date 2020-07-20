@@ -2,6 +2,7 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
+import { array } from "fp-ts/lib/Array";
 import {
   Either,
   isLeft,
@@ -12,7 +13,14 @@ import {
   toError
 } from "fp-ts/lib/Either";
 import { isSome, none, Option, some } from "fp-ts/lib/Option";
-import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import {
+  fromEither,
+  fromLeft,
+  TaskEither,
+  taskEither,
+  taskify,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
@@ -30,6 +38,7 @@ const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
+const blockedUserSetKey = "BLOCKEDUSERS";
 export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
@@ -313,15 +322,158 @@ export default class RedisSessionStorage extends RedisStorageUtils
       .run();
   }
 
+  /**
+   * Insert a user in the list of blocked account
+   *
+   * @param fiscalCode id of the user
+   *
+   * @returns a promise with either an error or true
+   */
+  public setBlockedUser(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(`Adding ${fiscalCode} to ${blockedUserSetKey} set`);
+      this.redisClient.sadd(blockedUserSetKey, fiscalCode, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
+  }
+
+  /**
+   * Remove a user from the list of blocked account
+   *
+   * @param fiscalCode id of the user
+   *
+   * @returns a promise with either an error or true
+   */
+  public unsetBlockedUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return new Promise<Either<Error, boolean>>(resolve => {
+      log.info(`Removing ${fiscalCode} from ${blockedUserSetKey} set`);
+      this.redisClient.srem(blockedUserSetKey, fiscalCode, (err, response) =>
+        resolve(
+          this.falsyResponseToError(
+            this.integerReply(err, response, 1),
+            new Error(
+              "Unexpected response from redis client deleting blockedUserKey"
+            )
+          )
+        )
+      );
+    });
+  }
+
+  /**
+   * Check if a user is blocked
+   *
+   * @param fiscalCode id of the user
+   *
+   * @returns a promise with either an error or a boolean indicating if the user is blocked
+   */
   public async isBlockedUser(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
-    return this.sismemberTask("BLOCKED-USERS", fiscalCode)
+    return this.sismemberTask(blockedUserSetKey, fiscalCode)
       .bimap(
         err => new Error(`Error accessing blocked users collection: ${err}`),
         result => result === 1
       )
       .run();
+  }
+
+  /**
+   * Delete all user session data
+   * @param fiscalCode
+   */
+  public async delUserAllSessions(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    const errorOrSessions = await this.readSessionInfoKeys(fiscalCode);
+
+    const delEverySession = (sessionTokens: readonly SessionToken[]) =>
+      array
+        .sequence(taskEither)<Error, boolean>(
+          sessionTokens.map(sessionToken =>
+            fromEither<Error, SessionToken>(
+              SessionToken.decode(sessionToken).mapLeft(
+                _ => new Error("Error decoding token")
+              )
+            )
+              .chain<boolean>((token: SessionToken) =>
+                tryCatch(() => this.delSingleSession(token), toError).chain(
+                  fromEither
+                )
+              )
+              .chain(_ =>
+                tryCatch(
+                  () => this.delSessionInfo(sessionToken),
+                  toError
+                ).chain(fromEither)
+              )
+          )
+        )
+        .map(() => true);
+
+    return fromEither(errorOrSessions)
+      .foldTaskEither<Error, boolean>(
+        // as we're deleting stuff, a NotFound error can be considered as a success
+        _ => (_ === sessionNotFoundError ? taskEither.of(true) : fromLeft(_)),
+        sessionInfoKeys =>
+          delEverySession(
+            sessionInfoKeys.map(
+              sessionInfoKey =>
+                sessionInfoKey.replace(sessionInfoKeyPrefix, "") as SessionToken
+            )
+          )
+      )
+      .chain(_ =>
+        tryCatch(() => this.delSessionsSet(fiscalCode), toError).chain(
+          fromEither
+        )
+      )
+      .run();
+  }
+
+  /**
+   * Given a token, it removes user session token and wallet token
+   * @param token
+   */
+  private async delSingleSession(
+    token: SessionToken
+  ): Promise<Either<Error, boolean>> {
+    try {
+      const errorOrUser = await this.loadSessionBySessionToken(token);
+      const user: User = errorOrUser.getOrElseL(err => {
+        throw err;
+      });
+      return this.del(user.session_token, user.wallet_token);
+    } catch (error) {
+      // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
+      return error === sessionNotFoundError
+        ? right<Error, boolean>(true)
+        : left(error);
+    }
+  }
+
+  private delSessionsSet(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(
+        `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
+      );
+      this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
+  }
+
+  private delSessionInfo(token: SessionToken): Promise<Either<Error, true>> {
+    const sessionInfoKey = `${sessionInfoKeyPrefix}${token}`;
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(`Deleting session info ${sessionInfoKey}`);
+      this.redisClient.del(`${sessionInfoKey}`, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
   }
 
   /*
