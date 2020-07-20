@@ -77,7 +77,7 @@ export default class SessionLockController {
   };
 
   /**
-   * Unock a user account
+   * Unlock a user account
    * @param req expects fiscal_code as a path param
    *
    * @returns a promise with the encoded response object
