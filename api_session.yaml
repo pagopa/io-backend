@@ -1,14 +1,12 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Proxy API
+  title: Session API
   description: Collection of enpoints to interact with user session.
 host: localhost
 basePath: /api/v1
 schemes:
   - https
-security:
-  - ApiKey: []
 paths:
   "/sessions/{fiscalcode}/lock":
     post:
@@ -18,6 +16,7 @@ paths:
         Use this operation if you want to block a user to log in. The operation succeed if the user is already blocked
       parameters:
         - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
       responses:
         "200":
           description: Success.
@@ -28,8 +27,6 @@ paths:
               "message": "ok"
         "400":
           description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
         "401":
           description: Token null or invalid.
         "404":
@@ -45,6 +42,7 @@ paths:
         Use this operation if you want to unblock a user and re-allow to login. The operation succeed if the user wasn't blocked
       parameters:
         - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
       responses:
         "200":
           description: Success.
@@ -55,8 +53,6 @@ paths:
               "message": "ok"
         "400":
           description: Bad request
-          schema:
-            $ref: "#/definitions/ProblemJson"
         "401":
           description: Token null or invalid.
         "500":
@@ -73,6 +69,12 @@ parameters:
     required: true
     description: The fiscal code of the user, all upper case.
     x-example: SPNDNL80R13C555X
+  Token:
+    name: token
+    in: query
+    type: string
+    required: true
+    description: The API key used to access this webhooks.
 definitions:
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
@@ -88,9 +90,3 @@ consumes:
   - application/json
 produces:
   - application/json
-securityDefinitions:
-  ApiKey:
-    type: apiKey
-    name: X-Functions-Key
-    in: header
-    description: The API key to access this function app.
