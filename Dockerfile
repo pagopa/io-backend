@@ -13,6 +13,8 @@ COPY /notification_queue_messages.yaml /usr/src/app/notification_queue_messages.
 COPY /api_backend.yaml /usr/src/app/api_backend.yaml
 COPY /api_pagopa.yaml /usr/src/app/api_pagopa.yaml
 COPY /api_public.yaml /usr/src/app/api_public.yaml
+COPY /api_bonus.yaml /usr/src/app/api_bonus.yaml
+COPY /api_session.yaml /usr/src/app/api_session.yaml
 
 COPY /.npmrc /usr/src/app/.npmrc
 RUN sudo chmod -R 777 /usr/src/app \
