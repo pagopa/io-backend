@@ -5,7 +5,7 @@
  */
 
 import * as express from "express";
-import { isLeft } from "fp-ts/lib/Either";
+import { isLeft, toError } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -24,6 +24,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 import { NewProfile } from "generated/io-api/NewProfile";
 
 import { FiscalCode } from "italia-ts-commons/lib/strings";
+import UsersLoginLogService from "src/services/usersLoginLogService";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
@@ -55,6 +56,7 @@ export default class AuthenticationController {
     ) => UrlFromString,
     private readonly profileService: ProfileService,
     private readonly notificationService: NotificationService,
+    private readonly usersLoginLogService: UsersLoginLogService,
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
   ) {}
 
@@ -184,6 +186,18 @@ export default class AuthenticationController {
       // we switch to a generic error since the acs definition
       // in io-spid-commons does not support 429 errors
       return ResponseErrorInternal(getProfileResponse.kind);
+    }
+
+    // Notify the user login
+    try {
+      await this.usersLoginLogService.logUserLogin({
+        fiscalCode: spidUser.fiscalNumber,
+        lastLoginAt: new Date(),
+        source: spidUser.email !== undefined ? "spid" : "cie"
+      });
+    } catch (e) {
+      // Fire & forget, so just print a debug message
+      log.debug("Cannot notify userLogin: %s", toError(e).message);
     }
 
     // async fire & forget

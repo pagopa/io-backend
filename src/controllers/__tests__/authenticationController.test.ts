@@ -29,6 +29,7 @@ import NotificationService from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
+import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
@@ -161,6 +162,14 @@ jest.mock("../../services/notificationService", () => {
   };
 });
 
+jest.mock("../../services/usersLoginLogService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      notifyUserLogin: () => Promise.resolve()
+    }))
+  };
+});
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -184,6 +193,7 @@ beforeAll(async () => {
   const api = new ApiClientFactory("", "");
   const profileService = new ProfileService(api);
   const notificationService = new NotificationService("", "");
+  const usersLoginLogService = new UsersLoginLogService("", "");
 
   controller = new AuthenticationController(
     redisSessionStorage,
@@ -191,6 +201,7 @@ beforeAll(async () => {
     getClientProfileRedirectionUrl,
     profileService,
     notificationService,
+    usersLoginLogService,
     []
   );
 });

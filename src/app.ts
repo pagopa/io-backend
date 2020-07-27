@@ -23,7 +23,9 @@ import {
   TEST_LOGIN_FISCAL_CODES,
   TEST_LOGIN_PASSWORD,
   tokenDurationSecs,
-  URL_TOKEN_STRATEGY
+  URL_TOKEN_STRATEGY,
+  USERS_LOGIN_QUEUE_NAME,
+  USERS_LOGIN_STORAGE_CONNECTION_STRING
 } from "./config";
 
 import * as apicache from "apicache";
@@ -74,6 +76,7 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
+import UsersLoginLogService from "./services/usersLoginLogService";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { localStrategy } from "./strategies/localStrategy";
@@ -274,12 +277,29 @@ export function newApp({
 
     const NOTIFICATION_SERVICE = ERROR_OR_NOTIFICATION_SERVICE.value;
 
+    // Create the UsersLoginLogService
+    const ERROR_OR_USERS_LOGIN_LOG_SERVICE = tryCatch2v(
+      () => {
+        return new UsersLoginLogService(
+          USERS_LOGIN_STORAGE_CONNECTION_STRING,
+          USERS_LOGIN_QUEUE_NAME
+        );
+      },
+      err => {
+        log.error("Error initializing UsersLoginLogService: %s", err);
+        process.exit(1);
+      }
+    );
+
+    const USERS_LOGIN_LOG_SERVICE = ERROR_OR_USERS_LOGIN_LOG_SERVICE.value;
+
     const acsController: AuthenticationController = new AuthenticationController(
       SESSION_STORAGE,
       TOKEN_SERVICE,
       getClientProfileRedirectionUrl,
       PROFILE_SERVICE,
       NOTIFICATION_SERVICE,
+      USERS_LOGIN_LOG_SERVICE,
       TEST_LOGIN_FISCAL_CODES
     );
 
