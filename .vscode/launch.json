@@ -16,7 +16,7 @@
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
       "windows": {
-        "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
       }
     },    
     {
@@ -33,7 +33,7 @@
         "${workspaceFolder}/src/**/*.js"
       ],
       "skipFiles": [
-        "<node_internals>/**/*.js",
+        "<node_internals>/**/*.js"
       ]
     }
   ]

@@ -656,7 +656,7 @@ function registerSessionAPIRoutes(
     checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
-      sessionLockController.lockUserSession,
+      sessionLockController.unlockUserSession,
       sessionLockController
     )
   );
