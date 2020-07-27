@@ -32,6 +32,7 @@ import TokenService from "../../services/tokenService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
+import UsersLoginNotificationService from "../../services/usersLoginNotificationService";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -184,6 +185,10 @@ beforeAll(async () => {
   const api = new ApiClientFactory("", "");
   const profileService = new ProfileService(api);
   const notificationService = new NotificationService("", "");
+  const usersLoginNotificationService = new UsersLoginNotificationService(
+    "",
+    ""
+  );
 
   controller = new AuthenticationController(
     redisSessionStorage,
@@ -191,6 +196,7 @@ beforeAll(async () => {
     getClientProfileRedirectionUrl,
     profileService,
     notificationService,
+    usersLoginNotificationService,
     []
   );
 });

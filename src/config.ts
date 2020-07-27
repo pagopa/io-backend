@@ -312,6 +312,14 @@ export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
 );
 export const SPID_LOG_QUEUE_NAME = getRequiredENVVar("SPID_LOG_QUEUE_NAME");
 
+// Needed to forward SPID/CIE successful login
+export const USERS_LOGIN_STORAGE_CONNECTION_STRING = getRequiredENVVar(
+  "USERS_LOGIN_STORAGE_CONNECTION_STRING "
+);
+export const USERS_LOGIN_QUEUE_NAME = getRequiredENVVar(
+  "USERS_LOGIN_QUEUE_NAME"
+);
+
 // Needed to forward push notifications actions events
 export const NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
   "NOTIFICATIONS_STORAGE_CONNECTION_STRING"
