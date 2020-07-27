@@ -29,10 +29,10 @@ import NotificationService from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
+import UsersLoginNotificationService from "../../services/usersLoginNotificationService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
-import UsersLoginNotificationService from "../../services/usersLoginNotificationService";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -158,6 +158,14 @@ jest.mock("../../services/notificationService", () => {
     default: jest.fn().mockImplementation(() => ({
       deleteInstallation: () =>
         Promise.resolve(ResponseSuccessJson({ message: "ok" }))
+    }))
+  };
+});
+
+jest.mock("../../services/usersLoginNotificationService", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      notifyUserLogin: () => Promise.resolve()
     }))
   };
 });
