@@ -1,5 +1,6 @@
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
+import { base64EncodeObject } from "../../utils/messages";
 import UsersLoginLogService, { UserLogin } from "../usersLoginLogService";
 
 const mockSendMessage = jest.fn();
@@ -24,7 +25,7 @@ describe("UsersLoginLogService#notifyUserLogin", () => {
       lastLoginAt: new Date(),
       source: "spid"
     };
-    const userLoginMessage = JSON.stringify(UserLogin.encode(userLogin));
+    const userLoginMessage = base64EncodeObject(UserLogin.encode(userLogin));
 
     await service.logUserLogin(userLogin);
 
