@@ -5,6 +5,8 @@ import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 
+import { base64EncodeObject } from "../utils/messages";
+
 export const UserLogin = t.interface({
   fiscalCode: FiscalCode,
   lastLoginAt: UTCISODateFromString,
@@ -16,7 +18,7 @@ export const UserLogin = t.interface({
 
 export type UserLogin = t.TypeOf<typeof UserLogin>;
 
-export default class UsersLoginNotificationService {
+export default class UsersLoginLogService {
   private queueClient: QueueClient;
 
   constructor(
@@ -29,11 +31,11 @@ export default class UsersLoginNotificationService {
     );
   }
 
-  public readonly notifyUserLogin = (
+  public readonly logUserLogin = (
     userLogin: UserLogin
   ): Promise<QueueSendMessageResponse> => {
     const userLoginEncoded = UserLogin.encode(userLogin);
 
-    return this.queueClient.sendMessage(JSON.stringify(userLoginEncoded));
+    return this.queueClient.sendMessage(base64EncodeObject(userLoginEncoded));
   };
 }

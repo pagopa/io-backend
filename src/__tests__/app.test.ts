@@ -29,7 +29,7 @@ jest.mock("../services/notificationService", () => {
     default: jest.fn().mockImplementation(() => ({}))
   };
 });
-jest.mock("../services/usersLoginNotificationService", () => {
+jest.mock("../services/usersLoginLogService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({}))
   };
