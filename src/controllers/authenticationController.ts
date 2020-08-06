@@ -5,7 +5,11 @@
  */
 
 import * as express from "express";
-import { isLeft, toError } from "fp-ts/lib/Either";
+import {
+  fromNullable as fromNullableE,
+  isLeft,
+  toError
+} from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -23,9 +27,12 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { AccessToken } from "../../generated/public/AccessToken";
+import { clientProfileRedirectionUrl } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
@@ -223,6 +230,35 @@ export default class AuthenticationController {
     );
 
     return ResponsePermanentRedirect(urlWithToken);
+  }
+
+  public async acsTest(
+    userPayload: unknown
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<AccessToken>
+  > {
+    const acsResponse = await this.acs(userPayload);
+    if (acsResponse.kind === "IResponsePermanentRedirect") {
+      const REDIRECT_URL = clientProfileRedirectionUrl.replace("{token}", "");
+      return fromNullableE(
+        new Error("Missing detail in ResponsePermanentRedirect")
+      )(acsResponse.detail)
+        .map(_ => _.replace(REDIRECT_URL, ""))
+        .chain(token =>
+          NonEmptyString.decode(token).mapLeft(
+            err => new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
+          )
+        )
+        .fold<IResponseSuccessJson<AccessToken> | IResponseErrorInternal>(
+          err => ResponseErrorInternal(err.message),
+          token => ResponseSuccessJson({ token })
+        );
+    }
+    return acsResponse;
   }
   /**
    * Retrieves the logout url from the IDP.

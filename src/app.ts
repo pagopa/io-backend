@@ -728,7 +728,7 @@ function registerAuthenticationRoutes(
     app.post(
       `${basePath}/test-login`,
       localAuth,
-      toExpressHandler(req => acsController.acs(req.user), acsController)
+      toExpressHandler(req => acsController.acsTest(req.user), acsController)
     );
   });
 
