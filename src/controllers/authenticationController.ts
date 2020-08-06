@@ -8,7 +8,9 @@ import * as express from "express";
 import {
   fromNullable as fromNullableE,
   isLeft,
-  toError
+  toError,
+  right,
+  left
 } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
@@ -28,7 +30,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 import { NewProfile } from "generated/io-api/NewProfile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -247,9 +249,14 @@ export default class AuthenticationController {
       return fromNullableE(
         new Error("Missing detail in ResponsePermanentRedirect")
       )(acsResponse.detail)
-        .map(_ => _.replace(REDIRECT_URL, ""))
+        .chain<string>(_ => {
+          if (_.includes(REDIRECT_URL)) {
+            return right(_.replace(REDIRECT_URL, ""));
+          }
+          return left(new Error("Unexpected redirection url"));
+        })
         .chain(token =>
-          NonEmptyString.decode(token).mapLeft(
+          SessionToken.decode(token).mapLeft(
             err => new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
           )
         )
