@@ -62,7 +62,7 @@ import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
 import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
-import { Task } from "fp-ts/lib/Task";
+import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
@@ -246,132 +246,137 @@ export function newApp({
   //
   // Setup routes
   //
-  return new Task(async () => {
-    // Ceate the Token Service
-    const TOKEN_SERVICE = new TokenService();
+  return tryCatch(
+    async () => {
+      // Ceate the Token Service
+      const TOKEN_SERVICE = new TokenService();
 
-    // Create the profile service
-    const PROFILE_SERVICE = new ProfileService(API_CLIENT);
+      // Create the profile service
+      const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
-    // Create the bonus service
-    const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
+      // Create the bonus service
+      const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
 
-    // Create the user data processing service
-    const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
-      API_CLIENT
-    );
+      // Create the user data processing service
+      const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
+        API_CLIENT
+      );
 
-    // Create the Notification Service
-    const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
-      () => {
-        return new NotificationService(
-          NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-          NOTIFICATIONS_QUEUE_NAME
-        );
-      },
-      err => {
-        log.error("Error initializing Notification Service: %s", err);
-        process.exit(1);
-      }
-    );
+      // Create the Notification Service
+      const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
+        () => {
+          return new NotificationService(
+            NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+            NOTIFICATIONS_QUEUE_NAME
+          );
+        },
+        err => {
+          throw new Error(`Error initializing Notification Service: [${err}]`);
+        }
+      );
 
-    const NOTIFICATION_SERVICE = ERROR_OR_NOTIFICATION_SERVICE.value;
+      const NOTIFICATION_SERVICE = ERROR_OR_NOTIFICATION_SERVICE.value;
 
-    // Create the UsersLoginLogService
-    const ERROR_OR_USERS_LOGIN_LOG_SERVICE = tryCatch2v(
-      () => {
-        return new UsersLoginLogService(
-          USERS_LOGIN_STORAGE_CONNECTION_STRING,
-          USERS_LOGIN_QUEUE_NAME
-        );
-      },
-      err => {
-        log.error("Error initializing UsersLoginLogService: %s", err);
-        process.exit(1);
-      }
-    );
+      // Create the UsersLoginLogService
+      const ERROR_OR_USERS_LOGIN_LOG_SERVICE = tryCatch2v(
+        () => {
+          return new UsersLoginLogService(
+            USERS_LOGIN_STORAGE_CONNECTION_STRING,
+            USERS_LOGIN_QUEUE_NAME
+          );
+        },
+        err => {
+          throw new Error(`Error initializing UsersLoginLogService: [${err}]`);
+        }
+      );
 
-    const USERS_LOGIN_LOG_SERVICE = ERROR_OR_USERS_LOGIN_LOG_SERVICE.value;
+      const USERS_LOGIN_LOG_SERVICE = ERROR_OR_USERS_LOGIN_LOG_SERVICE.value;
 
-    const acsController: AuthenticationController = new AuthenticationController(
-      SESSION_STORAGE,
-      TOKEN_SERVICE,
-      getClientProfileRedirectionUrl,
-      PROFILE_SERVICE,
-      NOTIFICATION_SERVICE,
-      USERS_LOGIN_LOG_SERVICE,
-      TEST_LOGIN_FISCAL_CODES
-    );
+      const acsController: AuthenticationController = new AuthenticationController(
+        SESSION_STORAGE,
+        TOKEN_SERVICE,
+        getClientProfileRedirectionUrl,
+        PROFILE_SERVICE,
+        NOTIFICATION_SERVICE,
+        USERS_LOGIN_LOG_SERVICE,
+        TEST_LOGIN_FISCAL_CODES
+      );
 
-    registerPublicRoutes(app);
+      registerPublicRoutes(app);
 
-    registerAuthenticationRoutes(
-      app,
-      authenticationBasePath,
-      acsController,
-      authMiddlewares.bearerSession,
-      authMiddlewares.local
-    );
-    // Create the messages service.
-    const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
-    const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
-    // Register the user metadata storage service.
-    const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
-    registerAPIRoutes(
-      app,
-      APIBasePath,
-      allowNotifyIPSourceRange,
-      authMiddlewares.urlToken,
-      PROFILE_SERVICE,
-      MESSAGES_SERVICE,
-      NOTIFICATION_SERVICE,
-      SESSION_STORAGE,
-      PAGOPA_PROXY_SERVICE,
-      USER_METADATA_STORAGE,
-      USER_DATA_PROCESSING_SERVICE,
-      authMiddlewares.bearerSession
-    );
-    registerSessionAPIRoutes(
-      app,
-      APIBasePath,
-      allowSessionHandleIPSourceRange,
-      authMiddlewares.urlToken,
-      SESSION_STORAGE,
-      USER_METADATA_STORAGE
-    );
-    if (FF_BONUS_ENABLED) {
-      registerBonusAPIRoutes(
+      registerAuthenticationRoutes(
         app,
-        BonusAPIBasePath,
-        BONUS_SERVICE,
+        authenticationBasePath,
+        acsController,
+        authMiddlewares.bearerSession,
+        authMiddlewares.local
+      );
+      // Create the messages service.
+      const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
+      const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
+      // Register the user metadata storage service.
+      const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
+      registerAPIRoutes(
+        app,
+        APIBasePath,
+        allowNotifyIPSourceRange,
+        authMiddlewares.urlToken,
+        PROFILE_SERVICE,
+        MESSAGES_SERVICE,
+        NOTIFICATION_SERVICE,
+        SESSION_STORAGE,
+        PAGOPA_PROXY_SERVICE,
+        USER_METADATA_STORAGE,
+        USER_DATA_PROCESSING_SERVICE,
         authMiddlewares.bearerSession
       );
-    }
-    registerPagoPARoutes(
-      app,
-      PagoPABasePath,
-      allowPagoPAIPSourceRange,
-      PROFILE_SERVICE,
-      authMiddlewares.bearerWallet
-    );
-    return { app, acsController };
-  })
+      registerSessionAPIRoutes(
+        app,
+        APIBasePath,
+        allowSessionHandleIPSourceRange,
+        authMiddlewares.urlToken,
+        SESSION_STORAGE,
+        USER_METADATA_STORAGE
+      );
+      if (FF_BONUS_ENABLED) {
+        registerBonusAPIRoutes(
+          app,
+          BonusAPIBasePath,
+          BONUS_SERVICE,
+          authMiddlewares.bearerSession
+        );
+      }
+      registerPagoPARoutes(
+        app,
+        PagoPABasePath,
+        allowPagoPAIPSourceRange,
+        PROFILE_SERVICE,
+        authMiddlewares.bearerWallet
+      );
+      return { app, acsController };
+    },
+    err => new Error(`Error on app routes setup: [${err}]`)
+  )
     .chain(_ => {
       const spidQueueClient = new QueueClient(
         SPID_LOG_STORAGE_CONNECTION_STRING,
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
-      return withSpid({
-        acs: _.acsController.acs.bind(_.acsController),
-        app: _.app,
-        appConfig,
-        doneCb: spidLogCallback,
-        logout: _.acsController.slo.bind(_.acsController),
-        redisClient: REDIS_CLIENT,
-        samlConfig,
-        serviceProviderConfig
-      });
+      return tryCatch(
+        () =>
+          withSpid({
+            acs: _.acsController.acs.bind(_.acsController),
+            app: _.app,
+            appConfig,
+            doneCb: spidLogCallback,
+            logout: _.acsController.slo.bind(_.acsController),
+            redisClient: REDIS_CLIENT,
+            samlConfig,
+            serviceProviderConfig
+          }).run(),
+        err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
+      );
     })
     .map(_ => {
       // Schedule automatic idpMetadataRefresher
@@ -389,16 +394,20 @@ export function newApp({
       );
       return _.app;
     })
-    .map(_ => {
+    .chain(_ => {
       const spidStrategyOption = getSpidStrategyOption(_);
       // Process ends in case no IDP is configured
       if (isEmpty(new StrMap(spidStrategyOption?.idp || {}))) {
         log.error(
           "Fatal error during application start. Cannot get IDPs metadata."
         );
-        process.exit(1);
+        return fromLeft<Error, Express>(
+          new Error(
+            "Fatal error during application start. Cannot get IDPs metadata."
+          )
+        );
       }
-      return _;
+      return taskEither.of(_);
     })
     .map(_ => {
       // Register the express error handler
@@ -406,6 +415,10 @@ export function newApp({
       // forwarded with express next function.
       _.use(expressErrorMiddleware);
       return _;
+    })
+    .getOrElseL(err => {
+      app.emit("server:stop");
+      throw err;
     })
     .run();
 }

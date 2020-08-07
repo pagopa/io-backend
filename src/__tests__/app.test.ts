@@ -24,14 +24,16 @@ jest.mock("../controllers/notificationController", () => {
     }))
   };
 });
+const mockNotificationService = jest.fn().mockImplementation(() => ({}));
 jest.mock("../services/notificationService", () => {
   return {
-    default: jest.fn().mockImplementation(() => ({}))
+    default: mockNotificationService
   };
 });
+const mockUsersLoginLogService = jest.fn().mockImplementation(() => ({}));
 jest.mock("../services/usersLoginLogService", () => {
   return {
-    default: jest.fn().mockImplementation(() => ({}))
+    default: mockUsersLoginLogService
   };
 });
 
@@ -57,14 +59,17 @@ const aValidNotification = {
 };
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
+const aBonusAPIBasePath = "/bonus/api/v1";
+const aPagoPABasePath = "/pagopa/api/v1";
+
 describe("Success app start", () => {
   // tslint:disable:no-let
   let app: Express;
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: "/api/v1",
-      BonusAPIBasePath: "/bonus/api/v1",
-      PagoPABasePath: "/pagopa/api/v1",
+      BonusAPIBasePath: aBonusAPIBasePath,
+      PagoPABasePath: aPagoPABasePath,
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
@@ -138,10 +143,11 @@ describe("Success app start", () => {
 });
 
 describe("Failure app start", () => {
-  let app: Express | undefined;
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   afterAll(() => {
     jest.restoreAllMocks();
-    app?.emit("server:stop");
   });
 
   it("Close app if download IDP metadata fails on startup", async () => {
@@ -153,20 +159,64 @@ describe("Failure app start", () => {
           new Task(async () => new Error("Error download metadata"))
         );
       });
-    const mockExit = jest
-      .spyOn(process, "exit")
-      .mockImplementation(() => true as never);
-    app = await appModule.newApp({
-      APIBasePath: "/api/v1",
-      BonusAPIBasePath: "/bonus/api/v1",
-      PagoPABasePath: "/pagopa/api/v1",
-      allowNotifyIPSourceRange: [aValidCIDR],
-      allowPagoPAIPSourceRange: [aValidCIDR],
-      allowSessionHandleIPSourceRange: [aValidCIDR],
-      authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION
+    expect.assertions(1);
+    try {
+      await appModule.newApp({
+        APIBasePath: "/api/v1",
+        BonusAPIBasePath: aBonusAPIBasePath,
+        PagoPABasePath: aPagoPABasePath,
+        allowNotifyIPSourceRange: [aValidCIDR],
+        allowPagoPAIPSourceRange: [aValidCIDR],
+        allowSessionHandleIPSourceRange: [aValidCIDR],
+        authenticationBasePath: "",
+        env: NodeEnvironmentEnum.PRODUCTION
+      });
+    } catch (err) {
+      expect(mockFetchIdpsMetadata).toBeCalledTimes(3);
+    }
+  });
+
+  it("Close app if Notification Service initialization fails", async () => {
+    // Override return value of generateSpidStrategy with a rejected promise.
+    mockNotificationService.mockImplementationOnce(() => {
+      throw new Error("Error on NotificationService");
     });
-    expect(mockFetchIdpsMetadata).toBeCalledTimes(3);
-    expect(mockExit).toBeCalledWith(1);
+    expect.assertions(1);
+    try {
+      await appModule.newApp({
+        APIBasePath: "/api/v1",
+        BonusAPIBasePath: aBonusAPIBasePath,
+        PagoPABasePath: aPagoPABasePath,
+        allowNotifyIPSourceRange: [aValidCIDR],
+        allowPagoPAIPSourceRange: [aValidCIDR],
+        allowSessionHandleIPSourceRange: [aValidCIDR],
+        authenticationBasePath: "",
+        env: NodeEnvironmentEnum.PRODUCTION
+      });
+    } catch (err) {
+      expect(mockNotificationService).toBeCalledTimes(1);
+    }
+  });
+
+  it("Close app if Users Login LogService initialization fails", async () => {
+    // Override return value of generateSpidStrategy with a rejected promise.
+    mockUsersLoginLogService.mockImplementationOnce(() => {
+      throw new Error("Error on UsersLoginLogService");
+    });
+    expect.assertions(1);
+    try {
+      await appModule.newApp({
+        APIBasePath: "/api/v1",
+        BonusAPIBasePath: aBonusAPIBasePath,
+        PagoPABasePath: aPagoPABasePath,
+        allowNotifyIPSourceRange: [aValidCIDR],
+        allowPagoPAIPSourceRange: [aValidCIDR],
+        allowSessionHandleIPSourceRange: [aValidCIDR],
+        authenticationBasePath: "",
+        env: NodeEnvironmentEnum.PRODUCTION
+      });
+    } catch (err) {
+      expect(mockNotificationService).toBeCalledTimes(1);
+    }
   });
 });

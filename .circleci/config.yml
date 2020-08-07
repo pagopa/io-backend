@@ -118,6 +118,7 @@ jobs:
             CIE_METADATA_URL: http://example.com
             IDP_METADATA_URL: "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml"
             REDIS_URL: redis://localhost
+            FF_BONUS_ENABLED: "1"
       - run: 'bash <(curl -s https://codecov.io/bash)'
 
 workflows:
