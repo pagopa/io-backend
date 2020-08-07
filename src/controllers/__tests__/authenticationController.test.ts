@@ -19,9 +19,9 @@ import { NewProfile } from "../../../generated/io-api/NewProfile";
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorValidation,
   ResponsePermanentRedirect,
-  ResponseSuccessJson,
-  ResponseErrorValidation
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { UserIdentity } from "../../../generated/backend/UserIdentity";
 import mockReq from "../../__mocks__/request";

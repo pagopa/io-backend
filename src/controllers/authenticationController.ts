@@ -8,9 +8,9 @@ import * as express from "express";
 import {
   fromNullable as fromNullableE,
   isLeft,
-  toError,
+  left,
   right,
-  left
+  toError
 } from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
