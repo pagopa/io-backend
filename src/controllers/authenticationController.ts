@@ -234,6 +234,9 @@ export default class AuthenticationController {
     return ResponsePermanentRedirect(urlWithToken);
   }
 
+  /**
+   * The Assertion consumer service for test-login
+   */
   public async acsTest(
     userPayload: unknown
   ): Promise<
@@ -244,6 +247,10 @@ export default class AuthenticationController {
     | IResponseSuccessJson<AccessToken>
   > {
     const acsResponse = await this.acs(userPayload);
+    // When the login succeeded with a ResponsePermanentRedirect (301)
+    // the token was extract from the response and returned into the body
+    // of a ResponseSuccessJson (200)
+    // Ref: https://www.pivotaltracker.com/story/show/173847889
     if (acsResponse.kind === "IResponsePermanentRedirect") {
       const REDIRECT_URL = clientProfileRedirectionUrl.replace("{token}", "");
       return fromNullableE(
