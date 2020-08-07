@@ -19,6 +19,8 @@ import { NewProfile } from "../../../generated/io-api/NewProfile";
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorValidation,
+  ResponsePermanentRedirect,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { UserIdentity } from "../../../generated/backend/UserIdentity";
@@ -415,6 +417,59 @@ describe("AuthenticationController#acs", () => {
       ...anErrorResponse,
       detail: "Error while creating the user session"
     });
+  });
+});
+
+describe("AuthenticationController#acsTest", () => {
+  let acsSpyOn: jest.SpyInstance<
+    ReturnType<AuthenticationController["acs"]>,
+    ArgsType<AuthenticationController["acs"]>
+  >;
+  const res = mockRes();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    acsSpyOn = jest.spyOn(controller, "acs");
+  });
+  afterAll(() => {
+    acsSpyOn.mockRestore();
+  });
+  it("should return ResponseSuccessJson with a valid token if acs succeeded", async () => {
+    const expectedToken = "token-111-222";
+    acsSpyOn.mockImplementation(async (_: unknown) => {
+      return ResponsePermanentRedirect(
+        getClientProfileRedirectionUrl(expectedToken)
+      );
+    });
+    const response = await controller.acsTest(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(response.kind).toEqual("IResponseSuccessJson");
+    expect(res.json).toHaveBeenCalledWith({ token: expectedToken });
+  });
+  it("should return the same response of acs if is different from SuccessPermanentRedirect", async () => {
+    const expectedResponse = ResponseErrorValidation(
+      "Validation error",
+      "Validation error message"
+    );
+    acsSpyOn.mockImplementation(async (_: unknown) => expectedResponse);
+    const response = await controller.acsTest(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(response).toEqual(expectedResponse);
+  });
+  it("should return ResponseErrorInternal if the token is missing", async () => {
+    acsSpyOn.mockImplementation(async (_: unknown) => {
+      return ResponsePermanentRedirect({
+        href: "http://invalid-url"
+      });
+    });
+    const response = await controller.acsTest(validUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(response.kind).toEqual("IResponseErrorInternal");
   });
 });
 

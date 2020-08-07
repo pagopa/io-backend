@@ -42,8 +42,10 @@ paths:
               username: AAABBB01C02D345Z
               password: secret
       responses:
-        "301":
-          description: Redirect to success or failure url callback
+        "200":
+          description: Access token
+          schema:
+            $ref: "#/definitions/AccessToken"
         "401":
           description: Invalid credentials
         "500":
@@ -91,6 +93,14 @@ definitions:
     required:
       - username
       - password
+  AccessToken:
+    type: object
+    properties:
+      token:
+        type: string
+        minLenght: 1
+    required:
+      - token
 consumes:
   - application/json
 produces:

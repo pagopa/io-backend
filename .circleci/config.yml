@@ -115,7 +115,7 @@ jobs:
             PAGOPA_API_URL_PROD: "https://pagopa-proxy-prod"
             PAGOPA_API_URL_TEST: "https://pagopa-proxy-test"
             PAGOPA_BASE_PATH: "/pagopa/api/v1"
-            CIE_METADATA_URL: https://idserver.servizicie.interno.gov.it:8443/idp/shibboleth
+            CIE_METADATA_URL: http://example.com
             IDP_METADATA_URL: "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml"
             REDIS_URL: redis://localhost
       - run: 'bash <(curl -s https://codecov.io/bash)'

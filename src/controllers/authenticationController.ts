@@ -5,7 +5,13 @@
  */
 
 import * as express from "express";
-import { isLeft, toError } from "fp-ts/lib/Either";
+import {
+  fromNullable as fromNullableE,
+  isLeft,
+  left,
+  right,
+  toError
+} from "fp-ts/lib/Either";
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -23,9 +29,12 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { AccessToken } from "../../generated/public/AccessToken";
+import { clientProfileRedirectionUrl } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
@@ -223,6 +232,47 @@ export default class AuthenticationController {
     );
 
     return ResponsePermanentRedirect(urlWithToken);
+  }
+
+  /**
+   * The Assertion consumer service for test-login
+   */
+  public async acsTest(
+    userPayload: unknown
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<AccessToken>
+  > {
+    const acsResponse = await this.acs(userPayload);
+    // When the login succeeded with a ResponsePermanentRedirect (301)
+    // the token was extract from the response and returned into the body
+    // of a ResponseSuccessJson (200)
+    // Ref: https://www.pivotaltracker.com/story/show/173847889
+    if (acsResponse.kind === "IResponsePermanentRedirect") {
+      const REDIRECT_URL = clientProfileRedirectionUrl.replace("{token}", "");
+      return fromNullableE(
+        new Error("Missing detail in ResponsePermanentRedirect")
+      )(acsResponse.detail)
+        .chain<string>(_ => {
+          if (_.includes(REDIRECT_URL)) {
+            return right(_.replace(REDIRECT_URL, ""));
+          }
+          return left(new Error("Unexpected redirection url"));
+        })
+        .chain(token =>
+          SessionToken.decode(token).mapLeft(
+            err => new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
+          )
+        )
+        .fold<IResponseSuccessJson<AccessToken> | IResponseErrorInternal>(
+          err => ResponseErrorInternal(err.message),
+          token => ResponseSuccessJson({ token })
+        );
+    }
+    return acsResponse;
   }
   /**
    * Retrieves the logout url from the IDP.

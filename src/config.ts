@@ -197,7 +197,7 @@ export const samlConfig: SamlConfig = {
 };
 
 // Redirection urls
-const clientProfileRedirectionUrl =
+export const clientProfileRedirectionUrl =
   process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
 
 if (!clientProfileRedirectionUrl.includes("{token}")) {
