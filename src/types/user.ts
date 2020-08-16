@@ -19,6 +19,7 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
+import { formatDate } from "src/utils/date";
 import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/backend/SpidUserIdentity";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
@@ -86,7 +87,8 @@ export function toAppUser(
 ): User {
   return {
     created_at: new Date().getTime(),
-    date_of_birth: from.dateOfBirth,
+    date_of_birth:
+      from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,

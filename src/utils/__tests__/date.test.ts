@@ -1,6 +1,6 @@
 import { isNone, isSome } from "fp-ts/lib/Option";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { isOlderThan, toBirthDate } from "../date";
+import { formatDate, isOlderThan, toBirthDate } from "../date";
 
 const toDate = new Date("2020-01-01");
 const olderThanValue = 18;
@@ -42,5 +42,16 @@ describe("User utility", () => {
   it("should return none if fiscalCode is not recognized", async () => {
     const extractedDateOfBirthOrError = toBirthDate(aWrongFiscalCode);
     expect(isNone(extractedDateOfBirthOrError)).toBeTruthy();
+  });
+});
+
+describe("Pad date string", () => {
+  it("should pad an invalid format", () => {
+    const parsed = formatDate("1980-10-1");
+    expect(parsed).toEqual("1980-10-01");
+  });
+  it("should pad an invalid format", () => {
+    const parsed = formatDate("1980-2-3");
+    expect(parsed).toEqual("1980-02-03");
   });
 });
