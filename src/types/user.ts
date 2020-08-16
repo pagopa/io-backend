@@ -19,10 +19,10 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
-import { formatDate } from "src/utils/date";
 import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/backend/SpidUserIdentity";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
