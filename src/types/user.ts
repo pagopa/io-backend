@@ -22,6 +22,7 @@ import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
 import { SpidUserIdentity } from "../../generated/backend/SpidUserIdentity";
 import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
@@ -86,7 +87,8 @@ export function toAppUser(
 ): User {
   return {
     created_at: new Date().getTime(),
-    date_of_birth: from.dateOfBirth,
+    date_of_birth:
+      from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     name: from.name,

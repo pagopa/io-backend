@@ -1,4 +1,4 @@
-import { addYears, isAfter } from "date-fns";
+import { addYears, format, isAfter } from "date-fns";
 import { Option, tryCatch } from "fp-ts/lib/Option";
 import { FiscalCode } from "generated/backend/FiscalCode";
 
@@ -72,4 +72,13 @@ export function toBirthDate(fiscalCode: FiscalCode): Option<Date> {
 
     return birthDay;
   });
+}
+
+/**
+ * Returns a formatted date.
+ *
+ * ie. convert 1980-13-1 to 1980-13-01
+ */
+export function formatDate(dateStr: string): string {
+  return format(dateStr, "YYYY-MM-DD");
 }

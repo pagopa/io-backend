@@ -14,6 +14,7 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 
+import { toInitializedProfile } from "../../types/profile";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
@@ -428,5 +429,16 @@ describe("ProfileService#emailValidationProcess", () => {
     const res = await service.emailValidationProcess(mockedUser);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+});
+
+describe("ProfileService#toInitializedProfile", () => {
+  it("should format invalid date", async () => {
+    const profile = toInitializedProfile(validApiProfile, {
+      ...mockedUser,
+      date_of_birth: "1980-10-1"
+    });
+
+    expect(profile.date_of_birth).toEqual("1980-10-01");
   });
 });

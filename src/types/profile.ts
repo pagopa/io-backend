@@ -14,6 +14,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
+import { formatDate } from "../utils//date";
 import { User } from "./user";
 
 /**
@@ -25,7 +26,10 @@ export const toInitializedProfile = (
 ): InitializedProfile => ({
   accepted_tos_version: profile.accepted_tos_version,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
-  date_of_birth: user.date_of_birth,
+  date_of_birth:
+    user.date_of_birth !== undefined
+      ? formatDate(user.date_of_birth)
+      : undefined,
   email: profile.email,
   family_name: user.family_name,
   fiscal_code: user.fiscal_code,
@@ -47,8 +51,7 @@ export const profileMissingErrorResponse = ResponseErrorInternal(
 
 export const notFoundProfileToInternalServerError = (
   // tslint:disable-next-line: prettier
-  getProfileResponse:
-  // tslint:disable-next-line: max-union-size
+  getProfileResponse: // tslint:disable-next-line: max-union-size
   | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
