@@ -17,11 +17,11 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
-import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
+import { PaginatedBonusActivationsCollection } from "io-functions-bonus-sdk/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import BonusService from "src/services/bonusService";
-import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
-import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
+import { EligibilityCheck } from "io-functions-bonus-sdk/EligibilityCheck";
+import { InstanceId } from "io-functions-bonus-sdk/InstanceId";
 import { withUserFromRequest } from "../types/user";
 import {
   IResponseErrorUnauthorizedForLegalReasons,

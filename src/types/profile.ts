@@ -28,7 +28,7 @@ export const toInitializedProfile = (
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
   date_of_birth:
     user.date_of_birth !== undefined
-      ? formatDate(user.date_of_birth)
+      ? new Date(formatDate(user.date_of_birth))
       : undefined,
   email: profile.email,
   family_name: user.family_name,

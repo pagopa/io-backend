@@ -23,11 +23,11 @@ import {
   ResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
-import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
-import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
+import { EligibilityCheck } from "io-functions-bonus-sdk/EligibilityCheck";
+import { InstanceId } from "io-functions-bonus-sdk/InstanceId";
 
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
-import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
+import { PaginatedBonusActivationsCollection } from "io-functions-bonus-sdk/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
@@ -91,7 +91,7 @@ export default class BonusService {
       }
 
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response => {
@@ -136,7 +136,7 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getBonusEligibilityCheck({
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response => {
@@ -178,7 +178,7 @@ export default class BonusService {
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getLatestBonusActivationById({
         bonus_id: bonusId,
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       // tslint:disable-next-line: no-identical-functions
@@ -227,7 +227,7 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getAllBonusActivations({
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       // tslint:disable-next-line: no-identical-functions
@@ -263,7 +263,7 @@ export default class BonusService {
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.startBonusActivationProcedure(
         {
-          fiscalCode: user.fiscal_code
+          fiscalcode: user.fiscal_code
         }
       );
 

@@ -42,7 +42,7 @@ export function PagoPAClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getActivationStatusDefaultDecoder(),
-    url: params => `/payment-activations/${params.codiceContestoPagamento}`
+    url: params => `/payment-activations/${params.codice_contesto_pagamento}`
   };
 
   const getPaymentInfo: GetPaymentInfoT = {
@@ -50,7 +50,7 @@ export function PagoPAClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getPaymentInfoDefaultDecoder(),
-    url: params => `/payment-requests/${params.rptId}`
+    url: params => `/payment-requests/${params.rpt_id_from_string}`
   };
 
   return {

@@ -3,7 +3,7 @@ import { toError } from "fp-ts/lib/Either";
 import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
-import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
+import { BonusActivation } from "io-functions-bonus-sdk/BonusActivation";
 import { image } from "qr-image";
 
 const MIME_TYPES = {

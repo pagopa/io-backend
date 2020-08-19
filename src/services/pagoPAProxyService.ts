@@ -46,7 +46,7 @@ export default class PagoPAProxyService {
         isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.getPaymentInfo({
-        rptId
+        rpt_id_from_string: rptId
       });
       return withValidatedOrInternalError(validated, response =>
         response.status === 200
@@ -117,7 +117,7 @@ export default class PagoPAProxyService {
         isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.getActivationStatus({
-        codiceContestoPagamento
+        codice_contesto_pagamento: codiceContestoPagamento
       });
       return withValidatedOrInternalError(validated, response =>
         response.status === 200

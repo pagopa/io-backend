@@ -7,12 +7,12 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
-import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
-import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
-import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
-import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
-import { InstanceId } from "../../../generated/io-bonus-api/InstanceId";
-import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
+import { BonusActivation } from "io-functions-bonus-sdk/BonusActivation";
+import { BonusActivationStatusEnum } from "io-functions-bonus-sdk/BonusActivationStatus";
+import { BonusCode } from "io-functions-bonus-sdk/BonusCode";
+import { EligibilityCheck } from "io-functions-bonus-sdk/EligibilityCheck";
+import { InstanceId } from "io-functions-bonus-sdk/InstanceId";
+import { PaginatedBonusActivationsCollection } from "io-functions-bonus-sdk/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
