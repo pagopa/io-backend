@@ -14,6 +14,7 @@ import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentA
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
 import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 
+import { withUserFromRequest } from "../types/user";
 import { withValidatedOrInternalError } from "../utils/responses";
 
 const parsePagopaTestParam = (testParam: unknown) =>
@@ -50,14 +51,23 @@ export default class PagoPAProxyController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PaymentActivationsPostResponse>
   > =>
-    withValidatedOrInternalError(
-      PaymentActivationsPostRequest.decode(req.body),
-      paymentActivationsPostRequest => {
-        return this.pagoPAProxyService.activatePayment(
-          paymentActivationsPostRequest,
-          parsePagopaTestParam(req.query.test)
-        );
-      }
+    withUserFromRequest(req, async user =>
+      withValidatedOrInternalError(
+        PaymentActivationsPostRequest.decode({
+          ...req.body,
+          soggettoPagatore: {
+            anagrafica: `${user.name} ${user.family_name}`,
+            fiscal_code: user.fiscal_code,
+            tipo: "F"
+          }
+        }),
+        paymentActivationsPostRequest => {
+          return this.pagoPAProxyService.activatePayment(
+            paymentActivationsPostRequest,
+            parsePagopaTestParam(req.query.test)
+          );
+        }
+      )
     );
 
   public readonly getActivationStatus = async (
