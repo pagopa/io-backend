@@ -39,7 +39,7 @@ definitions:
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
   FederatedUser:
-    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/definitions.yaml#/FederatedUser"
+    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/api_backend.yaml#/definitions/FederatedUser"
   MyPortalUser:
     title: MyPortal user
     description: User data needed by MyPortal backend.

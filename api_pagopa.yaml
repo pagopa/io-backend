@@ -81,7 +81,7 @@ definitions:
       - email
       - mobile_phone
   FederatedUser:
-    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/definitions.yaml#/FederatedUser"
+    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/api_backend.yaml#/definitions/FederatedUser"
   ExtendedPagoPAUser:
     title: ExtendedPagoPA user
     description: User data needed by PagoPA proxy with custom user email.
