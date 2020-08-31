@@ -4,13 +4,13 @@ info:
   title: MyPortal API
   description: MyPortal API for user authentication.
 host: localhost
-basePath: /pagopa/api/v1
+basePath: /myportal/api/v1
 schemes:
   - https
 security:
   - Token: []
 paths:
-  "/myportal-user":
+  "/user":
     x-swagger-router-controller: MyPortalController
     get:
       operationId: getUser
