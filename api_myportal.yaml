@@ -1,0 +1,70 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: MyPortal API
+  description: MyPortal API for user authentication.
+host: localhost
+basePath: /pagopa/api/v1
+schemes:
+  - https
+security:
+  - Token: []
+paths:
+  "/myportal-user":
+    x-swagger-router-controller: MyPortalController
+    get:
+      operationId: getUser
+      summary: Get user's data
+      description: Returns the user data needed by MyPortal backend.
+      parameters:
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/MyPortalUser"
+          examples:
+            application/json:
+              name: "Name"
+              family_name: "Surname"
+              fiscal_code: "AAABBB01C02D123Z"
+        "400":
+          description: Bad request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Token null or expired.
+        "500":
+          description: There was an error in retrieving the user data.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+definitions:
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
+  MyPortalUser:
+    title: MyPortal user
+    description: User data needed by MyPortal backend.
+    type: object
+    properties:
+      name:
+        type: string
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+    required:
+      - name
+      - family_name
+      - fiscal_code
+responses: {}
+parameters: {}
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Token:
+    type: apiKey
+    name: token
+    in: query
