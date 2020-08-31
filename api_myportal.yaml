@@ -27,10 +27,6 @@ paths:
               name: "Name"
               family_name: "Surname"
               fiscal_code: "AAABBB01C02D123Z"
-        "400":
-          description: Bad request.
-          schema:
-            $ref: "#/definitions/ProblemJson"
         "401":
           description: Token null or expired.
         "500":
