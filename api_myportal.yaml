@@ -34,16 +34,12 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 definitions:
+  MyPortalUser:
+    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/api_backend.yaml#/definitions/FederatedUser"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
-  FederatedUser:
-    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/api_backend.yaml#/definitions/FederatedUser"
-  MyPortalUser:
-    title: MyPortal user
-    description: User data needed by MyPortal backend.
-    $ref: "#/definitions/FederatedUser"
 responses: {}
 parameters: {}
 consumes:
