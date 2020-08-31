@@ -739,7 +739,7 @@ function registerAuthenticationRoutes(
       localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
     );
     app.post(
-      `${basePath}/test-login`,
+      `/test-login`,
       localAuth,
       toExpressHandler(req => acsController.acsTest(req.user), acsController)
     );
