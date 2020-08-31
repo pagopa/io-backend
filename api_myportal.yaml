@@ -38,21 +38,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
+  FederatedUser:
+    $ref: "https://raw.githubusercontent.com/BurnedMarshal/io-backend/myportal-auth-spec/definitions.yaml#/FederatedUser"
   MyPortalUser:
     title: MyPortal user
     description: User data needed by MyPortal backend.
-    type: object
-    properties:
-      name:
-        type: string
-      family_name:
-        type: string
-      fiscal_code:
-        $ref: '#/definitions/FiscalCode'
-    required:
-      - name
-      - family_name
-      - fiscal_code
+    $ref: "#/definitions/FederatedUser"
 responses: {}
 parameters: {}
 consumes:
