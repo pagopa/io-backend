@@ -16,7 +16,6 @@ paths:
       operationId: getUser
       summary: Get user's data
       description: Returns the user data needed by MyPortal backend.
-      parameters:
       responses:
         "200":
           description: Found.
