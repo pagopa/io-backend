@@ -27,8 +27,8 @@ import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
-import { SessionToken, WalletToken } from "../types/token";
-import { User } from "../types/user";
+import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
+import { User, UserWithMyPortalToken } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
@@ -36,6 +36,7 @@ import RedisStorageUtils from "./redisStorageUtils";
 
 const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
+const myPortalTokenPrefix = "MYPORTAL-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const blockedUserSetKey = "BLOCKEDUSERS";
@@ -63,7 +64,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * {@inheritDoc}
    */
-  public async set(user: User): Promise<Either<Error, boolean>> {
+  public async set(
+    user: UserWithMyPortalToken
+  ): Promise<Either<Error, boolean>> {
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
       // @see https://redis.io/commands/set
@@ -99,6 +102,24 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
       );
     });
+
+    const setMyPortalToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
+      this.redisClient.set(
+        `${myPortalTokenPrefix}${user.myportal_token}`,
+        user.session_token,
+        "EX",
+        this.tokenDurationSecs,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting MyPortal token")
+            )
+          )
+      );
+    });
     const sessionInfo: SessionInfo = {
       createdAt: new Date(),
       sessionToken: user.session_token
@@ -113,6 +134,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const setPromisesResult = await Promise.all([
       setSessionToken,
       setWalletToken,
+      setMyPortalToken,
       saveSessionInfoPromise,
       removeOtherUserSessionsPromise
     ]);
@@ -173,7 +195,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   public async del(
     sessionToken: SessionToken,
-    walletToken: WalletToken
+    walletToken: WalletToken,
+    myPortalToken?: MyPortalToken
   ): Promise<Either<Error, boolean>> {
     const user = await this.loadSessionBySessionToken(sessionToken);
     if (isLeft(user)) {
@@ -214,9 +237,30 @@ export default class RedisSessionStorage extends RedisStorageUtils
       );
     });
 
+    const deleteMyPortalToken = new Promise<Either<Error, true>>(resolve => {
+      if (myPortalToken === undefined) {
+        return resolve();
+      }
+      // Remove the specified key. A key is ignored if it does not exist.
+      // @see https://redis.io/commands/del
+      this.redisClient.del(
+        `${myPortalTokenPrefix}${myPortalToken}`,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.integerReply(err, response, 1),
+              new Error(
+                "Unexpected response from redis client deleting MyPortal token."
+              )
+            )
+          )
+      );
+    });
+
     const deletePromises = await Promise.all([
       deleteSessionTokens,
-      deleteWalletToken
+      deleteWalletToken,
+      deleteMyPortalToken
     ]);
 
     const isDeleteFailed = deletePromises.some(isLeft);
@@ -572,7 +616,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * Remove other user sessions and wallet tokens
    */
   private async removeOtherUserSessions(
-    user: User
+    user: UserWithMyPortalToken
   ): Promise<Either<Error, boolean>> {
     const sessionInfoKeys = await this.readSessionInfoKeys(user.fiscal_code);
     if (isRight(sessionInfoKeys)) {
@@ -593,30 +637,53 @@ export default class RedisSessionStorage extends RedisStorageUtils
           resolve(this.arrayStringReply(err, response))
         );
       });
+      // Deserialize all available user payloads and skip invalid one
+      const errorOrDeserializedUsers = errorOrUserWalletTokens.map(_ =>
+        _.map(this.parseUser).filter(isRight)
+      );
+
       // Map every user payload with an Option<WalletToken>
       // If the value is invalid or must be skipped, it will be mapped with none
-      const walletsToken = errorOrUserWalletTokens
+      const walletTokens = errorOrDeserializedUsers
         .fold(
           _ => [],
           _ =>
-            _.map(value => {
-              const errorOrDeserializedUser = this.parseUser(value);
-              if (
-                isLeft(errorOrDeserializedUser) ||
-                errorOrDeserializedUser.value.wallet_token === user.wallet_token
-              ) {
+            _.map(deserializedUser => {
+              if (deserializedUser.value.wallet_token === user.wallet_token) {
                 return none;
               }
-              return some(errorOrDeserializedUser.value.wallet_token);
+              return some(deserializedUser.value.wallet_token);
             })
         )
         .filter(isSome)
         .map(_ => `${walletKeyPrefix}${_.value}`);
-      // Delete all active session tokens and wallet tokens that are different
+
+      // Map every user payload with an Option<MyPortalToken>
+      // If the value is invalid or must be skipped, it will be mapped with none
+      const myPortalTokens = errorOrDeserializedUsers
+        .fold(
+          _ => [],
+          _ =>
+            _.map(deserializedUser => {
+              if (
+                deserializedUser.value.myportal_token === undefined ||
+                deserializedUser.value.myportal_token === user.myportal_token
+              ) {
+                return none;
+              }
+              return some(deserializedUser.value.myportal_token);
+            })
+        )
+        .filter(isSome)
+        .map(_ => `${myPortalTokenPrefix}${_.value}`);
+      // Delete all active session tokens, wallet tokens and MyPortal token that are different
       // from the new one generated and provided inside user object.
       return await new Promise(resolve => {
-        this.redisClient.del(...sessionKeys, ...walletsToken, (err, response) =>
-          resolve(this.integerReply(err, response))
+        this.redisClient.del(
+          ...sessionKeys,
+          ...walletTokens,
+          ...myPortalTokens,
+          (err, response) => resolve(this.integerReply(err, response))
         );
       });
     }

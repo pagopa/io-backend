@@ -27,7 +27,7 @@ import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
-import { SessionToken, WalletToken } from "./token";
+import { MyPortalToken, SessionToken, WalletToken } from "./token";
 
 // required attributes
 export const User = t.intersection([
@@ -42,6 +42,7 @@ export const User = t.intersection([
   }),
   t.partial({
     date_of_birth: t.string,
+    myportal_token: MyPortalToken,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
@@ -53,6 +54,8 @@ export const User = t.intersection([
 ]);
 
 export type User = t.TypeOf<typeof User>;
+
+export type UserWithMyPortalToken = User & { myportal_token: MyPortalToken };
 
 // required attributes
 export const SpidUser = t.intersection([
@@ -83,14 +86,16 @@ export function toAppUser(
   from: SpidUser,
   sessionToken: SessionToken,
   walletToken: WalletToken,
+  myPortalToken: MyPortalToken,
   sessionTrackingId: string
-): User {
+): UserWithMyPortalToken {
   return {
     created_at: new Date().getTime(),
     date_of_birth:
       from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
+    myportal_token: myPortalToken,
     name: from.name,
     session_token: sessionToken,
     session_tracking_id: sessionTrackingId,
