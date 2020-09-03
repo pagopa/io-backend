@@ -50,6 +50,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private sismemberTask: (
     ...args: ReadonlyArray<string>
   ) => TaskEither<Error, number>;
+  private ttlTask: (key: string) => TaskEither<Error, number>;
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
@@ -59,13 +60,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
     this.sismemberTask = taskify(
       this.redisClient.sismember.bind(this.redisClient)
     );
+    this.ttlTask = taskify(this.redisClient.ttl.bind(this.redisClient));
   }
 
   /**
    * {@inheritDoc}
    */
   public async set(
-    user: UserWithMyPortalToken
+    user: UserWithMyPortalToken,
+    expireSec: number = this.tokenDurationSecs
   ): Promise<Either<Error, boolean>> {
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
       // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
@@ -74,7 +77,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${sessionKeyPrefix}${user.session_token}`,
         JSON.stringify(user),
         "EX",
-        this.tokenDurationSecs,
+        expireSec,
         (err, response) =>
           resolve(
             this.falsyResponseToError(
@@ -92,7 +95,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${walletKeyPrefix}${user.wallet_token}`,
         user.session_token,
         "EX",
-        this.tokenDurationSecs,
+        expireSec,
         (err, response) =>
           resolve(
             this.falsyResponseToError(
@@ -110,7 +113,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `${myPortalTokenPrefix}${user.myportal_token}`,
         user.session_token,
         "EX",
-        this.tokenDurationSecs,
+        expireSec,
         (err, response) =>
           resolve(
             this.falsyResponseToError(
@@ -476,6 +479,19 @@ export default class RedisSessionStorage extends RedisStorageUtils
         )
       )
       .run();
+  }
+
+  /**
+   * Return the session token remaining time to live in seconds
+   * @param token
+   */
+  public async getSessionTtl(
+    token: SessionToken
+  ): Promise<Either<Error, number>> {
+    // Returns the key ttl in seconds
+    // -2 if the key doesn't exist or -1 if the key has no expire
+    // @see https://redis.io/commands/ttl
+    return this.ttlTask(`${sessionKeyPrefix}${token}`).run();
   }
 
   /**

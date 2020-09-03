@@ -51,7 +51,7 @@ import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 
 // how many random bytes to generate for each session token
-const SESSION_TOKEN_LENGTH_BYTES = 48;
+export const SESSION_TOKEN_LENGTH_BYTES = 48;
 
 // how many random bytes to generate for each session ID
 const SESSION_ID_LENGTH_BYTES = 32;

@@ -13,7 +13,8 @@ export interface ISessionStorage {
    * Stores a value to the cache.
    */
   readonly set: (
-    user: UserWithMyPortalToken
+    user: UserWithMyPortalToken,
+    expireSec?: number
   ) => Promise<Either<Error, boolean>>;
 
   /**
@@ -42,4 +43,8 @@ export interface ISessionStorage {
   readonly isBlockedUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
+
+  readonly getSessionTtl: (
+    token: SessionToken
+  ) => Promise<Either<Error, number>>;
 }
