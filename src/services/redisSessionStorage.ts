@@ -123,14 +123,23 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
       );
     });
-    const sessionInfo: SessionInfo = {
-      createdAt: new Date(),
-      sessionToken: user.session_token
-    };
-    const saveSessionInfoPromise = this.saveSessionInfo(
-      sessionInfo,
-      user.fiscal_code
-    );
+
+    // If is a session update, the session info key doesn't must be updated.
+    // tslint:disable-next-line: no-let
+    let saveSessionInfoPromise: Promise<Either<
+      Error,
+      boolean
+    >> = Promise.resolve(right(true));
+    if (expireSec === this.tokenDurationSecs) {
+      const sessionInfo: SessionInfo = {
+        createdAt: new Date(),
+        sessionToken: user.session_token
+      };
+      saveSessionInfoPromise = this.saveSessionInfo(
+        sessionInfo,
+        user.fiscal_code
+      );
+    }
 
     const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
 
@@ -242,7 +251,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     const deleteMyPortalToken = new Promise<Either<Error, true>>(resolve => {
       if (myPortalToken === undefined) {
-        return resolve();
+        return resolve(right(true));
       }
       // Remove the specified key. A key is ignored if it does not exist.
       // @see https://redis.io/commands/del
