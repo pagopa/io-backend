@@ -6,14 +6,14 @@ import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
-import { User, UserWithMyPortalToken } from "../types/user";
+import { User, UserV2 } from "../types/user";
 
 export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    */
   readonly set: (
-    user: UserWithMyPortalToken,
+    user: UserV2,
     expireSec?: number
   ) => Promise<Either<Error, boolean>>;
 
@@ -44,7 +44,5 @@ export interface ISessionStorage {
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 
-  readonly getSessionTtl: (
-    token: SessionToken
-  ) => Promise<Either<Error, number>>;
+  readonly update: (updatedUser: UserV2) => Promise<Either<Error, boolean>>;
 }

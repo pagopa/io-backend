@@ -44,6 +44,7 @@ import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
 import {
   exactUserIdentityDecode,
   toAppUser,
+  UserV2,
   validateSpidUser,
   withUserFromRequest
 } from "../types/user";
@@ -293,7 +294,7 @@ export default class AuthenticationController {
         const errorOrResponse = await this.sessionStorage.del(
           user.session_token,
           user.wallet_token,
-          user.myportal_token
+          UserV2.is(user) ? user.myportal_token : undefined
         );
 
         if (isLeft(errorOrResponse)) {

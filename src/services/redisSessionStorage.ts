@@ -28,7 +28,7 @@ import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
-import { User, UserWithMyPortalToken } from "../types/user";
+import { User, UserV2 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
@@ -67,7 +67,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async set(
-    user: UserWithMyPortalToken,
+    user: UserV2,
     expireSec: number = this.tokenDurationSecs
   ): Promise<Either<Error, boolean>> {
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
@@ -491,10 +491,42 @@ export default class RedisSessionStorage extends RedisStorageUtils
   }
 
   /**
+   * Update an user session keeping the current session TTL
+   * @param updatedUser
+   */
+  public async update(updatedUser: UserV2): Promise<Either<Error, boolean>> {
+    const errorOrSessionTtl = await this.getSessionTtl(
+      updatedUser.session_token
+    );
+
+    if (isLeft(errorOrSessionTtl)) {
+      return left(
+        new Error(
+          `Error retrieving user session ttl [${errorOrSessionTtl.value.message}]`
+        )
+      );
+    }
+    const sessionTtl = errorOrSessionTtl.value;
+    if (sessionTtl < 0) {
+      throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
+    }
+
+    const errorOrIsSessionUpdated = await this.set(updatedUser, sessionTtl);
+    if (isLeft(errorOrIsSessionUpdated)) {
+      return left(
+        new Error(
+          `Error updating user session [${errorOrIsSessionUpdated.value.message}]`
+        )
+      );
+    }
+    return right(true);
+  }
+
+  /**
    * Return the session token remaining time to live in seconds
    * @param token
    */
-  public async getSessionTtl(
+  private async getSessionTtl(
     token: SessionToken
   ): Promise<Either<Error, number>> {
     // Returns the key ttl in seconds
@@ -641,7 +673,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * Remove other user sessions and wallet tokens
    */
   private async removeOtherUserSessions(
-    user: UserWithMyPortalToken
+    user: UserV2
   ): Promise<Either<Error, boolean>> {
     const sessionInfoKeys = await this.readSessionInfoKeys(user.fiscal_code);
     if (isRight(sessionInfoKeys)) {
@@ -653,9 +685,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
         )
         .map(_ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`);
 
-      // Retrieve all user wallet tokens related to session tokens.
-      // Wallet tokens are stored inside user payload.
-      const errorOrUserWalletTokens = await new Promise<
+      // Retrieve all user data related to session tokens.
+      // All the tokens are stored inside user payload.
+      const errorOrSerializedUser = await new Promise<
         Either<Error, ReadonlyArray<string>>
       >(resolve => {
         this.redisClient.mget(...sessionKeys, (err, response) =>
@@ -663,8 +695,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
         );
       });
       // Deserialize all available user payloads and skip invalid one
-      const errorOrDeserializedUsers = errorOrUserWalletTokens.map(_ =>
-        _.map(this.parseUser).filter(isRight)
+      const errorOrDeserializedUsers = errorOrSerializedUser.map(_ =>
+        _.map(this.parseUser)
+          .filter(isRight)
+          .map(deserializedUser => deserializedUser.value)
       );
 
       // Map every user payload with an Option<WalletToken>
@@ -674,10 +708,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
           _ => [],
           _ =>
             _.map(deserializedUser => {
-              if (deserializedUser.value.wallet_token === user.wallet_token) {
+              if (deserializedUser.wallet_token === user.wallet_token) {
                 return none;
               }
-              return some(deserializedUser.value.wallet_token);
+              return some(deserializedUser.wallet_token);
             })
         )
         .filter(isSome)
@@ -691,12 +725,12 @@ export default class RedisSessionStorage extends RedisStorageUtils
           _ =>
             _.map(deserializedUser => {
               if (
-                deserializedUser.value.myportal_token === undefined ||
-                deserializedUser.value.myportal_token === user.myportal_token
+                !UserV2.is(deserializedUser) ||
+                deserializedUser.myportal_token === user.myportal_token
               ) {
                 return none;
               }
-              return some(deserializedUser.value.myportal_token);
+              return some(deserializedUser.myportal_token);
             })
         )
         .filter(isSome)
