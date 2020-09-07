@@ -19,7 +19,7 @@ import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { MyPortalToken, SessionToken, WalletToken } from "../../types/token";
-import { User, UserWithMyPortalToken } from "../../types/user";
+import { User, UserV2 } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
@@ -42,7 +42,7 @@ const aSessionToken = "HexToKen" as SessionToken;
 const aWalletToken = "HexToKen" as WalletToken;
 const aMyportalToken = "HexToKen" as MyPortalToken;
 // mock for a valid User
-const aValidUser: UserWithMyPortalToken = {
+const aValidUser: UserV2 = {
   created_at: 1183518855,
   family_name: "Garibaldi",
   fiscal_code: aFiscalCode,
@@ -469,7 +469,16 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelWalletError = new Error("hdel error");
 
   it.each([
-    [undefined, 1, undefined, 1,undefined, 1, right(true), "should delete a session"],
+    [
+      undefined,
+      1,
+      undefined,
+      1,
+      undefined,
+      1,
+      right(true),
+      "should delete a session"
+    ],
     [
       expectedRedisDelSessionError,
       undefined,
