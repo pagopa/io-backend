@@ -547,6 +547,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
       const user: User = errorOrUser.getOrElseL(err => {
         throw err;
       });
+      if (UserV2.is(user)) {
+        return this.del(
+          user.session_token,
+          user.wallet_token,
+          user.myportal_token
+        );
+      }
       return this.del(user.session_token, user.wallet_token);
     } catch (error) {
       // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
@@ -738,11 +745,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
       // Delete all active session tokens, wallet tokens and MyPortal token that are different
       // from the new one generated and provided inside user object.
       return await new Promise(resolve => {
-        this.redisClient.del(
+        const keys: ReadonlyArray<string> = [
           ...sessionKeys,
           ...walletTokens,
-          ...myPortalTokens,
-          (err, response) => resolve(this.integerReply(err, response))
+          ...myPortalTokens
+        ];
+        if (keys.length === 0) {
+          return resolve(right(true));
+        }
+        this.redisClient.del(...keys, (err, response) =>
+          resolve(this.integerReply(err, response))
         );
       });
     }

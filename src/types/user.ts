@@ -65,7 +65,7 @@ const RequiredUserTokensV2 = t.intersection([
 export const UserV2 = t.intersection([UserWithoutTokens, RequiredUserTokensV2]);
 export type UserV2 = t.TypeOf<typeof UserV2>;
 
-export const User = t.union([UserV1, UserV2]);
+export const User = t.union([UserV1, UserV2], "User");
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
