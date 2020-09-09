@@ -34,7 +34,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   MyPortalUser:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-backend/174574145-myportal-auth-spec/api_backend.yaml#/definitions/FederatedUser"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-backend/master/api_backend.yaml#/definitions/FederatedUser"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
