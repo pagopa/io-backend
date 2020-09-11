@@ -328,6 +328,7 @@ export function newApp({
         PAGOPA_PROXY_SERVICE,
         USER_METADATA_STORAGE,
         USER_DATA_PROCESSING_SERVICE,
+        TOKEN_SERVICE,
         authMiddlewares.bearerSession
       );
       registerSessionAPIRoutes(
@@ -457,6 +458,7 @@ function registerAPIRoutes(
   pagoPaProxyService: PagoPAProxyService,
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
+  tokenService: TokenService,
   // tslint:disable-next-line: no-any
   bearerSessionTokenAuth: any
 ): void {
@@ -482,7 +484,8 @@ function registerAPIRoutes(
   );
 
   const sessionController: SessionController = new SessionController(
-    sessionStorage
+    sessionStorage,
+    tokenService
   );
 
   const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(

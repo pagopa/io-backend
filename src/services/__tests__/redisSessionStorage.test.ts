@@ -18,8 +18,8 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { MyPortalToken, SessionToken, WalletToken } from "../../types/token";
+import { User, UserV2 } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
@@ -40,11 +40,13 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aSessionToken = "HexToKen" as SessionToken;
 const aWalletToken = "HexToKen" as WalletToken;
+const aMyportalToken = "HexToKen" as MyPortalToken;
 // mock for a valid User
-const aValidUser: User = {
+const aValidUser: UserV2 = {
   created_at: 1183518855,
   family_name: "Garibaldi",
   fiscal_code: aFiscalCode,
+  myportal_token: aMyportalToken,
   name: "Giuseppe Maria",
   session_token: aSessionToken,
   spid_email: anEmailAddress,
@@ -85,6 +87,7 @@ const mockSmembers = jest
   .mockImplementation((_, callback) => callback(null, [aSessionToken]));
 const mockExists = jest.fn();
 const mockSismember = jest.fn();
+const mockTtl = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
@@ -95,6 +98,7 @@ mockRedisClient.srem = mockSrem;
 mockRedisClient.smembers = mockSmembers;
 mockRedisClient.exists = mockExists;
 mockRedisClient.sismember = mockSismember;
+mockRedisClient.ttl = mockTtl;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
@@ -120,12 +124,16 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
+      undefined,
+      "OK",
       right(true),
       "should set a new session with valid values"
     ],
     [
       new Error("hmset error"),
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       left(
@@ -141,6 +149,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("hset error")],
@@ -154,6 +164,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("Error setting wallet token")],
@@ -165,6 +177,8 @@ describe("RedisSessionStorage#set", () => {
     [
       undefined,
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       left(
@@ -180,6 +194,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [
@@ -196,6 +212,8 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       new Error("hset error"),
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("hset error")],
@@ -209,6 +227,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("Error setting session token"), new Error("hset error")],
@@ -222,6 +242,8 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("Error setting wallet token")],
@@ -235,6 +257,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("Error setting wallet token")],
@@ -247,9 +271,11 @@ describe("RedisSessionStorage#set", () => {
     "%s, %s, %s, %s, %s, %s",
     async (
       sessionSetErr: Error,
-      sessionSetSuccess: boolean,
+      sessionSetSuccess: string,
       walletSetErr: Error,
-      walletSetSuccess: number,
+      walletSetSuccess: string,
+      myPortalSetError: Error,
+      myPortalSetSuccess: string,
       expected: Error
     ) => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
@@ -258,6 +284,10 @@ describe("RedisSessionStorage#set", () => {
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
         callback(walletSetErr, walletSetSuccess);
+      });
+
+      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        callback(myPortalSetError, myPortalSetSuccess);
       });
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
         callback(undefined, "OK");
@@ -273,20 +303,28 @@ describe("RedisSessionStorage#set", () => {
 
       const response = await sessionStorage.set(aValidUser);
 
-      expect(mockSet).toHaveBeenCalledTimes(3);
+      expect(mockSet).toHaveBeenCalledTimes(4);
+
       expect(mockSet.mock.calls[0][0]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
       expect(mockSet.mock.calls[0][1]).toEqual(JSON.stringify(aValidUser));
+
       expect(mockSet.mock.calls[1][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
       expect(mockSet.mock.calls[1][1]).toBe(aValidUser.session_token);
+
       expect(mockSet.mock.calls[2][0]).toBe(
+        `MYPORTAL-${aValidUser.myportal_token}`
+      );
+      expect(mockSet.mock.calls[2][1]).toBe(aValidUser.session_token);
+
+      expect(mockSet.mock.calls[3][0]).toBe(
         `SESSIONINFO-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[2][1]).toBeDefined();
-      expect(JSON.parse(mockSet.mock.calls[2][1])).toHaveProperty("createdAt");
+      expect(mockSet.mock.calls[3][1]).toBeDefined();
+      expect(JSON.parse(mockSet.mock.calls[3][1])).toHaveProperty("createdAt");
       expect(response).toEqual(expected);
     }
   );
@@ -431,10 +469,21 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelWalletError = new Error("hdel error");
 
   it.each([
-    [undefined, 1, undefined, 1, right(true), "should delete a session"],
+    [
+      undefined,
+      1,
+      undefined,
+      1,
+      undefined,
+      1,
+      right(true),
+      "should delete a session"
+    ],
     [
       expectedRedisDelSessionError,
       undefined,
+      undefined,
+      1,
       undefined,
       1,
       left(
@@ -450,6 +499,8 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       expectedRedisDelWalletError,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [expectedRedisDelSessionError, expectedRedisDelWalletError],
@@ -463,6 +514,8 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [
@@ -479,6 +532,8 @@ describe("RedisSessionStorage#del", () => {
     [
       undefined,
       undefined,
+      undefined,
+      1,
       undefined,
       1,
       left(
@@ -498,6 +553,8 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       expectedRedisDelWalletError,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [
@@ -516,6 +573,8 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [
@@ -536,6 +595,8 @@ describe("RedisSessionStorage#del", () => {
       1,
       expectedRedisDelWalletError,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [expectedRedisDelWalletError],
@@ -549,6 +610,8 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       expectedRedisDelWalletError,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [
@@ -567,6 +630,8 @@ describe("RedisSessionStorage#del", () => {
       1,
       undefined,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [
@@ -584,6 +649,8 @@ describe("RedisSessionStorage#del", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      1,
       left(
         multipleErrorsFormatter(
           [
@@ -604,8 +671,14 @@ describe("RedisSessionStorage#del", () => {
       sessionDelSuccess: boolean,
       walletDelErr: Error,
       walletDelSuccess: number,
+      myPortalDelErr: Error,
+      myPortalDelSuccess: number,
       expected: Error
     ) => {
+      const aValidUserWithMyPortalToken = {
+        ...aValidUser,
+        myportal_token: aMyportalToken
+      };
       mockDel.mockImplementationOnce((_, callback) => {
         callback(sessionDelErr, sessionDelSuccess);
       });
@@ -614,17 +687,25 @@ describe("RedisSessionStorage#del", () => {
         callback(walletDelErr, walletDelSuccess);
       });
 
+      mockDel.mockImplementationOnce((_, callback) => {
+        callback(myPortalDelErr, myPortalDelSuccess);
+      });
+
       const response = await sessionStorage.del(
-        aValidUser.session_token,
-        aValidUser.wallet_token
+        aValidUserWithMyPortalToken.session_token,
+        aValidUserWithMyPortalToken.wallet_token,
+        aValidUserWithMyPortalToken.myportal_token
       );
 
-      expect(mockDel).toHaveBeenCalledTimes(2);
+      expect(mockDel).toHaveBeenCalledTimes(3);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `SESSION-${aValidUser.session_token}`
+        `SESSION-${aValidUserWithMyPortalToken.session_token}`
       );
       expect(mockDel.mock.calls[1][0]).toBe(
-        `WALLET-${aValidUser.wallet_token}`
+        `WALLET-${aValidUserWithMyPortalToken.wallet_token}`
+      );
+      expect(mockDel.mock.calls[2][0]).toBe(
+        `MYPORTAL-${aValidUserWithMyPortalToken.myportal_token}`
       );
       expect(mockSrem).not.toBeCalled();
 

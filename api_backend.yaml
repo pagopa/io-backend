@@ -479,6 +479,10 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
+        "500":
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/sessions":
     x-swagger-router-controller: AuthenticationController
     get:
@@ -904,9 +908,12 @@ definitions:
          $ref: '#/definitions/SpidLevel'
       walletToken:
         type: string
+      myPortalToken:
+        type: string
     required:
       - spidLevel
       - walletToken
+      - myPortalToken
   SessionInfo:
     type: object
     title: Session info of a user

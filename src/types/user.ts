@@ -27,18 +27,16 @@ import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
-import { SessionToken, WalletToken } from "./token";
+import { MyPortalToken, SessionToken, WalletToken } from "./token";
 
 // required attributes
-export const User = t.intersection([
+export const UserWithoutTokens = t.intersection([
   t.interface({
     created_at: t.number,
     family_name: t.string,
     fiscal_code: FiscalCode,
     name: t.string,
-    session_token: SessionToken,
-    spid_level: SpidLevel,
-    wallet_token: WalletToken
+    spid_level: SpidLevel
   }),
   t.partial({
     date_of_birth: t.string,
@@ -51,7 +49,23 @@ export const User = t.intersection([
     spid_mobile_phone: NonEmptyString
   })
 ]);
+const RequiredUserTokensV1 = t.interface({
+  session_token: SessionToken,
+  wallet_token: WalletToken
+});
+export const UserV1 = t.intersection([UserWithoutTokens, RequiredUserTokensV1]);
+export type UserV1 = t.TypeOf<typeof UserV1>;
 
+const RequiredUserTokensV2 = t.intersection([
+  RequiredUserTokensV1,
+  t.interface({
+    myportal_token: MyPortalToken
+  })
+]);
+export const UserV2 = t.intersection([UserWithoutTokens, RequiredUserTokensV2]);
+export type UserV2 = t.TypeOf<typeof UserV2>;
+
+export const User = t.union([UserV1, UserV2], "User");
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
@@ -83,14 +97,16 @@ export function toAppUser(
   from: SpidUser,
   sessionToken: SessionToken,
   walletToken: WalletToken,
+  myPortalToken: MyPortalToken,
   sessionTrackingId: string
-): User {
+): UserV2 {
   return {
     created_at: new Date().getTime(),
     date_of_birth:
       from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
+    myportal_token: myPortalToken,
     name: from.name,
     session_token: sessionToken,
     session_tracking_id: sessionTrackingId,

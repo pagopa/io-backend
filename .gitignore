@@ -1,3 +1,6 @@
+# Exclude OS Folders
+.DS_Store
+
 # Exclude IDE folders.
 .vscode/*
 !.vscode/launch.json

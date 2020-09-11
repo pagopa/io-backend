@@ -12,3 +12,9 @@ interface IWalletTokenTag {
 }
 export const WalletToken = tag<IWalletTokenTag>()(t.string);
 export type WalletToken = t.TypeOf<typeof WalletToken>;
+
+interface IMyPortalTokenTag {
+  readonly kind: "MyPortalToken";
+}
+export const MyPortalToken = tag<IMyPortalTokenTag>()(t.string);
+export type MyPortalToken = t.TypeOf<typeof MyPortalToken>;

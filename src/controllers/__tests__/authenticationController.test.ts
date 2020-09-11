@@ -52,6 +52,7 @@ const mockSessionToken =
   "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
 const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
+const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -551,7 +552,7 @@ describe("AuthenticationController#logout", () => {
     jest.resetAllMocks();
   });
 
-  it("shoud return success after deleting the session token", async () => {
+  it("shoud return success after deleting session token and wallet token", async () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
@@ -562,7 +563,33 @@ describe("AuthenticationController#logout", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockDel).toHaveBeenCalledWith(mockSessionToken, mockWalletToken);
+    expect(mockDel).toHaveBeenCalledWith(
+      mockSessionToken,
+      mockWalletToken,
+      undefined
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+  });
+  it("shoud return success after deleting all auth tokens", async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = { ...mockedUser, myportal_token: mockMyPortalToken };
+
+    mockDel.mockReturnValue(Promise.resolve(right(true)));
+
+    const response = await controller.logout(req);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockDel).toHaveBeenCalledWith(
+      mockSessionToken,
+      mockWalletToken,
+      mockMyPortalToken
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
