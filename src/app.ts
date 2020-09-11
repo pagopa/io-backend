@@ -66,6 +66,7 @@ import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
+import { getUserForMyPortal } from "./controllers/ssoController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
@@ -77,6 +78,7 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import UsersLoginLogService from "./services/usersLoginLogService";
+import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { localStrategy } from "./strategies/localStrategy";
@@ -115,11 +117,13 @@ export interface IAppFactoryParameters {
   env: NodeEnvironment;
   allowNotifyIPSourceRange: readonly CIDR[];
   allowPagoPAIPSourceRange: readonly CIDR[];
+  allowMyPortalIPSourceRange: readonly CIDR[];
   allowSessionHandleIPSourceRange: readonly CIDR[];
   authenticationBasePath: string;
   APIBasePath: string;
   BonusAPIBasePath: string;
   PagoPABasePath: string;
+  MyPortalBasePath: string;
 }
 
 // tslint:disable-next-line: no-big-function
@@ -127,11 +131,13 @@ export function newApp({
   env,
   allowNotifyIPSourceRange,
   allowPagoPAIPSourceRange,
+  allowMyPortalIPSourceRange,
   allowSessionHandleIPSourceRange,
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
-  PagoPABasePath
+  PagoPABasePath,
+  MyPortalBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -157,11 +163,17 @@ export function newApp({
   // Add the strategy to authenticate proxy clients.
   passport.use("bearer.wallet", bearerWalletTokenStrategy(SESSION_STORAGE));
 
+  // Add the strategy to authenticate MyPortal clients.
+  passport.use("bearer.myportal", bearerMyPortalTokenStrategy(SESSION_STORAGE));
+
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
+    bearerMyPortal: passport.authenticate("bearer.myportal", {
+      session: false
+    }),
     bearerSession: passport.authenticate("bearer.session", {
       session: false
     }),
@@ -354,6 +366,12 @@ export function newApp({
         PROFILE_SERVICE,
         authMiddlewares.bearerWallet
       );
+      registerMyPortalRoutes(
+        app,
+        MyPortalBasePath,
+        allowMyPortalIPSourceRange,
+        authMiddlewares.bearerMyPortal
+      );
       return { app, acsController };
     },
     err => new Error(`Error on app routes setup: [${err}]`)
@@ -441,6 +459,21 @@ function registerPagoPARoutes(
     checkIP(allowPagoPAIPSourceRange),
     bearerWalletTokenAuth,
     toExpressHandler(pagopaController.getUser, pagopaController)
+  );
+}
+
+function registerMyPortalRoutes(
+  app: Express,
+  basePath: string,
+  allowMyPortalIPSourceRange: readonly CIDR[],
+  // tslint:disable-next-line: no-any
+  bearerMyPortalTokenAuth: any
+): void {
+  app.get(
+    `${basePath}/user`,
+    checkIP(allowMyPortalIPSourceRange),
+    bearerMyPortalTokenAuth,
+    toExpressHandler(getUserForMyPortal)
   );
 }
 

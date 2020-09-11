@@ -79,7 +79,9 @@ describe("GET /services/:id", () => {
     app = await appModule.newApp({
       APIBasePath: "/api/v1",
       BonusAPIBasePath: "/bonus/api/v1",
+      MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",
+      allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],

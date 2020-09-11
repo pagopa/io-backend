@@ -110,11 +110,13 @@ jobs:
             API_URL: "https://api.gateway.example.com/api/v1"
             ALLOW_NOTIFY_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             ALLOW_PAGOPA_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
+            ALLOW_MYPORTAL_IP_SOURCE_RANGE: "::ffff:ac13:1/112"
             AUTHENTICATION_BASE_PATH: ""
             API_BASE_PATH: "/api/v1"
             PAGOPA_API_URL_PROD: "https://pagopa-proxy-prod"
             PAGOPA_API_URL_TEST: "https://pagopa-proxy-test"
             PAGOPA_BASE_PATH: "/pagopa/api/v1"
+            MYPORTAL_BASE_PATH: "/myportal/api/v1"
             CIE_METADATA_URL: http://example.com
             IDP_METADATA_URL: "https://raw.githubusercontent.com/teamdigitale/io-backend/164984224-download-idp-metadata/test_idps/spid-entities-idps.xml"
             REDIS_URL: redis://localhost
