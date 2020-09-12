@@ -32,6 +32,13 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
+   * Retrieves a value from the cache using the myportal token.
+   */
+  readonly getByMyPortalToken: (
+    token: MyPortalToken
+  ) => Promise<Either<Error, Option<User>>>;
+
+  /**
    * Removes a value from the cache.
    */
   readonly del: (
