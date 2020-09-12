@@ -164,11 +164,13 @@ Those are all Environment variables needed by the application:
 | USERS_LOGIN_STORAGE_CONNECTION_STRING  | Connection string to Azure queue storage for usersLogin messages                  | string |
 | USERS_LOGIN_QUEUE_NAME                 | Queue name of Azure queue storage for usersLogin messages                         | string |
 | ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
+| ALLOW_MYPORTAL_IP_SOURCE_RANGE         | The range in CIDR form of allowed IPs for the MyPortal API                        | string |
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE  | The range in CIDR form of IPs of service allowed to handle user sessions          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
+| MYPORTAL_BASE_PATH                     | The root path for the MyPortal endpoints                                          | string |
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |

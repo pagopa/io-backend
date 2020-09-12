@@ -188,7 +188,33 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async getByWalletToken(
     token: WalletToken
   ): Promise<Either<Error, Option<User>>> {
-    const errorOrSession = await this.loadSessionByWalletToken(token);
+    const errorOrSession = await this.loadSessionByToken(
+      walletKeyPrefix,
+      token
+    );
+
+    if (isLeft(errorOrSession)) {
+      if (errorOrSession.value === sessionNotFoundError) {
+        return right(none);
+      }
+      return left(errorOrSession.value);
+    }
+
+    const user = errorOrSession.value;
+
+    return right(some(user));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getByMyPortalToken(
+    token: MyPortalToken
+  ): Promise<Either<Error, Option<User>>> {
+    const errorOrSession = await this.loadSessionByToken(
+      myPortalTokenPrefix,
+      token
+    );
 
     if (isLeft(errorOrSession)) {
       if (errorOrSession.value === sessionNotFoundError) {
@@ -649,14 +675,19 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * Return a Session for this token.
    */
-  private loadSessionByWalletToken(
-    token: WalletToken
+  private loadSessionByToken(
+    prefix: string,
+    token: WalletToken | MyPortalToken
   ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
-      this.redisClient.get(`${walletKeyPrefix}${token}`, (err, value) => {
+      this.redisClient.get(`${prefix}${token}`, (err, value) => {
         if (err) {
           // Client returns an error.
           return resolve(left<Error, User>(err));
+        }
+
+        if (value === null) {
+          return resolve(left<Error, User>(sessionNotFoundError));
         }
 
         this.loadSessionBySessionToken(value as SessionToken).then(

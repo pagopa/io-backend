@@ -61,6 +61,7 @@ const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aBonusAPIBasePath = "/bonus/api/v1";
 const aPagoPABasePath = "/pagopa/api/v1";
+const aMyPortalBasePath = "/myportal/api/v1";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -69,7 +70,9 @@ describe("Success app start", () => {
     app = await appModule.newApp({
       APIBasePath: "/api/v1",
       BonusAPIBasePath: aBonusAPIBasePath,
+      MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
+      allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
@@ -164,7 +167,9 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: "/api/v1",
         BonusAPIBasePath: aBonusAPIBasePath,
+        MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
@@ -186,7 +191,9 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: "/api/v1",
         BonusAPIBasePath: aBonusAPIBasePath,
+        MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
@@ -208,7 +215,9 @@ describe("Failure app start", () => {
       await appModule.newApp({
         APIBasePath: "/api/v1",
         BonusAPIBasePath: aBonusAPIBasePath,
+        MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],

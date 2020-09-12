@@ -11,9 +11,9 @@ security:
   - Token: []
 paths:
   "/user":
-    x-swagger-router-controller: MyPortalController
+    x-swagger-router-controller: SSOController
     get:
-      operationId: getUser
+      operationId: getUserForMyPortal
       summary: Get user's data
       description: Returns the user data needed by MyPortal backend.
       responses:
@@ -48,5 +48,5 @@ produces:
 securityDefinitions:
   Token:
     type: apiKey
-    name: token
+    name: access_token
     in: query
