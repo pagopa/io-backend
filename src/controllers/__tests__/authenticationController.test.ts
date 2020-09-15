@@ -53,7 +53,7 @@ const mockSessionToken =
 const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
 const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
-const mockBPDToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
+const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416";
 
 // mock for a valid User
 const mockedUser: User = {
