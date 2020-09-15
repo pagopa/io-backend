@@ -27,7 +27,7 @@ import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
-import { MyPortalToken, SessionToken, WalletToken } from "./token";
+import { BPDToken, MyPortalToken, SessionToken, WalletToken } from "./token";
 
 // required attributes
 export const UserWithoutTokens = t.intersection([
@@ -65,7 +65,16 @@ const RequiredUserTokensV2 = t.intersection([
 export const UserV2 = t.intersection([UserWithoutTokens, RequiredUserTokensV2]);
 export type UserV2 = t.TypeOf<typeof UserV2>;
 
-export const User = t.union([UserV1, UserV2], "User");
+const RequiredUserTokensV3 = t.intersection([
+  RequiredUserTokensV2,
+  t.interface({
+    bpd_token: BPDToken
+  })
+]);
+export const UserV3 = t.intersection([UserWithoutTokens, RequiredUserTokensV3]);
+export type UserV3 = t.TypeOf<typeof UserV3>;
+
+export const User = t.union([UserV1, UserV2, UserV3], "User");
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
@@ -98,9 +107,11 @@ export function toAppUser(
   sessionToken: SessionToken,
   walletToken: WalletToken,
   myPortalToken: MyPortalToken,
+  bpdToken: BPDToken,
   sessionTrackingId: string
-): UserV2 {
+): UserV3 {
   return {
+    bpd_token: bpdToken,
     created_at: new Date().getTime(),
     date_of_birth:
       from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,

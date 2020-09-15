@@ -35,6 +35,7 @@ const mockSessionToken =
 const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
 const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
+const mockBPDToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -77,7 +78,11 @@ const req = mockReq();
 
 describe("SessionController#getSessionState", () => {
   it("returns correct session state for valid session", async () => {
-    req.user = { ...mockedUser, myportal_token: mockMyPortalToken };
+    req.user = {
+      ...mockedUser,
+      bpd_token: mockBPDToken,
+      myportal_token: mockMyPortalToken
+    };
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -85,6 +90,7 @@ describe("SessionController#getSessionState", () => {
     expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
+      bpdToken: mockBPDToken,
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token
@@ -94,8 +100,12 @@ describe("SessionController#getSessionState", () => {
     req.user = mockedUser;
 
     mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
+    mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
 
     mockTtl.mockImplementationOnce((_, callback) => callback(undefined, 2000));
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
+      callback(undefined, "OK")
+    );
     mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
       callback(undefined, "OK")
     );
@@ -113,9 +123,10 @@ describe("SessionController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGetNewToken).toBeCalledTimes(1);
+    expect(mockGetNewToken).toBeCalledTimes(2);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
+      bpdToken: mockBPDToken,
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockWalletToken

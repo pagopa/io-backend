@@ -910,10 +910,13 @@ definitions:
         type: string
       myPortalToken:
         type: string
+      bpdToken:
+        type: string
     required:
       - spidLevel
       - walletToken
       - myPortalToken
+      - bpdToken
   SessionInfo:
     type: object
     title: Session info of a user

@@ -18,3 +18,9 @@ interface IMyPortalTokenTag {
 }
 export const MyPortalToken = tag<IMyPortalTokenTag>()(t.string);
 export type MyPortalToken = t.TypeOf<typeof MyPortalToken>;
+
+interface IBPDTokenTag {
+  readonly kind: "BPDToken";
+}
+export const BPDToken = tag<IBPDTokenTag>()(t.string);
+export type BPDToken = t.TypeOf<typeof BPDToken>;
