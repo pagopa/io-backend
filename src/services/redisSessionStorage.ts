@@ -693,8 +693,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * Remove other user sessions and wallet tokens
    */
+  // tslint:disable-next-line: cognitive-complexity
   private async removeOtherUserSessions(
-    user: UserV2
+    user: UserV3
   ): Promise<Either<Error, boolean>> {
     const sessionInfoKeys = await this.readSessionInfoKeys(user.fiscal_code);
     if (isRight(sessionInfoKeys)) {
@@ -722,48 +723,36 @@ export default class RedisSessionStorage extends RedisStorageUtils
           .map(deserializedUser => deserializedUser.value)
       );
 
-      // Map every user payload with an Option<WalletToken>
+      // Extract all tokens inside the user payload
       // If the value is invalid or must be skipped, it will be mapped with none
-      const walletTokens = errorOrDeserializedUsers
-        .fold(
-          _ => [],
-          _ =>
-            _.map(deserializedUser => {
-              if (deserializedUser.wallet_token === user.wallet_token) {
-                return none;
-              }
-              return some(deserializedUser.wallet_token);
-            })
-        )
-        .filter(isSome)
-        .map(_ => `${walletKeyPrefix}${_.value}`);
+      const externalTokens = errorOrDeserializedUsers.fold(
+        _ => [],
+        _ =>
+          _.map(deserializedUser => {
+            return [
+              deserializedUser.wallet_token !== user.wallet_token
+                ? some(`${walletKeyPrefix}${deserializedUser.wallet_token}`)
+                : none,
+              UserV2.is(deserializedUser) &&
+              deserializedUser.myportal_token !== user.myportal_token
+                ? some(
+                    `${myPortalTokenPrefix}${deserializedUser.myportal_token}`
+                  )
+                : none,
+              UserV3.is(deserializedUser) &&
+              deserializedUser.bpd_token !== user.bpd_token
+                ? some(`${bpdTokenPrefix}${deserializedUser.bpd_token}`)
+                : none
+            ]
+              .filter(isSome)
+              .map(tokens => tokens.value);
+          }).reduce((prev, tokens) => [...prev, ...tokens], [])
+      );
 
-      // Map every user payload with an Option<MyPortalToken>
-      // If the value is invalid or must be skipped, it will be mapped with none
-      const myPortalTokens = errorOrDeserializedUsers
-        .fold(
-          _ => [],
-          _ =>
-            _.map(deserializedUser => {
-              if (
-                !UserV2.is(deserializedUser) ||
-                deserializedUser.myportal_token === user.myportal_token
-              ) {
-                return none;
-              }
-              return some(deserializedUser.myportal_token);
-            })
-        )
-        .filter(isSome)
-        .map(_ => `${myPortalTokenPrefix}${_.value}`);
       // Delete all active session tokens, wallet tokens and MyPortal token that are different
       // from the new one generated and provided inside user object.
       return await new Promise(resolve => {
-        const keys: ReadonlyArray<string> = [
-          ...sessionKeys,
-          ...walletTokens,
-          ...myPortalTokens
-        ];
+        const keys: ReadonlyArray<string> = [...sessionKeys, ...externalTokens];
         if (keys.length === 0) {
           return resolve(right(true));
         }

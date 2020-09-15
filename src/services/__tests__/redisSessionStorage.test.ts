@@ -24,7 +24,7 @@ import {
   SessionToken,
   WalletToken
 } from "../../types/token";
-import { User, UserV3 } from "../../types/user";
+import { User, UserV2, UserV3 } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
@@ -416,6 +416,69 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     );
     expect(mockDel.mock.calls[0][3]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
+    );
+    expect(response.isRight());
+  });
+
+  it("should delete only older session token for UserV3 and UserV2 payload", async () => {
+    const oldSessionToken = "old_session_token" as SessionToken;
+    const oldWalletToken = "old_wallet_token" as WalletToken;
+    const oldMyPortalToken = "old_myportal_token" as MyPortalToken;
+    const oldBPDToken = "old_bpd_token" as BPDToken;
+    const oldUserPayload: UserV3 = {
+      ...aValidUser,
+      bpd_token: oldBPDToken,
+      myportal_token: oldMyPortalToken,
+      session_token: oldSessionToken,
+      wallet_token: oldWalletToken
+    };
+    const oldUserPayload2: UserV2 = {
+      ...aValidUser,
+      myportal_token: `${oldMyPortalToken}2` as MyPortalToken,
+      session_token: `${oldSessionToken}2` as SessionToken,
+      wallet_token: `${oldWalletToken}2` as WalletToken
+    };
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, [
+        `SESSIONINFO-${oldUserPayload.session_token}`,
+        `SESSIONINFO-${oldUserPayload2.session_token}`,
+        `SESSIONINFO-${aValidUser.session_token}`
+      ]);
+    });
+    mockMget.mockImplementation((_, __, callback) => {
+      callback(undefined, [
+        JSON.stringify(oldUserPayload),
+        JSON.stringify(oldUserPayload2)
+      ]);
+    });
+
+    const response: Either<Error, boolean> = await sessionStorage[
+      // tslint:disable-next-line: no-string-literal
+      "removeOtherUserSessions"
+    ](aValidUser);
+    expect(mockSmembers).toBeCalledTimes(1);
+    expect(mockSmembers.mock.calls[0][0]).toBe(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(
+      `SESSION-${oldUserPayload.session_token}`
+    );
+    expect(mockDel.mock.calls[0][1]).toBe(
+      `SESSION-${oldUserPayload2.session_token}`
+    );
+    expect(mockDel.mock.calls[0][2]).toBe(
+      `WALLET-${oldUserPayload.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][3]).toBe(
+      `MYPORTAL-${oldUserPayload.myportal_token}`
+    );
+    expect(mockDel.mock.calls[0][4]).toBe(`BPD-${oldUserPayload.bpd_token}`);
+    expect(mockDel.mock.calls[0][5]).toBe(
+      `WALLET-${oldUserPayload2.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][6]).toBe(
+      `MYPORTAL-${oldUserPayload2.myportal_token}`
     );
     expect(response.isRight());
   });
