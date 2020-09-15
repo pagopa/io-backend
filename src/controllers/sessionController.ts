@@ -16,9 +16,9 @@ import { SessionsList } from "../../generated/backend/SessionsList";
 
 import { isLeft } from "fp-ts/lib/Either";
 import TokenService from "src/services/tokenService";
-import { MyPortalToken } from "src/types/token";
+import { BPDToken, MyPortalToken } from "src/types/token";
 import RedisSessionStorage from "../services/redisSessionStorage";
-import { UserV2, withUserFromRequest } from "../types/user";
+import { UserV2, UserV3, withUserFromRequest } from "../types/user";
 import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 import { log } from "../utils/logger";
@@ -36,22 +36,29 @@ export default class SessionController {
     | IResponseSuccessJson<PublicSession>
   > =>
     withUserFromRequest(req, async user => {
-      if (UserV2.is(user)) {
+      if (UserV3.is(user)) {
+        // All required tokens are present on the current session, no update is required
         return ResponseSuccessJson({
+          bpdToken: user.bpd_token,
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token
         });
       }
 
-      // If the myportal_token is missing into the user session,
-      // a new one is generated and the session is updated
-      const myPortalToken = this.tokenService.getNewToken(
+      // If the myportal_token or bpd_token are missing into the user session,
+      // new tokens are generated and the session is updated
+      const bpdToken = this.tokenService.getNewToken(
         SESSION_TOKEN_LENGTH_BYTES
-      ) as MyPortalToken;
-      const updatedUser: UserV2 = {
+      ) as BPDToken;
+      const updatedUser: UserV3 = {
         ...user,
-        myportal_token: myPortalToken
+        bpd_token: bpdToken,
+        myportal_token: UserV2.is(user)
+          ? user.myportal_token
+          : (this.tokenService.getNewToken(
+              SESSION_TOKEN_LENGTH_BYTES
+            ) as MyPortalToken)
       };
 
       return (await this.sessionStorage.update(updatedUser)).fold<
@@ -65,6 +72,7 @@ export default class SessionController {
         },
         _ =>
           ResponseSuccessJson({
+            bpdToken: updatedUser.bpd_token,
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token

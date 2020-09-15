@@ -53,6 +53,7 @@ const mockSessionToken =
 const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
 const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
+const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -566,6 +567,7 @@ describe("AuthenticationController#logout", () => {
     expect(mockDel).toHaveBeenCalledWith(
       mockSessionToken,
       mockWalletToken,
+      undefined,
       undefined
     );
     expect(response).toEqual({
@@ -577,7 +579,11 @@ describe("AuthenticationController#logout", () => {
   it("shoud return success after deleting all auth tokens", async () => {
     const res = mockRes();
     const req = mockReq();
-    req.user = { ...mockedUser, myportal_token: mockMyPortalToken };
+    req.user = {
+      ...mockedUser,
+      bpd_token: mockBPDToken,
+      myportal_token: mockMyPortalToken
+    };
 
     mockDel.mockReturnValue(Promise.resolve(right(true)));
 
@@ -588,7 +594,8 @@ describe("AuthenticationController#logout", () => {
     expect(mockDel).toHaveBeenCalledWith(
       mockSessionToken,
       mockWalletToken,
-      mockMyPortalToken
+      mockMyPortalToken,
+      mockBPDToken
     );
     expect(response).toEqual({
       apply: expect.any(Function),

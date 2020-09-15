@@ -18,8 +18,13 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { MyPortalToken, SessionToken, WalletToken } from "../../types/token";
-import { User, UserV2 } from "../../types/user";
+import {
+  BPDToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken
+} from "../../types/token";
+import { User, UserV2, UserV3 } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
@@ -41,8 +46,10 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aSessionToken = "HexToKen" as SessionToken;
 const aWalletToken = "HexToKen" as WalletToken;
 const aMyportalToken = "HexToKen" as MyPortalToken;
+const aBPDToken = "HexToKen" as BPDToken;
 // mock for a valid User
-const aValidUser: UserV2 = {
+const aValidUser: UserV3 = {
+  bpd_token: aBPDToken,
   created_at: 1183518855,
   family_name: "Garibaldi",
   fiscal_code: aFiscalCode,
@@ -77,7 +84,7 @@ const mockGet = jest.fn().mockImplementation((_, callback) => {
 const mockMget = jest.fn();
 const mockDel = jest.fn().mockImplementation(
   // as del() can be can be called with variable arguments number, we extract the last as callback
-  callCallback(undefined, 1)
+  callCallback(undefined, 4)
 );
 
 const mockSadd = jest.fn();
@@ -126,12 +133,16 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
+      undefined,
+      "OK",
       right(true),
       "should set a new session with valid values"
     ],
     [
       new Error("hmset error"),
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       undefined,
@@ -151,6 +162,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("hset error")],
@@ -164,6 +177,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       left(
@@ -181,6 +196,8 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("Error setting session token")],
@@ -194,6 +211,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       left(
@@ -214,6 +233,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("hset error")],
@@ -227,6 +248,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       new Error("hset error"),
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       left(
@@ -244,6 +267,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       "OK",
+      undefined,
+      "OK",
       left(
         multipleErrorsFormatter(
           [new Error("Error setting wallet token")],
@@ -257,6 +282,8 @@ describe("RedisSessionStorage#set", () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      "OK",
       undefined,
       "OK",
       left(
@@ -276,7 +303,10 @@ describe("RedisSessionStorage#set", () => {
       walletSetSuccess: string,
       myPortalSetError: Error,
       myPortalSetSuccess: string,
+      bpdSetError: Error,
+      bpdSetSuccess: string,
       expected: Error
+      // tslint:disable-next-line: parameters-max-number
     ) => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
         callback(sessionSetErr, sessionSetSuccess);
@@ -289,6 +319,11 @@ describe("RedisSessionStorage#set", () => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
         callback(myPortalSetError, myPortalSetSuccess);
       });
+
+      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        callback(bpdSetError, bpdSetSuccess);
+      });
+
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
         callback(undefined, "OK");
       });
@@ -303,7 +338,7 @@ describe("RedisSessionStorage#set", () => {
 
       const response = await sessionStorage.set(aValidUser);
 
-      expect(mockSet).toHaveBeenCalledTimes(4);
+      expect(mockSet).toHaveBeenCalledTimes(5);
 
       expect(mockSet.mock.calls[0][0]).toBe(
         `SESSION-${aValidUser.session_token}`
@@ -320,11 +355,14 @@ describe("RedisSessionStorage#set", () => {
       );
       expect(mockSet.mock.calls[2][1]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[3][0]).toBe(
+      expect(mockSet.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
+      expect(mockSet.mock.calls[3][1]).toBe(aValidUser.session_token);
+
+      expect(mockSet.mock.calls[4][0]).toBe(
         `SESSIONINFO-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[3][1]).toBeDefined();
-      expect(JSON.parse(mockSet.mock.calls[3][1])).toHaveProperty("createdAt");
+      expect(mockSet.mock.calls[4][1]).toBeDefined();
+      expect(JSON.parse(mockSet.mock.calls[4][1])).toHaveProperty("createdAt");
       expect(response).toEqual(expected);
     }
   );
@@ -378,6 +416,69 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     );
     expect(mockDel.mock.calls[0][3]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
+    );
+    expect(response.isRight());
+  });
+
+  it("should delete only older session token for UserV3 and UserV2 payload", async () => {
+    const oldSessionToken = "old_session_token" as SessionToken;
+    const oldWalletToken = "old_wallet_token" as WalletToken;
+    const oldMyPortalToken = "old_myportal_token" as MyPortalToken;
+    const oldBPDToken = "old_bpd_token" as BPDToken;
+    const oldUserPayload: UserV3 = {
+      ...aValidUser,
+      bpd_token: oldBPDToken,
+      myportal_token: oldMyPortalToken,
+      session_token: oldSessionToken,
+      wallet_token: oldWalletToken
+    };
+    const oldUserPayload2: UserV2 = {
+      ...aValidUser,
+      myportal_token: `${oldMyPortalToken}2` as MyPortalToken,
+      session_token: `${oldSessionToken}2` as SessionToken,
+      wallet_token: `${oldWalletToken}2` as WalletToken
+    };
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, [
+        `SESSIONINFO-${oldUserPayload.session_token}`,
+        `SESSIONINFO-${oldUserPayload2.session_token}`,
+        `SESSIONINFO-${aValidUser.session_token}`
+      ]);
+    });
+    mockMget.mockImplementation((_, __, callback) => {
+      callback(undefined, [
+        JSON.stringify(oldUserPayload),
+        JSON.stringify(oldUserPayload2)
+      ]);
+    });
+
+    const response: Either<Error, boolean> = await sessionStorage[
+      // tslint:disable-next-line: no-string-literal
+      "removeOtherUserSessions"
+    ](aValidUser);
+    expect(mockSmembers).toBeCalledTimes(1);
+    expect(mockSmembers.mock.calls[0][0]).toBe(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(
+      `SESSION-${oldUserPayload.session_token}`
+    );
+    expect(mockDel.mock.calls[0][1]).toBe(
+      `SESSION-${oldUserPayload2.session_token}`
+    );
+    expect(mockDel.mock.calls[0][2]).toBe(
+      `WALLET-${oldUserPayload.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][3]).toBe(
+      `MYPORTAL-${oldUserPayload.myportal_token}`
+    );
+    expect(mockDel.mock.calls[0][4]).toBe(`BPD-${oldUserPayload.bpd_token}`);
+    expect(mockDel.mock.calls[0][5]).toBe(
+      `WALLET-${oldUserPayload2.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][6]).toBe(
+      `MYPORTAL-${oldUserPayload2.myportal_token}`
     );
     expect(response.isRight());
   });
@@ -655,247 +756,65 @@ describe("RedisSessionStorage#getByWalletToken", () => {
 
 // tslint:disable-next-line: no-big-function
 describe("RedisSessionStorage#del", () => {
-  const expectedRedisDelSessionError = new Error("del error");
-  const expectedRedisDelWalletError = new Error("hdel error");
+  const expectedRedisDelError = new Error("del error");
 
   it.each([
+    [undefined, 4, right(true), "should delete al user tokens"],
     [
+      expectedRedisDelError,
       undefined,
-      1,
-      undefined,
-      1,
-      undefined,
-      1,
-      right(true),
-      "should delete a session"
-    ],
-    [
-      expectedRedisDelSessionError,
-      undefined,
-      undefined,
-      1,
-      undefined,
-      1,
       left(
-        multipleErrorsFormatter(
-          [expectedRedisDelSessionError],
-          "RedisSessionStorage.del"
+        new Error(
+          `value [${expectedRedisDelError.message}] at RedisSessionStorage.del`
         )
       ),
-      "should fail if Redis client returns an error deleting the session"
+      "should fail if Redis client returns an error on deleting the user tokens"
     ],
     [
-      expectedRedisDelSessionError,
       undefined,
-      expectedRedisDelWalletError,
-      undefined,
-      undefined,
-      1,
+      3,
       left(
-        multipleErrorsFormatter(
-          [expectedRedisDelSessionError, expectedRedisDelWalletError],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns an error deleting the session and an error deleting the mapping"
-    ],
-    [
-      expectedRedisDelSessionError,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            expectedRedisDelSessionError,
+        new Error(
+          `value [${
             new Error(
-              "Unexpected response from redis client deleting walletToken."
-            )
-          ],
-          "RedisSessionStorage.del"
+              "Unexpected response from redis client deleting user tokens."
+            ).message
+          }] at RedisSessionStorage.del`
         )
       ),
       "should fail if Redis client returns an error deleting the session and false deleting the mapping"
-    ],
-    [
-      undefined,
-      undefined,
-      undefined,
-      1,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            new Error(
-              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
-            )
-          ],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns false on deleting the session"
-    ],
-    [
-      undefined,
-      undefined,
-      expectedRedisDelWalletError,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            new Error(
-              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
-            ),
-            expectedRedisDelWalletError
-          ],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns false on deleting the session and error deleting the mapping"
-    ],
-    [
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            new Error(
-              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
-            ),
-            new Error(
-              "Unexpected response from redis client deleting walletToken."
-            )
-          ],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns false on deleting the session and false deleting the mapping"
-    ],
-    [
-      undefined,
-      1,
-      expectedRedisDelWalletError,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [expectedRedisDelWalletError],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns an error on deleting the mapping"
-    ],
-    [
-      undefined,
-      undefined,
-      expectedRedisDelWalletError,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            new Error(
-              "Unexpected response from redis client deleting sessionInfoKey and sessionToken."
-            ),
-            expectedRedisDelWalletError
-          ],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns an error on deleting the mapping and false deleting the session"
-    ],
-    [
-      undefined,
-      1,
-      undefined,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            new Error(
-              "Unexpected response from redis client deleting walletToken."
-            )
-          ],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns false on deleting the mapping"
-    ],
-    [
-      expectedRedisDelSessionError,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      1,
-      left(
-        multipleErrorsFormatter(
-          [
-            expectedRedisDelSessionError,
-            new Error(
-              "Unexpected response from redis client deleting walletToken."
-            )
-          ],
-          "RedisSessionStorage.del"
-        )
-      ),
-      "should fail if Redis client returns false on deleting the mapping and error deleting the session"
     ]
   ])(
-    "%s, %s, %s, %s, %s, %s",
-    async (
-      sessionDelErr: Error,
-      sessionDelSuccess: boolean,
-      walletDelErr: Error,
-      walletDelSuccess: number,
-      myPortalDelErr: Error,
-      myPortalDelSuccess: number,
-      expected: Error
-    ) => {
-      const aValidUserWithMyPortalToken = {
+    "%s, %s",
+    async (tokenDelErr: Error, tokenDelResponse: number, expected: Error) => {
+      const aValidUserWithExternalTokens = {
         ...aValidUser,
+        bpd_token: aBPDToken,
         myportal_token: aMyportalToken
       };
-      mockDel.mockImplementationOnce((_, callback) => {
-        callback(sessionDelErr, sessionDelSuccess);
-      });
-
-      mockDel.mockImplementationOnce((_, callback) => {
-        callback(walletDelErr, walletDelSuccess);
-      });
-
-      mockDel.mockImplementationOnce((_, callback) => {
-        callback(myPortalDelErr, myPortalDelSuccess);
+      mockDel.mockImplementationOnce((_, __, ___, ____, callback) => {
+        callback(tokenDelErr, tokenDelResponse);
       });
 
       const response = await sessionStorage.del(
-        aValidUserWithMyPortalToken.session_token,
-        aValidUserWithMyPortalToken.wallet_token,
-        aValidUserWithMyPortalToken.myportal_token
+        aValidUserWithExternalTokens.session_token,
+        aValidUserWithExternalTokens.wallet_token,
+        aValidUserWithExternalTokens.myportal_token,
+        aValidUserWithExternalTokens.bpd_token
       );
 
-      expect(mockDel).toHaveBeenCalledTimes(3);
+      expect(mockDel).toHaveBeenCalledTimes(1);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `SESSION-${aValidUserWithMyPortalToken.session_token}`
+        `SESSION-${aValidUserWithExternalTokens.session_token}`
       );
-      expect(mockDel.mock.calls[1][0]).toBe(
-        `WALLET-${aValidUserWithMyPortalToken.wallet_token}`
+      expect(mockDel.mock.calls[0][1]).toBe(
+        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
       );
-      expect(mockDel.mock.calls[2][0]).toBe(
-        `MYPORTAL-${aValidUserWithMyPortalToken.myportal_token}`
+      expect(mockDel.mock.calls[0][2]).toBe(
+        `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
+      );
+      expect(mockDel.mock.calls[0][3]).toBe(
+        `BPD-${aValidUserWithExternalTokens.bpd_token}`
       );
       expect(mockSrem).not.toBeCalled();
 

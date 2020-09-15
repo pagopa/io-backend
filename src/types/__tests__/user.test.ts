@@ -10,7 +10,7 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { Issuer } from "../issuer";
-import { MyPortalToken, SessionToken, WalletToken } from "../token";
+import { BPDToken, MyPortalToken, SessionToken, WalletToken } from "../token";
 import {
   extractUserFromJson,
   toAppUser,
@@ -58,6 +58,7 @@ const mockedUser: User = {
 const mockSessionToken = "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b" as SessionToken;
 const mockWalletToken = "b1d8fbe93cc465e9dac98ff77018062d83d5f276279c0eea41960ed6e4199d4ce7ac51fcde4ea4a4755d09f621723388" as WalletToken;
 const mockMyPortalToken = "e9dac98ff7c465e9dac98ff77018062d83d5f276279c0eea4196cebed620488a4f932a62de4ea4a4755d09f6217fcde4" as MyPortalToken;
+const mockBPDToken = "eb6f94618021f75690c964ec63d5b27f2c7fd4f50a75fcea4256a9d96b43dcbb2a635530d8d63ec11eec3df6a0575268" as BPDToken;
 const mockSessionTrackingId = "324e25dcecebed6fewf2";
 
 describe("user type", () => {
@@ -69,6 +70,7 @@ describe("user type", () => {
       mockSessionToken,
       mockWalletToken,
       mockMyPortalToken,
+      mockBPDToken,
       mockSessionTrackingId
     );
 

@@ -40,11 +40,17 @@ import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
 import { SuccessResponse } from "../types/commons";
-import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
+import {
+  BPDToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken
+} from "../types/token";
 import {
   exactUserIdentityDecode,
   toAppUser,
   UserV2,
+  UserV3,
   validateSpidUser,
   withUserFromRequest
 } from "../types/user";
@@ -110,6 +116,7 @@ export default class AuthenticationController {
       sessionToken,
       walletToken,
       myPortalToken,
+      bpdToken,
       sessionTrackingId
     ] = await Promise.all([
       // ask the session storage whether this user is blocked
@@ -119,6 +126,8 @@ export default class AuthenticationController {
       // authentication token for pagoPA
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // authentication token for MyPortal
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for BPD
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // unique ID for tracking the user session
       this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
@@ -141,6 +150,7 @@ export default class AuthenticationController {
       sessionToken as SessionToken,
       walletToken as WalletToken,
       myPortalToken as MyPortalToken,
+      bpdToken as BPDToken,
       sessionTrackingId
     );
 
@@ -294,7 +304,8 @@ export default class AuthenticationController {
         const errorOrResponse = await this.sessionStorage.del(
           user.session_token,
           user.wallet_token,
-          UserV2.is(user) ? user.myportal_token : undefined
+          UserV2.is(user) ? user.myportal_token : undefined,
+          UserV3.is(user) ? user.bpd_token : undefined
         );
 
         if (isLeft(errorOrResponse)) {
