@@ -49,14 +49,15 @@ export const UserWithoutTokens = t.intersection([
     spid_mobile_phone: NonEmptyString
   })
 ]);
-const RequiredUserTokensV1 = t.interface({
+export const RequiredUserTokensV1 = t.interface({
   session_token: SessionToken,
   wallet_token: WalletToken
 });
+export type RequiredUserTokensV1 = t.TypeOf<typeof RequiredUserTokensV1>;
 export const UserV1 = t.intersection([UserWithoutTokens, RequiredUserTokensV1]);
 export type UserV1 = t.TypeOf<typeof UserV1>;
 
-const RequiredUserTokensV2 = t.intersection([
+export const RequiredUserTokensV2 = t.intersection([
   RequiredUserTokensV1,
   t.interface({
     myportal_token: MyPortalToken
@@ -65,7 +66,7 @@ const RequiredUserTokensV2 = t.intersection([
 export const UserV2 = t.intersection([UserWithoutTokens, RequiredUserTokensV2]);
 export type UserV2 = t.TypeOf<typeof UserV2>;
 
-const RequiredUserTokensV3 = t.intersection([
+export const RequiredUserTokensV3 = t.intersection([
   RequiredUserTokensV2,
   t.interface({
     bpd_token: BPDToken

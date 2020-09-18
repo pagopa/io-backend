@@ -387,8 +387,8 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     const oldWalletToken = "old_wallet_token" as WalletToken;
     const oldUserPayload: User = {
       ...aValidUser,
-      session_token: oldSessionToken,
-      wallet_token: oldWalletToken
+      session_token: `${oldSessionToken}1` as SessionToken,
+      wallet_token: `${oldWalletToken}1` as WalletToken
     };
     const oldUserPayload2: User = {
       ...aValidUser,
@@ -492,18 +492,18 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     expect(mockDel.mock.calls[0][3]).toBe(
       `SESSION-${oldUserPayload2.session_token}`
     );
-    expect(mockDel.mock.calls[0][4]).toBe(
-      `WALLET-${oldUserPayload.wallet_token}`
-    );
+    expect(mockDel.mock.calls[0][4]).toBe(`BPD-${oldUserPayload.bpd_token}`);
     expect(mockDel.mock.calls[0][5]).toBe(
       `MYPORTAL-${oldUserPayload.myportal_token}`
     );
-    expect(mockDel.mock.calls[0][6]).toBe(`BPD-${oldUserPayload.bpd_token}`);
+    expect(mockDel.mock.calls[0][6]).toBe(
+      `WALLET-${oldUserPayload.wallet_token}`
+    );
     expect(mockDel.mock.calls[0][7]).toBe(
-      `WALLET-${oldUserPayload2.wallet_token}`
+      `MYPORTAL-${oldUserPayload2.myportal_token}`
     );
     expect(mockDel.mock.calls[0][8]).toBe(
-      `MYPORTAL-${oldUserPayload2.myportal_token}`
+      `WALLET-${oldUserPayload2.wallet_token}`
     );
     expect(response.isRight());
   });
@@ -826,17 +826,17 @@ describe("RedisSessionStorage#del", () => {
 
       expect(mockDel).toHaveBeenCalledTimes(1);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `SESSION-${aValidUserWithExternalTokens.session_token}`
+        `BPD-${aValidUserWithExternalTokens.bpd_token}`
       );
-      expect(mockDel.mock.calls[0][1]).toBe(expectedSessionInfoKey);
-      expect(mockDel.mock.calls[0][2]).toBe(
-        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
-      );
-      expect(mockDel.mock.calls[0][3]).toBe(
+      expect(mockDel.mock.calls[0][1]).toBe(
         `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
       );
+      expect(mockDel.mock.calls[0][2]).toBe(expectedSessionInfoKey);
+      expect(mockDel.mock.calls[0][3]).toBe(
+        `SESSION-${aValidUserWithExternalTokens.session_token}`
+      );
       expect(mockDel.mock.calls[0][4]).toBe(
-        `BPD-${aValidUserWithExternalTokens.bpd_token}`
+        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
       );
 
       expect(response).toEqual(expected);

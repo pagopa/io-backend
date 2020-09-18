@@ -12,7 +12,9 @@ import {
   right,
   toError
 } from "fp-ts/lib/Either";
-import { isSome, none, Option, some } from "fp-ts/lib/Option";
+import { and, not } from "fp-ts/lib/function";
+import { none, Option, some } from "fp-ts/lib/Option";
+import { collect, StrMap } from "fp-ts/lib/StrMap";
 import {
   fromEither,
   fromLeft,
@@ -27,8 +29,9 @@ import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
+import { assertUnreachable } from "../types/commons";
 import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
-import { User, UserV2, UserV3 } from "../types/user";
+import { User, UserV1, UserV2, UserV3 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
@@ -252,15 +255,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async del(user: User): Promise<Either<Error, boolean>> {
-    const tokens: ReadonlyArray<string> = [
-      `${sessionKeyPrefix}${user.session_token}`,
-      `${sessionInfoKeyPrefix}${user.session_token}`,
-      `${walletKeyPrefix}${user.wallet_token}`,
-      ...(UserV2.is(user)
-        ? [`${myPortalTokenPrefix}${user.myportal_token}`]
-        : []),
-      ...(UserV3.is(user) ? [`${bpdTokenPrefix}${user.bpd_token}`] : [])
-    ];
+    const tokens: ReadonlyArray<string> = collect(
+      this.getUserTokens(user),
+      (_, { prefix, value }) => `${prefix}${value}`
+    );
 
     const deleteTokensPromise = await new Promise<Either<Error, true>>(
       resolve => {
@@ -292,7 +290,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async listUserSessions(
     user: User
   ): Promise<Either<Error, SessionsList>> {
+    // If some user session was expired we update the USERSESSION Redis set.
     await this.clearExpiredSetValues(user.fiscal_code);
+
     const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
     // tslint:disable-next-line: readonly-array
     const initializedSessionKeys: string[] = [];
@@ -319,6 +319,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
       .run();
   }
 
+  /**
+   * Remove expired `SESSIONINFO` value from the `USERSESSION` redis set.
+   * @param fiscalCode
+   */
   public async clearExpiredSetValues(
     fiscalCode: string
   ): Promise<ReadonlyArray<Either<Error, boolean>>> {
@@ -702,27 +706,45 @@ export default class RedisSessionStorage extends RedisStorageUtils
         _ => [],
         _ =>
           _.map(deserializedUser => {
-            return [
-              deserializedUser.wallet_token !== user.wallet_token
-                ? some(`${walletKeyPrefix}${deserializedUser.wallet_token}`)
-                : none,
-              UserV2.is(deserializedUser) &&
-              deserializedUser.myportal_token !== user.myportal_token
-                ? some(
-                    `${myPortalTokenPrefix}${deserializedUser.myportal_token}`
+            return collect(
+              this.getUserTokens(deserializedUser)
+                // Filter keys already contained in oldSessionInfoKeys and oldSessionKeys
+                .filter(
+                  not(
+                    p =>
+                      p.prefix === sessionInfoKeyPrefix ||
+                      p.prefix === sessionKeyPrefix
                   )
-                : none,
-              UserV3.is(deserializedUser) &&
-              deserializedUser.bpd_token !== user.bpd_token
-                ? some(`${bpdTokenPrefix}${deserializedUser.bpd_token}`)
-                : none
-            ]
-              .filter(isSome)
-              .map(tokens => tokens.value);
+                )
+                // Filter wallet_token of the new session
+                .filter(
+                  not(
+                    p =>
+                      p.prefix === walletKeyPrefix &&
+                      p.value === user.wallet_token
+                  )
+                )
+                // Filter myportal_token and bpd_token of the new session
+                .filter(
+                  and(
+                    not(
+                      p =>
+                        p.prefix === myPortalTokenPrefix &&
+                        p.value === user.myportal_token
+                    ),
+                    not(
+                      p =>
+                        p.prefix === bpdTokenPrefix &&
+                        p.value === user.bpd_token
+                    )
+                  )
+                ),
+              (_1, { prefix, value }) => `${prefix}${value}`
+            );
           }).reduce((prev, tokens) => [...prev, ...tokens], [])
       );
 
-      // Delete all active session tokens, wallet tokens and MyPortal token that are different
+      // Delete all active tokens that are different
       // from the new one generated and provided inside user object.
       const deleteOldKeysResponse = await new Promise<Either<Error, boolean>>(
         resolve => {
@@ -803,5 +825,50 @@ export default class RedisSessionStorage extends RedisStorageUtils
       },
       { sessions: [] } as SessionsList
     );
+  }
+
+  private getUserTokens(user: User): StrMap<{ prefix: string; value: string }> {
+    const requiredTokens = {
+      session_info: {
+        prefix: sessionInfoKeyPrefix,
+        value: user.session_token
+      },
+      session_token: {
+        prefix: sessionKeyPrefix,
+        value: user.session_token
+      },
+      wallet_token: {
+        prefix: walletKeyPrefix,
+        value: user.wallet_token
+      }
+    };
+    if (UserV3.is(user)) {
+      return new StrMap({
+        ...requiredTokens,
+        bpd_token: {
+          prefix: bpdTokenPrefix,
+          value: user.bpd_token
+        },
+        myportal_token: {
+          prefix: myPortalTokenPrefix,
+          value: user.myportal_token
+        }
+      });
+    }
+    if (UserV2.is(user)) {
+      return new StrMap({
+        ...requiredTokens,
+        myportal_token: {
+          prefix: myPortalTokenPrefix,
+          value: user.myportal_token
+        }
+      });
+    }
+    if (UserV1.is(user)) {
+      return new StrMap({
+        ...requiredTokens
+      });
+    }
+    return assertUnreachable(user);
   }
 }
