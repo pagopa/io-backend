@@ -49,8 +49,6 @@ import {
 import {
   exactUserIdentityDecode,
   toAppUser,
-  UserV2,
-  UserV3,
   validateSpidUser,
   withUserFromRequest
 } from "../types/user";
@@ -301,12 +299,7 @@ export default class AuthenticationController {
   > {
     return withUserFromRequest(req, user =>
       withCatchAsInternalError(async () => {
-        const errorOrResponse = await this.sessionStorage.del(
-          user.session_token,
-          user.wallet_token,
-          UserV2.is(user) ? user.myportal_token : undefined,
-          UserV3.is(user) ? user.bpd_token : undefined
-        );
+        const errorOrResponse = await this.sessionStorage.del(user);
 
         if (isLeft(errorOrResponse)) {
           const error = errorOrResponse.value;
