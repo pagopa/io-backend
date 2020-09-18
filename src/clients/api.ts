@@ -106,31 +106,31 @@ export function APIClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getProfileDefaultDecoder(),
-    url: params => `/profiles/${params.fiscalCode}`
+    url: params => `/profiles/${params.fiscal_code}`
   };
 
   const createProfileT: ReplaceRequestParams<
     CreateProfileT,
     Omit<RequestParams<CreateProfileT>, "SubscriptionKey">
   > = {
-    body: params => JSON.stringify(params.newProfile),
+    body: params => JSON.stringify(params.body),
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
     response_decoder: createProfileDefaultDecoder(),
-    url: params => `/profiles/${params.fiscalCode}`
+    url: params => `/profiles/${params.fiscal_code}`
   };
 
   const updateProfileT: ReplaceRequestParams<
     UpdateProfileT,
     Omit<RequestParams<UpdateProfileT>, "SubscriptionKey">
   > = {
-    body: params => JSON.stringify(params.profile),
+    body: params => JSON.stringify(params.body),
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "put",
     query: _ => ({}),
     response_decoder: updateProfileDefaultDecoder(),
-    url: params => `/profiles/${params.fiscalCode}`
+    url: params => `/profiles/${params.fiscal_code}`
   };
 
   const emailValidationProcessT: ReplaceRequestParams<
@@ -142,7 +142,7 @@ export function APIClient(
     method: "post",
     query: _ => ({}),
     response_decoder: startEmailValidationProcessCustomDecoder(),
-    url: params => `/email-validation-process/${params.fiscalCode}`
+    url: params => `/email-validation-process/${params.fiscal_code}`
   };
 
   const getUserDataProcessingT: ReplaceRequestParams<
@@ -154,7 +154,7 @@ export function APIClient(
     query: _ => ({}),
     response_decoder: getUserDataProcessingDefaultDecoder(),
     url: params =>
-      `/user-data-processing/${params.fiscalCode}/${params.userDataProcessingChoiceParam}`
+      `/user-data-processing/${params.fiscal_code}/${params.choice}`
   };
 
   const getMessagesT: ReplaceRequestParams<
@@ -165,7 +165,7 @@ export function APIClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getMessagesByUserDefaultDecoder(),
-    url: params => `/messages/${params.fiscalCode}`
+    url: params => `/messages/${params.fiscal_code}`
   };
 
   const getMessageT: ReplaceRequestParams<
@@ -176,7 +176,7 @@ export function APIClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getMessageDefaultDecoder(),
-    url: params => `/messages/${params.fiscalCode}/${params.id}`
+    url: params => `/messages/${params.fiscal_code}/${params.id}`
   };
 
   const getVisibleServicesT: ReplaceRequestParams<
@@ -205,12 +205,12 @@ export function APIClient(
     UpsertUserDataProcessingT,
     Omit<RequestParams<UpsertUserDataProcessingT>, "SubscriptionKey">
   > = {
-    body: params => JSON.stringify(params.userDataProcessingChoiceRequest),
+    body: params => JSON.stringify(params.body),
     headers: composeHeaderProducers(tokenHeaderProducer, ApiHeaderJson),
     method: "post",
     query: _ => ({}),
     response_decoder: upsertUserDataProcessingDefaultDecoder(),
-    url: params => `/user-data-processing/${params.fiscalCode}`
+    url: params => `/user-data-processing/${params.fiscal_code}`
   };
 
   return {

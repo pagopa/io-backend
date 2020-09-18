@@ -136,7 +136,7 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getBonusEligibilityCheck({
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response => {
@@ -178,7 +178,7 @@ export default class BonusService {
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getLatestBonusActivationById({
         bonus_id: bonusId,
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       // tslint:disable-next-line: no-identical-functions
@@ -227,7 +227,7 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getAllBonusActivations({
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       // tslint:disable-next-line: no-identical-functions

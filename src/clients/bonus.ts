@@ -93,7 +93,7 @@ export function BonusAPIClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getBonusEligibilityCheckDefaultDecoder(),
-    url: params => `/bonus/vacanze/eligibility/${params.fiscalCode}`
+    url: params => `/bonus/vacanze/eligibility/${params.fiscalcode}`
   };
 
   const getLatestBonusActivationByIdT: ReplaceRequestParams<
@@ -105,7 +105,7 @@ export function BonusAPIClient(
     query: _ => ({}),
     response_decoder: getLatestBonusActivationByIdDefaultDecoder(),
     url: params =>
-      `/bonus/vacanze/activations/${params.fiscalCode}/${params.bonus_id}`
+      `/bonus/vacanze/activations/${params.fiscalcode}/${params.bonus_id}`
   };
 
   const getAllBonusActivationsT: ReplaceRequestParams<
@@ -116,7 +116,7 @@ export function BonusAPIClient(
     method: "get",
     query: _ => ({}),
     response_decoder: getAllBonusActivationsDefaultDecoder(),
-    url: params => `/bonus/vacanze/activations/${params.fiscalCode}`
+    url: params => `/bonus/vacanze/activations/${params.fiscalcode}`
   };
 
   // This request type need to be rewritten because the code generator doesn't handle custom response header values
