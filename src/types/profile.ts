@@ -14,8 +14,8 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
-import { User } from "./user";
 import { formatDate } from "../utils/date";
+import { User } from "./user";
 
 /**
  * Converts an existing ExtendedProfile to a Proxy profile.
@@ -26,7 +26,7 @@ export const toInitializedProfile = (
 ): InitializedProfile => ({
   accepted_tos_version: profile.accepted_tos_version,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
-  date_of_birth: 
+  date_of_birth:
     user.date_of_birth !== undefined
       ? new Date(formatDate(user.date_of_birth))
       : undefined,

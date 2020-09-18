@@ -46,8 +46,8 @@ export default class UserDataProcessingService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.upsertUserDataProcessing({
-        fiscal_code: user.fiscal_code,
-        body: userDataProcessingChoiceRequest
+        body: userDataProcessingChoiceRequest,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response =>
@@ -80,8 +80,8 @@ export default class UserDataProcessingService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getUserDataProcessing({
-        fiscal_code: user.fiscal_code,
-        choice: userDataProcessingChoiceParam
+        choice: userDataProcessingChoiceParam,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response =>

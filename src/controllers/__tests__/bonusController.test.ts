@@ -58,7 +58,7 @@ const aInstanceId: InstanceId = {
 
 const aEligibilityCheck: EligibilityCheck = {
   dsu_request: {
-    dsu_created_at: new Date().toString(),
+    dsu_created_at: new Date(),
     dsu_protocol_id: "123" as NonEmptyString,
     family_members: [],
     has_discrepancies: false,
@@ -75,7 +75,7 @@ const aBonusActivation: BonusActivation = {
   applicant_fiscal_code: aFiscalCode,
   created_at: aDate,
   dsu_request: {
-    dsu_created_at: "",
+    dsu_created_at: new Date(),
     dsu_protocol_id: "dsuprotid" as NonEmptyString,
     family_members: [
       { fiscal_code: aFiscalCode, name: aValidName, surname: aValidFamilyname }

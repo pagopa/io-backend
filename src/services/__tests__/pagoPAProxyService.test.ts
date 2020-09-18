@@ -134,7 +134,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId
+      rpt_id_from_string: aRptId
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -153,7 +153,9 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
     const res = await service.getPaymentInfo(aRptId, true);
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
-    expect(mockGetPaymentInfo).toHaveBeenCalledWith({ rptId: aRptId });
+    expect(mockGetPaymentInfo).toHaveBeenCalledWith({
+      rpt_id_from_string: aRptId
+    });
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -172,7 +174,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId
+      rpt_id_from_string: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
@@ -188,7 +190,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId
+      rpt_id_from_string: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -204,7 +206,7 @@ describe("PagoPAProxyService#getPaymentInfo", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetPaymentInfo).toHaveBeenCalledWith({
-      rptId: aRptId
+      rpt_id_from_string: aRptId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -226,7 +228,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      body: validPaymentActivation
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -246,7 +248,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      body: validPaymentActivation
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -266,7 +268,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      body: validPaymentActivation
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
@@ -282,7 +284,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      body: validPaymentActivation
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -298,7 +300,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      paymentActivationsPostRequest: validPaymentActivation
+      body: validPaymentActivation
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -323,7 +325,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -346,7 +348,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -369,7 +371,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento
     });
     expect(res.kind).toEqual("IResponseErrorNotFound");
   });
@@ -388,7 +390,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -407,7 +409,7 @@ describe("PagoPAProxyService#getActivationStatus", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockGetActivationStatus).toHaveBeenCalledWith({
-      codiceContestoPagamento: acodiceContestoPagamento
+      codice_contesto_pagamento: acodiceContestoPagamento
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

@@ -31,7 +31,7 @@ const aBonusId = "aBonusId" as NonEmptyString & BonusCode;
 
 const aEligibilityCheck: EligibilityCheck = {
   dsu_request: {
-    dsu_created_at: new Date().toString(),
+    dsu_created_at: new Date(),
     dsu_protocol_id: "123" as NonEmptyString,
     family_members: [],
     has_discrepancies: false,
@@ -49,7 +49,7 @@ const aBonusActivation: BonusActivation = {
   applicant_fiscal_code: "SPNDNL80R14C522K" as FiscalCode,
   created_at: new Date(),
   dsu_request: {
-    dsu_created_at: "",
+    dsu_created_at: new Date(),
     dsu_protocol_id: "dsuprotid" as NonEmptyString,
     family_members: [
       {
@@ -247,7 +247,7 @@ describe("BonusService#getBonusEligibilityCheck", () => {
     await service.getBonusEligibilityCheck(mockedUser);
 
     expect(mockGetBonusEligibilityCheck).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code
     });
   });
 
@@ -320,7 +320,7 @@ describe("BonusService#getLatestBonusActivationById", () => {
 
     expect(mockGetLatestBonusActivationById).toHaveBeenCalledWith({
       bonus_id: aBonusId,
-      fiscalCode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code
     });
   });
 
@@ -414,7 +414,7 @@ describe("BonusService#getAllBonusActivations", () => {
     await service.getAllBonusActivations(mockedUser);
 
     expect(mockGetAllBonusActivations).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code
     });
   });
 

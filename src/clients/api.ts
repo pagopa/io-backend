@@ -1,4 +1,3 @@
-
 import nodeFetch from "node-fetch";
 import { Client, createClient } from "../../generated/io-api/client";
 
@@ -19,18 +18,16 @@ export function APIClient(
   // tslint:disable-next-line:no-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch // TODO: customize fetch with timeout
 ): Client<"SubscriptionKey"> {
-  const newClient = createClient<"SubscriptionKey">({
+  return createClient<"SubscriptionKey">({
+    basePath: "",
     baseUrl,
     fetchApi,
-    basePath: "",
-    withDefaults: op => (params) =>
+    withDefaults: op => params =>
       op({
         ...params,
         SubscriptionKey: token
       })
   });
-
-  return newClient
 }
 
 export type APIClient = typeof APIClient;

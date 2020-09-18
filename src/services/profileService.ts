@@ -139,8 +139,8 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.createProfile({
-        fiscal_code: user.fiscal_code,
-        body: newProfile
+        body: newProfile,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response =>
@@ -181,8 +181,8 @@ export default class ProfileService {
       async extendedProfileApi =>
         withCatchAsInternalError(async () => {
           const validated = await client.updateProfile({
-            fiscal_code: user.fiscal_code,
-            body:extendedProfileApi
+            body: extendedProfileApi,
+            fiscal_code: user.fiscal_code
           });
 
           return withValidatedOrInternalError(validated, response =>
