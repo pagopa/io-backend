@@ -216,7 +216,7 @@ export default class ProfileService {
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
-      const validated = await client.emailValidationProcess({
+      const validated = await client.startEmailValidationProcess({
         fiscal_code: user.fiscal_code
       });
       return withValidatedOrInternalError(validated, response => {
