@@ -131,7 +131,7 @@ describe("BonusService#startBonusEligibilityCheck", () => {
     await service.startBonusEligibilityCheck(mockedUser);
 
     expect(mockStartBonusEligibilityCheck).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code
     });
   });
 
@@ -503,7 +503,7 @@ describe("BonusService#startBonusActivationProcedure", () => {
     await service.startBonusActivationProcedure(mockedUser);
 
     expect(mockStartBonusActivationProcedure).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscalcode: mockedUser.fiscal_code
     });
   });
 

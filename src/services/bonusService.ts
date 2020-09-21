@@ -91,7 +91,7 @@ export default class BonusService {
       }
 
       const validated = await this.bonusApiClient.startBonusEligibilityCheck({
-        fiscalCode: user.fiscal_code
+        fiscalcode: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response => {
@@ -263,7 +263,7 @@ export default class BonusService {
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.startBonusActivationProcedure(
         {
-          fiscalCode: user.fiscal_code
+          fiscalcode: user.fiscal_code
         }
       );
 
