@@ -1,5 +1,5 @@
 import nodeFetch from "node-fetch";
-import { Client, createClient } from "../../generated/pagopa-proxy/client"
+import { Client, createClient } from "../../generated/pagopa-proxy/client";
 
 export function PagoPAClient(
   baseUrl: string,
