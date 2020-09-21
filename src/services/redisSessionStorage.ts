@@ -12,7 +12,6 @@ import {
   right,
   toError
 } from "fp-ts/lib/Either";
-import { not } from "fp-ts/lib/function";
 import { none, Option, some } from "fp-ts/lib/Option";
 import { collect, StrMap } from "fp-ts/lib/StrMap";
 import {
@@ -33,7 +32,6 @@ import { assertUnreachable } from "../types/commons";
 import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
 import { User, UserV1, UserV2, UserV3 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
-import { and } from "../utils/fp-ts";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
@@ -711,31 +709,20 @@ export default class RedisSessionStorage extends RedisStorageUtils
           _.map(deserializedUser => {
             return collect(
               this.getUserTokens(deserializedUser).filter(
-                and(
-                  // Filter keys already contained in oldSessionInfoKeys and oldSessionKeys
-                  not(
-                    p =>
-                      p.prefix === sessionInfoKeyPrefix ||
-                      p.prefix === sessionKeyPrefix
-                  ),
-                  // Filter wallet_token of the new session
-                  not(
-                    p =>
-                      p.prefix === walletKeyPrefix &&
-                      p.value === user.wallet_token
-                  ),
-                  // Filter myportal_token of the new session
-                  not(
-                    p =>
-                      p.prefix === myPortalTokenPrefix &&
-                      p.value === user.myportal_token
-                  ),
-                  // Filter bpd_token of the new session
-                  not(
-                    p =>
-                      p.prefix === bpdTokenPrefix && p.value === user.bpd_token
-                  )
-                )
+                p =>
+                  !(
+                    p.prefix === sessionInfoKeyPrefix ||
+                    p.prefix === sessionKeyPrefix
+                  ) &&
+                  !(
+                    p.prefix === walletKeyPrefix &&
+                    p.value === user.wallet_token
+                  ) &&
+                  !(
+                    p.prefix === myPortalTokenPrefix &&
+                    p.value === user.myportal_token
+                  ) &&
+                  !(p.prefix === bpdTokenPrefix && p.value === user.bpd_token)
               ),
               (_1, { prefix, value }) => `${prefix}${value}`
             );
