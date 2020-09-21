@@ -61,7 +61,9 @@ const mockTtl = jest.fn();
 const mockRedisClient = createMockRedis().createClient();
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
-mockRedisClient.smembers = mockSmembers;
+mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
+  callback(null, [`SESSIONINFO-${mockedUser.session_token}`]);
+});
 mockRedisClient.sismember = mockSismember;
 mockRedisClient.ttl = mockTtl;
 mockRedisClient.set = mockSet;
@@ -143,18 +145,12 @@ describe("SessionController#listSessions", () => {
   };
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(null, [`SESSIONINFO-${mockedUser.session_token}`]);
-    });
     mockMget.mockImplementationOnce((_, callback) => {
       callback(null, [JSON.stringify(expectedSessionInfo)]);
     });
   });
   it("returns list of sessions for an authenticated user", async () => {
     req.user = mockedUser;
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(null, [`SESSIONINFO-${mockedUser.session_token}`]);
-    });
     mockSrem.mockImplementationOnce((_, __, callback) =>
       callback(undefined, true)
     );
@@ -164,6 +160,8 @@ describe("SessionController#listSessions", () => {
 
     expect(controller).toBeTruthy();
     expect(mockSrem).toBeCalledTimes(1);
+    // smembers is called by clearExpiredSetValues and readSessionInfoKeys
+    expect(mockSmembers).toBeCalledTimes(2);
     expect(mockSrem.mock.calls[0][0]).toEqual(
       `USERSESSIONS-${mockedUser.fiscal_code}`
     );
