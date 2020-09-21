@@ -12,7 +12,7 @@ import {
   right,
   toError
 } from "fp-ts/lib/Either";
-import { and, not } from "fp-ts/lib/function";
+import { not } from "fp-ts/lib/function";
 import { none, Option, some } from "fp-ts/lib/Option";
 import { collect, StrMap } from "fp-ts/lib/StrMap";
 import {
@@ -33,6 +33,7 @@ import { assertUnreachable } from "../types/commons";
 import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
 import { User, UserV1, UserV2, UserV3 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
+import { and } from "../utils/fp-ts";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
@@ -680,6 +681,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
           _.startsWith(sessionInfoKeyPrefix) &&
           _ !== `${sessionInfoKeyPrefix}${user.session_token}`
       );
+      // Generate old session keys list from session info keys list
+      // transforming pattern SESSIONINFO-token into pattern SESSION-token with token as the same value
       const oldSessionKeys = oldSessionInfoKeys.map(
         _ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`
       );
@@ -707,38 +710,33 @@ export default class RedisSessionStorage extends RedisStorageUtils
         _ =>
           _.map(deserializedUser => {
             return collect(
-              this.getUserTokens(deserializedUser)
-                // Filter keys already contained in oldSessionInfoKeys and oldSessionKeys
-                .filter(
+              this.getUserTokens(deserializedUser).filter(
+                and(
+                  // Filter keys already contained in oldSessionInfoKeys and oldSessionKeys
                   not(
                     p =>
                       p.prefix === sessionInfoKeyPrefix ||
                       p.prefix === sessionKeyPrefix
-                  )
-                )
-                // Filter wallet_token of the new session
-                .filter(
+                  ),
+                  // Filter wallet_token of the new session
                   not(
                     p =>
                       p.prefix === walletKeyPrefix &&
                       p.value === user.wallet_token
+                  ),
+                  // Filter myportal_token of the new session
+                  not(
+                    p =>
+                      p.prefix === myPortalTokenPrefix &&
+                      p.value === user.myportal_token
+                  ),
+                  // Filter bpd_token of the new session
+                  not(
+                    p =>
+                      p.prefix === bpdTokenPrefix && p.value === user.bpd_token
                   )
                 )
-                // Filter myportal_token and bpd_token of the new session
-                .filter(
-                  and(
-                    not(
-                      p =>
-                        p.prefix === myPortalTokenPrefix &&
-                        p.value === user.myportal_token
-                    ),
-                    not(
-                      p =>
-                        p.prefix === bpdTokenPrefix &&
-                        p.value === user.bpd_token
-                    )
-                  )
-                ),
+              ),
               (_1, { prefix, value }) => `${prefix}${value}`
             );
           }).reduce((prev, tokens) => [...prev, ...tokens], [])
