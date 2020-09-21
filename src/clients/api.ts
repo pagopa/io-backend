@@ -1,17 +1,6 @@
 import nodeFetch from "node-fetch";
 import { Client, createClient } from "../../generated/io-api/client";
 
-// we want to authenticate against the platform APIs with the APIM header key or
-// the Azure Functions header key, so we send both headers
-/* function SubscriptionKeyHeaderProducer<P>(
-  token: string
-): RequestHeaderProducer<P, "X-Functions-Key" | "Ocp-Apim-Subscription-Key"> {
-  return () => ({
-    "Ocp-Apim-Subscription-Key": token,
-    "X-Functions-Key": token
-  });
-} */
-
 export function APIClient(
   baseUrl: string,
   token: string,
