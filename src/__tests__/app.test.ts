@@ -62,6 +62,7 @@ const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 const aBonusAPIBasePath = "/bonus/api/v1";
 const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
+const aBPDBasePath = "/bpd/api/v1";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -69,9 +70,11 @@ describe("Success app start", () => {
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: "/api/v1",
+      BPDBasePath: aBPDBasePath,
       BonusAPIBasePath: aBonusAPIBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
+      allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
@@ -166,9 +169,11 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: "/api/v1",
+        BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
@@ -190,9 +195,11 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: "/api/v1",
+        BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
@@ -214,9 +221,11 @@ describe("Failure app start", () => {
     try {
       await appModule.newApp({
         APIBasePath: "/api/v1",
+        BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],

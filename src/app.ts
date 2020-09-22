@@ -66,7 +66,7 @@ import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
-import { getUserForMyPortal } from "./controllers/ssoController";
+import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
@@ -78,6 +78,7 @@ import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import UsersLoginLogService from "./services/usersLoginLogService";
+import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
@@ -118,12 +119,14 @@ export interface IAppFactoryParameters {
   allowNotifyIPSourceRange: readonly CIDR[];
   allowPagoPAIPSourceRange: readonly CIDR[];
   allowMyPortalIPSourceRange: readonly CIDR[];
+  allowBPDIPSourceRange: readonly CIDR[];
   allowSessionHandleIPSourceRange: readonly CIDR[];
   authenticationBasePath: string;
   APIBasePath: string;
   BonusAPIBasePath: string;
   PagoPABasePath: string;
   MyPortalBasePath: string;
+  BPDBasePath: string;
 }
 
 // tslint:disable-next-line: no-big-function
@@ -132,12 +135,14 @@ export function newApp({
   allowNotifyIPSourceRange,
   allowPagoPAIPSourceRange,
   allowMyPortalIPSourceRange,
+  allowBPDIPSourceRange,
   allowSessionHandleIPSourceRange,
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
   PagoPABasePath,
-  MyPortalBasePath
+  MyPortalBasePath,
+  BPDBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -166,11 +171,17 @@ export function newApp({
   // Add the strategy to authenticate MyPortal clients.
   passport.use("bearer.myportal", bearerMyPortalTokenStrategy(SESSION_STORAGE));
 
+  // Add the strategy to authenticate BPD clients.
+  passport.use("bearer.bpd", bearerBPDTokenStrategy(SESSION_STORAGE));
+
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
+    bearerBPD: passport.authenticate("bearer.bpd", {
+      session: false
+    }),
     bearerMyPortal: passport.authenticate("bearer.myportal", {
       session: false
     }),
@@ -372,6 +383,12 @@ export function newApp({
         allowMyPortalIPSourceRange,
         authMiddlewares.bearerMyPortal
       );
+      registerBPDRoutes(
+        app,
+        BPDBasePath,
+        allowBPDIPSourceRange,
+        authMiddlewares.bearerBPD
+      );
       return { app, acsController };
     },
     err => new Error(`Error on app routes setup: [${err}]`)
@@ -474,6 +491,21 @@ function registerMyPortalRoutes(
     checkIP(allowMyPortalIPSourceRange),
     bearerMyPortalTokenAuth,
     toExpressHandler(getUserForMyPortal)
+  );
+}
+
+function registerBPDRoutes(
+  app: Express,
+  basePath: string,
+  allowBPDIPSourceRange: readonly CIDR[],
+  // tslint:disable-next-line: no-any
+  bearerBPDTokenAuth: any
+): void {
+  app.get(
+    `${basePath}/user`,
+    checkIP(allowBPDIPSourceRange),
+    bearerBPDTokenAuth,
+    toExpressHandler(getUserForBPD)
   );
 }
 
