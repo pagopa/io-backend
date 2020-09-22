@@ -12,7 +12,8 @@ import {
   right,
   toError
 } from "fp-ts/lib/Either";
-import { isSome, none, Option, some } from "fp-ts/lib/Option";
+import { none, Option, some } from "fp-ts/lib/Option";
+import { collect, StrMap } from "fp-ts/lib/StrMap";
 import {
   fromEither,
   fromLeft,
@@ -27,13 +28,9 @@ import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
-import {
-  BPDToken,
-  MyPortalToken,
-  SessionToken,
-  WalletToken
-} from "../types/token";
-import { User, UserV2, UserV3 } from "../types/user";
+import { assertUnreachable } from "../types/commons";
+import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
+import { User, UserV1, UserV2, UserV3 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
@@ -256,42 +253,33 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * {@inheritDoc}
    */
-  public async del(
-    sessionToken: SessionToken,
-    walletToken: WalletToken,
-    myPortalToken?: MyPortalToken,
-    bpdToken?: BPDToken
-  ): Promise<Either<Error, boolean>> {
-    const user = await this.loadSessionBySessionToken(sessionToken);
-    if (isLeft(user)) {
-      return left(user.value);
-    }
-    const tokens: ReadonlyArray<string> = [
-      `${sessionKeyPrefix}${sessionToken}`,
-      `${walletKeyPrefix}${walletToken}`,
-      ...(myPortalToken ? [`${myPortalTokenPrefix}${myPortalToken}`] : []),
-      ...(bpdToken ? [`${bpdTokenPrefix}${bpdToken}`] : [])
-    ];
+  public async del(user: User): Promise<Either<Error, boolean>> {
+    const tokens: ReadonlyArray<string> = collect(
+      this.getUserTokens(user),
+      (_, { prefix, value }) => `${prefix}${value}`
+    );
 
-    const deletePromise = await new Promise<Either<Error, true>>(resolve => {
-      // Remove the specified key. A key is ignored if it does not exist.
-      // @see https://redis.io/commands/del
-      this.redisClient.del(...tokens, (err, response) =>
-        resolve(
-          this.falsyResponseToError(
-            this.integerReply(err, response, tokens.length),
-            new Error(
-              "Unexpected response from redis client deleting user tokens."
+    const deleteTokensPromise = await new Promise<Either<Error, true>>(
+      resolve => {
+        // Remove the specified key. A key is ignored if it does not exist.
+        // @see https://redis.io/commands/del
+        this.redisClient.del(...tokens, (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.integerReply(err, response, tokens.length),
+              new Error(
+                "Unexpected response from redis client deleting user tokens."
+              )
             )
           )
-        )
-      );
-    });
+        );
+      }
+    );
 
-    if (isLeft(deletePromise)) {
+    if (isLeft(deleteTokensPromise)) {
       return left<Error, boolean>(
         new Error(
-          `value [${deletePromise.value.message}] at RedisSessionStorage.del`
+          `value [${deleteTokensPromise.value.message}] at RedisSessionStorage.del`
         )
       );
     }
@@ -301,6 +289,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async listUserSessions(
     user: User
   ): Promise<Either<Error, SessionsList>> {
+    // If some user session was expired we update the USERSESSION Redis set.
+    await this.clearExpiredSetValues(user.fiscal_code);
+
     const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
     // tslint:disable-next-line: readonly-array
     const initializedSessionKeys: string[] = [];
@@ -327,6 +318,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
       .run();
   }
 
+  /**
+   * Remove expired `SESSIONINFO` value from the `USERSESSION` redis set.
+   * @param fiscalCode
+   */
   public async clearExpiredSetValues(
     fiscalCode: string
   ): Promise<ReadonlyArray<Either<Error, boolean>>> {
@@ -465,18 +460,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
               SessionToken.decode(sessionToken).mapLeft(
                 _ => new Error("Error decoding token")
               )
+            ).chain<boolean>((token: SessionToken) =>
+              tryCatch(() => this.delSingleSession(token), toError).chain(
+                fromEither
+              )
             )
-              .chain<boolean>((token: SessionToken) =>
-                tryCatch(() => this.delSingleSession(token), toError).chain(
-                  fromEither
-                )
-              )
-              .chain(_ =>
-                tryCatch(
-                  () => this.delSessionInfo(sessionToken),
-                  toError
-                ).chain(fromEither)
-              )
           )
         )
         .map(() => true);
@@ -558,12 +546,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       const user: User = errorOrUser.getOrElseL(err => {
         throw err;
       });
-      return this.del(
-        user.session_token,
-        user.wallet_token,
-        UserV2.is(user) ? user.myportal_token : undefined,
-        UserV3.is(user) ? user.bpd_token : undefined
-      );
+      return this.del(user);
     } catch (error) {
       // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
       return error === sessionNotFoundError
@@ -578,16 +561,6 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
       );
       this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`, err =>
-        resolve(err ? left(err) : right(true))
-      );
-    });
-  }
-
-  private delSessionInfo(token: SessionToken): Promise<Either<Error, true>> {
-    const sessionInfoKey = `${sessionInfoKeyPrefix}${token}`;
-    return new Promise<Either<Error, true>>(resolve => {
-      log.info(`Deleting session info ${sessionInfoKey}`);
-      this.redisClient.del(`${sessionInfoKey}`, err =>
         resolve(err ? left(err) : right(true))
       );
     });
@@ -697,22 +670,27 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private async removeOtherUserSessions(
     user: UserV3
   ): Promise<Either<Error, boolean>> {
-    const sessionInfoKeys = await this.readSessionInfoKeys(user.fiscal_code);
-    if (isRight(sessionInfoKeys)) {
-      const sessionKeys = sessionInfoKeys.value
-        .filter(
-          _ =>
-            _.startsWith(sessionInfoKeyPrefix) &&
-            _ !== `${sessionInfoKeyPrefix}${user.session_token}`
-        )
-        .map(_ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`);
+    const errorOrSessionInfoKeys = await this.readSessionInfoKeys(
+      user.fiscal_code
+    );
+    if (isRight(errorOrSessionInfoKeys)) {
+      const oldSessionInfoKeys = errorOrSessionInfoKeys.value.filter(
+        _ =>
+          _.startsWith(sessionInfoKeyPrefix) &&
+          _ !== `${sessionInfoKeyPrefix}${user.session_token}`
+      );
+      // Generate old session keys list from session info keys list
+      // transforming pattern SESSIONINFO-token into pattern SESSION-token with token as the same value
+      const oldSessionKeys = oldSessionInfoKeys.map(
+        _ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`
+      );
 
       // Retrieve all user data related to session tokens.
       // All the tokens are stored inside user payload.
       const errorOrSerializedUser = await new Promise<
         Either<Error, ReadonlyArray<string>>
       >(resolve => {
-        this.redisClient.mget(...sessionKeys, (err, response) =>
+        this.redisClient.mget(...oldSessionKeys, (err, response) =>
           resolve(this.arrayStringReply(err, response))
         );
       });
@@ -729,41 +707,51 @@ export default class RedisSessionStorage extends RedisStorageUtils
         _ => [],
         _ =>
           _.map(deserializedUser => {
-            return [
-              deserializedUser.wallet_token !== user.wallet_token
-                ? some(`${walletKeyPrefix}${deserializedUser.wallet_token}`)
-                : none,
-              UserV2.is(deserializedUser) &&
-              deserializedUser.myportal_token !== user.myportal_token
-                ? some(
-                    `${myPortalTokenPrefix}${deserializedUser.myportal_token}`
-                  )
-                : none,
-              UserV3.is(deserializedUser) &&
-              deserializedUser.bpd_token !== user.bpd_token
-                ? some(`${bpdTokenPrefix}${deserializedUser.bpd_token}`)
-                : none
-            ]
-              .filter(isSome)
-              .map(tokens => tokens.value);
+            return collect(
+              this.getUserTokens(deserializedUser).filter(
+                p =>
+                  !(
+                    p.prefix === sessionInfoKeyPrefix ||
+                    p.prefix === sessionKeyPrefix
+                  ) &&
+                  !(
+                    p.prefix === walletKeyPrefix &&
+                    p.value === user.wallet_token
+                  ) &&
+                  !(
+                    p.prefix === myPortalTokenPrefix &&
+                    p.value === user.myportal_token
+                  ) &&
+                  !(p.prefix === bpdTokenPrefix && p.value === user.bpd_token)
+              ),
+              (_1, { prefix, value }) => `${prefix}${value}`
+            );
           }).reduce((prev, tokens) => [...prev, ...tokens], [])
       );
 
-      // Delete all active session tokens, wallet tokens and MyPortal token that are different
+      // Delete all active tokens that are different
       // from the new one generated and provided inside user object.
-      return await new Promise(resolve => {
-        const keys: ReadonlyArray<string> = [...sessionKeys, ...externalTokens];
-        if (keys.length === 0) {
-          return resolve(right(true));
+      const deleteOldKeysResponse = await new Promise<Either<Error, boolean>>(
+        resolve => {
+          const keys: ReadonlyArray<string> = [
+            ...oldSessionInfoKeys,
+            ...oldSessionKeys,
+            ...externalTokens
+          ];
+          if (keys.length === 0) {
+            return resolve(right(true));
+          }
+          this.redisClient.del(...keys, (err, response) =>
+            resolve(this.integerReply(err, response))
+          );
         }
-        this.redisClient.del(...keys, (err, response) =>
-          resolve(this.integerReply(err, response))
-        );
-      });
+      );
+      await this.clearExpiredSetValues(user.fiscal_code);
+      return deleteOldKeysResponse;
     }
-    return sessionInfoKeys.value === sessionNotFoundError
+    return errorOrSessionInfoKeys.value === sessionNotFoundError
       ? right(true)
-      : left(sessionInfoKeys.value);
+      : left(errorOrSessionInfoKeys.value);
   }
 
   private readSessionInfoKeys(
@@ -822,5 +810,50 @@ export default class RedisSessionStorage extends RedisStorageUtils
       },
       { sessions: [] } as SessionsList
     );
+  }
+
+  private getUserTokens(user: User): StrMap<{ prefix: string; value: string }> {
+    const requiredTokens = {
+      session_info: {
+        prefix: sessionInfoKeyPrefix,
+        value: user.session_token
+      },
+      session_token: {
+        prefix: sessionKeyPrefix,
+        value: user.session_token
+      },
+      wallet_token: {
+        prefix: walletKeyPrefix,
+        value: user.wallet_token
+      }
+    };
+    if (UserV3.is(user)) {
+      return new StrMap({
+        ...requiredTokens,
+        bpd_token: {
+          prefix: bpdTokenPrefix,
+          value: user.bpd_token
+        },
+        myportal_token: {
+          prefix: myPortalTokenPrefix,
+          value: user.myportal_token
+        }
+      });
+    }
+    if (UserV2.is(user)) {
+      return new StrMap({
+        ...requiredTokens,
+        myportal_token: {
+          prefix: myPortalTokenPrefix,
+          value: user.myportal_token
+        }
+      });
+    }
+    if (UserV1.is(user)) {
+      return new StrMap({
+        ...requiredTokens
+      });
+    }
+    return assertUnreachable(user);
   }
 }

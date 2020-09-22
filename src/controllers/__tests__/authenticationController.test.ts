@@ -564,12 +564,7 @@ describe("AuthenticationController#logout", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockDel).toHaveBeenCalledWith(
-      mockSessionToken,
-      mockWalletToken,
-      undefined,
-      undefined
-    );
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -579,11 +574,12 @@ describe("AuthenticationController#logout", () => {
   it("shoud return success after deleting all auth tokens", async () => {
     const res = mockRes();
     const req = mockReq();
-    req.user = {
+    const userWithExternalToken = {
       ...mockedUser,
       bpd_token: mockBPDToken,
       myportal_token: mockMyPortalToken
     };
+    req.user = userWithExternalToken;
 
     mockDel.mockReturnValue(Promise.resolve(right(true)));
 
@@ -591,12 +587,7 @@ describe("AuthenticationController#logout", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockDel).toHaveBeenCalledWith(
-      mockSessionToken,
-      mockWalletToken,
-      mockMyPortalToken,
-      mockBPDToken
-    );
+    expect(mockDel).toHaveBeenCalledWith(userWithExternalToken);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
