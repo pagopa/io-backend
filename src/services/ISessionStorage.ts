@@ -5,7 +5,12 @@
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
+import {
+  BPDToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken
+} from "../types/token";
 import { User, UserV3 } from "../types/user";
 
 export interface ISessionStorage {
@@ -36,6 +41,13 @@ export interface ISessionStorage {
    */
   readonly getByMyPortalToken: (
     token: MyPortalToken
+  ) => Promise<Either<Error, Option<User>>>;
+
+  /**
+   * Retrieves a value from the cache using the bpd token.
+   */
+  readonly getByBPDToken: (
+    token: BPDToken
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
