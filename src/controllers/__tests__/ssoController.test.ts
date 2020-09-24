@@ -1,13 +1,20 @@
+import { addDays, format, subYears } from "date-fns";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { BPDUser } from "../../../generated/bpd/BPDUser";
 import { MyPortalUser } from "../../../generated/myportal/MyPortalUser";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import { MyPortalToken, SessionToken, WalletToken } from "../../types/token";
-import { UserV2 } from "../../types/user";
-import { getUserForMyPortal } from "../ssoController";
+import {
+  BPDToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken
+} from "../../types/token";
+import { UserV3 } from "../../types/user";
+import { getUserForBPD, getUserForMyPortal } from "../ssoController";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -18,7 +25,8 @@ const aValidFamilyname = "Garibaldi";
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User
-const mockedUser: UserV2 = {
+const mockedUser: UserV3 = {
+  bpd_token: "12hexToken" as BPDToken,
   created_at: aTimestamp,
   family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
@@ -36,6 +44,11 @@ const myPortalUserResponse: MyPortalUser = {
   fiscal_code: mockedUser.fiscal_code,
   name: mockedUser.name
 };
+
+const bpdUserResponse: BPDUser = {
+  fiscal_code: mockedUser.fiscal_code
+};
+
 describe("SSOController#getUserForMyPortal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -78,5 +91,71 @@ describe("SSOController#getUserForMyPortal", () => {
     });
     response.apply(res);
     expect(res.status).toBeCalledWith(400);
+  });
+});
+
+describe("SSOController#getUserForBPD", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it("calls the getUserForBPD on the SSOController with valid values", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = mockedUser;
+
+    const response = await getUserForBPD(req);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: bpdUserResponse
+    });
+    response.apply(res);
+    expect(res.json).toBeCalledWith(bpdUserResponse);
+  });
+
+  it("calls the getUserForBPD on the SSOController with valid adult user", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    const today = new Date();
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = {
+      ...mockedUser,
+      date_of_birth: format(subYears(today, 18), "YYYY-MM-DD")
+    };
+
+    const response = await getUserForBPD(req);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: bpdUserResponse
+    });
+    response.apply(res);
+    expect(res.json).toBeCalledWith(bpdUserResponse);
+  });
+
+  it("calls the getUserForBPD on the SSOController with not adult user", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    const today = new Date();
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = {
+      ...mockedUser,
+      date_of_birth: format(addDays(subYears(today, 18), 1), "YYYY-MM-DD")
+    };
+
+    const response = await getUserForBPD(req);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      detail: expect.any(String),
+      kind: "IResponseErrorUnauthorizedForLegalReasons"
+    });
+    response.apply(res);
+    expect(res.status).toBeCalledWith(451);
   });
 });

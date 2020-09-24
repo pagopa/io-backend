@@ -29,7 +29,12 @@ import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
-import { MyPortalToken, SessionToken, WalletToken } from "../types/token";
+import {
+  BPDToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken
+} from "../types/token";
 import { User, UserV1, UserV2, UserV3 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
@@ -237,6 +242,26 @@ export default class RedisSessionStorage extends RedisStorageUtils
       myPortalTokenPrefix,
       token
     );
+
+    if (isLeft(errorOrSession)) {
+      if (errorOrSession.value === sessionNotFoundError) {
+        return right(none);
+      }
+      return left(errorOrSession.value);
+    }
+
+    const user = errorOrSession.value;
+
+    return right(some(user));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getByBPDToken(
+    token: BPDToken
+  ): Promise<Either<Error, Option<User>>> {
+    const errorOrSession = await this.loadSessionByToken(bpdTokenPrefix, token);
 
     if (isLeft(errorOrSession)) {
       if (errorOrSession.value === sessionNotFoundError) {
@@ -633,7 +658,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   private loadSessionByToken(
     prefix: string,
-    token: WalletToken | MyPortalToken
+    token: WalletToken | MyPortalToken | BPDToken
   ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
       this.redisClient.get(`${prefix}${token}`, (err, value) => {

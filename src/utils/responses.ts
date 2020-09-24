@@ -79,7 +79,7 @@ export interface IResponseErrorUnauthorizedForLegalReasons
   readonly detail: string;
 }
 /**
- * Returns an unauthorized error response with status code 401.
+ * Returns an unauthorized error response with status code 451.
  */
 export function ResponseErrorUnauthorizedForLegalReasons(
   title: string,
