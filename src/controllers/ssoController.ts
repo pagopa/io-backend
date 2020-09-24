@@ -56,22 +56,11 @@ export const getUserForBPD = (
   | IResponseErrorUnauthorizedForLegalReasons
   | IResponseSuccessJson<BPDUser>
 > =>
-  withUserFromRequest(req, async user => {
-    if (CieUserIdentity.is(user)) {
-      const [year, month, day] = user.date_of_birth
-        .split("-")
-        .map(_ => parseInt(_, 10));
-      if (!isOlderThan(18)(new Date(year, month - 1, day), new Date())) {
-        return ResponseErrorUnauthorizedForLegalReasons(
-          "Unauthorized",
-          "The user must be an adult"
-        );
-      }
-    }
-    return withValidatedOrInternalError(
+  withUserFromRequest(req, async user =>
+    withValidatedOrInternalError(
       BPDUser.decode({
         fiscal_code: user.fiscal_code
       }),
       _ => ResponseSuccessJson(_)
-    );
-  });
+    )
+  );
