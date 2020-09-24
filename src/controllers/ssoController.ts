@@ -9,17 +9,11 @@ import {
   IResponseSuccessJson,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
-import { isOlderThan } from "../utils/date";
 
 import { BPDUser } from "../../generated/bpd/BPDUser";
 import { MyPortalUser } from "../../generated/myportal/MyPortalUser";
 import { withUserFromRequest } from "../types/user";
-import {
-  IResponseErrorUnauthorizedForLegalReasons,
-  ResponseErrorUnauthorizedForLegalReasons,
-  withValidatedOrInternalError
-} from "../utils/responses";
+import { withValidatedOrInternalError } from "../utils/responses";
 
 /**
  * Returns the profile for the user identified by the provided fiscal
@@ -50,10 +44,8 @@ export const getUserForMyPortal = (
 export const getUserForBPD = (
   req: express.Request
 ): Promise<
-  // tslint:disable-next-line: max-union-size
   | IResponseErrorValidation
   | IResponseErrorInternal
-  | IResponseErrorUnauthorizedForLegalReasons
   | IResponseSuccessJson<BPDUser>
 > =>
   withUserFromRequest(req, async user =>
