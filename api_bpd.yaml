@@ -26,8 +26,6 @@ paths:
               fiscal_code: "AAABBB01C02D123Z"
         "401":
           description: Token null or expired.
-        "451":
-          description: Unauthorized for legal reason.
         "500":
           description: There was an error in retrieving the user data.
           schema:

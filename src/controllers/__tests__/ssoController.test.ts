@@ -1,4 +1,3 @@
-import { addDays, format, subYears } from "date-fns";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -113,49 +112,5 @@ describe("SSOController#getUserForBPD", () => {
     });
     response.apply(res);
     expect(res.json).toBeCalledWith(bpdUserResponse);
-  });
-
-  it("calls the getUserForBPD on the SSOController with valid adult user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    const today = new Date();
-
-    // tslint:disable-next-line: no-object-mutation
-    req.user = {
-      ...mockedUser,
-      date_of_birth: format(subYears(today, 18), "YYYY-MM-DD")
-    };
-
-    const response = await getUserForBPD(req);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: bpdUserResponse
-    });
-    response.apply(res);
-    expect(res.json).toBeCalledWith(bpdUserResponse);
-  });
-
-  it("calls the getUserForBPD on the SSOController with not adult user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    const today = new Date();
-
-    // tslint:disable-next-line: no-object-mutation
-    req.user = {
-      ...mockedUser,
-      date_of_birth: format(addDays(subYears(today, 18), 1), "YYYY-MM-DD")
-    };
-
-    const response = await getUserForBPD(req);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      detail: expect.any(String),
-      kind: "IResponseErrorUnauthorizedForLegalReasons"
-    });
-    response.apply(res);
-    expect(res.status).toBeCalledWith(451);
   });
 });
