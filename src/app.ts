@@ -639,14 +639,12 @@ function registerAPIRoutes(
 
   app.get(
     `${basePath}/services/:id`,
-    bearerSessionTokenAuth,
     cachingMiddleware(),
     toExpressHandler(servicesController.getService, servicesController)
   );
 
   app.get(
     `${basePath}/services`,
-    bearerSessionTokenAuth,
     cachingMiddleware(),
     toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
