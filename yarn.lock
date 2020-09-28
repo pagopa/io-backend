@@ -259,10 +259,8 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/types/-/types-0.2.0.tgz#2a0afd40fa7026e39ea56a454642bda72b172f80"
   integrity sha512-GtwNB6BNDdsIPAYEdpp3JnOGO/3AJxjPvny53s3HERBdXSJTGQw8IRhiaTEX0b3w9P8+FwFZde4k+qkjn67aVw==
 
-"@pagopa/io-spid-commons@^4.4.0":
+"@pagopa/io-spid-commons@../io-spid-commons":
   version "4.4.0"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.4.0/a301fd059eeb3d3be94b7320799089ca62a434beb8bf8015f965f8699fcb1990#eb120de879e5fe7cf206a55d96193e6fb1343981"
-  integrity sha512-Z9fd7eF1cPfSlPr1qTFF+YlG78KOJPnjYJ0Ts9gyQnjvYDvOBlQc6rzep+EzfwQQAWzYv1XxDH9sfU9PUG16Hw==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
