@@ -10,6 +10,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { BPDUser } from "../../generated/bpd/BPDUser";
 import { MyPortalUser } from "../../generated/myportal/MyPortalUser";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrInternalError } from "../utils/responses";
@@ -31,6 +32,26 @@ export const getUserForMyPortal = (
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
         name: user.name
+      }),
+      _ => ResponseSuccessJson(_)
+    )
+  );
+
+/**
+ * Returns the profile for the user identified by the provided fiscal
+ * code.
+ */
+export const getUserForBPD = (
+  req: express.Request
+): Promise<
+  | IResponseErrorValidation
+  | IResponseErrorInternal
+  | IResponseSuccessJson<BPDUser>
+> =>
+  withUserFromRequest(req, async user =>
+    withValidatedOrInternalError(
+      BPDUser.decode({
+        fiscal_code: user.fiscal_code
       }),
       _ => ResponseSuccessJson(_)
     )

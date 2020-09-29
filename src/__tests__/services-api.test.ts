@@ -78,9 +78,11 @@ describe("GET /services/:id", () => {
   beforeAll(async () => {
     app = await appModule.newApp({
       APIBasePath: "/api/v1",
+      BPDBasePath: "/bpd/api/v1",
       BonusAPIBasePath: "/bonus/api/v1",
       MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",
+      allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],

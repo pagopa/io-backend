@@ -26,10 +26,7 @@ paths:
         "200":
           description: Found.
           schema:
-            x-one-of: true
-            allOf:
-              - $ref: "#/definitions/PagoPAUser"
-              - $ref: "#/definitions/ExtendedPagoPAUser"
+            - $ref: "#/definitions/PagoPAUser"
           examples:
             application/json:
               email: "email@example.com"
@@ -61,30 +58,11 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
+  FederatedUser:
+    $ref: "api_backend.yaml#/definitions/FederatedUser"
   PagoPAUser:
     title: PagoPA user
     description: User data needed by PagaPA proxy.
-    type: object
-    properties:
-      name:
-        type: string
-      family_name:
-        type: string
-      email:
-        $ref: '#/definitions/EmailAddress'
-      mobile_phone:
-        type: string
-        minLength: 1
-    required:
-      - name
-      - family_name
-      - email
-      - mobile_phone
-  FederatedUser:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-backend/master/api_backend.yaml#/definitions/FederatedUser"
-  ExtendedPagoPAUser:
-    title: ExtendedPagoPA user
-    description: User data needed by PagoPA proxy with custom user email.
     allOf:
       - $ref: "#/definitions/FederatedUser"
       - type: object

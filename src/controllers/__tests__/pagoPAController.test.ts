@@ -6,7 +6,6 @@ import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
-import mockRes from "../../__mocks__/response";
 
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
@@ -16,7 +15,6 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../../../generated/io-api/PreferredLanguage";
-import { ExtendedPagoPAUser } from "../../../generated/pagopa/ExtendedPagoPAUser";
 import ApiClientFactory from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -47,13 +45,6 @@ const mockedUser: User = {
 };
 
 const proxyUserResponse: PagoPAUser = {
-  email: aSpidEmailAddress,
-  family_name: aValidFamilyname,
-  mobile_phone: aMobilePhone,
-  name: aValidName
-};
-
-const proxyExtendedUserResponse: ExtendedPagoPAUser = {
   family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
   mobile_phone: aMobilePhone,
@@ -83,13 +74,6 @@ const userInitializedProfile: InitializedProfile = {
   version: 42
 };
 
-const badRequestErrorResponse = {
-  detail: expect.any(String),
-  status: 400,
-  title: expect.any(String),
-  type: undefined
-};
-
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
@@ -104,50 +88,6 @@ describe("PagoPaController#getUser", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getUser on the PagoPaController with valid values", async () => {
-    const req = mockReq();
-
-    // tslint:disable-next-line: no-object-mutation
-    req.user = mockedUser;
-
-    const api = new ApiClientFactory("", "");
-    const profileService = new ProfileService(api);
-    const pagoPAController = new PagoPAController(profileService);
-
-    const response = await pagoPAController.getUser(req);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyUserResponse
-    });
-  });
-
-  it("should return an error if spid_email is not available for the user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    const mockedUserWithoutSpidEmail = {
-      ...mockedUser,
-      spid_email: undefined
-    };
-    // tslint:disable-next-line: no-object-mutation
-    req.user = mockedUserWithoutSpidEmail;
-
-    const api = new ApiClientFactory("", "");
-    const profileService = new ProfileService(api);
-    const pagoPAController = new PagoPAController(profileService);
-
-    const response = await pagoPAController.getUser(req);
-    response.apply(res);
-    expect(res.json).toBeCalledWith(badRequestErrorResponse);
-  });
-});
-
-describe("PagoPaController#getExtendedUser", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("should return a successful response with validated email", async () => {
     const req = mockReq();
 
@@ -157,10 +97,6 @@ describe("PagoPaController#getExtendedUser", () => {
 
     // tslint:disable-next-line: no-object-mutation
     req.user = mockedUser;
-    // tslint:disable-next-line: no-object-mutation
-    req.query = {
-      version: "20200114"
-    };
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
@@ -171,7 +107,7 @@ describe("PagoPaController#getExtendedUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyExtendedUserResponse
+      value: proxyUserResponse
     });
   });
 
@@ -190,10 +126,6 @@ describe("PagoPaController#getExtendedUser", () => {
 
     // tslint:disable-next-line: no-object-mutation
     req.user = mockedUser;
-    // tslint:disable-next-line: no-object-mutation
-    req.query = {
-      version: "20200114"
-    };
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
@@ -206,7 +138,7 @@ describe("PagoPaController#getExtendedUser", () => {
       kind: "IResponseSuccessJson",
       // Custom Email is not provided becouse not yet validated
       value: {
-        ...proxyExtendedUserResponse,
+        ...proxyUserResponse,
         notice_email: mockedUser.spid_email
       }
     });
@@ -232,10 +164,6 @@ describe("PagoPaController#getExtendedUser", () => {
     };
     // tslint:disable-next-line: no-object-mutation
     req.user = notSpidUserSessionUser;
-    // tslint:disable-next-line: no-object-mutation
-    req.query = {
-      version: "20200114"
-    };
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
@@ -246,27 +174,6 @@ describe("PagoPaController#getExtendedUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: "Validation Error: Invalid User Data",
-      kind: "IResponseErrorValidation"
-    });
-  });
-
-  it("should return a validation error response when version is invalid", async () => {
-    const req = mockReq();
-    // tslint:disable-next-line: no-object-mutation
-    req.user = mockedUser;
-    // tslint:disable-next-line: no-object-mutation
-    req.query = {
-      version: "invalid_version"
-    };
-
-    const apiClient = new ApiClientFactory("", "");
-    const profileService = new ProfileService(apiClient);
-    const pagoPAController = new PagoPAController(profileService);
-
-    const response = await pagoPAController.getUser(req);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      detail: "Validation Error: Invalid Version number",
       kind: "IResponseErrorValidation"
     });
   });

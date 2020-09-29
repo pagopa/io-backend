@@ -195,7 +195,7 @@ export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
 
   const valueWithoutPrefix = {
     ...value,
-    fiscalNumber: fiscalNumberWithoutPrefix
+    fiscalNumber: fiscalNumberWithoutPrefix.toUpperCase()
   };
 
   const valueWithDefaultSPIDLevel = {

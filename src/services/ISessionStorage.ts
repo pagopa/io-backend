@@ -44,14 +44,16 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
+   * Retrieves a value from the cache using the bpd token.
+   */
+  readonly getByBPDToken: (
+    token: BPDToken
+  ) => Promise<Either<Error, Option<User>>>;
+
+  /**
    * Removes a value from the cache.
    */
-  readonly del: (
-    sessionToken: SessionToken,
-    walletToken: WalletToken,
-    myPortalToken?: MyPortalToken,
-    bpdToken?: BPDToken
-  ) => Promise<Either<Error, boolean>>;
+  readonly del: (user: User) => Promise<Either<Error, boolean>>;
 
   readonly isBlockedUser: (
     fiscalCode: FiscalCode
