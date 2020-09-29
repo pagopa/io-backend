@@ -308,6 +308,19 @@ export default class RedisSessionStorage extends RedisStorageUtils
         )
       );
     }
+
+    // Remove SESSIONINFO reference from USERSESSIONS Set
+    // this operation is executed in background and doesn't compromise
+    // the logout process.
+    this.redisClient.srem(
+      `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
+      `${sessionInfoKeyPrefix}${user.session_token}`,
+      (err, _) => {
+        if (err) {
+          log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
+        }
+      }
+    );
     return right<Error, boolean>(true);
   }
 
