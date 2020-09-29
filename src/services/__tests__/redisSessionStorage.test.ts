@@ -811,7 +811,11 @@ describe("RedisSessionStorage#del", () => {
     ]
   ])(
     "%s, %s",
-    async (tokenDelErr: Error, tokenDelResponse: number, expected: Error) => {
+    async (
+      tokenDelErr: Error,
+      tokenDelResponse: number,
+      expected: Either<Error, boolean>
+    ) => {
       const aValidUserWithExternalTokens = {
         ...aValidUser,
         bpd_token: aBPDToken,
@@ -821,6 +825,7 @@ describe("RedisSessionStorage#del", () => {
       mockDel.mockImplementationOnce((_, __, ___, ____, _____, callback) => {
         callback(tokenDelErr, tokenDelResponse);
       });
+      mockSrem.mockImplementationOnce((_, __, callback) => callback(null, 1));
 
       const response = await sessionStorage.del(aValidUserWithExternalTokens);
 
@@ -838,7 +843,15 @@ describe("RedisSessionStorage#del", () => {
       expect(mockDel.mock.calls[0][4]).toBe(
         `WALLET-${aValidUserWithExternalTokens.wallet_token}`
       );
-
+      if (isRight(expected)) {
+        expect(mockSrem).toBeCalledWith(
+          `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
+          `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`,
+          expect.any(Function)
+        );
+      } else {
+        expect(mockSrem).not.toBeCalled();
+      }
       expect(response).toEqual(expected);
     }
   );
