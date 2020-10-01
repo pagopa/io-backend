@@ -85,6 +85,7 @@ newApp({
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
+  appInsightsClient: maybeAppInsightsClient.toUndefined(),
   authenticationBasePath,
   env: ENV
 })

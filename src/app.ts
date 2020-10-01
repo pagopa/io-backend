@@ -60,6 +60,7 @@ import checkIP from "./utils/middleware/checkIP";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import * as appInsights from "applicationinsights";
 import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
@@ -116,6 +117,7 @@ const cachingMiddleware = apicache.options({
 
 export interface IAppFactoryParameters {
   env: NodeEnvironment;
+  appInsightsClient?: appInsights.TelemetryClient;
   allowNotifyIPSourceRange: readonly CIDR[];
   allowPagoPAIPSourceRange: readonly CIDR[];
   allowMyPortalIPSourceRange: readonly CIDR[];
@@ -137,6 +139,7 @@ export function newApp({
   allowMyPortalIPSourceRange,
   allowBPDIPSourceRange,
   allowSessionHandleIPSourceRange,
+  appInsightsClient,
   authenticationBasePath,
   APIBasePath,
   BonusAPIBasePath,
@@ -404,7 +407,18 @@ export function newApp({
           withSpid({
             acs: _.acsController.acs.bind(_.acsController),
             app: _.app,
-            appConfig,
+            appConfig: {
+              ...appConfig,
+              eventTraker: event => {
+                appInsightsClient?.trackEvent({
+                  name: event.name,
+                  properties: {
+                    type: event.type,
+                    ...event.data
+                  }
+                });
+              }
+            },
             doneCb: spidLogCallback,
             logout: _.acsController.slo.bind(_.acsController),
             redisClient: REDIS_CLIENT,
