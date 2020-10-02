@@ -41,3 +41,6 @@ local.*
 
 # Exclude .npmrc file
 .npmrc 
+
+# Exclude Codetour plugin folder
+.tours

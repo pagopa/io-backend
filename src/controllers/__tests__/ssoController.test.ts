@@ -45,7 +45,9 @@ const myPortalUserResponse: MyPortalUser = {
 };
 
 const bpdUserResponse: BPDUser = {
-  fiscal_code: mockedUser.fiscal_code
+  family_name: mockedUser.family_name,
+  fiscal_code: mockedUser.fiscal_code,
+  name: mockedUser.name
 };
 
 describe("SSOController#getUserForMyPortal", () => {
