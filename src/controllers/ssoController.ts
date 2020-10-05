@@ -51,7 +51,9 @@ export const getUserForBPD = (
   withUserFromRequest(req, async user =>
     withValidatedOrInternalError(
       BPDUser.decode({
-        fiscal_code: user.fiscal_code
+        family_name: user.family_name,
+        fiscal_code: user.fiscal_code,
+        name: user.name
       }),
       _ => ResponseSuccessJson(_)
     )
