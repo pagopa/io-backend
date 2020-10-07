@@ -15,10 +15,10 @@ paths:
     post:
       operationId: logout
       summary: Execute the logout
-      description: Delete the user active session and the token is invalidated.
+      description: Delete user's active session and tokens.
       responses:
         "200":
-          description: Logout succeded
+          description: Logout succeeded
           schema:
             $ref: "#/definitions/SuccessResponse"
           examples:
@@ -31,15 +31,15 @@ paths:
         "401":
           description: Bearer token null or expired.
         "500":
-          description: There was an error deleting the user active session.
+          description: There was an error deleting user's session.
           schema:
             $ref: "#/definitions/ProblemJson"
   "/user-identity":
     x-swagger-router-controller: AuthenticationController
     get:
       operationId: getUserIdentity
-      summary: Get stored user identity
-      description: Returns the user identity stored during the login phase
+      summary: Get stored user's identity
+      description: Returns the user's identity stored during the login phase
       responses:
         "200":
           description: Found.
@@ -59,7 +59,7 @@ paths:
         "401":
           description: Bearer token null or expired.
         "500":
-          description: There was an error in retrieving the user profile.
+          description: There was an error retrieving user's profile.
           schema:
             $ref: "#/definitions/ProblemJson"
 definitions:
