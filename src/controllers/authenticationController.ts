@@ -32,14 +32,14 @@ import { NewProfile } from "generated/io-api/NewProfile";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
-import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { SuccessResponse } from "../../generated/auth/SuccessResponse";
+import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
 import { clientProfileRedirectionUrl } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
-import { SuccessResponse } from "../types/commons";
 import {
   BPDToken,
   MyPortalToken,
