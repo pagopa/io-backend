@@ -808,7 +808,7 @@ function registerBonusAPIRoutes(
 
 function registerAuthenticationRoutes(
   app: Express,
-  basePath: string,
+  authBasePath: string,
   acsController: AuthenticationController,
   // tslint:disable-next-line: no-any
   bearerSessionTokenAuth: any,
@@ -821,20 +821,20 @@ function registerAuthenticationRoutes(
       localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
     );
     app.post(
-      `/test-login`,
+      `${authBasePath}/test-login`,
       localAuth,
       toExpressHandler(req => acsController.acsTest(req.user), acsController)
     );
   });
 
   app.post(
-    `${basePath}/logout`,
+    `${authBasePath}/logout`,
     bearerSessionTokenAuth,
     toExpressHandler(acsController.logout, acsController)
   );
 
   app.get(
-    `${basePath}/user-identity`,
+    `${authBasePath}/user-identity`,
     bearerSessionTokenAuth,
     toExpressHandler(acsController.getUserIdentity, acsController)
   );

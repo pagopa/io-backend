@@ -23,7 +23,7 @@ import {
   ResponsePermanentRedirect,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { UserIdentity } from "../../../generated/backend/UserIdentity";
+import { UserIdentity } from "../../../generated/auth/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClientFactory from "../../services/apiClientFactory";

@@ -19,9 +19,9 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
-import { CieUserIdentity } from "../../generated/backend/CieUserIdentity";
-import { SpidUserIdentity } from "../../generated/backend/SpidUserIdentity";
-import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { CieUserIdentity } from "../../generated/auth/CieUserIdentity";
+import { SpidUserIdentity } from "../../generated/auth/SpidUserIdentity";
+import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
