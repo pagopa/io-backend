@@ -17,4 +17,5 @@ else
 	echo "Generating certificates in $1"
 	cd $1
 	openssl req -sha256 -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj "/C=IT/ST=Italy/L=Rome/O=ACME/OU=IT Department/CN=api.italia.local"
+	openssl pkcs12 -inkey key.pem -in cert.pem -export -out cert.pfx -password pass:secret
 fi

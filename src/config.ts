@@ -380,5 +380,11 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
   process.env.TEST_LOGIN_PASSWORD
 );
 
+// When the application is running as Azure Function
+// Express Body parser must be disabled.
+export const DISABLE_BODY_PARSER = fromNullable(process.env.DISABLE_BODY_PARSER)
+  .map(_ => _.toLocaleLowerCase() === "true")
+  .getOrElse(false);
+
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";

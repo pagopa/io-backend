@@ -9,14 +9,12 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "rootDir": "."
   },
-  "include": [
-    "./src/**/*"
-  ],
   "exclude": [
     "node_modules",
-    "src/**/__tests__/*",
-    "src/**/__mocks__/*"  
+    "__tests__",
+    "__mocks__"  
   ]
 }

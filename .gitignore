@@ -1,3 +1,7 @@
+# Exclude Azure functions files
+bin
+obj
+
 # Exclude OS Folders
 .DS_Store
 
@@ -35,6 +39,7 @@ npm-debug.log
 
 # Exclude certificates
 *.pem
+*.pfx
 
 # Exclude local files
 local.*
