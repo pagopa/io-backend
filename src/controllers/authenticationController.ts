@@ -32,14 +32,14 @@ import { NewProfile } from "generated/io-api/NewProfile";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
-import { UserIdentity } from "../../generated/backend/UserIdentity";
+import { SuccessResponse } from "../../generated/auth/SuccessResponse";
+import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
 import { clientProfileRedirectionUrl } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
-import { SuccessResponse } from "../types/commons";
 import {
   BPDToken,
   MyPortalToken,
@@ -49,8 +49,6 @@ import {
 import {
   exactUserIdentityDecode,
   toAppUser,
-  UserV2,
-  UserV3,
   validateSpidUser,
   withUserFromRequest
 } from "../types/user";
@@ -301,12 +299,7 @@ export default class AuthenticationController {
   > {
     return withUserFromRequest(req, user =>
       withCatchAsInternalError(async () => {
-        const errorOrResponse = await this.sessionStorage.del(
-          user.session_token,
-          user.wallet_token,
-          UserV2.is(user) ? user.myportal_token : undefined,
-          UserV3.is(user) ? user.bpd_token : undefined
-        );
+        const errorOrResponse = await this.sessionStorage.del(user);
 
         if (isLeft(errorOrResponse)) {
           const error = errorOrResponse.value;

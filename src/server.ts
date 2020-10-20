@@ -8,6 +8,7 @@ import * as https from "https";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
 import {
+  ALLOW_BPD_IP_SOURCE_RANGE,
   ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
   ALLOW_PAGOPA_IP_SOURCE_RANGE,
@@ -15,6 +16,7 @@ import {
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
   BONUS_API_BASE_PATH,
+  BPD_BASE_PATH,
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   MYPORTAL_BASE_PATH,
@@ -36,6 +38,7 @@ const APIBasePath = API_BASE_PATH;
 const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const PagoPABasePath = PAGOPA_BASE_PATH;
 const MyPortalBasePath = MYPORTAL_BASE_PATH;
+const BPDBasePath = BPD_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -73,13 +76,16 @@ const maybeAppInsightsClient = fromNullable(
 
 newApp({
   APIBasePath,
+  BPDBasePath,
   BonusAPIBasePath,
   MyPortalBasePath,
   PagoPABasePath,
+  allowBPDIPSourceRange: ALLOW_BPD_IP_SOURCE_RANGE,
   allowMyPortalIPSourceRange: ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
+  appInsightsClient: maybeAppInsightsClient.toUndefined(),
   authenticationBasePath,
   env: ENV
 })

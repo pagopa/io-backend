@@ -8,7 +8,7 @@ basePath: /myportal/api/v1
 schemes:
   - https
 security:
-  - Token: []
+  - Bearer: []
 paths:
   "/user":
     x-swagger-router-controller: SSOController
@@ -48,7 +48,7 @@ consumes:
 produces:
   - application/json
 securityDefinitions:
-  Token:
+  Bearer:
     type: apiKey
-    name: access_token
-    in: query
+    name: Authorization
+    in: header

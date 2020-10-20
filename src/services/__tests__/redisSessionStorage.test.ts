@@ -13,6 +13,7 @@ import { createMockRedis } from "mock-redis-client";
 import { none, some } from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { RedisClient } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
@@ -84,7 +85,7 @@ const mockGet = jest.fn().mockImplementation((_, callback) => {
 const mockMget = jest.fn();
 const mockDel = jest.fn().mockImplementation(
   // as del() can be can be called with variable arguments number, we extract the last as callback
-  callCallback(undefined, 4)
+  callCallback(undefined, 5)
 );
 
 const mockSadd = jest.fn();
@@ -95,7 +96,7 @@ const mockSmembers = jest
 const mockExists = jest.fn();
 const mockSismember = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = createMockRedis().createClient();
+const mockRedisClient = createMockRedis().createClient() as RedisClient;
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
@@ -369,13 +370,25 @@ describe("RedisSessionStorage#set", () => {
 });
 
 describe("RedisSessionStorage#removeOtherUserSessions", () => {
+  beforeAll(() => {
+    jest
+      .spyOn(RedisSessionStorage.prototype, "clearExpiredSetValues")
+      .mockImplementation(() =>
+        Promise.resolve<ReadonlyArray<Either<Error, boolean>>>([right(true)])
+      );
+  });
+  afterAll(() => {
+    jest
+      .spyOn(RedisSessionStorage.prototype, "clearExpiredSetValues")
+      .mockRestore();
+  });
   it("should delete only older session token", async () => {
     const oldSessionToken = "old_session_token" as SessionToken;
     const oldWalletToken = "old_wallet_token" as WalletToken;
     const oldUserPayload: User = {
       ...aValidUser,
-      session_token: oldSessionToken,
-      wallet_token: oldWalletToken
+      session_token: `${oldSessionToken}1` as SessionToken,
+      wallet_token: `${oldWalletToken}1` as WalletToken
     };
     const oldUserPayload2: User = {
       ...aValidUser,
@@ -406,15 +419,21 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     );
     expect(mockDel).toHaveBeenCalledTimes(1);
     expect(mockDel.mock.calls[0][0]).toBe(
-      `SESSION-${oldUserPayload.session_token}`
+      `SESSIONINFO-${oldUserPayload.session_token}`
     );
     expect(mockDel.mock.calls[0][1]).toBe(
-      `SESSION-${oldUserPayload2.session_token}`
+      `SESSIONINFO-${oldUserPayload2.session_token}`
     );
     expect(mockDel.mock.calls[0][2]).toBe(
-      `WALLET-${oldUserPayload.wallet_token}`
+      `SESSION-${oldUserPayload.session_token}`
     );
     expect(mockDel.mock.calls[0][3]).toBe(
+      `SESSION-${oldUserPayload2.session_token}`
+    );
+    expect(mockDel.mock.calls[0][4]).toBe(
+      `WALLET-${oldUserPayload.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][5]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
     );
     expect(response.isRight());
@@ -462,23 +481,29 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     );
     expect(mockDel).toHaveBeenCalledTimes(1);
     expect(mockDel.mock.calls[0][0]).toBe(
-      `SESSION-${oldUserPayload.session_token}`
+      `SESSIONINFO-${oldUserPayload.session_token}`
     );
     expect(mockDel.mock.calls[0][1]).toBe(
-      `SESSION-${oldUserPayload2.session_token}`
+      `SESSIONINFO-${oldUserPayload2.session_token}`
     );
     expect(mockDel.mock.calls[0][2]).toBe(
-      `WALLET-${oldUserPayload.wallet_token}`
+      `SESSION-${oldUserPayload.session_token}`
     );
     expect(mockDel.mock.calls[0][3]).toBe(
-      `MYPORTAL-${oldUserPayload.myportal_token}`
+      `SESSION-${oldUserPayload2.session_token}`
     );
     expect(mockDel.mock.calls[0][4]).toBe(`BPD-${oldUserPayload.bpd_token}`);
     expect(mockDel.mock.calls[0][5]).toBe(
-      `WALLET-${oldUserPayload2.wallet_token}`
+      `MYPORTAL-${oldUserPayload.myportal_token}`
     );
     expect(mockDel.mock.calls[0][6]).toBe(
+      `WALLET-${oldUserPayload.wallet_token}`
+    );
+    expect(mockDel.mock.calls[0][7]).toBe(
       `MYPORTAL-${oldUserPayload2.myportal_token}`
+    );
+    expect(mockDel.mock.calls[0][8]).toBe(
+      `WALLET-${oldUserPayload2.wallet_token}`
     );
     expect(response.isRight());
   });
@@ -759,7 +784,7 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelError = new Error("del error");
 
   it.each([
-    [undefined, 4, right(true), "should delete al user tokens"],
+    [undefined, 5, right(true), "should delete al user tokens"],
     [
       expectedRedisDelError,
       undefined,
@@ -786,38 +811,47 @@ describe("RedisSessionStorage#del", () => {
     ]
   ])(
     "%s, %s",
-    async (tokenDelErr: Error, tokenDelResponse: number, expected: Error) => {
+    async (
+      tokenDelErr: Error,
+      tokenDelResponse: number,
+      expected: Either<Error, boolean>
+    ) => {
       const aValidUserWithExternalTokens = {
         ...aValidUser,
         bpd_token: aBPDToken,
         myportal_token: aMyportalToken
       };
-      mockDel.mockImplementationOnce((_, __, ___, ____, callback) => {
+      const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
+      mockDel.mockImplementationOnce((_, __, ___, ____, _____, callback) => {
         callback(tokenDelErr, tokenDelResponse);
       });
+      mockSrem.mockImplementationOnce((_, __, callback) => callback(null, 1));
 
-      const response = await sessionStorage.del(
-        aValidUserWithExternalTokens.session_token,
-        aValidUserWithExternalTokens.wallet_token,
-        aValidUserWithExternalTokens.myportal_token,
-        aValidUserWithExternalTokens.bpd_token
-      );
+      const response = await sessionStorage.del(aValidUserWithExternalTokens);
 
       expect(mockDel).toHaveBeenCalledTimes(1);
       expect(mockDel.mock.calls[0][0]).toBe(
-        `SESSION-${aValidUserWithExternalTokens.session_token}`
-      );
-      expect(mockDel.mock.calls[0][1]).toBe(
-        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
-      );
-      expect(mockDel.mock.calls[0][2]).toBe(
-        `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
-      );
-      expect(mockDel.mock.calls[0][3]).toBe(
         `BPD-${aValidUserWithExternalTokens.bpd_token}`
       );
-      expect(mockSrem).not.toBeCalled();
-
+      expect(mockDel.mock.calls[0][1]).toBe(
+        `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
+      );
+      expect(mockDel.mock.calls[0][2]).toBe(expectedSessionInfoKey);
+      expect(mockDel.mock.calls[0][3]).toBe(
+        `SESSION-${aValidUserWithExternalTokens.session_token}`
+      );
+      expect(mockDel.mock.calls[0][4]).toBe(
+        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
+      );
+      if (isRight(expected)) {
+        expect(mockSrem).toBeCalledWith(
+          `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
+          `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`,
+          expect.any(Function)
+        );
+      } else {
+        expect(mockSrem).not.toBeCalled();
+      }
       expect(response).toEqual(expected);
     }
   );
@@ -825,6 +859,9 @@ describe("RedisSessionStorage#del", () => {
 
 describe("RedisSessionStorage#listUserSessions", () => {
   it("should re-init session info and session info set for a user", async () => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, []);
+    });
     mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, []);
     });
@@ -856,6 +893,9 @@ describe("RedisSessionStorage#listUserSessions", () => {
     mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, []);
     });
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, []);
+    });
     mockSet.mockImplementation((_, __, ___, ____, callback) => {
       callback(new Error("REDIS ERROR"), undefined);
     });
@@ -865,6 +905,12 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should skip a session with invalid value", async () => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
+    });
+    mockExists.mockImplementationOnce((_, callback) => {
+      callback(undefined, 1);
+    });
     mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
     });
@@ -884,6 +930,12 @@ describe("RedisSessionStorage#listUserSessions", () => {
   });
 
   it("should skip a session with unparseble value", async () => {
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
+    });
+    mockExists.mockImplementationOnce((_, callback) => {
+      callback(undefined, 1);
+    });
     mockSmembers.mockImplementationOnce((_, callback) => {
       callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
     });
@@ -909,13 +961,26 @@ describe("RedisSessionStorage#listUserSessions", () => {
         `SESSIONINFO-expired_session_token`
       ]);
     });
+    mockExists.mockImplementationOnce((_, callback) => {
+      callback(undefined, 1);
+    });
+    mockExists.mockImplementationOnce((_, callback) => {
+      callback(undefined, 0);
+    });
+    mockSrem.mockImplementationOnce((_, __, callback) => {
+      callback(undefined, 1);
+    });
+
+    mockSmembers.mockImplementationOnce((_, callback) => {
+      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
+    });
 
     const expectedSessionInfo = SessionInfo.decode({
       createdAt: new Date(),
       sessionToken: aValidUser.session_token
     });
-    mockMget.mockImplementationOnce((_, __, callback) => {
-      callback(undefined, [JSON.stringify(expectedSessionInfo.value), null]);
+    mockMget.mockImplementationOnce((_, callback) => {
+      callback(undefined, [JSON.stringify(expectedSessionInfo.value)]);
     });
 
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -924,7 +989,6 @@ describe("RedisSessionStorage#listUserSessions", () => {
     expect(mockMget.mock.calls[0][0]).toBe(
       `SESSIONINFO-${aValidUser.session_token}`
     );
-    expect(mockMget.mock.calls[0][1]).toBe(`SESSIONINFO-expired_session_token`);
     const expectedSessionsList = SessionsList.decode({
       sessions: [expectedSessionInfo.value]
     });
