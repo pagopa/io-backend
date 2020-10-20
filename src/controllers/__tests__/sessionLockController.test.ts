@@ -133,8 +133,6 @@ describe("SessionLockController#lockUserSession", () => {
   });
 });
 
-
-
 describe("SessionLockController#unlockUserSession", () => {
   it("should fail on invalid fiscal code", async () => {
     const req = mockReq({ params: { fiscal_code: "invalid" } });
@@ -175,7 +173,7 @@ describe("SessionLockController#unlockUserSession", () => {
       mockRedisUserMetadataStorage
     );
 
-    const response = await controller.lockUserSession(req);
+    const response = await controller.unlockUserSession(req);
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(200);
