@@ -99,7 +99,7 @@ describe("Success app start", () => {
     // test case: https forced. Already set: it trust the proxy and accept the header: X-Forwarded-Proto.
     it("should respond 200 if forwarded from an HTTPS connection", () => {
       return request(app)
-        .get("/")
+        .get("/info")
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200);
     });
