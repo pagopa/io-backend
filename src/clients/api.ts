@@ -14,6 +14,8 @@ export function APIClient(
     withDefaults: op => params =>
       op({
         ...params,
+        // please refer to source api spec for actual header mapping
+        // https://github.com/pagopa/io-functions-app/blob/master/openapi/index.yaml#:~:text=%20%20SubscriptionKey:
         SubscriptionKey: token
       })
   });
