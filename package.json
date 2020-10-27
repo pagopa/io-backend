@@ -119,7 +119,7 @@
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
     "italia-tslint-rules": "^1.1.3",
-    "italia-utils": "^5.1.0",
+    "italia-utils": "^6.1.0",
     "jest": "^23.6.0",
     "lolex": "4.2.0",
     "mock-redis-client": "^0.91.13",
