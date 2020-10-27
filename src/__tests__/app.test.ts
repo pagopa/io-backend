@@ -80,7 +80,8 @@ describe("Success app start", () => {
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION
+      env: NodeEnvironmentEnum.PRODUCTION,
+      withBodyParser: true
     });
   });
 
@@ -179,7 +180,8 @@ describe("Failure app start", () => {
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
+        withBodyParser: true
       });
     } catch (err) {
       expect(mockFetchIdpsMetadata).toBeCalledTimes(3);
@@ -205,7 +207,8 @@ describe("Failure app start", () => {
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
+        withBodyParser: true
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);
@@ -231,7 +234,8 @@ describe("Failure app start", () => {
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
+        withBodyParser: true
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);

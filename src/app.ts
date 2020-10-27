@@ -7,7 +7,6 @@ import {
   appConfig,
   BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
-  DISABLE_BODY_PARSER,
   ENV,
   FF_BONUS_ENABLED,
   getClientProfileRedirectionUrl,
@@ -132,6 +131,7 @@ export interface IAppFactoryParameters {
   PagoPABasePath: string;
   MyPortalBasePath: string;
   BPDBasePath: string;
+  withBodyParser: boolean;
 }
 
 // tslint:disable-next-line: cognitive-complexity no-big-function
@@ -148,7 +148,8 @@ export function newApp({
   BonusAPIBasePath,
   PagoPABasePath,
   MyPortalBasePath,
-  BPDBasePath
+  BPDBasePath,
+  withBodyParser
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -250,10 +251,9 @@ export function newApp({
 
   app.use(morgan(loggerFormat));
 
-  //
-  // Setup parsers
-  //
-  if (!DISABLE_BODY_PARSER) {
+  // When the application is running as Azure Function
+  // Express Body parser must be disabled.
+  if (withBodyParser) {
     // Parse the incoming request body. This is needed by Passport spid strategy.
     app.use(bodyParser.json());
 

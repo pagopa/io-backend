@@ -88,7 +88,8 @@ describe("GET /services/:id", () => {
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION
+      env: NodeEnvironmentEnum.PRODUCTION,
+      withBodyParser: true
     });
   });
 
