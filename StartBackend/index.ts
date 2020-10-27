@@ -81,7 +81,8 @@ const init = newApp({
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: maybeAppInsightsClient.toUndefined(),
   authenticationBasePath,
-  env: ENV
+  env: ENV,
+  withBodyParser: false
 }).then(app => {
   secureExpressApp(app);
   return {
