@@ -13,6 +13,7 @@ import {
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
+import { APIClient } from "../../clients/api";
 
 import { toInitializedProfile } from "../../types/profile";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -112,20 +113,19 @@ const expectedApiError = new Error("Api error.");
 const mockGetProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
 const mockCreateProfile = jest.fn();
-const mockEmailValidationProcess = jest.fn();
+const mockStartEmailValidationProcess = jest.fn();
 
-const mockGetClient = jest.fn().mockImplementation(() => {
-  return {
+// partial because we may not mock every method
+const mockClient: Partial<ReturnType<APIClient>> =  {
     createProfile: mockCreateProfile,
-    emailValidationProcess: mockEmailValidationProcess,
+    startEmailValidationProcess: mockStartEmailValidationProcess,
     getProfile: mockGetProfile,
-    updateProfile: mockUpdateProfile
+    updateProfile: mockUpdateProfile,
   };
-});
 jest.mock("../../services/apiClientFactory", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getClient: mockGetClient
+      getClient: () => mockClient
     }))
   };
 });
@@ -145,7 +145,7 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -173,7 +173,7 @@ describe("ProfileService#getProfile", () => {
     const res = await service.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorNotFound"
@@ -209,7 +209,7 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -237,7 +237,7 @@ describe("ProfileService#getApiProfile", () => {
     const res = await service.getApiProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       detail: "Not found: Profile not found.",
@@ -276,8 +276,8 @@ describe("ProfileService#updateProfile", () => {
     const res = await service.updateProfile(mockedUser, updateProfileRequest);
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      profile: updateProfileRequest
+      fiscal_code: mockedUser.fiscal_code,
+      body: updateProfileRequest
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -335,8 +335,8 @@ describe("ProfileService#createProfile", () => {
     const res = await service.createProfile(mockedUser, createProfileRequest);
 
     expect(mockCreateProfile).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      newProfile: createProfileRequest
+      fiscal_code: mockedUser.fiscal_code,
+      body: createProfileRequest
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -385,7 +385,7 @@ describe("ProfileService#emailValidationProcess", () => {
   });
 
   it("should returns ResponseSuccessAccepted if no error occours", async () => {
-    mockEmailValidationProcess.mockImplementation(() =>
+    mockStartEmailValidationProcess.mockImplementation(() =>
       t.success(acceptedApiResponse)
     );
 
@@ -393,8 +393,8 @@ describe("ProfileService#emailValidationProcess", () => {
 
     const res = await service.emailValidationProcess(mockedUser);
 
-    expect(mockEmailValidationProcess).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessAccepted"
@@ -402,7 +402,7 @@ describe("ProfileService#emailValidationProcess", () => {
   });
 
   it("returns 404 response if the 404 was provided from the functions API", async () => {
-    mockEmailValidationProcess.mockImplementation(() =>
+    mockStartEmailValidationProcess.mockImplementation(() =>
       t.success(notFoundApiResponse)
     );
 
@@ -410,8 +410,8 @@ describe("ProfileService#emailValidationProcess", () => {
 
     const res = await service.emailValidationProcess(mockedUser);
 
-    expect(mockEmailValidationProcess).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+    expect(mockStartEmailValidationProcess).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       detail: "Not found: User not found.",
@@ -420,7 +420,7 @@ describe("ProfileService#emailValidationProcess", () => {
   });
 
   it("returns an 429 HTTP error from emailValidationProcess upstream API", async () => {
-    mockEmailValidationProcess.mockImplementation(() =>
+    mockStartEmailValidationProcess.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
     );
 
@@ -439,6 +439,6 @@ describe("ProfileService#toInitializedProfile", () => {
       date_of_birth: "1980-10-1"
     });
 
-    expect(profile.date_of_birth).toEqual("1980-10-01");
+    expect(profile.date_of_birth).toEqual(new Date("1980-10-01T00:00:00.000Z"));
   });
 });

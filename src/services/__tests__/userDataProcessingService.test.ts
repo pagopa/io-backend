@@ -112,8 +112,8 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
     );
 
     expect(mockGetUserDataProcessing).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      userDataProcessingChoiceParam: mockedUserDataProcessingChoice
+      fiscal_code: mockedUser.fiscal_code,
+      choice: mockedUserDataProcessingChoice
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -146,8 +146,8 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
       mockedUserDataProcessingChoice
     );
     expect(mockGetUserDataProcessing).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      userDataProcessingChoiceParam: mockedUserDataProcessingChoice
+      fiscal_code: mockedUser.fiscal_code,
+      choice: mockedUserDataProcessingChoice
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -164,8 +164,8 @@ describe("UserDataProcessingService#getUserDataProcessing", () => {
       mockedUserDataProcessingChoice
     );
     expect(mockGetUserDataProcessing).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      userDataProcessingChoiceParam: mockedUserDataProcessingChoice
+      fiscal_code: mockedUser.fiscal_code,
+      choice: mockedUserDataProcessingChoice
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -188,8 +188,8 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
     );
 
     expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      userDataProcessingChoiceRequest: mockedUserDataProcessingChoiceRequest
+      fiscal_code: mockedUser.fiscal_code,
+      body: mockedUserDataProcessingChoiceRequest
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -239,8 +239,8 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
       mockedUserDataProcessingChoiceRequest
     );
     expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      userDataProcessingChoiceRequest: mockedUserDataProcessingChoiceRequest
+      fiscal_code: mockedUser.fiscal_code,
+      body: mockedUserDataProcessingChoiceRequest
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -257,8 +257,8 @@ describe("UserDataProcessingService#upsertUserDataProcessing", () => {
       mockedUserDataProcessingChoiceRequest
     );
     expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code,
-      userDataProcessingChoiceRequest: mockedUserDataProcessingChoiceRequest
+      fiscal_code: mockedUser.fiscal_code,
+      body: mockedUserDataProcessingChoiceRequest
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

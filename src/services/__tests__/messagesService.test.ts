@@ -165,14 +165,16 @@ beforeEach(() => {
 });
 
 jest.mock("../apiClientFactory");
-jest.spyOn(ApiClientFactory.prototype, "getClient").mockImplementation(() => {
-  return ({
-    getMessage: mockGetMessage,
-    getMessages: mockGetMessages,
-    getService: mockGetService,
-    getServices: mockGetServices
-  } as unknown) as ReturnType<APIClient>;
-});
+// partial because we may not want to mock every operation
+const mockClient: Partial<ReturnType<APIClient>> = {
+  getMessage: mockGetMessage,
+  getMessagesByUser: mockGetMessages,
+  getService: mockGetService,
+  getVisibleServices: mockGetServices
+};
+jest
+  .spyOn(ApiClientFactory.prototype, "getClient")
+  .mockImplementation(() => (mockClient as unknown) as ReturnType<APIClient>);
 
 const api = new ApiClientFactory("", "");
 
@@ -187,7 +189,7 @@ describe("MessageService#getMessagesByUser", () => {
     const res = await service.getMessagesByUser(mockedUser);
 
     expect(mockGetMessages).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -205,7 +207,7 @@ describe("MessageService#getMessagesByUser", () => {
     const res = await service.getMessagesByUser(mockedUser);
 
     expect(mockGetMessages).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res.kind).toEqual("IResponseErrorNotFound");
   });
@@ -229,7 +231,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
     expect(mockGetMessages).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -243,7 +245,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const res = await service.getMessagesByUser(mockedUser);
     expect(mockGetMessages).toHaveBeenCalledWith({
-      fiscalCode: mockedUser.fiscal_code
+      fiscal_code: mockedUser.fiscal_code
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -258,7 +260,7 @@ describe("MessageService#getMessage", () => {
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscalCode: aValidFiscalCode,
+      fiscal_code: aValidFiscalCode,
       id: aValidMessageId
     });
     expect(res).toMatchObject({
@@ -277,7 +279,7 @@ describe("MessageService#getMessage", () => {
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscalCode: aValidFiscalCode,
+      fiscal_code: aValidFiscalCode,
       id: aValidMessageId
     });
     expect(res).toMatchSnapshot();
@@ -289,7 +291,7 @@ describe("MessageService#getMessage", () => {
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscalCode: aValidFiscalCode,
+      fiscal_code: aValidFiscalCode,
       id: aValidMessageId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
@@ -304,7 +306,7 @@ describe("MessageService#getMessage", () => {
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscalCode: aValidFiscalCode,
+      fiscal_code: aValidFiscalCode,
       id: aValidMessageId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");

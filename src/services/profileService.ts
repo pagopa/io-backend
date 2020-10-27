@@ -53,7 +53,7 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
-        fiscalCode: user.fiscal_code
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response => {
@@ -97,7 +97,7 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
-        fiscalCode: user.fiscal_code
+        fiscal_code: user.fiscal_code
       });
       return withValidatedOrInternalError(validated, response => {
         if (response.status === 200) {
@@ -139,8 +139,8 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.createProfile({
-        fiscalCode: user.fiscal_code,
-        newProfile
+        body: newProfile,
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response =>
@@ -181,8 +181,8 @@ export default class ProfileService {
       async extendedProfileApi =>
         withCatchAsInternalError(async () => {
           const validated = await client.updateProfile({
-            fiscalCode: user.fiscal_code,
-            profile: extendedProfileApi
+            body: extendedProfileApi,
+            fiscal_code: user.fiscal_code
           });
 
           return withValidatedOrInternalError(validated, response =>
@@ -216,8 +216,8 @@ export default class ProfileService {
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
-      const validated = await client.emailValidationProcess({
-        fiscalCode: user.fiscal_code
+      const validated = await client.startEmailValidationProcess({
+        fiscal_code: user.fiscal_code
       });
       return withValidatedOrInternalError(validated, response => {
         return response.status === 202

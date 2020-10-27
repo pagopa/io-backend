@@ -44,8 +44,8 @@ export default class MessagesService {
   > =>
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
-      const validated = await client.getMessages({
-        fiscalCode: user.fiscal_code
+      const validated = await client.getMessagesByUser({
+        fiscal_code: user.fiscal_code
       });
 
       return withValidatedOrInternalError(validated, response =>
@@ -76,7 +76,7 @@ export default class MessagesService {
       const client = this.apiClient.getClient();
 
       const res = await client.getMessage({
-        fiscalCode: user.fiscal_code,
+        fiscal_code: user.fiscal_code,
         id: messageId
       });
 
