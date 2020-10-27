@@ -118,6 +118,38 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
+const staticContentMiddleware = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const path = "public" + req.path;
+    if (!fs.existsSync(path)) {
+      return next();
+    }
+    const stat = await fs.promises.stat(path);
+    if (stat.isDirectory()) {
+      return next();
+    }
+    const type = mime.lookup(path);
+    if (type) {
+      const charset = mime.charsets.lookup(type);
+      res.setHeader(
+        "Content-Type",
+        // tslint:disable-next-line: restrict-plus-operands
+        type + (charset ? `; charset=${charset}` : "")
+      );
+    }
+    const content = await fs.promises.readFile(path);
+    res.setHeader("Content-Length", stat.size);
+    res.status(200).send(content);
+  } catch (err) {
+    log.error(`static|Error retrieving static file asset|error:%s`, err);
+    return next(err);
+  }
+};
+
 export interface IAppFactoryParameters {
   env: NodeEnvironment;
   appInsightsClient?: appInsights.TelemetryClient;
@@ -266,33 +298,7 @@ export function newApp({
   // Define the folder that contains the public assets.
   //
 
-  app.get(/(\.html|\.svg|\.png)$/, async (req, res, next) => {
-    try {
-      const path = "public" + req.path;
-      if (!fs.existsSync(path)) {
-        return next();
-      }
-      const stat = await fs.promises.stat(path);
-      if (stat.isDirectory()) {
-        return next();
-      }
-      const type = mime.lookup(path);
-      if (type) {
-        const charset = mime.charsets.lookup(type);
-        res.setHeader(
-          "Content-Type",
-          // tslint:disable-next-line: restrict-plus-operands
-          type + (charset ? `; charset=${charset}` : "")
-        );
-      }
-      const content = await fs.promises.readFile(path);
-      res.setHeader("Content-Length", stat.size);
-      res.status(200).send(content);
-    } catch (err) {
-      log.error(`static|Error retrieving static file asset|error:%s`, err);
-      return next(err);
-    }
-  });
+  app.get(/(\.html|\.svg|\.png)$/, staticContentMiddleware);
 
   //
   // Initializes Passport for incoming requests.
