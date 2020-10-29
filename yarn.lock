@@ -259,10 +259,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/types/-/types-0.2.0.tgz#2a0afd40fa7026e39ea56a454642bda72b172f80"
   integrity sha512-GtwNB6BNDdsIPAYEdpp3JnOGO/3AJxjPvny53s3HERBdXSJTGQw8IRhiaTEX0b3w9P8+FwFZde4k+qkjn67aVw==
 
-"@pagopa/io-spid-commons@^4.7.0":
-  version "4.7.0"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.7.0/c60a133588be395180ae407e3d2a7dd3783eed5a2c92a0d959ed25dc3b6c6207#5f314d10afd70c8a6e3fdc9366be4a1aa99dbb3a"
-  integrity sha512-neSHBoQp0edNcSeaMxXdBVkckssYk3hHDuhqhK73PICF0vhH6jpTBLUeVsjXYiK74F2oLrvTyiUYgOjy9RoEsw==
+"@pagopa/io-spid-commons@^4.8.0":
+  version "4.8.0"
+  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/4.8.0/8e6ac7b5277dfdfcfe27d97720e69524e77149f357234f67ea8ca07e9f49bde5#65b360df4d284b58b8ba0db717d81ff50625c6e0"
+  integrity sha512-cYf4QC14qkSuadWDaxJTqKmxf79k3UybHhxW5vsh4CgOkNeq2mJhH7aJ5MLAcYBrWuBcbGTs7GFYSXfUYJwM8A==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
