@@ -639,6 +639,15 @@ function registerAPIRoutes(
     )
   );
 
+  app.delete(
+    `${basePath}/user-data-processing/:choice`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      userDataProcessingController.getUserDataProcessing,
+      userDataProcessingController
+    )
+  );
+
   app.get(
     `${basePath}/messages`,
     bearerSessionTokenAuth,
