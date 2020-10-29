@@ -127,7 +127,7 @@ export default class UserDataProcessingService {
           : response.status === 404
           ? ResponseErrorNotFound("Not Found", "User data processing not found")
           : response.status === 409
-          ? ResponseErrorConflict("Cannot abort request")
+          ? ResponseErrorConflict("Cannot abort user data processing request")
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status)
