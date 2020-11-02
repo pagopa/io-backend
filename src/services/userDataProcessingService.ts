@@ -8,10 +8,13 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
+  IResponseSuccessAccepted,
   IResponseSuccessJson,
   ResponseErrorConflict,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
+  ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -89,6 +92,42 @@ export default class UserDataProcessingService {
           ? ResponseSuccessJson(response.value)
           : response.status === 404
           ? ResponseErrorNotFound("Not Found", "User data processing not found")
+          : response.status === 429
+          ? ResponseErrorTooManyRequests()
+          : unhandledResponseStatus(response.status)
+      );
+    });
+  };
+
+  /**
+   * Abort the user data processing of a specific user.
+   */
+  public readonly abortUserDataProcessing = async (
+    user: User,
+    userDataProcessingChoiceParam: UserDataProcessingChoice
+  ): Promise<
+    // tslint:disable-next-line: max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseErrorConflict
+    | IResponseSuccessAccepted
+  > => {
+    const client = this.apiClient.getClient();
+    return withCatchAsInternalError(async () => {
+      const validated = await client.abortUserDataProcessing({
+        choice: userDataProcessingChoiceParam,
+        fiscal_code: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 202
+          ? ResponseSuccessAccepted()
+          : response.status === 404
+          ? ResponseErrorNotFound("Not Found", "User data processing not found")
+          : response.status === 409
+          ? ResponseErrorConflict("Cannot abort user data processing request")
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status)
