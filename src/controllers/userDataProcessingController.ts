@@ -10,6 +10,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
+  IResponseSuccessAccepted,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -69,6 +70,31 @@ export default class UserDataProcessingController {
         UserDataProcessingChoice.decode(req.params.choice),
         dataProcessingChoice =>
           this.userDataProcessingService.getUserDataProcessing(
+            user,
+            dataProcessingChoice
+          )
+      )
+    );
+
+  /**
+   * Abort the user data processing of a specific user.
+   */
+  public readonly abortUserDataProcessing = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseErrorConflict
+    | IResponseSuccessAccepted
+  > =>
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        UserDataProcessingChoice.decode(req.params.choice),
+        dataProcessingChoice =>
+          this.userDataProcessingService.abortUserDataProcessing(
             user,
             dataProcessingChoice
           )

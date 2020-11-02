@@ -643,7 +643,7 @@ function registerAPIRoutes(
     `${basePath}/user-data-processing/:choice`,
     bearerSessionTokenAuth,
     toExpressHandler(
-      userDataProcessingController.getUserDataProcessing,
+      userDataProcessingController.abortUserDataProcessing,
       userDataProcessingController
     )
   );
