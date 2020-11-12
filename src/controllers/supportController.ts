@@ -1,5 +1,5 @@
 /**
- * This controller returns data about the current user session
+ * This controller returns info used to support logged user
  */
 
 import * as express from "express";
@@ -11,10 +11,6 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import TokenService from "../../src/services/tokenService";
-import { withUserFromRequest } from "../types/user";
-
-import { fromEither } from "fp-ts/lib/TaskEither";
 import { SupportToken } from "../../generated/backend/SupportToken";
 import { TokenTypeEnum } from "../../generated/backend/TokenType";
 import {
@@ -22,7 +18,8 @@ import {
   JWT_SUPPORT_TOKEN_ISSUER,
   JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
 } from "../../src/config";
-import { errorsToError } from "../../src/utils/errorsFormatter";
+import TokenService from "../../src/services/tokenService";
+import { withUserFromRequest } from "../types/user";
 
 export default class SupportController {
   constructor(private readonly tokenService: TokenService) {}
@@ -41,14 +38,12 @@ export default class SupportController {
           JWT_SUPPORT_TOKEN_EXPIRATION,
           JWT_SUPPORT_TOKEN_ISSUER
         )
-        .chain(token =>
-          fromEither(
-            SupportToken.decode({
-              access_token: token,
-              expires_in: JWT_SUPPORT_TOKEN_EXPIRATION,
-              token_type: TokenTypeEnum.Bearer
-            }).mapLeft(errorsToError)
-          )
+        .map(token =>
+          SupportToken.encode({
+            access_token: token,
+            expires_in: JWT_SUPPORT_TOKEN_EXPIRATION,
+            token_type: TokenTypeEnum.Bearer
+          })
         )
         .fold<IResponseErrorInternal | IResponseSuccessJson<SupportToken>>(
           e => ResponseErrorInternal(e.message),

@@ -35,10 +35,9 @@ import {
   setFetchTimeout,
   toFetch
 } from "italia-ts-commons/lib/fetch";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { Millisecond } from "italia-ts-commons/lib/units";
+import { Millisecond, Second } from "italia-ts-commons/lib/units";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -406,13 +405,10 @@ export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
   return process.exit(1);
 });
 
-const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as NonNegativeInteger;
-export const JWT_SUPPORT_TOKEN_EXPIRATION: NonNegativeInteger = process.env
+const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
+export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = process.env
   .JWT_SUPPORT_TOKEN_EXPIRATION
-  ? (parseInt(
-      process.env.JWT_SUPPORT_TOKEN_EXPIRATION,
-      10
-    ) as NonNegativeInteger)
+  ? (parseInt(process.env.JWT_SUPPORT_TOKEN_EXPIRATION, 10) as Second)
   : DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION;
 log.info(
   "JWT support token expiration set to %s seconds",
