@@ -11,18 +11,18 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import TokenService from "src/services/tokenService";
+import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
 
 import { fromEither } from "fp-ts/lib/TaskEither";
-import { SupportToken } from "generated/backend/SupportToken";
-import { TokenTypeEnum } from "generated/backend/TokenType";
+import { SupportToken } from "../../generated/backend/SupportToken";
+import { TokenTypeEnum } from "../../generated/backend/TokenType";
 import {
   JWT_SUPPORT_TOKEN_EXPIRATION,
   JWT_SUPPORT_TOKEN_ISSUER,
   JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
-} from "src/config";
-import { errorsToError } from "src/utils/errorsFormatter";
+} from "../../src/config";
+import { errorsToError } from "../../src/utils/errorsFormatter";
 
 export default class SupportController {
   constructor(private readonly tokenService: TokenService) {}
