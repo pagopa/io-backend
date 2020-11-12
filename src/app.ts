@@ -735,7 +735,7 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/support-token`,
+    `${basePath}/token`,
     bearerSessionTokenAuth,
     toExpressHandler(supportController.getSupportToken, supportController)
   );

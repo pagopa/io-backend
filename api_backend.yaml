@@ -476,7 +476,7 @@ paths:
           description: Unavailable service
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/support-token":
+  "/token":
     x-swagger-router-controller: SupportController
     get:
       operationId: getSupportToken
