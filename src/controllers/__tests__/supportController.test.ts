@@ -7,7 +7,6 @@ import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { TokenTypeEnum } from "../../../generated/backend/TokenType";
 import mockReq from "../../__mocks__/request";
 import TokenService from "../../services/tokenService";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -66,7 +65,6 @@ describe("SupportController#getSupportToken", () => {
     expect(response.kind).toEqual("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value.access_token).toEqual(aSupportToken);
-      expect(response.value.token_type).toEqual(TokenTypeEnum.Bearer);
     }
   });
 

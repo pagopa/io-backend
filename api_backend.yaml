@@ -1032,11 +1032,6 @@ definitions:
           - name
           - family_name
       - $ref: "#/definitions/LimitedFederatedUser"
-  TokenType:
-    type: string
-    description: The type of the provided access token.
-    x-extensible-enum:
-      - Bearer
   SupportToken:
     title: Support token
     description: A Support Token response
@@ -1046,12 +1041,9 @@ definitions:
         type: string
       expires_in:
         type: number
-      token_type:
-        $ref: "#/definitions/TokenType"
     required:
       - access_token
       - expires_in
-      - token_type
 responses: {}
 parameters:
   PaginationRequest:

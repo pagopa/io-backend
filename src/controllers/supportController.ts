@@ -12,7 +12,6 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { SupportToken } from "../../generated/backend/SupportToken";
-import { TokenTypeEnum } from "../../generated/backend/TokenType";
 import {
   JWT_SUPPORT_TOKEN_EXPIRATION,
   JWT_SUPPORT_TOKEN_ISSUER,
@@ -41,8 +40,7 @@ export default class SupportController {
         .map(token =>
           SupportToken.encode({
             access_token: token,
-            expires_in: JWT_SUPPORT_TOKEN_EXPIRATION,
-            token_type: TokenTypeEnum.Bearer
+            expires_in: JWT_SUPPORT_TOKEN_EXPIRATION
           })
         )
         .fold<IResponseErrorInternal | IResponseSuccessJson<SupportToken>>(
