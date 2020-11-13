@@ -1,6 +1,6 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { Second } from "italia-ts-commons/lib/units";
 import TokenService from "../tokenService";
 
 const aFiscalCode = "AAAAAAAAAAAAAAA" as FiscalCode;
@@ -13,7 +13,7 @@ DyC2relGDbA6h/YrBg38fcr1KQgxe0bzAiAcUL30oIR/+BqDU4oJnNIYz0KezV0T
 0mcgtjHzphkuswIgXbRK1IpUECBYls7VHNXTZw/fWmg0YmUeklxBZDik6C8CIBXl
 niQ7qszA7Uel9+wv2DwzWj+8OUcRzJAGOVD8cy2S
 -----END RSA PRIVATE KEY-----` as NonEmptyString;
-const tokenTtl = 60 as NonNegativeInteger;
+const tokenTtl = 60 as Second;
 const aTokenIssuer = "ISSUER" as NonEmptyString;
 
 const aTokenLengthBytes = 48;
