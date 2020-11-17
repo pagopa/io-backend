@@ -385,7 +385,7 @@ export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
-  getRequiredENVVar("JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY")
+  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
 ).getOrElseL(errs => {
   log.error(
     `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
@@ -395,7 +395,7 @@ export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
   return process.exit(1);
 });
 export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
-  getRequiredENVVar("JWT_SUPPORT_TOKEN_ISSUER")
+  process.env.JWT_SUPPORT_TOKEN_ISSUER
 ).getOrElseL(errs => {
   log.error(
     `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
