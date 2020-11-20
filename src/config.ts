@@ -35,6 +35,7 @@ import {
   setFetchTimeout,
   toFetch
 } from "italia-ts-commons/lib/fetch";
+import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
@@ -406,10 +407,9 @@ export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
 });
 
 const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = process.env
-  .JWT_SUPPORT_TOKEN_EXPIRATION
-  ? (parseInt(process.env.JWT_SUPPORT_TOKEN_EXPIRATION, 10) as Second)
-  : DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION;
+export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.JWT_SUPPORT_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION) as Second;
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
