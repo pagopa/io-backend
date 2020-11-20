@@ -19,7 +19,7 @@ import { User } from "../../types/user";
 import BonusService from "../bonusService";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
-const aNotAdultFiscalCode = "DROLSS02S20H501F" as FiscalCode;
+const aNotAdultFiscalCode = "DROLSS20S20H501M" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
