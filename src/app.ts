@@ -68,6 +68,7 @@ import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
+import SupportController from "./controllers/supportController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import MessagesService from "./services/messagesService";
@@ -579,6 +580,10 @@ function registerAPIRoutes(
     userDataProcessingService
   );
 
+  const supportController: SupportController = new SupportController(
+    tokenService
+  );
+
   app.get(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
@@ -727,6 +732,12 @@ function registerAPIRoutes(
       pagoPAProxyController.getActivationStatus,
       pagoPAProxyController
     )
+  );
+
+  app.get(
+    `${basePath}/token`,
+    bearerSessionTokenAuth,
+    toExpressHandler(supportController.getSupportToken, supportController)
   );
 }
 

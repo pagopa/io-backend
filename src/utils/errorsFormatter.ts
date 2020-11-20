@@ -1,3 +1,6 @@
+import { Errors } from "io-ts";
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+
 /**
  * Merge into one single Error several errors provided in input and add a context description
  * @param errors
@@ -12,3 +15,6 @@ export function multipleErrorsFormatter(
     errors.map(_ => `value [${_.message}]`).join(` at [context: ${context}]\n`)
   );
 }
+
+export const errorsToError = (errors: Errors): Error =>
+  new Error(errorsToReadableMessages(errors).join(" / "));

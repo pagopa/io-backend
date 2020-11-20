@@ -35,9 +35,10 @@ import {
   setFetchTimeout,
   toFetch
 } from "italia-ts-commons/lib/fetch";
+import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { Millisecond } from "italia-ts-commons/lib/units";
+import { Millisecond, Second } from "italia-ts-commons/lib/units";
 import { STRINGS_RECORD } from "./types/commons";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -382,3 +383,34 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
 
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
+
+// Support Token
+export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
+  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.JWT_SUPPORT_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
+export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.JWT_SUPPORT_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION) as Second;
+log.info(
+  "JWT support token expiration set to %s seconds",
+  JWT_SUPPORT_TOKEN_EXPIRATION
+);

@@ -476,6 +476,28 @@ paths:
           description: Unavailable service
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/token":
+    x-swagger-router-controller: SupportController
+    get:
+      operationId: getSupportToken
+      summary: Get a JWT Support Token
+      description: Return a JWT Support Token for the authenticated user.
+      responses:
+        "200":
+          description: Created.
+          schema:
+            $ref: "#/definitions/SupportToken"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Unavailable service
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
   "/payment-requests/{rptId}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -1010,6 +1032,18 @@ definitions:
           - name
           - family_name
       - $ref: "#/definitions/LimitedFederatedUser"
+  SupportToken:
+    title: Support token
+    description: A Support Token response
+    type: object
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: number
+    required:
+      - access_token
+      - expires_in
 responses: {}
 parameters:
   PaginationRequest:
