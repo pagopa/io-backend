@@ -80,11 +80,7 @@ parameters:
 # - a tag named 'latest' is pushed
 # Note. In the last case, the tag can be (re-)created using the Git CLI, e.g.:
 #    git push -f origin <abfb967>:refs/tags/latest
-trigger:
-  branches:
-    include:
-      - '*'
-      - refs/tags/latest
+trigger: none
 
 # This pipeline has been implemented to be run on hosted agent pools based both
 # on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
