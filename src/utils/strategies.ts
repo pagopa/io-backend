@@ -21,7 +21,7 @@ export function fulfill(
   done: StrategyDoneFunction
 ): void {
   errorOrUser.fold(
-    error => done(undefined, false, error.message),
+    error => done(error.message),
     user => done(undefined, user.isNone() ? false : user.value)
   );
 }
