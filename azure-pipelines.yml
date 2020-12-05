@@ -85,6 +85,11 @@ parameters:
     displayName: 'Deploy on app service 2 (if enabled):'
     type: boolean
     default: true
+
+  - name: 'DEPLOY_TO_APP_SERVICE_3'
+    displayName: 'Deploy on app service 3 (if enabled):'
+    type: boolean
+    default: true
     
   - name: 'DEPLOY_TO_SLOT_NAME'
     displayName: 'Deploy on app service 2 (if enabled):'
