@@ -3913,7 +3913,7 @@ istanbul-reports@^1.5.1:
   dependencies:
     handlebars "^4.0.3"
 
-italia-ts-commons@^5.0.1, italia-ts-commons@^5.1.4:
+italia-ts-commons@^5.1.4:
   version "5.1.13"
   resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.13.tgz#7ae919374f9c03c04e38603b7f7e9681ebee79b7"
   integrity sha512-mXtrNG/HR6lRCOTtBrEzsxGmkHccoDXKqoc9i+J2+yGhhxcznASu+0KMC05ZR1yJP4bWliC9rXJ3hnCw0rMSnQ==
@@ -3937,6 +3937,20 @@ italia-ts-commons@^8.3.0:
     node-fetch "^2.6.0"
     validator "^10.1.0"
 
+italia-ts-commons@^8.6.0:
+  version "8.6.0"
+  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.6.0.tgz#d0e944ae7fb52d63ec016e172e6950529924f2fb"
+  integrity sha512-fMBhaqcGa5GD7/PmXWbjnCVUGcUWuRnZ5wF0hswkh0UMCGSozg3t3neSAqZGTF3eZaUEUk9WLkYSpTNxfeH1jw==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.2"
+    applicationinsights "^1.7.4"
+    fp-ts "1.17.4"
+    io-ts "1.8.5"
+    json-set-map "^1.0.2"
+    node-fetch "^2.6.0"
+    validator "^10.1.0"
+
 italia-tslint-rules@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/italia-tslint-rules/-/italia-tslint-rules-1.1.3.tgz#efac0c9638d14cef6cc907be74f0799b8bab0976"
@@ -3950,13 +3964,13 @@ italia-tslint-rules@^1.1.3:
     tslint-sonarts "^1.9.0"
     typestrict "^1.0.2"
 
-italia-utils@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-6.1.0.tgz#e95c22965bb68c87f7d30f1dc3c6ad75c4d149eb"
-  integrity sha512-LKqYMgGIjknblwZCCM3OEgxnCDPe+eRBcQEIz9DFxIHCezjyUD2AoGdc5XmD4zFLqueDRLcHuid8raZBhbb6Bg==
+italia-utils@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/italia-utils/-/italia-utils-6.3.0.tgz#7b1dac014ef05f5be14e3688c91fcc428238bf18"
+  integrity sha512-HS7gsBef+N+/NNndmTANg5PpNCma2o7/p2vY9s+mZhQ9nM0c3I1GYOoo6CziyGIsD/T3XdqGp/MXwqsRgtSYxw==
   dependencies:
     fs-extra "^6.0.0"
-    italia-ts-commons "^5.0.1"
+    italia-ts-commons "^8.6.0"
     nunjucks "^3.1.2"
     prettier "^1.12.1"
     safe-identifier "^0.4.2"
