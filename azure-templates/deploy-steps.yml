@@ -27,6 +27,10 @@ parameters:
     type: string
     default: ''
 
+  - name: 'slotName'
+    type: string
+    default: ''
+
   - name: 'appServiceName1'
     type: string
     default: ''
@@ -93,7 +97,7 @@ steps:
         package: '$(Build.ArtifactStagingDirectory)/'
         deploymentMethod: 'auto'
         deployToSlotOrASE: true
-        slotName: 'staging'
+        slotName: '${{ parameters.slotName }}'
       displayName: Deploy to staging slot only
 
   - ${{ if and(eq(parameters.deployToAppService2, true), eq(parameters.deployType, 'deployToStagingSlot')) }}:
@@ -106,7 +110,7 @@ steps:
         package: '$(Build.ArtifactStagingDirectory)/'
         deploymentMethod: 'auto'
         deployToSlotOrASE: true
-        slotName: 'staging'
+        slotName: '${{ parameters.slotName }}'
       displayName: Deploy to staging slot only
   
   # Option 3: deployment with two slots ('staging' and 'production')

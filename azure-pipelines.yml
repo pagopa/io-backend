@@ -84,6 +84,11 @@ parameters:
     displayName: 'Deploy on app service 2 (if enabled):'
     type: boolean
     default: true
+    
+  - name: 'DEPLOY_TO_SLOT_NAME'
+    displayName: 'Deploy on app service 2 (if enabled):'
+    type: string
+    default: 'staging'
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
@@ -261,6 +266,7 @@ stages:
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
               appName: '$(PRODUCTION_APP_NAME)'
+              slotName: '${{ parameters.DEPLOY_TO_SLOT_NAME }}'
               appServiceName1: '$(APP_SERVICE_NAME_1)'
               deployToAppService1: ${{ parameters.DEPLOY_TO_APP_SERVICE_1 }}
               appServiceName2: '$(APP_SERVICE_NAME_2)'
