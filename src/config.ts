@@ -414,3 +414,7 @@ log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
+
+
+// Emergency mode
+export const EMERGENCY_MODE = process.env.EMERGENCY_MODE === "1";

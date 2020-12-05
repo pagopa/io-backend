@@ -191,6 +191,7 @@ Those are all Environment variables needed by the application:
 | FETCH_KEEPALIVE_MAX_FREE_SOCKETS       | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_TIMEOUT                | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL      | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
+| EMERGENCY_MODE                         | When is `true` all the requests get a 500 as response                             | boolean |
 
 Notes:
 

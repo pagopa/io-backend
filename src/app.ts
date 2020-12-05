@@ -25,7 +25,8 @@ import {
   tokenDurationSecs,
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
-  USERS_LOGIN_STORAGE_CONNECTION_STRING
+  USERS_LOGIN_STORAGE_CONNECTION_STRING,
+  EMERGENCY_MODE
 } from "./config";
 
 import * as apicache from "apicache";
@@ -205,6 +206,13 @@ export function newApp({
 
   // Create and setup the Express app.
   const app = express();
+
+  // If emergency mode is active send 500 to all the requests
+  if (EMERGENCY_MODE) {
+    app.use((_, res) => {
+      res.status(500).send();
+    });
+  }
 
   //
   // Redirect unsecure connections.
