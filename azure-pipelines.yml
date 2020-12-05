@@ -46,6 +46,7 @@ variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   APP_SERVICE_NAME_1: 'io-p-app-appbackend'
   APP_SERVICE_NAME_2: 'io-p-app-appbackend-new'
+  APP_SERVICE_NAME_3: 'io-p-app-appbackendlinux'
 
 parameters:
   - name: 'TEST_ENABLE_DEPLOY'
@@ -84,6 +85,11 @@ parameters:
     displayName: 'Deploy on app service 2 (if enabled):'
     type: boolean
     default: true
+
+  - name: 'DEPLOY_TO_APP_SERVICE_3'
+    displayName: 'Deploy on app service 3 (if enabled):'
+    type: boolean
+    default: true
     
   - name: 'DEPLOY_TO_SLOT_NAME'
     displayName: 'Deploy on app service 2 (if enabled):'
@@ -106,7 +112,7 @@ trigger: none
 # verifying the build and deploying, and Linux OS for all other jobs for faster 
 # execution.
 pool:
-  vmImage: 'windows-2019'
+  vmImage: 'ubuntu-20.04'
 
 stages:
   # A) Build and code validation (always run)
@@ -271,3 +277,5 @@ stages:
               deployToAppService1: ${{ parameters.DEPLOY_TO_APP_SERVICE_1 }}
               appServiceName2: '$(APP_SERVICE_NAME_2)'
               deployToAppService2: ${{ parameters.DEPLOY_TO_APP_SERVICE_2 }}
+              appServiceName3: '$(APP_SERVICE_NAME_3)'
+              deployToAppService3: ${{ parameters.DEPLOY_TO_APP_SERVICE_3 }}
