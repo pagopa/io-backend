@@ -262,6 +262,6 @@ stages:
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
               appName: '$(PRODUCTION_APP_NAME)'
               appServiceName1: '$(APP_SERVICE_NAME_1)'
-              deployToAppService1: '$(DEPLOY_TO_APP_SERVICE_1)'
+              deployToAppService1: $(DEPLOY_TO_APP_SERVICE_1)
               appServiceName2: '$(APP_SERVICE_NAME_2)'
-              deployToAppService2: '$(DEPLOY_TO_APP_SERVICE_2)'
+              deployToAppService2: $(DEPLOY_TO_APP_SERVICE_2)
