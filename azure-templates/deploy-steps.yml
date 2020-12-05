@@ -26,6 +26,20 @@ parameters:
   - name: 'appName'
     type: string
     default: ''
+
+  - name: 'appServiceName1'
+    type: string
+    default: ''
+
+  - name: 'deployToAppService1'
+    type: boolean
+
+  - name: 'appServiceName2'
+    type: string
+    default: ''
+
+  - name: 'deployToAppService2'
+    type: boolean
     
 steps:
   - template: ./make-build-steps.yml
@@ -69,13 +83,26 @@ steps:
       displayName: Deploy to production slot
   
   # Option 2: deployment to 'staging' slot only
-  - ${{ if eq(parameters.deployType, 'deployToStagingSlot') }}:
+  - ${{ if and(eq(parameters.deployToAppService1, true), eq(parameters.deployType, 'deployToStagingSlot')) }}:
     - task: AzureWebApp@1
       inputs:
         azureSubscription: '${{ parameters.azureSubscription }}'
         resourceGroupName: '${{ parameters.resourceGroupName }}'
         appType: 'webApp'
-        appName: '${{ parameters.appName }}'
+        appName: '${{ parameters.appServiceName1 }}'
+        package: '$(Build.ArtifactStagingDirectory)/'
+        deploymentMethod: 'auto'
+        deployToSlotOrASE: true
+        slotName: 'staging'
+      displayName: Deploy to staging slot only
+
+  - ${{ if and(eq(parameters.deployToAppService2, true), eq(parameters.deployType, 'deployToStagingSlot')) }}:
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        resourceGroupName: '${{ parameters.resourceGroupName }}'
+        appType: 'webApp'
+        appName: '${{ parameters.appServiceName2 }}'
         package: '$(Build.ArtifactStagingDirectory)/'
         deploymentMethod: 'auto'
         deployToSlotOrASE: true

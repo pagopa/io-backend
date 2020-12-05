@@ -44,6 +44,8 @@
 variables:
   NODE_VERSION: '10.14.2'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+  APP_SERVICE_NAME_1: 'io-p-app-appbackend'
+  APP_SERVICE_NAME_2: 'io-p-app-appbackend-new'
 
 parameters:
   - name: 'TEST_ENABLE_DEPLOY'
@@ -72,6 +74,16 @@ parameters:
       - deployToStagingSlot  
       - deployToProductionSlot
       - deployToStagingSlotAndSwap
+
+  - name: 'DEPLOY_TO_APP_SERVICE_1'
+    displayName: 'Deploy on app service 1 (if enabled):'
+    type: boolean
+    default: true
+
+  - name: 'DEPLOY_TO_APP_SERVICE_2'
+    displayName: 'Deploy on app service 2 (if enabled):'
+    type: boolean
+    default: true
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
@@ -249,3 +261,7 @@ stages:
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
               appName: '$(PRODUCTION_APP_NAME)'
+              appServiceName1: '$(APP_SERVICE_NAME_1)'
+              deployToAppService1: '$(DEPLOY_TO_APP_SERVICE_1)'
+              appServiceName2: '$(APP_SERVICE_NAME_2)'
+              deployToAppService2: '$(DEPLOY_TO_APP_SERVICE_2)'
