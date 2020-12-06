@@ -7,6 +7,7 @@ import { isLeft } from "fp-ts/lib/Either";
 import { CIDR, IPString } from "italia-ts-commons/lib/strings";
 import * as rangeCheck from "range_check";
 import * as requestIp from "request-ip";
+import { log } from "../logger";
 
 export default function checkIP(
   range: readonly CIDR[]
@@ -24,11 +25,13 @@ export default function checkIP(
     const errorOrIPString = IPString.decode(clientIp);
 
     if (isLeft(errorOrIPString)) {
+      log.error(`Bad request: ${errorOrIPString.value}.`);
       res.status(400).send("Bad request");
     } else {
       const IP = errorOrIPString.value;
       // tslint:disable-next-line: readonly-array
       if (!rangeCheck.inRange(IP, range as CIDR[])) {
+        log.error(`Blocked source IP ${IP}.`);
         res.status(401).send("Unauthorized");
       } else {
         next();
