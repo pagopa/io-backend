@@ -34,6 +34,7 @@ import * as express from "express";
 import * as helmet from "helmet";
 import * as morgan from "morgan";
 import * as passport from "passport";
+import * as requestIp from "request-ip";
 
 import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
@@ -42,7 +43,6 @@ import {
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
 import { CIDR } from "italia-ts-commons/lib/strings";
-import { ServerInfo } from "../generated/public/ServerInfo";
 
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -873,8 +873,10 @@ function registerPublicRoutes(app: Express): void {
     VersionPerPlatform
   );
 
-  app.get("/info", (_, res) => {
-    const serverInfo: ServerInfo = {
+  app.get("/info", (req, res) => {
+    const serverInfo = {
+      client_ip: requestIp.getClientIp(req),
+      headers: JSON.stringify(req.headers),
       min_app_version: minAppVersion.getOrElse({
         android: "UNKNOWN",
         ios: "UNKNOWN"
@@ -883,6 +885,7 @@ function registerPublicRoutes(app: Express): void {
         android: "UNKNOWN",
         ios: "UNKNOWN"
       }),
+      request_ip: JSON.stringify(req.clientIp),
       version
     };
     res.status(200).json(serverInfo);
