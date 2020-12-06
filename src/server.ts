@@ -26,12 +26,10 @@ import {
   SERVER_PORT
 } from "./config";
 import { initAppInsights } from "./utils/appinsights";
+
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
-import {
-  getCurrentBackendVersion,
-  getValueFromPackageJson
-} from "./utils/package";
+import { getCurrentBackendVersion } from "./utils/package";
 
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
@@ -66,7 +64,6 @@ const maybeAppInsightsClient = fromNullable(
 ).map(k =>
   initAppInsights(k, {
     applicationVersion: getCurrentBackendVersion(),
-    cloudRole: getValueFromPackageJson("name"),
     disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
     samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
       ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
