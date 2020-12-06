@@ -44,9 +44,9 @@
 variables:
   NODE_VERSION: '10.14.2'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
-  APP_SERVICE_NAME_1: 'io-p-app-appbackend'
-  APP_SERVICE_NAME_2: 'io-p-app-appbackend-new'
-  APP_SERVICE_NAME_3: 'io-p-app-appbackendlinux'
+  APP_BACKEND_L1: 'io-p-app-appbackendl1'
+  APP_BACKEND_L2: 'io-p-app-appbackendl2'
+  APP_BACKEND_LI: 'io-p-app-appbackendli'
 
 parameters:
   - name: 'TEST_ENABLE_DEPLOY'
@@ -76,25 +76,20 @@ parameters:
       - deployToProductionSlot
       - deployToStagingSlotAndSwap
 
-  - name: 'DEPLOY_TO_APP_SERVICE_1'
-    displayName: 'Deploy on app service 1 (if enabled):'
+  - name: 'DEPLOY_TO_APP_BACKEND_L1'
+    displayName: 'Deploy on app backend l1 (if enabled):'
     type: boolean
     default: true
 
-  - name: 'DEPLOY_TO_APP_SERVICE_2'
-    displayName: 'Deploy on app service 2 (if enabled):'
+  - name: 'DEPLOY_TO_APP_BACKEND_L2'
+    displayName: 'Deploy on app backend l2 (if enabled):'
     type: boolean
     default: true
 
-  - name: 'DEPLOY_TO_APP_SERVICE_3'
-    displayName: 'Deploy on app service 3 (if enabled):'
+  - name: 'DEPLOY_TO_APP_BACKEND_LI'
+    displayName: 'Deploy on app backend internal (if enabled):'
     type: boolean
     default: true
-    
-  - name: 'DEPLOY_TO_SLOT_NAME'
-    displayName: 'Deploy on app service 2 (if enabled):'
-    type: string
-    default: 'staging'
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
@@ -112,7 +107,7 @@ trigger: none
 # verifying the build and deploying, and Linux OS for all other jobs for faster 
 # execution.
 pool:
-  vmImage: 'ubuntu-20.04'
+  vmImage: 'ubuntu-latest'
 
 stages:
   # A) Build and code validation (always run)
@@ -247,8 +242,8 @@ stages:
   #       - the 'latest' tag is pushed 
   #    - manual deployment:
   #       - $DO_DEPLOY == true and PRODUCTION_ENABLE_DEPLOY == true
-  - ${{ if eq(parameters.PRODUCTION_ENABLE_DEPLOY, true) }}:
-    - stage: Deploy_production
+  - ${{ if and(eq(parameters.PRODUCTION_ENABLE_DEPLOY, true), eq(parameters.DEPLOY_TO_APP_BACKEND_L1, true)) }}:
+    - stage: Deploy_production_appbackendl1
       condition: 
         and(
           succeeded(),
@@ -271,11 +266,56 @@ stages:
               deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
-              appName: '$(PRODUCTION_APP_NAME)'
-              slotName: '${{ parameters.DEPLOY_TO_SLOT_NAME }}'
-              appServiceName1: '$(APP_SERVICE_NAME_1)'
-              deployToAppService1: ${{ parameters.DEPLOY_TO_APP_SERVICE_1 }}
-              appServiceName2: '$(APP_SERVICE_NAME_2)'
-              deployToAppService2: ${{ parameters.DEPLOY_TO_APP_SERVICE_2 }}
-              appServiceName3: '$(APP_SERVICE_NAME_3)'
-              deployToAppService3: ${{ parameters.DEPLOY_TO_APP_SERVICE_3 }}
+              appName: '$(APP_BACKEND_L1)'
+
+  - ${{ if and(eq(parameters.PRODUCTION_ENABLE_DEPLOY, true), eq(parameters.DEPLOY_TO_APP_BACKEND_L2, true)) }}:
+    - stage: Deploy_production_appbackendl2
+      condition: 
+        and(
+          succeeded(),
+          and (
+            eq(variables['DO_DEPLOY'], true),
+            or(
+              eq(variables['Build.SourceBranch'], 'refs/tags/latest'),
+              eq(variables['Build.Reason'], 'Manual')
+            )
+          )
+        )
+      dependsOn:
+        - Build
+        - Test
+      jobs:
+        - job: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+          steps:
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+              appName: '$(APP_BACKEND_L2)'
+
+  - ${{ if and(eq(parameters.PRODUCTION_ENABLE_DEPLOY, true), eq(parameters.DEPLOY_TO_APP_BACKEND_LI, true)) }}:
+    - stage: Deploy_production_appbackendli
+      condition: 
+        and(
+          succeeded(),
+          and (
+            eq(variables['DO_DEPLOY'], true),
+            or(
+              eq(variables['Build.SourceBranch'], 'refs/tags/latest'),
+              eq(variables['Build.Reason'], 'Manual')
+            )
+          )
+        )
+      dependsOn:
+        - Build
+        - Test
+      jobs:
+        - job: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+          steps:
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+              appName: '$(APP_BACKEND_LI)'
