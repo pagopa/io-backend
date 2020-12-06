@@ -70,7 +70,7 @@ parameters:
   - name: 'PRODUCTION_DEPLOY_TYPE'
     displayName: 'Method to achieve deployment in Production (if enabled):'
     type: string
-    default: deployToStagingSlot
+    default: deployToStagingSlotAndSwap
     values:
       - deployToStagingSlot  
       - deployToProductionSlot
