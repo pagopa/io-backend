@@ -89,7 +89,7 @@ parameters:
   - name: 'DEPLOY_TO_APP_BACKEND_LI'
     displayName: 'Deploy on app backend internal (if enabled):'
     type: boolean
-    default: false
+    default: true
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
