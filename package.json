@@ -1,6 +1,6 @@
 {
   "name": "io-backend",
-  "version": "7.11.0",
+  "version": "7.11.1",
   "min_app_version": {
     "ios": "0.0.0",
     "android": "0.0.0"
