@@ -107,7 +107,7 @@ trigger: none
 # verifying the build and deploying, and Linux OS for all other jobs for faster 
 # execution.
 pool:
-  vmImage: 'ubuntu-20.04'
+  vmImage: 'ubuntu-latest'
 
 stages:
   # A) Build and code validation (always run)
