@@ -78,24 +78,24 @@ parameters:
       - deployToStagingSlotAndSwap
 
   - name: 'DEPLOY_TO_APP_BACKEND_L1'
-    displayName: 'Deploy on app backend l1 (if enabled):'
+    displayName: 'Deploy on appbackend-l1 (if enabled):'
     type: boolean
     default: true
 
   - name: 'DEPLOY_TO_APP_BACKEND_L2'
-    displayName: 'Deploy on app backend l2 (if enabled):'
+    displayName: 'Deploy on appbackend-l2 (if enabled):'
     type: boolean
     default: true
 
   - name: 'DEPLOY_TO_APP_BACKEND_LI'
-    displayName: 'Deploy on app backend li (if enabled):'
+    displayName: 'Deploy on appbackend-li (if enabled):'
     type: boolean
     default: true
 
   - name: 'DEPLOY_TO_APP_BACKEND_LINUX'
-    displayName: 'Deploy on app backend linux (if enabled):'
+    displayName: 'Deploy on appbackend-linux (if enabled):'
     type: boolean
-    default: true
+    default: false
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
