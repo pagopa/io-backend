@@ -47,7 +47,7 @@ const myPortalTokenPrefix = "MYPORTAL-";
 const bpdTokenPrefix = "BPD-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
-const NoticeEmailPrefix = "NoticeEmail-";
+const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -583,7 +583,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     return new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.set(
-        `${NoticeEmailPrefix}${user.session_token}`,
+        `${noticeEmailPrefix}${user.session_token}`,
         NoticeEmail,
         "EX",
         sessionTtl,
@@ -604,9 +604,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async delPagoPaNoticeEmail(user: User): Promise<Either<Error, true>> {
     return new Promise<Either<Error, true>>(resolve => {
       log.info(
-        `Deleting cashed notify email ${NoticeEmailPrefix}${user.fiscal_code}`
+        `Deleting cashed notify email ${noticeEmailPrefix}${user.fiscal_code}`
       );
-      this.redisClient.del(`${NoticeEmailPrefix}${user.session_token}`, err =>
+      this.redisClient.del(`${noticeEmailPrefix}${user.session_token}`, err =>
         resolve(err ? left(err) : right(true))
       );
     });
@@ -620,7 +620,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, EmailString>> {
     return new Promise<Either<Error, EmailString>>(resolve => {
       this.redisClient.get(
-        `${NoticeEmailPrefix}${user.session_token}`,
+        `${noticeEmailPrefix}${user.session_token}`,
         (err, value) => {
           if (err) {
             // Client returns an error.
