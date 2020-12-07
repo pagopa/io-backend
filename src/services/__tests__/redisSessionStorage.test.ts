@@ -5,7 +5,7 @@
 /* tslint:disable:no-null-keyword */
 /* tslint:disable:no-object-mutation */
 
-import { Either, isRight, left, Left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, isRight, left, Left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
@@ -1267,5 +1267,106 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
     expect(result.isRight()).toBeTruthy();
     expect(result.value).toBe(true);
+  });
+});
+
+describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
+  it("should fail getting a notice email for an missing key", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, null);
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(isLeft(response)).toBeTruthy();
+  });
+
+  it("should fail if the value is not a valid email", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, "fake-wrong-value");
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(isLeft(response)).toBeTruthy();
+  });
+
+  it("should fail if redis get fail with an error", async () => {
+    const expectedError = new Error("Redis Error");
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(expectedError, undefined);
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(left(expectedError));
+  });
+
+  it("should return an email if exists the notice key", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, anEmailAddress);
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(right(anEmailAddress));
+  });
+});
+
+describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
+  it("should succeded deleting a notice email", async () => {
+    mockDel.mockImplementationOnce((_, callback) => {
+      callback(undefined, 1);
+    });
+    const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(right(true));
+  });
+
+  it("should fail deleting a notice email", async () => {
+    const expectedError = new Error("Redis Error");
+    mockDel.mockImplementationOnce((_, callback) => {
+      callback(expectedError, undefined);
+    });
+    const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(left(expectedError));
+  });
+});
+
+describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
+  it("should succeded setting a notice email key", async () => {
+    const expectedTtl = 1000;
+    mockTtl.mockImplementationOnce((_, callback) => {
+      callback(undefined, expectedTtl);
+    });
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
+      callback(undefined, "OK")
+    );
+    const response = await sessionStorage.setPagoPaNoticeEmail(
+      aValidUser,
+      anEmailAddress
+    );
+    expect(mockSet).toBeCalledWith(
+      `NOTICEEMAIL-${aValidUser.session_token}`,
+      anEmailAddress,
+      "EX",
+      expectedTtl,
+      expect.any(Function)
+    );
+    expect(response).toEqual(right(true));
+  });
+
+  it("should return left if the notice email key was not created", async () => {
+    const expectedTtl = 1000;
+    const expectedError = new Error("RedisError");
+    mockTtl.mockImplementationOnce((_, callback) => {
+      callback(undefined, expectedTtl);
+    });
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
+      callback(expectedError, undefined)
+    );
+    const response = await sessionStorage.setPagoPaNoticeEmail(
+      aValidUser,
+      anEmailAddress
+    );
+    expect(mockSet).toBeCalledWith(
+      `NOTICEEMAIL-${aValidUser.session_token}`,
+      anEmailAddress,
+      "EX",
+      expectedTtl,
+      expect.any(Function)
+    );
+    expect(response).toEqual(left(expectedError));
   });
 });

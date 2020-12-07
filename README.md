@@ -183,6 +183,7 @@ Those are all Environment variables needed by the application:
 | APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
 | GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase                             | string |
 | FETCH_KEEPALIVE_ENABLED                | When is `true` enables `keepalive` agent in the API client (defaults to `false`)  | boolean |
+| ENABLE_NOTICE_EMAIL_CACHE              | (Optional) Enable `notice_email` cache in PagoPA getUser (defaults to `false`)    | boolean |
 | TEST_LOGIN_FISCAL_CODES                | (Optional) Enabled username for password based login (coma separated Fiscal Code) | string |
 | TEST_LOGIN_PASSWORD                    | (Optional) Password for password based login                                      | string |
 | FETCH_KEEPALIVE_MAX_SOCKETS            | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |

@@ -4,7 +4,7 @@
 
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
 import {
   BPDToken,
   MyPortalToken,
@@ -60,4 +60,15 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, boolean>>;
 
   readonly update: (updatedUser: UserV3) => Promise<Either<Error, boolean>>;
+
+  readonly setPagoPaNoticeEmail: (
+    user: User,
+    NoticeEmail: EmailString
+  ) => Promise<Either<Error, boolean>>;
+
+  readonly delPagoPaNoticeEmail: (user: User) => Promise<Either<Error, true>>;
+
+  readonly getPagoPaNoticeEmail: (
+    user: User
+  ) => Promise<Either<Error, EmailString>>;
 }

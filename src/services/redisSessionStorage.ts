@@ -23,7 +23,7 @@ import {
   tryCatch
 } from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -47,6 +47,7 @@ const myPortalTokenPrefix = "MYPORTAL-";
 const bpdTokenPrefix = "BPD-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
+const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -557,6 +558,90 @@ export default class RedisSessionStorage extends RedisStorageUtils
       );
     }
     return right(true);
+  }
+
+  /**
+   * Cache on redis the notify email for pagopa
+   */
+  public async setPagoPaNoticeEmail(
+    user: User,
+    NoticeEmail: EmailString
+  ): Promise<Either<Error, boolean>> {
+    const errorOrSessionTtl = await this.getSessionTtl(user.session_token);
+
+    if (isLeft(errorOrSessionTtl)) {
+      return left(
+        new Error(
+          `Error retrieving user session ttl [${errorOrSessionTtl.value.message}]`
+        )
+      );
+    }
+    const sessionTtl = errorOrSessionTtl.value;
+    if (sessionTtl < 0) {
+      throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
+    }
+
+    return new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.set(
+        `${noticeEmailPrefix}${user.session_token}`,
+        NoticeEmail,
+        "EX",
+        sessionTtl,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting session token")
+            )
+          )
+      );
+    });
+  }
+
+  /**
+   * Delete notify email cache related to an user
+   */
+  public async delPagoPaNoticeEmail(user: User): Promise<Either<Error, true>> {
+    return new Promise<Either<Error, true>>(resolve => {
+      log.info(
+        `Deleting cashed notify email ${noticeEmailPrefix}${user.fiscal_code}`
+      );
+      this.redisClient.del(`${noticeEmailPrefix}${user.session_token}`, err =>
+        resolve(err ? left(err) : right(true))
+      );
+    });
+  }
+
+  /**
+   * Get the notify email value from cache
+   */
+  public async getPagoPaNoticeEmail(
+    user: User
+  ): Promise<Either<Error, EmailString>> {
+    return new Promise<Either<Error, EmailString>>(resolve => {
+      this.redisClient.get(
+        `${noticeEmailPrefix}${user.session_token}`,
+        (err, value) => {
+          if (err) {
+            // Client returns an error.
+            return resolve(left<Error, EmailString>(err));
+          }
+
+          if (value === null) {
+            return resolve(
+              left<Error, EmailString>(
+                new Error("Notify email value not found")
+              )
+            );
+          }
+          const errorOrNoticeEmail = EmailString.decode(value).mapLeft(
+            validationErrors =>
+              new Error(errorsToReadableMessages(validationErrors).join("/"))
+          );
+          return resolve(errorOrNoticeEmail);
+        }
+      );
+    });
   }
 
   /**

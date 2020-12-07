@@ -1,4 +1,6 @@
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import * as redis from "redis";
+
+import { EmailString, NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -7,6 +9,7 @@ import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
 
+import { left, right } from "fp-ts/lib/Either";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
 import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
@@ -17,6 +20,7 @@ import {
 } from "../../../generated/io-api/PreferredLanguage";
 import ApiClientFactory from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
+import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
@@ -74,6 +78,27 @@ const userInitializedProfile: InitializedProfile = {
   version: 42
 };
 
+const mockGetPagoPaNoticeEmail = jest
+  .fn()
+  .mockImplementation((_, __) =>
+    Promise.resolve(
+      left<Error, EmailString>(new Error("Notify email value not found"))
+    )
+  );
+
+const mockSetPagoPaNoticeEmail = jest
+  .fn()
+  .mockImplementation(_ => Promise.resolve(right<Error, boolean>(true)));
+
+jest.mock("../../services/redisSessionStorage", () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      getPagoPaNoticeEmail: mockGetPagoPaNoticeEmail,
+      setPagoPaNoticeEmail: mockSetPagoPaNoticeEmail
+    }))
+  };
+});
+
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
@@ -82,6 +107,14 @@ jest.mock("../../services/profileService", () => {
     }))
   };
 });
+
+const redisClient = {} as redis.RedisClient;
+
+const tokenDurationSecs = 0;
+const redisSessionStorage = new RedisSessionStorage(
+  redisClient,
+  tokenDurationSecs
+);
 
 describe("PagoPaController#getUser", () => {
   beforeEach(() => {
@@ -100,10 +133,79 @@ describe("PagoPaController#getUser", () => {
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
-    const pagoPAController = new PagoPAController(profileService);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage,
+      true
+    );
 
     const response = await pagoPAController.getUser(req);
+    expect(mockGetPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockSetPagoPaNoticeEmail).toBeCalledWith(
+      mockedUser,
+      userInitializedProfile.email
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUserResponse
+    });
+  });
+
+  it("should return a successful response with notice-email cache disabled", async () => {
+    const req = mockReq();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(userInitializedProfile))
+    );
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = mockedUser;
+
+    const apiClient = new ApiClientFactory("", "");
+    const profileService = new ProfileService(apiClient);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage,
+      false
+    );
+
+    const response = await pagoPAController.getUser(req);
+    expect(mockGetPagoPaNoticeEmail).not.toBeCalled();
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockSetPagoPaNoticeEmail).toBeCalledWith(
+      mockedUser,
+      userInitializedProfile.email
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUserResponse
+    });
+  });
+
+  it("should return a successful response with cached notice email", async () => {
+    const req = mockReq();
+
+    mockGetPagoPaNoticeEmail.mockImplementationOnce(() =>
+      Promise.resolve(right(aCustomEmailAddress))
+    );
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = mockedUser;
+
+    const apiClient = new ApiClientFactory("", "");
+    const profileService = new ProfileService(apiClient);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage,
+      true
+    );
+
+    const response = await pagoPAController.getUser(req);
+    expect(mockGetProfile).not.toBeCalled();
+    expect(mockGetPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -129,7 +231,11 @@ describe("PagoPaController#getUser", () => {
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
-    const pagoPAController = new PagoPAController(profileService);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage,
+      true
+    );
 
     const response = await pagoPAController.getUser(req);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -167,7 +273,11 @@ describe("PagoPaController#getUser", () => {
 
     const apiClient = new ApiClientFactory("", "");
     const profileService = new ProfileService(apiClient);
-    const pagoPAController = new PagoPAController(profileService);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage,
+      true
+    );
 
     const response = await pagoPAController.getUser(req);
     expect(mockGetProfile).toHaveBeenCalledWith(notSpidUserSessionUser);
