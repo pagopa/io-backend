@@ -33,7 +33,8 @@ const VALIDATION_ERROR_TITLE = "Validation Error";
 export default class PagoPAController {
   constructor(
     readonly profileService: ProfileService,
-    private readonly sessionStorage: ISessionStorage
+    private readonly sessionStorage: ISessionStorage,
+    private readonly enableNoticeEmailCache: boolean
   ) {}
   /**
    * Returns the profile for the user identified by the provided fiscal
@@ -50,58 +51,62 @@ export default class PagoPAController {
     | IResponseSuccessJson<PagoPAUser>
   > =>
     withUserFromRequest(req, async user => {
-      const errorResponseOrNoticeEmail = await tryCatch(
-        () => this.sessionStorage.getPagoPaNoticeEmail(user),
-        _ => new Error("Error reading the notify email cache")
+      const getProfileAndSaveNoticeEmailCache = tryCatch(
+        () => this.profileService.getProfile(user),
+        () => new Error("Error getting the profile")
       )
-        .foldTaskEither(_ => fromLeft<Error, EmailString>(_), fromEither)
         .foldTaskEither(
-          _ =>
-            tryCatch(
-              () => this.profileService.getProfile(user),
-              () => new Error("Error getting the profile")
-            )
-              .foldTaskEither(
-                _1 =>
-                  fromLeft<
-                    | IResponseErrorInternal
-                    | IResponseErrorTooManyRequests
-                    | IResponseErrorNotFound,
-                    Option<EmailString>
-                  >(ResponseErrorInternal("Internal server error")),
-                response => {
-                  if (response.kind !== "IResponseSuccessJson") {
-                    // if getProfile returns a failure, we just return it
-                    return fromLeft(response);
-                  }
-                  // if no validated email is provided into InitializedProfile
-                  // spid_email will be used for notice email
-                  const maybeNoticeEmail: EmailAddress | undefined =
-                    response.value.email && response.value.is_email_validated
-                      ? response.value.email
-                      : user.spid_email;
-                  return taskEither.of(fromNullable(maybeNoticeEmail));
-                }
-              )
-              .chain(maybeNoticeEmail => {
-                if (isNone(maybeNoticeEmail)) {
-                  return taskEither.of(maybeNoticeEmail as Option<EmailString>);
-                }
-                return tryCatch(
-                  () =>
-                    this.sessionStorage.setPagoPaNoticeEmail(
-                      user,
-                      maybeNoticeEmail.value
-                    ),
-                  () => new Error("Error caching the notify email value")
-                ).foldTaskEither(
-                  _1 => taskEither.of(maybeNoticeEmail),
-                  _1 => taskEither.of(maybeNoticeEmail)
-                );
-              }),
-          _ => taskEither.of(some(_))
+          _1 =>
+            fromLeft<
+              | IResponseErrorInternal
+              | IResponseErrorTooManyRequests
+              | IResponseErrorNotFound,
+              Option<EmailString>
+            >(ResponseErrorInternal("Internal server error")),
+          response => {
+            if (response.kind !== "IResponseSuccessJson") {
+              // if getProfile returns a failure, we just return it
+              return fromLeft(response);
+            }
+            // if no validated email is provided into InitializedProfile
+            // spid_email will be used for notice email
+            const maybeNoticeEmail: EmailAddress | undefined =
+              response.value.email && response.value.is_email_validated
+                ? response.value.email
+                : user.spid_email;
+            return taskEither.of(fromNullable(maybeNoticeEmail));
+          }
         )
-        .run();
+        // Save the value into the redis cache
+        .chain(maybeNoticeEmail => {
+          if (isNone(maybeNoticeEmail)) {
+            return taskEither.of(maybeNoticeEmail as Option<EmailString>);
+          }
+          return tryCatch(
+            () =>
+              this.sessionStorage.setPagoPaNoticeEmail(
+                user,
+                maybeNoticeEmail.value
+              ),
+            () => new Error("Error caching the notify email value")
+          ).foldTaskEither(
+            _1 => taskEither.of(maybeNoticeEmail),
+            _1 => taskEither.of(maybeNoticeEmail)
+          );
+        });
+
+      const errorResponseOrNoticeEmail = await (this.enableNoticeEmailCache
+        ? tryCatch(
+            () => this.sessionStorage.getPagoPaNoticeEmail(user),
+            _ => new Error("Error reading the notify email cache")
+          )
+            .foldTaskEither(_ => fromLeft<Error, EmailString>(_), fromEither)
+            .foldTaskEither(
+              _ => getProfileAndSaveNoticeEmailCache,
+              _ => taskEither.of(some(_))
+            )
+        : getProfileAndSaveNoticeEmailCache
+      ).run();
 
       if (errorResponseOrNoticeEmail.isLeft()) {
         return errorResponseOrNoticeEmail.value;

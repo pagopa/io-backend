@@ -62,6 +62,12 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
+export const ENABLE_NOTICE_EMAIL_CACHE: boolean = fromNullable(
+  process.env.ENABLE_NOTICE_EMAIL_CACHE
+)
+  .map(_ => _.toLowerCase() === "true")
+  .getOrElse(false);
+
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () => {
   return fromNullable(process.env.SAML_KEY).getOrElseL(() =>

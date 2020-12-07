@@ -7,6 +7,7 @@ import {
   appConfig,
   BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
+  ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
   FF_BONUS_ENABLED,
   getClientProfileRedirectionUrl,
@@ -380,6 +381,7 @@ export function newApp({
         allowPagoPAIPSourceRange,
         PROFILE_SERVICE,
         SESSION_STORAGE,
+        ENABLE_NOTICE_EMAIL_CACHE,
         authMiddlewares.bearerWallet
       );
       registerMyPortalRoutes(
@@ -481,12 +483,14 @@ function registerPagoPARoutes(
   allowPagoPAIPSourceRange: readonly CIDR[],
   profileService: ProfileService,
   sessionStorage: RedisSessionStorage,
+  enableNoticeEmailCache: boolean,
   // tslint:disable-next-line: no-any
   bearerWalletTokenAuth: any
 ): void {
   const pagopaController: PagoPAController = new PagoPAController(
     profileService,
-    sessionStorage
+    sessionStorage,
+    enableNoticeEmailCache
   );
 
   app.get(

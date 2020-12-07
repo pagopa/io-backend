@@ -135,12 +135,49 @@ describe("PagoPaController#getUser", () => {
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      true
     );
 
     const response = await pagoPAController.getUser(req);
     expect(mockGetPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockSetPagoPaNoticeEmail).toBeCalledWith(
+      mockedUser,
+      userInitializedProfile.email
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUserResponse
+    });
+  });
+
+  it("should return a successful response with notice-email cache disabled", async () => {
+    const req = mockReq();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(userInitializedProfile))
+    );
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = mockedUser;
+
+    const apiClient = new ApiClientFactory("", "");
+    const profileService = new ProfileService(apiClient);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage,
+      false
+    );
+
+    const response = await pagoPAController.getUser(req);
+    expect(mockGetPagoPaNoticeEmail).not.toBeCalled();
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(mockSetPagoPaNoticeEmail).toBeCalledWith(
+      mockedUser,
+      userInitializedProfile.email
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -162,7 +199,8 @@ describe("PagoPaController#getUser", () => {
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      true
     );
 
     const response = await pagoPAController.getUser(req);
@@ -195,7 +233,8 @@ describe("PagoPaController#getUser", () => {
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      true
     );
 
     const response = await pagoPAController.getUser(req);
@@ -236,7 +275,8 @@ describe("PagoPaController#getUser", () => {
     const profileService = new ProfileService(apiClient);
     const pagoPAController = new PagoPAController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      true
     );
 
     const response = await pagoPAController.getUser(req);
