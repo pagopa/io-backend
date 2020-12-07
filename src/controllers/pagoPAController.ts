@@ -3,6 +3,7 @@
  */
 
 import * as express from "express";
+import { fromNullable, isNone, Option, some } from "fp-ts/lib/Option";
 import {
   fromEither,
   fromLeft,
@@ -66,7 +67,7 @@ export default class PagoPAController {
                     | IResponseErrorInternal
                     | IResponseErrorTooManyRequests
                     | IResponseErrorNotFound,
-                    EmailString | undefined
+                    Option<EmailString>
                   >(ResponseErrorInternal("Internal server error")),
                 response => {
                   if (response.kind !== "IResponseSuccessJson") {
@@ -79,18 +80,18 @@ export default class PagoPAController {
                     response.value.email && response.value.is_email_validated
                       ? response.value.email
                       : user.spid_email;
-                  return taskEither.of(maybeNoticeEmail);
+                  return taskEither.of(fromNullable(maybeNoticeEmail));
                 }
               )
               .chain(maybeNoticeEmail => {
-                if (!maybeNoticeEmail) {
-                  return taskEither.of(maybeNoticeEmail);
+                if (isNone(maybeNoticeEmail)) {
+                  return taskEither.of(maybeNoticeEmail as Option<EmailString>);
                 }
                 return tryCatch(
                   () =>
                     this.sessionStorage.setPagoPaNoticeEmail(
                       user,
-                      maybeNoticeEmail
+                      maybeNoticeEmail.value
                     ),
                   () => new Error("Error caching the notify email value")
                 ).foldTaskEither(
@@ -98,7 +99,7 @@ export default class PagoPAController {
                   _1 => taskEither.of(maybeNoticeEmail)
                 );
               }),
-          _ => taskEither.of(_)
+          _ => taskEither.of(some(_))
         )
         .run();
 
@@ -112,7 +113,7 @@ export default class PagoPAController {
         fiscal_code: user.fiscal_code,
         mobile_phone: user.spid_mobile_phone,
         name: user.name,
-        notice_email: errorResponseOrNoticeEmail.value,
+        notice_email: errorResponseOrNoticeEmail.value.toUndefined(),
         spid_email: user.spid_email
       }).fold<IResponseSuccessJson<PagoPAUser> | IResponseErrorValidation>(
         _ =>
