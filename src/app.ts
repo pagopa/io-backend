@@ -379,6 +379,7 @@ export function newApp({
         PagoPABasePath,
         allowPagoPAIPSourceRange,
         PROFILE_SERVICE,
+        SESSION_STORAGE,
         authMiddlewares.bearerWallet
       );
       registerMyPortalRoutes(
@@ -479,11 +480,13 @@ function registerPagoPARoutes(
   basePath: string,
   allowPagoPAIPSourceRange: readonly CIDR[],
   profileService: ProfileService,
+  sessionStorage: RedisSessionStorage,
   // tslint:disable-next-line: no-any
   bearerWalletTokenAuth: any
 ): void {
   const pagopaController: PagoPAController = new PagoPAController(
-    profileService
+    profileService,
+    sessionStorage
   );
 
   app.get(
@@ -543,7 +546,8 @@ function registerAPIRoutes(
   bearerSessionTokenAuth: any
 ): void {
   const profileController: ProfileController = new ProfileController(
-    profileService
+    profileService,
+    sessionStorage
   );
 
   const messagesController: MessagesController = new MessagesController(
