@@ -1304,3 +1304,22 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
     expect(response).toEqual(right(anEmailAddress));
   });
 });
+
+describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
+  it("should succeded deleting a notice email", async () => {
+    mockDel.mockImplementationOnce((_, callback) => {
+      callback(undefined, 1);
+    });
+    const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(right(true));
+  });
+
+  it("should fail deleting a notice email", async () => {
+    const expectedError = new Error("Redis Error");
+    mockDel.mockImplementationOnce((_, callback) => {
+      callback(expectedError, undefined);
+    });
+    const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(left(expectedError));
+  });
+});
