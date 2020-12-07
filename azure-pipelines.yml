@@ -47,6 +47,7 @@ variables:
   APP_BACKEND_L1: 'io-p-app-appbackendl1'
   APP_BACKEND_L2: 'io-p-app-appbackendl2'
   APP_BACKEND_LI: 'io-p-app-appbackendli'
+  APP_BACKEND_LINUX: 'io-p-app-appbackendlinux'
 
 parameters:
   - name: 'TEST_ENABLE_DEPLOY'
@@ -87,7 +88,12 @@ parameters:
     default: true
 
   - name: 'DEPLOY_TO_APP_BACKEND_LI'
-    displayName: 'Deploy on app backend internal (if enabled):'
+    displayName: 'Deploy on app backend li (if enabled):'
+    type: boolean
+    default: true
+
+  - name: 'DEPLOY_TO_APP_BACKEND_LINUX'
+    displayName: 'Deploy on app backend linux (if enabled):'
     type: boolean
     default: true
 
@@ -319,3 +325,29 @@ stages:
               azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
               appName: '$(APP_BACKEND_LI)'
+
+  - ${{ if and(eq(parameters.PRODUCTION_ENABLE_DEPLOY, true), eq(parameters.DEPLOY_TO_APP_BACKEND_LINUX, true)) }}:
+    - stage: Deploy_production_appbackendlinux
+      condition: 
+        and(
+          succeeded(),
+          and (
+            eq(variables['DO_DEPLOY'], true),
+            or(
+              eq(variables['Build.SourceBranch'], 'refs/tags/latest'),
+              eq(variables['Build.Reason'], 'Manual')
+            )
+          )
+        )
+      dependsOn:
+        - Build
+        - Test
+      jobs:
+        - job: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+          steps:
+          - template: azure-templates/deploy-steps.yml
+            parameters:
+              deployType: '${{ parameters.PRODUCTION_DEPLOY_TYPE }}'
+              azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+              resourceGroupName: '$(PRODUCTION_RESOURCE_GROUP_NAME)'
+              appName: '$(APP_BACKEND_LINUX)'
