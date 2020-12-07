@@ -139,7 +139,35 @@ describe("PagoPaController#getUser", () => {
     );
 
     const response = await pagoPAController.getUser(req);
+    expect(mockGetPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUserResponse
+    });
+  });
+
+  it("should return a successful response with cached notice email", async () => {
+    const req = mockReq();
+
+    mockGetPagoPaNoticeEmail.mockImplementationOnce(() =>
+      Promise.resolve(right(aCustomEmailAddress))
+    );
+
+    // tslint:disable-next-line: no-object-mutation
+    req.user = mockedUser;
+
+    const apiClient = new ApiClientFactory("", "");
+    const profileService = new ProfileService(apiClient);
+    const pagoPAController = new PagoPAController(
+      profileService,
+      redisSessionStorage
+    );
+
+    const response = await pagoPAController.getUser(req);
+    expect(mockGetProfile).not.toBeCalled();
+    expect(mockGetPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",

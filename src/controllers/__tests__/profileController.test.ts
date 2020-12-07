@@ -302,6 +302,7 @@ describe("ProfileController#upsertProfile", () => {
     const errorOrProfile = Profile.decode(req.body);
     expect(isRight(errorOrProfile)).toBeTruthy();
 
+    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
     expect(mockUpdateProfile).toHaveBeenCalledWith(
       mockedUser,
       errorOrProfile.value
