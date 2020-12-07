@@ -5,7 +5,7 @@
 /* tslint:disable:no-null-keyword */
 /* tslint:disable:no-object-mutation */
 
-import { Either, isRight, left, Left, right } from "fp-ts/lib/Either";
+import { Either, isLeft, isRight, left, Left, right } from "fp-ts/lib/Either";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
@@ -1267,5 +1267,40 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
     expect(result.isRight()).toBeTruthy();
     expect(result.value).toBe(true);
+  });
+});
+
+describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
+  it("should fail getting a notice email for an missing key", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, null);
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(isLeft(response)).toBeTruthy();
+  });
+
+  it("should fail if the value is not a valid email", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, "fake-wrong-value");
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(isLeft(response)).toBeTruthy();
+  });
+
+  it("should fail if redis get fail with an error", async () => {
+    const expectedError = new Error("Redis Error");
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(expectedError, undefined);
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(left(expectedError));
+  });
+
+  it("should return an email if exists the notice key", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, anEmailAddress);
+    });
+    const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
+    expect(response).toEqual(right(anEmailAddress));
   });
 });
