@@ -22,6 +22,7 @@ import {
   taskify,
   tryCatch
 } from "fp-ts/lib/TaskEither";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
@@ -49,6 +50,7 @@ const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
+const emailValidationPrefix = "EMAILVALIDATION-";
 export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
@@ -558,6 +560,47 @@ export default class RedisSessionStorage extends RedisStorageUtils
       );
     }
     return right(true);
+  }
+
+  public async setEmailValidationProcessPending(
+    fiscalCode: FiscalCode,
+    lockTTL: NonNegativeInteger
+  ): Promise<Either<Error, boolean>> {
+    return new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.set(
+        `${emailValidationPrefix}${fiscalCode}`,
+        "PENDING",
+        "EX",
+        lockTTL,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting email validation process")
+            )
+          )
+      );
+    });
+  }
+
+  public async isEmailValidationProcessPending(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.get(
+        `${emailValidationPrefix}${fiscalCode}`,
+        (err, value) => {
+          if (err) {
+            // Client returns an error.
+            return resolve(left<Error, boolean>(err));
+          }
+
+          return value === null
+            ? resolve(right<Error, boolean>(false))
+            : resolve(right<Error, boolean>(true));
+        }
+      );
+    });
   }
 
   /**

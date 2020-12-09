@@ -100,6 +100,8 @@ const badRequestErrorResponse = {
   type: undefined
 };
 
+const lockEmailValidationProcessTtl = 10 as NonNegativeInteger;
+
 const mockGetProfile = jest.fn();
 const mockGetApiProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
@@ -386,7 +388,10 @@ describe("ProfileController#startEmailValidationProcess", () => {
       redisSessionStorage
     );
 
-    const response = await controller.startEmailValidationProcess(req);
+    const response = await controller.startEmailValidationProcess(
+      req,
+      lockEmailValidationProcessTtl
+    );
 
     expect(mockEmailValidationProcess).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({

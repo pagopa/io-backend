@@ -12,6 +12,7 @@ import { createMockRedis } from "mock-redis-client";
 
 import { none, some } from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { RedisClient } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -1368,5 +1369,59 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
       expect.any(Function)
     );
     expect(response).toEqual(left(expectedError));
+  });
+});
+
+describe("RedisSessionStorage#isEmailValidationProcessPending", () => {
+  it("should fail getting an email validation process for an missing key", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, null);
+    });
+    const response = await sessionStorage.isEmailValidationProcessPending(
+      aValidUser.fiscal_code
+    );
+    expect(isLeft(response)).toBeTruthy();
+  });
+
+  it("should fail if redis get fail with an error", async () => {
+    const expectedError = new Error("Redis Error");
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(expectedError, undefined);
+    });
+    const response = await sessionStorage.isEmailValidationProcessPending(
+      aValidUser.fiscal_code
+    );
+    expect(response).toEqual(left(expectedError));
+  });
+
+  it("should return true if exists the email process key", async () => {
+    mockGet.mockImplementationOnce((_, callback) => {
+      callback(undefined, true);
+    });
+    const response = await sessionStorage.isEmailValidationProcessPending(
+      aValidUser.fiscal_code
+    );
+    expect(response).toEqual(right(true));
+  });
+});
+
+describe("RedisSessionStorage#setEmailValidationProcessPending", () => {
+  it("should succeded setting an email validation process key", async () => {
+    const expectedTtl = 1000 as NonNegativeInteger;
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
+      callback(undefined, "OK")
+    );
+    const response = await sessionStorage.setEmailValidationProcessPending(
+      aValidUser.fiscal_code,
+      expectedTtl
+    );
+    expect(mockSet).toBeCalledWith(
+      `EMAILVALIDATION-${aValidUser.fiscal_code}`,
+      "PENDING",
+      "EX",
+      expectedTtl,
+      expect.any(Function)
+    );
+    expect(response).toEqual(right(true));
   });
 });

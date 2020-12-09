@@ -4,6 +4,7 @@
 
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
 import {
   BPDToken,
@@ -71,4 +72,13 @@ export interface ISessionStorage {
   readonly getPagoPaNoticeEmail: (
     user: User
   ) => Promise<Either<Error, EmailString>>;
+
+  readonly setEmailValidationProcessPending: (
+    fiscalCode: FiscalCode,
+    lockTTL: NonNegativeInteger
+  ) => Promise<Either<Error, boolean>>;
+
+  readonly isEmailValidationProcessPending: (
+    fiscalCode: FiscalCode
+  ) => Promise<Either<Error, boolean>>;
 }

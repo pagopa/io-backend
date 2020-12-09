@@ -4,6 +4,14 @@
  */
 
 import * as express from "express";
+import { toError } from "fp-ts/lib/Either";
+import { identity } from "fp-ts/lib/function";
+import {
+  fromEither,
+  fromLeft,
+  taskEither,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -11,7 +19,9 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
 
@@ -19,6 +29,7 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
+import { EMAIL_VALIDATION_PROCESS_TTL } from "../config";
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
@@ -104,7 +115,57 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, async user =>
-      this.profileService.emailValidationProcess(user)
-    );
+    withUserFromRequest(req, async user => {
+      type ErrorTypes =
+        | IResponseErrorValidation
+        | IResponseErrorNotFound
+        | IResponseErrorInternal
+        | IResponseErrorTooManyRequests;
+      const startEmailValidationProcessTask = tryCatch(
+        () => this.profileService.emailValidationProcess(user),
+        () => new Error("Error starting email validation process")
+      ).foldTaskEither<ErrorTypes, IResponseSuccessAccepted>(
+        _ => fromLeft(ResponseErrorInternal(_.message)),
+        response =>
+          response.kind !== "IResponseSuccessAccepted"
+            ? fromLeft(response)
+            : taskEither.of(response)
+      );
+
+      return tryCatch(
+        () =>
+          // check if an email validation process exists in Redis
+          this.sessionStorage.isEmailValidationProcessPending(user.fiscal_code),
+        toError
+      )
+        .chain(fromEither)
+        .foldTaskEither(
+          () => startEmailValidationProcessTask,
+          isEmailValidationProcessPending =>
+            isEmailValidationProcessPending
+              ? // email validation process already requested, return 202
+                taskEither.of(ResponseSuccessAccepted())
+              : startEmailValidationProcessTask
+        )
+
+        .chain(_ =>
+          // Setting a new key-value pair on Redis for email validation process
+          tryCatch(
+            () =>
+              this.sessionStorage.setEmailValidationProcessPending(
+                user.fiscal_code,
+                EMAIL_VALIDATION_PROCESS_TTL
+              ),
+            toError
+          )
+            .chain(fromEither)
+            .foldTaskEither(
+              // either on error or success case returns response from emailValidationProcess
+              () => taskEither.of(_),
+              () => taskEither.of(_)
+            )
+        )
+        .fold<ErrorTypes | IResponseSuccessAccepted>(identity, identity)
+        .run();
+    });
 }
