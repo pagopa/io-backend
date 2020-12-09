@@ -596,7 +596,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
           }
 
           return value === null
-            ? resolve(right<Error, boolean>(false))
+            ? resolve(
+                left<Error, boolean>(
+                  new Error("Email validation process value not found")
+                )
+              )
             : resolve(right<Error, boolean>(true));
         }
       );

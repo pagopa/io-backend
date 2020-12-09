@@ -388,10 +388,7 @@ describe("ProfileController#startEmailValidationProcess", () => {
       redisSessionStorage
     );
 
-    const response = await controller.startEmailValidationProcess(
-      req,
-      lockEmailValidationProcessTtl
-    );
+    const response = await controller.startEmailValidationProcess(req);
 
     expect(mockEmailValidationProcess).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({

@@ -141,11 +141,9 @@ export default class ProfileController {
         .chain(fromEither)
         .foldTaskEither(
           () => startEmailValidationProcessTask,
-          isEmailValidationProcessPending =>
-            isEmailValidationProcessPending
-              ? // email validation process already requested, return 202
-                taskEither.of(ResponseSuccessAccepted())
-              : startEmailValidationProcessTask
+          () =>
+            // email validation process already requested, return 202
+            taskEither.of(ResponseSuccessAccepted())
         )
 
         .chain(_ =>

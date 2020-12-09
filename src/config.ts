@@ -424,7 +424,7 @@ log.info(
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
 
-export const EMAIL_VALIDATION_PROCESS_TTL: NonNegativeInteger = NonNegativeInteger.decode(
+export const EMAIL_VALIDATION_PROCESS_TTL: NonNegativeInteger = IntegerFromString.decode(
   process.env.EMAIL_VALIDATION_PROCESS_TTL
 ).getOrElseL(errs => {
   log.error(
@@ -433,4 +433,4 @@ export const EMAIL_VALIDATION_PROCESS_TTL: NonNegativeInteger = NonNegativeInteg
     )}`
   );
   return process.exit(1);
-});
+}) as NonNegativeInteger;
