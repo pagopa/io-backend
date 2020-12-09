@@ -6,8 +6,7 @@ import * as express from "express";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
-  IResponseSuccessJson,
-  ResponseSuccessJson
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
 import { Installation } from "../../generated/backend/Installation";
@@ -21,7 +20,6 @@ import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
 import NotificationService from "../services/notificationService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
-import { log } from "../utils/logger";
 import {
   withCatchAsInternalError,
   withValidatedOrValidationError
@@ -84,25 +82,28 @@ export default class NotificationController {
 
   public async createOrUpdateInstallation(
     req: express.Request
-  ): Promise<IResponseErrorValidation | IResponseSuccessJson<SuccessResponse>> {
-    return withUserFromRequest(req, async user =>
-      withValidatedOrValidationError(InstallationID.decode(req.params.id), _ =>
-        withValidatedOrValidationError(
-          Installation.decode(req.body),
-          installation => {
-            // async fire & forget
-            this.notificationService
-              .createOrUpdateInstallation(user.fiscal_code, installation)
-              .catch(err => {
-                log.error(
-                  "Cannot create installation: %s",
-                  JSON.stringify(err)
-                );
-              });
-            return ResponseSuccessJson({ message: "ok" });
-          }
-        )
-      )
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseSuccessJson<SuccessResponse>
+  > {
+    return withCatchAsInternalError(
+      () =>
+        withUserFromRequest(req, async user =>
+          withValidatedOrValidationError(
+            InstallationID.decode(req.params.id),
+            _ =>
+              withValidatedOrValidationError(
+                Installation.decode(req.body),
+                installation =>
+                  this.notificationService.createOrUpdateInstallation(
+                    user.fiscal_code,
+                    installation
+                  )
+              )
+          )
+        ),
+      "Error upserting installation"
     );
   }
 }

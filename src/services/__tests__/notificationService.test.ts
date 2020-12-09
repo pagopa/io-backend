@@ -127,16 +127,9 @@ describe("NotificationService#createOrUpdateInstallation", () => {
 
     const service = new NotificationService("", "");
 
-    const res = await service.createOrUpdateInstallation(
-      aFiscalCode,
-      anAppleDevice
-    );
+    const res = service.createOrUpdateInstallation(aFiscalCode, anAppleDevice);
 
-    expect(res).toEqual({
-      apply: expect.any(Function),
-      detail: expect.anything(),
-      kind: "IResponseErrorInternal"
-    });
+    await expect(res).rejects.toEqual(genericError);
     expect(mockSendMessage).toBeCalledWith(
       base64EncodeObject(anAppleInstallation)
     );
