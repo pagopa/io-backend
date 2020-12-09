@@ -35,10 +35,7 @@ import {
   setFetchTimeout,
   toFetch
 } from "italia-ts-commons/lib/fetch";
-import {
-  IntegerFromString,
-  NonNegativeInteger
-} from "italia-ts-commons/lib/numbers";
+import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
@@ -424,13 +421,11 @@ log.info(
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
 
-export const EMAIL_VALIDATION_PROCESS_TTL: NonNegativeInteger = IntegerFromString.decode(
-  process.env.EMAIL_VALIDATION_PROCESS_TTL
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid EMAIL_VALIDATION_PROCESS_TTL environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-}) as NonNegativeInteger;
+const DEFAULT_EMAIL_VALIDATION_PROCESS_TTL_S = 3600 as Second;
+export const EMAIL_VALIDATION_PROCESS_TTL_S: Second = IntegerFromString.decode(
+  process.env.EMAIL_VALIDATION_PROCESS_TTL_S
+).getOrElse(DEFAULT_EMAIL_VALIDATION_PROCESS_TTL_S) as Second;
+log.info(
+  "Email Validation process TTL set to %s seconds",
+  EMAIL_VALIDATION_PROCESS_TTL_S
+);

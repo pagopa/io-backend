@@ -7,6 +7,7 @@ import {
   appConfig,
   BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
+  EMAIL_VALIDATION_PROCESS_TTL_S,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
   FF_BONUS_ENABLED,
@@ -65,6 +66,7 @@ import * as appInsights from "applicationinsights";
 import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { Second } from "italia-ts-commons/lib/units";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
@@ -357,6 +359,7 @@ export function newApp({
         USER_METADATA_STORAGE,
         USER_DATA_PROCESSING_SERVICE,
         TOKEN_SERVICE,
+        EMAIL_VALIDATION_PROCESS_TTL_S,
         authMiddlewares.bearerSession
       );
       registerSessionAPIRoutes(
@@ -546,12 +549,14 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
   tokenService: TokenService,
+  emailValidationProcessTTLSeconds: Second,
   // tslint:disable-next-line: no-any
   bearerSessionTokenAuth: any
 ): void {
   const profileController: ProfileController = new ProfileController(
     profileService,
-    sessionStorage
+    sessionStorage,
+    emailValidationProcessTTLSeconds
   );
 
   const messagesController: MessagesController = new MessagesController(

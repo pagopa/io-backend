@@ -10,7 +10,8 @@ import {
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
 
-import { isRight, right } from "fp-ts/lib/Either";
+import { isRight, left, right } from "fp-ts/lib/Either";
+import { Second } from "italia-ts-commons/lib/units";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -100,7 +101,7 @@ const badRequestErrorResponse = {
   type: undefined
 };
 
-const lockEmailValidationProcessTtl = 10 as NonNegativeInteger;
+const lockEmailValidationProcessTtl = 10 as Second;
 
 const mockGetProfile = jest.fn();
 const mockGetApiProfile = jest.fn();
@@ -121,10 +122,22 @@ const mockDelPagoPaNoticeEmail = jest
   .fn()
   .mockImplementation(_ => Promise.resolve(right<Error, boolean>(true)));
 
+const mockGetEmailValidationProcess = jest
+  .fn()
+  .mockImplementation(_ =>
+    Promise.resolve(left<Error, boolean>(new Error("Missing key")))
+  );
+
+const mockSetEmailValidationProcess = jest
+  .fn()
+  .mockImplementation((_, __) => Promise.resolve(right<Error, boolean>(true)));
+
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail
+      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail,
+      getEmailValidationProcessPending: mockGetEmailValidationProcess,
+      setEmailValidationProcessPending: mockSetEmailValidationProcess
     }))
   };
 });
@@ -155,7 +168,8 @@ describe("ProfileController#getProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.getProfile(req);
@@ -182,7 +196,8 @@ describe("ProfileController#getProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.getProfile(req);
@@ -207,7 +222,8 @@ describe("ProfileController#getProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.getProfile(req);
@@ -239,7 +255,8 @@ describe("ProfileController#getApiProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
     const response = await controller.getApiProfile(req);
 
@@ -265,7 +282,8 @@ describe("ProfileController#getApiProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.getApiProfile(req);
@@ -296,7 +314,8 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.updateProfile(req);
@@ -331,7 +350,8 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.updateProfile(req);
@@ -356,7 +376,8 @@ describe("ProfileController#upsertProfile", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.updateProfile(req);
@@ -385,7 +406,8 @@ describe("ProfileController#startEmailValidationProcess", () => {
     const profileService = new ProfileService(apiClient);
     const controller = new ProfileController(
       profileService,
-      redisSessionStorage
+      redisSessionStorage,
+      lockEmailValidationProcessTtl
     );
 
     const response = await controller.startEmailValidationProcess(req);

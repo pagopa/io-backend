@@ -22,9 +22,9 @@ import {
   taskify,
   tryCatch
 } from "fp-ts/lib/TaskEither";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
+import { Second } from "italia-ts-commons/lib/units";
 import * as redis from "redis";
 import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -564,7 +564,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   public async setEmailValidationProcessPending(
     fiscalCode: FiscalCode,
-    lockTTL: NonNegativeInteger
+    lockTTL: Second
   ): Promise<Either<Error, boolean>> {
     return new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.set(
@@ -583,7 +583,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     });
   }
 
-  public async isEmailValidationProcessPending(
+  public async getEmailValidationProcessPending(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
     return new Promise<Either<Error, boolean>>(resolve => {

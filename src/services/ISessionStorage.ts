@@ -4,8 +4,8 @@
 
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
+import { Second } from "italia-ts-commons/lib/units";
 import {
   BPDToken,
   MyPortalToken,
@@ -75,10 +75,10 @@ export interface ISessionStorage {
 
   readonly setEmailValidationProcessPending: (
     fiscalCode: FiscalCode,
-    lockTTL: NonNegativeInteger
+    lockTTL: Second
   ) => Promise<Either<Error, boolean>>;
 
-  readonly isEmailValidationProcessPending: (
+  readonly getEmailValidationProcessPending: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 }

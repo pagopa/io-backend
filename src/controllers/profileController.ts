@@ -23,13 +23,13 @@ import {
   ResponseErrorInternal,
   ResponseSuccessAccepted
 } from "italia-ts-commons/lib/responses";
+import { Second } from "italia-ts-commons/lib/units";
 import { ISessionStorage } from "src/services/ISessionStorage";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
-import { EMAIL_VALIDATION_PROCESS_TTL } from "../config";
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
@@ -38,7 +38,8 @@ import { withValidatedOrValidationError } from "../utils/responses";
 export default class ProfileController {
   constructor(
     private readonly profileService: ProfileService,
-    private readonly sessionStorage: ISessionStorage
+    private readonly sessionStorage: ISessionStorage,
+    private readonly emailValidationProcessTtl: Second
   ) {}
 
   /**
@@ -135,7 +136,9 @@ export default class ProfileController {
       return tryCatch(
         () =>
           // check if an email validation process exists in Redis
-          this.sessionStorage.isEmailValidationProcessPending(user.fiscal_code),
+          this.sessionStorage.getEmailValidationProcessPending(
+            user.fiscal_code
+          ),
         toError
       )
         .chain(fromEither)
@@ -152,7 +155,7 @@ export default class ProfileController {
             () =>
               this.sessionStorage.setEmailValidationProcessPending(
                 user.fiscal_code,
-                EMAIL_VALIDATION_PROCESS_TTL
+                this.emailValidationProcessTtl
               ),
             toError
           )

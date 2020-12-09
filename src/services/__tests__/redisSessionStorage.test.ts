@@ -12,8 +12,8 @@ import { createMockRedis } from "mock-redis-client";
 
 import { none, some } from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { Second } from "italia-ts-commons/lib/units";
 import { RedisClient } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -1372,12 +1372,12 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
   });
 });
 
-describe("RedisSessionStorage#isEmailValidationProcessPending", () => {
+describe("RedisSessionStorage#getEmailValidationProcessPending", () => {
   it("should fail getting an email validation process for an missing key", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, null);
     });
-    const response = await sessionStorage.isEmailValidationProcessPending(
+    const response = await sessionStorage.getEmailValidationProcessPending(
       aValidUser.fiscal_code
     );
     expect(isLeft(response)).toBeTruthy();
@@ -1388,7 +1388,7 @@ describe("RedisSessionStorage#isEmailValidationProcessPending", () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(expectedError, undefined);
     });
-    const response = await sessionStorage.isEmailValidationProcessPending(
+    const response = await sessionStorage.getEmailValidationProcessPending(
       aValidUser.fiscal_code
     );
     expect(response).toEqual(left(expectedError));
@@ -1398,7 +1398,7 @@ describe("RedisSessionStorage#isEmailValidationProcessPending", () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, true);
     });
-    const response = await sessionStorage.isEmailValidationProcessPending(
+    const response = await sessionStorage.getEmailValidationProcessPending(
       aValidUser.fiscal_code
     );
     expect(response).toEqual(right(true));
@@ -1407,7 +1407,7 @@ describe("RedisSessionStorage#isEmailValidationProcessPending", () => {
 
 describe("RedisSessionStorage#setEmailValidationProcessPending", () => {
   it("should succeded setting an email validation process key", async () => {
-    const expectedTtl = 1000 as NonNegativeInteger;
+    const expectedTtl = 1000 as Second;
     mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
       callback(undefined, "OK")
     );
