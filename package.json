@@ -83,7 +83,6 @@
     "range_check": "^1.4.0",
     "redis": "^2.8.0",
     "redis-clustr": "^1.6.0",
-    "request-ip": "^2.1.1",
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.0.0",

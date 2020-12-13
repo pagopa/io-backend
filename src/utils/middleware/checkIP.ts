@@ -6,7 +6,6 @@ import * as express from "express";
 import { isLeft } from "fp-ts/lib/Either";
 import { CIDR, IPString } from "italia-ts-commons/lib/strings";
 import * as rangeCheck from "range_check";
-import * as requestIp from "request-ip";
 import { log } from "../logger";
 
 export default function checkIP(
@@ -21,8 +20,10 @@ export default function checkIP(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    const clientIp = requestIp.getClientIp(req);
-    const errorOrIPString = IPString.decode(clientIp);
+    // when the boolean flag "trust proxy" is enabled
+    // express takes this from the leftmost value
+    // contained in the x-forwarded-for header
+    const errorOrIPString = IPString.decode(req.ip);
 
     if (isLeft(errorOrIPString)) {
       log.error(`Bad request: ${errorOrIPString.value}.`);

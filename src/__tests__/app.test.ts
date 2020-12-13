@@ -123,7 +123,8 @@ describe("Success app start", () => {
         .post("/api/v1/notify?token=12345")
         .send(aValidNotification)
         .set(X_FORWARDED_PROTO_HEADER, "https")
-        .set("X-Client-Ip", "192.168.1.2")
+        .set("X-Client-Ip", "1.1.1.1")
+        .set("X-Forwarded-For", "192.168.1.2")
         .expect(200);
     });
 
