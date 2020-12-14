@@ -8,7 +8,10 @@ import { fromNullable, isSome } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { agent } from "italia-ts-commons";
 
-import { getNodeEnvironmentFromProcessEnv } from "italia-ts-commons/lib/environment";
+import {
+  getNodeEnvironmentFromProcessEnv,
+  NodeEnvironmentEnum
+} from "italia-ts-commons/lib/environment";
 import {
   errorsToReadableMessages,
   readableReport
@@ -137,8 +140,15 @@ export const CLIENT_REDIRECTION_URL =
 const SPID_LEVEL_WHITELIST = fromNullable(process.env.SPID_LEVEL_WHITELIST)
   .map(_ => _.split(","))
   .foldL(
-    // If SPID_LEVEL_WHITELIST is unset, all the spid levels are enabled
-    () => right<t.Errors, SpidLevelArray>(["SpidL1", "SpidL2", "SpidL3"]),
+    // SPID_LEVEL_WHITELIST is unset
+    () => {
+      if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
+        // default config for development, all the spid levels are allowed
+        return right<t.Errors, SpidLevelArray>(["SpidL1", "SpidL2", "SpidL3"]);
+      }
+      // default config for production, only L2 and L3 are allowed
+      return right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
+    },
     _ => SpidLevelArray.decode(_)
   )
   .getOrElseL(err => {
