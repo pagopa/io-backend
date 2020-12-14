@@ -3,8 +3,9 @@
  */
 
 import * as dotenv from "dotenv";
-import { parseJSON, toError } from "fp-ts/lib/Either";
+import { parseJSON, right, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
+import * as t from "io-ts";
 import { agent } from "italia-ts-commons";
 
 import { getNodeEnvironmentFromProcessEnv } from "italia-ts-commons/lib/environment";
@@ -40,6 +41,7 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
 import { STRINGS_RECORD } from "./types/commons";
+import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 
 // Without this, the environment variables loaded by dotenv aren't available in
@@ -132,6 +134,21 @@ export const CLIENT_ERROR_REDIRECTION_URL =
 export const CLIENT_REDIRECTION_URL =
   process.env.CLIENT_REDIRECTION_URL || "/login";
 
+const SPID_LEVEL_WHITELIST = fromNullable(process.env.SPID_LEVEL_WHITELIST)
+  .map(_ => _.split(","))
+  .foldL(
+    // If SPID_LEVEL_WHITELIST is unset, all the spid levels are enabled
+    () => right<t.Errors, SpidLevelArray>(["SpidL1", "SpidL2", "SpidL3"]),
+    _ => SpidLevelArray.decode(_)
+  )
+  .getOrElseL(err => {
+    log.error(
+      "Invalid value for SPID_LEVEL_WHITELIST env [%s]",
+      readableReport(err)
+    );
+    return process.exit(1);
+  });
+
 export const appConfig: IApplicationConfig = {
   assertionConsumerServicePath: "/assertionConsumerService",
   clientErrorRedirectionUrl: CLIENT_ERROR_REDIRECTION_URL,
@@ -139,6 +156,7 @@ export const appConfig: IApplicationConfig = {
   loginPath: "/login",
   metadataPath: "/metadata",
   sloPath: "/slo",
+  spidLevelsWhitelist: SPID_LEVEL_WHITELIST,
   startupIdpsMetadata: STARTUP_IDPS_METADATA
 };
 

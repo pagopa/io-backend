@@ -4,6 +4,8 @@
  * @see http://www.agid.gov.it/agenda-digitale/infrastrutture-architetture/spid/percorso-attuazione
  */
 
+import { SPID_LEVELS } from "@pagopa/io-spid-commons/dist/config";
+import * as t from "io-ts";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
 type SpidLevel1 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL1"];
@@ -26,3 +28,6 @@ function isSpidL3(uri: string): uri is SpidLevel3 {
 export function isSpidL(uri: string): uri is SpidLevel {
   return isSpidL1(uri) || isSpidL2(uri) || isSpidL3(uri);
 }
+
+export const SpidLevelArray = t.readonlyArray(t.keyof(SPID_LEVELS));
+export type SpidLevelArray = t.TypeOf<typeof SpidLevelArray>;
