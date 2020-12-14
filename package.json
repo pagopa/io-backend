@@ -56,7 +56,7 @@
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
-    "@pagopa/io-spid-commons": "^4.10.0",
+    "@pagopa/io-spid-commons": "^5.0.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.7.4",
     "body-parser": "^1.18.3",
