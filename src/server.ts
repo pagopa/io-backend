@@ -51,6 +51,7 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
 
 // tslint:disable-next-line: no-let
 let server: http.Server | https.Server;
+const hrStart = process.hrtime();
 
 /**
  * If APPINSIGHTS_INSTRUMENTATIONKEY env is provided initialize an App Insights Client
@@ -94,11 +95,15 @@ newApp({
       const options = { key: SAML_KEY, cert: SAML_CERT };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
+        const hrEnd = process.hrtime(hrStart);
+        log.info(`Startup time: %dms`, hrEnd[1] / 1000000);
       });
     } else {
       log.info("Starting HTTP server on port %d", SERVER_PORT);
       server = http.createServer(app).listen(SERVER_PORT, () => {
         log.info("Listening on port %d", SERVER_PORT);
+        const hrEnd = process.hrtime(hrStart);
+        log.info(`Startup time: %dms`, hrEnd[1] / 1000000);
       });
     }
     server.on("close", () => {

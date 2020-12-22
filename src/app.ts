@@ -271,6 +271,9 @@ export function newApp({
 
   app.use(passport.initialize());
 
+  // tslint:disable-next-line: no-let readonly-array
+  let hrStart: [number, number];
+
   //
   // Setup routes
   //
@@ -406,6 +409,7 @@ export function newApp({
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
+      hrStart = process.hrtime();
       return tryCatch(
         () =>
           withSpid({
@@ -433,6 +437,8 @@ export function newApp({
       );
     })
     .map(_ => {
+      const hrEnd = process.hrtime(hrStart);
+      log.info(`Spid init time: %dms`, hrEnd[1] / 1000000);
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
         () =>
