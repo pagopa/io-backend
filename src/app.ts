@@ -100,6 +100,7 @@ import {
   createSimpleRedisClient
 } from "./utils/redis";
 import { makeSpidLogCallback } from "./utils/spid";
+import { TimeTracer } from "./utils/timer";
 
 const defaultModule = {
   newApp
@@ -271,9 +272,6 @@ export function newApp({
 
   app.use(passport.initialize());
 
-  // tslint:disable-next-line: no-let readonly-array
-  let hrStart: [number, number];
-
   //
   // Setup routes
   //
@@ -409,7 +407,7 @@ export function newApp({
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
-      hrStart = process.hrtime();
+      const timer = TimeTracer();
       return tryCatch(
         () =>
           withSpid({
@@ -434,11 +432,13 @@ export function newApp({
             serviceProviderConfig
           }).run(),
         err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
-      );
+      ).map(withSpidApp => ({ ...withSpidApp, timer }));
     })
     .map(_ => {
-      const hrEnd = process.hrtime(hrStart);
-      log.info(`Spid init time: %dms`, hrEnd[1] / 1000000);
+      log.info(
+        `Spid init time: %sms`,
+        _.timer.getElapsedMilliseconds().toString()
+      );
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
         () =>
