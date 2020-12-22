@@ -407,6 +407,8 @@ export function newApp({
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
+      // no-unused-variable bug, linter rule disabled manually
+      // tslint:disable-next-line: no-unused-variable
       const timer = TimeTracer();
       return tryCatch(
         () =>
