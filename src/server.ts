@@ -25,7 +25,11 @@ import {
   SAML_KEY,
   SERVER_PORT
 } from "./config";
-import { initAppInsights } from "./utils/appinsights";
+import {
+  initAppInsights,
+  StartupEventName,
+  trackStartupTime
+} from "./utils/appinsights";
 
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
@@ -89,6 +93,7 @@ newApp({
   env: ENV
 })
   .then(app => {
+    const startupTimeMs = timer.getElapsedMilliseconds();
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
@@ -96,18 +101,18 @@ newApp({
       const options = { key: SAML_KEY, cert: SAML_CERT };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
-        log.info(
-          `Startup time: %sms`,
-          timer.getElapsedMilliseconds().toString()
+        log.info(`Startup time: %sms`, startupTimeMs.toString());
+        maybeAppInsightsClient.map(_ =>
+          trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
         );
       });
     } else {
       log.info("Starting HTTP server on port %d", SERVER_PORT);
       server = http.createServer(app).listen(SERVER_PORT, () => {
         log.info("Listening on port %d", SERVER_PORT);
-        log.info(
-          `Startup time: %sms`,
-          timer.getElapsedMilliseconds().toString()
+        log.info(`Startup time: %sms`, startupTimeMs.toString());
+        maybeAppInsightsClient.map(_ =>
+          trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
         );
       });
     }

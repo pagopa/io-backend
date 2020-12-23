@@ -87,7 +87,11 @@ import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy"
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
-import { attachTrackingData } from "./utils/appinsights";
+import {
+  attachTrackingData,
+  StartupEventName,
+  trackStartupTime
+} from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
@@ -438,6 +442,13 @@ export function newApp({
       }));
     })
     .map(_ => {
+      if (appInsightsClient) {
+        trackStartupTime(
+          appInsightsClient,
+          StartupEventName.SPID,
+          _.spidConfigTime
+        );
+      }
       log.info(`Spid init time: %sms`, _.spidConfigTime.toString());
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
