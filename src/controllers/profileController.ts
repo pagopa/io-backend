@@ -14,6 +14,7 @@ import {
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
+import { toExpressHandler } from "../utils/express";
 
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
@@ -24,11 +25,45 @@ import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
-export default class ProfileController {
+import { IBackendController } from "./IBackendController";
+
+export default class ProfileController implements IBackendController {
   constructor(
     private readonly profileService: ProfileService,
     private readonly sessionStorage: ISessionStorage
   ) {}
+
+  public setupRouting(
+    app: express.Express,
+    basePath: string,
+    ...middlewares: any
+  ): void {
+    app.get(
+      `${basePath}/profile`,
+      middlewares,
+      toExpressHandler(this.getProfile, this)
+    );
+
+    app.get(
+      `${basePath}/api-profile`,
+      middlewares,
+      toExpressHandler(this.getApiProfile, this)
+    );
+
+    app.post(
+      `${basePath}/profile`,
+      middlewares,
+      toExpressHandler(this.updateProfile, this)
+    );
+
+    app.post(
+      `${basePath}/email-validation-process`,
+      middlewares,
+      toExpressHandler(this.startEmailValidationProcess, this)
+    );
+
+    console.log("CI SONO");
+  }
 
   /**
    * Returns the profile for the user identified by the provided fiscal

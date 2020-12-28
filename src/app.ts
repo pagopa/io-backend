@@ -592,32 +592,7 @@ function registerAPIRoutes(
     tokenService
   );
 
-  app.get(
-    `${basePath}/profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.getProfile, profileController)
-  );
-
-  app.get(
-    `${basePath}/api-profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.getApiProfile, profileController)
-  );
-
-  app.post(
-    `${basePath}/profile`,
-    bearerSessionTokenAuth,
-    toExpressHandler(profileController.updateProfile, profileController)
-  );
-
-  app.post(
-    `${basePath}/email-validation-process`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      profileController.startEmailValidationProcess,
-      profileController
-    )
-  );
+  profileController.setupRouting(app, basePath, bearerSessionTokenAuth);
 
   app.get(
     `${basePath}/user-metadata`,
