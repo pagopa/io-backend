@@ -34,6 +34,7 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import { rights } from "fp-ts/lib/Array";
+import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import {
   AbortableFetch,
   setFetchTimeout,
@@ -46,7 +47,6 @@ import { Millisecond, Second } from "italia-ts-commons/lib/units";
 import { STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.

@@ -91,6 +91,7 @@ import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
+import { dueDateMiddleware } from "./utils/middleware/dueDate";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
@@ -101,7 +102,6 @@ import {
   createSimpleRedisClient
 } from "./utils/redis";
 import { makeSpidLogCallback } from "./utils/spid";
-import { dueDateMiddleware } from "./utils/middleware/dueDate";
 
 const defaultModule = {
   newApp
