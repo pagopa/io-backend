@@ -6,6 +6,7 @@ import {
   API_CLIENT,
   appConfig,
   BONUS_API_CLIENT,
+  BONUS_REQUEST_LIMIT_DATE,
   CACHE_MAX_AGE_SECONDS,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
@@ -90,6 +91,7 @@ import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { toExpressHandler } from "./utils/express";
+import { dueDateMiddleware } from "./utils/middleware/dueDate";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
@@ -372,7 +374,8 @@ export function newApp({
           app,
           BonusAPIBasePath,
           BONUS_SERVICE,
-          authMiddlewares.bearerSession
+          authMiddlewares.bearerSession,
+          BONUS_REQUEST_LIMIT_DATE
         );
       }
       registerPagoPARoutes(
@@ -790,12 +793,14 @@ function registerBonusAPIRoutes(
   basePath: string,
   bonusService: BonusService,
   // tslint:disable-next-line: no-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: any,
+  requestLimitDate: Date
 ): void {
   const bonusController: BonusController = new BonusController(bonusService);
 
   app.post(
     `${basePath}/bonus/vacanze/eligibility`,
+    dueDateMiddleware(requestLimitDate),
     bearerSessionTokenAuth,
     toExpressHandler(
       bonusController.startBonusEligibilityCheck,
@@ -826,6 +831,7 @@ function registerBonusAPIRoutes(
 
   app.post(
     `${basePath}/bonus/vacanze/activations`,
+    dueDateMiddleware(requestLimitDate),
     bearerSessionTokenAuth,
     toExpressHandler(
       bonusController.startBonusActivationProcedure,
