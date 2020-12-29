@@ -4,6 +4,8 @@
  */
 
 import * as express from "express";
+import { ParamsDictionary, RequestHandler } from "express-serve-static-core";
+
 import {
   IResponseErrorConflict,
   IResponseErrorInternal,
@@ -33,32 +35,35 @@ export default class ProfileController implements IBackendController {
     private readonly sessionStorage: ISessionStorage
   ) {}
 
-  public setupRouting(
+  // tslint:disable-next-line: no-any
+  public setupRouting<ResBody = any, ReqBody = any>(
     app: express.Express,
     basePath: string,
-    ...middlewares: any
+    ...handlers: ReadonlyArray<
+      RequestHandler<ParamsDictionary, ResBody, ReqBody>
+    >
   ): void {
     app.get(
       `${basePath}/profile`,
-      middlewares,
+      ...handlers,
       toExpressHandler(this.getProfile, this)
     );
 
     app.get(
       `${basePath}/api-profile`,
-      middlewares,
+      ...handlers,
       toExpressHandler(this.getApiProfile, this)
     );
 
     app.post(
       `${basePath}/profile`,
-      middlewares,
+      ...handlers,
       toExpressHandler(this.updateProfile, this)
     );
 
     app.post(
       `${basePath}/email-validation-process`,
-      middlewares,
+      ...handlers,
       toExpressHandler(this.startEmailValidationProcess, this)
     );
   }
