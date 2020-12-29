@@ -61,8 +61,6 @@ export default class ProfileController implements IBackendController {
       middlewares,
       toExpressHandler(this.startEmailValidationProcess, this)
     );
-
-    console.log("CI SONO");
   }
 
   /**
