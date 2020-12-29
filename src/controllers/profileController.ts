@@ -34,6 +34,12 @@ export default class ProfileController implements IBackendController {
     private readonly sessionStorage: ISessionStorage
   ) {}
 
+  /**
+   * Method used for setting up routing for Controller
+   * @param app The Express app
+   * @param basePath The base path of the api. NOTE: Do not include trailing slash
+   * @param handlers A list of middlewares to be called before the Controller's functions
+   */
   public setupRouting<ResBody = unknown, ReqBody = unknown>(
     app: express.Express,
     basePath: string,
