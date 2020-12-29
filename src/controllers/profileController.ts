@@ -26,7 +26,6 @@ import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
-
 import { IBackendController } from "./IBackendController";
 
 export default class ProfileController implements IBackendController {
@@ -35,8 +34,7 @@ export default class ProfileController implements IBackendController {
     private readonly sessionStorage: ISessionStorage
   ) {}
 
-  // tslint:disable-next-line: no-any
-  public setupRouting<ResBody = any, ReqBody = any>(
+  public setupRouting<ResBody = unknown, ReqBody = unknown>(
     app: express.Express,
     basePath: string,
     ...handlers: ReadonlyArray<
