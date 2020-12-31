@@ -36,9 +36,7 @@ export function toExpressHandlerWithUser<T, P>(
 ): (req: express.Request, res: express.Response) => void {
   return (req, res) =>
     withUserFromRequest(req, user => handler.call(object, user, req))
-      .catch(err => {
-        return ResponseErrorInternal(err);
-      })
+      .catch(ResponseErrorInternal)
       .then(response => {
         // tslint:disable-next-line:no-object-mutation
         res.locals.detail = response.detail;

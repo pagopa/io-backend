@@ -141,13 +141,9 @@ describe("ProfileController#getProfile", () => {
   });
 
   it("calls the getProfile on the ProfileService with valid values", async () => {
-    const req = mockReq();
-
     mockGetProfile.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
-
-    req.user = mockedUser;
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const profileService = new ProfileService(apiClient);
@@ -156,7 +152,7 @@ describe("ProfileController#getProfile", () => {
       redisSessionStorage
     );
 
-    const response = await controller.getProfile(req);
+    const response = await controller.getProfile(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
@@ -164,31 +160,6 @@ describe("ProfileController#getProfile", () => {
       kind: "IResponseSuccessJson",
       value: proxyUserResponse
     });
-  });
-
-  it("calls the getProfile on the ProfileService with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
-    );
-
-    req.user = "";
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.getProfile(req);
-    response.apply(res);
-
-    // getProfile is not called
-    expect(mockGetProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 
   it("should return an ResponseErrorInternal if no profile was found", async () => {
@@ -208,7 +179,7 @@ describe("ProfileController#getProfile", () => {
       redisSessionStorage
     );
 
-    const response = await controller.getProfile(req);
+    const response = await controller.getProfile(mockedUser);
     response.apply(res);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -239,7 +210,7 @@ describe("ProfileController#getApiProfile", () => {
       profileService,
       redisSessionStorage
     );
-    const response = await controller.getApiProfile(req);
+    const response = await controller.getApiProfile(mockedUser);
 
     expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
@@ -247,31 +218,6 @@ describe("ProfileController#getApiProfile", () => {
       kind: "IResponseSuccessJson",
       value: apiUserProfileResponse
     });
-  });
-
-  it("calls the getApiProfile on the ProfileService with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetApiProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
-    );
-
-    req.user = "";
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.getApiProfile(req);
-    response.apply(res);
-
-    // getApiProfile is not called
-    expect(mockGetApiProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
 
@@ -297,7 +243,7 @@ describe("ProfileController#upsertProfile", () => {
       redisSessionStorage
     );
 
-    const response = await controller.updateProfile(req);
+    const response = await controller.updateProfile(mockedUser, req);
 
     const errorOrProfile = Profile.decode(req.body);
     expect(isRight(errorOrProfile)).toBeTruthy();
@@ -314,31 +260,6 @@ describe("ProfileController#upsertProfile", () => {
     });
   });
 
-  it("calls the upsertProfile on the ProfileService with empty user and valid upsert user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockUpdateProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyUserResponse))
-    );
-
-    req.user = "";
-    req.body = mockedUpsertProfile;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.updateProfile(req);
-    response.apply(res);
-
-    expect(mockUpdateProfile).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-
   it("calls the upsertProfile on the ProfileService with valid user and empty upsert profile", async () => {
     const req = mockReq();
     const res = mockRes();
@@ -347,7 +268,6 @@ describe("ProfileController#upsertProfile", () => {
       Promise.resolve(ResponseSuccessJson(proxyUserResponse))
     );
 
-    req.user = mockedUser;
     req.body = "";
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
@@ -357,7 +277,7 @@ describe("ProfileController#upsertProfile", () => {
       redisSessionStorage
     );
 
-    const response = await controller.updateProfile(req);
+    const response = await controller.updateProfile(mockedUser, req);
     response.apply(res);
 
     expect(mockUpdateProfile).not.toBeCalled();
@@ -386,7 +306,7 @@ describe("ProfileController#startEmailValidationProcess", () => {
       redisSessionStorage
     );
 
-    const response = await controller.startEmailValidationProcess(req);
+    const response = await controller.startEmailValidationProcess(mockedUser);
 
     expect(mockEmailValidationProcess).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
