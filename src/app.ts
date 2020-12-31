@@ -90,7 +90,7 @@ import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
 import { attachTrackingData } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
-import { toExpressHandler } from "./utils/express";
+import { toExpressHandler, toExpressHandlerWithUser } from "./utils/express";
 import { dueDateMiddleware } from "./utils/middleware/dueDate";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
@@ -598,25 +598,25 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
-    toExpressHandler(profileController.getProfile, profileController)
+    toExpressHandlerWithUser(profileController.getProfile, profileController)
   );
 
   app.get(
     `${basePath}/api-profile`,
     bearerSessionTokenAuth,
-    toExpressHandler(profileController.getApiProfile, profileController)
+    toExpressHandlerWithUser(profileController.getApiProfile, profileController)
   );
 
   app.post(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
-    toExpressHandler(profileController.updateProfile, profileController)
+    toExpressHandlerWithUser(profileController.updateProfile, profileController)
   );
 
   app.post(
     `${basePath}/email-validation-process`,
     bearerSessionTokenAuth,
-    toExpressHandler(
+    toExpressHandlerWithUser(
       profileController.startEmailValidationProcess,
       profileController
     )

@@ -21,7 +21,7 @@ import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/Ex
 
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";
-import { withUserFromRequest } from "../types/user";
+import { User } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class ProfileController {
@@ -34,43 +34,39 @@ export default class ProfileController {
    * Returns the profile for the user identified by the provided fiscal
    * code.
    */
-  public readonly getProfile = (
-    req: express.Request
+  public readonly getProfile = async (
+    user: User
   ): Promise<
-    // tslint:disable-next-line:max-union-size
-    | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
-  > =>
-    withUserFromRequest(req, async user => {
-      const response = await this.profileService.getProfile(user);
-      return response.kind === "IResponseErrorNotFound"
-        ? profileMissingErrorResponse
-        : response;
-    });
+  > => {
+    const response = await this.profileService.getProfile(user);
+    return response.kind === "IResponseErrorNotFound"
+      ? profileMissingErrorResponse
+      : response;
+  };
 
   /**
    * Returns the profile for the user identified by the provided fiscal
    * code stored into the API.
    */
   public readonly getApiProfile = (
-    req: express.Request
+    user: User
   ): Promise<
     // tslint:disable-next-line:max-union-size
-    | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<ExtendedProfileApi>
-  > =>
-    withUserFromRequest(req, user => this.profileService.getApiProfile(user));
+  > => this.profileService.getApiProfile(user);
 
   /**
    * Update the preferences for the user identified by the provided
    * fiscal code.
    */
-  public readonly updateProfile = (
+  public readonly updateProfile = async (
+    user: User,
     req: express.Request
   ): Promise<
     // tslint:disable-next-line:max-union-size
@@ -81,30 +77,24 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > =>
-    withUserFromRequest(req, async user =>
-      withValidatedOrValidationError(
-        Profile.decode(req.body),
-        async extendedProfile => {
-          await this.sessionStorage.delPagoPaNoticeEmail(user);
-          return this.profileService.updateProfile(user, extendedProfile);
-        }
-      )
+    withValidatedOrValidationError(
+      Profile.decode(req.body),
+      async extendedProfile => {
+        await this.sessionStorage.delPagoPaNoticeEmail(user);
+        return this.profileService.updateProfile(user, extendedProfile);
+      }
     );
 
   /**
    * Send an email to start the email validation process
    */
   public readonly startEmailValidationProcess = (
-    req: express.Request
+    user: User
   ): Promise<
     // tslint:disable-next-line:max-union-size
-    | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessAccepted
-  > =>
-    withUserFromRequest(req, async user =>
-      this.profileService.emailValidationProcess(user)
-    );
+  > => this.profileService.emailValidationProcess(user);
 }
