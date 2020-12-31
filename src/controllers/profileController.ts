@@ -27,6 +27,8 @@ import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { IBackendController } from "./IBackendController";
 
+import { ParamsDictionary, RequestHandler } from "express-serve-static-core";
+
 export default class ProfileController implements IBackendController {
   constructor(
     private readonly profileService: ProfileService,
@@ -36,14 +38,33 @@ export default class ProfileController implements IBackendController {
   /**
    * Method used for setting up routing for Controller
    * @param router An Express app router
+   * @param handlers A list of middlewares to be called before the Controller's functions
    * @returns The router with paths for Controller
    */
-  public setupRouting(router: express.Router): express.Router {
-    router.get(`/profile`, toExpressHandler(this.getProfile, this));
-    router.get(`/api-profile`, toExpressHandler(this.getApiProfile, this));
-    router.post(`/profile`, toExpressHandler(this.updateProfile, this));
+  public setupRouting<ResBody = unknown, ReqBody = unknown>(
+    router: express.Router,
+    ...handlers: ReadonlyArray<
+      RequestHandler<ParamsDictionary, ResBody, ReqBody>
+    >
+  ): express.Router {
+    router.get(
+      `/profile`,
+      ...handlers,
+      toExpressHandler(this.getProfile, this)
+    );
+    router.get(
+      `/api-profile`,
+      ...handlers,
+      toExpressHandler(this.getApiProfile, this)
+    );
+    router.post(
+      `/profile`,
+      ...handlers,
+      toExpressHandler(this.updateProfile, this)
+    );
     router.post(
       `/email-validation-process`,
+      ...handlers,
       toExpressHandler(this.startEmailValidationProcess, this)
     );
 
