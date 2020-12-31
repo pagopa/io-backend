@@ -4,7 +4,6 @@
  */
 
 import * as express from "express";
-import { ParamsDictionary, RequestHandler } from "express-serve-static-core";
 
 import {
   IResponseErrorConflict,
@@ -36,40 +35,19 @@ export default class ProfileController implements IBackendController {
 
   /**
    * Method used for setting up routing for Controller
-   * @param app The Express app
-   * @param basePath The base path of the api. NOTE: Do not include trailing slash
-   * @param handlers A list of middlewares to be called before the Controller's functions
+   * @param router An Express app router
+   * @returns The router with paths for Controller
    */
-  public setupRouting<ResBody = unknown, ReqBody = unknown>(
-    app: express.Express,
-    basePath: string,
-    ...handlers: ReadonlyArray<
-      RequestHandler<ParamsDictionary, ResBody, ReqBody>
-    >
-  ): void {
-    app.get(
-      `${basePath}/profile`,
-      ...handlers,
-      toExpressHandler(this.getProfile, this)
-    );
-
-    app.get(
-      `${basePath}/api-profile`,
-      ...handlers,
-      toExpressHandler(this.getApiProfile, this)
-    );
-
-    app.post(
-      `${basePath}/profile`,
-      ...handlers,
-      toExpressHandler(this.updateProfile, this)
-    );
-
-    app.post(
-      `${basePath}/email-validation-process`,
-      ...handlers,
+  public setupRouting(router: express.Router): express.Router {
+    router.get(`/profile`, toExpressHandler(this.getProfile, this));
+    router.get(`/api-profile`, toExpressHandler(this.getApiProfile, this));
+    router.post(`/profile`, toExpressHandler(this.updateProfile, this));
+    router.post(
+      `/email-validation-process`,
       toExpressHandler(this.startEmailValidationProcess, this)
     );
+
+    return router;
   }
 
   /**

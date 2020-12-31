@@ -100,6 +100,7 @@ import {
   createSimpleRedisClient
 } from "./utils/redis";
 import { makeSpidLogCallback } from "./utils/spid";
+import e = require("express");
 
 const defaultModule = {
   newApp
@@ -592,7 +593,9 @@ function registerAPIRoutes(
     tokenService
   );
 
-  profileController.setupRouting(app, basePath, bearerSessionTokenAuth);
+  const router = e.Router();
+  profileController.setupRouting(router);
+  app.use(basePath, bearerSessionTokenAuth, router);
 
   app.get(
     `${basePath}/user-metadata`,
