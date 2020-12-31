@@ -25,13 +25,15 @@ export default function checkIP(
     // express takes this from the leftmost value
     // contained in the x-forwarded-for header
     const errorOrIPString = IPString.decode(req.ip).alt(
-      IPString.decode(req.connection.remoteAddress)
+      // use x-client-ip instead of x-forwarded-for
+      // for internal calls (same vnet)
+      IPString.decode(req.headers["x-client-ip"])
     );
 
     if (isLeft(errorOrIPString)) {
       log.error(
-        `Cannot decode source IP: (req.ip=${req.ip},remoteAddress=${
-          req.connection.remoteAddress
+        `Cannot decode source IP: (req.ip=${req.ip},x-client-ip=${
+          req.headers["x-client-ip"]
         },error=${readableReport(errorOrIPString.value)}.`
       );
       res.status(400).send("Bad request");
