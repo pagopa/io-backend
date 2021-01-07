@@ -146,6 +146,7 @@ Those are all Environment variables needed by the application:
 | BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
 | BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
 | BONUS_API_BASE_PATH                    | The root path for the backend bonus api endpoints                                 | string |
+| BONUS_REQUEST_LIMIT_DATE               | The date until a user can request a bonus, in UTC ISO format                      | string |
 | CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
 | CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
 | PORT                                   | The HTTP port the Express server is listening to                                  | int    |

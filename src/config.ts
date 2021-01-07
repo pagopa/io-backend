@@ -34,6 +34,7 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import { rights } from "fp-ts/lib/Array";
+import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
 import {
   AbortableFetch,
   setFetchTimeout,
@@ -323,6 +324,17 @@ export const BONUS_API_CLIENT = BonusAPIClient(
   BONUS_API_URL,
   httpApiFetch
 );
+// the date until a user can request a bonus
+export const BONUS_REQUEST_LIMIT_DATE = UTCISODateFromString.decode(
+  process.env.BONUS_REQUEST_LIMIT_DATE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid BONUS_REQUEST_LIMIT_DATE environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
