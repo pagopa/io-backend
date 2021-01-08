@@ -19,8 +19,8 @@
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5859 --nolazy src/server.js",
-    "lint": "tslint -p . -c tslint.json -t verbose",
-    "lint-autofix": "tslint -p . -c tslint.json -t verbose --fix",
+    "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx",
+    "lint-autofix": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix",
     "prettify": "prettier --write \"./**/*.ts\"",
     "test": "jest -i",
     "test:coverage": "dotenv -e .env.example -- jest -i --coverage",
@@ -89,6 +89,7 @@
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
+    "@pagopa/eslint-config": "^1.0.0",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.16.0",
@@ -119,7 +120,7 @@
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
-    "italia-tslint-rules": "^1.1.3",
+    "eslint-plugin-prettier": "^3.3.1",
     "italia-utils": "^6.3.0",
     "jest": "^23.6.0",
     "lolex": "4.2.0",
@@ -136,7 +137,6 @@
     "swagger-parser": "^5.0.5",
     "ts-jest": "^23.10.4",
     "ts-node": "^7.0.1",
-    "tslint": "^5.11.0",
     "typescript": "^3.6.2"
   },
   "jest": {

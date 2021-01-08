@@ -64,7 +64,7 @@ describe("SPID logs", () => {
     };
     makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
       "1.1.1.1",
-      // tslint:disable-next-line: no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       undefined as any,
       aSAMLResponse
     );
@@ -78,7 +78,7 @@ describe("SPID logs", () => {
     makeSpidLogCallback((mockQueueClient as unknown) as QueueClient)(
       "1.1.1.1",
       aSAMLRequest,
-      // tslint:disable-next-line: no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       undefined as any
     );
     expect(mockQueueClient.sendMessage).not.toHaveBeenCalled();

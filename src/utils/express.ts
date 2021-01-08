@@ -13,12 +13,12 @@ export function toExpressHandler<T, P>(
   handler: (req: express.Request) => Promise<IResponse<T>>,
   object?: P
 ): (req: express.Request, res: express.Response) => void {
-  return (req, res) =>
+  return (req, res): Promise<void | undefined> =>
     handler
       .call(object, req)
       .catch(ResponseErrorInternal)
       .then(response => {
-        // tslint:disable-next-line:no-object-mutation
+        // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);
       });

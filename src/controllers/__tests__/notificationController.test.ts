@@ -130,9 +130,9 @@ const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = j
 
 const notificationService = new NotificationService("", "");
 
-// tslint:disable-next-line: no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpdateInstallation = jest.fn());
-// tslint:disable-next-line: no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockNotify = ((notificationService as any).notify = jest.fn());
 
 // do not import these from config as the module has side effects

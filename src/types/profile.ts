@@ -2,10 +2,6 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-
-import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
-
 import { fromNullable } from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
@@ -14,6 +10,10 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
+import { InitializedProfile } from "../../generated/backend/InitializedProfile";
+
+import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
+
 import { formatDate } from "../utils/date";
 import { User } from "./user";
 
@@ -50,9 +50,8 @@ export const profileMissingErrorResponse = ResponseErrorInternal(
 );
 
 export const notFoundProfileToInternalServerError = (
-  // tslint:disable-next-line: prettier
-  getProfileResponse: // tslint:disable-next-line: max-union-size
-  | IResponseErrorInternal
+  getProfileResponse:
+    | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>

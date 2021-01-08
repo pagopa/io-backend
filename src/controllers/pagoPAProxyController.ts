@@ -29,22 +29,20 @@ export default class PagoPAProxyController {
   public readonly getPaymentInfo = async (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
-    withValidatedOrInternalError(t.string.decode(req.params.rptId), rptId => {
-      return this.pagoPAProxyService.getPaymentInfo(
+    withValidatedOrInternalError(t.string.decode(req.params.rptId), rptId =>
+      this.pagoPAProxyService.getPaymentInfo(
         rptId,
         parsePagopaTestParam(req.query.test)
-      );
-    });
+      )
+    );
 
   public readonly activatePayment = async (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
@@ -52,18 +50,16 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       PaymentActivationsPostRequest.decode(req.body),
-      paymentActivationsPostRequest => {
-        return this.pagoPAProxyService.activatePayment(
+      paymentActivationsPostRequest =>
+        this.pagoPAProxyService.activatePayment(
           paymentActivationsPostRequest,
           parsePagopaTestParam(req.query.test)
-        );
-      }
+        )
     );
 
   public readonly getActivationStatus = async (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
@@ -71,11 +67,10 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       t.string.decode(req.params.codiceContestoPagamento),
-      codiceContestoPagamento => {
-        return this.pagoPAProxyService.getActivationStatus(
+      codiceContestoPagamento =>
+        this.pagoPAProxyService.getActivationStatus(
           codiceContestoPagamento,
           parsePagopaTestParam(req.query.test)
-        );
-      }
+        )
     );
 }

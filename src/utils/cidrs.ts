@@ -5,7 +5,9 @@ import { CIDR } from "italia-ts-commons/lib/strings";
 /**
  * Parse a comma separated string of CIDR(s) or IP(s) into an array
  */
-export function decodeCIDRs(cidrs?: string): Either<Errors, readonly CIDR[]> {
+export function decodeCIDRs(
+  cidrs?: string
+): Either<Errors, ReadonlyArray<CIDR>> {
   return array(CIDR).decode(
     cidrs
       // may be a comma separated list of CIDR(s) or IP(s)

@@ -6,18 +6,13 @@ import { FiscalCode } from "generated/backend/FiscalCode";
  * Returns a comparator of two dates that returns true if
  * the difference in years is at least the provided value.
  */
-export const isOlderThan = (years: number) => (
-  dateOfBirth: Date,
-  when: Date
-) => {
-  return !isAfter(addYears(dateOfBirth, years), when);
-};
+export const isOlderThan = (years: number) => (dateOfBirth: Date, when: Date) =>
+  !isAfter(addYears(dateOfBirth, years), when);
 
-export const isValidDate = (d: Date) => {
-  return d instanceof Date && !isNaN(d.getTime());
-};
+export const isValidDate = (d: Date) =>
+  d instanceof Date && !isNaN(d.getTime());
 
-const months: { [k: string]: number } = {
+const months: { readonly [k: string]: number } = {
   ["A"]: 1,
   ["B"]: 2,
   ["C"]: 3,

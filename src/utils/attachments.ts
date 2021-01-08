@@ -20,8 +20,8 @@ const toBarcodeAttachments = (name: string, value: string) =>
   toBarcode(value).fold(
     () => [],
     barcodes => [
-      { name, content: barcodes.png, mime_type: MIME_TYPES.png },
-      { name, content: barcodes.svg, mime_type: MIME_TYPES.svg }
+      { content: barcodes.png, mime_type: MIME_TYPES.png, name },
+      { content: barcodes.svg, mime_type: MIME_TYPES.svg, name }
     ]
   );
 
@@ -32,8 +32,7 @@ const toBarcodeAttachments = (name: string, value: string) =>
  */
 export function getPrescriptionAttachments(
   prescriptionData: PrescriptionData
-  // tslint:disable-next-line: readonly-array
-): Task<MessageAttachment[]> {
+): Task<ReadonlyArray<MessageAttachment>> {
   return array
     .sequence(task)([
       toBarcodeAttachments("iup", prescriptionData.iup),

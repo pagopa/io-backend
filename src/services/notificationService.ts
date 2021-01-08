@@ -9,6 +9,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { QueueClient } from "@azure/storage-queue";
+import { fromNullable } from "fp-ts/lib/Option";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
@@ -27,13 +29,11 @@ import {
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
-import { QueueClient } from "@azure/storage-queue";
-import { fromNullable } from "fp-ts/lib/Option";
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
 
 export default class NotificationService {
-  private notificationQueueClient: QueueClient;
+  private readonly notificationQueueClient: QueueClient;
   constructor(
     private readonly queueStorageConnectionString: string,
     private readonly queueName: string

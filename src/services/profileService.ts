@@ -18,6 +18,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../generated/io-api/NewProfile";
 import { Profile as ProfileApi } from "../../generated/io-api/Profile";
@@ -25,7 +26,6 @@ import { Profile as ProfileApi } from "../../generated/io-api/Profile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile as ProfileBackend } from "../../generated/backend/Profile";
 
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { toInitializedProfile } from "../types/profile";
 import { User } from "../types/user";
 import {
@@ -44,12 +44,12 @@ export default class ProfileService {
   public readonly getProfile = (
     user: User
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
@@ -88,12 +88,12 @@ export default class ProfileService {
   public readonly getApiProfile = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<ExtendedProfileApi>
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
@@ -130,12 +130,12 @@ export default class ProfileService {
     user: User,
     newProfile: NewProfile
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict
     | IResponseSuccessJson<InitializedProfile>
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.createProfile({
@@ -165,13 +165,13 @@ export default class ProfileService {
     user: User,
     profileBackend: ProfileBackend
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorConflict
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withValidatedOrInternalError(
       // we need to convert the ExtendedProfile from the backend specs to the
@@ -208,26 +208,26 @@ export default class ProfileService {
   public readonly emailValidationProcess = async (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessAccepted
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.startEmailValidationProcess({
         fiscal_code: user.fiscal_code
       });
-      return withValidatedOrInternalError(validated, response => {
-        return response.status === 202
+      return withValidatedOrInternalError(validated, response =>
+        response.status === 202
           ? ResponseSuccessAccepted()
           : response.status === 404
           ? ResponseErrorNotFound("Not found", "User not found.")
           : response.status === 429
           ? ResponseErrorTooManyRequests()
-          : unhandledResponseStatus(response.status);
-      });
+          : unhandledResponseStatus(response.status)
+      );
     });
   };
 }

@@ -40,12 +40,12 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict
     | IResponseSuccessJson<UserDataProcessing>
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.upsertUserDataProcessing({
@@ -74,12 +74,12 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceParam: UserDataProcessingChoice
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
     | IResponseSuccessJson<UserDataProcessing>
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getUserDataProcessing({
@@ -106,7 +106,6 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceParam: UserDataProcessingChoice
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
@@ -114,6 +113,7 @@ export default class UserDataProcessingService {
     | IResponseErrorConflict
     | IResponseSuccessAccepted
   > => {
+    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.abortUserDataProcessing({

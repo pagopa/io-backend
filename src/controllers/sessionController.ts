@@ -11,17 +11,16 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { PublicSession } from "../../generated/backend/PublicSession";
-import { SessionsList } from "../../generated/backend/SessionsList";
-
 import { isLeft } from "fp-ts/lib/Either";
 import TokenService from "src/services/tokenService";
 import { BPDToken, MyPortalToken } from "src/types/token";
+import { SessionsList } from "../../generated/backend/SessionsList";
+import { PublicSession } from "../../generated/backend/PublicSession";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { UserV2, UserV3, withUserFromRequest } from "../types/user";
-import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 import { log } from "../utils/logger";
+import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 export default class SessionController {
   constructor(

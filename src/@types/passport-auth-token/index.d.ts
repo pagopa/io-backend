@@ -14,7 +14,6 @@ interface IVerifyOptions {
 
 type VerifyFunction = (
   token: string,
-  // tslint:disable-next-line:no-any
   done: (error: any, user?: any, options?: IVerifyOptions) => void
 ) => void;
 

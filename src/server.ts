@@ -1,10 +1,10 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-import * as appInsights from "applicationinsights";
-import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
+import * as appInsights from "applicationinsights";
+import { fromNullable } from "fp-ts/lib/Option";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
 import {
@@ -54,7 +54,7 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
   ? parseInt(process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS, 10)
   : DEFAULT_SHUTDOWN_TIMEOUT_MILLIS;
 
-// tslint:disable-next-line: no-let
+// eslint-disable-next-line functional/no-let
 let server: http.Server | https.Server;
 const timer = TimeTracer();
 
@@ -63,6 +63,7 @@ const timer = TimeTracer();
  * WARNING: When the key is provided several information are collected automatically
  * and sent to App Insights.
  * To see what kind of informations are automatically collected
+ *
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder
  */
 const maybeAppInsightsClient = fromNullable(
@@ -98,7 +99,7 @@ newApp({
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
       log.info("Starting HTTPS server on port %d", SERVER_PORT);
-      const options = { key: SAML_KEY, cert: SAML_CERT };
+      const options = { cert: SAML_CERT, key: SAML_KEY };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
         log.info(`Startup time: %sms`, startupTimeMs.toString());

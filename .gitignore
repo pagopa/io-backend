@@ -23,6 +23,7 @@ npm-debug.log
 
 # Exclude typescript generated javascript files.
 *.js
+!.eslintrc.js
 !.release-it.js
 *.js.map
 

@@ -4,6 +4,8 @@ import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
+  IResponseErrorInternal,
+  IResponseErrorValidation,
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorNotFound,
@@ -14,6 +16,7 @@ import {
  * Interface for a no content response returning a empty object.
  */
 export interface IResponseNoContent extends IResponse<"IResponseNoContent"> {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   readonly value: {};
 }
 /**
@@ -21,7 +24,7 @@ export interface IResponseNoContent extends IResponse<"IResponseNoContent"> {
  */
 export function ResponseNoContent(): IResponseNoContent {
   return {
-    apply: (res: express.Response) => res.status(204).json({}),
+    apply: (res: express.Response): unknown => res.status(204).json({}),
     kind: "IResponseNoContent",
     value: {}
   };
@@ -41,14 +44,16 @@ export const ResponseErrorDismissed = ResponseErrorNotFound(
 export const withCatchAsInternalError = <T>(
   f: () => Promise<T>,
   message: string = "Exception while calling upstream API (likely a timeout)."
-) =>
+): Promise<T | IResponseErrorInternal> =>
   f().catch(_ => {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error(_);
     return ResponseErrorInternal(`${message} [${_}]`);
   });
 
-export const unhandledResponseStatus = (status: number) =>
+export const unhandledResponseStatus = (
+  status: number
+): IResponseErrorInternal =>
   ResponseErrorInternal(`unhandled API response status [${status}]`);
 
 /**
@@ -57,8 +62,8 @@ export const unhandledResponseStatus = (status: number) =>
  */
 export const withValidatedOrInternalError = <T, U>(
   validated: t.Validation<T>,
-  f: (t: T) => U
-) =>
+  f: (p: T) => U
+): U | IResponseErrorInternal =>
   validated.isLeft()
     ? ResponseErrorInternal(
         errorsToReadableMessages(validated.value).join(" / ")
@@ -71,8 +76,8 @@ export const withValidatedOrInternalError = <T, U>(
  */
 export const withValidatedOrValidationError = <T, U>(
   response: t.Validation<T>,
-  f: (t: T) => U
-) =>
+  f: (p: T) => U
+): U | IResponseErrorValidation =>
   response.isLeft()
     ? ResponseErrorValidation(
         "Bad request",

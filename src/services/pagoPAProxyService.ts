@@ -1,5 +1,3 @@
-// tslint:disable:no-duplicate-string
-
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -11,11 +9,6 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import {
-  IPagoPAClientFactoryInterface,
-  PagoPAEnvironment
-} from "./IPagoPAClientFactory";
-
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
 import { PaymentActivationsPostResponse } from "../../generated/backend/PaymentActivationsPostResponse";
 import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentRequestsGetResponse";
@@ -26,6 +19,10 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+import {
+  IPagoPAClientFactoryInterface,
+  PagoPAEnvironment
+} from "./IPagoPAClientFactory";
 
 export default class PagoPAProxyService {
   constructor(private readonly pagoPAClient: IPagoPAClientFactoryInterface) {}
@@ -56,7 +53,9 @@ export default class PagoPAProxyService {
             )
           : response.status === 400
           ? ResponseErrorValidation(
+              // eslint-disable-next-line sonarjs/no-duplicate-string
               response.value.title || "Bad request (upstream)",
+              // eslint-disable-next-line sonarjs/no-duplicate-string
               response.value.detail || "Bad request response from upstream API"
             )
           : ResponseErrorInternal(response.value.detail)
@@ -70,7 +69,6 @@ export default class PagoPAProxyService {
     paymentActivationsPostRequest: PaymentActivationsPostRequest,
     isTest: boolean
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
@@ -106,7 +104,6 @@ export default class PagoPAProxyService {
     codiceContestoPagamento: string,
     isTest: boolean
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound

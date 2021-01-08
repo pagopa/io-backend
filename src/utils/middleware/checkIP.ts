@@ -10,7 +10,7 @@ import * as rangeCheck from "range_check";
 import { log } from "../logger";
 
 export default function checkIP(
-  range: readonly CIDR[]
+  range: ReadonlyArray<CIDR>
 ): (
   req: express.Request,
   res: express.Response,
@@ -20,7 +20,7 @@ export default function checkIP(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
-  ) => {
+  ): void => {
     // when the boolean flag "trust proxy" is enabled
     // express takes this from the leftmost value
     // contained in the x-forwarded-for header
@@ -39,8 +39,7 @@ export default function checkIP(
       res.status(400).send("Bad request");
     } else {
       const IP = errorOrIPString.value;
-      // tslint:disable-next-line: readonly-array
-      if (!rangeCheck.inRange(IP, range as CIDR[])) {
+      if (!rangeCheck.inRange(IP, Array.from(range))) {
         log.error(`Blocked source IP ${IP}.`);
         res.status(401).send("Unauthorized");
       } else {

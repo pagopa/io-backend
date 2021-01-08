@@ -19,7 +19,7 @@ export const UserLogin = t.interface({
 export type UserLogin = t.TypeOf<typeof UserLogin>;
 
 export default class UsersLoginLogService {
-  private queueClient: QueueClient;
+  private readonly queueClient: QueueClient;
 
   constructor(
     private readonly queueStorageConnectionString: string,
@@ -36,6 +36,7 @@ export default class UsersLoginLogService {
   ): Promise<QueueSendMessageResponse> => {
     const userLoginEncoded = UserLogin.encode(userLogin);
 
+    // eslint-disable-next-line
     return this.queueClient.sendMessage(base64EncodeObject(userLoginEncoded));
   };
 }

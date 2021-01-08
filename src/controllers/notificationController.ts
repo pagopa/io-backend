@@ -10,14 +10,14 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { toError } from "fp-ts/lib/Either";
+import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { Installation } from "../../generated/backend/Installation";
 import { InstallationID } from "../../generated/backend/InstallationID";
 
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
-import { toError } from "fp-ts/lib/Either";
-import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
 import NotificationService from "../services/notificationService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
@@ -28,8 +28,8 @@ import {
 } from "../utils/responses";
 
 export interface INotificationControllerOptions {
-  notificationDefaultSubject: string;
-  notificationDefaultTitle: string;
+  readonly notificationDefaultSubject: string;
+  readonly notificationDefaultTitle: string;
 }
 
 export default class NotificationController {

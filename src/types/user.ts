@@ -102,6 +102,7 @@ export type SpidUser = t.TypeOf<typeof SpidUser>;
 /**
  * Converts a SPID User to a Proxy User.
  */
+// eslint-disable-next-line max-params
 export function toAppUser(
   from: SpidUser,
   sessionToken: SessionToken,
@@ -131,6 +132,7 @@ export function toAppUser(
 /**
  * Discriminate from a CieUserIdentity and a SpidUserIdentity
  * checking the spid_email property.
+ *
  * @param user
  */
 export function isSpidUserIdentity(
@@ -157,6 +159,27 @@ const SpidObject = t.intersection([
     issuer: t.any
   })
 ]);
+
+/**
+ * Extract AuthnContextClassRef from SAML response
+ *
+ * ie. for <saml2:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml2:AuthnContextClassRef>
+ * returns "https://www.spid.gov.it/SpidL2"
+ */
+function getAuthnContextFromResponse(xml: string): Option<string> {
+  return fromNullable(xml)
+    .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
+    .chain(xmlResponse =>
+      xmlResponse
+        ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
+        : none
+    )
+    .chain(responseAuthLevelEl =>
+      responseAuthLevelEl?.[0]?.textContent
+        ? some(responseAuthLevelEl[0].textContent.trim())
+        : none
+    );
+}
 
 /**
  * Validates a SPID User extracted from a SAML response.
@@ -214,12 +237,11 @@ export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
 
   const result = SpidUser.decode(valueWithDefaultSPIDLevel);
 
-  return result.mapLeft(err => {
-    return (
+  return result.mapLeft(
+    err =>
       "Cannot validate SPID user object: " +
       errorsToReadableMessages(err).join(" / ")
-    );
-  });
+  );
 }
 
 export const withUserFromRequest = async <T>(
@@ -244,26 +266,3 @@ export const extractUserFromJson = (from: string): Either<string, User> =>
           )}`
       )
     );
-
-/**
- * Extract AuthnContextClassRef from SAML response
- *
- * ie. for <saml2:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml2:AuthnContextClassRef>
- * returns "https://www.spid.gov.it/SpidL2"
- */
-function getAuthnContextFromResponse(xml: string): Option<string> {
-  return fromNullable(xml)
-    .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
-    .chain(xmlResponse =>
-      xmlResponse
-        ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
-        : none
-    )
-    .chain(responseAuthLevelEl =>
-      responseAuthLevelEl &&
-      responseAuthLevelEl[0] &&
-      responseAuthLevelEl[0].textContent
-        ? some(responseAuthLevelEl[0].textContent.trim())
-        : none
-    );
-}
