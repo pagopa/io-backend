@@ -17,6 +17,7 @@ import {
   AUTHENTICATION_BASE_PATH,
   BONUS_API_BASE_PATH,
   BPD_BASE_PATH,
+  CGN_API_BASE_PATH,
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   MYPORTAL_BASE_PATH,
@@ -37,6 +38,7 @@ const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const PagoPABasePath = PAGOPA_BASE_PATH;
 const MyPortalBasePath = MYPORTAL_BASE_PATH;
 const BPDBasePath = BPD_BASE_PATH;
+const CGNAPIBasePath = CGN_API_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -75,6 +77,7 @@ newApp({
   APIBasePath,
   BPDBasePath,
   BonusAPIBasePath,
+  CGNAPIBasePath,
   MyPortalBasePath,
   PagoPABasePath,
   allowBPDIPSourceRange: ALLOW_BPD_IP_SOURCE_RANGE,

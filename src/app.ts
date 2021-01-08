@@ -8,6 +8,7 @@ import {
   BONUS_API_CLIENT,
   BONUS_REQUEST_LIMIT_DATE,
   CACHE_MAX_AGE_SECONDS,
+  CGN_API_CLIENT,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
   FF_BONUS_ENABLED,
@@ -68,11 +69,13 @@ import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
+import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
+import CgnService from "./services/cgnService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -133,6 +136,7 @@ export interface IAppFactoryParameters {
   PagoPABasePath: string;
   MyPortalBasePath: string;
   BPDBasePath: string;
+  CGNAPIBasePath: string;
 }
 
 // tslint:disable-next-line: no-big-function
@@ -149,7 +153,8 @@ export function newApp({
   BonusAPIBasePath,
   PagoPABasePath,
   MyPortalBasePath,
-  BPDBasePath
+  BPDBasePath,
+  CGNAPIBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -287,6 +292,9 @@ export function newApp({
       // Create the bonus service
       const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
 
+      // Create the cgn service
+      const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
+
       // Create the user data processing service
       const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
         API_CLIENT
@@ -378,6 +386,12 @@ export function newApp({
           BONUS_REQUEST_LIMIT_DATE
         );
       }
+      registerCgnAPIRoutes(
+        app,
+        CGNAPIBasePath,
+        CGN_SERVICE,
+        authMiddlewares.bearerSession
+      );
       registerPagoPARoutes(
         app,
         PagoPABasePath,
@@ -785,6 +799,22 @@ function registerSessionAPIRoutes(
       sessionLockController.unlockUserSession,
       sessionLockController
     )
+  );
+}
+
+function registerCgnAPIRoutes(
+  app: Express,
+  basePath: string,
+  cgnService: CgnService,
+  // tslint:disable-next-line: no-any
+  bearerSessionTokenAuth: any
+): void {
+  const cgnController: CgnController = new CgnController(cgnService);
+
+  app.get(
+    `${basePath}/cgn/status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 }
 

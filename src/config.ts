@@ -44,6 +44,7 @@ import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
+import { CgnAPIClient } from "./clients/cgn";
 import { STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
@@ -335,6 +336,15 @@ export const BONUS_REQUEST_LIMIT_DATE = UTCISODateFromString.decode(
   );
   return process.exit(1);
 });
+
+export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
+export const CGN_API_URL = getRequiredENVVar("GGN_API_URL");
+export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
+export const CGN_API_CLIENT = CgnAPIClient(
+  CGN_API_KEY,
+  CGN_API_URL,
+  httpApiFetch
+);
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
