@@ -38,7 +38,7 @@ export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 
   /**
-   * Starts the procedure to check if the current user is eligible for the bonus.
+   * Get the current CGN Status related to the user.
    */
   public readonly getCgnStatus = (
     user: User
