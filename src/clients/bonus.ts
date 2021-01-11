@@ -4,8 +4,7 @@ import { Client, createClient } from "../../generated/io-bonus-api/client";
 export function BonusAPIClient(
   token: string,
   baseUrl: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch
 ): Client<"ApiKey"> {
   return createClient<"ApiKey">({
     basePath: "",

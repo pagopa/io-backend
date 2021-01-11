@@ -4,8 +4,7 @@ import { Client, createClient } from "../../generated/io-api/client";
 export function APIClient(
   baseUrl: string,
   token: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch // TODO: customize fetch with timeout
+  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch // TODO: customize fetch with timeout
 ): Client<"SubscriptionKey"> {
   return createClient<"SubscriptionKey">({
     basePath: "",
