@@ -35,7 +35,7 @@ const aEligibilityCheck: EligibilityCheck = {
     request_id: 1
   },
   id: "aEligibilityCheck.id" as NonEmptyString,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // tslint:disable-next-line: no-any
   status: "ELIGIBLE" as any
 };
 
