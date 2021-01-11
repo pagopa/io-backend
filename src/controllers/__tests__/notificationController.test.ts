@@ -19,7 +19,7 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import { right } from "fp-ts/lib/Either";
-import { MessageSubject } from "generated/notifications/MessageSubject";
+import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
 
 const aTimestamp = 1518010929530;
@@ -130,9 +130,9 @@ const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = j
 
 const notificationService = new NotificationService("", "");
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// tslint:disable-next-line: no-any
 const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpdateInstallation = jest.fn());
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// tslint:disable-next-line: no-any
 const mockNotify = ((notificationService as any).notify = jest.fn());
 
 // do not import these from config as the module has side effects
