@@ -439,6 +439,7 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
 
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
+export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
