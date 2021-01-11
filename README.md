@@ -197,7 +197,7 @@ Those are all Environment variables needed by the application:
 | FETCH_KEEPALIVE_MAX_FREE_SOCKETS       | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_TIMEOUT                | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL      | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-
+| FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
 Notes:
 
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)

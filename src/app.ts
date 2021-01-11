@@ -12,6 +12,7 @@ import {
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
   FF_BONUS_ENABLED,
+  FF_CGN_ENABLED,
   getClientProfileRedirectionUrl,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   NOTIFICATION_DEFAULT_SUBJECT,
@@ -386,12 +387,14 @@ export function newApp({
           BONUS_REQUEST_LIMIT_DATE
         );
       }
-      registerCgnAPIRoutes(
-        app,
-        CGNAPIBasePath,
-        CGN_SERVICE,
-        authMiddlewares.bearerSession
-      );
+      if (FF_CGN_ENABLED) {
+        registerCgnAPIRoutes(
+          app,
+          CGNAPIBasePath,
+          CGN_SERVICE,
+          authMiddlewares.bearerSession
+        );
+      }
       registerPagoPARoutes(
         app,
         PagoPABasePath,
