@@ -36,7 +36,6 @@ export default class UsersLoginLogService {
   ): Promise<QueueSendMessageResponse> => {
     const userLoginEncoded = UserLogin.encode(userLogin);
 
-    // eslint-disable-next-line
     return this.queueClient.sendMessage(base64EncodeObject(userLoginEncoded));
   };
 }

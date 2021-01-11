@@ -49,7 +49,6 @@ export default class ProfileService {
     | IResponseErrorNotFound
     | IResponseSuccessJson<InitializedProfile>
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
@@ -93,7 +92,6 @@ export default class ProfileService {
     | IResponseErrorNotFound
     | IResponseSuccessJson<ExtendedProfileApi>
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
@@ -135,7 +133,6 @@ export default class ProfileService {
     | IResponseErrorConflict
     | IResponseSuccessJson<InitializedProfile>
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.createProfile({
@@ -171,7 +168,6 @@ export default class ProfileService {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withValidatedOrInternalError(
       // we need to convert the ExtendedProfile from the backend specs to the
@@ -213,7 +209,6 @@ export default class ProfileService {
     | IResponseErrorNotFound
     | IResponseSuccessAccepted
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.startEmailValidationProcess({

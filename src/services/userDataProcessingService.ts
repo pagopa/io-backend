@@ -45,7 +45,6 @@ export default class UserDataProcessingService {
     | IResponseErrorConflict
     | IResponseSuccessJson<UserDataProcessing>
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.upsertUserDataProcessing({
@@ -79,7 +78,6 @@ export default class UserDataProcessingService {
     | IResponseErrorNotFound
     | IResponseSuccessJson<UserDataProcessing>
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getUserDataProcessing({
@@ -113,7 +111,6 @@ export default class UserDataProcessingService {
     | IResponseErrorConflict
     | IResponseSuccessAccepted
   > => {
-    // eslint-disable-next-line
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.abortUserDataProcessing({
