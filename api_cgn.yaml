@@ -38,48 +38,15 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
 
   CgnPendingStatus:
-    type: object
-    properties:
-      status:
-        type: string
-        x-extensible-enum:
-          - PENDING
-    required:
-      - status
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
   CgnActivatedStatus:
-    type: object
-    properties:
-      status:
-        type: string
-        x-extensible-enum:
-          - ACTIVATED
-    required:
-      - status
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivatedStatus"
   CgnRevokedStatus:
-    type: object
-    properties:
-      status:
-        type: string
-        x-extensible-enum:
-          - REVOKED
-    required:
-      - status
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnRevokedStatus"
   CgnCanceledStatus:
-    type: object
-    properties:
-      status:
-        type: string
-        x-extensible-enum:
-          - CANCELED
-    required:
-      - status
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnCanceledStatus"
   CgnStatus:
-    x-one-of: true
-    allOf:
-      - $ref: "#/definitions/CgnPendingStatus"
-      - $ref: "#/definitions/CgnActivatedStatus"
-      - $ref: "#/definitions/CgnRevokedStatus"
-      - $ref: "#/definitions/CgnCanceledStatus"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
   
 securityDefinitions:
   Bearer:
