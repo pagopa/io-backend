@@ -1,5 +1,3 @@
-// tslint:disable:no-any
-
 /**
  * mockRes
  * @returns {{append, attachment, cookie, clearCookie, download, end, format, get, json, jsonp, links, location, redirect, render, send, sendFile, sendStatus, set, status, type, vary, reset: resetMock}}

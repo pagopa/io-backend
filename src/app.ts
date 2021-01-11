@@ -171,7 +171,6 @@ export function newApp({
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
   passport.use(
-    // tslint:disable-next-line: no-duplicate-string
     "bearer.session",
     bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData)
   );
