@@ -8,7 +8,6 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import { BonusAPIClient } from "../../clients/bonus";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import CgnController from "../cgnController";
@@ -82,7 +81,7 @@ describe("CgnController#getCgnStatus", () => {
       Promise.resolve(ResponseSuccessJson(aPendingCgnStatus))
     );
 
-    const client = BonusAPIClient(API_KEY, API_URL);
+    const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
     
@@ -91,7 +90,7 @@ describe("CgnController#getCgnStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aInstanceId
+      value: aPendingCgnStatus
     });
   });
 
@@ -99,7 +98,7 @@ describe("CgnController#getCgnStatus", () => {
     const req = { ...mockReq(), user: undefined };
     const res = mockRes();
 
-    const client = BonusAPIClient(API_KEY, API_URL);
+    const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
     

@@ -338,7 +338,7 @@ export const BONUS_REQUEST_LIMIT_DATE = UTCISODateFromString.decode(
 });
 
 export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
-export const CGN_API_URL = getRequiredENVVar("GGN_API_URL");
+export const CGN_API_URL = getRequiredENVVar("CGN_API_URL");
 export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
 export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,

@@ -52,7 +52,7 @@ describe("CgnService#getCgnStatus", () => {
   
     it("should handle a success response", async () => {
         mockGetCgnStatus.mockImplementation(() =>
-        t.success(aPendingCgnStatus)
+        t.success({status: 200, value:aPendingCgnStatus})
       );
   
       const service = new CgnService(api);
