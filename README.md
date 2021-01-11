@@ -11,7 +11,7 @@ This repository contains the code of the backend used by the
 
 ## Table of content
 
-- [IO mobile backend](#io-mobile-backend)
+- [Digital citizenship web and mobile backend](#digital-citizenship-web-and-mobile-backend)
   - [Table of content](#table-of-content)
   - [What is this?](#what-is-this)
   - [Authentication process](#authentication-process)
@@ -39,8 +39,8 @@ This repository contains the code of the backend used by the
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
+  - [| 6   | Backend is deployed on more than one instance |                    |](#-6----backend-is-deployed-on-more-than-one-instance---------------------)
   - [Troubleshooting](#troubleshooting)
-  - [License](#license)
 
 ---
 
@@ -146,6 +146,9 @@ Those are all Environment variables needed by the application:
 | BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
 | BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
 | BONUS_API_BASE_PATH                    | The root path for the backend bonus api endpoints                                 | string |
+| CGN_API_KEY                            | The key used to authenticate to the io-functions-cgn API                          | string |
+| CGN_API_URL                            | The io-functions-cgn  URL                                                         | string |
+| CGN_API_BASE_PATH                      | The root path for the backend cgn api endpoints                                   | string |
 | BONUS_REQUEST_LIMIT_DATE               | The date until a user can request a bonus, in UTC ISO format                      | string |
 | CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
 | CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
