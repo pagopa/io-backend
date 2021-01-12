@@ -20,6 +20,10 @@ paths:
           description: The feature has been dismissed
           schema:
             $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
     get:
       operationId: getBonusEligibilityCheck
@@ -53,6 +57,10 @@ paths:
           description: Bearer token null or expired.
         "404":
           description: The feature has been dismissed
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
     get:
       operationId: getAllBonusActivations
