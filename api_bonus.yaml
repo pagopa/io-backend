@@ -16,6 +16,8 @@ paths:
       responses:
         "404":
           description: The feature has been dismissed
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
     get:
       operationId: getBonusEligibilityCheck
