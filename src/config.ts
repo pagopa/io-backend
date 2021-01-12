@@ -34,10 +34,7 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import { rights } from "fp-ts/lib/Array";
-import {
-  DateFromString,
-  UTCISODateFromString
-} from "italia-ts-commons/lib/dates";
+import { DateFromString } from "italia-ts-commons/lib/dates";
 import {
   AbortableFetch,
   setFetchTimeout,
