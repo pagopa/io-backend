@@ -34,7 +34,10 @@ import {
 } from "@pagopa/io-spid-commons";
 
 import { rights } from "fp-ts/lib/Array";
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
+import {
+  DateFromString,
+  UTCISODateFromString
+} from "italia-ts-commons/lib/dates";
 import {
   AbortableFetch,
   setFetchTimeout,
@@ -325,7 +328,7 @@ export const BONUS_API_CLIENT = BonusAPIClient(
   httpApiFetch
 );
 // the date until a user can request a bonus
-export const BONUS_REQUEST_LIMIT_DATE = UTCISODateFromString.decode(
+export const BONUS_REQUEST_LIMIT_DATE = DateFromString.decode(
   process.env.BONUS_REQUEST_LIMIT_DATE
 ).getOrElseL(errs => {
   log.error(
