@@ -45,3 +45,6 @@ local.*
 
 # Exclude Codetour plugin folder
 .tours
+
+# Exclude ESLint cache file
+.eslintcache
