@@ -3,24 +3,17 @@
  */
 
 import {
-  IResponseErrorConflict,
-  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGone,
   IResponseErrorInternal,
   IResponseErrorNotFound,
-  IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
-  IResponseSuccessRedirectToResource,
   ProblemJson,
-  ResponseErrorConflict,
-  ResponseErrorForbiddenNotAuthorized,
   ResponseErrorGone,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
-  ResponseSuccessJson,
-  ResponseSuccessRedirectToResource
+  ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
@@ -33,17 +26,12 @@ import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import { withQrcode } from "../utils/qrcode";
 import {
-  IResponseErrorUnauthorizedForLegalReasons,
-  ResponseErrorUnauthorizedForLegalReasons,
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
 
 import { toString } from "fp-ts/lib/function";
-
-import { isSome } from "fp-ts/lib/Option";
-import { isOlderThan, toBirthDate } from "../utils/date";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
@@ -60,66 +48,6 @@ const ResponseErrorUnexpectedAuthProblem = () =>
 
 export default class BonusService {
   constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
-
-  /**
-   * Starts the procedure to check if the current user is eligible for the bonus.
-   */
-  public readonly startBonusEligibilityCheck = (
-    user: User
-  ): Promise<
-    // tslint:disable-next-line: max-union-size
-    | IResponseErrorInternal
-    | IResponseErrorConflict
-    | IResponseErrorValidation
-    | IResponseSuccessAccepted
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorGone
-    | IResponseErrorUnauthorizedForLegalReasons
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
-  > =>
-    withCatchAsInternalError(async () => {
-      // check if the current logged in user can start a bonus request
-      const maybeBirthDate = toBirthDate(user.fiscal_code);
-      if (
-        isSome(maybeBirthDate) &&
-        !isOlderThan(18)(maybeBirthDate.value, new Date())
-      ) {
-        return ResponseErrorUnauthorizedForLegalReasons(
-          "Unauthorized",
-          "The user must be an adult"
-        );
-      }
-
-      const validated = await this.bonusApiClient.startBonusEligibilityCheck({
-        fiscalcode: user.fiscal_code
-      });
-
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 201:
-            return ResponseSuccessRedirectToResource(
-              response.value,
-              response.headers.Location || "",
-              response.value
-            );
-          case 202:
-            return ResponseSuccessAccepted();
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 403:
-            return ResponseErrorForbiddenNotAuthorized;
-          case 409:
-            return ResponseErrorConflict(readableProblem(response.value));
-          // TODO: uncomment when done intro API
-          // case 410:
-          //   return ResponseErrorGone("EligibilityCheck expired");
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
 
   /**
    * Retrieve the status of an eligibility check previously started
@@ -237,56 +165,6 @@ export default class BonusService {
             return ResponseSuccessJson(response.value);
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
-    });
-
-  /**
-   * Start bonus activation request procedure
-   */
-  public readonly startBonusActivationProcedure = (
-    user: User
-  ): Promise<
-    // tslint:disable-next-line: max-union-size
-    | IResponseErrorInternal
-    | IResponseErrorConflict
-    | IResponseErrorValidation
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessAccepted<InstanceId>
-    | IResponseErrorGone
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
-  > =>
-    withCatchAsInternalError(async () => {
-      const validated = await this.bonusApiClient.startBonusActivationProcedure(
-        {
-          fiscalcode: user.fiscal_code
-        }
-      );
-
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 201:
-            return ResponseSuccessRedirectToResource(
-              response.value,
-              response.headers.Location || "",
-              response.value
-            );
-          case 202:
-            return ResponseSuccessAccepted();
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 403:
-            return ResponseErrorForbiddenNotAuthorized;
-          case 409:
-            return ResponseErrorConflict(
-              "Cannot activate a new bonus because another active or consumed bonus related to this user was found."
-            );
-          case 410:
-            return ResponseErrorGone("DSU request expired.");
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
