@@ -14,34 +14,8 @@ paths:
       operationId: startBonusEligibilityCheck
       summary: Start bonus eligibility check (ISEE)
       responses:
-        "201":
-          description: Request created.
-          schema:
-            $ref: "#/definitions/InstanceId"
-          headers:
-            Location:
-              type: string
-              description: |-
-                Location (URL) of created request resource.
-                A GET request to this URL returns the request status and details.
-        "202":
-          description: Processing request.
-        "401":
-          description: Bearer token null or expired.
-        "403":
-          description: |
-            Cannot request a new check since there's already
-            an active bonus related to this user
-        "409":
-          description: "Conflict: pending request found."
-          schema:
-            $ref: "#/definitions/ProblemJson"
-        "451":
-          description: Unauthorized for legal reason.
-        "500":
-          description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
+        "404":
+          description: The feature has been dismissed
 
     get:
       operationId: getBonusEligibilityCheck
@@ -71,39 +45,9 @@ paths:
       operationId: startBonusActivationProcedure
       summary: Start bonus activation request procedure
       responses:
-        "201":
-          description: Request created.
-          schema:
-            $ref: "#/definitions/InstanceId"
-          headers:
-            Location:
-              type: string
-              description: |-
-                Location (URL) of created request resource.
-                A GET request to this URL returns the request status and details.
-        "202":
-          description: Processing request.
-          schema:
-            $ref: "#/definitions/InstanceId"
-        "401":
-          description: Bearer token null or expired.
-        "403":
-          description: |
-            Cannot activate a new bonus because the eligibility data has expired
-            or the user is ineligible to get the bonus.
-            She must re-initiate the eligibility procedure to refresh her data
-            and retry to activate the bonus within 24h since she got the result.
-        "409":
-          description: |
-            Cannot activate a new bonus because another active or redeemed
-            bonus related to this user was found.
-        "410":
-          description: |
-            Cannot activate a new bonus because DSU request is expired.
-        "500":
-          description: Service unavailable.
-          schema:
-            $ref: "#/definitions/ProblemJson"
+        "404":
+          description: The feature has been dismissed
+
     get:
       operationId: getAllBonusActivations
       summary: |
