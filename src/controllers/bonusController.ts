@@ -5,15 +5,12 @@
 
 import * as express from "express";
 import {
-  IResponseErrorConflict,
-  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorGone,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson,
-  IResponseSuccessRedirectToResource
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
@@ -23,10 +20,7 @@ import BonusService from "src/services/bonusService";
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
-import {
-  IResponseErrorUnauthorizedForLegalReasons,
-  withValidatedOrValidationError
-} from "../utils/responses";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export const withBonusIdFromRequest = async <T>(
   req: express.Request,
@@ -39,28 +33,6 @@ export const withBonusIdFromRequest = async <T>(
 
 export default class BonusController {
   constructor(private readonly bonusService: BonusService) {}
-
-  /**
-   * Starts a request for a bonus for the current user.
-   * Returns either an error or a reference to the request
-   *
-   */
-  public readonly startBonusEligibilityCheck = (
-    req: express.Request
-  ): Promise<
-    // tslint:disable-next-line:max-union-size
-    | IResponseErrorValidation
-    | IResponseErrorConflict
-    | IResponseErrorInternal
-    | IResponseSuccessAccepted
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseErrorGone
-    | IResponseErrorUnauthorizedForLegalReasons
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
-  > =>
-    withUserFromRequest(req, user =>
-      this.bonusService.startBonusEligibilityCheck(user)
-    );
 
   /**
    * Starts a request for a bonus for the current user.
@@ -117,26 +89,5 @@ export default class BonusController {
   > =>
     withUserFromRequest(req, user =>
       this.bonusService.getAllBonusActivations(user)
-    );
-
-  /**
-   * Start bonus activation request procedure
-   * Returns either an error or a reference to the request
-   *
-   */
-  public readonly startBonusActivationProcedure = (
-    req: express.Request
-  ): Promise<
-    // tslint:disable-next-line:max-union-size
-    | IResponseErrorValidation
-    | IResponseErrorConflict
-    | IResponseErrorInternal
-    | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessAccepted<InstanceId>
-    | IResponseErrorGone
-    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
-  > =>
-    withUserFromRequest(req, user =>
-      this.bonusService.startBonusActivationProcedure(user)
     );
 }
