@@ -75,7 +75,7 @@ definitions:
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/175908973_add_revoke_api/openapi/index.yaml#/definitions/InstanceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/175908973_add_revoke_api/openapi/index.yaml#/definitions/InstanceId"
   CgnPendingStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
   CgnActivatedStatus:
