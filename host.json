@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "logging": {
+    "logLevel": {
+      "default": "Information"
+    }
+  },
+  "extensions": {
+    "http": {
+      "routePrefix": ""
+    },
+    "durableTask": {
+      "hubName": "%SLOT_TASK_HUBNAME%"
+    }
+  }
+}

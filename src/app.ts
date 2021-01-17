@@ -55,6 +55,7 @@ import ServicesController from "./controllers/servicesController";
 import SessionController from "./controllers/sessionController";
 import UserMetadataController from "./controllers/userMetadataController";
 
+import * as mime from "mime";
 import { log } from "./utils/logger";
 import checkIP from "./utils/middleware/checkIP";
 
@@ -65,6 +66,7 @@ import * as appInsights from "applicationinsights";
 import { tryCatch2v } from "fp-ts/lib/Either";
 import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
 import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import * as fs from "fs";
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
@@ -118,6 +120,38 @@ const cachingMiddleware = apicache.options({
   }
 }).middleware;
 
+const staticContentMiddleware = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const path = "public" + req.path;
+    if (!fs.existsSync(path)) {
+      return next();
+    }
+    const stat = await fs.promises.stat(path);
+    if (stat.isDirectory()) {
+      return next();
+    }
+    const type = mime.lookup(path);
+    if (type) {
+      const charset = mime.charsets.lookup(type);
+      res.setHeader(
+        "Content-Type",
+        // tslint:disable-next-line: restrict-plus-operands
+        type + (charset ? `; charset=${charset}` : "")
+      );
+    }
+    const content = await fs.promises.readFile(path);
+    res.setHeader("Content-Length", stat.size);
+    res.status(200).send(content);
+  } catch (err) {
+    log.error(`static|Error retrieving static file asset|error:%s`, err);
+    return next(err);
+  }
+};
+
 export interface IAppFactoryParameters {
   env: NodeEnvironment;
   appInsightsClient?: appInsights.TelemetryClient;
@@ -132,9 +166,10 @@ export interface IAppFactoryParameters {
   PagoPABasePath: string;
   MyPortalBasePath: string;
   BPDBasePath: string;
+  withBodyParser: boolean;
 }
 
-// tslint:disable-next-line: no-big-function
+// tslint:disable-next-line: cognitive-complexity no-big-function
 export function newApp({
   env,
   allowNotifyIPSourceRange,
@@ -148,7 +183,8 @@ export function newApp({
   BonusAPIBasePath,
   PagoPABasePath,
   MyPortalBasePath,
-  BPDBasePath
+  BPDBasePath,
+  withBodyParser
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -250,21 +286,21 @@ export function newApp({
 
   app.use(morgan(loggerFormat));
 
-  //
-  // Setup parsers
-  //
+  // When the application is running as Azure Function
+  // Express Body parser must be disabled.
+  if (withBodyParser) {
+    // Parse the incoming request body. This is needed by Passport spid strategy.
+    app.use(bodyParser.json());
 
-  // Parse the incoming request body. This is needed by Passport spid strategy.
-  app.use(bodyParser.json());
-
-  // Parse an urlencoded body.
-  app.use(bodyParser.urlencoded({ extended: true }));
+    // Parse an urlencoded body.
+    app.use(bodyParser.urlencoded({ extended: true }));
+  }
 
   //
   // Define the folder that contains the public assets.
   //
 
-  app.use(express.static("public"));
+  app.get(/(\.html|\.svg|\.png)$/, staticContentMiddleware);
 
   //
   // Initializes Passport for incoming requests.

@@ -84,7 +84,8 @@ newApp({
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: maybeAppInsightsClient.toUndefined(),
   authenticationBasePath,
-  env: ENV
+  env: ENV,
+  withBodyParser: true
 })
   .then(app => {
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
