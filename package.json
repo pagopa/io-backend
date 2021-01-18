@@ -41,7 +41,9 @@
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all generate:proxy-models build dist:modules"
+    "predeploy": "npm-run-all generate:proxy-models build dist:modules",
+    "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
+    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
   "repository": {
     "type": "git",
@@ -116,6 +118,7 @@
     "@types/validator": "^9.4.2",
     "@types/xml2js": "^0.4.5",
     "@types/xmldom": "^0.1.29",
+    "auto-changelog": "^2.2.1",
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
@@ -128,7 +131,6 @@
     "nodemon": "^1.19.2",
     "npm-run-all": "^4.1.3",
     "prettier": "^1.14.3",
-    "release-it": "^12.4.3",
     "shx": "^0.3.2",
     "superagent": "^3.8.3",
     "supertest": "^3.3.0",
