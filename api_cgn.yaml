@@ -12,7 +12,8 @@ paths:
   "/cgn/status":
     get:
       operationId: getCgnStatus
-      summary: |
+      summary: Get the CGN status details
+      description: |
         Get the CGN status details 
         by the provided fiscal code
       responses:
@@ -21,9 +22,46 @@ paths:
           schema:
             $ref: "#/definitions/CgnStatus"
         "401":
-          description: Wrong or missing function key.
+          description: Bearer token null or expired.
         "404":
           description: No CGN found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/cgn/activations":
+    post:
+      operationId: startCgnActivation
+      summary: Start a CGN activation procedure
+      description: | 
+        Start a new CGN activation procedure
+        for the logged user calculating if the user is
+        eligible to get a CGN.
+      responses:
+        "201":
+          description: Request created.
+          schema:
+            $ref: "#/definitions/InstanceId"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+        "202":
+          description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
+        "401":
+          description: Bearer token null or expired.
+        "403":
+          description: |
+            Cannot activate a new CGN because the user is ineligible to get the CGN.
+        "409":
+          description: |
+            Cannot activate the user's cgn because another updateCgn request was found
+            for this user or it is already active.
         "500":
           description: Service unavailable.
           schema:
@@ -36,7 +74,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
-
+  InstanceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/175908973_add_revoke_api/openapi/index.yaml#/definitions/InstanceId"
   CgnPendingStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
   CgnActivatedStatus:
