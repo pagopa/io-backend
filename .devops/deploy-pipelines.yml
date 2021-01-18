@@ -1,7 +1,7 @@
 # Azure DevOps pipeline to release a new version and deploy to production.
 
 variables:
-  NODE_VERSION: '10.14.1'
+  NODE_VERSION: '10.14.2'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   # Configuration to run the healthcheck container
   HEALTHCHECK_CONTAINER_RG: 'io-p-rg-common'
