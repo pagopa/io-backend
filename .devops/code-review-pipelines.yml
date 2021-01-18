@@ -1,0 +1,100 @@
+# Azure DevOps pipeline to build, check source codes and run tests.
+#
+# To make Danger JS run on a pull request you need to add the following pipeline 
+# variable and set it with a GitHub access token (scope public_repo); otherwise 
+# set its value to 'skip' without marking it secret: 
+# - DANGER_GITHUB_API_TOKEN
+# 
+
+variables:
+  NODE_VERSION: '10.14.1'
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+
+# Automatically triggered on PR
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pr-trigger
+trigger: none
+
+# Execute agents (jobs) on latest Ubuntu version.
+# To change OS for a specific, ovverride "pool" attribute inside the job definition
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: Build
+    dependsOn: []
+    jobs:
+      - job: make_build  
+        steps:
+        - template: azure-templates/setup-project.yml
+        - script: |
+            yarn build
+          displayName: 'Build'
+  
+  - stage: Static_analysis
+    dependsOn: []
+    jobs:
+
+      - job: lint     
+        steps:
+        - template: azure-templates/setup-project.yml
+        - script: |
+            yarn lint
+          displayName: 'Lint'
+
+      - job: validate_api_specification     
+        steps:
+        - script: |
+            # Adding Oval is quicker than using npx multiple times
+            # Changes are not committes, so it's the same result
+            yarn add --dev oval
+
+            # By convention, we expose api specifications using files
+            #  in form api_<api-name>.yaml in the root of this project
+            valid=1
+            for apispec in $(ls api_*.yaml); do
+              echo "validating $apispec"
+              yarn oval validate -p $apispec
+              result=$?
+              if [ ! $result = 0 ]; then
+                valid=0
+                echo "$apispec failed with code $result"
+              fi
+            done
+            [[ $valid = 1 ]] && exit 0 || exit 1
+          displayName: 'Validate API specifications'
+
+      - job: danger
+        condition: 
+          and(
+            succeeded(),
+            ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
+          )
+        steps:
+          - template: azure-templates/setup-project.yml
+
+          - bash: |
+              yarn danger ci
+            env:
+              DANGER_GITHUB_API_TOKEN: '$(DANGER_GITHUB_API_TOKEN)'
+            displayName: 'Danger CI'
+
+
+  # B) Run unit tests if there is a push or pull request on any branch.
+  - stage: Test
+    dependsOn: []
+    jobs:
+      - job: unit_tests
+        steps:
+        - template: azure-templates/setup-project.yml
+        
+        - script: |
+            yarn generate:test-certs
+          displayName: 'Generate test certificates'
+
+        - script: |
+            yarn test:coverage
+          displayName: 'Unit tests exec'
+
+        - bash: |
+            bash <(curl -s https://codecov.io/bash)
+          displayName: 'Code coverage'
