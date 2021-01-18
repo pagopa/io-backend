@@ -16,6 +16,7 @@
   },
   "scripts": {
     "watch": "tsc -w",
+    "prebuild": "yarn generate",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5859 --nolazy src/server.js",
@@ -25,6 +26,7 @@
     "test": "jest -i",
     "test:coverage": "dotenv -e .env.example -- jest -i --coverage",
     "start": "node src/server.js",
+    "generate": "npm-run-all generate:*",
     "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
     "generate:proxy:auth-models": "rimraf generated/auth && gen-api-models --api-spec api_auth.yaml --out-dir generated/auth",

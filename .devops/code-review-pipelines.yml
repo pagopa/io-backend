@@ -88,8 +88,8 @@ stages:
         - template: azure-templates/setup-project.yml
         
         - script: |
-            yarn generate:test-certs
-          displayName: 'Generate test certificates'
+            yarn generate
+          displayName: 'Generate test certificates and definitions'        
 
         - script: |
             yarn test:coverage
