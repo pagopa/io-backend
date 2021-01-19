@@ -16,7 +16,7 @@
   },
   "scripts": {
     "watch": "tsc -w",
-    "prebuild": "yarn generate",
+    "prebuild": "yarn generate:proxy-models",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5859 --nolazy src/server.js",
@@ -43,7 +43,7 @@
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all generate:proxy-models build dist:modules",
+    "predeploy": "npm-run-all build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
     "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
   },
