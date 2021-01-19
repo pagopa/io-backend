@@ -30,6 +30,9 @@ steps:
   displayName: 'Set up Node.js'
 
 - script: |
+    echo registry=https://registry.npmjs.com/ >> .npmrc
+    echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc
+    echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc
     yarn install --frozen-lockfile --no-progress --non-interactive --network-concurrency 1
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)    
