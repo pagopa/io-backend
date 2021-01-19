@@ -170,8 +170,6 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/QrCodeImage"
-        required:
-          - items
     required:
       - qr_code
 
