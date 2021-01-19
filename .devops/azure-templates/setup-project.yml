@@ -31,4 +31,6 @@ steps:
 
 - script: |
     yarn install --frozen-lockfile --no-progress --non-interactive --network-concurrency 1
+  env:
+    GITHUB_TOKEN: $(GITHUB_TOKEN)    
   displayName: 'Install node modules'
