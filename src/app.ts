@@ -813,6 +813,7 @@ function registerBonusAPIRoutes(
   app: Express,
   basePath: string,
   bonusService: BonusService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
   const bonusController: BonusController = new BonusController(bonusService);

@@ -31,7 +31,7 @@ export function constantExpressHandler<T>(
   response: IResponse<T>
 ): (req: express.Request, res: express.Response) => void {
   return (_, res) => {
-    // tslint:disable-next-line:no-object-mutation
+    // eslint-disable-next-line functional/immutable-data
     res.locals.detail = response.detail;
     response.apply(res);
   };
