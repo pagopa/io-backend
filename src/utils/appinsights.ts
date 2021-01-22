@@ -79,6 +79,7 @@ export function sessionIdPreprocessor(
   return true;
 }
 
+// eslint-disable-next-line no-shadow
 export enum StartupEventName {
   SERVER = "api-backend.httpserver.startup",
   SPID = "api-backend.spid.config"
@@ -97,6 +98,7 @@ export const trackStartupTime = (
     tagOverrides: { samplingEnabled: "false" }
   });
 };
+
 /**
  * App Insights is initialized to collect the following informations:
  * - Incoming API calls
