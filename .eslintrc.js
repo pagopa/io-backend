@@ -24,8 +24,6 @@ module.exports = {
         "prefer-arrow/prefer-arrow-functions": "off",
         "@typescript-eslint/naming-convention": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
-        "no-invalid-this": "off",
-        "no-shadow": "off",
-        "@typescript-eslint/no-shadow": "error"
+        "no-invalid-this": "off"
     }
 };

@@ -275,10 +275,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/types/-/types-0.2.0.tgz#2a0afd40fa7026e39ea56a454642bda72b172f80"
   integrity sha512-GtwNB6BNDdsIPAYEdpp3JnOGO/3AJxjPvny53s3HERBdXSJTGQw8IRhiaTEX0b3w9P8+FwFZde4k+qkjn67aVw==
 
-"@pagopa/eslint-config@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/eslint-config/-/eslint-config-1.0.0.tgz#d650f720455c527c3f419b17ef7a7cf3d97fc8b0"
-  integrity sha512-udI3NAjCXxGtvUuTzhIosGhgCPkbBbAmxX8ru6oJmFvw/J6/ugCJwCcg87tZwTEfUxaT2DCQA/VQGAoh5V7xpQ==
+"@pagopa/eslint-config@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@pagopa/eslint-config/-/eslint-config-1.1.1.tgz#09fdfa59708f44996c042451d4d16a624b276bcb"
+  integrity sha512-b4MBnPWFj1I/O3wpQfR475BoLcB7Nmze67eqLl+J1t7ajFKPi4FF8k7+Xpfct6Z1ziVSTYVjQgMuoBJRHADcrA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.10.0"
     "@typescript-eslint/eslint-plugin-tslint" "^4.10.0"
