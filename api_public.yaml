@@ -98,7 +98,7 @@ definitions:
     properties:
       token:
         type: string
-        minLenght: 1
+        minLength: 1
     required:
       - token
 consumes:

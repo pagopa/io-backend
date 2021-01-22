@@ -30,7 +30,7 @@ import { UrlFromString } from "italia-ts-commons/lib/url";
 import { NewProfile } from "generated/io-api/NewProfile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
@@ -276,7 +276,7 @@ export default class AuthenticationController {
           return left(new Error("Unexpected redirection url"));
         })
         .chain(token =>
-          SessionToken.decode(token).mapLeft(
+          NonEmptyString.decode(token).mapLeft(
             err => new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
           )
         )

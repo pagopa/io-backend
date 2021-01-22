@@ -26,7 +26,7 @@ paths:
         "200":
           description: Found.
           schema:
-            - $ref: "#/definitions/PagoPAUser"
+            $ref: "#/definitions/PagoPAUser"
           examples:
             application/json:
               email: "email@example.com"

@@ -23,3 +23,16 @@ export function toExpressHandler<T, P>(
         response.apply(res);
       });
 }
+
+/**
+ * An Express handler that always respond with the same response object
+ */
+export function constantExpressHandler<T>(
+  response: IResponse<T>
+): (req: express.Request, res: express.Response) => void {
+  return (_, res) => {
+    // tslint:disable-next-line:no-object-mutation
+    res.locals.detail = response.detail;
+    response.apply(res);
+  };
+}

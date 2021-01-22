@@ -6,6 +6,7 @@ import {
   IResponse,
   ResponseErrorGeneric,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponseErrorValidation
 } from "italia-ts-commons/lib/responses";
 
@@ -25,6 +26,14 @@ export function ResponseNoContent(): IResponseNoContent {
     value: {}
   };
 }
+
+/**
+ * A response error for when a feature has been dismissed.
+ */
+export const ResponseErrorDismissed = ResponseErrorNotFound(
+  "Expired resource",
+  "The resource you asked for is no longer available"
+);
 
 /**
  * Transforms async failures into internal errors

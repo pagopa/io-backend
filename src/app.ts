@@ -6,7 +6,6 @@ import {
   API_CLIENT,
   appConfig,
   BONUS_API_CLIENT,
-  BONUS_REQUEST_LIMIT_DATE,
   CACHE_MAX_AGE_SECONDS,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
@@ -94,8 +93,7 @@ import {
   trackStartupTime
 } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
-import { toExpressHandler } from "./utils/express";
-import { dueDateMiddleware } from "./utils/middleware/dueDate";
+import { constantExpressHandler, toExpressHandler } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
@@ -105,6 +103,7 @@ import {
   createClusterRedisClient,
   createSimpleRedisClient
 } from "./utils/redis";
+import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
 
@@ -379,8 +378,7 @@ export function newApp({
           app,
           BonusAPIBasePath,
           BONUS_SERVICE,
-          authMiddlewares.bearerSession,
-          BONUS_REQUEST_LIMIT_DATE
+          authMiddlewares.bearerSession
         );
       }
       registerPagoPARoutes(
@@ -810,19 +808,14 @@ function registerBonusAPIRoutes(
   basePath: string,
   bonusService: BonusService,
   // tslint:disable-next-line: no-any
-  bearerSessionTokenAuth: any,
-  requestLimitDate: Date
+  bearerSessionTokenAuth: any
 ): void {
   const bonusController: BonusController = new BonusController(bonusService);
 
   app.post(
     `${basePath}/bonus/vacanze/eligibility`,
-    dueDateMiddleware(requestLimitDate),
     bearerSessionTokenAuth,
-    toExpressHandler(
-      bonusController.startBonusEligibilityCheck,
-      bonusController
-    )
+    constantExpressHandler(ResponseErrorDismissed)
   );
 
   app.get(
@@ -848,12 +841,8 @@ function registerBonusAPIRoutes(
 
   app.post(
     `${basePath}/bonus/vacanze/activations`,
-    dueDateMiddleware(requestLimitDate),
     bearerSessionTokenAuth,
-    toExpressHandler(
-      bonusController.startBonusActivationProcedure,
-      bonusController
-    )
+    constantExpressHandler(ResponseErrorDismissed)
   );
 }
 
