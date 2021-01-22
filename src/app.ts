@@ -87,7 +87,11 @@ import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy"
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
 import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
-import { attachTrackingData } from "./utils/appinsights";
+import {
+  attachTrackingData,
+  StartupEventName,
+  trackStartupTime
+} from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import { constantExpressHandler, toExpressHandler } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
@@ -101,6 +105,7 @@ import {
 } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
+import { TimeTracer } from "./utils/timer";
 
 const defaultModule = {
   newApp
@@ -407,6 +412,7 @@ export function newApp({
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
+      const timer = TimeTracer();
       return tryCatch(
         () =>
           withSpid({
@@ -431,9 +437,20 @@ export function newApp({
             serviceProviderConfig
           }).run(),
         err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
-      );
+      ).map(withSpidApp => ({
+        ...withSpidApp,
+        spidConfigTime: timer.getElapsedMilliseconds()
+      }));
     })
     .map(_ => {
+      if (appInsightsClient) {
+        trackStartupTime(
+          appInsightsClient,
+          StartupEventName.SPID,
+          _.spidConfigTime
+        );
+      }
+      log.info(`Spid init time: %sms`, _.spidConfigTime.toString());
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
         () =>
