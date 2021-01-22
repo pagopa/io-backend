@@ -79,7 +79,6 @@ export function sessionIdPreprocessor(
   return true;
 }
 
-// eslint-disable-next-line no-shadow
 export enum StartupEventName {
   SERVER = "api-backend.httpserver.startup",
   SPID = "api-backend.spid.config"

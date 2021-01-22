@@ -3,7 +3,6 @@
  */
 import { PagoPAClient } from "../clients/pagopa";
 
-// eslint-disable-next-line no-shadow
 export enum PagoPAEnvironment {
   PRODUCTION = "PRODUCTION",
   TEST = "TEST"
