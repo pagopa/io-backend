@@ -19,7 +19,7 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import { right } from "fp-ts/lib/Either";
-import { MessageSubject } from "generated/notifications/MessageSubject";
+import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
 
 const aTimestamp = 1518010929530;

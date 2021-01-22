@@ -32,7 +32,7 @@ const VALIDATION_ERROR_TITLE = "Validation Error";
 
 export default class PagoPAController {
   constructor(
-    readonly profileService: ProfileService,
+    private readonly profileService: ProfileService,
     private readonly sessionStorage: ISessionStorage,
     private readonly enableNoticeEmailCache: boolean
   ) {}
@@ -43,7 +43,6 @@ export default class PagoPAController {
   public readonly getUser = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal

@@ -9,12 +9,12 @@ import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 // TODO: this class is actually useless as APIClient is immutable, it can be removed
 export default class ApiClientFactory implements IApiClientFactoryInterface {
-  private apiClient!: ReturnType<APIClient>;
+  private readonly apiClient!: ReturnType<APIClient>;
 
   constructor(
     apiKey: string,
     apiUrl: string,
-    // tslint:disable-next-line: no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchApi: typeof fetch = nodeFetch as any
   ) {
     this.apiClient = APIClient(apiUrl, apiKey, fetchApi);

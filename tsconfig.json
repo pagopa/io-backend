@@ -9,7 +9,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "resolveJsonModule": true
   },
   "include": [
     "./src/**/*"

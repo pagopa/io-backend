@@ -1,4 +1,3 @@
-// tslint:disable-next-line: no-any
-export const base64EncodeObject = (_: any) => {
-  return Buffer.from(JSON.stringify(_)).toString("base64");
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const base64EncodeObject = (_: any): string =>
+  Buffer.from(JSON.stringify(_)).toString("base64");

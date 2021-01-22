@@ -115,7 +115,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
               }
               const userMetadata = errorOrDeserializedUserMetadata.value;
               return resolve(right<Error, UserMetadata>(userMetadata));
-            } catch (err) {
+            } catch (_) {
               return resolve(
                 left<Error, UserMetadata>(
                   new Error("Unable to parse the user metadata json")

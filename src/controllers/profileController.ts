@@ -37,7 +37,6 @@ export default class ProfileController {
   public readonly getProfile = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
@@ -57,7 +56,6 @@ export default class ProfileController {
   public readonly getApiProfile = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
@@ -73,7 +71,6 @@ export default class ProfileController {
   public readonly updateProfile = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
@@ -97,7 +94,6 @@ export default class ProfileController {
   public readonly startEmailValidationProcess = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal

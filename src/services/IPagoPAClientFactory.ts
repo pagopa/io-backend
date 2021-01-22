@@ -3,6 +3,11 @@
  */
 import { PagoPAClient } from "../clients/pagopa";
 
+export enum PagoPAEnvironment {
+  PRODUCTION = "PRODUCTION",
+  TEST = "TEST"
+}
+
 export interface IPagoPAClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
@@ -10,9 +15,4 @@ export interface IPagoPAClientFactoryInterface {
   readonly getClient: (
     environment: PagoPAEnvironment
   ) => ReturnType<PagoPAClient>;
-}
-
-export enum PagoPAEnvironment {
-  PRODUCTION = "PRODUCTION",
-  TEST = "TEST"
 }

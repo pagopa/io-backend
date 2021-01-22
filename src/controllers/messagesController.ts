@@ -12,10 +12,10 @@ import {
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
-import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 
 export default class MessagesController {
@@ -27,7 +27,6 @@ export default class MessagesController {
   public readonly getMessagesByUser = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
@@ -41,7 +40,6 @@ export default class MessagesController {
   public readonly getMessage = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound

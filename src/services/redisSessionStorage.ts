@@ -2,6 +2,7 @@
  * This service uses the Redis client to store and retrieve session information.
  */
 
+import { isArray } from "util";
 import { array } from "fp-ts/lib/Array";
 import {
   Either,
@@ -25,7 +26,6 @@ import {
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
 import * as redis from "redis";
-import { isArray } from "util";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
@@ -53,13 +53,13 @@ export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
   implements ISessionStorage {
-  private mgetTask: (
+  private readonly mgetTask: (
     ...args: ReadonlyArray<string>
   ) => TaskEither<Error, ReadonlyArray<string>>;
-  private sismemberTask: (
+  private readonly sismemberTask: (
     ...args: ReadonlyArray<string>
   ) => TaskEither<Error, number>;
-  private ttlTask: (key: string) => TaskEither<Error, number>;
+  private readonly ttlTask: (key: string) => TaskEither<Error, number>;
   constructor(
     private readonly redisClient: redis.RedisClient,
     private readonly tokenDurationSecs: number
@@ -152,7 +152,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     });
 
     // If is a session update, the session info key doesn't must be updated.
-    // tslint:disable-next-line: no-let
+    // eslint-disable-next-line functional/no-let
     let saveSessionInfoPromise: Promise<Either<
       Error,
       boolean
@@ -332,7 +332,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     await this.clearExpiredSetValues(user.fiscal_code);
 
     const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
-    // tslint:disable-next-line: readonly-array
+    // eslint-disable-next-line functional/prefer-readonly-type
     const initializedSessionKeys: string[] = [];
     if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
       return left(sessionKeys.value);
@@ -348,6 +348,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       if (isLeft(refreshUserSessionInfo)) {
         return left(sessionNotFoundError);
       }
+      // eslint-disable-next-line functional/immutable-data
       initializedSessionKeys.push(
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
@@ -359,6 +360,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   /**
    * Remove expired `SESSIONINFO` value from the `USERSESSION` redis set.
+   *
    * @param fiscalCode
    */
   public async clearExpiredSetValues(
@@ -375,25 +377,27 @@ export default class RedisSessionStorage extends RedisStorageUtils
       });
     });
     const activeKeys = await Promise.all(
-      keys.map(_ => {
-        return new Promise<Either<string, string>>(resolve => {
-          this.redisClient.exists(_, (err, response) => {
-            if (err || !response) {
-              return resolve(left(_));
-            }
-            return resolve(right(_));
-          });
-        });
-      })
+      keys.map(
+        _ =>
+          new Promise<Either<string, string>>(resolve => {
+            this.redisClient.exists(_, (err, response) => {
+              if (err || !response) {
+                return resolve(left(_));
+              }
+              return resolve(right(_));
+            });
+          })
+      )
     );
     return await Promise.all(
-      activeKeys.filter(isLeft).map(_ => {
-        return new Promise<Either<Error, boolean>>(resolve => {
-          this.redisClient.srem(userSessionSetKey, _.value, (err, response) =>
-            resolve(this.integerReply(err, response))
-          );
-        });
-      })
+      activeKeys.filter(isLeft).map(
+        _ =>
+          new Promise<Either<Error, boolean>>(resolve => {
+            this.redisClient.srem(userSessionSetKey, _.value, (err, response) =>
+              resolve(this.integerReply(err, response))
+            );
+          })
+      )
     );
   }
 
@@ -484,6 +488,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   /**
    * Delete all user session data
+   *
    * @param fiscalCode
    */
   public async delUserAllSessions(
@@ -491,7 +496,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, boolean>> {
     const errorOrSessions = await this.readSessionInfoKeys(fiscalCode);
 
-    const delEverySession = (sessionTokens: readonly SessionToken[]) =>
+    const delEverySession = (
+      sessionTokens: ReadonlyArray<SessionToken>
+    ): TaskEither<Error, boolean> =>
       array
         .sequence(taskEither)<Error, boolean>(
           sessionTokens.map(sessionToken =>
@@ -530,6 +537,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   /**
    * Update an user session keeping the current session TTL
+   *
    * @param updatedUser
    */
   public async update(updatedUser: UserV3): Promise<Either<Error, boolean>> {
@@ -587,6 +595,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         NoticeEmail,
         "EX",
         sessionTtl,
+        // eslint-disable-next-line sonarjs/no-identical-functions
         (err, response) =>
           resolve(
             this.falsyResponseToError(
@@ -646,6 +655,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   /**
    * Return the session token remaining time to live in seconds
+   *
    * @param token
    */
   private async getSessionTtl(
@@ -659,6 +669,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
   /**
    * Given a token, it removes user session token and wallet token
+   *
    * @param token
    */
   private async delSingleSession(
@@ -789,7 +800,6 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * Remove other user sessions and wallet tokens
    */
-  // tslint:disable-next-line: cognitive-complexity
   private async removeOtherUserSessions(
     user: UserV3
   ): Promise<Either<Error, boolean>> {
@@ -829,8 +839,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
       const externalTokens = errorOrDeserializedUsers.fold(
         _ => [],
         _ =>
-          _.map(deserializedUser => {
-            return collect(
+          _.map(deserializedUser =>
+            collect(
               this.getUserTokens(deserializedUser).filter(
                 p =>
                   !(
@@ -848,8 +858,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
                   !(p.prefix === bpdTokenPrefix && p.value === user.bpd_token)
               ),
               (_1, { prefix, value }) => `${prefix}${value}`
-            );
-          }).reduce((prev, tokens) => [...prev, ...tokens], [])
+            )
+          ).reduce((prev, tokens) => [...prev, ...tokens], [])
       );
 
       // Delete all active tokens that are different
@@ -901,41 +911,40 @@ export default class RedisSessionStorage extends RedisStorageUtils
   }
 
   private parseUser(value: string): Either<Error, User> {
-    return parseJSON<Error>(value, toError).chain(data => {
-      return User.decode(data).mapLeft(err => {
-        return new Error(errorsToReadableMessages(err).join("/"));
-      });
-    });
+    return parseJSON<Error>(value, toError).chain(data =>
+      User.decode(data).mapLeft(
+        err => new Error(errorsToReadableMessages(err).join("/"))
+      )
+    );
   }
 
   private parseUserSessionList(
     userSessionTokensResult: ReadonlyArray<string>
   ): SessionsList {
     return userSessionTokensResult.reduce(
-      (prev: SessionsList, _) => {
-        return parseJSON<Error>(_, toError)
-          .chain(data => {
-            return SessionInfo.decode(data).mapLeft(err => {
-              return new Error(errorsToReadableMessages(err).join("/"));
-            });
-          })
+      (prev: SessionsList, _) =>
+        parseJSON<Error>(_, toError)
+          .chain(data =>
+            SessionInfo.decode(data).mapLeft(
+              err => new Error(errorsToReadableMessages(err).join("/"))
+            )
+          )
           .fold(
             err => {
               log.warn("Unable to decode the session info: %s. Skipped.", err);
               return prev;
             },
-            sessionInfo => {
-              return {
-                sessions: [...prev.sessions, sessionInfo]
-              };
-            }
-          );
-      },
+            sessionInfo => ({
+              sessions: [...prev.sessions, sessionInfo]
+            })
+          ),
       { sessions: [] } as SessionsList
     );
   }
 
-  private getUserTokens(user: User): StrMap<{ prefix: string; value: string }> {
+  private getUserTokens(
+    user: User
+  ): StrMap<{ readonly prefix: string; readonly value: string }> {
     const requiredTokens = {
       session_info: {
         prefix: sessionInfoKeyPrefix,

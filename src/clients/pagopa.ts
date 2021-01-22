@@ -3,8 +3,7 @@ import { Client, createClient } from "../../generated/pagopa-proxy/client";
 
 export function PagoPAClient(
   baseUrl: string,
-  // tslint:disable-next-line:no-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch
 ): Client {
   return createClient({
     basePath: "",

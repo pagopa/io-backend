@@ -2,6 +2,43 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
+import * as apicache from "apicache";
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import * as helmet from "helmet";
+import * as morgan from "morgan";
+import * as passport from "passport";
+
+import { Express } from "express";
+import expressEnforcesSsl = require("express-enforces-ssl");
+import {
+  NodeEnvironment,
+  NodeEnvironmentEnum
+} from "italia-ts-commons/lib/environment";
+import { CIDR } from "italia-ts-commons/lib/strings";
+import { QueueClient } from "@azure/storage-queue";
+import { withSpid } from "@pagopa/io-spid-commons";
+import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import * as appInsights from "applicationinsights";
+import { tryCatch2v } from "fp-ts/lib/Either";
+import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
+import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { ServerInfo } from "../generated/public/ServerInfo";
+
+import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
+import AuthenticationController from "./controllers/authenticationController";
+import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
+import PagoPAController from "./controllers/pagoPAController";
+import PagoPAProxyController from "./controllers/pagoPAProxyController";
+import ProfileController from "./controllers/profileController";
+import ServicesController from "./controllers/servicesController";
+import SessionController from "./controllers/sessionController";
+import UserMetadataController from "./controllers/userMetadataController";
+
+import { log } from "./utils/logger";
+import checkIP from "./utils/middleware/checkIP";
+
 import {
   API_CLIENT,
   appConfig,
@@ -28,44 +65,6 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING
 } from "./config";
-
-import * as apicache from "apicache";
-import * as bodyParser from "body-parser";
-import * as express from "express";
-import * as helmet from "helmet";
-import * as morgan from "morgan";
-import * as passport from "passport";
-
-import { Express } from "express";
-import expressEnforcesSsl = require("express-enforces-ssl");
-import {
-  NodeEnvironment,
-  NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
-import { ServerInfo } from "../generated/public/ServerInfo";
-
-import AuthenticationController from "./controllers/authenticationController";
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import PagoPAController from "./controllers/pagoPAController";
-import PagoPAProxyController from "./controllers/pagoPAProxyController";
-import ProfileController from "./controllers/profileController";
-import ServicesController from "./controllers/servicesController";
-import SessionController from "./controllers/sessionController";
-import UserMetadataController from "./controllers/userMetadataController";
-
-import { log } from "./utils/logger";
-import checkIP from "./utils/middleware/checkIP";
-
-import { QueueClient } from "@azure/storage-queue";
-import { withSpid } from "@pagopa/io-spid-commons";
-import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
-import * as appInsights from "applicationinsights";
-import { tryCatch2v } from "fp-ts/lib/Either";
-import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
-import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import BonusController from "./controllers/bonusController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
@@ -108,6 +107,7 @@ import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
 
 const defaultModule = {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   newApp
 };
 
@@ -124,22 +124,22 @@ const cachingMiddleware = apicache.options({
 }).middleware;
 
 export interface IAppFactoryParameters {
-  env: NodeEnvironment;
-  appInsightsClient?: appInsights.TelemetryClient;
-  allowNotifyIPSourceRange: readonly CIDR[];
-  allowPagoPAIPSourceRange: readonly CIDR[];
-  allowMyPortalIPSourceRange: readonly CIDR[];
-  allowBPDIPSourceRange: readonly CIDR[];
-  allowSessionHandleIPSourceRange: readonly CIDR[];
-  authenticationBasePath: string;
-  APIBasePath: string;
-  BonusAPIBasePath: string;
-  PagoPABasePath: string;
-  MyPortalBasePath: string;
-  BPDBasePath: string;
+  readonly env: NodeEnvironment;
+  readonly appInsightsClient?: appInsights.TelemetryClient;
+  readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowPagoPAIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowBPDIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
+  readonly authenticationBasePath: string;
+  readonly APIBasePath: string;
+  readonly BonusAPIBasePath: string;
+  readonly PagoPABasePath: string;
+  readonly MyPortalBasePath: string;
+  readonly BPDBasePath: string;
 }
 
-// tslint:disable-next-line: no-big-function
+// eslint-disable-next-line max-lines-per-function
 export function newApp({
   env,
   allowNotifyIPSourceRange,
@@ -171,7 +171,6 @@ export function newApp({
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.
   passport.use(
-    // tslint:disable-next-line: no-duplicate-string
     "bearer.session",
     bearerSessionTokenStrategy(SESSION_STORAGE, attachTrackingData)
   );
@@ -298,12 +297,11 @@ export function newApp({
 
       // Create the Notification Service
       const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
-        () => {
-          return new NotificationService(
+        () =>
+          new NotificationService(
             NOTIFICATIONS_STORAGE_CONNECTION_STRING,
             NOTIFICATIONS_QUEUE_NAME
-          );
-        },
+          ),
         err => {
           throw new Error(`Error initializing Notification Service: [${err}]`);
         }
@@ -313,12 +311,11 @@ export function newApp({
 
       // Create the UsersLoginLogService
       const ERROR_OR_USERS_LOGIN_LOG_SERVICE = tryCatch2v(
-        () => {
-          return new UsersLoginLogService(
+        () =>
+          new UsersLoginLogService(
             USERS_LOGIN_STORAGE_CONNECTION_STRING,
             USERS_LOGIN_QUEUE_NAME
-          );
-        },
+          ),
         err => {
           throw new Error(`Error initializing UsersLoginLogService: [${err}]`);
         }
@@ -336,8 +333,10 @@ export function newApp({
         TEST_LOGIN_FISCAL_CODES
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerPublicRoutes(app);
 
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerAuthenticationRoutes(
         app,
         authenticationBasePath,
@@ -350,6 +349,7 @@ export function newApp({
       const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
       // Register the user metadata storage service.
       const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerAPIRoutes(
         app,
         APIBasePath,
@@ -365,6 +365,7 @@ export function newApp({
         TOKEN_SERVICE,
         authMiddlewares.bearerSession
       );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerSessionAPIRoutes(
         app,
         APIBasePath,
@@ -374,6 +375,7 @@ export function newApp({
         USER_METADATA_STORAGE
       );
       if (FF_BONUS_ENABLED) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerBonusAPIRoutes(
           app,
           BonusAPIBasePath,
@@ -381,6 +383,7 @@ export function newApp({
           authMiddlewares.bearerSession
         );
       }
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerPagoPARoutes(
         app,
         PagoPABasePath,
@@ -390,19 +393,21 @@ export function newApp({
         ENABLE_NOTICE_EMAIL_CACHE,
         authMiddlewares.bearerWallet
       );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerMyPortalRoutes(
         app,
         MyPortalBasePath,
         allowMyPortalIPSourceRange,
         authMiddlewares.bearerMyPortal
       );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerBPDRoutes(
         app,
         BPDBasePath,
         allowBPDIPSourceRange,
         authMiddlewares.bearerBPD
       );
-      return { app, acsController };
+      return { acsController, app };
     },
     err => new Error(`Error on app routes setup: [${err}]`)
   )
@@ -495,14 +500,15 @@ export function newApp({
     .run();
 }
 
+// eslint-disable-next-line max-params
 function registerPagoPARoutes(
   app: Express,
   basePath: string,
-  allowPagoPAIPSourceRange: readonly CIDR[],
+  allowPagoPAIPSourceRange: ReadonlyArray<CIDR>,
   profileService: ProfileService,
   sessionStorage: RedisSessionStorage,
   enableNoticeEmailCache: boolean,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerWalletTokenAuth: any
 ): void {
   const pagopaController: PagoPAController = new PagoPAController(
@@ -522,8 +528,8 @@ function registerPagoPARoutes(
 function registerMyPortalRoutes(
   app: Express,
   basePath: string,
-  allowMyPortalIPSourceRange: readonly CIDR[],
-  // tslint:disable-next-line: no-any
+  allowMyPortalIPSourceRange: ReadonlyArray<CIDR>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerMyPortalTokenAuth: any
 ): void {
   app.get(
@@ -537,8 +543,8 @@ function registerMyPortalRoutes(
 function registerBPDRoutes(
   app: Express,
   basePath: string,
-  allowBPDIPSourceRange: readonly CIDR[],
-  // tslint:disable-next-line: no-any
+  allowBPDIPSourceRange: ReadonlyArray<CIDR>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerBPDTokenAuth: any
 ): void {
   app.get(
@@ -549,12 +555,12 @@ function registerBPDRoutes(
   );
 }
 
-// tslint:disable-next-line: parameters-max-number
+// eslint-disable-next-line max-params, max-lines-per-function
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  allowNotifyIPSourceRange: readonly CIDR[],
-  // tslint:disable-next-line: no-any
+  allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
   messagesService: MessagesService,
@@ -564,7 +570,7 @@ function registerAPIRoutes(
   userMetadataStorage: RedisUserMetadataStorage,
   userDataProcessingService: UserDataProcessingService,
   tokenService: TokenService,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
   const profileController: ProfileController = new ProfileController(
@@ -767,12 +773,12 @@ function registerAPIRoutes(
   );
 }
 
-// tslint:disable-next-line: parameters-max-number
+// eslint-disable-next-line max-params
 function registerSessionAPIRoutes(
   app: Express,
   basePath: string,
-  allowSessionHandleIPSourceRange: readonly CIDR[],
-  // tslint:disable-next-line: no-any
+  allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage
@@ -807,7 +813,7 @@ function registerBonusAPIRoutes(
   app: Express,
   basePath: string,
   bonusService: BonusService,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
   const bonusController: BonusController = new BonusController(bonusService);
@@ -850,9 +856,9 @@ function registerAuthenticationRoutes(
   app: Express,
   authBasePath: string,
   acsController: AuthenticationController,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   localAuth: any
 ): void {
   TEST_LOGIN_PASSWORD.map(testLoginPassword => {

@@ -42,7 +42,6 @@ export default class BonusController {
   public readonly getBonusEligibilityCheck = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
@@ -62,7 +61,6 @@ export default class BonusController {
   public readonly getLatestBonusActivationById = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
@@ -82,7 +80,6 @@ export default class BonusController {
   public readonly getAllBonusActivations = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
