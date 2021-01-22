@@ -12,11 +12,11 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { fromNullable } from "fp-ts/lib/Option";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 
-import { fromNullable } from "fp-ts/lib/Option";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../../src/utils/attachments";
 import { User } from "../types/user";
@@ -36,7 +36,6 @@ export default class MessagesService {
   public readonly getMessagesByUser = (
     user: User
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
@@ -66,7 +65,6 @@ export default class MessagesService {
     user: User,
     messageId: string
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
@@ -118,7 +116,6 @@ export default class MessagesService {
   public readonly getService = (
     serviceId: string
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests

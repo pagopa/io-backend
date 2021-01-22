@@ -12,13 +12,14 @@ const MIME_TYPES = {
 };
 
 // Needed to display the SVG into the mobile App
-const fixQrcodeFill = (svgStr: string) =>
+const fixQrcodeFill = (svgStr: string): string =>
   svgStr.replace("<path", '<path fill="black"');
 
 function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  // tslint:disable-next-line: readonly-array no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type
   const chunks: any[] = [];
   return new Promise((resolve, reject) => {
+    // eslint-disable-next-line functional/immutable-data
     stream.on("data", chunk => chunks.push(chunk));
     stream.on("error", reject);
     stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
@@ -26,20 +27,23 @@ function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
 }
 
 function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-  // tslint:disable-next-line: readonly-array no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type
   const chunks: any[] = [];
   return new Promise((resolve, reject) => {
+    // eslint-disable-next-line functional/immutable-data
     stream.on("data", chunk => chunks.push(chunk));
     stream.on("error", reject);
     stream.on("end", () => resolve(Buffer.concat(chunks)));
   });
 }
 
-const streamToBufferTask = (stream: NodeJS.ReadableStream) =>
-  tryCatch(() => streamToBuffer(stream), toError);
+const streamToBufferTask = (
+  stream: NodeJS.ReadableStream
+): TaskEither<Error, Buffer> => tryCatch(() => streamToBuffer(stream), toError);
 
-const streamToStringTask = (stream: NodeJS.ReadableStream) =>
-  tryCatch(() => streamToString(stream), toError);
+const streamToStringTask = (
+  stream: NodeJS.ReadableStream
+): TaskEither<Error, string> => tryCatch(() => streamToString(stream), toError);
 
 export function withQrcode(
   bonus: BonusActivation

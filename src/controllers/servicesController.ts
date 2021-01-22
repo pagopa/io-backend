@@ -27,7 +27,6 @@ export default class ServicesController {
   public readonly getService = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound

@@ -3,13 +3,13 @@
  */
 
 import * as crypto from "crypto";
+import { promisify } from "util";
 import { toError } from "fp-ts/lib/Either";
 import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Second } from "italia-ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
-import { promisify } from "util";
 
 const asyncRandomBytes = promisify(crypto.randomBytes);
 
@@ -32,6 +32,7 @@ export default class TokenService {
 
   /**
    * Generates a new support token containing the logged user's fiscalCode.
+   *
    * @param privateKey: The RSA's private key used to sign this JWT token
    * @param fiscalCode: The logged user's FiscalCode
    * @param tokenTtl: Token Time To live (expressed in seconds)

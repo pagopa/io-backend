@@ -23,6 +23,7 @@ npm-debug.log
 
 # Exclude typescript generated javascript files.
 *.js
+!.eslintrc.js
 !.release-it.js
 *.js.map
 
@@ -44,3 +45,6 @@ local.*
 
 # Exclude Codetour plugin folder
 .tours
+
+# Exclude ESLint cache file
+.eslintcache

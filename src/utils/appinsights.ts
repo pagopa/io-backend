@@ -6,23 +6,6 @@ import {
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
 
-/**
- * App Insights is initialized to collect the following informations:
- * - Incoming API calls
- * - Server performance information (CPU, RAM)
- * - Unandled Runtime Exceptions
- * - Outcoming API Calls (dependencies)
- * - Realtime API metrics
- */
-export function initAppInsights(
-  instrumentationKey: string,
-  config: ApplicationInsightsConfig = {}
-): appInsights.TelemetryClient {
-  startAppInsights(instrumentationKey, config);
-  appInsights.defaultClient.addTelemetryProcessor(sessionIdPreprocessor);
-  return appInsights.defaultClient;
-}
-
 const SESSION_TRACKING_ID_KEY = "session_tracking_id";
 const USER_TRACKING_ID_KEY = "user_tracking_id";
 
@@ -65,8 +48,8 @@ export function attachTrackingData(user: User): void {
 export function sessionIdPreprocessor(
   envelope: appInsights.Contracts.Envelope,
   context?: {
-    // tslint:disable-next-line: no-any
-    [name: string]: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly [name: string]: any;
   }
 ): boolean {
   if (context !== undefined) {
@@ -75,7 +58,7 @@ export function sessionIdPreprocessor(
         USER_TRACKING_ID_KEY
       );
       if (userTrackingId !== undefined) {
-        // tslint:disable-next-line: no-object-mutation
+        // eslint-disable-next-line functional/immutable-data
         envelope.tags[
           appInsights.defaultClient.context.keys.userId
         ] = userTrackingId;
@@ -84,7 +67,7 @@ export function sessionIdPreprocessor(
         SESSION_TRACKING_ID_KEY
       );
       if (sessionTrackingId !== undefined) {
-        // tslint:disable-next-line: no-object-mutation
+        // eslint-disable-next-line functional/immutable-data
         envelope.tags[
           appInsights.defaultClient.context.keys.sessionId
         ] = sessionTrackingId;
@@ -94,4 +77,40 @@ export function sessionIdPreprocessor(
     }
   }
   return true;
+}
+
+export enum StartupEventName {
+  SERVER = "api-backend.httpserver.startup",
+  SPID = "api-backend.spid.config"
+}
+
+export const trackStartupTime = (
+  telemetryClient: appInsights.TelemetryClient,
+  type: StartupEventName,
+  timeMs: bigint
+): void => {
+  telemetryClient.trackEvent({
+    name: type,
+    properties: {
+      time: timeMs.toString()
+    },
+    tagOverrides: { samplingEnabled: "false" }
+  });
+};
+
+/**
+ * App Insights is initialized to collect the following informations:
+ * - Incoming API calls
+ * - Server performance information (CPU, RAM)
+ * - Unandled Runtime Exceptions
+ * - Outcoming API Calls (dependencies)
+ * - Realtime API metrics
+ */
+export function initAppInsights(
+  instrumentationKey: string,
+  config: ApplicationInsightsConfig = {}
+): appInsights.TelemetryClient {
+  startAppInsights(instrumentationKey, config);
+  appInsights.defaultClient.addTelemetryProcessor(sessionIdPreprocessor);
+  return appInsights.defaultClient;
 }

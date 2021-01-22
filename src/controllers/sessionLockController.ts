@@ -30,6 +30,7 @@ export default class SessionLockController {
 
   /**
    * Lock a user account and clear all its session data
+   *
    * @param req expects fiscal_code as a path param
    *
    * @returns a promise with the encoded response object
@@ -40,8 +41,8 @@ export default class SessionLockController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
-  > => {
-    return taskEither
+  > =>
+    taskEither
       .of<IResponseErrorInternal | IResponseErrorValidation, void>(void 0)
       .chain(_ =>
         fromEither(
@@ -74,10 +75,10 @@ export default class SessionLockController {
         | IResponseSuccessJson<SuccessResponse>
       >(identity, _ => ResponseSuccessJson({ message: "ok" }))
       .run();
-  };
 
   /**
    * Unlock a user account
+   *
    * @param req expects fiscal_code as a path param
    *
    * @returns a promise with the encoded response object
@@ -88,9 +89,10 @@ export default class SessionLockController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
-  > => {
-    return taskEither
+  > =>
+    taskEither
       .of<IResponseErrorInternal | IResponseErrorValidation, void>(void 0)
+      // eslint-disable-next-line sonarjs/no-identical-functions
       .chain(_ =>
         fromEither(
           FiscalCode.decode(req.params.fiscal_code).mapLeft(err =>
@@ -113,5 +115,4 @@ export default class SessionLockController {
         | IResponseSuccessJson<SuccessResponse>
       >(identity, _ => ResponseSuccessJson({ message: "ok" }))
       .run();
-  };
 }

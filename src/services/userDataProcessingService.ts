@@ -40,7 +40,6 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceRequest: UserDataProcessingChoiceRequest
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict
@@ -74,7 +73,6 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceParam: UserDataProcessingChoice
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound
@@ -106,7 +104,6 @@ export default class UserDataProcessingService {
     user: User,
     userDataProcessingChoiceParam: UserDataProcessingChoice
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound

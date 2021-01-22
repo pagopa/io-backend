@@ -33,7 +33,6 @@ export default class UserDataProcessingController {
   public readonly upsertUserDataProcessing = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
@@ -58,7 +57,6 @@ export default class UserDataProcessingController {
   public readonly getUserDataProcessing = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorInternal
@@ -82,7 +80,6 @@ export default class UserDataProcessingController {
   public readonly abortUserDataProcessing = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorNotFound

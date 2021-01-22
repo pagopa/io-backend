@@ -4,9 +4,9 @@ import { IVerifyOptions } from "passport-http-bearer";
 import { User } from "../types/user";
 
 export type StrategyDoneFunction = (
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user?: any,
   options?: IVerifyOptions | string
 ) => void;

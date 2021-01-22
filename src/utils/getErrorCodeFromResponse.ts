@@ -19,13 +19,11 @@ export default function getErrorCodeFromResponse(
         ? some(xmlResponse.getElementsByTagName("StatusMessage"))
         : none
     )
-    .chain(responseStatusMessageEl => {
-      return responseStatusMessageEl &&
-        responseStatusMessageEl[0] &&
-        responseStatusMessageEl[0].textContent
+    .chain(responseStatusMessageEl =>
+      responseStatusMessageEl?.[0]?.textContent
         ? some(responseStatusMessageEl[0].textContent.trim())
-        : none;
-    })
+        : none
+    )
     .chain(errorString => {
       const indexString = "ErrorCode nr";
       const errorCode = errorString.slice(

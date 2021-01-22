@@ -14,9 +14,9 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { isLeft } from "fp-ts/lib/Either";
 import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 
-import { isLeft } from "fp-ts/lib/Either";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { IUserMetadataStorage } from "../services/IUserMetadataStorage";
 import {
@@ -35,7 +35,6 @@ export default class UserMetadataController {
   public readonly getMetadata = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseNoContent
@@ -61,7 +60,6 @@ export default class UserMetadataController {
   public readonly upsertMetadata = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorConflict
     | IResponseErrorValidation
     | IResponseErrorInternal

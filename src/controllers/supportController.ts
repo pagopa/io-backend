@@ -29,8 +29,8 @@ export default class SupportController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SupportToken>
   > =>
-    withUserFromRequest(req, async user => {
-      return this.tokenService
+    withUserFromRequest(req, async user =>
+      this.tokenService
         .getJwtSupportToken(
           JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
           user.fiscal_code,
@@ -47,6 +47,6 @@ export default class SupportController {
           e => ResponseErrorInternal(e.message),
           ResponseSuccessJson
         )
-        .run();
-    });
+        .run()
+    );
 }

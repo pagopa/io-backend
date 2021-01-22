@@ -5,6 +5,7 @@ import { log } from "../logger";
 /**
  * Error Handler method for Express Application.
  * Catch an express error and returns a ResponseErrorInternal response
+ *
  * @ref https://expressjs.com/en/guide/error-handling.htmls
  */
 export function expressErrorMiddleware(
