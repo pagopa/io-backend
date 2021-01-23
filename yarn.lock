@@ -297,10 +297,10 @@
     eslint-plugin-sonarjs "^0.5.0"
     prettier "^2.1.2"
 
-"@pagopa/io-spid-commons@^5.0.0":
-  version "5.0.0"
-  resolved "https://npm.pkg.github.com/download/@pagopa/io-spid-commons/5.0.0/febc0c8f9c1cd82a5654a57db097273654eab8d6eca5e77ff43cc2b50c75874e#9a4a2cf23a8c4e72ee959d5ad226cf8b82f5924d"
-  integrity sha512-7q8PVg2qo3V0SpLAoI/YbLrkazznjH49GPbgLR7u/09uDxRQcD+hYgmmdkF438xLtQWF2Rk7jh+dW2IO5JEVzA==
+"@pagopa/io-spid-commons@^6.0.2":
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-6.0.3.tgz#f520afbcd0b85c2c3e718da23323fc9bebb16856"
+  integrity sha512-urH+PhadHkr8CoyMvfevsSwEBuChI70gYXXLc/mFSEuGIklfdbQmJm/sS5hxQLw7XUpBEVfGPpFj+uEW0er20g==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
