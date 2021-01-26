@@ -1,4 +1,4 @@
-// tslint:disable
+/* eslint-disable */
 
 import { ToBufferOptions, IFontLib } from "bwip-js";
 

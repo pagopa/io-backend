@@ -1,0 +1,210 @@
+# Azure DevOps pipeline to release a new version and deploy to production.
+
+variables:
+  NODE_VERSION: '10.14.2'
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+  # Configuration to run the healthcheck container
+  HEALTHCHECK_CONTAINER_RG: 'io-p-rg-common'
+  HEALTHCHECK_CONTAINER_VNET: 'io-p-vnet-common'
+  HEALTHCHECK_CONTAINER_SUBNET: 'azure-devops' 
+  HEALTHCHECK_PATH: '/info' 
+
+parameters:
+  - name: 'RELEASE_SEMVER'
+    displayName: 'When packing a release, define the version bump to apply'
+    type: string
+    values:
+      - major
+      - minor
+      - patch
+    default: minor
+  # Map of production apps to deploy to, in the form
+  #   {logicName}: 
+  #     appname: {name of the resource}
+  #     rg: {name of the resource group}
+  # Although it's a parameter, it's not intended to be edited at runtime.
+  # It's here because variables only handle scalar values
+  - name: 'PRODUCTION_APPS'
+    displayName: ''
+    type: object
+    default:
+      appbackendl1:
+        appname: io-p-app-appbackendl1
+        rg: io-p-rg-linux
+      appbackendl2:
+        appname: io-p-app-appbackendl2
+        rg: io-p-rg-linux
+      appbackendli:
+        appname: io-p-app-appbackendli
+        rg: io-p-rg-linux
+
+# Only manual activations are intended
+trigger: none
+pr: none
+
+# This pipeline has been implemented to be run on hosted agent pools based both
+# on 'windows' and 'ubuntu' virtual machine images and using the scripts defined
+# in the package.json file. Since we are deploying on Azure functions on Windows
+# runtime, the pipeline is currently configured to use a Windows hosted image for
+# the build and deploy.
+pool:
+  vmImage: 'windows-2019'
+
+resources:
+  repositories:
+    - repository: pagopaCommons
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: refs/tags/v4
+      endpoint: 'pagopa'
+
+stages:
+
+  # Create a relase
+  # Activated when ONE OF these are met:
+  # - is on branch master 
+  # - is a tag in the form v{version}-RELEASE
+  - stage: Release
+    condition:
+      and(
+        succeeded(),
+        or(
+          eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+          and(
+            startsWith(variables['Build.SourceBranch'], 'refs/tags'),
+            endsWith(variables['Build.SourceBranch'], '-RELEASE')
+          )
+        )
+      )
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - job: make_release
+        steps:
+        - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+          - template: templates/node-github-release/template.yaml@pagopaCommons 
+            parameters:
+              semver: '${{ parameters.RELEASE_SEMVER }}'
+              gitEmail: $(GIT_EMAIL)
+              gitUsername: $(GIT_USERNAME)
+              gitHubConnection: $(GITHUB_CONNECTION)
+              nodeVersion: $(NODE_VERSION)
+              pkg_cache_version_id: $(CACHE_VERSION_ID)
+              pkg_cache_folder: $(YARN_CACHE_FOLDER)
+
+        - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+          - script: |
+              echo "We assume this reference to be a valid release: $(Build.SourceBranch). Therefore, there is no need to bundle a new release."
+            displayName: 'Skip release bundle'
+
+  # Prepare Artifact
+  - stage: Prepare_artifact
+    dependsOn:
+      - Release
+    jobs:
+      - job: 'prepare_artifact'
+        steps:
+          # Build application
+          - template: azure-templates/setup-project.yml
+            parameters:
+              # On the assumption that this stage is executed only when Relase stage is,
+              #  with this parameter we set the reference the deploy script must pull changes from.
+              # The branch/tag name is calculated from the source branch
+              #  ex: Build.SourceBranch=refs/heads/master --> master
+              #  ex: Build.SourceBranch=refs/tags/v1.2.3-RELEASE --> v1.2.3-RELEASE
+              gitReference: ${{ replace(replace(variables['Build.SourceBranch'], 'refs/tags/', ''), 'refs/heads/', '') }}
+          - script: |
+              yarn predeploy
+            displayName: 'Build'
+  
+          # Copy application to  
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: '$(System.DefaultWorkingDirectory)'
+              TargetFolder: '$(System.DefaultWorkingDirectory)/bundle'
+              Contents: |
+                **/*
+                !.git/**/*
+                !.vscode/**/*
+                !.devops/**/*
+                ![.]*
+                !scripts/**/*
+                !**/*.js.map
+                !**/*.ts
+                !*.md
+                !docker-compose.yml
+                !Dangerfile.ts
+                !jest.config.js
+                !local.settings.json
+                !test
+                !tslint.json
+                !tsconfig.json                
+            displayName: 'Copy deploy files'
+          
+          - publish: $(System.DefaultWorkingDirectory)/bundle
+            artifact: Bundle
+
+  # Deploy on staging slot
+  - ${{ each app in parameters.PRODUCTION_APPS }}:
+    - stage: Deploy_${{ app.Key }}_to_staging
+      dependsOn:
+        - Prepare_artifact
+      jobs:
+        - job: 'do_deploy_${{ app.Key }}'
+          steps:
+            - checkout: none
+            - download: current
+              artifact: Bundle
+
+            - task: AzureWebApp@1
+              inputs:
+                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+                resourceGroupName: '${{ app.Value.rg }}'
+                appType: 'webApp'
+                appName: '${{ app.Value.appname }}'
+                package: '$(Pipeline.Workspace)/Bundle'
+                deploymentMethod: 'auto'
+                deployToSlotOrASE: true
+                slotName: 'staging'
+              displayName: Deploy to staging slot
+
+  # Check that the staging instance is healthy
+  - ${{ each app in parameters.PRODUCTION_APPS }}:
+    - stage: Healthcheck_${{ app.Key }}
+      dependsOn:
+        - Deploy_${{ app.Key }}_to_staging
+      jobs:
+        - job: 'do_healthcheck_${{ app.Key }}'       
+          steps:  
+            - checkout: none
+            - template: templates/rest-healthcheck/template.yaml@pagopaCommons 
+              parameters:
+                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+                appName: '${{ app.Value.appname }}'
+                endpoint: 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
+                endpointType: 'private'
+                containerInstanceResourceGroup: '$(HEALTHCHECK_CONTAINER_RG)'
+                containerInstanceVNet: '$(HEALTHCHECK_CONTAINER_VNET)'
+                containerInstanceSubnet: '$(HEALTHCHECK_CONTAINER_SUBNET)'
+
+  # Promote the staging instance to production
+  - ${{ each app in parameters.PRODUCTION_APPS }}:
+    - stage: Swap_${{ app.Key }}_to_production
+      dependsOn:
+        - Deploy_${{ app.Key }}_to_staging
+        # Wait for every healthcheck to succeed
+        # This implied that no app is swapped to prod if at least one healthcheck fails
+        - ${{ each appInner in parameters.PRODUCTION_APPS }}:
+          - Healthcheck_${{ appInner.Key }}
+      jobs:
+        - job: 'do_deploy_${{ app.Key }}'       
+          steps:  
+            - checkout: none
+            - task: AzureAppServiceManage@0
+              inputs:
+                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
+                resourceGroupName: '${{ app.Value.rg }}'
+                webAppName: '${{ app.Value.appname }}'
+                sourceSlot: staging
+                swapWithProduction: true
+              displayName: Swap with production slot

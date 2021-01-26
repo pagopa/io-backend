@@ -1,5 +1,3 @@
-// tslint:disable:no-any
-
 /**
  * mockReq
  * @returns {{header, accepts, acceptsEncodings, acceptsEncoding, acceptsCharsets, acceptsCharset, acceptsLanguages, acceptsLanguage, range, param, is, reset: resetMock}}

@@ -1,10 +1,10 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-import * as appInsights from "applicationinsights";
-import { fromNullable } from "fp-ts/lib/Option";
 import * as http from "http";
 import * as https from "https";
+import * as appInsights from "applicationinsights";
+import { fromNullable } from "fp-ts/lib/Option";
 import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
 import { newApp } from "./app";
 import {
@@ -26,11 +26,16 @@ import {
   SAML_KEY,
   SERVER_PORT
 } from "./config";
-import { initAppInsights } from "./utils/appinsights";
+import {
+  initAppInsights,
+  StartupEventName,
+  trackStartupTime
+} from "./utils/appinsights";
 
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
 import { log } from "./utils/logger";
 import { getCurrentBackendVersion } from "./utils/package";
+import { TimeTracer } from "./utils/timer";
 
 const authenticationBasePath = AUTHENTICATION_BASE_PATH;
 const APIBasePath = API_BASE_PATH;
@@ -51,14 +56,16 @@ const shutdownTimeout: number = process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS
   ? parseInt(process.env.DEFAULT_SHUTDOWN_TIMEOUT_MILLIS, 10)
   : DEFAULT_SHUTDOWN_TIMEOUT_MILLIS;
 
-// tslint:disable-next-line: no-let
+// eslint-disable-next-line functional/no-let
 let server: http.Server | https.Server;
+const timer = TimeTracer();
 
 /**
  * If APPINSIGHTS_INSTRUMENTATIONKEY env is provided initialize an App Insights Client
  * WARNING: When the key is provided several information are collected automatically
  * and sent to App Insights.
  * To see what kind of informations are automatically collected
+ *
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder
  */
 const maybeAppInsightsClient = fromNullable(
@@ -90,18 +97,27 @@ newApp({
   env: ENV
 })
   .then(app => {
+    const startupTimeMs = timer.getElapsedMilliseconds();
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
     if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
       log.info("Starting HTTPS server on port %d", SERVER_PORT);
-      const options = { key: SAML_KEY, cert: SAML_CERT };
+      const options = { cert: SAML_CERT, key: SAML_KEY };
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
+        log.info(`Startup time: %sms`, startupTimeMs.toString());
+        maybeAppInsightsClient.map(_ =>
+          trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
+        );
       });
     } else {
       log.info("Starting HTTP server on port %d", SERVER_PORT);
       server = http.createServer(app).listen(SERVER_PORT, () => {
         log.info("Listening on port %d", SERVER_PORT);
+        log.info(`Startup time: %sms`, startupTimeMs.toString());
+        maybeAppInsightsClient.map(_ =>
+          trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
+        );
       });
     }
     server.on("close", () => {

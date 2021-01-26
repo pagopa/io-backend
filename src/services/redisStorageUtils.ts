@@ -1,5 +1,5 @@
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 import { isNumber } from "util";
+import { Either, isLeft, left, right } from "fp-ts/lib/Either";
 
 export default class RedisStorageUtils {
   /**

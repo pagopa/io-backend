@@ -3,6 +3,7 @@ import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 
 /**
  * Merge into one single Error several errors provided in input and add a context description
+ *
  * @param errors
  * @param context
  * @returns A single Error instance with a formatted message.

@@ -20,10 +20,8 @@ const SAML_NAMESPACE = {
   PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol"
 };
 
-export const getFiscalNumberFromPayload = (
-  doc: Document
-): Option<FiscalCode> => {
-  return fromNullable(
+export const getFiscalNumberFromPayload = (doc: Document): Option<FiscalCode> =>
+  fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
   )
     .mapNullable(collection =>
@@ -33,17 +31,15 @@ export const getFiscalNumberFromPayload = (
     )
     .mapNullable(_ => _.textContent?.trim().replace("TINIT-", ""))
     .chain(_ => fromEither(FiscalCode.decode(_)));
-};
 
 const getRequestIDFromPayload = (tagName: string, attrName: string) => (
   doc: Document
-): Option<string> => {
-  return fromNullable(
+): Option<string> =>
+  fromNullable(
     doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
   ).chain(element =>
     fromEither(NonEmptyString.decode(element.getAttribute(attrName)))
   );
-};
 
 export const getRequestIDFromRequest = getRequestIDFromPayload(
   "AuthnRequest",

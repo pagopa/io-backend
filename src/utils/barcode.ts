@@ -12,8 +12,8 @@ import { BARCODE_ALGORITHM } from "../../src/config";
 import { DrawingSVG } from "./bwipjs-svg";
 
 export interface IBarcodeOutput {
-  png: string;
-  svg: string;
+  readonly png: string;
+  readonly svg: string;
 }
 
 /**

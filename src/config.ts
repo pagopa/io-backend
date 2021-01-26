@@ -18,15 +18,6 @@ import {
 } from "italia-ts-commons/lib/reporters";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 
-import { BonusAPIClient } from "./clients/bonus";
-import ApiClientFactory from "./services/apiClientFactory";
-import PagoPAClientFactory from "./services/pagoPAClientFactory";
-
-import urlTokenStrategy from "./strategies/urlTokenStrategy";
-
-import { getRequiredENVVar, readFile } from "./utils/container";
-import { log } from "./utils/logger";
-
 import {
   IApplicationConfig,
   IServiceProviderConfig,
@@ -44,6 +35,12 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
 import { CgnAPIClient } from "./clients/cgn";
+import { log } from "./utils/logger";
+import urlTokenStrategy from "./strategies/urlTokenStrategy";
+import { getRequiredENVVar, readFile } from "./utils/container";
+import PagoPAClientFactory from "./services/pagoPAClientFactory";
+import ApiClientFactory from "./services/apiClientFactory";
+import { BonusAPIClient } from "./clients/bonus";
 import { STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
@@ -75,22 +72,20 @@ export const ENABLE_NOTICE_EMAIL_CACHE: boolean = fromNullable(
   .getOrElse(false);
 
 // Private key used in SAML authentication to a SPID IDP.
-const samlKey = () => {
-  return fromNullable(process.env.SAML_KEY).getOrElseL(() =>
+const samlKey = () =>
+  fromNullable(process.env.SAML_KEY).getOrElseL(() =>
     readFile(process.env.SAML_KEY_PATH || "./certs/key.pem", "SAML private key")
   );
-};
 export const SAML_KEY = samlKey();
 
 // Public certificate used in SAML authentication to a SPID IDP.
-const samlCert = () => {
-  return fromNullable(process.env.SAML_CERT).getOrElseL(() =>
+const samlCert = () =>
+  fromNullable(process.env.SAML_CERT).getOrElseL(() =>
     readFile(
       process.env.SAML_CERT_PATH || "./certs/cert.pem",
       "SAML certificate"
     )
   );
-};
 
 export const SAML_CERT = samlCert();
 

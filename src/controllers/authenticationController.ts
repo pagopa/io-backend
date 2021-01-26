@@ -62,6 +62,7 @@ export const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_ID_LENGTH_BYTES = 32;
 
 export default class AuthenticationController {
+  // eslint-disable-next-line max-params
   constructor(
     private readonly sessionStorage: ISessionStorage,
     private readonly tokenService: TokenService,
@@ -80,7 +81,6 @@ export default class AuthenticationController {
   public async acs(
     userPayload: unknown
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
@@ -253,7 +253,6 @@ export default class AuthenticationController {
   public async acsTest(
     userPayload: unknown
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
@@ -338,8 +337,8 @@ export default class AuthenticationController {
     | IResponseErrorInternal
     | IResponseSuccessJson<UserIdentity>
   > =>
-    withUserFromRequest(req, async user => {
-      return UserIdentity.decode(user).fold<
+    withUserFromRequest(req, async user =>
+      UserIdentity.decode(user).fold<
         IResponseErrorInternal | IResponseSuccessJson<UserIdentity>
       >(
         _ => ResponseErrorInternal("Unexpected User Identity data format."),
@@ -350,6 +349,6 @@ export default class AuthenticationController {
             _1 => ResponseErrorInternal("Exact decode failed."),
             _1 => ResponseSuccessJson<UserIdentity>(_1)
           )
-      );
-    });
+      )
+    );
 }

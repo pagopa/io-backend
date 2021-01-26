@@ -16,12 +16,13 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
-import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
-
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { toString } from "fp-ts/lib/function";
+import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
+import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
+
 import { BonusAPIClient } from "../clients/bonus";
 import { User } from "../types/user";
 import { withQrcode } from "../utils/qrcode";
@@ -31,15 +32,13 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 
-import { toString } from "fp-ts/lib/function";
-
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
 
 const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
   // This case should not happen, so response is of type never.
   // However, the underlying api may not follow the specs so we might trace the unhandled status
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unhandledResponseStatus((response as any).status);
 
 const ResponseErrorUnexpectedAuthProblem = () =>
@@ -55,7 +54,6 @@ export default class BonusService {
   public readonly getBonusEligibilityCheck = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseSuccessAccepted
     | IResponseErrorNotFound
@@ -97,7 +95,6 @@ export default class BonusService {
     user: User,
     bonusId: NonEmptyString
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseSuccessAccepted<InstanceId>
     | IResponseErrorNotFound
@@ -109,7 +106,6 @@ export default class BonusService {
         fiscalcode: user.fiscal_code
       });
 
-      // tslint:disable-next-line: no-identical-functions
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
@@ -143,13 +139,13 @@ export default class BonusService {
     });
 
   /**
-   *  Get all IDs of the bonus activations requested by
-   *  the authenticated user or by any between his family member
+   * Get all IDs of the bonus activations requested by
+   * the authenticated user or by any between his family member
+   *
    */
   public readonly getAllBonusActivations = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
   > =>
@@ -158,7 +154,6 @@ export default class BonusService {
         fiscalcode: user.fiscal_code
       });
 
-      // tslint:disable-next-line: no-identical-functions
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
