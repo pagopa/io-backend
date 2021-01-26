@@ -4,7 +4,7 @@ import { Client, createClient } from "../../generated/io-cgn-api/client";
 export function CgnAPIClient(
   token: string,
   baseUrl: string,
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
 ): Client<"ApiKey"> {
   return createClient<"ApiKey">({

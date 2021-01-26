@@ -15,6 +15,8 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
+import { CgnStatus } from "generated/io-cgn-api/CgnStatus";
+import { CgnAPIClient } from "src/clients/cgn";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,
@@ -22,16 +24,13 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 
-import { CgnStatus } from "generated/io-cgn-api/CgnStatus";
-import { CgnAPIClient } from "src/clients/cgn";
-
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
 
 const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
   // This case should not happen, so response is of type never.
   // However, the underlying api may not follow the specs so we might trace the unhandled status
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unhandledResponseStatus((response as any).status);
 
 export default class CgnService {

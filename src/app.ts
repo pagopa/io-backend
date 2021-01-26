@@ -2,6 +2,30 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
+import * as apicache from "apicache";
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import * as helmet from "helmet";
+import * as morgan from "morgan";
+import * as passport from "passport";
+
+import { Express } from "express";
+import expressEnforcesSsl = require("express-enforces-ssl");
+import {
+  NodeEnvironment,
+  NodeEnvironmentEnum
+} from "italia-ts-commons/lib/environment";
+import { CIDR } from "italia-ts-commons/lib/strings";
+import { QueueClient } from "@azure/storage-queue";
+import { withSpid } from "@pagopa/io-spid-commons";
+import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
+import * as appInsights from "applicationinsights";
+import { tryCatch2v } from "fp-ts/lib/Either";
+import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
+import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { ServerInfo } from "../generated/public/ServerInfo";
+
+import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import {
   API_CLIENT,
   appConfig,
@@ -30,31 +54,6 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING
 } from "./config";
-
-import * as apicache from "apicache";
-import * as bodyParser from "body-parser";
-import * as express from "express";
-import * as helmet from "helmet";
-import * as morgan from "morgan";
-import * as passport from "passport";
-
-import { Express } from "express";
-import expressEnforcesSsl = require("express-enforces-ssl");
-import {
-  NodeEnvironment,
-  NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
-import { QueueClient } from "@azure/storage-queue";
-import { withSpid } from "@pagopa/io-spid-commons";
-import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
-import * as appInsights from "applicationinsights";
-import { tryCatch2v } from "fp-ts/lib/Either";
-import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
-import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { ServerInfo } from "../generated/public/ServerInfo";
-
-import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -129,20 +128,20 @@ const cachingMiddleware = apicache.options({
 }).middleware;
 
 export interface IAppFactoryParameters {
-  env: NodeEnvironment;
-  appInsightsClient?: appInsights.TelemetryClient;
-  allowNotifyIPSourceRange: readonly CIDR[];
-  allowPagoPAIPSourceRange: readonly CIDR[];
-  allowMyPortalIPSourceRange: readonly CIDR[];
-  allowBPDIPSourceRange: readonly CIDR[];
-  allowSessionHandleIPSourceRange: readonly CIDR[];
-  authenticationBasePath: string;
-  APIBasePath: string;
-  BonusAPIBasePath: string;
-  PagoPABasePath: string;
-  MyPortalBasePath: string;
-  BPDBasePath: string;
-  CGNAPIBasePath: string;
+  readonly env: NodeEnvironment;
+  readonly appInsightsClient?: appInsights.TelemetryClient;
+  readonly allowNotifyIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowPagoPAIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowBPDIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
+  readonly authenticationBasePath: string;
+  readonly APIBasePath: string;
+  readonly BonusAPIBasePath: string;
+  readonly PagoPABasePath: string;
+  readonly MyPortalBasePath: string;
+  readonly BPDBasePath: string;
+  readonly CGNAPIBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -394,6 +393,7 @@ export function newApp({
         );
       }
       if (FF_CGN_ENABLED) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerCgnAPIRoutes(
           app,
           CGNAPIBasePath,
@@ -831,7 +831,7 @@ function registerCgnAPIRoutes(
   app: Express,
   basePath: string,
   cgnService: CgnService,
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
   const cgnController: CgnController = new CgnController(cgnService);
