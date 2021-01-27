@@ -29,9 +29,14 @@ stages:
     jobs:
       - job: make_build  
         steps:
+        - script: |	
+            echo registry=https://registry.npmjs.com/ >> .npmrc	
+            echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
+            echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
+          env:	
+            GITHUB_TOKEN: $(GITHUB_TOKEN)    	
+          displayName: 'Npm config'
         - template: templates/node-job-setup/template.yaml@pagopaCommons 
-          parameters:
-            npmrc: '.devops/.npmrc-for-ci'
         - script: |
             yarn build
           displayName: 'Build'
@@ -42,9 +47,14 @@ stages:
 
       - job: lint     
         steps:
+        - script: |	
+            echo registry=https://registry.npmjs.com/ >> .npmrc	
+            echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
+            echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
+          env:	
+            GITHUB_TOKEN: $(GITHUB_TOKEN)    	
+          displayName: 'Npm config'
         - template: templates/node-job-setup/template.yaml@pagopaCommons 
-          parameters:
-            npmrc: '.devops/.npmrc-for-ci'
         - script: |
             yarn lint
           displayName: 'Lint'
@@ -74,9 +84,14 @@ stages:
             ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
           )
         steps:
+          - script: |	
+            echo registry=https://registry.npmjs.com/ >> .npmrc	
+            echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
+            echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
+          env:	
+            GITHUB_TOKEN: $(GITHUB_TOKEN)    	
+          displayName: 'Npm config'
           - template: templates/node-job-setup/template.yaml@pagopaCommons 
-            parameters:
-              npmrc: '.devops/.npmrc-for-ci'
 
           - bash: |
               yarn danger ci
@@ -91,9 +106,14 @@ stages:
     jobs:
       - job: unit_tests
         steps:
+        - script: |	
+            echo registry=https://registry.npmjs.com/ >> .npmrc	
+            echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
+            echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
+          env:	
+            GITHUB_TOKEN: $(GITHUB_TOKEN)    	
+          displayName: 'Npm config'
         - template: templates/node-job-setup/template.yaml@pagopaCommons 
-          parameters:
-            npmrc: '.devops/.npmrc-for-ci'
         
         - script: |
             yarn generate:proxy-models
