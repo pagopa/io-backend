@@ -85,12 +85,12 @@ stages:
           )
         steps:
           - script: |	
-            echo registry=https://registry.npmjs.com/ >> .npmrc	
-            echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
-            echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
-          env:	
-            GITHUB_TOKEN: $(GITHUB_TOKEN)    	
-          displayName: 'Npm config'
+              echo registry=https://registry.npmjs.com/ >> .npmrc	
+              echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
+              echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
+            env:	
+              GITHUB_TOKEN: $(GITHUB_TOKEN)    	
+            displayName: 'Npm config'
           - template: templates/node-job-setup/template.yaml@pagopaCommons 
 
           - bash: |
