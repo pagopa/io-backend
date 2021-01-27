@@ -6,10 +6,6 @@
 # - DANGER_GITHUB_API_TOKEN
 # 
 
-variables:
-  NODE_VERSION: '10.14.2'
-  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
-
 # Automatically triggered on PR
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pr-trigger
 trigger: none
@@ -19,13 +15,23 @@ trigger: none
 pool:
   vmImage: 'ubuntu-latest'
 
+resources:
+  repositories:
+    - repository: pagopaCommons
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: refs/tags/v7
+      endpoint: 'pagopa'
+
 stages:
   - stage: Build
     dependsOn: []
     jobs:
       - job: make_build  
         steps:
-        - template: azure-templates/setup-project.yml
+        - template: templates/node-job-setup/template.yaml@pagopaCommons 
+          parameters:
+            npmrc: '.devops/.npmrc-for-ci'
         - script: |
             yarn build
           displayName: 'Build'
@@ -36,7 +42,9 @@ stages:
 
       - job: lint     
         steps:
-        - template: azure-templates/setup-project.yml
+        - template: templates/node-job-setup/template.yaml@pagopaCommons 
+          parameters:
+            npmrc: '.devops/.npmrc-for-ci'
         - script: |
             yarn lint
           displayName: 'Lint'
@@ -66,7 +74,9 @@ stages:
             ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
           )
         steps:
-          - template: azure-templates/setup-project.yml
+          - template: templates/node-job-setup/template.yaml@pagopaCommons 
+            parameters:
+              npmrc: '.devops/.npmrc-for-ci'
 
           - bash: |
               yarn danger ci
@@ -81,7 +91,9 @@ stages:
     jobs:
       - job: unit_tests
         steps:
-        - template: azure-templates/setup-project.yml
+        - template: templates/node-job-setup/template.yaml@pagopaCommons 
+          parameters:
+            npmrc: '.devops/.npmrc-for-ci'
         
         - script: |
             yarn generate:proxy-models
