@@ -80,11 +80,10 @@ stages:
       - job: make_release
         steps:
         - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-          - template: templates/node-job-setup/template.yaml@pagopaCommons 
+          - template: templates/node-job-setup/template.yaml
             parameters:
-              npmrc: '.devops/.npmrc-for-ci'
               persistCredentials: true
-          - template: templates/node-github-release/template.yaml@pagopaCommons 
+          - template: templates/node-github-release/template.yaml@pagopaCommons
             parameters:
               semver: '${{ parameters.RELEASE_SEMVER }}'
               gitEmail: $(GIT_EMAIL)
@@ -104,7 +103,7 @@ stages:
       - job: 'prepare_artifact'
         steps:
           # Build application
-          - template: templates/node-job-setup/template.yaml@pagopaCommons 
+          - template: azure-templates/setup-project.yml
             parameters:
               # On the assumption that this stage is executed only when Relase stage is,
               #  with this parameter we set the reference the deploy script must pull changes from.
@@ -112,7 +111,6 @@ stages:
               #  ex: Build.SourceBranch=refs/heads/master --> master
               #  ex: Build.SourceBranch=refs/tags/v1.2.3-RELEASE --> v1.2.3-RELEASE
               gitReference: ${{ replace(replace(variables['Build.SourceBranch'], 'refs/tags/', ''), 'refs/heads/', '') }}
-              npmrc: '.devops/.npmrc-for-ci'
           - script: |
               yarn predeploy
             displayName: 'Build'
