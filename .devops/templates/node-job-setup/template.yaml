@@ -60,6 +60,14 @@ steps:
     version: $(NODE_VERSION)
   displayName: 'Set up Node.js'
 
+- script: |	
+    echo registry=https://registry.npmjs.com/ >> .npmrc	
+    echo \//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN >> .npmrc	
+    echo \@pagopa:registry=https://npm.pkg.github.com/ >> .npmrc	
+  env:	
+    GITHUB_TOKEN: $(GITHUB_TOKEN)    	
+  displayName: 'Npm config'
+
 - script: |
     yarn install --frozen-lockfile --no-progress --non-interactive --network-concurrency 1 
   displayName: 'Install node modules'
