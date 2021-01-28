@@ -1,0 +1,74 @@
+# Node Github Relase steps
+# Mark a release on the project repository, with version bump and tag,
+# and publish a release on Github
+
+parameters:
+
+# Versioning parameters
+- name: 'semver'
+  type: string
+  values:
+  - major
+  - minor
+  - patch
+
+# This is the branch in which we will push the release tag.
+# It'll be master, but it can be overridden
+# Basically, this variable is used to enforce the fact that we use the very same branch in different steps
+- name: 'release_branch'
+  type: string
+  default: master
+
+# Github parameters
+- name: 'gitUsername'
+  type: string
+- name: 'gitEmail'
+  type: string
+- name: 'gitHubConnection'
+  type: string
+
+
+steps:
+# setup git author
+- script: |
+    git config --global user.email "${{ parameters.gitEmail }}" && git config --global user.name "${{ parameters.gitUsername }}"
+  displayName: 'Git setup' 
+
+# Without this step, changes would be applied to a detached head
+- script: |
+    git checkout ${{ parameters.release_branch }}
+  displayName: 'Checkout release branch'
+  
+# bump version
+- script: |
+    npm version ${{ parameters.semver }} -m "Bump version to %s [skip ci]"
+    NEXT_VERSION=$(node -p "require('./package.json').version")
+    RELEASE_TAG="v$NEXT_VERSION-RELEASE"
+    git tag $RELEASE_TAG
+  displayName: 'Version bump and tag'
+- script: |
+    NEXT_VERSION=$(node -p "require('./package.json').version")
+    HEAD_SHA=$(git rev-parse HEAD)
+    TITLE="Release $NEXT_VERSION"
+    TAG="v$NEXT_VERSION-RELEASE"
+    echo "##vso[task.setvariable variable=title]$TITLE"
+    echo "##vso[task.setvariable variable=sha]$HEAD_SHA"
+    echo "##vso[task.setvariable variable=tag]$TAG"
+  displayName: 'Set release variables'
+
+# push new version
+- script: |
+    git push origin ${{ parameters.release_branch }} && git push --tags
+  displayName: 'Push to the release branch'
+
+# create new releae
+- task: GitHubRelease@0
+  inputs:
+    gitHubConnection: ${{ parameters.gitHubConnection }}
+    repositoryName: $(Build.Repository.Name)
+    action: create
+    target: $(sha)
+    tagSource: manual
+    tag: $(tag)
+    title: $(title)
+    addChangelog: true

@@ -1,0 +1,65 @@
+# Azure DevOps pipeline template used to setup the Node project:
+# 1. checkout code
+# 2. setup correct node version
+# 3. install node dependencies
+
+parameters:
+
+# the branch, tag or commit to checkout
+- name: 'gitReference'
+  type: string
+  default: 'none'
+
+# whether code must be checked-out with persisted credentials
+- name: 'persistCredentials'
+  type: string
+  default: false
+
+# optional sub path where the project to be initialized is located. To be used on repository with multiple projects. 
+- name: 'projectDir'
+  type: string
+  default: '.' # current folder is default
+
+# if not set, the Node version will be red from .node-version and -nvmrc files, in this order
+- name: 'nodeVersion'
+  type: string
+  default: 'none'
+  
+steps:
+- checkout: self
+  displayName: 'Checkout'
+  persistCredentials: ${{ parameters.persistCredentials }}
+
+# This is needed because the pipeline may point to a different commit than expected
+# The common case is when the previous stage pushed another commit
+- ${{ if ne(parameters.gitReference, 'none') }}:
+  - script: |
+      git fetch && git checkout ${{ parameters.gitReference }}
+    displayName: 'Checkout reference'  
+
+- script: |
+    cd ${{ parameters.projectDir }}
+  displayName: 'Move to project folder'  
+
+# If a Node version is defined explicitly by parameter, such version is used
+# Else, version is red from .node-version file
+# Else, version is red from .nvmrc file
+- ${{ if ne(parameters.nodeVersion, 'none') }}:
+  - script: |
+      FROM_PARAM=${{ parameters.nodeVersion }}
+      echo "##vso[task.setvariable variable=NODE_VERSION]$FROM_PARAM"
+    displayName: 'Determine Node.js version from template param'
+- ${{ if eq(parameters.nodeVersion, 'none') }}:
+  - script: |
+      FROM_SOURCE=$(cat .node-version || cat .nvmrc)
+      echo "##vso[task.setvariable variable=NODE_VERSION]$FROM_SOURCE"
+    displayName: 'Determine Node.js version from source'
+
+- task: UseNode@1
+  inputs:
+    version: $(NODE_VERSION)
+  displayName: 'Set up Node.js'
+
+- script: |
+    yarn install --frozen-lockfile --no-progress --non-interactive --network-concurrency 1 
+  displayName: 'Install node modules'
