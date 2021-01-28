@@ -103,7 +103,7 @@ stages:
       - job: 'prepare_artifact'
         steps:
           # Build application
-          - template: azure-templates/setup-project.yml
+          - template: templates/node-job-setup/template.yaml
             parameters:
               # On the assumption that this stage is executed only when Relase stage is,
               #  with this parameter we set the reference the deploy script must pull changes from.
