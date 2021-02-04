@@ -80,7 +80,7 @@ stages:
       - job: make_release
         steps:
         - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-          - template: templates/node-job-setup/template.yaml
+          - template: templates/node-job-setup/template.yaml@pagopaCommons
             parameters:
               persistCredentials: true
           - template: templates/node-github-release/template.yaml@pagopaCommons
