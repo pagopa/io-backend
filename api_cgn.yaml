@@ -30,7 +30,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
-  "/cgn/activations":
+  "/cgn/activation":
     post:
       operationId: startCgnActivation
       summary: Start a CGN activation procedure
@@ -82,8 +82,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivatedStatus"
   CgnRevokedStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnRevokedStatus"
-  CgnCanceledStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnCanceledStatus"
+  CgnExpiredStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnExpiredStatus"
   CgnStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
   
