@@ -5,15 +5,19 @@
 
 import * as express from "express";
 import {
+  IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessAccepted,
+  IResponseSuccessJson,
+  IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
 import { CgnStatus } from "generated/io-cgn-api/CgnStatus";
 import CgnService from "src/services/cgnService";
+import { InstanceId } from "generated/io-cgn-api/InstanceId";
 import { withUserFromRequest } from "../types/user";
 
 export default class CgnController {
@@ -32,4 +36,20 @@ export default class CgnController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<CgnStatus>
   > => withUserFromRequest(req, user => this.cgnService.getCgnStatus(user));
+
+  /**
+   * Start a Cgn activation for the current user.
+   */
+  public readonly startCgnActivation = (
+    req: express.Request
+  ): Promise<
+    // tslint:disable-next-line:max-union-size
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withUserFromRequest(req, user => this.cgnService.startCgnActivation(user));
 }

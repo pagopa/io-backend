@@ -1,6 +1,6 @@
 /* tslint:disable no-any no-duplicate-string */
 
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { ResponseSuccessAccepted, ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -46,10 +46,12 @@ const mockedUser: User = {
 };
 
 const mockGetCgnStatus = jest.fn();
+const mockStartCgnActivation = jest.fn();
 jest.mock("../../services/cgnService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getCgnStatus: mockGetCgnStatus
+      getCgnStatus: mockGetCgnStatus,
+      startCgnActivation: mockStartCgnActivation
     }))
   };
 });
@@ -108,6 +110,61 @@ describe("CgnController#getCgnStatus", () => {
 
     // service method is not called
     expect(mockGetCgnStatus).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("CgnController#startCgnActivation", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService);
+    await controller.startCgnActivation(req);
+
+    expect(mockStartCgnActivation).toHaveBeenCalledWith(mockedUser);
+  });
+
+  it("should call startCgnActivation method on the CgnService with valid values", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    mockStartCgnActivation.mockReturnValue(
+      Promise.resolve(ResponseSuccessAccepted())
+    );
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService);
+    
+    const response = await controller.startCgnActivation(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessAccepted",
+      value: undefined
+    });
+  });
+
+  it("should not call startCgnActivation method on the CgnService with empty user", async () => {
+    const req = { ...mockReq(), user: undefined };
+    const res = mockRes();
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService);
+    
+    const response = await controller.startCgnActivation(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockStartCgnActivation).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });

@@ -841,6 +841,12 @@ function registerCgnAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
+
+  app.post(
+    `${basePath}/cgn/activation`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.startCgnActivation, cgnController)
+  );
 }
 
 function registerBonusAPIRoutes(
