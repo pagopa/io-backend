@@ -36,6 +36,20 @@ parameters:
         appname: io-p-app-appbackendli
         rg: io-p-rg-linux
 
+
+  - name: 'OPENAPI_SPEC_PATHS'
+    type: object
+    default:
+      api_auth: 'api_auth.yaml'
+      api_backend: 'api_backend.yaml'
+      api_bonus: 'api_bonus.yaml'
+      api_bpd: 'api_bpd.yaml'
+      api_myportal: 'api_myportal.yaml'
+      api_notifications: 'api_notifications.yaml'
+      api_pagopa: 'api_pagopa.yaml'
+      api_public: 'api_public.yaml'
+      api_session: 'api_session.yaml'
+
 # Only manual activations are intended
 trigger: none
 pr: none
@@ -53,7 +67,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v8
+      ref: refs/tags/v9
       endpoint: 'pagopa'
 
 stages:
@@ -94,6 +108,21 @@ stages:
           - script: |
               echo "We assume this reference to be a valid release: $(Build.SourceBranch). Therefore, there is no need to bundle a new release."
             displayName: 'Skip release bundle'
+
+
+  # Publish client SDKs to NPM
+  - stage: PublishClientSDKstoNPM
+    dependsOn: Release
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - ${{ each spec in parameters.OPENAPI_SPEC_PATHS }}:
+        - job: publish_SDK_index_${{ spec.Key }}   
+          steps:
+          # Template for generating and deploying client SDk to NPM
+          - template: templates/client-sdk-publish/template.yaml@pagopaCommons
+            parameters:
+              openapiSpecPath: '${{ spec.Value }}'
 
   # Prepare Artifact
   - stage: Prepare_artifact
