@@ -66,6 +66,25 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
+    get:
+      operationId: getCgnActivation
+      summary: |
+        Get CGN activation process' status
+      description: |
+        Get informations about a CGN activation process
+      responses:
+        "200":
+            description: Cgn activation details.
+            schema:
+              $ref: "#/definitions/CgnActivationDetail"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: No CGN activation process found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
 definitions:
   Timestamp:
@@ -75,7 +94,7 @@ definitions:
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/175908973_add_revoke_api/openapi/index.yaml#/definitions/InstanceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/InstanceId"
   CgnPendingStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
   CgnActivatedStatus:
@@ -86,7 +105,9 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnExpiredStatus"
   CgnStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
-  
+  CgnActivationDetail:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782092_add_get_activation_status_api/openapi/index.yaml#/definitions/CgnActivationDetail"
+    
 securityDefinitions:
   Bearer:
     type: apiKey
