@@ -67,7 +67,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v9
+      ref: refs/tags/v10
       endpoint: 'pagopa'
 
 stages:
@@ -117,12 +117,13 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
       - ${{ each spec in parameters.OPENAPI_SPEC_PATHS }}:
-        - job: publish_SDK_index_${{ spec.Key }}   
+        - job: publish_SDK_${{ spec.Key }}   
           steps:
           # Template for generating and deploying client SDk to NPM
           - template: templates/client-sdk-publish/template.yaml@pagopaCommons
             parameters:
               openapiSpecPath: '${{ spec.Value }}'
+              artifactName: 'Bundle_${{ spec.Key }}'
 
   # Prepare Artifact
   - stage: Prepare_artifact
