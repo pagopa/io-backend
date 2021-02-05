@@ -16,6 +16,7 @@ const mockGetCgnStatus = jest.fn();
 
 const mockCgnAPIClient = {
   getCgnStatus: mockGetCgnStatus,
+  startCgnActivation: jest.fn(),
   upsertCgnStatus: jest.fn()
 } as ReturnType<CgnAPIClient>;
 
