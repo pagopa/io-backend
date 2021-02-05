@@ -15,7 +15,8 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const mockGetCgnStatus = jest.fn();
 
 const mockCgnAPIClient = {
-  getCgnStatus: mockGetCgnStatus
+  getCgnStatus: mockGetCgnStatus,
+  upsertCgnStatus: jest.fn()
 } as ReturnType<CgnAPIClient>;
 
 const api = mockCgnAPIClient;
