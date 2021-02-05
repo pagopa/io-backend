@@ -19,13 +19,21 @@ trigger: none
 pool:
   vmImage: 'ubuntu-latest'
 
+resources:
+  repositories:
+    - repository: pagopaCommons
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: refs/tags/v8
+      endpoint: 'pagopa'
+
 stages:
   - stage: Build
     dependsOn: []
     jobs:
       - job: make_build  
         steps:
-        - template: azure-templates/setup-project.yml
+        - template: templates/node-job-setup/template.yaml@pagopaCommons
         - script: |
             yarn build
           displayName: 'Build'
@@ -36,7 +44,7 @@ stages:
 
       - job: lint     
         steps:
-        - template: azure-templates/setup-project.yml
+        - template: templates/node-job-setup/template.yaml@pagopaCommons
         - script: |
             yarn lint
           displayName: 'Lint'
@@ -66,7 +74,7 @@ stages:
             ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
           )
         steps:
-          - template: azure-templates/setup-project.yml
+          - template: templates/node-job-setup/template.yaml@pagopaCommons
 
           - bash: |
               yarn danger ci
@@ -81,7 +89,7 @@ stages:
     jobs:
       - job: unit_tests
         steps:
-        - template: azure-templates/setup-project.yml
+        - template: templates/node-job-setup/template.yaml@pagopaCommons
         
         - script: |
             yarn generate:proxy-models

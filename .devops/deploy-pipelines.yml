@@ -1,8 +1,6 @@
 # Azure DevOps pipeline to release a new version and deploy to production.
 
 variables:
-  NODE_VERSION: '10.14.2'
-  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   # Configuration to run the healthcheck container
   HEALTHCHECK_CONTAINER_RG: 'io-p-rg-common'
   HEALTHCHECK_CONTAINER_VNET: 'io-p-vnet-common'
@@ -55,7 +53,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v4
+      ref: refs/tags/v8
       endpoint: 'pagopa'
 
 stages:
@@ -82,15 +80,15 @@ stages:
       - job: make_release
         steps:
         - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-          - template: templates/node-github-release/template.yaml@pagopaCommons 
+          - template: templates/node-job-setup/template.yaml@pagopaCommons
+            parameters:
+              persistCredentials: true
+          - template: templates/node-github-release/template.yaml@pagopaCommons
             parameters:
               semver: '${{ parameters.RELEASE_SEMVER }}'
               gitEmail: $(GIT_EMAIL)
               gitUsername: $(GIT_USERNAME)
               gitHubConnection: $(GITHUB_CONNECTION)
-              nodeVersion: $(NODE_VERSION)
-              pkg_cache_version_id: $(CACHE_VERSION_ID)
-              pkg_cache_folder: $(YARN_CACHE_FOLDER)
 
         - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
           - script: |
@@ -105,7 +103,7 @@ stages:
       - job: 'prepare_artifact'
         steps:
           # Build application
-          - template: azure-templates/setup-project.yml
+          - template: templates/node-job-setup/template.yaml
             parameters:
               # On the assumption that this stage is executed only when Relase stage is,
               #  with this parameter we set the reference the deploy script must pull changes from.
