@@ -10,8 +10,8 @@ import * as t from "io-ts";
 import {
   errorsToReadableMessages,
   readableReport
-} from "italia-ts-commons/lib/reporters";
-import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/reporters";
+import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
 import { EmailAddress } from "../../generated/backend/EmailAddress";

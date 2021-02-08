@@ -10,8 +10,8 @@ import {
   EmailString,
   FiscalCode,
   NonEmptyString
-} from "italia-ts-commons/lib/strings";
-import { Second } from "italia-ts-commons/lib/units";
+} from "@pagopa/ts-commons/lib/strings";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
 import { PecServerConfig } from "src/config";

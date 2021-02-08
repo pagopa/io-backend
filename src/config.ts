@@ -12,17 +12,17 @@ import {
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { record } from "fp-ts";
-import { agent } from "italia-ts-commons";
+import { agent } from "@pagopa/ts-commons";
 
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
+} from "@pagopa/ts-commons/lib/environment";
 import {
   errorsToReadableMessages,
   readableReport
-} from "italia-ts-commons/lib/reporters";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+} from "@pagopa/ts-commons/lib/reporters";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import {
   IApplicationConfig,
@@ -35,12 +35,14 @@ import {
   AbortableFetch,
   setFetchTimeout,
   toFetch
-} from "italia-ts-commons/lib/fetch";
-import { IntegerFromString } from "italia-ts-commons/lib/numbers";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { Millisecond, Second } from "italia-ts-commons/lib/units";
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+} from "@pagopa/ts-commons/lib/fetch";
+import {
+  IntegerFromString,
+  NumberFromString
+} from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -331,22 +333,14 @@ export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = decodeCIDRs(
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
-// HTTP-only fetch with optional keepalive agent
+// Generic HTTP/HTTPS fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const abortableFetch = AbortableFetch(agent.getHttpFetch(process.env));
+const abortableFetch = AbortableFetch(agent.getFetch(process.env));
 const fetchWithTimeout = setFetchTimeout(
   DEFAULT_REQUEST_TIMEOUT_MS,
   abortableFetch
 );
-const httpApiFetch = toFetch(fetchWithTimeout);
-
-// HTTPS-only fetch with optional keepalive agent
-const httpsAbortableFetch = AbortableFetch(agent.getHttpsFetch(process.env));
-const httpsFetchWithTimeout = setFetchTimeout(
-  DEFAULT_REQUEST_TIMEOUT_MS,
-  httpsAbortableFetch
-);
-const httpsApiFetch = toFetch(httpsFetchWithTimeout);
+const httpOrHttpsApiFetch = toFetch(fetchWithTimeout);
 
 const bearerAuthFetch = (
   origFetch: typeof fetch = fetch,
@@ -361,7 +355,7 @@ export const getHttpsApiFetchWithBearer = (bearer: string) =>
   toFetch(
     setFetchTimeout(
       DEFAULT_REQUEST_TIMEOUT_MS,
-      AbortableFetch(bearerAuthFetch(httpsApiFetch, bearer))
+      AbortableFetch(bearerAuthFetch(httpOrHttpsApiFetch, bearer))
     )
   );
 
@@ -397,7 +391,7 @@ export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const API_CLIENT = new ApiClientFactory(
   API_KEY,
   API_URL,
-  API_URL.startsWith("https") ? httpsApiFetch : httpApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const APP_MESSAGES_API_KEY = getRequiredENVVar("APP_MESSAGES_API_KEY");
@@ -415,7 +409,7 @@ export const BONUS_API_BASE_PATH = getRequiredENVVar("BONUS_API_BASE_PATH");
 export const BONUS_API_CLIENT = BonusAPIClient(
   BONUS_API_KEY,
   BONUS_API_URL,
-  BONUS_API_URL.startsWith("https") ? httpsApiFetch : httpApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
@@ -425,7 +419,7 @@ export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
   CGN_API_BASE_PATH,
-  httpApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
@@ -441,7 +435,7 @@ export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   CGN_OPERATOR_SEARCH_API_KEY,
   CGN_OPERATOR_SEARCH_API_URL,
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
-  httpsApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
@@ -452,7 +446,7 @@ export const EUCOVIDCERT_API_BASE_PATH = getRequiredENVVar(
 export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
   EUCOVIDCERT_API_KEY,
   EUCOVIDCERT_API_URL,
-  httpApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const MIT_VOUCHER_API_BASE_PATH = getRequiredENVVar(
@@ -627,6 +621,7 @@ export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
 });
 
 const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
   process.env.JWT_SUPPORT_TOKEN_EXPIRATION
 ).getOrElse(DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION) as Second;
