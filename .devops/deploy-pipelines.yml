@@ -255,4 +255,4 @@ stages:
             parameters:
               openapiSpecPath: '${{ spec.Value.openapi_spec_path }}'
               artifactName: 'Bundle_${{ spec.Key }}'
-              sdkPackageName: 'Bundle_${{ spec.Value.package_name }}'
+              sdkPackageName: '${{ spec.Value.package_name }}'
