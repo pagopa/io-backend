@@ -223,7 +223,6 @@ stages:
               displayName: Swap with production slot
 
 
-
   # Publish client SDKs to NPM
   - stage: PublishClientSDKstoNPM
     dependsOn: Release
