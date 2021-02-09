@@ -110,21 +110,6 @@ stages:
             displayName: 'Skip release bundle'
 
 
-  # Publish client SDKs to NPM
-  - stage: PublishClientSDKstoNPM
-    dependsOn: Release
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - ${{ each spec in parameters.OPENAPI_SPEC_PATHS }}:
-        - job: publish_SDK_${{ spec.Key }}   
-          steps:
-          # Template for generating and deploying client SDk to NPM
-          - template: templates/client-sdk-publish/template.yaml@pagopaCommons
-            parameters:
-              openapiSpecPath: '${{ spec.Value }}'
-              artifactName: 'Bundle_${{ spec.Key }}'
-
   # Prepare Artifact
   - stage: Prepare_artifact
     dependsOn:
@@ -236,3 +221,20 @@ stages:
                 sourceSlot: staging
                 swapWithProduction: true
               displayName: Swap with production slot
+
+
+
+  # Publish client SDKs to NPM
+  - stage: PublishClientSDKstoNPM
+    dependsOn: Release
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - ${{ each spec in parameters.OPENAPI_SPEC_PATHS }}:
+        - job: publish_SDK_${{ spec.Key }}   
+          steps:
+          # Template for generating and deploying client SDk to NPM
+          - template: templates/client-sdk-publish/template.yaml@pagopaCommons
+            parameters:
+              openapiSpecPath: '${{ spec.Value }}'
+              artifactName: 'Bundle_${{ spec.Key }}'
