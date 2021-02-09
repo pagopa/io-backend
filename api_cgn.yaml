@@ -106,7 +106,7 @@ definitions:
   CgnStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
   CgnActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782092_add_get_activation_status_api/openapi/index.yaml#/definitions/CgnActivationDetail"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
     
 securityDefinitions:
   Bearer:
