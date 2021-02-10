@@ -356,7 +356,7 @@ describe("CgnService#getCgnActivation", () => {
   });
 
   it("should return an error if the api call thows", async () => {
-      mockGetCgnStatus.mockImplementationOnce(() => {
+    mockGetCgnActivation.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new CgnService(api);
