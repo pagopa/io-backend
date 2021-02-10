@@ -15,11 +15,11 @@ import {
   IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
-import { CgnStatus } from "generated/cgn/CgnStatus";
-import CgnService from "src/services/cgnService";
-import { InstanceId } from "generated/cgn/InstanceId";
-import { CgnActivationDetail } from "generated/cgn/CgnActivationDetail";
+import { CgnStatus } from "../../generated/cgn/CgnStatus";
+import CgnService from "../../src/services/cgnService";
+import { InstanceId } from "../../generated/cgn/InstanceId";
 import { withUserFromRequest } from "../types/user";
+import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 
 export default class CgnController {
   constructor(private readonly cgnService: CgnService) {}
@@ -30,7 +30,6 @@ export default class CgnController {
   public readonly getCgnStatus = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
@@ -44,7 +43,6 @@ export default class CgnController {
   public readonly startCgnActivation = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
@@ -55,12 +53,11 @@ export default class CgnController {
     withUserFromRequest(req, user => this.cgnService.startCgnActivation(user));
 
   /**
-   * Cget Cgn activation's proces status for the current user.
+   * Get Cgn activation's process status for the current user.
    */
   public readonly getCgnActivation = (
     req: express.Request
   ): Promise<
-    // tslint:disable-next-line:max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound

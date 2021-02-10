@@ -69,7 +69,7 @@ paths:
     get:
       operationId: getCgnActivation
       summary: |
-        Get CGN activation process' status
+        Get CGN activation process status
       description: |
         Get informations about a CGN activation process
       responses:

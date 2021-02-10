@@ -16,14 +16,12 @@ const mockGetCgnStatus = jest.fn();
 const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 
-const mockCgnAPIClient = {
+const api = {
   getCgnActivation: mockGetCgnActivation,
   getCgnStatus: mockGetCgnStatus,
   startCgnActivation: mockStartCgnActivation,
   upsertCgnStatus: jest.fn()
 } as ReturnType<CgnAPIClient>;
-
-const api = mockCgnAPIClient;
 
 const mockedUser: User = {
     created_at: 1183518855,
@@ -249,7 +247,7 @@ describe("CgnService#startCgnActivation", () => {
     );
     const service = new CgnService(api);
 
-    const res = await service.getCgnStatus(mockedUser);
+    const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -262,7 +260,7 @@ describe("CgnService#startCgnActivation", () => {
     });
     const service = new CgnService(api);
 
-    const res = await service.getCgnStatus(mockedUser);
+    const res = await service.startCgnActivation(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

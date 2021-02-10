@@ -21,30 +21,21 @@ import {
   ResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
-import { CgnStatus } from "generated/io-cgn-api/CgnStatus";
-import { CgnAPIClient } from "src/clients/cgn";
-import { InstanceId } from "generated/io-cgn-api/InstanceId";
 import { fromNullable } from "fp-ts/lib/Option";
-import { CgnActivationDetail } from "generated/cgn/CgnActivationDetail";
+import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
+import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
+import { CgnAPIClient } from "../../src/clients/cgn";
+import { CgnStatus } from "../../generated/io-cgn-api/CgnStatus";
 import { User } from "../types/user";
 import {
-  unhandledResponseStatus,
+  ResponseErrorStatusNotDefinedInSpec,
+  ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
 
 const readableProblem = (problem: ProblemJson) =>
   `${problem.title} (${problem.type || "no problem type specified"})`;
-
-const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
-  // This case should not happen, so response is of type never.
-  // However, the underlying api may not follow the specs so we might trace the unhandled status
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unhandledResponseStatus((response as any).status);
-
-const ResponseErrorUnexpectedAuthProblem = () =>
-  // This case can only happen because of misconfiguration, thus it might be considered an error
-  ResponseErrorInternal("Underlying API fails with an unexpected 401");
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 
@@ -54,7 +45,6 @@ export default class CgnService {
   public readonly getCgnStatus = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
@@ -88,7 +78,6 @@ export default class CgnService {
   public readonly startCgnActivation = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorForbiddenNotAuthorized
@@ -135,7 +124,6 @@ export default class CgnService {
   public readonly getCgnActivation = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound

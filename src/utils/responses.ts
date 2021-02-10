@@ -107,3 +107,13 @@ export function ResponseErrorUnauthorizedForLegalReasons(
     }
   };
 }
+
+export const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
+  // This case should not happen, so response is of type never.
+  // However, the underlying api may not follow the specs so we might trace the unhandled status
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  unhandledResponseStatus((response as any).status);
+
+export const ResponseErrorUnexpectedAuthProblem = () =>
+  // This case can only happen because of misconfiguration, thus it might be considered an error
+  ResponseErrorInternal("Underlying API fails with an unexpected 401");
