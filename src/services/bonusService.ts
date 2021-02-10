@@ -8,7 +8,6 @@ import {
   IResponseErrorNotFound,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
-  ProblemJson,
   ResponseErrorGone,
   ResponseErrorInternal,
   ResponseErrorNotFound,
@@ -32,10 +31,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-
-const readableProblem = (problem: ProblemJson) =>
-  `${problem.title} (${problem.type || "no problem type specified"})`;
-
+import { readableProblem } from "../../src/utils/errorsFormatter";
 export default class BonusService {
   constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
 

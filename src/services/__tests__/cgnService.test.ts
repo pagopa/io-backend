@@ -16,6 +16,22 @@ const mockGetCgnStatus = jest.fn();
 const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 
+mockGetCgnStatus.mockImplementation(() =>
+  t.success({status: 200, value:aPendingCgnStatus})
+);
+
+mockStartCgnActivation.mockImplementation(() =>
+  t.success({status: 201, headers: {Location: "/api/v1/cgn/activation"}, value: {
+    id: {
+      id: "AnInstanceId"
+    }
+  }})
+);
+
+mockGetCgnActivation.mockImplementation(() =>
+  t.success({status: 200})
+);
+
 const api = {
   getCgnActivation: mockGetCgnActivation,
   getCgnStatus: mockGetCgnStatus,
@@ -54,9 +70,6 @@ describe("CgnService#getCgnStatus", () => {
     });
   
     it("should handle a success response", async () => {
-        mockGetCgnStatus.mockImplementation(() =>
-        t.success({status: 200, value:aPendingCgnStatus})
-      );
   
       const service = new CgnService(api);
   
@@ -68,7 +81,7 @@ describe("CgnService#getCgnStatus", () => {
     });
 
     it("should handle an internal error when the client returns 401", async () => {
-        mockGetCgnStatus.mockImplementation(() =>
+        mockGetCgnStatus.mockImplementationOnce(() =>
         t.success({ status: 401 })
       );
   
@@ -82,7 +95,7 @@ describe("CgnService#getCgnStatus", () => {
     });
   
     it("should handle a not found error when the CGN is not found", async () => {
-        mockGetCgnStatus.mockImplementation(() =>
+        mockGetCgnStatus.mockImplementationOnce(() =>
         t.success({ status: 404 })
       );
   
@@ -97,7 +110,7 @@ describe("CgnService#getCgnStatus", () => {
   
     it("should handle an internal error response", async () => {
       const aGenericProblem = {};
-      mockGetCgnStatus.mockImplementation(() =>
+      mockGetCgnStatus.mockImplementationOnce(() =>
         t.success({ status: 500, value: aGenericProblem })
       );
   
@@ -111,7 +124,7 @@ describe("CgnService#getCgnStatus", () => {
     });
   
     it("should return an error for unhandled response status code", async () => {
-        mockGetCgnStatus.mockImplementation(() =>
+        mockGetCgnStatus.mockImplementationOnce(() =>
         t.success({ status: 123 })
       );
       const service = new CgnService(api);
@@ -124,7 +137,7 @@ describe("CgnService#getCgnStatus", () => {
     });
   
     it("should return an error if the api call thows", async () => {
-        mockGetCgnStatus.mockImplementation(() => {
+        mockGetCgnStatus.mockImplementationOnce(() => {
         throw new Error();
       });
       const service = new CgnService(api);
@@ -153,13 +166,6 @@ describe("CgnService#startCgnActivation", () => {
   });
 
   it("should handle a success redirect to resource response", async () => {
-    mockStartCgnActivation.mockImplementation(() =>
-      t.success({status: 201, headers: {Location: "/api/v1/cgn/activation"}, value: {
-        id: {
-          id: "AnInstanceId"
-        }
-      }})
-    );
 
     const service = new CgnService(api);
 
@@ -171,7 +177,7 @@ describe("CgnService#startCgnActivation", () => {
   });
 
   it("should handle a success Accepted response", async () => {
-    mockStartCgnActivation.mockImplementation(() =>
+    mockStartCgnActivation.mockImplementationOnce(() =>
     t.success({status: 202})
   );
 
@@ -185,10 +191,9 @@ describe("CgnService#startCgnActivation", () => {
 });
 
   it("should handle an internal error when the client returns 401", async () => {
-    mockStartCgnActivation.mockImplementation(() =>
-      t.success({ status: 401 })
-    );
-
+    mockStartCgnActivation.mockImplementationOnce(() =>
+    t.success({status: 401})
+  );
     const service = new CgnService(api);
 
     const res = await service.startCgnActivation(mockedUser);
@@ -199,7 +204,7 @@ describe("CgnService#startCgnActivation", () => {
   });
 
   it("should handle a Forbidden error if the user is ineligible for a CGN", async () => {
-    mockStartCgnActivation.mockImplementation(() =>
+    mockStartCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 403 })
     );
 
@@ -213,7 +218,7 @@ describe("CgnService#startCgnActivation", () => {
   });
 
   it("should handle a conflict error when the CGN is already activated", async () => {
-    mockStartCgnActivation.mockImplementation(() =>
+    mockStartCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 409 })
     );
 
@@ -228,7 +233,7 @@ describe("CgnService#startCgnActivation", () => {
 
   it("should handle an internal error response", async () => {
     const aGenericProblem = {};
-    mockStartCgnActivation.mockImplementation(() =>
+    mockStartCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 500, value: aGenericProblem })
     );
 
@@ -242,7 +247,7 @@ describe("CgnService#startCgnActivation", () => {
   });
 
   it("should return an error for unhandled response status code", async () => {
-      mockGetCgnStatus.mockImplementation(() =>
+    mockStartCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 123 })
     );
     const service = new CgnService(api);
@@ -255,7 +260,7 @@ describe("CgnService#startCgnActivation", () => {
   });
 
   it("should return an error if the api call thows", async () => {
-      mockGetCgnStatus.mockImplementation(() => {
+    mockStartCgnActivation.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new CgnService(api);
@@ -284,9 +289,6 @@ describe("CgnService#getCgnActivation", () => {
   });
 
   it("should handle a success redirect to resource response", async () => {
-    mockGetCgnActivation.mockImplementation(() =>
-      t.success({status: 200})
-    );
 
     const service = new CgnService(api);
 
@@ -298,7 +300,7 @@ describe("CgnService#getCgnActivation", () => {
   });
 
   it("should handle an internal error when the client returns 401", async () => {
-    mockGetCgnActivation.mockImplementation(() =>
+    mockGetCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 401 })
     );
 
@@ -312,7 +314,7 @@ describe("CgnService#getCgnActivation", () => {
   });
 
   it("should handle a Not Found Error when no CGN activation infos are found", async () => {
-    mockGetCgnActivation.mockImplementation(() =>
+    mockGetCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 404 })
     );
 
@@ -327,7 +329,7 @@ describe("CgnService#getCgnActivation", () => {
 
   it("should handle an internal error response", async () => {
     const aGenericProblem = {};
-    mockGetCgnActivation.mockImplementation(() =>
+    mockGetCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 500, value: aGenericProblem })
     );
 
@@ -341,7 +343,7 @@ describe("CgnService#getCgnActivation", () => {
   });
 
   it("should return an error for unhandled response status code", async () => {
-    mockGetCgnActivation.mockImplementation(() =>
+    mockGetCgnActivation.mockImplementationOnce(() =>
       t.success({ status: 123 })
     );
     const service = new CgnService(api);
@@ -354,7 +356,7 @@ describe("CgnService#getCgnActivation", () => {
   });
 
   it("should return an error if the api call thows", async () => {
-      mockGetCgnStatus.mockImplementation(() => {
+      mockGetCgnStatus.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new CgnService(api);

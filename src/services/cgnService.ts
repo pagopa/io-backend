@@ -11,7 +11,6 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
-  ProblemJson,
   ResponseErrorConflict,
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
@@ -33,9 +32,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-
-const readableProblem = (problem: ProblemJson) =>
-  `${problem.title} (${problem.type || "no problem type specified"})`;
+import { readableProblem } from "../../src/utils/errorsFormatter";
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 
