@@ -34,6 +34,7 @@ import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
+import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
 import { getRequiredENVVar, readFile } from "./utils/container";
@@ -319,6 +320,15 @@ export const BONUS_API_CLIENT = BonusAPIClient(
   httpApiFetch
 );
 
+export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
+export const CGN_API_URL = getRequiredENVVar("CGN_API_URL");
+export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
+export const CGN_API_CLIENT = CgnAPIClient(
+  CGN_API_KEY,
+  CGN_API_URL,
+  httpApiFetch
+);
+
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
 export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
@@ -412,6 +422,7 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
 
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
+export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
