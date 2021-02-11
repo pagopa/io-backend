@@ -227,7 +227,6 @@ Realtime data collection is enabled.
 
 Redis Database stores data required only by application side functionalities. Below a table with an example of data for an hypothetical user with fiscal code `MRARSS80A01H501T` and with session token `HexToken`.
 
-
 | Key                          | Value                                                              | type   | expire in |
 |----------------------------------------|-----------------------------------------------------------------------------------|--------|-----------|
 | SESSION-HexToken       | a JSON representing the user object | `User` | TOKEN_DURATION_IN_SECONDS |
