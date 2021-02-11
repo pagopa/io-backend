@@ -26,27 +26,16 @@ import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
-import AuthenticationController from "./controllers/authenticationController";
-import MessagesController from "./controllers/messagesController";
-import NotificationController from "./controllers/notificationController";
-import PagoPAController from "./controllers/pagoPAController";
-import PagoPAProxyController from "./controllers/pagoPAProxyController";
-import ProfileController from "./controllers/profileController";
-import ServicesController from "./controllers/servicesController";
-import SessionController from "./controllers/sessionController";
-import UserMetadataController from "./controllers/userMetadataController";
-
-import { log } from "./utils/logger";
-import checkIP from "./utils/middleware/checkIP";
-
 import {
   API_CLIENT,
   appConfig,
   BONUS_API_CLIENT,
   CACHE_MAX_AGE_SECONDS,
+  CGN_API_CLIENT,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
   FF_BONUS_ENABLED,
+  FF_CGN_ENABLED,
   getClientProfileRedirectionUrl,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   NOTIFICATION_DEFAULT_SUBJECT,
@@ -65,12 +54,27 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING
 } from "./config";
+import AuthenticationController from "./controllers/authenticationController";
+import MessagesController from "./controllers/messagesController";
+import NotificationController from "./controllers/notificationController";
+import PagoPAController from "./controllers/pagoPAController";
+import PagoPAProxyController from "./controllers/pagoPAProxyController";
+import ProfileController from "./controllers/profileController";
+import ServicesController from "./controllers/servicesController";
+import SessionController from "./controllers/sessionController";
+import UserMetadataController from "./controllers/userMetadataController";
+
+import { log } from "./utils/logger";
+import checkIP from "./utils/middleware/checkIP";
+
 import BonusController from "./controllers/bonusController";
+import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
+import CgnService from "./services/cgnService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -137,6 +141,7 @@ export interface IAppFactoryParameters {
   readonly PagoPABasePath: string;
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
+  readonly CGNAPIBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -153,7 +158,8 @@ export function newApp({
   BonusAPIBasePath,
   PagoPABasePath,
   MyPortalBasePath,
-  BPDBasePath
+  BPDBasePath,
+  CGNAPIBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -290,6 +296,9 @@ export function newApp({
       // Create the bonus service
       const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
 
+      // Create the cgn service
+      const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
+
       // Create the user data processing service
       const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
         API_CLIENT
@@ -380,6 +389,15 @@ export function newApp({
           app,
           BonusAPIBasePath,
           BONUS_SERVICE,
+          authMiddlewares.bearerSession
+        );
+      }
+      if (FF_CGN_ENABLED) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerCgnAPIRoutes(
+          app,
+          CGNAPIBasePath,
+          CGN_SERVICE,
           authMiddlewares.bearerSession
         );
       }
@@ -806,6 +824,22 @@ function registerSessionAPIRoutes(
       sessionLockController.unlockUserSession,
       sessionLockController
     )
+  );
+}
+
+function registerCgnAPIRoutes(
+  app: Express,
+  basePath: string,
+  cgnService: CgnService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const cgnController: CgnController = new CgnController(cgnService);
+
+  app.get(
+    `${basePath}/cgn/status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 }
 
