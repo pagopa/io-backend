@@ -1,5 +1,3 @@
-/* tslint:disable no-any no-duplicate-string */
-
 import { ResponseSuccessAccepted, ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
