@@ -1,5 +1,6 @@
 import { Errors } from "io-ts";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { ProblemJson } from "italia-ts-commons/lib/responses";
 
 /**
  * Merge into one single Error several errors provided in input and add a context description
@@ -19,3 +20,6 @@ export function multipleErrorsFormatter(
 
 export const errorsToError = (errors: Errors): Error =>
   new Error(errorsToReadableMessages(errors).join(" / "));
+
+export const readableProblem = (problem: ProblemJson) =>
+  `${problem.title} (${problem.type || "no problem type specified"})`;

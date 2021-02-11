@@ -1,0 +1,115 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Carta Giovani Nazionale API
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/cgn/status":
+    get:
+      operationId: getCgnStatus
+      summary: Get the CGN status details
+      description: |
+        Get the CGN status details 
+        by the provided fiscal code
+      responses:
+        "200":
+          description: CGN status details.
+          schema:
+            $ref: "#/definitions/CgnStatus"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: No CGN found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/cgn/activation":
+    post:
+      operationId: startCgnActivation
+      summary: Start a CGN activation procedure
+      description: | 
+        Start a new CGN activation procedure
+        for the logged user calculating if the user is
+        eligible to get a CGN.
+      responses:
+        "201":
+          description: Request created.
+          schema:
+            $ref: "#/definitions/InstanceId"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+        "202":
+          description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
+        "401":
+          description: Bearer token null or expired.
+        "403":
+          description: |
+            Cannot activate a new CGN because the user is ineligible to get the CGN.
+        "409":
+          description: |
+            Cannot activate the user's cgn because another updateCgn request was found
+            for this user or it is already active.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+    get:
+      operationId: getCgnActivation
+      summary: |
+        Get CGN activation process status
+      description: |
+        Get informations about a CGN activation process
+      responses:
+        "200":
+            description: Cgn activation details.
+            schema:
+              $ref: "#/definitions/CgnActivationDetail"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: No CGN activation process found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+definitions:
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/Timestamp"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/FiscalCode"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
+  InstanceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/InstanceId"
+  CgnPendingStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
+  CgnActivatedStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivatedStatus"
+  CgnRevokedStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnRevokedStatus"
+  CgnExpiredStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnExpiredStatus"
+  CgnStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
+  CgnActivationDetail:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
+    
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
