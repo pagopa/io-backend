@@ -63,7 +63,7 @@ const aBonusAPIBasePath = "/bonus/api/v1";
 const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
-const aCgnAPIBasePath = "/cgn/api/v1";
+const aCgnAPIBasePath = "/api/v1/cgn";
 
 describe("Success app start", () => {
   // tslint:disable:no-let

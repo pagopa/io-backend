@@ -42,7 +42,6 @@ export default class CgnService {
   public readonly getCgnStatus = (
     user: User
   ): Promise<
-    // tslint:disable-next-line: max-union-size
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
