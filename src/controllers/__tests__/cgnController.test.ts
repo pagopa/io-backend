@@ -11,7 +11,7 @@ import { User } from "../../types/user";
 import CgnController from "../cgnController";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
-import { CgnPendingStatus, StatusEnum } from "../../../generated/io-cgn-api/CgnPendingStatus";
+import { CardPendingStatus, StatusEnum } from "../../../generated/io-cgn-api/CardPendingStatus";
 import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "../../../generated/io-cgn-api/CgnActivationDetail";
 
 const API_KEY = "";
@@ -57,7 +57,7 @@ jest.mock("../../services/cgnService", () => {
   };
 });
 
-const aPendingCgnStatus: CgnPendingStatus = {
+const aPendingCgnStatus: CardPendingStatus = {
   status: StatusEnum.PENDING
 }
 

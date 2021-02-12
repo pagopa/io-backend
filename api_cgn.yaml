@@ -20,7 +20,7 @@ paths:
         "200":
           description: CGN status details.
           schema:
-            $ref: "#/definitions/CgnStatus"
+            $ref: "#/definitions/CardStatus"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -95,18 +95,20 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/InstanceId"
-  CgnPendingStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
-  CgnActivatedStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivatedStatus"
-  CgnRevokedStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnRevokedStatus"
-  CgnExpiredStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnExpiredStatus"
-  CgnStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
+  CommonCardStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CommonCardStatus"
+  CardPendingStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardPendingStatus"
+  CardActivatedStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardActivatedStatus"
+  CardRevokedStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardRevokedStatus"
+  CardExpiredStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardExpiredStatus"
+  CardStatus:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardStatus"
   CgnActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CgnActivationDetail"
     
 securityDefinitions:
   Bearer:

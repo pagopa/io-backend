@@ -6,7 +6,7 @@ import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import CgnService from "../cgnService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { CgnPendingStatus, StatusEnum } from "../../../generated/io-cgn-api/CgnPendingStatus";
+import { CardPendingStatus, StatusEnum } from "../../../generated/io-cgn-api/CardPendingStatus";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
@@ -51,7 +51,7 @@ const mockedUser: User = {
     wallet_token: "HexToKen" as WalletToken
   };
 
-const aPendingCgnStatus: CgnPendingStatus = {
+const aPendingCgnStatus: CardPendingStatus = {
     status: StatusEnum.PENDING
 }
 describe("CgnService#getCgnStatus", () => {
