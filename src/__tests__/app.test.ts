@@ -63,6 +63,7 @@ const aBonusAPIBasePath = "/bonus/api/v1";
 const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
+const aCgnAPIBasePath = "/api/v1/cgn";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -72,6 +73,7 @@ describe("Success app start", () => {
       APIBasePath: "/api/v1",
       BPDBasePath: aBPDBasePath,
       BonusAPIBasePath: aBonusAPIBasePath,
+      CGNAPIBasePath: aCgnAPIBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
       allowBPDIPSourceRange: [aValidCIDR],
@@ -172,6 +174,7 @@ describe("Failure app start", () => {
         APIBasePath: "/api/v1",
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
+        CGNAPIBasePath: aCgnAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
@@ -198,6 +201,7 @@ describe("Failure app start", () => {
         APIBasePath: "/api/v1",
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
+        CGNAPIBasePath: aCgnAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
@@ -224,6 +228,7 @@ describe("Failure app start", () => {
         APIBasePath: "/api/v1",
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
+        CGNAPIBasePath: aCgnAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
