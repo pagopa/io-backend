@@ -76,7 +76,7 @@
     "http-graceful-shutdown": "^2.3.2",
     "io-ts": "1.8.5",
     "io-ts-types": "^0.4.7",
-    "italia-ts-commons": "^8.3.0",
+    "italia-ts-commons": "^8.6.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.1",
