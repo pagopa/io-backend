@@ -91,7 +91,7 @@
     "redis-clustr": "^1.6.0",
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
-    "winston": "^3.0.0",
+    "winston": "^3.3.3",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
