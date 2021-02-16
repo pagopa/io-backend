@@ -11,7 +11,7 @@ import { User } from "../../types/user";
 import CgnController from "../cgnController";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
-import { CgnPendingStatus, StatusEnum } from "../../../generated/io-cgn-api/CgnPendingStatus";
+import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
 import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "../../../generated/io-cgn-api/CgnActivationDetail";
 
 const API_KEY = "";
@@ -57,7 +57,7 @@ jest.mock("../../services/cgnService", () => {
   };
 });
 
-const aPendingCgnStatus: CgnPendingStatus = {
+const aPendingCgn: CardPending = {
   status: StatusEnum.PENDING
 }
 
@@ -88,7 +88,7 @@ describe("CgnController#getCgnStatus", () => {
     const req = { ...mockReq(), user: mockedUser };
 
     mockGetCgnStatus.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(aPendingCgnStatus))
+      Promise.resolve(ResponseSuccessJson(aPendingCgn))
     );
 
     const client = CgnAPIClient(API_KEY, API_URL);
@@ -100,7 +100,7 @@ describe("CgnController#getCgnStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: aPendingCgnStatus
+      value: aPendingCgn
     });
   });
 

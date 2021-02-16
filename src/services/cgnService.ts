@@ -24,7 +24,7 @@ import { fromNullable } from "fp-ts/lib/Option";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
 import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 import { CgnAPIClient } from "../../src/clients/cgn";
-import { CgnStatus } from "../../generated/io-cgn-api/CgnStatus";
+import { Card } from "../../generated/io-cgn-api/Card";
 import { User } from "../types/user";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -46,7 +46,7 @@ export default class CgnService {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessJson<CgnStatus>
+    | IResponseSuccessJson<Card>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnApiClient.getCgnStatus({

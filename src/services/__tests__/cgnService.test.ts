@@ -6,7 +6,7 @@ import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import CgnService from "../cgnService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { CgnPendingStatus, StatusEnum } from "../../../generated/io-cgn-api/CgnPendingStatus";
+import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
@@ -17,7 +17,7 @@ const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 
 mockGetCgnStatus.mockImplementation(() =>
-  t.success({status: 200, value:aPendingCgnStatus})
+  t.success({status: 200, value:aPendingCgn})
 );
 
 mockStartCgnActivation.mockImplementation(() =>
@@ -51,7 +51,7 @@ const mockedUser: User = {
     wallet_token: "HexToKen" as WalletToken
   };
 
-const aPendingCgnStatus: CgnPendingStatus = {
+const aPendingCgn: CardPending = {
     status: StatusEnum.PENDING
 }
 describe("CgnService#getCgnStatus", () => {

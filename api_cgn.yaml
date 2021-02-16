@@ -20,7 +20,7 @@ paths:
         "200":
           description: CGN status details.
           schema:
-            $ref: "#/definitions/CgnStatus"
+            $ref: "#/definitions/Card"
         "401":
           description: Bearer token null or expired.
         "404":
@@ -95,16 +95,18 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/InstanceId"
-  CgnPendingStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnPendingStatus"
-  CgnActivatedStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivatedStatus"
-  CgnRevokedStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnRevokedStatus"
-  CgnExpiredStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnExpiredStatus"
-  CgnStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnStatus"
+  CommonCard:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CommonCard"
+  CardPending:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardPending"
+  CardActivated:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardActivated"
+  CardRevoked:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardRevoked"
+  CardExpired:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardExpired"
+  Card:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/Card"
   CgnActivationDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
     
