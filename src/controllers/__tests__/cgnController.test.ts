@@ -47,12 +47,14 @@ const mockedUser: User = {
 const mockGetCgnStatus = jest.fn();
 const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
+const mockStartEycaActivation = jest.fn();
 jest.mock("../../services/cgnService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getCgnActivation: mockGetCgnActivation,
       getCgnStatus: mockGetCgnStatus,
-      startCgnActivation: mockStartCgnActivation
+      startCgnActivation: mockStartCgnActivation,
+      startEycaActivation: mockStartEycaActivation
     }))
   };
 });
@@ -228,6 +230,61 @@ describe("CgnController#getCgnActivation", () => {
 
     // service method is not called
     expect(mockGetCgnActivation).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("CgnController#startEycaActivation", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService);
+    await controller.startEycaActivation(req);
+
+    expect(mockStartEycaActivation).toHaveBeenCalledWith(mockedUser);
+  });
+
+  it("should call startEycaActivation method on the CgnService with valid values", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    mockStartEycaActivation.mockReturnValue(
+      Promise.resolve(ResponseSuccessAccepted())
+    );
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService);
+    
+    const response = await controller.startEycaActivation(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessAccepted",
+      value: undefined
+    });
+  });
+
+  it("should not call startEycaActivation method on the CgnService with empty user", async () => {
+    const req = { ...mockReq(), user: undefined };
+    const res = mockRes();
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService);
+    
+    const response = await controller.startEycaActivation(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockStartEycaActivation).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });

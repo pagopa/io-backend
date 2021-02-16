@@ -70,7 +70,7 @@ export default class CgnService {
     });
 
   /**
-   * Get the current CGN Status related to the user.
+   * Start a CGN activation for the logged user.
    */
   public readonly startCgnActivation = (
     user: User
@@ -141,6 +141,52 @@ export default class CgnService {
             return ResponseErrorNotFound(
               "Not Found",
               "No User CGN activation found"
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Start a CGN activation for the logged user.
+   */
+  public readonly startEycaActivation = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.startEycaActivation({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              fromNullable(response.headers.Location).getOrElse(
+                "/api/v1/cgn/eyca/activation"
+              ),
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired"
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));

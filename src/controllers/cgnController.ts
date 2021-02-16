@@ -63,4 +63,19 @@ export default class CgnController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<CgnActivationDetail>
   > => withUserFromRequest(req, user => this.cgnService.getCgnActivation(user));
+
+  /**
+   * Start an EYCA activation for the current user.
+   */
+  public readonly startEycaActivation = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withUserFromRequest(req, user => this.cgnService.startEycaActivation(user));
 }
