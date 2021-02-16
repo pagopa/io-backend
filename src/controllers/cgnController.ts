@@ -15,7 +15,7 @@ import {
   IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
-import { CgnStatus } from "../../generated/cgn/CgnStatus";
+import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
 import { withUserFromRequest } from "../types/user";
@@ -34,7 +34,7 @@ export default class CgnController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorForbiddenNotAuthorized
-    | IResponseSuccessJson<CgnStatus>
+    | IResponseSuccessJson<Card>
   > => withUserFromRequest(req, user => this.cgnService.getCgnStatus(user));
 
   /**
