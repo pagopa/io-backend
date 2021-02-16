@@ -36,38 +36,6 @@ parameters:
         appname: io-p-app-appbackendli
         rg: io-p-rg-linux
 
-
-  - name: 'OPENAPI_SPEC_PATHS'
-    type: object
-    default:
-      api_auth: 
-        openapi_spec_path: 'api_auth.yaml'
-        package_name: '@pagopa/io-backend-auth-sdk'
-      api_backend: 
-        openapi_spec_path: 'api_backend.yaml'
-        package_name: '@pagopa/io-backend-sdk'
-      api_bonus: 
-        openapi_spec_path: 'api_bonus.yaml'
-        package_name: '@pagopa/io-backend-bonus-sdk'
-      api_bpd: 
-        openapi_spec_path: 'api_bpd.yaml'
-        package_name: '@pagopa/io-backend-bpd-sdk'
-      api_myportal: 
-        openapi_spec_path: 'api_myportal.yaml'
-        package_name: '@pagopa/io-backend-myportal-sdk'
-      api_notifications: 
-        openapi_spec_path: 'api_notifications.yaml'
-        package_name: '@pagopa/io-backend-notifications-sdk'
-      api_pagopa: 
-        openapi_spec_path: 'api_pagopa.yaml'
-        package_name: '@pagopa/io-backend-pagopa-sdk'
-      api_public: 
-        openapi_spec_path: 'api_public.yaml'
-        package_name: '@pagopa/io-backend-public-sdk'
-      api_session: 
-        openapi_spec_path: 'api_session.yaml'
-        package_name: '@pagopa/io-backend-session-sdk'
-
 # Only manual activations are intended
 trigger: none
 pr: none
@@ -85,7 +53,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v11
+      ref: refs/tags/v8
       endpoint: 'pagopa'
 
 stages:
@@ -126,7 +94,6 @@ stages:
           - script: |
               echo "We assume this reference to be a valid release: $(Build.SourceBranch). Therefore, there is no need to bundle a new release."
             displayName: 'Skip release bundle'
-
 
   # Prepare Artifact
   - stage: Prepare_artifact
@@ -239,20 +206,3 @@ stages:
                 sourceSlot: staging
                 swapWithProduction: true
               displayName: Swap with production slot
-
-
-  # Publish client SDKs to NPM
-  - stage: PublishClientSDKstoNPM
-    dependsOn: Release
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - ${{ each spec in parameters.OPENAPI_SPEC_PATHS }}:
-        - job: publish_SDK_${{ spec.Key }}   
-          steps:
-          # Template for generating and deploying client SDk to NPM
-          - template: templates/client-sdk-publish/template.yaml@pagopaCommons
-            parameters:
-              openapiSpecPath: '${{ spec.Value.openapi_spec_path }}'
-              artifactName: 'Bundle_${{ spec.Key }}'
-              sdkPackageName: '${{ spec.Value.package_name }}'
