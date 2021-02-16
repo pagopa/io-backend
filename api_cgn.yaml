@@ -96,19 +96,19 @@ definitions:
   InstanceId:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/InstanceId"
   CommonCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CommonCard"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CommonCard"
   CardPending:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardPending"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardPending"
   CardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardActivated"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardActivated"
   CardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardRevoked"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardRevoked"
   CardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CardExpired"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CardExpired"
   Card:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/Card"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/Card"
   CgnActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176782168_add_eyca_async_activation/openapi/index.yaml#/definitions/CgnActivationDetail"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
     
 securityDefinitions:
   Bearer:
