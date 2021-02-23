@@ -180,7 +180,7 @@ definitions:
   CgnActivationDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
   EycaActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924316_add_start_eyca_activation_api/openapi/index.yaml#/definitions/EycaActivationDetail"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaActivationDetail"
   EycaCard:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCard"
     
