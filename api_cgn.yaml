@@ -187,7 +187,13 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaActivationDetail"
   EycaCard:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCard"
-    
+  EycaCardActivated:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardActivated"
+  EycaCardExpired:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardExpired"
+  EycaCardRevoked:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardRevoked"
+  
 securityDefinitions:
   Bearer:
     type: apiKey
