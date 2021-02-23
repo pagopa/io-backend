@@ -121,6 +121,25 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
+    get:
+      operationId: getEycaActivation
+      summary: |
+        Get EYCA activation process' status
+      description: |
+        Get informations about an EYCA activation process
+      responses:
+        "200":
+            description: Eyca Card activation details.
+            schema:
+              $ref: "#/definitions/EycaActivationDetail"
+        "401":
+          description: Wrong or missing function key.
+        "404":
+          description: No EYCA Card activation process found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/Timestamp"
@@ -144,6 +163,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/Card"
   CgnActivationDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
+  EycaActivationDetail:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924316_add_start_eyca_activation_api/openapi/index.yaml#/definitions/EycaActivationDetail"
     
 securityDefinitions:
   Bearer:

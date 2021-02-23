@@ -16,6 +16,8 @@ const mockGetCgnStatus = jest.fn();
 const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 const mockStartEycaActivation = jest.fn();
+const mockGetEycaActivation = jest.fn();
+const mockGetEycaStatus = jest.fn();
 
 mockGetCgnStatus.mockImplementation(() =>
   t.success({status: 200, value:aPendingCgn})
@@ -33,6 +35,11 @@ mockGetCgnActivation.mockImplementation(() =>
   t.success({status: 200})
 );
 
+mockGetEycaActivation.mockImplementation(() =>
+  t.success({status: 200})
+);
+
+
 mockStartEycaActivation.mockImplementation(() => 
   t.success({status: 201, headers: {Location: "/api/v1/cgn/eyca/activation"}, value: {
     id: {
@@ -44,6 +51,8 @@ mockStartEycaActivation.mockImplementation(() =>
 const api = {
   getCgnActivation: mockGetCgnActivation,
   getCgnStatus: mockGetCgnStatus,
+  getEycaStatus: mockGetEycaStatus,
+  getEycaActivation: mockGetEycaActivation,
   startCgnActivation: mockStartCgnActivation,
   startEycaActivation: mockStartEycaActivation,
   upsertCgnStatus: jest.fn()
@@ -372,6 +381,102 @@ describe("CgnService#getCgnActivation", () => {
     const service = new CgnService(api);
 
     const res = await service.getCgnActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("CgnService#getEycaActivation", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new CgnService(api);
+
+    await service.getEycaActivation(mockedUser);
+
+    expect(mockGetEycaActivation).toHaveBeenCalledWith({
+      fiscalcode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a success response", async () => {
+
+    const service = new CgnService(api);
+
+    const res = await service.getEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle an internal error when the client returns 401", async () => {
+    mockGetEycaActivation.mockImplementationOnce(() =>
+      t.success({ status: 401 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.getEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should handle a Not Found Error when no CGN activation infos are found", async () => {
+    mockGetEycaActivation.mockImplementationOnce(() =>
+      t.success({ status: 404 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.getEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGetEycaActivation.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.getEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetEycaActivation.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
+    const service = new CgnService(api);
+
+    const res = await service.getEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetEycaActivation.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new CgnService(api);
+
+    const res = await service.getEycaActivation(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

@@ -21,6 +21,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
+import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
 import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 import { CgnAPIClient } from "../../src/clients/cgn";
@@ -151,7 +152,7 @@ export default class CgnService {
     });
 
   /**
-   * Start a CGN activation for the logged user.
+   * Start an EYCA activation for the logged user.
    */
   public readonly startEycaActivation = (
     user: User
@@ -187,6 +188,41 @@ export default class CgnService {
           case 409:
             return ResponseErrorConflict(
               "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired"
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get EYCA's activation status for the logged user.
+   */
+  public readonly getEycaActivation = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<EycaActivationDetail>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.getEycaActivation({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "No EYCA Card activation found"
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));

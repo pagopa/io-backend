@@ -859,6 +859,12 @@ function registerCgnAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startEycaActivation, cgnController)
   );
+
+  app.get(
+    `${basePath}/cgn/eyca/activation`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.getEycaActivation, cgnController)
+  );
 }
 
 function registerBonusAPIRoutes(

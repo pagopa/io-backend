@@ -15,6 +15,7 @@ import {
   IResponseSuccessRedirectToResource
 } from "italia-ts-commons/lib/responses";
 
+import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
@@ -63,6 +64,19 @@ export default class CgnController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<CgnActivationDetail>
   > => withUserFromRequest(req, user => this.cgnService.getCgnActivation(user));
+
+  /**
+   * Get EYCA card activation's process status for the current user.
+   */
+  public readonly getEycaActivation = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<EycaActivationDetail>
+  > =>
+    withUserFromRequest(req, user => this.cgnService.getEycaActivation(user));
 
   /**
    * Start an EYCA activation for the current user.
