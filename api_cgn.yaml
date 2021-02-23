@@ -86,6 +86,26 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
+  "/cgn/eyca/status":
+    get:
+      operationId: getEycaStatus
+      summary: Get the Eyca Card status details
+      description: |
+        Get the Eyca Card status details
+      responses:
+        "200":
+          description: Eyca Card status details.
+          schema:
+            $ref: "#/definitions/EycaCard"
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: No Eyca Card found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
 definitions:
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/Timestamp"
@@ -109,6 +129,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/Card"
   CgnActivationDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
+  EycaCard:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCard"
     
 securityDefinitions:
   Bearer:

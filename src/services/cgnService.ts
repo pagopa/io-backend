@@ -21,6 +21,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
+import { EycaCard } from "generated/io-cgn-api/EycaCard";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
 import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 import { CgnAPIClient } from "../../src/clients/cgn";
@@ -61,6 +62,39 @@ export default class CgnService {
             return ResponseErrorUnexpectedAuthProblem();
           case 404:
             return ResponseErrorNotFound("Not Found", "CGN not found");
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get the current Eyca Card Status related to the user.
+   */
+  public readonly getEycaStatus = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<EycaCard>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.getEycaStatus({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound("Not Found", "Eyca Card not found");
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:
