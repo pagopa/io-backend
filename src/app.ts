@@ -842,6 +842,12 @@ function registerCgnAPIRoutes(
     toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 
+  app.get(
+    `${basePath}/cgn/eyca/status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.getEycaStatus, cgnController)
+  );
+
   app.post(
     `${basePath}/cgn/activation`,
     bearerSessionTokenAuth,
