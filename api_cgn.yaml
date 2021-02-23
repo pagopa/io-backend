@@ -85,6 +85,61 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/cgn/eyca/activation":
+    post:
+      operationId: startEycaActivation
+      summary: Start an EYCA activation procedure
+      description: | 
+        Start a new EYCA activation procedure
+        for the logged user calculating if the user is
+        eligible to enable EYCA on his CGN card.
+      responses:
+        "201":
+          description: Request created.
+          schema:
+            $ref: "#/definitions/InstanceId"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the request status and details.
+        "202":
+          description: Processing request.
+          schema:
+            $ref: "#/definitions/InstanceId"
+        "401":
+          description: Bearer token null or expired.
+        "403":
+          description: |
+            Cannot activate EYCA Card because the user is ineligible to enable EYCA.
+        "409":
+          description: |
+            Cannot activate EYCA Card because another EYCA Card activation request was found
+            for this user or it is already active.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+    get:
+      operationId: getEycaActivation
+      summary: |
+        Get EYCA activation process' status
+      description: |
+        Get informations about an EYCA activation process
+      responses:
+        "200":
+            description: Eyca Card activation details.
+            schema:
+              $ref: "#/definitions/EycaActivationDetail"
+        "401":
+          description: Wrong or missing function key.
+        "404":
+          description: No EYCA Card activation process found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
   "/cgn/eyca/status":
     get:
@@ -105,7 +160,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
 definitions:
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/Timestamp"
@@ -129,6 +183,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/Card"
   CgnActivationDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CgnActivationDetail"
+  EycaActivationDetail:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaActivationDetail"
   EycaCard:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCard"
     

@@ -21,6 +21,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
+import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "generated/io-cgn-api/EycaCard";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
 import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
@@ -104,7 +105,7 @@ export default class CgnService {
     });
 
   /**
-   * Get the current CGN Status related to the user.
+   * Start a CGN activation process for the logged user.
    */
   public readonly startCgnActivation = (
     user: User
@@ -150,7 +151,7 @@ export default class CgnService {
     });
 
   /**
-   * Get the current CGN Activation status related to the user.
+   * Get CGN activation status details for the logged user.
    */
   public readonly getCgnActivation = (
     user: User
@@ -175,6 +176,87 @@ export default class CgnService {
             return ResponseErrorNotFound(
               "Not Found",
               "No User CGN activation found"
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Start an EYCA activation for the logged user.
+   */
+  public readonly startEycaActivation = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.startEycaActivation({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              fromNullable(response.headers.Location).getOrElse(
+                "/api/v1/cgn/eyca/activation"
+              ),
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot start a new EYCA activation because EYCA card is already active, revoked or expired"
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get EYCA's activation status detail for the logged user.
+   */
+  public readonly getEycaActivation = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<EycaActivationDetail>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.getEycaActivation({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "No EYCA Card activation found"
             );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
