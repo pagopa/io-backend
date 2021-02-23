@@ -615,8 +615,8 @@ describe("CgnService#startEycaActivation", () => {
 
   it("should handle a success Accepted response", async () => {
     mockStartEycaActivation.mockImplementationOnce(() =>
-    t.success({status: 202})
-  );
+      t.success({status: 202})
+    );
 
   const service = new CgnService(api);
 
