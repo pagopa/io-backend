@@ -232,7 +232,7 @@ export default class CgnService {
     });
 
   /**
-   * Get EYCA's activation status for the logged user.
+   * Get EYCA's activation status detail for the logged user.
    */
   public readonly getEycaActivation = (
     user: User
