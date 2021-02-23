@@ -136,6 +136,10 @@ paths:
           description: Wrong or missing function key.
         "404":
           description: No EYCA Card activation process found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
   "/cgn/eyca/status":
     get:
