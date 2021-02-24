@@ -186,13 +186,15 @@ definitions:
   EycaActivationDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaActivationDetail"
   EycaCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCard"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924278_add_eyca_ccdb_api_integration/openapi/index.yaml#/definitions/EycaCard"
   EycaCardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardActivated"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924278_add_eyca_ccdb_api_integration/openapi/index.yaml#/definitions/EycaCardActivated"
   EycaCardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardExpired"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924278_add_eyca_ccdb_api_integration/openapi/index.yaml#/definitions/EycaCardExpired"
   EycaCardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardRevoked"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924278_add_eyca_ccdb_api_integration/openapi/index.yaml#/definitions/EycaCardRevoked"
+  CcdbNumber:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/176924278_add_eyca_ccdb_api_integration/openapi/index.yaml#/definitions/EycaCardRevoked"
   
 securityDefinitions:
   Bearer:
