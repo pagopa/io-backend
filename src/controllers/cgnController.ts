@@ -49,6 +49,7 @@ export default class CgnController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
     | IResponseSuccessJson<EycaCard>
   > => withUserFromRequest(req, user => this.cgnService.getEycaStatus(user));
 

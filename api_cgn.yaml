@@ -154,8 +154,12 @@ paths:
             $ref: "#/definitions/EycaCard"
         "401":
           description: Bearer token null or expired.
+        "403":
+          description: Forbidden.
         "404":
           description: No Eyca Card found.
+        "409":
+          description: Conflict.
         "500":
           description: Service unavailable.
           schema:
@@ -194,7 +198,7 @@ definitions:
   EycaCardRevoked:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardRevoked"
   CcdbNumber:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/EycaCardRevoked"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/master/openapi/index.yaml#/definitions/CcdbNumber"
   
 securityDefinitions:
   Bearer:
