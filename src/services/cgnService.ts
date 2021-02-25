@@ -81,6 +81,7 @@ export default class CgnService {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
     | IResponseSuccessJson<EycaCard>
   > =>
     withCatchAsInternalError(async () => {
@@ -94,8 +95,14 @@ export default class CgnService {
             return ResponseSuccessJson(response.value);
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
           case 404:
             return ResponseErrorNotFound("Not Found", "Eyca Card not found");
+          case 409:
+            return ResponseErrorConflict(
+              "EYCA Card is missing while citizen is eligible to obtain it or a CGN is already activated"
+            );
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:

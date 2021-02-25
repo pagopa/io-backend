@@ -215,6 +215,20 @@ describe("CgnService#getEycaStatus", () => {
         kind: "IResponseErrorInternal"
       });
     });
+
+    it("should handle a Forbidden error when the client returns 403", async () => {
+      mockGetEycaStatus.mockImplementationOnce(() =>
+      t.success({ status: 403 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.getEycaStatus(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorForbiddenNotAuthorized"
+    });
+  });
   
     it("should handle a not found error when the Eyca Card is not found", async () => {
         mockGetEycaStatus.mockImplementationOnce(() =>
@@ -229,6 +243,20 @@ describe("CgnService#getEycaStatus", () => {
         kind: "IResponseErrorNotFound"
       });
     });
+
+    it("should handle a Conflict error when the client returns 409", async () => {
+      mockGetEycaStatus.mockImplementationOnce(() =>
+      t.success({ status: 409 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.getEycaStatus(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorConflict"
+    });
+  });
   
     it("should handle an internal error response", async () => {
       const aGenericProblem = {};
