@@ -12,19 +12,34 @@ import {
   IResponseErrorValidation,
   IResponseSuccessAccepted,
   IResponseSuccessJson,
-  IResponseSuccessRedirectToResource
+  IResponseSuccessRedirectToResource,
+  ResponseErrorForbiddenNotAuthorized
 } from "italia-ts-commons/lib/responses";
 
 import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "generated/io-cgn-api/EycaCard";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
-import { withUserFromRequest } from "../types/user";
+import { User, withUserFromRequest } from "../types/user";
 import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 
+export const withAllowedUser = async <T>(
+  user: User,
+  allowedFiscalCodes: ReadonlyArray<FiscalCode>,
+  f: (user: User) => Promise<T>
+) =>
+  allowedFiscalCodes.includes(user.fiscal_code) ||
+  allowedFiscalCodes.length === 0
+    ? f(user)
+    : ResponseErrorForbiddenNotAuthorized;
+
 export default class CgnController {
-  constructor(private readonly cgnService: CgnService) {}
+  constructor(
+    private readonly cgnService: CgnService,
+    private readonly allowedFiscalCodes: ReadonlyArray<FiscalCode>
+  ) {}
 
   /**
    * Get the Cgn status for the current user.
@@ -37,7 +52,14 @@ export default class CgnController {
     | IResponseErrorNotFound
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Card>
-  > => withUserFromRequest(req, user => this.cgnService.getCgnStatus(user));
+  > =>
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.getCgnStatus
+      )
+    );
 
   /**
    * Get the Eyca Card status for the current user.
@@ -51,7 +73,14 @@ export default class CgnController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorConflict
     | IResponseSuccessJson<EycaCard>
-  > => withUserFromRequest(req, user => this.cgnService.getEycaStatus(user));
+  > =>
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.getEycaStatus
+      )
+    );
 
   /**
    * Start a Cgn activation for the current user.
@@ -66,7 +95,13 @@ export default class CgnController {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, user => this.cgnService.startCgnActivation(user));
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.startCgnActivation
+      )
+    );
 
   /**
    * Get Cgn activation's process status for the current user.
@@ -77,8 +112,16 @@ export default class CgnController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<CgnActivationDetail>
-  > => withUserFromRequest(req, user => this.cgnService.getCgnActivation(user));
+  > =>
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.getCgnActivation
+      )
+    );
 
   /**
    * Get EYCA card activation's process status for the current user.
@@ -89,9 +132,16 @@ export default class CgnController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<EycaActivationDetail>
   > =>
-    withUserFromRequest(req, user => this.cgnService.getEycaActivation(user));
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.getEycaActivation
+      )
+    );
 
   /**
    * Start an EYCA activation for the current user.
@@ -106,5 +156,11 @@ export default class CgnController {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, user => this.cgnService.startEycaActivation(user));
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.startEycaActivation
+      )
+    );
 }

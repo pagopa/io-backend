@@ -454,3 +454,10 @@ log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
+
+export const TEST_CGN_FISCAL_CODES = NonEmptyString.decode(
+  process.env.TEST_CGN_FISCAL_CODES
+)
+  .map(_ => _.split(","))
+  .map(_ => rights(_.map(FiscalCode.decode)))
+  .getOrElse([]);
