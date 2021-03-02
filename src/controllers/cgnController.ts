@@ -30,8 +30,8 @@ export const withAllowedUser = async <T>(
   allowedFiscalCodes: ReadonlyArray<FiscalCode>,
   f: (user: User) => Promise<T>
 ) =>
-  allowedFiscalCodes.includes(user.fiscal_code) ||
-  allowedFiscalCodes.length === 0
+  allowedFiscalCodes.length === 0 ||
+  allowedFiscalCodes.includes(user.fiscal_code)
     ? f(user)
     : ResponseErrorForbiddenNotAuthorized;
 

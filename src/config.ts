@@ -41,7 +41,7 @@ import { getRequiredENVVar, readFile } from "./utils/container";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import ApiClientFactory from "./services/apiClientFactory";
 import { BonusAPIClient } from "./clients/bonus";
-import { STRINGS_RECORD } from "./types/commons";
+import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 
@@ -455,9 +455,10 @@ log.info(
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
 
-export const TEST_CGN_FISCAL_CODES = NonEmptyString.decode(
-  process.env.TEST_CGN_FISCAL_CODES
-)
-  .map(_ => _.split(","))
-  .map(_ => rights(_.map(FiscalCode.decode)))
-  .getOrElse([]);
+export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
+  .decode(process.env.TEST_CGN_FISCAL_CODES || "")
+  .getOrElseL(err => {
+    throw new Error(
+      `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
+    );
+  });
