@@ -21,12 +21,13 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
-import { EycaCard } from "generated/io-cgn-api/EycaCard";
-import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
-import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
+import { EycaActivationDetail } from "generated/cgn/EycaActivationDetail";
+import { EycaCard } from "generated/cgn/EycaCard";
+import { InstanceId } from "../../generated/cgn/InstanceId";
+import { CgnActivationDetail } from "../../generated/cgn/CgnActivationDetail";
 import { CgnAPIClient } from "../../src/clients/cgn";
-import { Card } from "../../generated/io-cgn-api/Card";
+import { Card } from "../../generated/cgn/Card";
+import { Otp } from "../../generated/cgn/Otp";
 import { User } from "../types/user";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -265,6 +266,38 @@ export default class CgnService {
               "Not Found",
               "No EYCA Card activation found"
             );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * generate a CGN OTP
+   */
+  public readonly generateOtp = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<Otp>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.generateOtp({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           default:

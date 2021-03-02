@@ -164,6 +164,28 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
+  
+  "/cgn/otp":
+    post:
+      operationId: generateOtp
+      summary: |
+        Generate a new Otp related to a CGN
+      description: |
+        Generate a new Otp used to discount an online purchase
+        through a valid CGN
+      responses:
+        "200":
+            description: Otp generated.
+            schema:
+              $ref: "#/definitions/Otp"
+        "401":
+          description: Bearer token null or expired.
+        "403":
+          description: Forbidden.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/Timestamp"
@@ -199,7 +221,11 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v0.1.4/openapi/index.yaml#/definitions/EycaCardRevoked"
   CcdbNumber:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v0.1.4/openapi/index.yaml#/definitions/CcdbNumber"
-  
+  Otp:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/175761529_expose_otp_generation_api/openapi/index.yaml#/definitions/Otp"
+  OtpCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/175761529_expose_otp_generation_api/openapi/index.yaml#/definitions/OtpCode"
+
 securityDefinitions:
   Bearer:
     type: apiKey
