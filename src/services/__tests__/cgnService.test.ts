@@ -6,7 +6,7 @@ import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import CgnService from "../cgnService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
+import { CardPending, StatusEnum } from "@pagopa/io-functions-cgn-sdk/CardPending";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;

@@ -11,9 +11,9 @@ import { User } from "../../types/user";
 import CgnController from "../cgnController";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
-import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
-import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "../../../generated/io-cgn-api/CgnActivationDetail";
-import { EycaActivationDetail } from "../../../generated/io-cgn-api/EycaActivationDetail";
+import { CardPending, StatusEnum } from "@pagopa/io-functions-cgn-sdk/CardPending";
+import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
 
 const API_KEY = "";
 const API_URL = "";
