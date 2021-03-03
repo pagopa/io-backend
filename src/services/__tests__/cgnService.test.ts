@@ -55,9 +55,9 @@ mockStartEycaActivation.mockImplementation(() =>
   }})
 );
 
-mockGenerateOtp.mockImplementation(() =>
-t.success({status: 200, value:aGeneratedOtp})
-);
+  mockGenerateOtp.mockImplementation(() =>
+    t.success({status: 200, value:aGeneratedOtp})
+  );
 
 const api = {
   generateOtp: mockGenerateOtp,
