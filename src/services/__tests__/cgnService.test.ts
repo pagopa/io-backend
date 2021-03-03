@@ -835,7 +835,7 @@ describe("CgnService#generateOtp", () => {
   });
 
   it("should return an error if the api call thows", async () => {
-      mockGenerateOtp.mockImplementationOnce(() => {
+    mockGenerateOtp.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new CgnService(api);
