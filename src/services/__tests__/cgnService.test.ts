@@ -7,6 +7,8 @@ import { User } from "../../types/user";
 import CgnService from "../cgnService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
+import { Otp } from "../../../generated/cgn/Otp";
+import { OtpCode } from "../../../generated/cgn/OtpCode";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
@@ -18,6 +20,7 @@ const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 const mockStartEycaActivation = jest.fn();
 const mockGetEycaActivation = jest.fn();
+const mockGenerateOtp = jest.fn();
 
 mockGetCgnStatus.mockImplementation(() =>
   t.success({status: 200, value:aPendingCgn})
@@ -50,9 +53,14 @@ mockStartEycaActivation.mockImplementation(() =>
       id: "AnInstanceId"
     }
   }})
-)
+);
+
+  mockGenerateOtp.mockImplementation(() =>
+    t.success({status: 200, value:aGeneratedOtp})
+  );
 
 const api = {
+  generateOtp: mockGenerateOtp,
   getCgnActivation: mockGetCgnActivation,
   getCgnStatus: mockGetCgnStatus,
   getEycaStatus: mockGetEycaStatus,
@@ -79,6 +87,12 @@ const aPendingCgn: CardPending = {
 }
 const aPendingEycaCard: CardPending = {
     status: StatusEnum.PENDING
+}
+
+const aGeneratedOtp: Otp = {
+  code: "AAAAAA12312" as OtpCode,
+  expires_at: new Date(),
+  ttl: 10
 }
 describe("CgnService#getCgnStatus", () => {
     beforeEach(() => {
@@ -731,6 +745,102 @@ describe("CgnService#startEycaActivation", () => {
     const service = new CgnService(api);
 
     const res = await service.startEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("CgnService#generateOtp", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new CgnService(api);
+
+    await service.generateOtp(mockedUser);
+
+    expect(mockGenerateOtp).toHaveBeenCalledWith({
+      fiscalcode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a success response", async () => {
+
+    const service = new CgnService(api);
+
+    const res = await service.generateOtp(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle an internal error when the client returns 401", async () => {
+    mockGenerateOtp.mockImplementationOnce(() =>
+      t.success({ status: 401 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.generateOtp(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should handle a Forbidden error when the client returns 403", async () => {
+    mockGenerateOtp.mockImplementationOnce(() =>
+      t.success({ status: 403 })
+    );
+
+  const service = new CgnService(api);
+
+  const res = await service.generateOtp(mockedUser);
+
+  expect(res).toMatchObject({
+    kind: "IResponseErrorForbiddenNotAuthorized"
+  });
+});
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGenerateOtp.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.generateOtp(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+      mockGenerateOtp.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
+    const service = new CgnService(api);
+
+    const res = await service.generateOtp(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGenerateOtp.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new CgnService(api);
+
+    const res = await service.generateOtp(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

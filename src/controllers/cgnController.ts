@@ -17,6 +17,7 @@ import {
 
 import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "generated/io-cgn-api/EycaCard";
+import { Otp } from "generated/cgn/Otp";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
@@ -107,4 +108,16 @@ export default class CgnController {
     | IResponseSuccessAccepted
   > =>
     withUserFromRequest(req, user => this.cgnService.startEycaActivation(user));
+
+  /**
+   * Generate a CGN OTP for the current user.
+   */
+  public readonly generateOtp = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<Otp>
+  > => withUserFromRequest(req, user => this.cgnService.generateOtp(user));
 }
