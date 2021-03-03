@@ -19,6 +19,7 @@ import {
 import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "generated/io-cgn-api/EycaCard";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { Otp } from "generated/cgn/Otp";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
@@ -161,6 +162,25 @@ export default class CgnController {
         user,
         this.allowedFiscalCodes,
         this.cgnService.startEycaActivation
+      )
+    );
+
+  /**
+   * Generate a CGN OTP for the current user.
+   */
+  public readonly generateOtp = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<Otp>
+  > =>
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.generateOtp
       )
     );
 }

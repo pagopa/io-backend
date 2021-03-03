@@ -14,6 +14,8 @@ import CgnService from "../../services/cgnService";
 import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
 import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "../../../generated/io-cgn-api/CgnActivationDetail";
 import { EycaActivationDetail } from "../../../generated/io-cgn-api/EycaActivationDetail";
+import { Otp } from "../../../generated/cgn/Otp";
+import { OtpCode } from "../../../generated/cgn/OtpCode";
 
 const API_KEY = "";
 const API_URL = "";
@@ -52,6 +54,7 @@ const mockGetCgnActivation = jest.fn();
 const mockGetEycaActivation = jest.fn();
 const mockStartEycaActivation = jest.fn();
 
+const mockGenerateOtp = jest.fn();
 jest.mock("../../services/cgnService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -60,7 +63,8 @@ jest.mock("../../services/cgnService", () => {
       getEycaActivation: mockGetEycaActivation,
       startCgnActivation: mockStartCgnActivation,
       startEycaActivation: mockStartEycaActivation,
-      getEycaStatus: mockGetEycaStatus
+      getEycaStatus: mockGetEycaStatus,
+      generateOtp: mockGenerateOtp
     }))
   };
 });
@@ -85,6 +89,11 @@ const anEycaActivationDetail: EycaActivationDetail = {
 }
 
 const allowedTestFiscalCodesMock = jest.fn().mockImplementation(() => [])
+const aGeneratedOtp: Otp = {
+  code: "AAAAAA12312" as OtpCode,
+  expires_at: new Date(),
+  ttl: 10
+}
 
 describe("CgnController#getCgnStatus", () => {
   beforeEach(() => {
@@ -512,5 +521,60 @@ describe("CgnController#startEycaActivation", () => {
     expect(response).toMatchObject({
       kind: "IResponseErrorForbiddenNotAuthorized"
     });
+  });
+});
+
+describe("CgnController#generateOtp", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    await controller.generateOtp(req);
+
+    expect(mockGenerateOtp).toHaveBeenCalledWith(mockedUser);
+  });
+
+  it("should call generateOtp method on the CgnService with valid values", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    mockGenerateOtp.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aGeneratedOtp))
+    );
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    
+    const response = await controller.generateOtp(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aGeneratedOtp
+    });
+  });
+
+  it("should not call generateOtp method on the CgnService with empty user", async () => {
+    const req = { ...mockReq(), user: undefined };
+    const res = mockRes();
+
+    const client = CgnAPIClient(API_KEY, API_URL);
+    const cgnService = new CgnService(client);
+    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    
+    const response = await controller.generateOtp(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGenerateOtp).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
