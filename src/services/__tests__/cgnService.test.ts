@@ -794,8 +794,8 @@ describe("CgnService#generateOtp", () => {
 
   it("should handle a Forbidden error when the client returns 403", async () => {
     mockGenerateOtp.mockImplementationOnce(() =>
-    t.success({ status: 403 })
-  );
+      t.success({ status: 403 })
+    );
 
   const service = new CgnService(api);
 
