@@ -21,13 +21,13 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import { EycaActivationDetail } from "generated/cgn/EycaActivationDetail";
-import { EycaCard } from "generated/cgn/EycaCard";
-import { InstanceId } from "../../generated/cgn/InstanceId";
-import { CgnActivationDetail } from "../../generated/cgn/CgnActivationDetail";
+import { EycaActivationDetail } from "../../generated/io-cgn-api/EycaActivationDetail";
+import { EycaCard } from "../../generated/io-cgn-api/EycaCard";
+import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
+import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 import { CgnAPIClient } from "../../src/clients/cgn";
-import { Card } from "../../generated/cgn/Card";
-import { Otp } from "../../generated/cgn/Otp";
+import { Card } from "../../generated/io-cgn-api/Card";
+import { Otp } from "../../generated/io-cgn-api/Otp";
 import { User } from "../types/user";
 import {
   ResponseErrorStatusNotDefinedInSpec,
