@@ -107,4 +107,16 @@ export default class CgnController {
     | IResponseSuccessAccepted
   > =>
     withUserFromRequest(req, user => this.cgnService.startEycaActivation(user));
+
+  /**
+   * Generate a CGN OTP for the current user.
+   */
+  public readonly generateOtp = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<Otp>
+  > => withUserFromRequest(req, user => this.cgnService.generateOtp(user));
 }
