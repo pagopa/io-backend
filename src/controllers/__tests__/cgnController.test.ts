@@ -14,6 +14,8 @@ import CgnService from "../../services/cgnService";
 import { CardPending, StatusEnum } from "@pagopa/io-functions-cgn-sdk/CardPending";
 import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
 import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { OtpCode } from "@pagopa/io-functions-cgn-sdk/OtpCode";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 
 const API_KEY = "";
 const API_URL = "";

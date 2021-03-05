@@ -26,6 +26,7 @@ import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivatio
 import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
 import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
 import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 import { CgnAPIClient } from "../../src/clients/cgn";
 import { User } from "../types/user";
 import {

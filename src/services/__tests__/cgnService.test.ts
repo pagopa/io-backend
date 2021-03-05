@@ -6,13 +6,9 @@ import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import CgnService from "../cgnService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-<<<<<<< HEAD
 import { CardPending, StatusEnum } from "@pagopa/io-functions-cgn-sdk/CardPending";
-=======
-import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
-import { Otp } from "../../../generated/cgn/Otp";
-import { OtpCode } from "../../../generated/cgn/OtpCode";
->>>>>>> origin/master
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
+import { OtpCode } from "@pagopa/io-functions-cgn-sdk/OtpCode";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;

@@ -18,6 +18,7 @@ import {
 import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
 import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
 import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
