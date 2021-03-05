@@ -25,6 +25,7 @@ npm-debug.log
 *.js
 !.eslintrc.js
 !.release-it.js
+!jest.config.js
 *.js.map
 
 # Excluded auto-generated API client.
