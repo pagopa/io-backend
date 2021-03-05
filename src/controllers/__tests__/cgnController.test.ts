@@ -1,4 +1,7 @@
-import { ResponseSuccessAccepted, ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import {
+  ResponseSuccessAccepted,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -11,9 +14,15 @@ import { User } from "../../types/user";
 import CgnController from "../cgnController";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
-import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
-import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "../../../generated/io-cgn-api/CgnActivationDetail";
-import { EycaActivationDetail } from "../../../generated/io-cgn-api/EycaActivationDetail";
+import {
+  CardPending,
+  StatusEnum
+} from "../@pagopa/io-functions-cgn-sdk/CardPending";
+import {
+  CgnActivationDetail,
+  StatusEnum as ActivationStatusEnum
+} from "../@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "../@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
 import { Otp } from "../../../generated/cgn/Otp";
 import { OtpCode } from "../../../generated/cgn/OtpCode";
 
@@ -70,28 +79,28 @@ jest.mock("../../services/cgnService", () => {
 
 const aPendingCgn: CardPending = {
   status: StatusEnum.PENDING
-}
+};
 
 const aPendingEycaCard: CardPending = {
   status: StatusEnum.PENDING
-}
+};
 
 const aCgnActivationDetail: CgnActivationDetail = {
   instance_id: {
     id: "instanceId" as NonEmptyString
   },
   status: ActivationStatusEnum.COMPLETED
-}
+};
 
 const anEycaActivationDetail: EycaActivationDetail = {
   status: ActivationStatusEnum.COMPLETED
-}
+};
 
 const aGeneratedOtp: Otp = {
   code: "AAAAAA12312" as OtpCode,
   expires_at: new Date(),
   ttl: 10
-}
+};
 
 describe("CgnController#getCgnStatus", () => {
   beforeEach(() => {
@@ -119,7 +128,7 @@ describe("CgnController#getCgnStatus", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getCgnStatus(req);
 
     expect(response).toEqual({
@@ -136,7 +145,7 @@ describe("CgnController#getCgnStatus", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getCgnStatus(req);
 
     response.apply(res);
@@ -174,7 +183,7 @@ describe("CgnController#getEycaStatus", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getEycaStatus(req);
 
     expect(response).toEqual({
@@ -191,7 +200,7 @@ describe("CgnController#getEycaStatus", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getEycaStatus(req);
 
     response.apply(res);
@@ -230,7 +239,7 @@ describe("CgnController#startCgnActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.startCgnActivation(req);
 
     expect(response).toEqual({
@@ -247,7 +256,7 @@ describe("CgnController#startCgnActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.startCgnActivation(req);
 
     response.apply(res);
@@ -285,7 +294,7 @@ describe("CgnController#getCgnActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getCgnActivation(req);
 
     expect(response).toEqual({
@@ -302,7 +311,7 @@ describe("CgnController#getCgnActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getCgnActivation(req);
 
     response.apply(res);
@@ -340,7 +349,7 @@ describe("CgnController#getEycaActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getEycaActivation(req);
 
     expect(response).toEqual({
@@ -357,7 +366,7 @@ describe("CgnController#getEycaActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.getEycaActivation(req);
 
     response.apply(res);
@@ -395,7 +404,7 @@ describe("CgnController#startEycaActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.startEycaActivation(req);
 
     expect(response).toEqual({
@@ -412,7 +421,7 @@ describe("CgnController#startEycaActivation", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.startEycaActivation(req);
 
     response.apply(res);
@@ -450,7 +459,7 @@ describe("CgnController#generateOtp", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.generateOtp(req);
 
     expect(response).toEqual({
@@ -467,7 +476,7 @@ describe("CgnController#generateOtp", () => {
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
     const controller = new CgnController(cgnService);
-    
+
     const response = await controller.generateOtp(req);
 
     response.apply(res);

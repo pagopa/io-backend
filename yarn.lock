@@ -301,6 +301,15 @@
     eslint-plugin-sonarjs "^0.5.0"
     prettier "^2.1.2"
 
+"@pagopa/io-functions-cgn-sdk@*":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-cgn-sdk/-/io-functions-cgn-sdk-0.1.4.tgz#da10af9fb65da4fc31a1568c61cd0b17d74bfa5d"
+  integrity sha512-QMWGMGe00V0x5tXZ3/VuAeGAq2zkQXNz9q5J1tccdu4uMhkAi6WEDx6/B3K14Uqpk0bkdNktHHA90jGekLhEtg==
+  dependencies:
+    fp-ts "1.17.4"
+    io-ts "1.8.5"
+    italia-ts-commons "^5.1.13"
+
 "@pagopa/io-spid-commons@^6.1.0":
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-6.1.0.tgz#faebd392062a9cbbe6194c4cadebe122dd893dee"
@@ -4157,7 +4166,7 @@ istanbul-reports@^1.5.1:
   dependencies:
     handlebars "^4.0.3"
 
-italia-ts-commons@^5.1.4:
+italia-ts-commons@^5.1.13, italia-ts-commons@^5.1.4:
   version "5.1.13"
   resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-5.1.13.tgz#7ae919374f9c03c04e38603b7f7e9681ebee79b7"
   integrity sha512-mXtrNG/HR6lRCOTtBrEzsxGmkHccoDXKqoc9i+J2+yGhhxcznASu+0KMC05ZR1yJP4bWliC9rXJ3hnCw0rMSnQ==
