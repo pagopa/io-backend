@@ -88,7 +88,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v14
+      ref: refs/tags/v8
       endpoint: 'pagopa'
 
 stages:
@@ -243,19 +243,3 @@ stages:
                 swapWithProduction: true
               displayName: Swap with production slot
 
-
-  # Publish client SDKs to NPM
-  - stage: PublishClientSDKstoNPM
-    dependsOn: Release
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - ${{ each spec in parameters.OPENAPI_SPEC_PATHS }}:
-        - job: publish_SDK_${{ spec.Key }}   
-          steps:
-          # Template for generating and deploying client SDk to NPM
-          - template: templates/client-sdk-publish/template.yaml@pagopaCommons
-            parameters:
-              openapiSpecPath: '${{ spec.Value.openapi_spec_path }}'
-              artifactName: 'Bundle_${{ spec.Key }}'
-              sdkPackageName: '${{ spec.Value.package_name }}'
