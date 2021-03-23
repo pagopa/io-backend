@@ -52,6 +52,9 @@ parameters:
       api_bpd: 
         openapi_spec_path: 'api_bpd.yaml'
         package_name: '@pagopa/io-backend-bpd-sdk'
+      api_cgn: 
+        openapi_spec_path: 'api_cgn.yaml'
+        package_name: '@pagopa/io-backend-cgn-sdk'
       api_myportal: 
         openapi_spec_path: 'api_myportal.yaml'
         package_name: '@pagopa/io-backend-myportal-sdk'
@@ -85,7 +88,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v11
+      ref: refs/tags/v14
       endpoint: 'pagopa'
 
 stages:
