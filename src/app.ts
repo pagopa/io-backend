@@ -52,7 +52,8 @@ import {
   tokenDurationSecs,
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
-  USERS_LOGIN_STORAGE_CONNECTION_STRING
+  USERS_LOGIN_STORAGE_CONNECTION_STRING,
+  TEST_CGN_FISCAL_CODES
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -834,7 +835,10 @@ function registerCgnAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const cgnController: CgnController = new CgnController(cgnService);
+  const cgnController: CgnController = new CgnController(
+    cgnService,
+    TEST_CGN_FISCAL_CODES
+  );
 
   app.get(
     `${basePath}/cgn/status`,

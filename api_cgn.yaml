@@ -23,6 +23,8 @@ paths:
             $ref: "#/definitions/Card"
         "401":
           description: Bearer token null or expired.
+        "403":
+          description: Forbidden.
         "404":
           description: No CGN found.
         "500":
@@ -79,6 +81,8 @@ paths:
               $ref: "#/definitions/CgnActivationDetail"
         "401":
           description: Bearer token null or expired.
+        "403":
+          description: Forbidden.
         "404":
           description: No CGN activation process found.
         "500":
@@ -134,6 +138,8 @@ paths:
               $ref: "#/definitions/EycaActivationDetail"
         "401":
           description: Wrong or missing function key.
+        "403":
+          description: Forbidden.
         "404":
           description: No EYCA Card activation process found.
         "500":
