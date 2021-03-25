@@ -259,3 +259,4 @@ stages:
               openapiSpecPath: '${{ spec.Value.openapi_spec_path }}'
               artifactName: 'Bundle_${{ spec.Key }}'
               sdkPackageName: '${{ spec.Value.package_name }}'
+              generatorPackageName: italia-utils
