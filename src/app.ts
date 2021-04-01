@@ -109,6 +109,10 @@ import {
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
+import {
+  checkAcceptHeader,
+  checkContentTypeHeader
+} from "./utils/middleware/checkHeaders";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -259,6 +263,20 @@ export function newApp({
     ":date[iso] - :method :obfuscated_url :status - :fiscal_code_short - :response-time ms - :detail";
 
   app.use(morgan(loggerFormat));
+
+  //
+  // Check headers
+  //
+
+  app.use(checkAcceptHeader(["application/json", "application/xml"]));
+
+  app.use(
+    checkContentTypeHeader([
+      "application/json",
+      "application/x-www-form-urlencoded",
+      "multipart/form-data"
+    ])
+  );
 
   //
   // Setup parsers
