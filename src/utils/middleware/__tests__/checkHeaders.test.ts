@@ -1,5 +1,5 @@
 import { checkAcceptHeader, checkContentTypeHeader, validate } from '../checkHeaders';
-import { Request, Response } from "Express";
+import { Request, Response } from "express";
 import { some, none } from 'fp-ts/lib/Option';
 import { isRight, isLeft } from 'fp-ts/lib/Either';
 import { log } from "../../logger"

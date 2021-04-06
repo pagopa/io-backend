@@ -4,7 +4,7 @@
 
 /* eslint-disable sonarjs/no-duplicate-string */
 
-import { Request, Response, NextFunction } from "Express";
+import { Request, Response, NextFunction } from "express";
 import { fromNullable, Option } from "fp-ts/lib/Option";
 import { fromPredicate, fromOption, Either } from "fp-ts/lib/Either";
 import { intersection } from "fp-ts/lib/Array";
