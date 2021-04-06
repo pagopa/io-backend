@@ -52,6 +52,9 @@ parameters:
       api_bpd: 
         openapi_spec_path: 'api_bpd.yaml'
         package_name: '@pagopa/io-backend-bpd-sdk'
+      api_cgn: 
+        openapi_spec_path: 'api_cgn.yaml'
+        package_name: '@pagopa/io-backend-cgn-sdk'
       api_myportal: 
         openapi_spec_path: 'api_myportal.yaml'
         package_name: '@pagopa/io-backend-myportal-sdk'
@@ -136,7 +139,7 @@ stages:
       - job: 'prepare_artifact'
         steps:
           # Build application
-          - template: templates/node-job-setup/template.yaml
+          - template: templates/node-job-setup/template.yaml@pagopaCommons
             parameters:
               # On the assumption that this stage is executed only when Relase stage is,
               #  with this parameter we set the reference the deploy script must pull changes from.
@@ -256,3 +259,4 @@ stages:
               openapiSpecPath: '${{ spec.Value.openapi_spec_path }}'
               artifactName: 'Bundle_${{ spec.Key }}'
               sdkPackageName: '${{ spec.Value.package_name }}'
+              generatorPackageName: italia-utils
