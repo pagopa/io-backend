@@ -24,12 +24,12 @@ const contentTypeHeader = (req: Request): Option<string> =>
 
 export const validate = (expectedHeaderValues: ReadonlyArray<string>) => (
   maybeHeader: Option<string>
-): Either<ValidateErrors, void> =>
+): Either<ValidateErrors, ReadonlyArray<string>> =>
   // check if expected headers is not empty
   fromPredicate<ValidateErrors, void>(
     () => expectedHeaderValues.length > 0,
     () => "no-expected-headers-provided"
-  )().chain<void>(() =>
+  )().chain<ReadonlyArray<string>>(() =>
     fromOption<ValidateErrors>("no-header")(maybeHeader)
       // split header on , for values and on ; for q-factors
       .map(header => header.split(/[,;]/).map(s => s.trim()))
@@ -47,9 +47,15 @@ export const validate = (expectedHeaderValues: ReadonlyArray<string>) => (
           () => "unexpected-header-values"
         )
       )
-      .map(_ => void 0)
   );
 
+/**
+ * This function logs if the request `accept` header is present
+ * and contains at least one of the given expected values.
+ *
+ * @param expectedHeaderValues an array of expected values
+ * @returns
+ */
 export const checkAcceptHeader = (
   expectedHeaderValues: ReadonlyArray<string>
 ): ((req: Request, res: Response, next: NextFunction) => void) => (
@@ -75,6 +81,13 @@ export const checkAcceptHeader = (
   next();
 };
 
+/**
+ * This function logs if the request `content-type` header is present
+ * and contains at least one of the given expected values.
+ *
+ * @param expectedHeaderValues an array of expected values
+ * @returns
+ */
 export const checkContentTypeHeader = (
   expectedHeaderValues: ReadonlyArray<string>
 ): ((req: Request, res: Response, next: NextFunction) => void) => (
