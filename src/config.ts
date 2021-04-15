@@ -406,7 +406,7 @@ export const BARCODE_ALGORITHM = NonEmptyString.decode(
 ).getOrElse("code128" as NonEmptyString);
 
 // Application insights sampling percentage
-export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 20;
+export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 
 // Password login params
 export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
