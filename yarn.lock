@@ -301,10 +301,10 @@
     eslint-plugin-sonarjs "^0.5.0"
     prettier "^2.1.2"
 
-"@pagopa/io-spid-commons@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-6.1.0.tgz#faebd392062a9cbbe6194c4cadebe122dd893dee"
-  integrity sha512-v2FcZAeWO5Q7cp21AN8R4jJUbBsL2d6M0iIF7M/9LPKkWS1c10qVGgkIkiebm/WgRbyW8gPrgiA9r+69R7iQaA==
+"@pagopa/io-spid-commons@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-6.2.0.tgz#01f81a88c3d6a173dd270ae8600b4926da619e1c"
+  integrity sha512-JagYRpTXTIubQwzjYhw24QN4IHGPXK5nuxonoQ6GBWD71scwPvJyOiFfGDMbzcdJU2PWITqenKtRJmveEQlWLg==
   dependencies:
     "@types/redis" "^2.8.14"
     date-fns "^1.30.1"
