@@ -44,6 +44,7 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
+import { HereAPIClient } from "./clients/here";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -328,6 +329,20 @@ export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_URL,
   httpApiFetch
 );
+
+export const GEO_API_BASE_PATH = getRequiredENVVar("GEO_API_BASE_PATH");
+export const HERE_API_KEY = NonEmptyString.decode(
+  process.env.HERE_API_KEY
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid HERE_API_KEY environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const HERE_API_URL = getRequiredENVVar("HERE_API_URL");
+export const HERE_API_CLIENT = HereAPIClient(HERE_API_URL, httpApiFetch);
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
