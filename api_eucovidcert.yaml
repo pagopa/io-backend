@@ -29,6 +29,8 @@ paths:
           description: Payload has bad format
         '403':
           description: Access data provided are invalid or no Certificate has been emitted for the given Citizen
+        '410':
+          description: Endpoint no longer avaible
         '500':
           description: Generic server error
         '504':
