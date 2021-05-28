@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   version: 0.0.1
   title: EU Covid Certificate service for IO App
-basePath: /eucovidcert/api/v1
+basePath: /api/v1/eucovidcert
 schemes:
   - https
 security:
@@ -27,6 +27,8 @@ paths:
             $ref: "#/definitions/Certificate"
         '400':
           description: Payload has bad format
+        '401':
+          description: Bearer token null or expired
         '403':
           description: Access data provided are invalid or no Certificate has been emitted for the given Citizen
         '410':
