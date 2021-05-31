@@ -81,6 +81,7 @@ describe("GET /services/:id", () => {
       BPDBasePath: "/bpd/api/v1",
       BonusAPIBasePath: "/bonus/api/v1",
       CGNAPIBasePath: "/cgn/api/v1",
+      CGNOperatorSearchAPIBasePath: "/api/v1",
       MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",
       allowBPDIPSourceRange: [aValidCIDR],
