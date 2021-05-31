@@ -15,7 +15,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
+import { CIDR, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
@@ -54,7 +54,8 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
-  HERE_API_CLIENT
+  HERE_API_CLIENT,
+  HERE_API_KEY
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -416,6 +417,7 @@ export function newApp({
         app,
         GeoAPIBasePath,
         GEO_SERVICE,
+        HERE_API_KEY,
         authMiddlewares.bearerSession
       );
 
@@ -849,10 +851,14 @@ function registerGeoAPIRoutes(
   app: Express,
   basePath: string,
   geoService: GeoService,
+  hereApiKey: NonEmptyString,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const geoController: GeoController = new GeoController(geoService);
+  const geoController: GeoController = new GeoController(
+    geoService,
+    hereApiKey
+  );
 
   app.get(
     `${basePath}/geo/autocomplete`,
