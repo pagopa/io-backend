@@ -64,6 +64,7 @@ const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
+const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -74,6 +75,7 @@ describe("Success app start", () => {
       BPDBasePath: aBPDBasePath,
       BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
+      EUCovidCertBasePath: aEuCovidCertAPIBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
       allowBPDIPSourceRange: [aValidCIDR],
@@ -175,6 +177,7 @@ describe("Failure app start", () => {
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
+        EUCovidCertBasePath:aEuCovidCertAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
@@ -202,6 +205,7 @@ describe("Failure app start", () => {
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
+        EUCovidCertBasePath:aEuCovidCertAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
@@ -229,6 +233,7 @@ describe("Failure app start", () => {
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
+        EUCovidCertBasePath:aEuCovidCertAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
