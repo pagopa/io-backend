@@ -44,6 +44,7 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
+import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -326,6 +327,17 @@ export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
 export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
+  httpApiFetch
+);
+
+export const CGN_OPERATOR_SEARCH_API_URL = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_URL"
+);
+export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_BASE_PATH"
+);
+export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
+  CGN_OPERATOR_SEARCH_API_URL,
   httpApiFetch
 );
 

@@ -53,7 +53,8 @@ import {
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
-  TEST_CGN_FISCAL_CODES
+  TEST_CGN_FISCAL_CODES,
+  CGN_OPERATOR_SEARCH_API_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -76,6 +77,7 @@ import SupportController from "./controllers/supportController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
+import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -110,6 +112,7 @@ import {
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
+import CgnOperatorController from "./controllers/cgnOperatorController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -143,6 +146,7 @@ export interface IAppFactoryParameters {
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
   readonly CGNAPIBasePath: string;
+  readonly CGNOperatorSearchAPIBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -160,7 +164,8 @@ export function newApp({
   PagoPABasePath,
   MyPortalBasePath,
   BPDBasePath,
-  CGNAPIBasePath
+  CGNAPIBasePath,
+  CGNOperatorSearchAPIBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -300,6 +305,11 @@ export function newApp({
       // Create the cgn service
       const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
+      // Create the cgn operator search service
+      const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
+        CGN_OPERATOR_SEARCH_API_CLIENT
+      );
+
       // Create the user data processing service
       const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
         API_CLIENT
@@ -399,6 +409,14 @@ export function newApp({
           app,
           CGNAPIBasePath,
           CGN_SERVICE,
+          authMiddlewares.bearerSession
+        );
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerCgnOperatorSearchAPIRoutes(
+          app,
+          CGNOperatorSearchAPIBasePath,
+          CGN_OPERATOR_SEARCH_SERVICE,
           authMiddlewares.bearerSession
         );
       }
@@ -880,6 +898,42 @@ function registerCgnAPIRoutes(
     `${basePath}/cgn/otp`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.generateOtp, cgnController)
+  );
+}
+
+function registerCgnOperatorSearchAPIRoutes(
+  app: Express,
+  basePath: string,
+  cgnOperatorSearchService: CgnOperatorSearchService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const cgnOperatorController: CgnOperatorController = new CgnOperatorController(
+    cgnOperatorSearchService
+  );
+
+  app.get(
+    `${basePath}/cgn-operator-search/merchants/:merchantId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
+  );
+
+  app.post(
+    `${basePath}/cgn-operator-search/online-merchants`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getOnlineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.post(
+    `${basePath}/cgn-operator-search/offline-merchants`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getOfflineMerchants,
+      cgnOperatorController
+    )
   );
 }
 
