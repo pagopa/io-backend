@@ -83,6 +83,7 @@ describe("GET /services/:id", () => {
       CGNAPIBasePath: "/cgn/api/v1",
       MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",
+      GeoAPIBasePath: "/geo/api/v1",
       allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],

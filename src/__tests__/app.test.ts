@@ -64,6 +64,7 @@ const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
+const aGeoAPIBasePath = "/api/v1/geo";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -76,6 +77,7 @@ describe("Success app start", () => {
       CGNAPIBasePath: aCgnAPIBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
+      GeoAPIBasePath: aGeoAPIBasePath,
       allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
@@ -177,6 +179,7 @@ describe("Failure app start", () => {
         CGNAPIBasePath: aCgnAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        GeoAPIBasePath: aGeoAPIBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
@@ -204,6 +207,7 @@ describe("Failure app start", () => {
         CGNAPIBasePath: aCgnAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        GeoAPIBasePath: aGeoAPIBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
@@ -231,6 +235,7 @@ describe("Failure app start", () => {
         CGNAPIBasePath: aCgnAPIBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        GeoAPIBasePath: aGeoAPIBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
