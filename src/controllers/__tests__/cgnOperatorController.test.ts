@@ -19,6 +19,7 @@ import { OnlineMerchantSearchRequest } from "../../../generated/cgn-operator-sea
 import { OfflineMerchantSearchRequest, OrderingEnum } from "../../../generated/cgn-operator-search/OfflineMerchantSearchRequest";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 
+const anAPIKey = "";
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidName = "Giuseppe Maria";
@@ -112,7 +113,7 @@ describe("CgnOperatorController#getMerchant", () => {
 
   it("should make the correct service method call", async () => {
     const req = { ...mockReq({params: { merchantId: aMerchantId }}), user: mockedUser };
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
     await controller.getMerchant(req);
@@ -125,7 +126,7 @@ describe("CgnOperatorController#getMerchant", () => {
 
     mockGetMerchant.mockReturnValue(Promise.resolve(ResponseSuccessJson(aMerchant)));
     
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
 
@@ -141,7 +142,7 @@ describe("CgnOperatorController#getMerchant", () => {
   it("should not call getMerchant method on the CgnOperatorSearchService with empty user", async () => {
     const req = { ...mockReq({params: { merchantId: aMerchantId }}), user: undefined };
     const res = mockRes();
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
 
@@ -163,7 +164,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
 
   it("should make the correct service method call", async () => {
     const req = { ...mockReq({ body: anOnlineMerchantSearchRequest }), user: mockedUser };
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
     await controller.getOnlineMerchants(req);
@@ -176,7 +177,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
 
     mockGetOnlineMerchants.mockReturnValue(Promise.resolve(ResponseSuccessJson(aSearchResponse)));
     
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
 
@@ -192,7 +193,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
   it("should not call getOnlineMerchants method on the CgnOperatorSearchService with empty user", async () => {
     const req = { ...mockReq({ body: anOnlineMerchantSearchRequest }), user: undefined };
     const res = mockRes();
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
 
@@ -214,7 +215,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
 
   it("should make the correct service method call", async () => {
     const req = { ...mockReq({ body: anOfflineMerchantSearchRequest }), user: mockedUser };
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
     await controller.getOfflineMerchants(req);
@@ -227,7 +228,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
 
     mockGetOfflineMerchants.mockReturnValue(Promise.resolve(ResponseSuccessJson(aSearchResponse)));
     
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
 
@@ -243,7 +244,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
   it("should not call getOfflineMerchants method on the CgnOperatorSearchService with empty user", async () => {
     const req = { ...mockReq({ body: anOfflineMerchantSearchRequest }), user: undefined };
     const res = mockRes();
-    const client = CgnOperatorSearchAPIClient("");
+    const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
     const controller = new CgnOperatorController(cgnOperatorSearchService);
 
