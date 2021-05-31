@@ -5,14 +5,20 @@ import {
 } from "../../generated/io-cgn-operator-search-api/client";
 
 export function CgnOperatorSearchAPIClient(
+  token: string,
   baseUrl: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
-): Client {
-  return createClient({
+): Client<"ApiKey"> {
+  return createClient<"ApiKey">({
     basePath: "",
     baseUrl,
-    fetchApi
+    fetchApi,
+    withDefaults: op => params =>
+      op({
+        ...params,
+        ApiKey: token
+      })
   });
 }
 

@@ -330,6 +330,9 @@ export const CGN_API_CLIENT = CgnAPIClient(
   httpApiFetch
 );
 
+export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_KEY"
+);
 export const CGN_OPERATOR_SEARCH_API_URL = getRequiredENVVar(
   "CGN_OPERATOR_SEARCH_API_URL"
 );
@@ -338,6 +341,7 @@ export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
 );
 export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   CGN_OPERATOR_SEARCH_API_URL,
+  CGN_OPERATOR_SEARCH_API_KEY,
   httpApiFetch
 );
 
