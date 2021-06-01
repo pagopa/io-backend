@@ -84,10 +84,14 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/Merchant"
   OfflineMerchants:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OfflineMerchants"
+  OfflineMerchant:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OfflineMerchant"
   OfflineMerchantSearchRequest:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
   OnlineMerchants:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchants"
+  OnlineMerchant:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchant"
   OnlineMerchantSearchRequest:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
   Discount:
