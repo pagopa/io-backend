@@ -97,7 +97,7 @@ describe("GeoService#getAutocomplete", () => {
     });
   
     it("should make the correct api call", async () => {
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -112,7 +112,7 @@ describe("GeoService#getAutocomplete", () => {
   
     it("should handle a success response", async () => {
   
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       const res = await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -126,7 +126,7 @@ describe("GeoService#getAutocomplete", () => {
           t.success({ status: 503 })
       );
   
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       const res = await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -140,7 +140,7 @@ describe("GeoService#getAutocomplete", () => {
         t.success({ status: 405 })
       );
   
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       const res = await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -155,7 +155,7 @@ describe("GeoService#getAutocomplete", () => {
         t.success({ status: 400, value: aGenericProblem })
       );
   
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       const res = await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -168,7 +168,7 @@ describe("GeoService#getAutocomplete", () => {
       mockAutocomplete.mockImplementationOnce(() =>
         t.success({ status: 123 })
       );
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       const res = await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -181,7 +181,7 @@ describe("GeoService#getAutocomplete", () => {
         mockAutocomplete.mockImplementationOnce(() => {
         throw new Error("Error");
       });
-      const service = new GeoService(api);
+      const service = new GeoService(api, api, api);
   
       const res = await service.getAutocomplete(mockReq.queryAddress, mockReq.limit, mockReq.apiKey);
   
@@ -197,7 +197,7 @@ describe("GeoService#getGeocoding", () => {
   });
 
   it("should make the correct api call", async () => {
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -210,7 +210,7 @@ describe("GeoService#getGeocoding", () => {
 
   it("should handle a success response", async () => {
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -224,7 +224,7 @@ describe("GeoService#getGeocoding", () => {
         t.success({ status: 503 })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -238,7 +238,7 @@ describe("GeoService#getGeocoding", () => {
       t.success({ status: 405 })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -253,7 +253,7 @@ describe("GeoService#getGeocoding", () => {
       t.success({ status: 400, value: aGenericProblem })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -266,7 +266,7 @@ describe("GeoService#getGeocoding", () => {
     mockGeocoding.mockImplementationOnce(() =>
       t.success({ status: 123 })
     );
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -279,7 +279,7 @@ describe("GeoService#getGeocoding", () => {
     mockGeocoding.mockImplementationOnce(() => {
       throw new Error("Error");
     });
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getGeocoding(mockReq.queryAddress, mockReq.apiKey);
 
@@ -295,7 +295,7 @@ describe("GeoService#getLookup", () => {
   });
 
   it("should make the correct api call", async () => {
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -307,7 +307,7 @@ describe("GeoService#getLookup", () => {
 
   it("should handle a success response", async () => {
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -321,7 +321,7 @@ describe("GeoService#getLookup", () => {
         t.success({ status: 503 })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -335,7 +335,7 @@ describe("GeoService#getLookup", () => {
       t.success({ status: 405 })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -349,7 +349,7 @@ describe("GeoService#getLookup", () => {
       t.success({ status: 404 })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -364,7 +364,7 @@ describe("GeoService#getLookup", () => {
       t.success({ status: 400, value: aGenericProblem })
     );
 
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -377,7 +377,7 @@ describe("GeoService#getLookup", () => {
     mockLookup.mockImplementationOnce(() =>
       t.success({ status: 123 })
     );
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 
@@ -390,7 +390,7 @@ describe("GeoService#getLookup", () => {
     mockLookup.mockImplementationOnce(() => {
       throw new Error("Error");
     });
-    const service = new GeoService(api);
+    const service = new GeoService(api, api, api);
 
     const res = await service.getLookup(mockReq.id, mockReq.apiKey);
 

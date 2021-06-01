@@ -54,7 +54,9 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
-  HERE_API_CLIENT,
+  HERE_GEOCODE_API_CLIENT,
+  HERE_AUTOCOMPLETE_API_CLIENT,
+  HERE_LOOKUP_API_CLIENT,
   HERE_API_KEY
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
@@ -307,7 +309,11 @@ export function newApp({
       const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
       // Create the geo service
-      const GEO_SERVICE = new GeoService(HERE_API_CLIENT);
+      const GEO_SERVICE = new GeoService(
+        HERE_GEOCODE_API_CLIENT,
+        HERE_AUTOCOMPLETE_API_CLIENT,
+        HERE_LOOKUP_API_CLIENT
+      );
 
       // Create the user data processing service
       const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(

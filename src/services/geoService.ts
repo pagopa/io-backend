@@ -35,7 +35,11 @@ const BAD_REQUEST_TITLE = "Bad Request";
 const NOT_SUPPORTED_TITLE = "Not Supported";
 
 export default class TokenService {
-  constructor(private readonly hereApiClient: ReturnType<HereAPIClient>) {}
+  constructor(
+    private readonly hereGeocodeApiClient: ReturnType<HereAPIClient>,
+    private readonly hereAutocompleteApiClient: ReturnType<HereAPIClient>,
+    private readonly hereLookupApiClient: ReturnType<HereAPIClient>
+  ) {}
 
   /**
    * Call Here's autocomplete API
@@ -54,7 +58,7 @@ export default class TokenService {
     | IResponseSuccessJson<OpenSearchAutocompleteResponse>
   > {
     return withCatchAsInternalError(async () => {
-      const validated = await this.hereApiClient.autocomplete({
+      const validated = await this.hereAutocompleteApiClient.autocomplete({
         apiKey,
         in: DEFAULT_SEARCH_COUNTRIES,
         lang: DEFAULT_LANG,
@@ -102,7 +106,7 @@ export default class TokenService {
     | IResponseSuccessJson<OpenSearchGeocodeResponse>
   > {
     return withCatchAsInternalError(async () => {
-      const validated = await this.hereApiClient.geocode({
+      const validated = await this.hereGeocodeApiClient.geocode({
         apiKey,
         in: DEFAULT_SEARCH_COUNTRIES,
         q: queryAddress
@@ -149,7 +153,7 @@ export default class TokenService {
     | IResponseSuccessJson<LookupResponse>
   > {
     return withCatchAsInternalError(async () => {
-      const validated = await this.hereApiClient.lookup({
+      const validated = await this.hereLookupApiClient.lookup({
         apiKey,
         id
       });

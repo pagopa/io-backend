@@ -341,8 +341,25 @@ export const HERE_API_KEY = NonEmptyString.decode(
   );
   return process.exit(1);
 });
-export const HERE_API_URL = getRequiredENVVar("HERE_API_URL");
-export const HERE_API_CLIENT = HereAPIClient(HERE_API_URL, httpApiFetch);
+export const HERE_AUTOCOMPLETE_API_URL = getRequiredENVVar(
+  "HERE_AUTOCOMPLETE_API_URL"
+);
+export const HERE_AUTOCOMPLETE_API_CLIENT = HereAPIClient(
+  HERE_AUTOCOMPLETE_API_URL,
+  httpApiFetch
+);
+
+export const HERE_GEOCODE_API_URL = getRequiredENVVar("HERE_GEOCODE_API_URL");
+export const HERE_GEOCODE_API_CLIENT = HereAPIClient(
+  HERE_GEOCODE_API_URL,
+  httpApiFetch
+);
+
+export const HERE_LOOKUP_API_URL = getRequiredENVVar("HERE_LOOKUP_API_URL");
+export const HERE_LOOKUP_API_CLIENT = HereAPIClient(
+  HERE_LOOKUP_API_URL,
+  httpApiFetch
+);
 
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
