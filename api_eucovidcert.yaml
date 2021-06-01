@@ -45,16 +45,20 @@ definitions:
       auth_code:
         type: string
         description: OTP previously sent to the Citizen
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
     required:
       - auth_code
   Certificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/Certificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-certificate-model/openapi/index.yaml#/definitions/Certificate"
   ValidCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ValidCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-certificate-model/openapi/index.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/RevokedCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-certificate-model/openapi/index.yaml#/definitions/RevokedCertificate"
   QRCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/QRCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-certificate-model/openapi/index.yaml#/definitions/QRCode"
+  PreferredLanguages:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-certificate-model/openapi/index.yaml#/definitions/PreferredLanguages"
 
 consumes:
   - application/json
