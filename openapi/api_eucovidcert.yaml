@@ -70,8 +70,13 @@ definitions:
         type: string
       info:
         description: >-
-          A markdown-formatted text in which show Certificate information for
-          the Citizen to read.
+          A markdown-formatted text in which show basic Certificate information
+          for the Citizen to read.
+        type: string
+      detail:
+        description: >-
+          A markdown-formatted text in which show complete Certificate
+          information for the Citizen to read.
         type: string
       qr_code:
         description: >-
@@ -84,7 +89,6 @@ definitions:
         enum:
           - valid
     required:
-      - id
       - qr_code
       - status
   RevokedCertificate:
@@ -92,11 +96,6 @@ definitions:
     properties:
       id:
         description: Unique identifier of the Certificate
-        type: string
-      info:
-        description: >-
-          A markdown-formatted text in which show Certificate information for
-          the Citizen to read.
         type: string
       status:
         description: must be 'revoked'
@@ -116,10 +115,7 @@ definitions:
         x-import: '@pagopa/ts-commons/lib/dates'
         example: '2018-10-13T00:00:00.000Z'
     required:
-      - id
       - status
-      - revoke_reason
-      - revoked_on
   QRCode:
     description: A qr code imamge encoded into a base64 string
     type: object

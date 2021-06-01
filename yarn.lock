@@ -301,10 +301,10 @@
     eslint-plugin-sonarjs "^0.5.0"
     prettier "^2.1.2"
 
-"@pagopa/io-functions-eucovidcerts-sdk@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-eucovidcerts-sdk/-/io-functions-eucovidcerts-sdk-1.0.2.tgz#92defa0335cf36dd2aa46c60fce082153f7fdff3"
-  integrity sha512-wbGuxExuaUo/40KJTa8uP8SzugYFEqiNRfpZsoUDm8378Xdte4Ep2RrDmdG5zotGFwuF/KTXy8KIZjosg40gUA==
+"@pagopa/io-functions-eucovidcerts-sdk@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-eucovidcerts-sdk/-/io-functions-eucovidcerts-sdk-1.1.0.tgz#3bcd707a4e3cf0d064d478b9ac36520af24de980"
+  integrity sha512-YlB7zczAk6oXgCjqb5OZaXC1rZQBGP0Ejb7mfY7ii73s3//Y0EJv2ddjkAysHS+OBAr/7g1/bugq3RJniZj3sw==
   dependencies:
     "@pagopa/ts-commons" "^9.1.0"
     fp-ts "1.17.4"
