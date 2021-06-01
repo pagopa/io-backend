@@ -1,0 +1,591 @@
+
+swagger: "2.0"
+info:
+  title: Geocoding and Search API v7
+  version: '7.65'
+  description: This document describes the Geocoding and Search API.
+
+host: lookup.search.hereapi.com
+basePath: "/v1"
+parameters:
+  apiKey:
+    description: |
+      API key used to authorize requests.
+        For more information, see https://developer.here.com/documentation/authentication/dev_guide/topics/api-key-credentials.html.
+    name: apiKey
+    type: string
+    required: true
+    in: query
+    minLength: 1
+  id:
+    name: id
+    description: Location ID, which is the ID of a result item eg. of a Discover
+      request
+    in: query
+    type: string
+    required: true
+    minLength: 1
+    
+definitions:
+    Address:
+      type: object
+      properties:
+        label:
+          type: string
+          description: 'Assembled address value built out of the address components
+            according to the regional postal rules. These are the same rules for all
+            endpoints. It may not include all the input terms. For example: "Schulstraße
+            4, 32547 Bad Oeynhausen, Germany"'
+        countryCode:
+          type: string
+          description: 'A three-letter country code. For example: "DEU"'
+        countryName:
+          type: string
+          description: 'The localised country name. For example: "Deutschland"'
+        stateCode:
+          type: string
+          description: 'A state code or state name abbreviation – country specific.
+            For example, in the United States it is the two letter state abbreviation:
+            "CA" for California.'
+        state:
+          type: string
+          description: 'The state division of a country. For example: "North Rhine-Westphalia"'
+        countyCode:
+          type: string
+          description: 'A county code or county name abbreviation – country specific.
+            For example, for Italy it is the province abbreviation: "RM" for Rome.'
+        county:
+          type: string
+          description: A division of a state; typically, a secondary-level administrative
+            division of a country or equivalent.
+        city:
+          type: string
+          description: 'The name of the primary locality of the place. For example:
+            "Bad Oyenhausen"'
+        district:
+          type: string
+          description: 'A division of city; typically an administrative unit within
+            a larger city or a customary name of a city''s neighborhood. For example:
+            "Bad Oyenhausen"'
+        subdistrict:
+          type: string
+          description: 'A subdivision of a district. For example: "Minden-Lübbecke"'
+        street:
+          type: string
+          description: 'Name of street. For example: "Schulstrasse"'
+        block:
+          type: string
+          description: Name of block.
+        subblock:
+          type: string
+          description: Name of sub-block.
+        postalCode:
+          type: string
+          description: 'An alphanumeric string included in a postal address to facilitate
+            mail sorting, such as post code, postcode, or ZIP code. For example: "32547"'
+        houseNumber:
+          type: string
+          description: 'House number. For example: "4"'
+    DisplayResponseCoordinate:
+      type: object
+      required:
+      - lat
+      - lng
+      properties:
+        lat:
+          type: number
+          format: double
+          description: 'Latitude of the address. For example: "52.19404"'
+        lng:
+          type: number
+          format: double
+          description: 'Longitude of the address. For example: "8.80135"'
+    AccessResponseCoordinate:
+      type: object
+      required:
+      - lat
+      - lng
+      properties:
+        lat:
+          type: number
+          format: double
+          description: 'Latitude of the address. For example: "52.19404"'
+        lng:
+          type: number
+          format: double
+          description: 'Longitude of the address. For example: "8.80135"'
+    MapView:
+      type: object
+      required:
+      - west
+      - south
+      - east
+      - north
+      properties:
+        west:
+          type: number
+          format: double
+          description: 'Longitude of the western-side of the box. For example: "8.80068"'
+        south:
+          type: number
+          format: double
+          description: 'Latitude of the southern-side of the box. For example: "52.19333"'
+        east:
+          type: number
+          format: double
+          description: 'Longitude of the eastern-side of the box. For example: "8.8167"'
+        north:
+          type: number
+          format: double
+          description: 'Latitude of the northern-side of the box. For example: "52.19555"'
+    Category:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: 'Identifier number for an associated category. For example:
+            "900-9300-0000"'
+        name:
+          type: string
+          description: Name of the place category in the result item language.
+        primary:
+          type: boolean
+          description: Whether or not it is a primary category. This field is visible
+            only when the value is 'true'.
+    TimeZoneInfo:
+      type: object
+      required:
+      - name
+      - utcOffset
+      properties:
+        name:
+          type: string
+          description: 'The name of the time zone as defined in the [tz database](https://en.wikipedia.org/wiki/Tz_database).
+            For example: "Europe/Berlin"'
+        utcOffset:
+          type: string
+          description: The UTC offset for this time zone at request time. For example
+            "+02:00"
+    ErrorResponse:
+      type: object
+      required:
+      - status
+      - title
+      - correlationId
+      - requestId
+      properties:
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code
+        title:
+          type: string
+          description: Human-readable error description
+        code:
+          type: string
+          description: Error code
+        cause:
+          type: string
+          description: Human-readable explanation for the error
+        action:
+          type: string
+          description: Human-readable action for the user
+        correlationId:
+          type: string
+          description: Auto-generated ID univocally identifying this request
+        requestId:
+          type: string
+          description: Request identifier provided by the user
+    Chain:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: 'Identifier number for an associated chain. For example: "272"'
+    SupplierReference:
+      type: object
+      required:
+      - supplier
+      - id
+      properties:
+        supplier:
+          $ref: "#/definitions/Supplier"
+          description: Information about the supplier of this reference.
+        id:
+          type: string
+          description: Identifier of the place as provided by the supplier.
+    Supplier:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          enum:
+          - core
+          - yelp
+          - tripadvisor
+          - parkopedia
+          description: An identifier for the supplier.
+    ContactInformation:
+      type: object
+      properties:
+        phone:
+          type: array
+          items:
+            $ref: "#/definitions/Contact"
+        mobile:
+          type: array
+          items:
+            $ref: "#/definitions/Contact"
+        tollFree:
+          type: array
+          items:
+            $ref: "#/definitions/Contact"
+        fax:
+          type: array
+          items:
+            $ref: "#/definitions/Contact"
+        www:
+          type: array
+          items:
+            $ref: "#/definitions/Contact"
+        email:
+          type: array
+          items:
+            $ref: "#/definitions/Contact"
+    Contact:
+      type: object
+      required:
+      - value
+      properties:
+        label:
+          type: string
+          description: Optional label for the contact string, such as "Customer Service"
+            or "Pharmacy Fax".
+        value:
+          type: string
+          description: Contact information, as specified by the contact type.
+    OpeningHours:
+      type: object
+      required:
+      - text
+      - structured
+      properties:
+        text:
+          type: array
+          items:
+            type: string
+        isOpen:
+          type: boolean
+        structured:
+          type: array
+          items:
+            $ref: "#/definitions/StructuredOpeningHours"
+    StructuredOpeningHours:
+      type: object
+      required:
+      - start
+      - duration
+      - recurrence
+      properties:
+        start:
+          type: string
+        duration:
+          type: string
+        recurrence:
+          type: string
+    ExtendedAttribute:
+      type: object
+      properties:
+        evStation:
+          $ref: "#/definitions/EvChargingAttributes"
+          description: EV charging pool information
+    EvChargingAttributes:
+      type: object
+      properties:
+        connectors:
+          type: array
+          items:
+            $ref: "#/definitions/EvConnector"
+          description: List of EV pool groups of connectors. Each group is defined
+            by a common charging connector type and max power level. The numberOfConnectors
+            field contains the number of connectors in the group.
+        totalNumberOfConnectors:
+          type: integer
+          format: int32
+          description: Total number of charging connectors in the EV charging pool
+    EvConnector:
+      type: object
+      properties:
+        supplierName:
+          type: string
+          description: The EV charge point operator
+        connectorType:
+          $ref: "#/definitions/EvNameId"
+          description: |-
+            Id and name element pair representing the connector type in the EV pool group.
+            For more information on the current connector types, see the [connectorTypes](https://developer.here.com/documentation/charging-stations/dev_guide/topics/resource-type-connector-types.html) values in the HERE EV Charge Points API.
+        powerFeedType:
+          $ref: "#/definitions/EvNameId"
+          description: Details on type of power feed with respect to [SAE J1772](https://en.wikipedia.org/wiki/SAE_J1772#Charging)
+            standard.
+        maxPowerLevel:
+          type: number
+          format: double
+          description: Maximum charge power (in kilowatt) of connectors in connectors
+            group.
+        chargingPoint:
+          $ref: "#/definitions/EvChargingPoint"
+          description: Connectors group additional charging information
+    EvNameId:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Any string value
+        id:
+          type: string
+          description: Unique ID
+    EvChargingPoint:
+      type: object
+      properties:
+        numberOfConnectors:
+          type: integer
+          format: int32
+          description: Number of physical connectors in the connectors group
+        chargeMode:
+          type: string
+          description: Charge mode of the connectors group. For more information,
+            check the [IEC-61851-1](https://en.wikipedia.org/w/index.php?title=Charging_station&oldid=1013010605#IEC-61851-1_Charging_Modes)
+            standard.
+        voltsRange:
+          type: string
+          description: Voltage provided by the connectors group
+          example: 100-120V AC
+        phases:
+          type: integer
+          format: int32
+          description: Number of phases provided by the connectors group
+        ampsRange:
+          type: string
+          description: Amperage provided by the connectors group
+          example: 12A-80A
+    PhonemesSection:
+      type: object
+      properties:
+        placeName:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the name of the place.
+        countryName:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the county name.
+        state:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the state name.
+        county:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the county name.
+        city:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the city name.
+        district:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the district name.
+        subdistrict:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the subdistrict name.
+        street:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the street name.
+        block:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the block.
+        subblock:
+          type: array
+          items:
+            $ref: "#/definitions/Phoneme"
+          description: Phonemes for the sub-block.
+    Phoneme:
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: string
+          description: The actual phonetic transcription in the NT-SAMPA format.
+        language:
+          type: string
+          description: The [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag)
+            language code.
+        preferred:
+          type: boolean
+          description: Whether or not it is the preferred phoneme.
+    
+    LookupResponse:
+      type: object
+      required:
+      - title
+      - address
+      properties:
+        title:
+          type: string
+          description: The localized display name of this result item.
+        id:
+          type: string
+          description: The unique identifier for the result item. This ID can be used
+            for a Look Up by ID search as well.
+        resultType:
+          type: string
+          enum:
+          - administrativeArea
+          - locality
+          - street
+          - intersection
+          - addressBlock
+          - houseNumber
+          - postalCodePoint
+          - place
+          description: 'WARNING: The resultType values ''intersection'' and ''postalCodePoint''
+            are in BETA state'
+        houseNumberType:
+          type: string
+          enum:
+          - PA
+          - interpolated
+        addressBlockType:
+          type: string
+          enum:
+          - block
+          - subblock
+        localityType:
+          type: string
+          enum:
+          - postalCode
+          - subdistrict
+          - district
+          - city
+        administrativeAreaType:
+          type: string
+          enum:
+          - county
+          - state
+          - country
+        houseNumberFallback:
+          type: boolean
+          description: If true, indicates that the requested house number was corrected
+            to match the nearest known house number. This field is visible only when
+            the value is true.
+        address:
+          $ref: "#/definitions/Address"
+          description: Postal address of the result item.
+        position:
+          $ref: "#/definitions/DisplayResponseCoordinate"
+          description: The coordinates (latitude, longitude) of a pin on a map corresponding
+            to the searched place.
+        access:
+          type: array
+          items:
+            $ref: "#/definitions/AccessResponseCoordinate"
+          description: Coordinates of the place you are navigating to (for example,
+            driving or walking). This is a point on a road or in a parking lot.
+        mapView:
+          $ref: "#/definitions/MapView"
+          description: The bounding box enclosing the geometric shape (area or line)
+            that an individual result covers. `place` typed results have no `mapView`.
+        categories:
+          type: array
+          items:
+            $ref: "#/definitions/Category"
+          description: The list of categories assigned to this place.
+        chains:
+          type: array
+          items:
+            $ref: "#/definitions/Chain"
+          description: The list of chains assigned to this place.
+        references:
+          type: array
+          items:
+            $ref: "#/definitions/SupplierReference"
+          description: The list of supplier references available for this place.
+        foodTypes:
+          type: array
+          items:
+            $ref: "#/definitions/Category"
+          description: The list of food types assigned to this place.
+        contacts:
+          type: array
+          items:
+            $ref: "#/definitions/ContactInformation"
+          description: Contact information like phone, email, WWW.
+        openingHours:
+          type: array
+          items:
+            $ref: "#/definitions/OpeningHours"
+          description: A list of hours during which the place is open for business.
+        timeZone:
+          $ref: "#/definitions/TimeZoneInfo"
+          description: BETA - Provides time zone information for this place. (rendered
+            only if 'show=tz' is provided.)
+        extended:
+          $ref: "#/definitions/ExtendedAttribute"
+          description: Extended attributes section to contain detailed information
+            for specific result types.
+        phonemes:
+          $ref: "#/definitions/PhonemesSection"
+          description: Phonemes for address and place names. (rendered only if 'show=phonemes'
+            is provided.)
+paths:
+  "/lookup":
+    get:
+      operationId: lookup
+      summary: Lookup By ID
+      description: This endpoint looks up a known place by the HERE ID included in
+        the request.
+      parameters:
+        - $ref: "#/parameters/apiKey"
+        - $ref: "#/parameters/id"
+      responses:
+        '200':
+          description: The search results.
+          schema:
+            $ref: "#/definitions/LookupResponse"
+        '400':
+          description: 'Client error: request failed validation.'
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '404':
+          description: Requested id could not be found.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '405':
+          description: 'Client error: http method not supported.'
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        '503':
+          description: Temporary server error.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+

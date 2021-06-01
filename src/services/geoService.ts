@@ -16,17 +16,21 @@ import {
   IResponseErrorNotFound
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { HereAPIClient } from "../../src/clients/here";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withValidatedOrInternalError,
   withCatchAsInternalError
 } from "../../src/utils/responses";
-import { OpenSearchAutocompleteResponse } from "../../generated/api-here/OpenSearchAutocompleteResponse";
-import { LookupResponse } from "../../generated/api-here/LookupResponse";
-import { OpenSearchGeocodeResponse } from "../../generated/api-here/OpenSearchGeocodeResponse";
+import { OpenSearchAutocompleteResponse } from "../../generated/api-here-autocomplete/OpenSearchAutocompleteResponse";
+import { LookupResponse } from "../../generated/api-here-lookup/LookupResponse";
+import { OpenSearchGeocodeResponse } from "../../generated/api-here-geocoding/OpenSearchGeocodeResponse";
 import { AutocompleteQueryParams } from "../../generated/geo/AutocompleteQueryParams";
+import {
+  HereAutocompleteAPIClient,
+  HereGeocodingAPIClient,
+  HereLookupAPIClient
+} from "../../src/clients/here";
 
 export const DEFAULT_LANG = "it_IT";
 export const DEFAULT_SEARCH_COUNTRIES = "countryCode:ITA";
@@ -36,9 +40,11 @@ const NOT_SUPPORTED_TITLE = "Not Supported";
 
 export default class TokenService {
   constructor(
-    private readonly hereGeocodeApiClient: ReturnType<HereAPIClient>,
-    private readonly hereAutocompleteApiClient: ReturnType<HereAPIClient>,
-    private readonly hereLookupApiClient: ReturnType<HereAPIClient>
+    private readonly hereGeocodeApiClient: ReturnType<HereGeocodingAPIClient>,
+    private readonly hereAutocompleteApiClient: ReturnType<
+      HereAutocompleteAPIClient
+    >,
+    private readonly hereLookupApiClient: ReturnType<HereLookupAPIClient>
   ) {}
 
   /**

@@ -10,10 +10,10 @@ import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import GeoController from "../geoController";
 import GeoService from "../../services/geoService";
-import { HereAPIClient } from "../../clients/here";
-import { OpenSearchAutocompleteResponse } from "../../../generated/api-here/OpenSearchAutocompleteResponse";
-import { OpenSearchGeocodeResponse } from "../../../generated/api-here/OpenSearchGeocodeResponse";
-import { LookupResponse, ResultTypeEnum } from "../../../generated/api-here/LookupResponse";
+import { HereAutocompleteAPIClient, HereGeocodingAPIClient, HereLookupAPIClient } from "../../clients/here";
+import { OpenSearchAutocompleteResponse } from "../../../generated/api-here-autocomplete/OpenSearchAutocompleteResponse";
+import { OpenSearchGeocodeResponse } from "../../../generated/api-here-geocoding/OpenSearchGeocodeResponse";
+import { LookupResponse, ResultTypeEnum } from "../../../generated/api-here-lookup/LookupResponse";
 import { LookupQueryParams } from "../../../generated/geo/LookupQueryParams";
 import { AutocompleteQueryParams } from "../../../generated/geo/AutocompleteQueryParams";
 import { AddressQueryParams } from "../../../generated/geo/AddressQueryParams";
@@ -130,6 +130,11 @@ const lookupQueryParams: LookupQueryParams = {
   id: "aGeoId" as NonEmptyString
 };
 
+const autocmpleteClient = HereAutocompleteAPIClient(API_URL);
+const geocodingClient = HereGeocodingAPIClient(API_URL);
+const lookupClient = HereLookupAPIClient(API_URL);
+const geoService = new GeoService(geocodingClient, autocmpleteClient, lookupClient);
+
 describe("GeoController#getAutocomplete", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -138,8 +143,6 @@ describe("GeoController#getAutocomplete", () => {
   it("should make the correct service method call", async () => {
     const req = { ...mockReq({query: autocompleteQueryParams}), user: mockedUser };
 
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     await controller.getAutocomplete(req);
 
@@ -156,8 +159,6 @@ describe("GeoController#getAutocomplete", () => {
     mockGetAutocomplete.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(anAutocompleteResponse))
     );
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     const response = await controller.getAutocomplete(req);
 
@@ -171,9 +172,6 @@ describe("GeoController#getAutocomplete", () => {
   it("should not call getAutocomplete method on the GeoService with empty user", async () => {
     const req = { ...mockReq({query: autocompleteQueryParams}), user: undefined };
     const res = mockRes();
-
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     const response = await controller.getAutocomplete(req);
 
@@ -193,8 +191,6 @@ describe("GeoController#getGeocoding", () => {
 
   it("should make the correct service method call", async () => {
     const req = { ...mockReq({query: geocodeQueryParams}), user: mockedUser };
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     await controller.getGeocoding(req);
 
@@ -207,8 +203,6 @@ describe("GeoController#getGeocoding", () => {
     mockGetGeocoding.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(aGeocodeResponse))
     );
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     const response = await controller.getGeocoding(req);
 
@@ -222,9 +216,6 @@ describe("GeoController#getGeocoding", () => {
   it("should not call getGeocoding method on the GeoService with empty user", async () => {
     const req = { ...mockReq({query: geocodeQueryParams}), user: undefined };
     const res = mockRes();
-
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     const response = await controller.getGeocoding(req);
 
@@ -244,8 +235,6 @@ describe("GeoController#getLookup", () => {
 
   it("should make the correct service method call", async () => {
     const req = { ...mockReq({query: lookupQueryParams}), user: mockedUser };
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     await controller.getLookup(req);
 
@@ -258,8 +247,6 @@ describe("GeoController#getLookup", () => {
     mockGetLookup.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(aLookupResponse))
     );
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     const response = await controller.getLookup(req);
 
@@ -273,9 +260,6 @@ describe("GeoController#getLookup", () => {
   it("should not call getLookup method on the GeoService with empty user", async () => {
     const req = { ...mockReq({query: lookupQueryParams}), user: undefined };
     const res = mockRes();
-
-    const client = HereAPIClient(API_URL);
-    const geoService = new GeoService(client);
     const controller = new GeoController(geoService, API_KEY);
     const response = await controller.getLookup(req);
 

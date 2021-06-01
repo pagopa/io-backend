@@ -44,7 +44,11 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
-import { HereAPIClient } from "./clients/here";
+import {
+  HereAutocompleteAPIClient,
+  HereGeocodingAPIClient,
+  HereLookupAPIClient
+} from "./clients/here";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -344,19 +348,19 @@ export const HERE_API_KEY = NonEmptyString.decode(
 export const HERE_AUTOCOMPLETE_API_URL = getRequiredENVVar(
   "HERE_AUTOCOMPLETE_API_URL"
 );
-export const HERE_AUTOCOMPLETE_API_CLIENT = HereAPIClient(
+export const HERE_AUTOCOMPLETE_API_CLIENT = HereAutocompleteAPIClient(
   HERE_AUTOCOMPLETE_API_URL,
   httpApiFetch
 );
 
 export const HERE_GEOCODE_API_URL = getRequiredENVVar("HERE_GEOCODE_API_URL");
-export const HERE_GEOCODE_API_CLIENT = HereAPIClient(
+export const HERE_GEOCODE_API_CLIENT = HereGeocodingAPIClient(
   HERE_GEOCODE_API_URL,
   httpApiFetch
 );
 
 export const HERE_LOOKUP_API_URL = getRequiredENVVar("HERE_LOOKUP_API_URL");
-export const HERE_LOOKUP_API_CLIENT = HereAPIClient(
+export const HERE_LOOKUP_API_CLIENT = HereLookupAPIClient(
   HERE_LOOKUP_API_URL,
   httpApiFetch
 );
