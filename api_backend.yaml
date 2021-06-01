@@ -729,7 +729,7 @@ definitions:
   MessageBodyMarkdown:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.4.0/openapi/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   NotificationChannelStatusValue:
