@@ -1,0 +1,146 @@
+swagger: '2.0'
+info:
+  version: 7.15.6
+  title: EU Covid Certificate service for IO App
+basePath: /api/v1/eucovidcert
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  /certificate:
+    post:
+      operationId: getCertificate
+      summary: Retrieve a certificate for a given Citizen
+      description: >-
+        Given a Citizen's fiscal code and an OTP (the auth code previously sent
+        via IO Message), a Certificate is returned with ID, encoded QR-code,
+        expiration date and a markdown text with all meaningful information to
+        be shown to Citizens.
+      parameters:
+        - name: accessData
+          in: body
+          schema:
+            $ref: '#/definitions/GetCertificateParams'
+      responses:
+        '200':
+          description: >-
+            A Certificate exists and it's found for the given access data. It is
+            retrieved regardless of it's expired or its current status
+          schema:
+            $ref: '#/definitions/Certificate'
+        '400':
+          description: Payload has bad format
+        '401':
+          description: Bearer token null or expired
+        '403':
+          description: >-
+            Access data provided are invalid or no Certificate has been emitted
+            for the given Citizen
+        '410':
+          description: Endpoint no longer available
+        '500':
+          description: Generic server error
+        '504':
+          description: Gateway Timeout
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+definitions:
+  GetCertificateParams:
+    type: object
+    properties:
+      auth_code:
+        type: string
+        description: OTP previously sent to the Citizen
+    required:
+      - auth_code
+  Certificate:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/ValidCertificate'
+      - $ref: '#/definitions/RevokedCertificate'
+  ValidCertificate:
+    type: object
+    properties:
+      id:
+        description: Unique identifier of the Certificate
+        type: string
+      info:
+        description: >-
+          A markdown-formatted text in which show Certificate information for
+          the Citizen to read.
+        type: string
+      qr_code:
+        description: >-
+          The qr-code image to be shown to authorities for Certificate
+          validation
+        $ref: '#/definitions/QRCode'
+      status:
+        description: must be 'valid'
+        type: string
+        enum:
+          - valid
+    required:
+      - id
+      - qr_code
+      - status
+  RevokedCertificate:
+    type: object
+    properties:
+      id:
+        description: Unique identifier of the Certificate
+        type: string
+      info:
+        description: >-
+          A markdown-formatted text in which show Certificate information for
+          the Citizen to read.
+        type: string
+      status:
+        description: must be 'revoked'
+        type: string
+        enum:
+          - revoked
+      revoke_reason:
+        description: >-
+          A human-readable plain text which explains why the certificate has
+          been revoked
+        type: string
+        maxLength: 200
+      revoked_on:
+        description: The date the Certificate has been revoked on
+        type: string
+        format: UTCISODateFromString
+        x-import: '@pagopa/ts-commons/lib/dates'
+        example: '2018-10-13T00:00:00.000Z'
+    required:
+      - id
+      - status
+      - revoke_reason
+      - revoked_on
+  QRCode:
+    description: A qr code imamge encoded into a base64 string
+    type: object
+    properties:
+      mime_type:
+        description: the formate the image has been encoded in
+        type: string
+        enum:
+          - image/png
+          - image/svg
+      content:
+        description: a base64 string representing the image to be shown
+        type: string
+    required:
+      - mime_type
+      - content
+    example:
+      mime_type: image/png
+      content: >-
+        PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMyAyMyI+PHBhdGggZmlsbD0iYmxhY2siIGQ9Ik0xIDFoN3Y3aC03ek05IDFoMXYxaC0xek0xMSAxaDJ2MWgtMXYxaC0ydi0xaDF6TTE1IDFoN3Y3aC03ek0yIDJ2NWg1di01ek0xNiAydjVoNXYtNXpNMyAzaDN2M2gtM3pNOSAzaDF2MWgtMXpNMTIgM2gxdjJoMXY0aC0xdi0yaC0xdjNoLTF2MWgxdi0xaDF2MWgxdjFoLTF2MWgydi0xaDF2MmgtNHYtMmgtMXYxaC0xdi0yaC0xdi0xaDF2LTFoMXYtMmgtMXYxaC0xdi0yaDF2LTJoMnpNMTcgM2gzdjNoLTN6TTEgOWgxdjFoLTF6TTMgOWgxdjFoLTF6TTcgOWgydjFoLTJ6TTE2IDloMXYxaC0xek0xOSA5aDF2MWgtMXpNMjEgOWgxdjJoLTJ2LTFoMXpNNCAxMGgydjFoLTF2MWgtMXpNMTQgMTBoMnYxaC0yek0xIDExaDJ2MWgtMXYxaDF2LTFoMXYxaDF2LTFoMXYtMWgzdjFoLTJ2MWgtMXYxaC01ek0xNyAxMWgxdjFoMXYxaDF2MmgtMXYtMWgtMXYtMWgtMXpNMTkgMTFoMXYxaC0xek0yMCAxMmgydjZoLTF2LTJoLTF2LTFoMXYtMmgtMXpNNyAxM2gxdjFoLTF6TTkgMTNoMXYzaC0xek0xNiAxNGgydjFoLTF2MWgtM3YtMWgyek0xIDE1aDd2N2gtN3pNMTEgMTVoMXYxaC0xek0xOCAxNWgxdjFoLTF6TTIgMTZ2NWg1di01ek0xMyAxNmgxdjFoLTF6TTE5IDE2aDF2MWgtMXpNMyAxN2gzdjNoLTN6TTExIDE3aDF2MWgtMXpNMTQgMTdoNXYxaC0xdjNoLTF2LTFoLTF2LTFoLTF2MWgxdjJoLTR2LTFoLTJ2LTFoMXYtMWgxdi0xaDF2MWgxek0xMCAxOGgxdjFoLTF6TTE5IDE4aDF2MWgtMXpNOSAxOWgxdjFoLTF6TTIwIDE5aDJ2M2gtM3YtMWgydi0xaC0xek0xMyAyMHYxaDF2LTF6TTkgMjFoMXYxaC0xeiIvPjwvc3ZnPg==
+consumes:
+  - application/json
+produces:
+  - application/json

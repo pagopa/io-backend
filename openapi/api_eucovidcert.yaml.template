@@ -37,7 +37,13 @@ paths:
           description: Generic server error
         '504':
           description: Gateway Timeout
-          
+  
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
 definitions:
   GetCertificateParams:
     type: object
@@ -48,20 +54,16 @@ definitions:
     required:
       - auth_code
   Certificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/Certificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/Certificate"
   ValidCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ValidCertificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/RevokedCertificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/RevokedCertificate"
   QRCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/QRCode"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/QRCode"
 
 consumes:
   - application/json
 produces:
   - application/json
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
+
