@@ -301,6 +301,15 @@
     eslint-plugin-sonarjs "^0.5.0"
     prettier "^2.1.2"
 
+"@pagopa/io-functions-eucovidcerts-sdk@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-eucovidcerts-sdk/-/io-functions-eucovidcerts-sdk-1.0.2.tgz#92defa0335cf36dd2aa46c60fce082153f7fdff3"
+  integrity sha512-wbGuxExuaUo/40KJTa8uP8SzugYFEqiNRfpZsoUDm8378Xdte4Ep2RrDmdG5zotGFwuF/KTXy8KIZjosg40gUA==
+  dependencies:
+    "@pagopa/ts-commons" "^9.1.0"
+    fp-ts "1.17.4"
+    io-ts "1.8.5"
+
 "@pagopa/io-spid-commons@^6.2.0":
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-6.2.0.tgz#01f81a88c3d6a173dd270ae8600b4926da619e1c"
@@ -323,7 +332,7 @@
     xmldom "^0.1.27"
     yargs "^15.3.0"
 
-"@pagopa/ts-commons@^9.4.0":
+"@pagopa/ts-commons@^9.1.0", "@pagopa/ts-commons@^9.4.0":
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-9.4.0.tgz#680ba8a43db4c0397e6c4e8f9cfd3d758cc0b30c"
   integrity sha512-eLuyLQPQsQArCHTfcLhtES8dan6GaJ99AfqbyZS8VsyZxuOZ0lyCZkFQBdd9QlmGUHXiEpLVjVEz+uXcGSnLUg==

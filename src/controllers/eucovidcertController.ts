@@ -8,7 +8,8 @@ import {
   IResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
-import { Certificate } from "../../generated/eucovidcert-api/Certificate";
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
+
 import { GetCertificateParams } from "../../generated/eucovidcert/GetCertificateParams";
 import { withValidatedOrValidationError } from "../utils/responses";
 import EUCovidService from "../services/eucovidcertService";

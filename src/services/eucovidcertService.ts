@@ -9,8 +9,8 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
-import { Certificate } from "../../generated/eucovidcert-api/Certificate";
 
 import {
   ResponseErrorStatusNotDefinedInSpec,
