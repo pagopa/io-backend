@@ -14,17 +14,17 @@ import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem
 } from "../../utils/responses";
+import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
 
 const API_KEY = "";
 const API_URL = "";
 
 const aMockedAuthCode = "000";
 
-const aRevokedCertificate = {
-  id: "000",
-  revoke_reason: "bla bla bla",
+const aRevokedCertificate : RevokedCertificate= {
+  uvci: "000",
+  revoke_info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
-  info: "Revoked Certificate",
   status: RevokedStatusEnum.revoked
 };
 

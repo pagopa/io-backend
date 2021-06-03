@@ -3,6 +3,7 @@ import EUCovidCertService from "../eucovidcertService";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
 import { aMockedUser } from "../../__mocks__/user_mock";
 import { StatusEnum as RevokedStatusEnum } from "../../../generated/eucovidcert-api/RevokedCertificate";
+import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
 
 const mockClientGetCertificate = jest.fn();
 
@@ -12,11 +13,10 @@ const client = {
 
 const aMockedAuthCode = "000";
 
-const aRevokedCertificate = {
-  id: "000",
-  revoke_reason: "bla bla bla",
+const aRevokedCertificate: RevokedCertificate = {
+  uvci: "000",
+  revoke_info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
-  info: "Revoked Certificate",
   status: RevokedStatusEnum.revoked
 };
 
@@ -51,7 +51,8 @@ describe("EUCovidCertService", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessJson",
+      value: aRevokedCertificate
     });
   });
 
