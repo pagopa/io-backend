@@ -57,13 +57,13 @@ describe("EUCovidCertService", () => {
   });
 
   it.each`
-    title                                                            | status_code | expected_kind               | expected_detail
-    ${"return IResponseErrorInternal"}                               | ${400}      | ${"IResponseErrorInternal"} | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorInternal"}                               | ${401}      | ${"IResponseErrorInternal"} | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorNotFound"}                               | ${403}      | ${"IResponseErrorNotFound"} | ${"Not Found: Certificate not found"}
-    ${"return IResponseErrorInternal"}                               | ${500}      | ${"IResponseErrorInternal"} | ${"Internal server error: "}
-    ${"return IResponseErrorInternal"}                               | ${504}      | ${"IResponseErrorInternal"} | ${"Internal server error: "}
-    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${"IResponseErrorInternal"} | ${"Internal server error: unhandled API response status [418]"}
+    title                                                            | status_code | expected_kind                 | expected_detail
+    ${"return IResponseErrorValidation"}                             | ${400}      | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal"}                               | ${401}      | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound"}                               | ${403}      | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
+    ${"return IResponseErrorInternal"}                               | ${500}      | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
+    ${"return IResponseErrorInternal"}                               | ${504}      | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
+    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `(
     "should $title",
     async ({ status_code, expected_kind, expected_detail }) => {

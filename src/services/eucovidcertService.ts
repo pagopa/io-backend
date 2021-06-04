@@ -6,11 +6,13 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
 import { Certificate } from "../../generated/eucovidcert-api/Certificate";
+import { PreferredLanguages } from "../../generated/eucovidcert-api/PreferredLanguages";
 
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -30,7 +32,8 @@ export default class EUCovidCertService {
    */
   public readonly getEUCovidCertificate = (
     user: User,
-    auth_code: string
+    auth_code: string,
+    preferred_languages?: PreferredLanguages
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -42,7 +45,8 @@ export default class EUCovidCertService {
       const validated = await this.eucovidCertApiClient.getCertificate({
         accessData: {
           auth_code,
-          fiscal_code: user.fiscal_code
+          fiscal_code: user.fiscal_code,
+          preferred_languages
         }
       });
 
@@ -51,7 +55,10 @@ export default class EUCovidCertService {
           case 200:
             return ResponseSuccessJson(response.value);
           case 400:
-            return ResponseErrorUnexpectedAuthProblem();
+            return ResponseErrorValidation(
+              "Bad Request",
+              "Payload has bad format"
+            );
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
           case 403:
