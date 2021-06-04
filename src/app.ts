@@ -416,16 +416,16 @@ export function newApp({
           CGN_SERVICE,
           authMiddlewares.bearerSession
         );
-      }
 
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerGeoAPIRoutes(
-        app,
-        GeoAPIBasePath,
-        GEO_SERVICE,
-        HERE_API_KEY,
-        authMiddlewares.bearerSession
-      );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerGeoAPIRoutes(
+          app,
+          GeoAPIBasePath,
+          GEO_SERVICE,
+          HERE_API_KEY,
+          authMiddlewares.bearerSession
+        );
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerPagoPARoutes(
