@@ -15,7 +15,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
+import { CIDR, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
@@ -53,7 +53,11 @@ import {
   URL_TOKEN_STRATEGY,
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
-  TEST_CGN_FISCAL_CODES
+  TEST_CGN_FISCAL_CODES,
+  HERE_GEOCODE_API_CLIENT,
+  HERE_AUTOCOMPLETE_API_CLIENT,
+  HERE_LOOKUP_API_CLIENT,
+  HERE_API_KEY
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -83,6 +87,7 @@ import ProfileService from "./services/profileService";
 import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
+import GeoService from "./services/geoService";
 import UserDataProcessingService from "./services/userDataProcessingService";
 import UsersLoginLogService from "./services/usersLoginLogService";
 import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
@@ -110,6 +115,7 @@ import {
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
+import GeoController from "./controllers/geoController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -143,6 +149,7 @@ export interface IAppFactoryParameters {
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
   readonly CGNAPIBasePath: string;
+  readonly GeoAPIBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -160,7 +167,8 @@ export function newApp({
   PagoPABasePath,
   MyPortalBasePath,
   BPDBasePath,
-  CGNAPIBasePath
+  CGNAPIBasePath,
+  GeoAPIBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -300,6 +308,13 @@ export function newApp({
       // Create the cgn service
       const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
+      // Create the geo service
+      const GEO_SERVICE = new GeoService(
+        HERE_GEOCODE_API_CLIENT,
+        HERE_AUTOCOMPLETE_API_CLIENT,
+        HERE_LOOKUP_API_CLIENT
+      );
+
       // Create the user data processing service
       const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
         API_CLIENT
@@ -401,7 +416,17 @@ export function newApp({
           CGN_SERVICE,
           authMiddlewares.bearerSession
         );
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerGeoAPIRoutes(
+          app,
+          GeoAPIBasePath,
+          GEO_SERVICE,
+          HERE_API_KEY,
+          authMiddlewares.bearerSession
+        );
       }
+
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerPagoPARoutes(
         app,
@@ -825,6 +850,38 @@ function registerSessionAPIRoutes(
       sessionLockController.unlockUserSession,
       sessionLockController
     )
+  );
+}
+
+function registerGeoAPIRoutes(
+  app: Express,
+  basePath: string,
+  geoService: GeoService,
+  hereApiKey: NonEmptyString,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const geoController: GeoController = new GeoController(
+    geoService,
+    hereApiKey
+  );
+
+  app.get(
+    `${basePath}/geo/autocomplete`,
+    bearerSessionTokenAuth,
+    toExpressHandler(geoController.getAutocomplete, geoController)
+  );
+
+  app.get(
+    `${basePath}/geo/geocode`,
+    bearerSessionTokenAuth,
+    toExpressHandler(geoController.getGeocoding, geoController)
+  );
+
+  app.get(
+    `${basePath}/geo/lookup`,
+    bearerSessionTokenAuth,
+    toExpressHandler(geoController.getLookup, geoController)
   );
 }
 
