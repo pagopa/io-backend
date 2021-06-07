@@ -50,17 +50,17 @@ definitions:
     required:
       - auth_code
   Certificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/Certificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/Certificate"
   ValidCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/ValidCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/RevokedCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/RevokedCertificate"
   ExpiredCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/ExpiredCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ExpiredCertificate"
   QRCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/QRCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/QRCode"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/PreferredLanguages"
 
 consumes:
   - application/json

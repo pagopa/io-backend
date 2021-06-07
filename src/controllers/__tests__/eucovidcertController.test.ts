@@ -24,7 +24,7 @@ const aMockedAuthCode = "000";
 
 const aRevokedCertificate: RevokedCertificate = {
   uvci: "000",
-  revoke_info: "bla bla bla",
+  info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
   status: RevokedStatusEnum.revoked
 };
