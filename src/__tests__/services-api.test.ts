@@ -80,6 +80,7 @@ describe("GET /services/:id", () => {
       APIBasePath: "/api/v1",
       BPDBasePath: "/bpd/api/v1",
       BonusAPIBasePath: "/bonus/api/v1",
+      EUCovidCertBasePath: "/eucovidcerts/api/v1",
       CGNAPIBasePath: "/cgn/api/v1",
       MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",

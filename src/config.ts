@@ -44,6 +44,7 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
+import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -329,6 +330,17 @@ export const CGN_API_CLIENT = CgnAPIClient(
   httpApiFetch
 );
 
+export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
+export const EUCOVIDCERT_API_URL = getRequiredENVVar("EUCOVIDCERT_API_URL");
+export const EUCOVIDCERT_API_BASE_PATH = getRequiredENVVar(
+  "EUCOVIDCERT_API_BASE_PATH"
+);
+export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
+  EUCOVIDCERT_API_KEY,
+  EUCOVIDCERT_API_URL,
+  httpApiFetch
+);
+
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
 export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
@@ -423,6 +435,8 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
+export const FF_EUCOVIDCERT_ENABLED =
+  process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
