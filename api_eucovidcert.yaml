@@ -55,6 +55,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/RevokedCertificate"
+  ExpiredCertificate:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/ExpiredCertificate"
   QRCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/update-api/openapi/index.yaml#/definitions/QRCode"
   PreferredLanguages:
