@@ -3,11 +3,12 @@ import { aMockedUser } from "../../__mocks__/user_mock";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
 import EUCovidCertController from "../eucovidcertController";
 import EUCovidCertService from "../../services/eucovidcertService";
-import { StatusEnum as RevokedStatusEnum } from "@pagopa/io-functions-eucovidcerts-sdk/RevokedCertificate";
+import { RevokedCertificate, StatusEnum as RevokedStatusEnum } from "@pagopa/io-functions-eucovidcerts-sdk/RevokedCertificate";
 import * as e from "express";
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import {
@@ -20,11 +21,10 @@ const API_URL = "";
 
 const aMockedAuthCode = "000";
 
-const aRevokedCertificate = {
-  id: "000",
-  revoke_reason: "bla bla bla",
+const aRevokedCertificate: RevokedCertificate = {
+  uvci: "000",
+  info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
-  info: "Revoked Certificate",
   status: RevokedStatusEnum.revoked
 };
 
@@ -57,7 +57,8 @@ describe("EUCovidCertificateController", () => {
 
     expect(aMockedGetCertificate).toHaveBeenCalledWith(
       aMockedUser,
-      aMockedAuthCode
+      aMockedAuthCode,
+      undefined
     );
   });
 
@@ -80,11 +81,12 @@ describe("EUCovidCertificateController", () => {
   });
 
   it.each`
-    title                                                            | fn                                                                       | expected_kind               | expected_detail
-    ${"return IResponseErrorInternal"}                               | ${ResponseErrorUnexpectedAuthProblem}                                    | ${"IResponseErrorInternal"} | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorNotFound"}                               | ${() => ResponseErrorNotFound("Not Found", "Certificate not found")}     | ${"IResponseErrorNotFound"} | ${"Not Found: Certificate not found"}
-    ${"return IResponseErrorInternal"}                               | ${() => ResponseErrorInternal("")}                                       | ${"IResponseErrorInternal"} | ${"Internal server error: "}
-    ${"return IResponseErrorInternal if status code is not in spec"} | ${() => ResponseErrorStatusNotDefinedInSpec({ status: "418" } as never)} | ${"IResponseErrorInternal"} | ${"Internal server error: unhandled API response status [418]"}
+    title                                                            | fn                                                                        | expected_kind                 | expected_detail
+    ${"return IResponseErrorValidation"}                             | ${() => ResponseErrorValidation("Bad Request", "Payload has bad format")} | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal"}                               | ${ResponseErrorUnexpectedAuthProblem}                                     | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound"}                               | ${() => ResponseErrorNotFound("Not Found", "Certificate not found")}      | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
+    ${"return IResponseErrorInternal"}                               | ${() => ResponseErrorInternal("")}                                        | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
+    ${"return IResponseErrorInternal if status code is not in spec"} | ${() => ResponseErrorStatusNotDefinedInSpec({ status: "418" } as never)}  | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `("should $title", async ({ fn, expected_kind, expected_detail }) => {
     aMockedGetCertificate.mockReturnValue(fn());
 

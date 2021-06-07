@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 7.15.6
+  version: 7.16.0
   title: EU Covid Certificate service for IO App
 basePath: /api/v1/eucovidcert
 schemes:
@@ -55,6 +55,8 @@ definitions:
       auth_code:
         type: string
         description: OTP previously sent to the Citizen
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
     required:
       - auth_code
   Certificate:
@@ -62,10 +64,11 @@ definitions:
     allOf:
       - $ref: '#/definitions/ValidCertificate'
       - $ref: '#/definitions/RevokedCertificate'
+      - $ref: '#/definitions/ExpiredCertificate'
   ValidCertificate:
     type: object
     properties:
-      id:
+      uvci:
         description: Unique identifier of the Certificate
         type: string
       info:
@@ -94,7 +97,7 @@ definitions:
   RevokedCertificate:
     type: object
     properties:
-      id:
+      uvci:
         description: Unique identifier of the Certificate
         type: string
       status:
@@ -102,12 +105,11 @@ definitions:
         type: string
         enum:
           - revoked
-      revoke_reason:
-        description: >-
-          A human-readable plain text which explains why the certificate has
-          been revoked
+      info:
+        description: |-
+          A human-readable message, in plain text or Markdown format, 
+          which explains why the certificate has been revoked
         type: string
-        maxLength: 200
       revoked_on:
         description: The date the Certificate has been revoked on
         type: string
@@ -116,6 +118,25 @@ definitions:
         example: '2018-10-13T00:00:00.000Z'
     required:
       - status
+  ExpiredCertificate:
+    type: object
+    properties:
+      uvci:
+        description: Unique identifier of the Certificate
+        type: string
+      status:
+        description: must be 'expired'
+        type: string
+        enum:
+          - expired
+      info:
+        description: |-
+          A human-readable message, in plain text or Markdown format,
+          which explains that the Certificate is expired
+        type: string
+    required:
+      - status
+      - info
   QRCode:
     description: A qr code imamge encoded into a base64 string
     type: object
@@ -125,7 +146,6 @@ definitions:
         type: string
         enum:
           - image/png
-          - image/svg
       content:
         description: a base64 string representing the image to be shown
         type: string
@@ -136,6 +156,30 @@ definitions:
       mime_type: image/png
       content: >-
         PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMyAyMyI+PHBhdGggZmlsbD0iYmxhY2siIGQ9Ik0xIDFoN3Y3aC03ek05IDFoMXYxaC0xek0xMSAxaDJ2MWgtMXYxaC0ydi0xaDF6TTE1IDFoN3Y3aC03ek0yIDJ2NWg1di01ek0xNiAydjVoNXYtNXpNMyAzaDN2M2gtM3pNOSAzaDF2MWgtMXpNMTIgM2gxdjJoMXY0aC0xdi0yaC0xdjNoLTF2MWgxdi0xaDF2MWgxdjFoLTF2MWgydi0xaDF2MmgtNHYtMmgtMXYxaC0xdi0yaC0xdi0xaDF2LTFoMXYtMmgtMXYxaC0xdi0yaDF2LTJoMnpNMTcgM2gzdjNoLTN6TTEgOWgxdjFoLTF6TTMgOWgxdjFoLTF6TTcgOWgydjFoLTJ6TTE2IDloMXYxaC0xek0xOSA5aDF2MWgtMXpNMjEgOWgxdjJoLTJ2LTFoMXpNNCAxMGgydjFoLTF2MWgtMXpNMTQgMTBoMnYxaC0yek0xIDExaDJ2MWgtMXYxaDF2LTFoMXYxaDF2LTFoMXYtMWgzdjFoLTJ2MWgtMXYxaC01ek0xNyAxMWgxdjFoMXYxaDF2MmgtMXYtMWgtMXYtMWgtMXpNMTkgMTFoMXYxaC0xek0yMCAxMmgydjZoLTF2LTJoLTF2LTFoMXYtMmgtMXpNNyAxM2gxdjFoLTF6TTkgMTNoMXYzaC0xek0xNiAxNGgydjFoLTF2MWgtM3YtMWgyek0xIDE1aDd2N2gtN3pNMTEgMTVoMXYxaC0xek0xOCAxNWgxdjFoLTF6TTIgMTZ2NWg1di01ek0xMyAxNmgxdjFoLTF6TTE5IDE2aDF2MWgtMXpNMyAxN2gzdjNoLTN6TTExIDE3aDF2MWgtMXpNMTQgMTdoNXYxaC0xdjNoLTF2LTFoLTF2LTFoLTF2MWgxdjJoLTR2LTFoLTJ2LTFoMXYtMWgxdi0xaDF2MWgxek0xMCAxOGgxdjFoLTF6TTE5IDE4aDF2MWgtMXpNOSAxOWgxdjFoLTF6TTIwIDE5aDJ2M2gtM3YtMWgydi0xaC0xek0xMyAyMHYxaDF2LTF6TTkgMjFoMXYxaC0xeiIvPjwvc3ZnPg==
+  PreferredLanguages:
+    type: array
+    items:
+      type: string
+      x-extensible-enum:
+        - it_IT
+        - en_GB
+        - es_ES
+        - de_DE
+        - fr_FR
+      example: it_IT
+    description: >-
+      Indicates the User's preferred written or spoken languages in order
+
+      of preference. Generally used for selecting a localized User interface.
+      Valid
+
+      values are concatenation of the ISO 639-1 two letter language code, an
+      underscore,
+
+      and the ISO 3166-1 2 letter country code; e.g., 'en_US' specifies the
+      language
+
+      English and country US.
 consumes:
   - application/json
 produces:

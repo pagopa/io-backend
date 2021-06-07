@@ -37,13 +37,7 @@ paths:
           description: Generic server error
         '504':
           description: Gateway Timeout
-  
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
-
+          
 definitions:
   GetCertificateParams:
     type: object
@@ -56,20 +50,24 @@ definitions:
     required:
       - auth_code
   Certificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/Certificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/Certificate"
   ValidCertificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/ValidCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/RevokedCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/RevokedCertificate"
   ExpiredCertificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/ExpiredCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ExpiredCertificate"
   QRCode:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/QRCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/QRCode"
   PreferredLanguages:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/PreferredLanguages"
 
 consumes:
   - application/json
 produces:
   - application/json
-
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

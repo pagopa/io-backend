@@ -302,9 +302,9 @@
     prettier "^2.1.2"
 
 "@pagopa/io-functions-eucovidcerts-sdk@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-eucovidcerts-sdk/-/io-functions-eucovidcerts-sdk-1.1.0.tgz#3bcd707a4e3cf0d064d478b9ac36520af24de980"
-  integrity sha512-YlB7zczAk6oXgCjqb5OZaXC1rZQBGP0Ejb7mfY7ii73s3//Y0EJv2ddjkAysHS+OBAr/7g1/bugq3RJniZj3sw==
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-eucovidcerts-sdk/-/io-functions-eucovidcerts-sdk-1.2.0.tgz#a77913b345465fa6e705d7f04b7370c3cd30efad"
+  integrity sha512-h7nAOsHZRvqZ+juoFH1eB1O8vt/xwtpvW1GUugaNP0+CJxjSkYDvi4cIu1q9i5F++Jg3YvXqXrXKR3y4ih/5fA==
   dependencies:
     "@pagopa/ts-commons" "^9.1.0"
     fp-ts "1.17.4"
@@ -332,7 +332,21 @@
     xmldom "^0.1.27"
     yargs "^15.3.0"
 
-"@pagopa/ts-commons@^9.1.0", "@pagopa/ts-commons@^9.4.0":
+"@pagopa/ts-commons@^9.1.0":
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-9.4.1.tgz#cc2c1c08c84fb6fa55a99c506227b8c2dcc69c01"
+  integrity sha512-wA/eInP9l0vPovR4+50vpVxHdUr/el0xUrJ0LoRJv6qAErS9NzGIDwyg4ZjW6SHxDGzN4PpIFSb0QFki27wswg==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.2"
+    applicationinsights "^1.7.4"
+    fp-ts "1.17.4"
+    io-ts "1.8.5"
+    json-set-map "^1.0.2"
+    node-fetch "^2.6.0"
+    validator "^10.1.0"
+
+"@pagopa/ts-commons@^9.4.0":
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-9.4.0.tgz#680ba8a43db4c0397e6c4e8f9cfd3d758cc0b30c"
   integrity sha512-eLuyLQPQsQArCHTfcLhtES8dan6GaJ99AfqbyZS8VsyZxuOZ0lyCZkFQBdd9QlmGUHXiEpLVjVEz+uXcGSnLUg==
@@ -817,9 +831,9 @@ agent-base@4, agent-base@^4.3.0:
     es6-promisify "^5.0.0"
 
 agentkeepalive@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.2.tgz#d7bc3bafd7ea88032f6be22b6f1389b3d42c9c91"
-  integrity sha512-waNHE7tQBBn+2qXucI8HY0o2Y0OBPWldWOWsZwY71JcCm4SvrPnWdceFfB5NIXSqE8Ewq6VR/Qt5b1i69P6KCQ==
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.4.tgz#d928028a4862cb11718e55227872e842a44c945b"
+  integrity sha512-+V/rGa3EuU74H6wR04plBb7Ks10FbtUQgRj/FQOG7uUIEuaINI+AiqJR1k6t3SVNs7o7ZjIdus6706qqzVq8jQ==
   dependencies:
     debug "^4.1.0"
     depd "^1.1.2"
@@ -4663,9 +4677,9 @@ json-schema@0.2.3:
   integrity sha1-tIDIkuWaLwWVTOcnvT8qTogvnhM=
 
 json-set-map@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/json-set-map/-/json-set-map-1.0.2.tgz#608aacb5464d9759158d06523a6e30be5650adc4"
-  integrity sha1-YIqstUZNl1kVjQZSOm4wvlZQrcQ=
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/json-set-map/-/json-set-map-1.1.2.tgz#536cbc6549d06e8af11f76cb4fbd441ed2389e6e"
+  integrity sha512-x0TGwgcOG21jOa8wV1PWXDpSXUAKa1WuhMSHPBQhXU5Pb+4DdMrxOw5HMAWztVLP8KhSG5Kl5BoAOVF0aW63wA==
 
 json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
@@ -4992,9 +5006,9 @@ lodash.zip@^4.2.0:
   integrity sha1-7GZi5IlkCO1KtsVCo5kLcswIACA=
 
 lodash@^4.13.1, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.4, lodash@^4.5.0:
-  version "4.17.20"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
-  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 log-symbols@^2.2.0:
   version "2.2.0"
@@ -5314,10 +5328,15 @@ ms@2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
-ms@2.1.2, ms@^2.0.0, ms@^2.1.1:
+ms@2.1.2, ms@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+ms@^2.0.0:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 nan@^2.12.1:
   version "2.14.0"
