@@ -43,11 +43,6 @@ paths:
           description: Generic server error
         '504':
           description: Gateway Timeout
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
 definitions:
   GetCertificateParams:
     type: object
@@ -184,3 +179,8 @@ consumes:
   - application/json
 produces:
   - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
