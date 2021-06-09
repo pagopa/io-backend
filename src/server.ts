@@ -21,6 +21,7 @@ import {
   CGN_OPERATOR_SEARCH_API_BASE_PATH,
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
+  EUCOVIDCERT_API_BASE_PATH,
   MYPORTAL_BASE_PATH,
   PAGOPA_BASE_PATH,
   SAML_CERT,
@@ -46,6 +47,7 @@ const MyPortalBasePath = MYPORTAL_BASE_PATH;
 const BPDBasePath = BPD_BASE_PATH;
 const CGNAPIBasePath = CGN_API_BASE_PATH;
 const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
+const EUCovidCertBasePath = EUCOVIDCERT_API_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -88,6 +90,7 @@ newApp({
   BonusAPIBasePath,
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
+  EUCovidCertBasePath,
   MyPortalBasePath,
   PagoPABasePath,
   allowBPDIPSourceRange: ALLOW_BPD_IP_SOURCE_RANGE,

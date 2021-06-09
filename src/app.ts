@@ -36,6 +36,7 @@ import {
   ENV,
   FF_BONUS_ENABLED,
   FF_CGN_ENABLED,
+  FF_EUCOVIDCERT_ENABLED,
   getClientProfileRedirectionUrl,
   IDP_METADATA_REFRESH_INTERVAL_SECONDS,
   NOTIFICATION_DEFAULT_SUBJECT,
@@ -55,7 +56,8 @@ import {
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
   CGN_OPERATOR_SEARCH_API_CLIENT,
-  CGN_MERCHANT_CACHE_MAX_AGE_SECONDS
+  CGN_MERCHANT_CACHE_MAX_AGE_SECONDS,
+  EUCOVIDCERT_API_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -114,6 +116,8 @@ import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
 import CgnOperatorController from "./controllers/cgnOperatorController";
+import EUCovidCertService from "./services/eucovidcertService";
+import EUCovidCertController from "./controllers/eucovidcertController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -148,6 +152,7 @@ export interface IAppFactoryParameters {
   readonly BPDBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
+  readonly EUCovidCertBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -166,7 +171,8 @@ export function newApp({
   MyPortalBasePath,
   BPDBasePath,
   CGNAPIBasePath,
-  CGNOperatorSearchAPIBasePath
+  CGNOperatorSearchAPIBasePath,
+  EUCovidCertBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -311,6 +317,11 @@ export function newApp({
         CGN_OPERATOR_SEARCH_API_CLIENT
       );
 
+      // Create the EUCovidCert service
+      const EUCOVIDCERT_SERVICE = new EUCovidCertService(
+        EUCOVIDCERT_API_CLIENT
+      );
+
       // Create the user data processing service
       const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
         API_CLIENT
@@ -421,6 +432,17 @@ export function newApp({
           authMiddlewares.bearerSession
         );
       }
+
+      if (FF_EUCOVIDCERT_ENABLED) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerEUCovidCertAPIRoutes(
+          app,
+          EUCovidCertBasePath,
+          EUCOVIDCERT_SERVICE,
+          authMiddlewares.bearerSession
+        );
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerPagoPARoutes(
         app,
@@ -590,6 +612,27 @@ function registerBPDRoutes(
     checkIP(allowBPDIPSourceRange),
     bearerBPDTokenAuth,
     toExpressHandler(getUserForBPD)
+  );
+}
+
+function registerEUCovidCertAPIRoutes(
+  app: Express,
+  basePath: string,
+  eucovidcertService: EUCovidCertService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const eucovidCertController: EUCovidCertController = new EUCovidCertController(
+    eucovidcertService
+  );
+
+  app.post(
+    `${basePath}/certificate`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      eucovidCertController.getEUCovidCertificate,
+      eucovidCertController
+    )
   );
 }
 
