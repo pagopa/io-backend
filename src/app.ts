@@ -54,7 +54,8 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
-  CGN_OPERATOR_SEARCH_API_CLIENT
+  CGN_OPERATOR_SEARCH_API_CLIENT,
+  CGN_MERCHANT_CACHE_MAX_AGE_SECONDS
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -912,9 +913,22 @@ function registerCgnOperatorSearchAPIRoutes(
     cgnOperatorSearchService
   );
 
+  const cgnMerchantCacheDuration = `${CGN_MERCHANT_CACHE_MAX_AGE_SECONDS} seconds`;
+
+  const cgnMerchantCachingMiddleware = apicache.options({
+    debug:
+      process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
+      process.env.APICACHE_DEBUG === "true",
+    defaultDuration: cgnMerchantCacheDuration,
+    statusCodes: {
+      include: [200]
+    }
+  }).middleware;
+
   app.get(
     `${basePath}/cgn-operator-search/merchants/:merchantId`,
     bearerSessionTokenAuth,
+    cgnMerchantCachingMiddleware(),
     toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
   );
 

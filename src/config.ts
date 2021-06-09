@@ -66,6 +66,16 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
+// Default cache control max-age value is 5 minutes
+const DEFAULT_CGN_MERCHANT_CACHE_MAX_AGE_SECONDS: string = "3600";
+
+// Resolve cache control default max-age value
+export const CGN_MERCHANT_CACHE_MAX_AGE_SECONDS: number = parseInt(
+  process.env.CGN_MERCHANT_CACHE_MAX_AGE_SECONDS ||
+    DEFAULT_CGN_MERCHANT_CACHE_MAX_AGE_SECONDS,
+  10
+);
+
 export const ENABLE_NOTICE_EMAIL_CACHE: boolean = fromNullable(
   process.env.ENABLE_NOTICE_EMAIL_CACHE
 )
