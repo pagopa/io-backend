@@ -341,6 +341,10 @@ export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
   httpApiFetch
 );
 
+export const MIT_VOUCHER_API_BASE_PATH = getRequiredENVVar(
+  "MIT_VOUCHER_API_BASE_PATH"
+);
+
 // Set default session duration to 30 days
 const DEFAULT_TOKEN_DURATION_IN_SECONDS = 3600 * 24 * 30;
 export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
@@ -438,6 +442,9 @@ export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
 export const FF_EUCOVIDCERT_ENABLED =
   process.env.FF_EUCOVIDCERT_ENABLED === "1";
 
+export const FF_MIT_VOUCHER_ENABLED =
+  process.env.FF_MIT_VOUCHER_ENABLED === "1";
+
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
   process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
@@ -468,6 +475,48 @@ log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
+
+// Mit  Voucher Token
+export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = NonEmptyString.decode(
+  process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const JWT_MIT_VOUCHER_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION = 600 as Second;
+export const JWT_MIT_VOUCHER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.JWT_MIT_VOUCHER_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION) as Second;
+log.info(
+  "JWT Mit Voucher expiration set to %s seconds",
+  JWT_MIT_VOUCHER_TOKEN_EXPIRATION
+);
+
+export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = NonEmptyString.decode(
+  process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
 
 export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
   .decode(process.env.TEST_CGN_FISCAL_CODES || "")
