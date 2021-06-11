@@ -58,13 +58,13 @@ describe("EUCovidCertService", () => {
   });
 
   it.each`
-    title                                                            | status_code | value                                                                                     | expected_kind                 | expected_detail
-    ${"return IResponseErrorValidation if status is 400"}            | ${400}      | ${null}                                                                                   | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
-    ${"return IResponseErrorInternal if status is 401"}              | ${401}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorNotFound if status is 403"}              | ${403}      | ${null}                                                                                   | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
-    ${"return IResponseErrorInternal if status is 500"}              | ${500}      | ${{ title: "An error", detail: "An error detail", type: "An error type" } as ProblemJson} | ${"IResponseErrorInternal"}   | ${"Internal server error: An error (An error type)"}
-    ${"return IResponseErrorInternal if status is 504"}              | ${504}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
-    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
+    title                                                                | status_code | value                                                                                     | expected_kind                 | expected_detail
+    ${"return IResponseErrorValidation if status is 400"}                | ${400}      | ${null}                                                                                   | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal if status is 401"}                  | ${401}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound if status is 403"}                  | ${403}      | ${null}                                                                                   | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
+    ${"return IResponseErrorInternal if status is 500"}                  | ${500}      | ${{ title: "An error", detail: "An error detail", type: "An error type" } as ProblemJson} | ${"IResponseErrorInternal"}   | ${"Internal server error: An error (An error type)"}
+    ${"return IResponseErrorInternal: Gateway Timeout if status is 504"} | ${504}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: Gateway Timeout"}
+    ${"return IResponseErrorInternal if status code is not in spec"}     | ${418}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `(
     "should $title",
     async ({ status_code, value, expected_kind, expected_detail }) => {

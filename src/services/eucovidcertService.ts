@@ -67,7 +67,7 @@ export default class EUCovidCertService {
           case 500:
             return ResponseErrorInternal(readableProblem(response.value));
           case 504:
-            return ResponseErrorInternal("");
+            return ResponseErrorInternal("Gateway Timeout");
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
