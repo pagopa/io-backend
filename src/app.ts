@@ -643,7 +643,7 @@ function registerMitVoucherAPIRoutes(
   );
 
   app.get(
-    `${basePath}/certificate`,
+    `${basePath}/token`,
     bearerSessionTokenAuth,
     toExpressHandler(
       mitVoucherController.getMitVoucherToken,
