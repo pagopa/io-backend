@@ -60,7 +60,7 @@ export default class TokenService {
   }
 
   /**
-   * Generates a new support token containing the logged user's fiscalCode.
+   * Generates a new Mit voucher token containing the logged user's fiscalCode.
    *
    * @param privateKey: The RSA's private key used to sign this JWT token
    * @param fiscalCode: The logged user's FiscalCode
