@@ -4,6 +4,7 @@ import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
 import { aMockedUser } from "../../__mocks__/user_mock";
 import { StatusEnum as RevokedStatusEnum } from "../../../generated/eucovidcert-api/RevokedCertificate";
 import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
+import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 
 const mockClientGetCertificate = jest.fn();
 
@@ -57,18 +58,18 @@ describe("EUCovidCertService", () => {
   });
 
   it.each`
-    title                                                            | status_code | expected_kind                 | expected_detail
-    ${"return IResponseErrorValidation"}                             | ${400}      | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
-    ${"return IResponseErrorInternal"}                               | ${401}      | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorNotFound"}                               | ${403}      | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
-    ${"return IResponseErrorInternal"}                               | ${500}      | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
-    ${"return IResponseErrorInternal"}                               | ${504}      | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
-    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
+    title                                                            | status_code | value                                                                                     | expected_kind                 | expected_detail
+    ${"return IResponseErrorValidation if status is 400"}            | ${400}      | ${null}                                                                                   | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal if status is 401"}              | ${401}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound if status is 403"}              | ${403}      | ${null}                                                                                   | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
+    ${"return IResponseErrorInternal if status is 500"}              | ${500}      | ${{ title: "An error", detail: "An error detail", type: "An error type" } as ProblemJson} | ${"IResponseErrorInternal"}   | ${"Internal server error: An error (An error type)"}
+    ${"return IResponseErrorInternal if status is 504"}              | ${504}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
+    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${null}                                                                                   | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `(
     "should $title",
-    async ({ status_code, expected_kind, expected_detail }) => {
+    async ({ status_code, value, expected_kind, expected_detail }) => {
       mockClientGetCertificate.mockImplementation(() =>
-        t.success({ status: status_code })
+        t.success({ status: status_code, value })
       );
       const service = new EUCovidCertService(client);
 

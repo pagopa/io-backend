@@ -10,6 +10,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
+import { readableProblem } from "../utils/errorsFormatter";
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
 import { Certificate } from "../../generated/eucovidcert-api/Certificate";
 import { PreferredLanguages } from "../../generated/eucovidcert-api/PreferredLanguages";
@@ -64,7 +65,7 @@ export default class EUCovidCertService {
           case 403:
             return ResponseErrorNotFound("Not Found", "Certificate not found");
           case 500:
-            return ResponseErrorInternal("");
+            return ResponseErrorInternal(readableProblem(response.value));
           case 504:
             return ResponseErrorInternal("");
           default:
