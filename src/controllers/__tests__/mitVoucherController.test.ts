@@ -8,7 +8,7 @@ import { fromLeft } from "fp-ts/lib/TaskEither";
 
 const aMockedRequestWithRightParams = {
   ...mockReq(),
-  user: aMockedUser,
+  user: aMockedUser
 } as e.Request;
 
 const mockGetJwtMitVoucherToken = jest.fn();
@@ -29,12 +29,13 @@ describe("MitVoucherController", () => {
   });
 
   it("should return a valid Mit and with valid value", async () => {
-
     mockGetJwtMitVoucherToken.mockReturnValue(taskEither.of(aMitVoucherToken));
 
     const tokenService = new TokenService();
     const controller = new MitVoucherController(tokenService);
-    const response =  await controller.getMitVoucherToken(aMockedRequestWithRightParams);
+    const response = await controller.getMitVoucherToken(
+      aMockedRequestWithRightParams
+    );
 
     expect(response.kind).toEqual("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
@@ -42,16 +43,16 @@ describe("MitVoucherController", () => {
     }
   });
 
-
   it("should return an error if JWT generation fails", async () => {
-
     mockGetJwtMitVoucherToken.mockReturnValue(
       fromLeft(new Error("Cannot generate an empty Mit Voucher JWT Token"))
     );
-  
+
     const tokenService = new TokenService();
     const controller = new MitVoucherController(tokenService);
-    const response =  await controller.getMitVoucherToken(aMockedRequestWithRightParams);
+    const response = await controller.getMitVoucherToken(
+      aMockedRequestWithRightParams
+    );
 
     // getUserDataProcessing is not called
     expect(response.kind).toEqual("IResponseErrorInternal");
@@ -61,5 +62,4 @@ describe("MitVoucherController", () => {
       );
     }
   });
-  
 });

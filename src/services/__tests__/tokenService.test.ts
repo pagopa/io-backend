@@ -68,31 +68,36 @@ describe("TokenService#getSupportToken", () => {
   });
 });
 
-
 describe("TokenService#getJwtMitVoucherToken", () => {
-  it("should generate a token for mit voucher", async () => { 
+  it("should generate a token for mit voucher", async () => {
     // generate new token
     const tokenService = new TokenService();
-    const mitVoucherToken = await tokenService.getJwtMitVoucherToken(
-      mitVoucher_privateKey_mock,
-      aFiscalCode,
-      600 as Second,
-      mitVoucher_tokenIssuer_mock,
-      mitVoucher_audience_mock).run();
+    const mitVoucherToken = await tokenService
+      .getJwtMitVoucherToken(
+        mitVoucher_privateKey_mock,
+        aFiscalCode,
+        600 as Second,
+        mitVoucher_tokenIssuer_mock,
+        mitVoucher_audience_mock
+      )
+      .run();
 
-      expect(isRight(mitVoucherToken)).toBeTruthy();
+    expect(isRight(mitVoucherToken)).toBeTruthy();
   });
 
-  it("should return an error if an error occurs during token generation", async () => { 
+  it("should return an error if an error occurs during token generation", async () => {
     // generate new token
     const tokenService = new TokenService();
-    const mitVoucherToken = await tokenService.getJwtMitVoucherToken(
-      "aPrivateEcFakeKey" as NonEmptyString,
-      aFiscalCode,
-      600 as Second,
-      mitVoucher_tokenIssuer_mock,
-      mitVoucher_audience_mock).run();
+    const mitVoucherToken = await tokenService
+      .getJwtMitVoucherToken(
+        "aPrivateEcFakeKey" as NonEmptyString,
+        aFiscalCode,
+        600 as Second,
+        mitVoucher_tokenIssuer_mock,
+        mitVoucher_audience_mock
+      )
+      .run();
 
-      expect(isLeft(mitVoucherToken)).toBeTruthy();
+    expect(isLeft(mitVoucherToken)).toBeTruthy();
   });
 });
