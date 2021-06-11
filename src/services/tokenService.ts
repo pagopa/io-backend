@@ -66,6 +66,7 @@ export default class TokenService {
    * @param fiscalCode: The logged user's FiscalCode
    * @param tokenTtl: Token Time To live (expressed in seconds)
    * @param issuer: The Token issuer
+   * @param audience: The Token audience
    */
   public getJwtMitVoucherToken(
     privateKey: NonEmptyString,
