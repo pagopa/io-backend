@@ -82,12 +82,12 @@ describe("EUCovidCertificateController", () => {
   });
 
   it.each`
-    title                                                            | fn                                                                        | expected_kind                 | expected_detail
-    ${"return IResponseErrorValidation"}                             | ${() => ResponseErrorValidation("Bad Request", "Payload has bad format")} | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
-    ${"return IResponseErrorInternal"}                               | ${ResponseErrorUnexpectedAuthProblem}                                     | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorNotFound"}                               | ${() => ResponseErrorNotFound("Not Found", "Certificate not found")}      | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
-    ${"return IResponseErrorInternal"}                               | ${() => ResponseErrorInternal("")}                                        | ${"IResponseErrorInternal"}   | ${"Internal server error: "}
-    ${"return IResponseErrorInternal if status code is not in spec"} | ${() => ResponseErrorStatusNotDefinedInSpec({ status: "418" } as never)}  | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
+    title                                                                | fn                                                                        | expected_kind                 | expected_detail
+    ${"return IResponseErrorValidation if validation error occurs"}      | ${() => ResponseErrorValidation("Bad Request", "Payload has bad format")} | ${"IResponseErrorValidation"} | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal if unexpected auth problem occurs"} | ${ResponseErrorUnexpectedAuthProblem}                                     | ${"IResponseErrorInternal"}   | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound"}                                   | ${() => ResponseErrorNotFound("Not Found", "Certificate not found")}      | ${"IResponseErrorNotFound"}   | ${"Not Found: Certificate not found"}
+    ${"return IResponseErrorInternal"}                                   | ${() => ResponseErrorInternal("An error detail")}                         | ${"IResponseErrorInternal"}   | ${"Internal server error: An error detail"}
+    ${"return IResponseErrorInternal if status code is not in spec"}     | ${() => ResponseErrorStatusNotDefinedInSpec({ status: "418" } as never)}  | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `("should $title", async ({ fn, expected_kind, expected_detail }) => {
     aMockedGetCertificate.mockReturnValue(fn());
 

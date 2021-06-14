@@ -1,15 +1,17 @@
 import {
+  HttpStatusCodeEnum,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorGeneric,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
+import { readableProblem } from "../utils/errorsFormatter";
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
 import { Certificate } from "../../generated/eucovidcert-api/Certificate";
 import { PreferredLanguages } from "../../generated/eucovidcert-api/PreferredLanguages";
@@ -21,6 +23,40 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 import { User } from "../types/user";
+
+/**
+ * Returns a `504` `Gateway Timeout` error
+ *
+ * @param detail The error message
+ */
+export function ResponseGatewayTimeout(detail: string): IResponseErrorInternal {
+  return {
+    ...ResponseErrorGeneric(
+      HttpStatusCodeEnum.HTTP_STATUS_504,
+      "Gateway Timeout",
+      detail
+    ),
+    kind: "IResponseErrorInternal"
+  };
+}
+
+/**
+ * Returns a `403` as `Not Found` error
+ *
+ * @param detail The error message
+ */
+export function ResponseErrorNotFound403(
+  detail: string
+): IResponseErrorNotFound {
+  return {
+    ...ResponseErrorGeneric(
+      HttpStatusCodeEnum.HTTP_STATUS_403,
+      "Not Found",
+      detail
+    ),
+    kind: "IResponseErrorNotFound"
+  };
+}
 
 export default class EUCovidCertService {
   constructor(
@@ -62,11 +98,13 @@ export default class EUCovidCertService {
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
           case 403:
-            return ResponseErrorNotFound("Not Found", "Certificate not found");
+            return ResponseErrorNotFound403(
+              "Access data provided are invalid or no Certificate has been emitted for the given Citizen"
+            );
           case 500:
-            return ResponseErrorInternal("");
+            return ResponseErrorInternal(readableProblem(response.value));
           case 504:
-            return ResponseErrorInternal("");
+            return ResponseGatewayTimeout("DGC took to long to respond");
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }
