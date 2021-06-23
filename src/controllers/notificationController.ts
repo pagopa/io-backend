@@ -12,6 +12,7 @@ import {
 
 import { toError } from "fp-ts/lib/Either";
 import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { Millisecond } from "italia-ts-commons/lib/units";
 import { Installation } from "../../generated/backend/Installation";
 import { InstallationID } from "../../generated/backend/InstallationID";
 
@@ -26,6 +27,8 @@ import {
   withCatchAsInternalError,
   withValidatedOrValidationError
 } from "../utils/responses";
+
+const delay = (ms: Millisecond) => new Promise(ok => setTimeout(ok, ms));
 
 export interface INotificationControllerOptions {
   readonly notificationDefaultSubject: string;
@@ -91,8 +94,18 @@ export default class NotificationController {
           Installation.decode(req.body),
           installation => {
             // async fire & forget
-            this.notificationService
-              .createOrUpdateInstallation(user.fiscal_code, installation)
+            // On login, we do a deleteInstallation to prevent a device to be associated with a previous user, which might be a different one
+            // We have empirical evidence that such deleteInstallation is processed after the createOrUpdateInstallation,
+            //  so that the installation we are recording after login is lost
+            // The correct order of execution must be enforced by the processing notifications service.
+            // Anyway, to quickly mitigate the disservice to our users, we apply this temporary workaround
+            delay(10000 as Millisecond)
+              .then(() =>
+                this.notificationService.createOrUpdateInstallation(
+                  user.fiscal_code,
+                  installation
+                )
+              )
               .catch(err => {
                 log.error(
                   "Cannot create installation: %s",
