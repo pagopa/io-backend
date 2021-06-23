@@ -6,9 +6,6 @@
 # - DANGER_GITHUB_API_TOKEN
 # 
 
-variables:
-  NODE_VERSION: '10.14.2'
-  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
 
 # Automatically triggered on PR
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pr-trigger
@@ -24,7 +21,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v8
+      ref: refs/tags/v15
       endpoint: 'pagopa'
 
 stages:
