@@ -3712,6 +3712,11 @@ io-ts-types@^0.4.7:
   resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.4.8.tgz#e5fd8940ce7a5ddd780083c33989b3f8978918c2"
   integrity sha512-E/o4y8I/yP5sVcC731K3T2Zi6BTvJljyJLqhHYkxzkc9fr9vAC2cU0y0xZ5aJqEDfl76zMeEiXkAkf/3gQYlvA==
 
+io-ts-types@^0.5.16:
+  version "0.5.16"
+  resolved "https://registry.yarnpkg.com/io-ts-types/-/io-ts-types-0.5.16.tgz#e9eed75371e217c97050cc507915e8eedc250946"
+  integrity sha512-h9noYVfY9rlbmKI902SJdnV/06jgiT2chxG6lYDxaYNp88HscPi+SBCtmcU+m0E7WT5QSwt7sIMj93+qu0FEwQ==
+
 io-ts@1.8.5:
   version "1.8.5"
   resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.8.5.tgz#2e102f7f518abe17b0f7e7ede0db54a4c4ddc188"
