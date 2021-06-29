@@ -12,8 +12,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
-// TODO: use specs from functions-app
-import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
+import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 
 import { formatDate } from "../utils/date";
 import { User } from "./user";
