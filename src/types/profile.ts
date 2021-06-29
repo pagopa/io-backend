@@ -12,7 +12,8 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
-import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
+// TODO: use specs from functions-app
+import { ExtendedProfile } from "../../generated/backend/ExtendedProfile";
 
 import { formatDate } from "../utils/date";
 import { User } from "./user";
@@ -40,6 +41,7 @@ export const toInitializedProfile = (
   is_webhook_enabled: profile.is_webhook_enabled,
   name: user.name,
   preferred_languages: profile.preferred_languages,
+  service_preferences_settings: profile.service_preferences_settings,
   spid_email: user.spid_email,
   spid_mobile_phone: user.spid_mobile_phone,
   version: profile.version

@@ -31,6 +31,9 @@ import {
 } from "../profile";
 import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
+import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const aTosVersion = 1 as AcceptedTosVersion;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -43,6 +46,10 @@ const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsEmailEnabled = true as IsEmailEnabled;
 const anIsEmailValidated = true as IsEmailValidated;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
+const aServicePreferencesSettings: ServicePreferencesSettings = {
+  mode: ServicesPreferencesModeEnum.AUTO,
+  version: 0 as NonNegativeInteger
+}
 
 // mock for a valid User extracted from SPID
 const mockedUser: User = {
@@ -67,6 +74,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   is_test_profile: false,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
+  service_preferences_settings: aServicePreferencesSettings,
   version: 1 as Version
 };
 
@@ -78,6 +86,7 @@ const mockedExtendedProfileWithoutTos: ExtendedProfileApi = {
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
+  service_preferences_settings: aServicePreferencesSettings,
   version: 1 as Version
 };
 

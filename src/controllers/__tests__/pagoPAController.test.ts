@@ -24,6 +24,9 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
+import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const aTimestamp = 1518010929530;
 
@@ -62,6 +65,10 @@ const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
+const aServicePreferencesSettings: ServicePreferencesSettings = {
+  mode: ServicesPreferencesModeEnum.AUTO,
+  version: 0 as NonNegativeInteger
+}
 
 const userInitializedProfile: InitializedProfile = {
   email: aCustomEmailAddress,
@@ -75,6 +82,7 @@ const userInitializedProfile: InitializedProfile = {
   name: aValidName,
   preferred_languages: aPreferredLanguages,
   spid_mobile_phone: aMobilePhone,
+  service_preferences_settings: aServicePreferencesSettings,
   version: 42
 };
 
