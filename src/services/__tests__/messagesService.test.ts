@@ -1,5 +1,6 @@
 /* tslint:disable:no-identical-functions */
 
+import * as e from "express";
 import * as t from "io-ts";
 import {
   NonEmptyString,
@@ -9,12 +10,14 @@ import {
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
+import { ServiceId } from "../../../generated/io-api/ServiceId";
 
 import { APIClient } from "../../clients/api";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
+import mockRes from "../../__mocks__/response";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidEmail = "test@example.com" as EmailAddress;
@@ -159,6 +162,7 @@ const mockGetMessages = jest.fn();
 const mockGetServices = jest.fn();
 const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
+const mockGetServicePreferences = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -170,7 +174,8 @@ const mockClient: Partial<ReturnType<APIClient>> = {
   getMessage: mockGetMessage,
   getMessagesByUser: mockGetMessages,
   getService: mockGetService,
-  getVisibleServices: mockGetServices
+  getVisibleServices: mockGetServices,
+  getServicePreferences: mockGetServicePreferences
 };
 jest
   .spyOn(ApiClientFactory.prototype, "getClient")
@@ -378,4 +383,83 @@ describe("MessageService#getService", () => {
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
+});
+
+describe("MessageService#getServicePreferences", () => {
+  const aServicePreferences = {
+    is_email_enabled: true,
+    is_inbox_enabled: true,
+    is_webhook_enabled: true,
+    settings_version: 0
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    mockGetServicePreferences.mockImplementation(() => {
+      return t.success({
+        status: 200,
+        value: aServicePreferences
+      });
+    });
+
+    const service = new MessageService(api);
+    const res = await service.getServicePreferences(
+      aValidFiscalCode,
+      aValidServiceID as ServiceId
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aServicePreferences
+    });
+
+    expect(mockGetServicePreferences).toHaveBeenCalledWith({
+      fiscal_code: aValidFiscalCode,
+      service_id: aValidServiceID as ServiceId
+    });
+  });
+
+  it.each`
+    title                                                            | status_code | value   | expected_status_code | expected_kind                      | expected_detail
+    ${"return IResponseErrorValidation if status is 400"}            | ${400}      | ${null} | ${400}               | ${"IResponseErrorValidation"}      | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal if status is 401"}              | ${401}      | ${null} | ${500}               | ${"IResponseErrorInternal"}        | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound if status is 404"}              | ${404}      | ${null} | ${404}               | ${"IResponseErrorNotFound"}        | ${"Not Found: User or Service not found"}
+    ${"return IResponseErrorTooManyRequests if status is 429"}       | ${429}      | ${null} | ${429}               | ${"IResponseErrorTooManyRequests"} | ${"Too many requests: "}
+    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${null} | ${500}               | ${"IResponseErrorInternal"}        | ${"Internal server error: unhandled API response status [418]"}
+  `(
+    "should $title",
+    async ({
+      status_code,
+      value,
+      expected_status_code,
+      expected_kind,
+      expected_detail
+    }) => {
+      mockGetServicePreferences.mockImplementation(() => {
+        return t.success({
+          status: status_code,
+          value
+        });
+      });
+
+      const service = new MessageService(api);
+      const res = await service.getServicePreferences(
+        aValidFiscalCode,
+        aValidServiceID as ServiceId
+      );
+
+      // Check status code
+      const responseMock: e.Response = mockRes();
+      res.apply(responseMock);
+      expect(responseMock.status).toHaveBeenCalledWith(expected_status_code);
+
+      expect(res).toMatchObject({
+        kind: expected_kind,
+        detail: expected_detail
+      });
+    }
+  );
 });

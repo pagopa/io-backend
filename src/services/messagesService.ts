@@ -6,25 +6,32 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
+  ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
+import { ServicePreference } from "../../generated/backend/ServicePreference";
 
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../../src/utils/attachments";
 import { User } from "../types/user";
 import {
+  ResponseErrorStatusNotDefinedInSpec,
+  ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class MessagesService {
@@ -140,6 +147,51 @@ export default class MessagesService {
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status)
       );
+    });
+
+  /**
+   * Retrieve the service preferences fot the defined user and service
+   */
+  public readonly getServicePreferences = (
+    fiscalCode: FiscalCode,
+    serviceId: ServiceId
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ServicePreference>
+  > =>
+    withCatchAsInternalError(async () => {
+      const client = this.apiClient.getClient();
+
+      const validated = await client.getServicePreferences({
+        fiscal_code: fiscalCode,
+        service_id: serviceId
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 400:
+            return ResponseErrorValidation(
+              "Bad Request",
+              "Payload has bad format"
+            );
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "User or Service not found"
+            );
+          case 429:
+            return ResponseErrorTooManyRequests();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
     });
 
   public readonly getVisibleServices = (): Promise<
