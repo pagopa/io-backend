@@ -3,11 +3,13 @@
  */
 
 import {
+  IResponseErrorConflict,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ResponseErrorConflict,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseErrorValidation,
@@ -159,6 +161,7 @@ export default class MessagesService {
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorConflict
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePreference>
   > =>
@@ -185,6 +188,11 @@ export default class MessagesService {
             return ResponseErrorNotFound(
               "Not Found",
               "User or Service not found"
+            );
+          case 409:
+            return ResponseErrorConflict(
+              response.value.detail ??
+                "The Profile is not in the correct preference mode"
             );
           case 429:
             return ResponseErrorTooManyRequests();

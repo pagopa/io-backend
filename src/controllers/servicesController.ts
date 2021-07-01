@@ -12,6 +12,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { IResponseErrorConflict } from "@pagopa/ts-commons/lib/responses";
 import { withUserFromRequest } from "../../src/types/user";
 import { withValidatedOrValidationError } from "../../src/utils/responses";
 
@@ -47,6 +48,7 @@ export default class ServicesController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorConflict
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePreference>
   > =>

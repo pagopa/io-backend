@@ -18,6 +18,7 @@ import { User } from "../../types/user";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 import mockRes from "../../__mocks__/response";
+import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidEmail = "test@example.com" as EmailAddress;
@@ -423,12 +424,14 @@ describe("MessageService#getServicePreferences", () => {
   });
 
   it.each`
-    title                                                            | status_code | value   | expected_status_code | expected_kind                      | expected_detail
-    ${"return IResponseErrorValidation if status is 400"}            | ${400}      | ${null} | ${400}               | ${"IResponseErrorValidation"}      | ${"Bad Request: Payload has bad format"}
-    ${"return IResponseErrorInternal if status is 401"}              | ${401}      | ${null} | ${500}               | ${"IResponseErrorInternal"}        | ${"Internal server error: Underlying API fails with an unexpected 401"}
-    ${"return IResponseErrorNotFound if status is 404"}              | ${404}      | ${null} | ${404}               | ${"IResponseErrorNotFound"}        | ${"Not Found: User or Service not found"}
-    ${"return IResponseErrorTooManyRequests if status is 429"}       | ${429}      | ${null} | ${429}               | ${"IResponseErrorTooManyRequests"} | ${"Too many requests: "}
-    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${null} | ${500}               | ${"IResponseErrorInternal"}        | ${"Internal server error: unhandled API response status [418]"}
+    title                                                            | status_code | value                                                                                     | expected_status_code | expected_kind                      | expected_detail
+    ${"return IResponseErrorValidation if status is 400"}            | ${400}      | ${null}                                                                                   | ${400}               | ${"IResponseErrorValidation"}      | ${"Bad Request: Payload has bad format"}
+    ${"return IResponseErrorInternal if status is 401"}              | ${401}      | ${null}                                                                                   | ${500}               | ${"IResponseErrorInternal"}        | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound if status is 404"}              | ${404}      | ${null}                                                                                   | ${404}               | ${"IResponseErrorNotFound"}        | ${"Not Found: User or Service not found"}
+    ${"return IResponseErrorNotFound if status is 409"}              | ${409}      | ${{ title: "Conflict", detail: "An error detail", type: "An error type" } as ProblemJson} | ${409}               | ${"IResponseErrorConflict"}        | ${"Conflict: An error detail"}
+    ${"return IResponseErrorNotFound if status is 409"}              | ${409}      | ${{ title: "Conflict", detail: undefined, type: "An error type" } as ProblemJson}         | ${409}               | ${"IResponseErrorConflict"}        | ${"Conflict: The Profile is not in the correct preference mode"}
+    ${"return IResponseErrorTooManyRequests if status is 429"}       | ${429}      | ${null}                                                                                   | ${429}               | ${"IResponseErrorTooManyRequests"} | ${"Too many requests: "}
+    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}      | ${null}                                                                                   | ${500}               | ${"IResponseErrorInternal"}        | ${"Internal server error: unhandled API response status [418]"}
   `(
     "should $title",
     async ({
