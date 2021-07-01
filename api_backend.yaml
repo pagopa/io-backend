@@ -730,7 +730,9 @@ paths:
         "404":
           description: No service found for the provided ID.
         "409":
-          description: Conflict. Invalid preference setting version.
+          description: |-
+            Conflict. Either the provided preference setting version is not consistent with the current version stored in the Profile
+            or the Profile is not in the correct preference mode.
         "429":
           description: Too many requests
         "500":
@@ -759,6 +761,8 @@ paths:
           description: Unauthorized
         "404":
           description: No service found for the provided ID.
+        "409":
+          description: Conflict. The Profile is not in the correct preference mode.
         "429":
           description: Too many requests
         "500":
