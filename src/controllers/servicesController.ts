@@ -4,7 +4,6 @@
  */
 
 import * as express from "express";
-import { ServicePreference } from "generated/backend/ServicePreference";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -19,6 +18,7 @@ import { withValidatedOrValidationError } from "../../src/utils/responses";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
+import { ServicePreference } from "../../generated/backend/ServicePreference";
 
 import MessagesService from "../services/messagesService";
 
