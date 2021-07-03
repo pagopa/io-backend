@@ -64,6 +64,35 @@ export default class ServicesController {
     );
 
   /**
+   * Create or Update the service preferences for the provided service id
+   */
+  public readonly upsertServicePreferences = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorConflict
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ServicePreference>
+  > =>
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        ServiceId.decode(req.params.id),
+        serviceId =>
+          withValidatedOrValidationError(
+            ServicePreference.decode(req.body.body),
+            pref =>
+              this.messagesService.upsertServicePreferences(
+                user.fiscal_code,
+                serviceId,
+                pref
+              )
+          )
+      )
+    );
+
+  /**
    * Get visible services
    *
    * @param _
