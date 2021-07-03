@@ -26,7 +26,6 @@ import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const aTimestamp = 1518010929530;
 
@@ -66,8 +65,7 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
-  version: 0 as NonNegativeInteger
+  mode: ServicesPreferencesModeEnum.AUTO
 }
 
 const userInitializedProfile: InitializedProfile = {

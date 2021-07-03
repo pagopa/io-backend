@@ -1,5 +1,4 @@
 import * as t from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -34,8 +33,7 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
-  version: 0 as NonNegativeInteger
+  mode: ServicesPreferencesModeEnum.AUTO
 }
 
 const validApiProfile: ExtendedProfileApi = {
