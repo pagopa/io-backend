@@ -202,6 +202,60 @@ export default class MessagesService {
       });
     });
 
+  /**
+   * Retrieve the service preferences fot the defined user and service
+   */
+  public readonly upsertServicePreferences = (
+    fiscalCode: FiscalCode,
+    serviceId: ServiceId,
+    servicePreferences: ServicePreference
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseErrorConflict
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ServicePreference>
+  > =>
+    withCatchAsInternalError(async () => {
+      const client = this.apiClient.getClient();
+
+      const validated = await client.upsertServicePreferences({
+        body: servicePreferences,
+        fiscal_code: fiscalCode,
+        service_id: serviceId
+      });
+
+      // eslint-disable-next-line sonarjs/no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 400:
+            return ResponseErrorValidation(
+              "Bad Request",
+              "Payload has bad format"
+            );
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "User or Service not found"
+            );
+          case 409:
+            return ResponseErrorConflict(
+              response.value.detail ??
+                "The Profile is not in the correct preference mode"
+            );
+          case 429:
+            return ResponseErrorTooManyRequests();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
   public readonly getVisibleServices = (): Promise<
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
