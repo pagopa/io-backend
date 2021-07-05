@@ -2,7 +2,6 @@ import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
@@ -10,6 +9,9 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
+import { Profile } from "../../../generated/backend/Profile";
+import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
@@ -30,6 +32,9 @@ const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
+const aServicePreferencesSettings: ServicePreferencesSettings = {
+  mode: ServicesPreferencesModeEnum.AUTO
+};
 
 const validApiProfile: ExtendedProfileApi = {
   email: aValidAPIEmail,
@@ -38,6 +43,7 @@ const validApiProfile: ExtendedProfileApi = {
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   preferred_languages: aPreferredLanguages,
+  service_preferences_settings: aServicePreferencesSettings,
   version: 42
 };
 
@@ -61,12 +67,10 @@ const proxyInitializedProfileResponse = {
   version: 42
 };
 
-const updateProfileRequest: ExtendedProfile = {
+const updateProfileRequest: Profile = {
   email: aValidAPIEmail,
   is_email_enabled: true,
-  is_email_validated: true,
   is_inbox_enabled: anIsInboxEnabled,
-  is_test_profile: false,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
   version: 42
@@ -116,12 +120,12 @@ const mockCreateProfile = jest.fn();
 const mockStartEmailValidationProcess = jest.fn();
 
 // partial because we may not mock every method
-const mockClient: Partial<ReturnType<APIClient>> =  {
-    createProfile: mockCreateProfile,
-    startEmailValidationProcess: mockStartEmailValidationProcess,
-    getProfile: mockGetProfile,
-    updateProfile: mockUpdateProfile,
-  };
+const mockClient: Partial<ReturnType<APIClient>> = {
+  createProfile: mockCreateProfile,
+  startEmailValidationProcess: mockStartEmailValidationProcess,
+  getProfile: mockGetProfile,
+  updateProfile: mockUpdateProfile
+};
 jest.mock("../../services/apiClientFactory", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -373,7 +377,7 @@ describe("ProfileService#createProfile", () => {
 
     const service = new ProfileService(api);
 
-    const res = await service.createProfile(mockedUser, updateProfileRequest);
+    const res = await service.createProfile(mockedUser, createProfileRequest);
 
     expect(res.kind).toEqual("IResponseErrorConflict");
   });

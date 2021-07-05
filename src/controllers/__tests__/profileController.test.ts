@@ -31,6 +31,8 @@ import { profileMissingErrorResponse } from "../../types/profile";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ProfileController from "../profileController";
+import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
+import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 
 const aTimestamp = 1518010929530;
 
@@ -44,6 +46,9 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
+const aServicePreferencesSettings: ServicePreferencesSettings = {
+  mode: ServicesPreferencesModeEnum.AUTO
+};
 
 const proxyUserResponse = {
   created_at: aTimestamp,
@@ -90,6 +95,7 @@ const mockedUpsertProfile: ExtendedProfile = {
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
   preferred_languages: aPreferredLanguages,
+  service_preferences_settings: aServicePreferencesSettings,
   version: 1 as NonNegativeInteger
 };
 

@@ -40,6 +40,7 @@ export const toInitializedProfile = (
   is_webhook_enabled: profile.is_webhook_enabled,
   name: user.name,
   preferred_languages: profile.preferred_languages,
+  service_preferences_settings: profile.service_preferences_settings,
   spid_email: user.spid_email,
   spid_mobile_phone: user.spid_mobile_phone,
   version: profile.version
