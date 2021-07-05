@@ -47,9 +47,8 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 ];
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
-  version: 0 as NonNegativeInteger
-}
+  mode: ServicesPreferencesModeEnum.AUTO
+};
 
 const proxyUserResponse = {
   created_at: aTimestamp,

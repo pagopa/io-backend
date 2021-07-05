@@ -33,7 +33,6 @@ import { SessionToken, WalletToken } from "../token";
 import { User } from "../user";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const aTosVersion = 1 as AcceptedTosVersion;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -47,9 +46,8 @@ const anIsEmailEnabled = true as IsEmailEnabled;
 const anIsEmailValidated = true as IsEmailValidated;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
-  version: 0 as NonNegativeInteger
-}
+  mode: ServicesPreferencesModeEnum.AUTO
+};
 
 // mock for a valid User extracted from SPID
 const mockedUser: User = {

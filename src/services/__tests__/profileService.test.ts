@@ -1,5 +1,4 @@
 import * as t from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -34,9 +33,8 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO,
-  version: 0 as NonNegativeInteger
-}
+  mode: ServicesPreferencesModeEnum.AUTO
+};
 
 const validApiProfile: ExtendedProfileApi = {
   email: aValidAPIEmail,
@@ -122,12 +120,12 @@ const mockCreateProfile = jest.fn();
 const mockStartEmailValidationProcess = jest.fn();
 
 // partial because we may not mock every method
-const mockClient: Partial<ReturnType<APIClient>> =  {
-    createProfile: mockCreateProfile,
-    startEmailValidationProcess: mockStartEmailValidationProcess,
-    getProfile: mockGetProfile,
-    updateProfile: mockUpdateProfile,
-  };
+const mockClient: Partial<ReturnType<APIClient>> = {
+  createProfile: mockCreateProfile,
+  startEmailValidationProcess: mockStartEmailValidationProcess,
+  getProfile: mockGetProfile,
+  updateProfile: mockUpdateProfile
+};
 jest.mock("../../services/apiClientFactory", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
