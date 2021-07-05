@@ -81,7 +81,7 @@ export default class ServicesController {
         ServiceId.decode(req.params.id),
         serviceId =>
           withValidatedOrValidationError(
-            ServicePreference.decode(req.body.body),
+            ServicePreference.decode(req.body),
             pref =>
               this.messagesService.upsertServicePreferences(
                 user.fiscal_code,
