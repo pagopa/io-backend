@@ -66,7 +66,7 @@ const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
 ];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
   mode: ServicesPreferencesModeEnum.AUTO
-}
+};
 
 const userInitializedProfile: InitializedProfile = {
   email: aCustomEmailAddress,
