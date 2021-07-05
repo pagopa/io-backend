@@ -767,6 +767,15 @@ function registerAPIRoutes(
   );
 
   app.get(
+    `${basePath}/services/:id/preferences`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      servicesController.getServicePreferences,
+      servicesController
+    )
+  );
+
+  app.get(
     `${basePath}/services`,
     bearerSessionTokenAuth,
     cachingMiddleware(),

@@ -46,7 +46,7 @@ const anIsEmailEnabled = true as IsEmailEnabled;
 const anIsEmailValidated = true as IsEmailValidated;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO
+  mode: ServicesPreferencesModeEnum.LEGACY
 };
 
 // mock for a valid User extracted from SPID
