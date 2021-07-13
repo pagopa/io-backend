@@ -2,7 +2,6 @@
  * This controller returns info used to support logged user
  */
 
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import { fromEither } from "fp-ts/lib/TaskEither";
 import {
@@ -12,6 +11,7 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
+import { MitVoucherToken } from "../../generated/mitvoucher/MitVoucherToken";
 
 import {
   JWT_MIT_VOUCHER_TOKEN_AUDIENCE,
@@ -29,7 +29,7 @@ export default class MitVoucherController {
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseSuccessJson<NonEmptyString>
+    | IResponseSuccessJson<MitVoucherToken>
   > =>
     withUserFromRequest(req, async user =>
       this.tokenService
@@ -40,12 +40,13 @@ export default class MitVoucherController {
           JWT_MIT_VOUCHER_TOKEN_ISSUER,
           JWT_MIT_VOUCHER_TOKEN_AUDIENCE
         )
-        .chain(token =>
-          fromEither(NonEmptyString.decode(token)).mapLeft(
+        .map(_ => ({ token: _ }))
+        .chain(rawMitVoucherToken =>
+          fromEither(MitVoucherToken.decode(rawMitVoucherToken)).mapLeft(
             () => new Error("Cannot generate an empty Mit Voucher JWT Token")
           )
         )
-        .fold<IResponseErrorInternal | IResponseSuccessJson<NonEmptyString>>(
+        .fold<IResponseErrorInternal | IResponseSuccessJson<MitVoucherToken>>(
           e => ResponseErrorInternal(e.message),
           ResponseSuccessJson
         )

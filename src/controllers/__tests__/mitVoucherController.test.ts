@@ -39,7 +39,7 @@ describe("MitVoucherController", () => {
 
     expect(response.kind).toEqual("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual(aMitVoucherToken);
+      expect(response.value).toEqual({token: aMitVoucherToken});
     }
   });
 
