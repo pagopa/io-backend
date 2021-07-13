@@ -16,6 +16,8 @@ paths:
       responses:
         '200':
           description: Payload with Json Web Token
+          schema:
+            $ref: "#/definitions/MitVoucherToken"
         '400':
           description: Payload has bad format
         '401':
@@ -34,6 +36,16 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
   SuccessResponse:
     $ref: "api_backend.yaml#/definitions/SuccessResponse"
+  MitVoucherToken:
+    title: Mit Voucher Token
+    description: A Json Web Token used to call Mit Voucher APIs
+    type: object
+    properties:
+      token:
+        type: string
+        minLength: 1
+    required:
+      - token
 
 securityDefinitions:
   Bearer:
