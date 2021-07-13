@@ -19,6 +19,10 @@ const aTokenIssuer = "ISSUER" as NonEmptyString;
 const aTokenLengthBytes = 48;
 const aTokenLengthString = aTokenLengthBytes * 2; // because bytes
 
+const mitVoucher_privateKey_mock = `-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIPNKa/mrzj3DHOJiNn6pCY4xpn3VC+8yHbWbM7uuTfGuoAoGCCqGSM49\nAwEHoUQDQgAEC1bQKO9dKObwgKAGv97QMLR9w6IOFIlBGZx7PY0yE+z18xYdKZp/\nC547dDoYKjllfxMTIO0bKfHKPj2bxMiXSQ==\n-----END EC PRIVATE KEY-----` as NonEmptyString;
+const mitVoucher_audience_mock = "69b3d5a9c935fac3d60c" as NonEmptyString;
+const mitVoucher_tokenIssuer_mock = "app-backend.io.italia.it" as NonEmptyString;
+
 describe("TokenService#getNewToken", () => {
   it("generate a new token", () => {
     // generate new token
@@ -61,5 +65,39 @@ describe("TokenService#getSupportToken", () => {
       )
       .run();
     expect(isLeft(errorOrNewJwtToken)).toBeTruthy();
+  });
+});
+
+describe("TokenService#getJwtMitVoucherToken", () => {
+  it("should generate a token for mit voucher", async () => {
+    // generate new token
+    const tokenService = new TokenService();
+    const mitVoucherToken = await tokenService
+      .getJwtMitVoucherToken(
+        mitVoucher_privateKey_mock,
+        aFiscalCode,
+        600 as Second,
+        mitVoucher_tokenIssuer_mock,
+        mitVoucher_audience_mock
+      )
+      .run();
+
+    expect(isRight(mitVoucherToken)).toBeTruthy();
+  });
+
+  it("should return an error if an error occurs during token generation", async () => {
+    // generate new token
+    const tokenService = new TokenService();
+    const mitVoucherToken = await tokenService
+      .getJwtMitVoucherToken(
+        "aPrivateEcFakeKey" as NonEmptyString,
+        aFiscalCode,
+        600 as Second,
+        mitVoucher_tokenIssuer_mock,
+        mitVoucher_audience_mock
+      )
+      .run();
+
+    expect(isLeft(mitVoucherToken)).toBeTruthy();
   });
 });

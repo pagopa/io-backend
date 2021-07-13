@@ -55,7 +55,8 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
-  EUCOVIDCERT_API_CLIENT
+  EUCOVIDCERT_API_CLIENT,
+  FF_MIT_VOUCHER_ENABLED
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -114,6 +115,7 @@ import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
 import EUCovidCertService from "./services/eucovidcertService";
 import EUCovidCertController from "./controllers/eucovidcertController";
+import MitVoucherController from "./controllers/mitVoucherController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -148,6 +150,7 @@ export interface IAppFactoryParameters {
   readonly BPDBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
+  readonly MitVoucherBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -166,7 +169,8 @@ export function newApp({
   MyPortalBasePath,
   BPDBasePath,
   CGNAPIBasePath,
-  EUCovidCertBasePath
+  EUCovidCertBasePath,
+  MitVoucherBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -424,6 +428,16 @@ export function newApp({
         );
       }
 
+      if (FF_MIT_VOUCHER_ENABLED) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerMitVoucherAPIRoutes(
+          app,
+          MitVoucherBasePath,
+          TOKEN_SERVICE,
+          authMiddlewares.bearerSession
+        );
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerPagoPARoutes(
         app,
@@ -613,6 +627,27 @@ function registerEUCovidCertAPIRoutes(
     toExpressHandler(
       eucovidCertController.getEUCovidCertificate,
       eucovidCertController
+    )
+  );
+}
+
+function registerMitVoucherAPIRoutes(
+  app: Express,
+  basePath: string,
+  tokenService: TokenService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const mitVoucherController: MitVoucherController = new MitVoucherController(
+    tokenService
+  );
+
+  app.get(
+    `${basePath}/token`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      mitVoucherController.getMitVoucherToken,
+      mitVoucherController
     )
   );
 }

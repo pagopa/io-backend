@@ -65,6 +65,7 @@ const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
+const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -76,6 +77,7 @@ describe("Success app start", () => {
       BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
+      MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
       allowBPDIPSourceRange: [aValidCIDR],
@@ -177,7 +179,8 @@ describe("Failure app start", () => {
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
-        EUCovidCertBasePath:aEuCovidCertAPIBasePath,
+        EUCovidCertBasePath: aEuCovidCertAPIBasePath,
+        MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
@@ -205,7 +208,8 @@ describe("Failure app start", () => {
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
-        EUCovidCertBasePath:aEuCovidCertAPIBasePath,
+        EUCovidCertBasePath: aEuCovidCertAPIBasePath,
+        MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],
@@ -233,7 +237,8 @@ describe("Failure app start", () => {
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
-        EUCovidCertBasePath:aEuCovidCertAPIBasePath,
+        EUCovidCertBasePath: aEuCovidCertAPIBasePath,
+        MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
         allowBPDIPSourceRange: [aValidCIDR],

@@ -58,4 +58,36 @@ export default class TokenService {
       )
     )().mapLeft(toError);
   }
+
+  /**
+   * Generates a new Mit voucher token containing the logged user's fiscalCode.
+   *
+   * @param privateKey: The RSA's private key used to sign this JWT token
+   * @param fiscalCode: The logged user's FiscalCode
+   * @param tokenTtl: Token Time To live (expressed in seconds)
+   * @param issuer: The Token issuer
+   * @param audience: The Token audience
+   */
+  public getJwtMitVoucherToken(
+    privateKey: NonEmptyString,
+    fiscalCode: FiscalCode,
+    tokenTtl: Second,
+    issuer: NonEmptyString,
+    audience: NonEmptyString
+  ): TaskEither<Error, string> {
+    return taskify<Error, string>(cb =>
+      jwt.sign(
+        {},
+        privateKey,
+        {
+          algorithm: "ES256",
+          audience,
+          expiresIn: `${tokenTtl} seconds`,
+          issuer,
+          subject: fiscalCode
+        },
+        cb
+      )
+    )().mapLeft(toError);
+  }
 }
