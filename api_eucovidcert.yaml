@@ -27,6 +27,8 @@ paths:
             $ref: "#/definitions/Certificate"
         '400':
           description: Payload has bad format
+          schema:
+            $ref: "#/definitions/ProblemJson"
         '401':
           description: Bearer token null or expired
         '403':
@@ -35,6 +37,8 @@ paths:
           description: Endpoint no longer available
         '500':
           description: Generic server error
+          schema:
+            $ref: "#/definitions/ProblemJson"
         '504':
           description: Gateway Timeout
           
@@ -61,7 +65,9 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/QRCode"
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/PreferredLanguages"
-
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.5.3/openapi/definitions.yaml#/ProblemJson"
+ 
 consumes:
   - application/json
 produces:

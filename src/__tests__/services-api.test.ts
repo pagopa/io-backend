@@ -81,6 +81,7 @@ describe("GET /services/:id", () => {
       BPDBasePath: "/bpd/api/v1",
       BonusAPIBasePath: "/bonus/api/v1",
       EUCovidCertBasePath: "/eucovidcerts/api/v1",
+      MitVoucherBasePath: "/api/v1/mitvoucher/auth",
       CGNAPIBasePath: "/cgn/api/v1",
       CGNOperatorSearchAPIBasePath: "/api/v1",
       MyPortalBasePath: "/myportal/api/v1",

@@ -102,7 +102,7 @@ A Linux/macOS environment is required at the moment.
 
 1. clone the project in a folder called `io-backend`
 1. go to the project's folder
-1. copy `.nprm.example` to `.npmrc` and replace the `TOKEN` planceholder with
+1. copy `.nprmc.example` to `.npmrc` and replace the `TOKEN` planceholder with
    your GitHub token (must have repo and packages scopes)
 1. run `scripts/build-tools.sh` to build the `tools` Docker image
 1. run `scripts/yarn.sh` to install backend dependencies
