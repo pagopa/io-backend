@@ -95,7 +95,7 @@ definitions:
   OnlineMerchantSearchRequest:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
   Discount:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/Discount"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/Discount"
   ProductCategory:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/ProductCategory"
   Address:
