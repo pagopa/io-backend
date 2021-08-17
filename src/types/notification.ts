@@ -5,7 +5,6 @@
 import * as crypto from "crypto";
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { tag } from "italia-ts-commons/lib/types";
 
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 
@@ -15,11 +14,8 @@ import { FiscalCode } from "../../generated/backend/FiscalCode";
  * The fiscal code is used as a tag in the Notification Hub installation,
  * to avoid expose the fiscal code to a third party system we use an hash instead.
  */
-interface IFiscalCodeHashTag {
-  readonly kind: "IFiscalCodeHashTag";
-}
 
-const FiscalCodeHash = tag<IFiscalCodeHashTag>()(NonEmptyString);
+const FiscalCodeHash = NonEmptyString;
 
 type FiscalCodeHash = t.TypeOf<typeof FiscalCodeHash>;
 
