@@ -81,29 +81,29 @@ definitions:
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
   Merchant:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/Merchant"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/Merchant"
   OfflineMerchants:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OfflineMerchants"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/OfflineMerchants"
   OfflineMerchant:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OfflineMerchant"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/OfflineMerchant"
   OfflineMerchantSearchRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
   OnlineMerchants:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchants"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/OnlineMerchants"
   OnlineMerchant:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchant"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/OnlineMerchant"
   OnlineMerchantSearchRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
   Discount:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/Discount"
   ProductCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/ProductCategory"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/ProductCategory"
   Address:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/Address"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/Address"
   Coordinates:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/Coordinates"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/Coordinates"
   BoundingBox:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v1.3.2/openapi/index.yaml#/definitions/BoundingBox"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml#/definitions/BoundingBox"
 securityDefinitions:
   Bearer:
     type: apiKey
