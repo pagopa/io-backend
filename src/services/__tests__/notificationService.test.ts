@@ -15,6 +15,7 @@ import {
   KindEnum as DeleteKind
 } from "../../../generated/messages/DeleteInstallationMessage";
 import { NotifyMessage } from "../../../generated/messages/NotifyMessage";
+import { ServiceId } from "../../../generated/notifications/ServiceId";
 import { toFiscalCodeHash } from "../../types/notification";
 import { base64EncodeObject } from "../../utils/messages";
 import NotificationService from "../notificationService";
@@ -58,7 +59,7 @@ const aValidNotification = {
     created_at: new Date(),
     fiscal_code: aFiscalCode,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567"
+    sender_service_id: "234567" as ServiceId
   },
   sender_metadata: {
     department_name: "test department" as NonEmptyString,
