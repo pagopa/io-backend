@@ -11,9 +11,6 @@
   },
   "description": "IO app and web backend",
   "main": "index.js",
-  "engines": {
-    "node": "10.14.2"
-  },
   "scripts": {
     "watch": "tsc -w",
     "prebuild": "yarn generate:proxy-models",
