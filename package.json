@@ -12,7 +12,7 @@
   "description": "IO app and web backend",
   "main": "index.js",
   "engines": {
-    "node": "10.14.2"
+    "node": "14.16.0"
   },
   "scripts": {
     "watch": "tsc -w",
@@ -27,6 +27,8 @@
     "test": "jest -i",
     "test:coverage": "dotenv -e .env.example -- jest -i --coverage",
     "start": "node src/server.js",
+    "pregenerate": "npm run openapi:bundle",
+    "openapi:bundle": "bundle-api-spec -i openapi/api_notifications.yaml.template -o openapi/api_notifications.yaml -V $npm_package_version",
     "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
     "generate:proxy:auth-models": "rimraf generated/auth && gen-api-models --api-spec api_auth.yaml --out-dir generated/auth",
@@ -65,8 +67,8 @@
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
-    "@pagopa/io-spid-commons": "^6.2.0",
-    "@pagopa/ts-commons": "^9.4.0",
+    "@pagopa/io-spid-commons": "../../../clean/io-spid-commons/pagopa-io-spid-commons-6.5.1.tgz",
+    "@pagopa/ts-commons": "^10.0.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.7.4",
     "body-parser": "^1.18.3",
@@ -75,12 +77,11 @@
     "dotenv": "^6.0.0",
     "express": "^4.16.2",
     "express-enforces-ssl": "1.1.0",
-    "fp-ts": "~1.17.0",
+    "fp-ts": "^2.11.1",
     "helmet": "3.23.3",
     "http-graceful-shutdown": "^2.3.2",
-    "io-ts": "1.8.5",
-    "io-ts-types": "^0.4.7",
-    "italia-ts-commons": "^8.3.0",
+    "io-ts": "^2.2.16",
+    "io-ts-types": "^0.5.16",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.1",
@@ -100,6 +101,7 @@
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^1.1.1",
+    "@pagopa/openapi-codegen-ts": "^10.0.0",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.16.0",
@@ -119,7 +121,7 @@
     "@types/passport-strategy": "^0.2.35",
     "@types/qr-image": "^3.2.2",
     "@types/range_check": "^1.4.0",
-    "@types/redis": "^2.8.13",
+    "@types/redis": "^2.8.32",
     "@types/request-ip": "^0.0.34",
     "@types/superagent": "^3.8.4",
     "@types/supertest": "^2.0.6",
@@ -132,7 +134,6 @@
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "italia-utils": "^6.3.0",
     "jest": "^23.6.0",
     "lolex": "4.2.0",
     "mock-redis-client": "^0.91.13",
@@ -175,7 +176,6 @@
     ]
   },
   "resolutions": {
-    "fp-ts": "1.17.4",
     "handlebars": "~4.5.3"
   }
 }
