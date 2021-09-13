@@ -2,8 +2,8 @@
 /* tslint:disable:no-object-mutation */
 /* tslint:disable:no-inferred-empty-object-type */
 
-import { isLeft, isRight } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -20,7 +20,7 @@ import { Version } from "../../../generated/backend/Version";
 
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 
-import { ResponseErrorNotFound } from "italia-ts-commons/lib/responses";
+import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
 import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";
@@ -130,17 +130,17 @@ describe("profile type", () => {
     // extract the upsert user data from Express request with correct values. Return right.
     const userDataOK = ExtendedProfileBackend.decode(req.body);
 
-    expect(isRight(userDataOK)).toBeTruthy();
-    if (isRight(userDataOK)) {
+    expect(E.isRight(userDataOK)).toBeTruthy();
+    if (E.isRight(userDataOK)) {
       expect(userDataOK._tag).toBe("Right");
-      expect(userDataOK.value).toEqual(mockedExtendedProfile);
+      expect(userDataOK.right).toEqual(mockedExtendedProfile);
     }
 
     // extract the upsert user data from Express request with incorrect values. Return left.
     req.body.email = "it.is.not.an.email";
     const userDataKO = ExtendedProfileBackend.decode(req.body);
-    expect(isLeft(userDataKO)).toBeTruthy();
-    if (isLeft(userDataKO)) {
+    expect(E.isLeft(userDataKO)).toBeTruthy();
+    if (E.isLeft(userDataKO)) {
       expect(userDataKO._tag).toBe("Left");
     }
   });
