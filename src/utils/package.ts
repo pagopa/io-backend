@@ -1,5 +1,8 @@
-import { none, Option, some } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/function";
+import { Option } from "fp-ts/lib/Option";
 import * as packageJson from "../../package.json";
 
 /**
@@ -8,7 +11,11 @@ import * as packageJson from "../../package.json";
  */
 export const getValueFromPackageJson = (
   key: keyof typeof packageJson
-): string => t.string.decode(packageJson[key]).getOrElse("UNKNOWN");
+): string =>
+  pipe(
+    t.string.decode(packageJson[key]),
+    E.getOrElse(() => "UNKNOWN")
+  );
 
 /**
  * Parse a generic Object for a specific key from the package.json file.
@@ -18,9 +25,12 @@ export const getObjectFromPackageJson = <T>(
   key: keyof typeof packageJson,
   type: t.Type<T>
 ): Option<T> =>
-  type.decode(packageJson[key]).fold(
-    _ => none,
-    _ => some(_)
+  pipe(
+    type.decode(packageJson[key]),
+    E.fold(
+      _ => O.none,
+      _ => O.some(_)
+    )
   );
 
 /**
