@@ -13,12 +13,12 @@ import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-
+} from "@pagopa/ts-commons/lib/responses";
+import * as TE from "fp-ts/lib/TaskEither";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { PaginatedBonusActivationsCollection } from "generated/io-bonus-api/PaginatedBonusActivationsCollection";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { toString } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
 import { EligibilityCheck } from "../../generated/io-bonus-api/EligibilityCheck";
 import { InstanceId } from "../../generated/io-bonus-api/InstanceId";
 
@@ -32,6 +32,7 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
+
 export default class BonusService {
   constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}
 
@@ -96,18 +97,16 @@ export default class BonusService {
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
-            return withQrcode(response.value)
-              .fold<
-                | IResponseErrorInternal
-                | IResponseSuccessJson<BonusActivationWithQrCode>
-              >(
-                err =>
-                  ResponseErrorInternal(
-                    `Cannot encode qrcode: ${toString(err)}`
-                  ),
-                bonus => ResponseSuccessJson(bonus)
-              )
-              .run();
+            return pipe(
+              withQrcode(response.value),
+              TE.map(bonus => ResponseSuccessJson(bonus)),
+              TE.mapLeft(err =>
+                ResponseErrorInternal(
+                  `Cannot encode qrcode: ${JSON.stringify(err)}`
+                )
+              ),
+              TE.toUnion
+            )();
           case 202:
             return ResponseSuccessAccepted();
           case 401:
