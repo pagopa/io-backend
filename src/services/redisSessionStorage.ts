@@ -3,29 +3,20 @@
  */
 
 import { isArray } from "util";
-import { array } from "fp-ts/lib/Array";
-import {
-  Either,
-  isLeft,
-  isRight,
-  left,
-  parseJSON,
-  right,
-  toError
-} from "fp-ts/lib/Either";
-import { none, Option, some } from "fp-ts/lib/Option";
-import { collect, StrMap } from "fp-ts/lib/StrMap";
-import {
-  fromEither,
-  fromLeft,
-  TaskEither,
-  taskEither,
-  taskify,
-  tryCatch
-} from "fp-ts/lib/TaskEither";
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
+import * as A from "fp-ts/lib/Array";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+// import { collect, StrMap } from "fp-ts/lib/StrMap";
+import * as R from "fp-ts/lib/Record";
+import * as TE from "fp-ts/lib/TaskEither";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as redis from "redis";
+import { TaskEither } from "fp-ts/lib/TaskEither";
+import { Either } from "fp-ts/lib/Either";
+import { Option } from "fp-ts/lib/Option";
+import { flow, pipe } from "fp-ts/lib/function";
+import { Ord } from "fp-ts/lib/string";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
@@ -65,11 +56,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
     private readonly tokenDurationSecs: number
   ) {
     super();
-    this.mgetTask = taskify(this.redisClient.mget.bind(this.redisClient));
-    this.sismemberTask = taskify(
+    this.mgetTask = TE.taskify(this.redisClient.mget.bind(this.redisClient));
+    this.sismemberTask = TE.taskify(
       this.redisClient.sismember.bind(this.redisClient)
     );
-    this.ttlTask = taskify(this.redisClient.ttl.bind(this.redisClient));
+    this.ttlTask = TE.taskify(this.redisClient.ttl.bind(this.redisClient));
   }
 
   /**
@@ -156,7 +147,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     let saveSessionInfoPromise: Promise<Either<
       Error,
       boolean
-    >> = Promise.resolve(right(true));
+    >> = Promise.resolve(E.right(true));
     if (expireSec === this.tokenDurationSecs) {
       const sessionInfo: SessionInfo = {
         createdAt: new Date(),
@@ -178,16 +169,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
       saveSessionInfoPromise,
       removeOtherUserSessionsPromise
     ]);
-    const isSetFailed = setPromisesResult.some(isLeft);
+    const isSetFailed = setPromisesResult.some(E.isLeft);
     if (isSetFailed) {
-      return left<Error, boolean>(
+      return E.left<Error, boolean>(
         multipleErrorsFormatter(
-          setPromisesResult.filter(isLeft).map(_ => _.value),
+          setPromisesResult.filter(E.isLeft).map(_ => _.left),
           "RedisSessionStorage.set"
         )
       );
     }
-    return right<Error, boolean>(true);
+    return E.right<Error, boolean>(true);
   }
 
   /**
@@ -198,16 +189,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionBySessionToken(token);
 
-    if (isLeft(errorOrSession)) {
-      if (errorOrSession.value === sessionNotFoundError) {
-        return right(none);
+    if (E.isLeft(errorOrSession)) {
+      if (errorOrSession.left === sessionNotFoundError) {
+        return E.right(O.none);
       }
-      return left(errorOrSession.value);
+      return E.left(errorOrSession.left);
     }
 
-    const user = errorOrSession.value;
+    const user = errorOrSession.right;
 
-    return right(some(user));
+    return E.right(O.some(user));
   }
 
   /**
@@ -221,16 +212,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
       token
     );
 
-    if (isLeft(errorOrSession)) {
-      if (errorOrSession.value === sessionNotFoundError) {
-        return right(none);
+    if (E.isLeft(errorOrSession)) {
+      if (errorOrSession.left === sessionNotFoundError) {
+        return E.right(O.none);
       }
-      return left(errorOrSession.value);
+      return E.left(errorOrSession.left);
     }
 
-    const user = errorOrSession.value;
+    const user = errorOrSession.right;
 
-    return right(some(user));
+    return E.right(O.some(user));
   }
 
   /**
@@ -244,16 +235,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
       token
     );
 
-    if (isLeft(errorOrSession)) {
-      if (errorOrSession.value === sessionNotFoundError) {
-        return right(none);
+    if (E.isLeft(errorOrSession)) {
+      if (errorOrSession.left === sessionNotFoundError) {
+        return E.right(O.none);
       }
-      return left(errorOrSession.value);
+      return E.left(errorOrSession.left);
     }
 
-    const user = errorOrSession.value;
+    const user = errorOrSession.right;
 
-    return right(some(user));
+    return E.right(O.some(user));
   }
 
   /**
@@ -264,26 +255,25 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionByToken(bpdTokenPrefix, token);
 
-    if (isLeft(errorOrSession)) {
-      if (errorOrSession.value === sessionNotFoundError) {
-        return right(none);
+    if (E.isLeft(errorOrSession)) {
+      if (errorOrSession.left === sessionNotFoundError) {
+        return E.right(O.none);
       }
-      return left(errorOrSession.value);
+      return E.left(errorOrSession.left);
     }
 
-    const user = errorOrSession.value;
+    const user = errorOrSession.right;
 
-    return right(some(user));
+    return E.right(O.some(user));
   }
 
   /**
    * {@inheritDoc}
    */
   public async del(user: User): Promise<Either<Error, boolean>> {
-    const tokens: ReadonlyArray<string> = collect(
-      this.getUserTokens(user),
+    const tokens: ReadonlyArray<string> = R.collect(
       (_, { prefix, value }) => `${prefix}${value}`
-    );
+    )(this.getUserTokens(user));
 
     const deleteTokensPromise = await new Promise<Either<Error, true>>(
       resolve => {
@@ -302,10 +292,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
       }
     );
 
-    if (isLeft(deleteTokensPromise)) {
-      return left<Error, boolean>(
+    if (E.isLeft(deleteTokensPromise)) {
+      return E.left(
         new Error(
-          `value [${deleteTokensPromise.value.message}] at RedisSessionStorage.del`
+          `value [${deleteTokensPromise.left.message}] at RedisSessionStorage.del`
         )
       );
     }
@@ -322,7 +312,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         }
       }
     );
-    return right<Error, boolean>(true);
+    return E.right(true);
   }
 
   public async listUserSessions(
@@ -334,9 +324,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
     // eslint-disable-next-line functional/prefer-readonly-type
     const initializedSessionKeys: string[] = [];
-    if (isLeft(sessionKeys) && sessionKeys.value !== sessionNotFoundError) {
-      return left(sessionKeys.value);
-    } else if (isLeft(sessionKeys)) {
+    if (E.isLeft(sessionKeys) && sessionKeys.left !== sessionNotFoundError) {
+      return E.left(sessionKeys.left);
+    } else if (E.isLeft(sessionKeys)) {
       const sessionInfo: SessionInfo = {
         createdAt: new Date(),
         sessionToken: user.session_token
@@ -345,17 +335,23 @@ export default class RedisSessionStorage extends RedisStorageUtils
         sessionInfo,
         user.fiscal_code
       );
-      if (isLeft(refreshUserSessionInfo)) {
-        return left(sessionNotFoundError);
+      if (E.isLeft(refreshUserSessionInfo)) {
+        return E.left(sessionNotFoundError);
       }
       // eslint-disable-next-line functional/immutable-data
       initializedSessionKeys.push(
         `${sessionInfoKeyPrefix}${user.session_token}`
       );
     }
-    return this.mgetTask(...sessionKeys.getOrElse(initializedSessionKeys))
-      .map(_ => this.parseUserSessionList(_))
-      .run();
+    return pipe(
+      this.mgetTask(
+        ...pipe(
+          sessionKeys,
+          E.getOrElseW(() => initializedSessionKeys)
+        )
+      ),
+      TE.map(_ => this.parseUserSessionList(_))
+    )();
   }
 
   /**
@@ -382,18 +378,18 @@ export default class RedisSessionStorage extends RedisStorageUtils
           new Promise<Either<string, string>>(resolve => {
             this.redisClient.exists(_, (err, response) => {
               if (err || !response) {
-                return resolve(left(_));
+                return resolve(E.left(_));
               }
-              return resolve(right(_));
+              return resolve(E.right(_));
             });
           })
       )
     );
     return await Promise.all(
-      activeKeys.filter(isLeft).map(
+      activeKeys.filter(E.isLeft).map(
         _ =>
           new Promise<Either<Error, boolean>>(resolve => {
-            this.redisClient.srem(userSessionSetKey, _.value, (err, response) =>
+            this.redisClient.srem(userSessionSetKey, _.left, (err, response) =>
               resolve(this.integerReply(err, response))
             );
           })
@@ -405,26 +401,28 @@ export default class RedisSessionStorage extends RedisStorageUtils
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
     const sessionKeys = await this.readSessionInfoKeys(fiscalCode);
-    if (sessionKeys.value === sessionNotFoundError) {
-      return right(false);
-    } else if (isLeft(sessionKeys)) {
-      return left(sessionKeys.value);
+    if (E.isLeft(sessionKeys)) {
+      return sessionKeys.left === sessionNotFoundError
+        ? E.right(false)
+        : E.left(sessionKeys.left);
     }
-    const errorOrSessionTokens = await this.mgetTask(...sessionKeys.value)
-      .map(_ =>
+    const errorOrSessionTokens = await pipe(
+      this.mgetTask(...sessionKeys.right),
+      TE.map(_ =>
         this.parseUserSessionList(_).sessions.map(__ => __.sessionToken)
       )
-      .run();
+    )();
 
-    if (errorOrSessionTokens.isLeft()) {
-      return left(errorOrSessionTokens.value);
-    } else if (errorOrSessionTokens.value.length === 0) {
-      return right(false);
+    if (E.isLeft(errorOrSessionTokens)) {
+      return E.left(errorOrSessionTokens.left);
+    } else if (errorOrSessionTokens.right.length === 0) {
+      return E.right(false);
     }
 
-    return this.mgetTask(...errorOrSessionTokens.value)
-      .map(_ => _.length > 0)
-      .run();
+    return pipe(
+      this.mgetTask(...errorOrSessionTokens.right),
+      TE.map(_ => _.length > 0)
+    )();
   }
 
   /**
@@ -438,7 +436,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     return new Promise<Either<Error, true>>(resolve => {
       log.info(`Adding ${fiscalCode} to ${blockedUserSetKey} set`);
       this.redisClient.sadd(blockedUserSetKey, fiscalCode, err =>
-        resolve(err ? left(err) : right(true))
+        resolve(err ? E.left(err) : E.right(true))
       );
     });
   }
@@ -478,12 +476,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
   public async isBlockedUser(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
-    return this.sismemberTask(blockedUserSetKey, fiscalCode)
-      .bimap(
+    return pipe(
+      this.sismemberTask(blockedUserSetKey, fiscalCode),
+      TE.bimap(
         err => new Error(`Error accessing blocked users collection: ${err}`),
         result => result === 1
       )
-      .run();
+    )();
   }
 
   /**
@@ -499,26 +498,33 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const delEverySession = (
       sessionTokens: ReadonlyArray<SessionToken>
     ): TaskEither<Error, boolean> =>
-      array
-        .sequence(taskEither)<Error, boolean>(
+      pipe(
+        A.sequence(TE.ApplicativePar)<Error, boolean>(
           sessionTokens.map(sessionToken =>
-            fromEither<Error, SessionToken>(
-              SessionToken.decode(sessionToken).mapLeft(
-                _ => new Error("Error decoding token")
-              )
-            ).chain<boolean>((token: SessionToken) =>
-              tryCatch(() => this.delSingleSession(token), toError).chain(
-                fromEither
+            pipe(
+              TE.fromEither(
+                pipe(
+                  SessionToken.decode(sessionToken),
+                  E.mapLeft(_ => new Error("Error decoding token"))
+                )
+              ),
+              TE.chain((token: SessionToken) =>
+                pipe(
+                  TE.tryCatch(() => this.delSingleSession(token), E.toError),
+                  TE.chain(TE.fromEither)
+                )
               )
             )
           )
-        )
-        .map(() => true);
+        ),
+        TE.map(() => true)
+      );
 
-    return fromEither(errorOrSessions)
-      .foldTaskEither<Error, boolean>(
+    return pipe(
+      TE.fromEither(errorOrSessions),
+      TE.fold(
         // as we're deleting stuff, a NotFound error can be considered as a success
-        _ => (_ === sessionNotFoundError ? taskEither.of(true) : fromLeft(_)),
+        _ => (_ === sessionNotFoundError ? TE.of(true) : TE.left(_)),
         sessionInfoKeys =>
           delEverySession(
             sessionInfoKeys.map(
@@ -526,13 +532,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
                 sessionInfoKey.replace(sessionInfoKeyPrefix, "") as SessionToken
             )
           )
-      )
-      .chain(_ =>
-        tryCatch(() => this.delSessionsSet(fiscalCode), toError).chain(
-          fromEither
+      ),
+      TE.chain(_ =>
+        pipe(
+          TE.tryCatch(() => this.delSessionsSet(fiscalCode), E.toError),
+          TE.chain(TE.fromEither)
         )
       )
-      .run();
+    )();
   }
 
   /**
@@ -545,27 +552,27 @@ export default class RedisSessionStorage extends RedisStorageUtils
       updatedUser.session_token
     );
 
-    if (isLeft(errorOrSessionTtl)) {
-      return left(
+    if (E.isLeft(errorOrSessionTtl)) {
+      return E.left(
         new Error(
-          `Error retrieving user session ttl [${errorOrSessionTtl.value.message}]`
+          `Error retrieving user session ttl [${errorOrSessionTtl.left.message}]`
         )
       );
     }
-    const sessionTtl = errorOrSessionTtl.value;
+    const sessionTtl = errorOrSessionTtl.right;
     if (sessionTtl < 0) {
       throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
     }
 
     const errorOrIsSessionUpdated = await this.set(updatedUser, sessionTtl);
-    if (isLeft(errorOrIsSessionUpdated)) {
-      return left(
+    if (E.isLeft(errorOrIsSessionUpdated)) {
+      return E.left(
         new Error(
-          `Error updating user session [${errorOrIsSessionUpdated.value.message}]`
+          `Error updating user session [${errorOrIsSessionUpdated.left.message}]`
         )
       );
     }
-    return right(true);
+    return E.right(true);
   }
 
   /**
@@ -577,14 +584,14 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, boolean>> {
     const errorOrSessionTtl = await this.getSessionTtl(user.session_token);
 
-    if (isLeft(errorOrSessionTtl)) {
-      return left(
+    if (E.isLeft(errorOrSessionTtl)) {
+      return E.left(
         new Error(
-          `Error retrieving user session ttl [${errorOrSessionTtl.value.message}]`
+          `Error retrieving user session ttl [${errorOrSessionTtl.left.message}]`
         )
       );
     }
-    const sessionTtl = errorOrSessionTtl.value;
+    const sessionTtl = errorOrSessionTtl.right;
     if (sessionTtl < 0) {
       throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
     }
@@ -616,7 +623,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `Deleting cashed notify email ${noticeEmailPrefix}${user.fiscal_code}`
       );
       this.redisClient.del(`${noticeEmailPrefix}${user.session_token}`, err =>
-        resolve(err ? left(err) : right(true))
+        resolve(err ? E.left(err) : E.right(true))
       );
     });
   }
@@ -633,19 +640,18 @@ export default class RedisSessionStorage extends RedisStorageUtils
         (err, value) => {
           if (err) {
             // Client returns an error.
-            return resolve(left<Error, EmailString>(err));
+            return resolve(E.left(err));
           }
 
           if (value === null) {
-            return resolve(
-              left<Error, EmailString>(
-                new Error("Notify email value not found")
-              )
-            );
+            return resolve(E.left(new Error("Notify email value not found")));
           }
-          const errorOrNoticeEmail = EmailString.decode(value).mapLeft(
-            validationErrors =>
-              new Error(errorsToReadableMessages(validationErrors).join("/"))
+          const errorOrNoticeEmail = pipe(
+            EmailString.decode(value),
+            E.mapLeft(
+              validationErrors =>
+                new Error(errorsToReadableMessages(validationErrors).join("/"))
+            )
           );
           return resolve(errorOrNoticeEmail);
         }
@@ -664,7 +670,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
     // Returns the key ttl in seconds
     // -2 if the key doesn't exist or -1 if the key has no expire
     // @see https://redis.io/commands/ttl
-    return this.ttlTask(`${sessionKeyPrefix}${token}`).run();
+    return this.ttlTask(`${sessionKeyPrefix}${token}`)();
   }
 
   /**
@@ -676,16 +682,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
     token: SessionToken
   ): Promise<Either<Error, boolean>> {
     try {
-      const errorOrUser = await this.loadSessionBySessionToken(token);
-      const user: User = errorOrUser.getOrElseL(err => {
-        throw err;
-      });
+      const user: User = pipe(
+        await this.loadSessionBySessionToken(token),
+        E.getOrElseW(err => {
+          throw err;
+        })
+      );
       return this.del(user);
     } catch (error) {
       // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
-      return error === sessionNotFoundError
-        ? right<Error, boolean>(true)
-        : left(error);
+      return error === sessionNotFoundError ? E.right(true) : E.left(error);
     }
   }
 
@@ -695,7 +701,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
       );
       this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`, err =>
-        resolve(err ? left(err) : right(true))
+        resolve(err ? E.left(err) : E.right(true))
       );
     });
   }
@@ -721,7 +727,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
             this.singleStringReply(err, response),
             new Error("Error setting user token info")
           );
-          if (isLeft(saveSessionInfoResult)) {
+          if (E.isLeft(saveSessionInfoResult)) {
             return resolve(saveSessionInfoResult);
           }
           this.redisClient.sadd(
@@ -750,11 +756,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
       this.redisClient.get(`${sessionKeyPrefix}${token}`, (err, value) => {
         if (err) {
           // Client returns an error.
-          return resolve(left<Error, User>(err));
+          return resolve(E.left(err));
         }
 
         if (value === null) {
-          return resolve(left<Error, User>(sessionNotFoundError));
+          return resolve(E.left(sessionNotFoundError));
         }
         const errorOrDeserializedUser = this.parseUser(value);
         return resolve(errorOrDeserializedUser);
@@ -773,24 +779,23 @@ export default class RedisSessionStorage extends RedisStorageUtils
       this.redisClient.get(`${prefix}${token}`, (err, value) => {
         if (err) {
           // Client returns an error.
-          return resolve(left<Error, User>(err));
+          return resolve(E.left(err));
         }
 
         if (value === null) {
-          return resolve(left<Error, User>(sessionNotFoundError));
+          return resolve(E.left(sessionNotFoundError));
         }
 
         this.loadSessionBySessionToken(value as SessionToken).then(
-          (errorOrSession: Either<Error, User>) => {
-            errorOrSession.fold(
-              error => resolve(left<Error, User>(error)),
-              session => {
-                resolve(right<Error, User>(session));
-              }
-            );
-          },
+          flow(
+            E.mapLeft(error => resolve(E.left(error))),
+            E.map(session => {
+              resolve(E.right(session));
+            }),
+            E.toUnion
+          ),
           error => {
-            resolve(left<Error, User>(error));
+            resolve(E.left(error));
           }
         );
       });
@@ -806,8 +811,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
     const errorOrSessionInfoKeys = await this.readSessionInfoKeys(
       user.fiscal_code
     );
-    if (isRight(errorOrSessionInfoKeys)) {
-      const oldSessionInfoKeys = errorOrSessionInfoKeys.value.filter(
+    if (E.isRight(errorOrSessionInfoKeys)) {
+      const oldSessionInfoKeys = errorOrSessionInfoKeys.right.filter(
         _ =>
           _.startsWith(sessionInfoKeyPrefix) &&
           _ !== `${sessionInfoKeyPrefix}${user.session_token}`
@@ -828,20 +833,25 @@ export default class RedisSessionStorage extends RedisStorageUtils
         );
       });
       // Deserialize all available user payloads and skip invalid one
-      const errorOrDeserializedUsers = errorOrSerializedUser.map(_ =>
-        _.map(this.parseUser)
-          .filter(isRight)
-          .map(deserializedUser => deserializedUser.value)
+      const errorOrDeserializedUsers = pipe(
+        errorOrSerializedUser,
+        E.map(_ =>
+          _.map(this.parseUser)
+            .filter(E.isRight)
+            .map(deserializedUser => deserializedUser.right)
+        )
       );
 
       // Extract all tokens inside the user payload
       // If the value is invalid or must be skipped, it will be mapped with none
-      const externalTokens = errorOrDeserializedUsers.fold(
-        _ => [],
-        _ =>
+      const externalTokens = pipe(
+        errorOrDeserializedUsers,
+        E.mapLeft(_ => []),
+        E.map(_ =>
           _.map(deserializedUser =>
-            collect(
-              this.getUserTokens(deserializedUser).filter(
+            pipe(
+              this.getUserTokens(deserializedUser),
+              R.filter(
                 p =>
                   !(
                     p.prefix === sessionInfoKeyPrefix ||
@@ -857,9 +867,11 @@ export default class RedisSessionStorage extends RedisStorageUtils
                   ) &&
                   !(p.prefix === bpdTokenPrefix && p.value === user.bpd_token)
               ),
-              (_1, { prefix, value }) => `${prefix}${value}`
+              R.collect(Ord)((_1, { prefix, value }) => `${prefix}${value}`)
             )
           ).reduce((prev, tokens) => [...prev, ...tokens], [])
+        ),
+        E.toUnion
       );
 
       // Delete all active tokens that are different
@@ -872,7 +884,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
             ...externalTokens
           ];
           if (keys.length === 0) {
-            return resolve(right(true));
+            return resolve(E.right(true));
           }
           this.redisClient.del(...keys, (err, response) =>
             resolve(this.integerReply(err, response))
@@ -882,9 +894,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
       await this.clearExpiredSetValues(user.fiscal_code);
       return deleteOldKeysResponse;
     }
-    return errorOrSessionInfoKeys.value === sessionNotFoundError
-      ? right(true)
-      : left(errorOrSessionInfoKeys.value);
+    return errorOrSessionInfoKeys.left === sessionNotFoundError
+      ? E.right(true)
+      : E.left(errorOrSessionInfoKeys.left);
   }
 
   private readSessionInfoKeys(
@@ -903,17 +915,21 @@ export default class RedisSessionStorage extends RedisStorageUtils
     replay: ReadonlyArray<string> | undefined
   ): Either<Error, ReadonlyArray<string>> {
     if (err) {
-      return left(err);
+      return E.left(err);
     } else if (!isArray(replay) || replay.length === 0) {
-      return left(sessionNotFoundError);
+      return E.left(sessionNotFoundError);
     }
-    return right(replay);
+    return E.right(replay);
   }
 
   private parseUser(value: string): Either<Error, User> {
-    return parseJSON<Error>(value, toError).chain(data =>
-      User.decode(data).mapLeft(
-        err => new Error(errorsToReadableMessages(err).join("/"))
+    return pipe(
+      E.parseJSON(value, E.toError),
+      E.chain(data =>
+        pipe(
+          User.decode(data),
+          E.mapLeft(err => new Error(errorsToReadableMessages(err).join("/")))
+        )
       )
     );
   }
@@ -923,13 +939,17 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): SessionsList {
     return userSessionTokensResult.reduce(
       (prev: SessionsList, _) =>
-        parseJSON<Error>(_, toError)
-          .chain(data =>
-            SessionInfo.decode(data).mapLeft(
-              err => new Error(errorsToReadableMessages(err).join("/"))
+        pipe(
+          E.parseJSON(_, E.toError),
+          E.chain(data =>
+            pipe(
+              SessionInfo.decode(data),
+              E.mapLeft(
+                err => new Error(errorsToReadableMessages(err).join("/"))
+              )
             )
-          )
-          .fold(
+          ),
+          E.fold(
             err => {
               log.warn("Unable to decode the session info: %s. Skipped.", err);
               return prev;
@@ -937,14 +957,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
             sessionInfo => ({
               sessions: [...prev.sessions, sessionInfo]
             })
-          ),
+          )
+        ),
       { sessions: [] } as SessionsList
     );
   }
 
   private getUserTokens(
     user: User
-  ): StrMap<{ readonly prefix: string; readonly value: string }> {
+  ): Record<string, { readonly prefix: string; readonly value: string }> {
     const requiredTokens = {
       session_info: {
         prefix: sessionInfoKeyPrefix,
@@ -960,7 +981,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       }
     };
     if (UserV3.is(user)) {
-      return new StrMap({
+      return {
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
@@ -970,21 +991,21 @@ export default class RedisSessionStorage extends RedisStorageUtils
           prefix: myPortalTokenPrefix,
           value: user.myportal_token
         }
-      });
+      };
     }
     if (UserV2.is(user)) {
-      return new StrMap({
+      return {
         ...requiredTokens,
         myportal_token: {
           prefix: myPortalTokenPrefix,
           value: user.myportal_token
         }
-      });
+      };
     }
     if (UserV1.is(user)) {
-      return new StrMap({
+      return {
         ...requiredTokens
-      });
+      };
     }
     return assertUnreachable(user);
   }
