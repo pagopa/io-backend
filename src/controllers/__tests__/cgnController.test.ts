@@ -1,5 +1,8 @@
-import { ResponseSuccessAccepted, ResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  ResponseSuccessAccepted,
+  ResponseSuccessJson
+} from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -11,8 +14,14 @@ import { User } from "../../types/user";
 import CgnController from "../cgnController";
 import { CgnAPIClient } from "../../clients/cgn";
 import CgnService from "../../services/cgnService";
-import { CardPending, StatusEnum } from "../../../generated/io-cgn-api/CardPending";
-import { CgnActivationDetail, StatusEnum as ActivationStatusEnum } from "../../../generated/io-cgn-api/CgnActivationDetail";
+import {
+  CardPending,
+  StatusEnum
+} from "../../../generated/io-cgn-api/CardPending";
+import {
+  CgnActivationDetail,
+  StatusEnum as ActivationStatusEnum
+} from "../../../generated/io-cgn-api/CgnActivationDetail";
 import { EycaActivationDetail } from "../../../generated/io-cgn-api/EycaActivationDetail";
 import { Otp } from "../../../generated/cgn/Otp";
 import { OtpCode } from "../../../generated/cgn/OtpCode";
@@ -71,29 +80,29 @@ jest.mock("../../services/cgnService", () => {
 
 const aPendingCgn: CardPending = {
   status: StatusEnum.PENDING
-}
+};
 
 const aPendingEycaCard: CardPending = {
   status: StatusEnum.PENDING
-}
+};
 
 const aCgnActivationDetail: CgnActivationDetail = {
   instance_id: {
     id: "instanceId" as NonEmptyString
   },
   status: ActivationStatusEnum.COMPLETED
-}
+};
 
 const anEycaActivationDetail: EycaActivationDetail = {
   status: ActivationStatusEnum.COMPLETED
-}
+};
 
-const allowedTestFiscalCodesMock = jest.fn().mockImplementation(() => [])
+const allowedTestFiscalCodesMock = jest.fn().mockImplementation(() => []);
 const aGeneratedOtp: Otp = {
   code: "AAAAAA12312" as OtpCode,
   expires_at: new Date(),
   ttl: 10
-}
+};
 
 describe("CgnController#getCgnStatus", () => {
   beforeEach(() => {
@@ -104,7 +113,10 @@ describe("CgnController#getCgnStatus", () => {
     const req = { ...mockReq(), user: mockedUser };
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.getCgnStatus(req);
 
     expect(mockGetCgnStatus).toHaveBeenCalledWith(mockedUser);
@@ -118,8 +130,11 @@ describe("CgnController#getCgnStatus", () => {
     );
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getCgnStatus(req);
 
     expect(response).toEqual({
@@ -135,8 +150,11 @@ describe("CgnController#getCgnStatus", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getCgnStatus(req);
 
     response.apply(res);
@@ -150,10 +168,15 @@ describe("CgnController#getCgnStatus", () => {
   it("should not call getCgnStatus method on the CgnService with Not allowed user", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    allowedTestFiscalCodesMock.mockImplementationOnce(() => ["GRBGPP87L04L741Z" as FiscalCode])
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
 
     const response = await controller.getCgnStatus(req);
 
@@ -175,7 +198,10 @@ describe("CgnController#getEycaStatus", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.getEycaStatus(req);
 
     expect(mockGetEycaStatus).toHaveBeenCalledWith(mockedUser);
@@ -190,8 +216,11 @@ describe("CgnController#getEycaStatus", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getEycaStatus(req);
 
     expect(response).toEqual({
@@ -207,8 +236,11 @@ describe("CgnController#getEycaStatus", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getEycaStatus(req);
 
     response.apply(res);
@@ -223,10 +255,15 @@ describe("CgnController#getEycaStatus", () => {
   it("should not call getEycaStatus method on the CgnService with Not allowed user", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    allowedTestFiscalCodesMock.mockImplementationOnce(() => ["GRBGPP87L04L741Z" as FiscalCode])
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
 
     const response = await controller.getEycaStatus(req);
 
@@ -248,7 +285,10 @@ describe("CgnController#startCgnActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.startCgnActivation(req);
 
     expect(mockStartCgnActivation).toHaveBeenCalledWith(mockedUser);
@@ -263,8 +303,11 @@ describe("CgnController#startCgnActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.startCgnActivation(req);
 
     expect(response).toEqual({
@@ -280,8 +323,11 @@ describe("CgnController#startCgnActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.startCgnActivation(req);
 
     response.apply(res);
@@ -295,10 +341,15 @@ describe("CgnController#startCgnActivation", () => {
   it("should not call startCgnActivation method on the CgnService with Not allowed user", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    allowedTestFiscalCodesMock.mockImplementationOnce(() => ["GRBGPP87L04L741Z" as FiscalCode])
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
 
     const response = await controller.startCgnActivation(req);
 
@@ -320,7 +371,10 @@ describe("CgnController#getCgnActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.getCgnActivation(req);
 
     expect(mockGetCgnActivation).toHaveBeenCalledWith(mockedUser);
@@ -335,8 +389,11 @@ describe("CgnController#getCgnActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getCgnActivation(req);
 
     expect(response).toEqual({
@@ -352,8 +409,11 @@ describe("CgnController#getCgnActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getCgnActivation(req);
 
     response.apply(res);
@@ -366,10 +426,15 @@ describe("CgnController#getCgnActivation", () => {
   it("should not call getCgnActivation method on the CgnService with Not allowed user", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    allowedTestFiscalCodesMock.mockImplementationOnce(() => ["GRBGPP87L04L741Z" as FiscalCode])
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
 
     const response = await controller.getCgnActivation(req);
 
@@ -391,7 +456,10 @@ describe("CgnController#getEycaActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.getEycaActivation(req);
 
     expect(mockGetEycaActivation).toHaveBeenCalledWith(mockedUser);
@@ -406,8 +474,11 @@ describe("CgnController#getEycaActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getEycaActivation(req);
 
     expect(response).toEqual({
@@ -423,8 +494,11 @@ describe("CgnController#getEycaActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.getEycaActivation(req);
 
     response.apply(res);
@@ -438,10 +512,15 @@ describe("CgnController#getEycaActivation", () => {
   it("should not call getEycaActivation method on the CgnService with Not allowed user", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    allowedTestFiscalCodesMock.mockImplementationOnce(() => ["GRBGPP87L04L741Z" as FiscalCode])
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
 
     const response = await controller.getEycaActivation(req);
 
@@ -463,7 +542,10 @@ describe("CgnController#startEycaActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.startEycaActivation(req);
 
     expect(mockStartEycaActivation).toHaveBeenCalledWith(mockedUser);
@@ -478,8 +560,11 @@ describe("CgnController#startEycaActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.startEycaActivation(req);
 
     expect(response).toEqual({
@@ -495,8 +580,11 @@ describe("CgnController#startEycaActivation", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.startEycaActivation(req);
 
     response.apply(res);
@@ -509,10 +597,15 @@ describe("CgnController#startEycaActivation", () => {
   it("should not call startEycaActivation method on the CgnService with Not allowed user", async () => {
     const req = { ...mockReq(), user: mockedUser };
 
-    allowedTestFiscalCodesMock.mockImplementationOnce(() => ["GRBGPP87L04L741Z" as FiscalCode])
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
 
     const response = await controller.startEycaActivation(req);
 
@@ -534,7 +627,10 @@ describe("CgnController#generateOtp", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
     await controller.generateOtp(req);
 
     expect(mockGenerateOtp).toHaveBeenCalledWith(mockedUser);
@@ -549,8 +645,11 @@ describe("CgnController#generateOtp", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.generateOtp(req);
 
     expect(response).toEqual({
@@ -566,8 +665,11 @@ describe("CgnController#generateOtp", () => {
 
     const client = CgnAPIClient(API_KEY, API_URL);
     const cgnService = new CgnService(client);
-    const controller = new CgnController(cgnService, allowedTestFiscalCodesMock());
-    
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
     const response = await controller.generateOtp(req);
 
     response.apply(res);
