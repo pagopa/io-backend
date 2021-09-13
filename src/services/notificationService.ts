@@ -7,10 +7,10 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 import { QueueClient } from "@azure/storage-queue";
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
@@ -31,6 +31,7 @@ import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
+import { pipe } from "fp-ts/lib/function";
 
 export default class NotificationService {
   private readonly notificationQueueClient: QueueClient;
@@ -57,8 +58,13 @@ export default class NotificationService {
       payload: {
         message: notificationSubject,
         message_id: notification.message.id,
-        title: fromNullable(notificationTitle).getOrElse(
-          `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
+        title: pipe(
+          notificationTitle,
+          O.fromNullable,
+          O.getOrElse(
+            () =>
+              `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
+          )
         )
       }
     };

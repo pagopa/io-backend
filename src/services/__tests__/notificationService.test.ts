@@ -1,6 +1,8 @@
 /* tslint:disable:no-null-keyword */
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";
@@ -15,7 +17,6 @@ import {
   KindEnum as DeleteKind
 } from "../../../generated/messages/DeleteInstallationMessage";
 import { NotifyMessage } from "../../../generated/messages/NotifyMessage";
-import { ServiceId } from "../../../generated/notifications/ServiceId";
 import { toFiscalCodeHash } from "../../types/notification";
 import { base64EncodeObject } from "../../utils/messages";
 import NotificationService from "../notificationService";
@@ -59,7 +60,7 @@ const aValidNotification = {
     created_at: new Date(),
     fiscal_code: aFiscalCode,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567" as ServiceId
+    sender_service_id: "234567" as NonEmptyString
   },
   sender_metadata: {
     department_name: "test department" as NonEmptyString,
@@ -164,7 +165,7 @@ describe("NotificationService#notify", () => {
     const decodedMessage = JSON.parse(
       Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
     );
-    expect(NotifyMessage.decode(decodedMessage).isRight()).toBeTruthy();
+    expect(E.isRight(NotifyMessage.decode(decodedMessage))).toBeTruthy();
   });
 
   it("should fail if the Queue Storage fails on notify", async () => {
@@ -183,7 +184,7 @@ describe("NotificationService#notify", () => {
     const decodedMessage = JSON.parse(
       Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
     );
-    expect(NotifyMessage.decode(decodedMessage).isRight()).toBeTruthy();
+    expect(E.isRight(NotifyMessage.decode(decodedMessage))).toBeTruthy();
   });
 });
 
