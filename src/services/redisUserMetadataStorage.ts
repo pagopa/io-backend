@@ -1,8 +1,9 @@
 import * as redis from "redis";
 
-import { Either, isLeft, isRight, left, right } from "fp-ts/lib/Either";
-import { ReadableReporter } from "italia-ts-commons/lib/reporters";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+import { ReadableReporter } from "@pagopa/ts-commons/lib/reporters";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Either } from "fp-ts/lib/Either";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
@@ -36,16 +37,16 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       user.fiscal_code
     );
     if (
-      isRight(getUserMetadataResult) &&
-      getUserMetadataResult.value.version !== payload.version - 1
+      E.isRight(getUserMetadataResult) &&
+      getUserMetadataResult.right.version !== payload.version - 1
     ) {
-      return left(invalidVersionNumberError);
+      return E.left(invalidVersionNumberError);
     }
     if (
-      isLeft(getUserMetadataResult) &&
-      getUserMetadataResult.value !== metadataNotFoundError
+      E.isLeft(getUserMetadataResult) &&
+      getUserMetadataResult.left !== metadataNotFoundError
     ) {
-      return left(getUserMetadataResult.value);
+      return E.left(getUserMetadataResult.left);
     }
     return await new Promise<Either<Error, boolean>>(resolve => {
       // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
@@ -75,9 +76,9 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
       log.info(`Deleting metadata for ${fiscalCode}`);
       this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`, err => {
         if (err) {
-          resolve(left(err));
+          resolve(E.left(err));
         } else {
-          resolve(right(true));
+          resolve(E.right(true));
         }
       });
     });
@@ -93,7 +94,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
         `${userMetadataPrefix}${fiscalCode}`,
         (err, response) => {
           if (err || response === null) {
-            resolve(left(err || metadataNotFoundError));
+            resolve(E.left(err || metadataNotFoundError));
           } else {
             // Try-catch is needed because parse() may throw an exception.
             try {
@@ -102,22 +103,22 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
                 metadataPayload
               );
 
-              if (isLeft(errorOrDeserializedUserMetadata)) {
+              if (E.isLeft(errorOrDeserializedUserMetadata)) {
                 log.error(
                   "Unable to decode the user metadata: %s",
                   ReadableReporter.report(errorOrDeserializedUserMetadata)
                 );
                 return resolve(
-                  left<Error, UserMetadata>(
+                  E.left<Error, UserMetadata>(
                     new Error("Unable to decode the user metadata")
                   )
                 );
               }
-              const userMetadata = errorOrDeserializedUserMetadata.value;
-              return resolve(right<Error, UserMetadata>(userMetadata));
+              const userMetadata = errorOrDeserializedUserMetadata.right;
+              return resolve(E.right<Error, UserMetadata>(userMetadata));
             } catch (_) {
               return resolve(
-                left<Error, UserMetadata>(
+                E.left<Error, UserMetadata>(
                   new Error("Unable to parse the user metadata json")
                 )
               );
