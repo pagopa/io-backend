@@ -3,8 +3,8 @@ import { aMockedUser } from "../../__mocks__/user_mock";
 import TokenService from "../../services/tokenService";
 import MitVoucherController from "../mitVoucherController";
 import * as e from "express";
-import { taskEither } from "fp-ts/lib/TaskEither";
-import { fromLeft } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/TaskEither";
 
 const aMockedRequestWithRightParams = {
   ...mockReq(),
@@ -29,7 +29,7 @@ describe("MitVoucherController", () => {
   });
 
   it("should return a valid Mit and with valid value", async () => {
-    mockGetJwtMitVoucherToken.mockReturnValue(taskEither.of(aMitVoucherToken));
+    mockGetJwtMitVoucherToken.mockReturnValue(TE.of(aMitVoucherToken));
 
     const tokenService = new TokenService();
     const controller = new MitVoucherController(tokenService);
@@ -39,13 +39,13 @@ describe("MitVoucherController", () => {
 
     expect(response.kind).toEqual("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual({token: aMitVoucherToken});
+      expect(response.value).toEqual({ token: aMitVoucherToken });
     }
   });
 
   it("should return an error if JWT generation fails", async () => {
     mockGetJwtMitVoucherToken.mockReturnValue(
-      fromLeft(new Error("Cannot generate an empty Mit Voucher JWT Token"))
+      E.left(new Error("Cannot generate an empty Mit Voucher JWT Token"))
     );
 
     const tokenService = new TokenService();

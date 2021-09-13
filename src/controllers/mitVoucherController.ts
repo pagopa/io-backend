@@ -3,14 +3,15 @@
  */
 
 import * as express from "express";
-import { fromEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
+import { pipe } from "fp-ts/lib/function";
 import { MitVoucherToken } from "../../generated/mitvoucher/MitVoucherToken";
 
 import {
@@ -32,24 +33,28 @@ export default class MitVoucherController {
     | IResponseSuccessJson<MitVoucherToken>
   > =>
     withUserFromRequest(req, async user =>
-      this.tokenService
-        .getJwtMitVoucherToken(
+      pipe(
+        this.tokenService.getJwtMitVoucherToken(
           JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY,
           user.fiscal_code,
           JWT_MIT_VOUCHER_TOKEN_EXPIRATION,
           JWT_MIT_VOUCHER_TOKEN_ISSUER,
           JWT_MIT_VOUCHER_TOKEN_AUDIENCE
-        )
-        .map(_ => ({ token: _ }))
-        .chain(rawMitVoucherToken =>
-          fromEither(MitVoucherToken.decode(rawMitVoucherToken)).mapLeft(
-            () => new Error("Cannot generate an empty Mit Voucher JWT Token")
+        ),
+        TE.map(_ => ({ token: _ })),
+        TE.chain(rawMitVoucherToken =>
+          pipe(
+            rawMitVoucherToken,
+            MitVoucherToken.decode,
+            TE.fromEither,
+            TE.mapLeft(
+              () => new Error("Cannot generate an empty Mit Voucher JWT Token")
+            )
           )
-        )
-        .fold<IResponseErrorInternal | IResponseSuccessJson<MitVoucherToken>>(
-          e => ResponseErrorInternal(e.message),
-          ResponseSuccessJson
-        )
-        .run()
+        ),
+        TE.mapLeft(e => ResponseErrorInternal(e.message)),
+        TE.map(ResponseSuccessJson),
+        TE.toUnion
+      )()
     );
 }
