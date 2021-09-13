@@ -16,9 +16,10 @@ import {
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
+import { pipe } from "fp-ts/lib/function";
 
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 import { UserDataProcessing } from "generated/io-api/UserDataProcessing";
 import { UserDataProcessingChoice } from "generated/io-api/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
@@ -59,7 +60,10 @@ export default class UserDataProcessingService {
           ? ResponseErrorTooManyRequests()
           : response.status === 409
           ? ResponseErrorConflict(
-              fromNullable(response.value.detail).getOrElse("Conflict")
+              pipe(
+                O.fromNullable(response.value.detail),
+                O.getOrElse(() => "Conflict")
+              )
             )
           : unhandledResponseStatus(response.status)
       );

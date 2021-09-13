@@ -1,7 +1,7 @@
 /* tslint:disable:no-identical-functions */
 
 import * as t from "io-ts";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { EmailAddress } from "../../../generated/io-api/EmailAddress";
