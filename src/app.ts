@@ -14,15 +14,17 @@ import expressEnforcesSsl = require("express-enforces-ssl");
 import {
   NodeEnvironment,
   NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
-import { CIDR } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/environment";
+import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
 import * as appInsights from "applicationinsights";
-import { tryCatch2v } from "fp-ts/lib/Either";
-import { isEmpty, StrMap } from "fp-ts/lib/StrMap";
-import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import * as R from "fp-ts/lib/Record";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -255,9 +257,12 @@ export function newApp({
   // Adds the user fiscal code
   // we take only the first 6 characters of the fiscal code
   morgan.token("fiscal_code_short", (req, _) =>
-    User.decode(req.user)
-      .map(user => String(user.fiscal_code).slice(0, 6))
-      .getOrElse("")
+    pipe(
+      req.user,
+      User.decode,
+      E.map(user => String(user.fiscal_code).slice(0, 6)),
+      E.getOrElse(() => "")
+    )
   );
 
   const obfuscateToken = (originalUrl: string) =>
@@ -296,213 +301,223 @@ export function newApp({
   //
   // Setup routes
   //
-  return tryCatch(
-    async () => {
-      // Ceate the Token Service
-      const TOKEN_SERVICE = new TokenService();
+  return pipe(
+    TE.tryCatch(
+      async () => {
+        // Ceate the Token Service
+        const TOKEN_SERVICE = new TokenService();
 
-      // Create the profile service
-      const PROFILE_SERVICE = new ProfileService(API_CLIENT);
+        // Create the profile service
+        const PROFILE_SERVICE = new ProfileService(API_CLIENT);
 
-      // Create the bonus service
-      const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
+        // Create the bonus service
+        const BONUS_SERVICE = new BonusService(BONUS_API_CLIENT);
 
-      // Create the cgn service
-      const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
+        // Create the cgn service
+        const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
-      // Create the EUCovidCert service
-      const EUCOVIDCERT_SERVICE = new EUCovidCertService(
-        EUCOVIDCERT_API_CLIENT
-      );
+        // Create the EUCovidCert service
+        const EUCOVIDCERT_SERVICE = new EUCovidCertService(
+          EUCOVIDCERT_API_CLIENT
+        );
 
-      // Create the user data processing service
-      const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
-        API_CLIENT
-      );
+        // Create the user data processing service
+        const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
+          API_CLIENT
+        );
 
-      // Create the Notification Service
-      const ERROR_OR_NOTIFICATION_SERVICE = tryCatch2v(
-        () =>
-          new NotificationService(
-            NOTIFICATIONS_STORAGE_CONNECTION_STRING,
-            NOTIFICATIONS_QUEUE_NAME
+        // Create the Notification Service
+        const NOTIFICATION_SERVICE = pipe(
+          E.tryCatch(
+            () =>
+              new NotificationService(
+                NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+                NOTIFICATIONS_QUEUE_NAME
+              ),
+            err =>
+              new Error(`Error initializing Notification Service: [${err}]`)
           ),
-        err => {
-          throw new Error(`Error initializing Notification Service: [${err}]`);
-        }
-      );
+          E.getOrElseW(err => {
+            throw err;
+          })
+        );
 
-      const NOTIFICATION_SERVICE = ERROR_OR_NOTIFICATION_SERVICE.value;
-
-      // Create the UsersLoginLogService
-      const ERROR_OR_USERS_LOGIN_LOG_SERVICE = tryCatch2v(
-        () =>
-          new UsersLoginLogService(
-            USERS_LOGIN_STORAGE_CONNECTION_STRING,
-            USERS_LOGIN_QUEUE_NAME
+        // Create the UsersLoginLogService
+        const USERS_LOGIN_LOG_SERVICE = pipe(
+          E.tryCatch(
+            () =>
+              new UsersLoginLogService(
+                USERS_LOGIN_STORAGE_CONNECTION_STRING,
+                USERS_LOGIN_QUEUE_NAME
+              ),
+            err =>
+              new Error(`Error initializing UsersLoginLogService: [${err}]`)
           ),
-        err => {
-          throw new Error(`Error initializing UsersLoginLogService: [${err}]`);
-        }
-      );
-
-      const USERS_LOGIN_LOG_SERVICE = ERROR_OR_USERS_LOGIN_LOG_SERVICE.value;
-
-      const acsController: AuthenticationController = new AuthenticationController(
-        SESSION_STORAGE,
-        TOKEN_SERVICE,
-        getClientProfileRedirectionUrl,
-        PROFILE_SERVICE,
-        NOTIFICATION_SERVICE,
-        USERS_LOGIN_LOG_SERVICE,
-        TEST_LOGIN_FISCAL_CODES
-      );
-
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerPublicRoutes(app);
-
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerAuthenticationRoutes(
-        app,
-        authenticationBasePath,
-        acsController,
-        authMiddlewares.bearerSession,
-        authMiddlewares.local
-      );
-      // Create the messages service.
-      const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
-      const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
-      // Register the user metadata storage service.
-      const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerAPIRoutes(
-        app,
-        APIBasePath,
-        allowNotifyIPSourceRange,
-        authMiddlewares.urlToken,
-        PROFILE_SERVICE,
-        MESSAGES_SERVICE,
-        NOTIFICATION_SERVICE,
-        SESSION_STORAGE,
-        PAGOPA_PROXY_SERVICE,
-        USER_METADATA_STORAGE,
-        USER_DATA_PROCESSING_SERVICE,
-        TOKEN_SERVICE,
-        authMiddlewares.bearerSession
-      );
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerSessionAPIRoutes(
-        app,
-        APIBasePath,
-        allowSessionHandleIPSourceRange,
-        authMiddlewares.urlToken,
-        SESSION_STORAGE,
-        USER_METADATA_STORAGE
-      );
-      if (FF_BONUS_ENABLED) {
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerBonusAPIRoutes(
-          app,
-          BonusAPIBasePath,
-          BONUS_SERVICE,
-          authMiddlewares.bearerSession
+          E.getOrElseW(err => {
+            throw err;
+          })
         );
-      }
-      if (FF_CGN_ENABLED) {
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerCgnAPIRoutes(
-          app,
-          CGNAPIBasePath,
-          CGN_SERVICE,
-          authMiddlewares.bearerSession
-        );
-      }
 
-      if (FF_EUCOVIDCERT_ENABLED) {
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerEUCovidCertAPIRoutes(
-          app,
-          EUCovidCertBasePath,
-          EUCOVIDCERT_SERVICE,
-          authMiddlewares.bearerSession
+        const acsController: AuthenticationController = new AuthenticationController(
+          SESSION_STORAGE,
+          TOKEN_SERVICE,
+          getClientProfileRedirectionUrl,
+          PROFILE_SERVICE,
+          NOTIFICATION_SERVICE,
+          USERS_LOGIN_LOG_SERVICE,
+          TEST_LOGIN_FISCAL_CODES
         );
-      }
 
-      if (FF_MIT_VOUCHER_ENABLED) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerMitVoucherAPIRoutes(
+        registerPublicRoutes(app);
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerAuthenticationRoutes(
           app,
-          MitVoucherBasePath,
+          authenticationBasePath,
+          acsController,
+          authMiddlewares.bearerSession,
+          authMiddlewares.local
+        );
+        // Create the messages service.
+        const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
+        const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
+        // Register the user metadata storage service.
+        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
+          REDIS_CLIENT
+        );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerAPIRoutes(
+          app,
+          APIBasePath,
+          allowNotifyIPSourceRange,
+          authMiddlewares.urlToken,
+          PROFILE_SERVICE,
+          MESSAGES_SERVICE,
+          NOTIFICATION_SERVICE,
+          SESSION_STORAGE,
+          PAGOPA_PROXY_SERVICE,
+          USER_METADATA_STORAGE,
+          USER_DATA_PROCESSING_SERVICE,
           TOKEN_SERVICE,
           authMiddlewares.bearerSession
         );
-      }
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerSessionAPIRoutes(
+          app,
+          APIBasePath,
+          allowSessionHandleIPSourceRange,
+          authMiddlewares.urlToken,
+          SESSION_STORAGE,
+          USER_METADATA_STORAGE
+        );
+        if (FF_BONUS_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerBonusAPIRoutes(
+            app,
+            BonusAPIBasePath,
+            BONUS_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+        if (FF_CGN_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerCgnAPIRoutes(
+            app,
+            CGNAPIBasePath,
+            CGN_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
 
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerPagoPARoutes(
-        app,
-        PagoPABasePath,
-        allowPagoPAIPSourceRange,
-        PROFILE_SERVICE,
-        SESSION_STORAGE,
-        ENABLE_NOTICE_EMAIL_CACHE,
-        authMiddlewares.bearerWallet
-      );
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerMyPortalRoutes(
-        app,
-        MyPortalBasePath,
-        allowMyPortalIPSourceRange,
-        authMiddlewares.bearerMyPortal
-      );
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerBPDRoutes(
-        app,
-        BPDBasePath,
-        allowBPDIPSourceRange,
-        authMiddlewares.bearerBPD
-      );
-      return { acsController, app };
-    },
-    err => new Error(`Error on app routes setup: [${err}]`)
-  )
-    .chain(_ => {
+        if (FF_EUCOVIDCERT_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerEUCovidCertAPIRoutes(
+            app,
+            EUCovidCertBasePath,
+            EUCOVIDCERT_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+
+        if (FF_MIT_VOUCHER_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerMitVoucherAPIRoutes(
+            app,
+            MitVoucherBasePath,
+            TOKEN_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerPagoPARoutes(
+          app,
+          PagoPABasePath,
+          allowPagoPAIPSourceRange,
+          PROFILE_SERVICE,
+          SESSION_STORAGE,
+          ENABLE_NOTICE_EMAIL_CACHE,
+          authMiddlewares.bearerWallet
+        );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerMyPortalRoutes(
+          app,
+          MyPortalBasePath,
+          allowMyPortalIPSourceRange,
+          authMiddlewares.bearerMyPortal
+        );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerBPDRoutes(
+          app,
+          BPDBasePath,
+          allowBPDIPSourceRange,
+          authMiddlewares.bearerBPD
+        );
+        return { acsController, app };
+      },
+      err => new Error(`Error on app routes setup: [${err}]`)
+    ),
+    TE.chain(_ => {
       const spidQueueClient = new QueueClient(
         SPID_LOG_STORAGE_CONNECTION_STRING,
         SPID_LOG_QUEUE_NAME
       );
       const spidLogCallback = makeSpidLogCallback(spidQueueClient);
       const timer = TimeTracer();
-      return tryCatch(
-        () =>
-          withSpid({
-            acs: _.acsController.acs.bind(_.acsController),
-            app: _.app,
-            appConfig: {
-              ...appConfig,
-              eventTraker: event => {
-                appInsightsClient?.trackEvent({
-                  name: event.name,
-                  properties: {
-                    type: event.type,
-                    ...event.data
-                  }
-                });
-              }
-            },
-            doneCb: spidLogCallback,
-            logout: _.acsController.slo.bind(_.acsController),
-            redisClient: REDIS_CLIENT,
-            samlConfig,
-            serviceProviderConfig
-          }).run(),
-        err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
-      ).map(withSpidApp => ({
-        ...withSpidApp,
-        spidConfigTime: timer.getElapsedMilliseconds()
-      }));
-    })
-    .map(_ => {
+      return pipe(
+        TE.tryCatch(
+          () =>
+            withSpid({
+              acs: _.acsController.acs.bind(_.acsController),
+              app: _.app,
+              appConfig: {
+                ...appConfig,
+                eventTraker: event => {
+                  appInsightsClient?.trackEvent({
+                    name: event.name,
+                    properties: {
+                      type: event.type,
+                      ...event.data
+                    }
+                  });
+                }
+              },
+              doneCb: spidLogCallback,
+              logout: _.acsController.slo.bind(_.acsController),
+              redisClient: REDIS_CLIENT,
+              samlConfig,
+              serviceProviderConfig
+            })(),
+          err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
+        ),
+        TE.map(withSpidApp => ({
+          ...withSpidApp,
+          spidConfigTime: timer.getElapsedMilliseconds()
+        }))
+      );
+    }),
+    TE.map(_ => {
       if (appInsightsClient) {
         trackStartupTime(
           appInsightsClient,
@@ -514,45 +529,43 @@ export function newApp({
       // Schedule automatic idpMetadataRefresher
       const startIdpMetadataRefreshTimer = setInterval(
         () =>
-          _.idpMetadataRefresher()
-            .run()
-            .catch(e => {
-              log.error("loadSpidStrategyOptions|error:%s", e);
-            }),
+          _.idpMetadataRefresher()().catch((e: unknown) => {
+            log.error("loadSpidStrategyOptions|error:%s", e);
+          }),
         IDP_METADATA_REFRESH_INTERVAL_SECONDS * 1000
       );
       _.app.on("server:stop", () =>
         clearInterval(startIdpMetadataRefreshTimer)
       );
       return _.app;
-    })
-    .chain(_ => {
+    }),
+    TE.chain(_ => {
       const spidStrategyOption = getSpidStrategyOption(_);
       // Process ends in case no IDP is configured
-      if (isEmpty(new StrMap(spidStrategyOption?.idp || {}))) {
+      if (R.isEmpty(spidStrategyOption?.idp || {})) {
         log.error(
           "Fatal error during application start. Cannot get IDPs metadata."
         );
-        return fromLeft<Error, Express>(
+        return TE.left(
           new Error(
             "Fatal error during application start. Cannot get IDPs metadata."
           )
         );
       }
-      return taskEither.of(_);
-    })
-    .map(_ => {
+      return TE.of(_);
+    }),
+    TE.map(_ => {
       // Register the express error handler
       // This middleware must be the last in order to catch all the errors
       // forwarded with express next function.
       _.use(expressErrorMiddleware);
       return _;
-    })
-    .getOrElseL(err => {
+    }),
+    TE.getOrElse(err => {
       app.emit("server:stop");
       throw err;
     })
-    .run();
+  )();
 }
 
 // eslint-disable-next-line max-params
@@ -1031,17 +1044,20 @@ function registerAuthenticationRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   localAuth: any
 ): void {
-  TEST_LOGIN_PASSWORD.map(testLoginPassword => {
-    passport.use(
-      "local",
-      localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
-    );
-    app.post(
-      `${authBasePath}/test-login`,
-      localAuth,
-      toExpressHandler(req => acsController.acsTest(req.user), acsController)
-    );
-  });
+  pipe(
+    TEST_LOGIN_PASSWORD,
+    E.map(testLoginPassword => {
+      passport.use(
+        "local",
+        localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
+      );
+      app.post(
+        `${authBasePath}/test-login`,
+        localAuth,
+        toExpressHandler(req => acsController.acsTest(req.user), acsController)
+      );
+    })
+  );
 
   app.post(
     `${authBasePath}/logout`,
@@ -1071,14 +1087,20 @@ function registerPublicRoutes(app: Express): void {
 
   app.get("/info", (_, res) => {
     const serverInfo: ServerInfo = {
-      min_app_version: minAppVersion.getOrElse({
-        android: "UNKNOWN",
-        ios: "UNKNOWN"
-      }),
-      min_app_version_pagopa: minAppVersionPagoPa.getOrElse({
-        android: "UNKNOWN",
-        ios: "UNKNOWN"
-      }),
+      min_app_version: pipe(
+        minAppVersion,
+        O.getOrElse(() => ({
+          android: "UNKNOWN",
+          ios: "UNKNOWN"
+        }))
+      ),
+      min_app_version_pagopa: pipe(
+        minAppVersionPagoPa,
+        O.getOrElse(() => ({
+          android: "UNKNOWN",
+          ios: "UNKNOWN"
+        }))
+      ),
       version
     };
     res.status(200).json(serverInfo);

@@ -1,11 +1,10 @@
 import * as spid from "@pagopa/io-spid-commons/dist/utils/metadata";
 import { Express } from "express";
-import { isRight } from "fp-ts/lib/Either";
-import { Task } from "fp-ts/lib/Task";
+import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { CIDR } from "italia-ts-commons/lib/strings";
+import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 
@@ -150,7 +149,7 @@ describe("Success app start", () => {
         .get("/info")
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .expect(200);
-      expect(isRight(ServerInfo.decode(response.body)));
+      expect(E.isRight(ServerInfo.decode(response.body)));
     });
   });
 });
@@ -168,9 +167,7 @@ describe("Failure app start", () => {
     const mockFetchIdpsMetadata = jest
       .spyOn(spid, "fetchIdpsMetadata")
       .mockImplementation(() => {
-        return TE.left(
-          new Task(async () => new Error("Error download metadata"))
-        );
+        return TE.left(new Error("Error download metadata"));
       });
     expect.assertions(1);
     try {
