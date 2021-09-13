@@ -1,5 +1,6 @@
 import { isNumber } from "util";
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
 
 export default class RedisStorageUtils {
   /**
@@ -12,10 +13,10 @@ export default class RedisStorageUtils {
     reply: "OK" | undefined
   ): Either<Error, boolean> {
     if (err) {
-      return left<Error, boolean>(err);
+      return E.left(err);
     }
 
-    return right<Error, boolean>(reply === "OK");
+    return E.right(reply === "OK");
   }
 
   /**
@@ -29,25 +30,25 @@ export default class RedisStorageUtils {
     expectedReply?: number
   ): Either<Error, boolean> {
     if (err) {
-      return left<Error, boolean>(err);
+      return E.left(err);
     }
     if (expectedReply !== undefined && expectedReply !== reply) {
-      return right<Error, boolean>(false);
+      return E.right(false);
     }
-    return right<Error, boolean>(isNumber(reply));
+    return E.right(isNumber(reply));
   }
 
   protected falsyResponseToError(
     response: Either<Error, boolean>,
     error: Error
   ): Either<Error, true> {
-    if (isLeft(response)) {
-      return left(response.value);
+    if (E.isLeft(response)) {
+      return E.left(response.left);
     } else {
-      if (response.value) {
-        return right(true);
+      if (response.right) {
+        return E.right(true);
       }
-      return left(error);
+      return E.left(error);
     }
   }
 }
