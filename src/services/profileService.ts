@@ -16,9 +16,9 @@ import {
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../generated/io-api/NewProfile";
 import { Profile as ProfileApi } from "../../generated/io-api/Profile";
@@ -34,6 +34,8 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -99,11 +101,14 @@ export default class ProfileService {
       });
       return withValidatedOrInternalError(validated, response => {
         if (response.status === 200) {
-          return ExtendedProfileApi.decode(response.value).fold<
-            IResponseSuccessJson<ExtendedProfileApi> | IResponseErrorInternal
-          >(
-            _ => ResponseErrorInternal(errorsToReadableMessages(_).join(" / ")),
-            _ => ResponseSuccessJson(_)
+          return pipe(
+            response.value,
+            ExtendedProfileApi.decode,
+            E.mapLeft(_ =>
+              ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
+            ),
+            E.map(_ => ResponseSuccessJson(_)),
+            E.toUnion
           );
         }
         // The profile doesn't exists for the user
