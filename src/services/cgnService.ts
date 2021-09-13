@@ -18,9 +18,9 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 import { EycaActivationDetail } from "../../generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "../../generated/io-cgn-api/EycaCard";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
@@ -36,6 +36,7 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
+import { pipe } from "fp-ts/lib/function";
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 
@@ -135,8 +136,10 @@ export default class CgnService {
           case 201:
             return ResponseSuccessRedirectToResource(
               response.value,
-              fromNullable(response.headers.Location).getOrElse(
-                "/api/v1/cgn/activation"
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/activation")
               ),
               response.value
             );
@@ -216,8 +219,10 @@ export default class CgnService {
           case 201:
             return ResponseSuccessRedirectToResource(
               response.value,
-              fromNullable(response.headers.Location).getOrElse(
-                "/api/v1/cgn/eyca/activation"
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/eyca/activation")
               ),
               response.value
             );
