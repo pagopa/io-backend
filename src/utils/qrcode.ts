@@ -1,6 +1,7 @@
-import { sequenceS } from "fp-ts/lib/Apply";
-import { toError } from "fp-ts/lib/Either";
-import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import * as AP from "fp-ts/lib/Apply";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
 import { BonusActivation } from "generated/io-bonus-api/BonusActivation";
@@ -39,29 +40,34 @@ function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
 
 const streamToBufferTask = (
   stream: NodeJS.ReadableStream
-): TaskEither<Error, Buffer> => tryCatch(() => streamToBuffer(stream), toError);
+): TaskEither<Error, Buffer> =>
+  TE.tryCatch(() => streamToBuffer(stream), E.toError);
 
 const streamToStringTask = (
   stream: NodeJS.ReadableStream
-): TaskEither<Error, string> => tryCatch(() => streamToString(stream), toError);
+): TaskEither<Error, string> =>
+  TE.tryCatch(() => streamToString(stream), E.toError);
 
 export function withQrcode(
   bonus: BonusActivation
 ): TaskEither<Error, BonusActivationWithQrCode> {
-  return sequenceS(taskEither)({
-    pngBuffer: streamToBufferTask(image(bonus.id, { type: "png" })),
-    svgString: streamToStringTask(image(bonus.id, { type: "svg" }))
-  }).map(({ pngBuffer, svgString }) => ({
-    ...bonus,
-    qr_code: [
-      {
-        content: pngBuffer.toString("base64"),
-        mime_type: MIME_TYPES.png
-      },
-      {
-        content: Buffer.from(fixQrcodeFill(svgString)).toString("base64"),
-        mime_type: MIME_TYPES.svg
-      }
-    ]
-  }));
+  return pipe(
+    AP.sequenceS(TE.ApplicativePar)({
+      pngBuffer: streamToBufferTask(image(bonus.id, { type: "png" })),
+      svgString: streamToStringTask(image(bonus.id, { type: "svg" }))
+    }),
+    TE.map(({ pngBuffer, svgString }) => ({
+      ...bonus,
+      qr_code: [
+        {
+          content: pngBuffer.toString("base64"),
+          mime_type: MIME_TYPES.png
+        },
+        {
+          content: Buffer.from(fixQrcodeFill(svgString)).toString("base64"),
+          mime_type: MIME_TYPES.svg
+        }
+      ]
+    }))
+  );
 }
