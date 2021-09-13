@@ -3,8 +3,10 @@
  */
 
 import * as express from "express";
-import { Either, isRight } from "fp-ts/lib/Either";
-import { isSome, Option } from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option";
 import * as passport from "passport-http-bearer";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { SessionToken } from "../types/token";
@@ -28,10 +30,10 @@ const bearerSessionTokenStrategy = (
           try {
             if (
               onValidUser !== undefined &&
-              isRight(errorOrUser) &&
-              isSome(errorOrUser.value)
+              E.isRight(errorOrUser) &&
+              O.isSome(errorOrUser.right)
             ) {
-              onValidUser(errorOrUser.value.value);
+              onValidUser(errorOrUser.right.value);
             }
             fulfill(errorOrUser, done);
           } catch (e) {
