@@ -12,9 +12,9 @@ import {
   ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { isLeft } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import { IResponseNoContent, ResponseNoContent } from "../utils/responses";
 
 import { UserMetadata } from "../../generated/backend/UserMetadata";
@@ -42,12 +42,12 @@ export default class UserMetadataController {
   > =>
     withUserFromRequest(req, async user => {
       const metadata = await this.userMetadataStorage.get(user);
-      if (isLeft(metadata)) {
-        return metadata.value === metadataNotFoundError
+      if (E.isLeft(metadata)) {
+        return metadata.left === metadataNotFoundError
           ? ResponseNoContent()
-          : ResponseErrorInternal(metadata.value.message);
+          : ResponseErrorInternal(metadata.left.message);
       } else {
-        return ResponseSuccessJson(metadata.value);
+        return ResponseSuccessJson(metadata.right);
       }
     });
 
@@ -73,11 +73,11 @@ export default class UserMetadataController {
             user,
             metadata
           );
-          if (isLeft(setMetadataResponse)) {
-            if (setMetadataResponse.value === invalidVersionNumberError) {
-              return ResponseErrorConflict(setMetadataResponse.value.message);
+          if (E.isLeft(setMetadataResponse)) {
+            if (setMetadataResponse.left === invalidVersionNumberError) {
+              return ResponseErrorConflict(setMetadataResponse.left.message);
             }
-            return ResponseErrorInternal(setMetadataResponse.value.message);
+            return ResponseErrorInternal(setMetadataResponse.left.message);
           }
           return ResponseSuccessJson(metadata);
         }

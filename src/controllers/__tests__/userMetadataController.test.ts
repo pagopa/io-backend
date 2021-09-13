@@ -1,6 +1,6 @@
 /* tslint:disable:no-object-mutation */
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { left, right } from "fp-ts/lib/Either";
 import * as redis from "redis";
