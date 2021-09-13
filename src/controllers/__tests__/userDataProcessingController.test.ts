@@ -4,10 +4,10 @@
 import {
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { isRight } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -208,12 +208,13 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     const errorOrUserDataProcessingChoice = UserDataProcessingChoiceRequest.decode(
       req.body
     );
-    expect(isRight(errorOrUserDataProcessingChoice)).toBeTruthy();
-
-    expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith(
-      mockedUser,
-      errorOrUserDataProcessingChoice.value
-    );
+    expect(E.isRight(errorOrUserDataProcessingChoice)).toBeTruthy();
+    if (E.isRight(errorOrUserDataProcessingChoice)) {
+      expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith(
+        mockedUser,
+        errorOrUserDataProcessingChoice.right
+      );
+    }
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
