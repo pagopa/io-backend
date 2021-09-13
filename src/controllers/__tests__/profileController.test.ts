@@ -1,16 +1,16 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as redis from "redis";
 
-import { isRight, right } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -123,7 +123,7 @@ jest.mock("../../services/profileService", () => {
 
 const mockDelPagoPaNoticeEmail = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve(right<Error, boolean>(true)));
+  .mockImplementation(_ => Promise.resolve(E.right(true)));
 
 jest.mock("../../services/redisSessionStorage", () => {
   return {
@@ -306,13 +306,14 @@ describe("ProfileController#upsertProfile", () => {
     const response = await controller.updateProfile(req);
 
     const errorOrProfile = Profile.decode(req.body);
-    expect(isRight(errorOrProfile)).toBeTruthy();
-
+    expect(E.isRight(errorOrProfile)).toBeTruthy();
     expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
-    expect(mockUpdateProfile).toHaveBeenCalledWith(
-      mockedUser,
-      errorOrProfile.value
-    );
+    if (E.isRight(errorOrProfile)) {
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        mockedUser,
+        errorOrProfile.right
+      );
+    }
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
