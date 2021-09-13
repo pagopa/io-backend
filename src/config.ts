@@ -3,20 +3,20 @@
  */
 
 import * as dotenv from "dotenv";
-import { parseJSON, right, toError } from "fp-ts/lib/Either";
-import { fromNullable, isSome } from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { agent } from "italia-ts-commons";
+import { agent } from "@pagopa/ts-commons";
 
 import {
   getNodeEnvironmentFromProcessEnv,
   NodeEnvironmentEnum
-} from "italia-ts-commons/lib/environment";
+} from "@pagopa/ts-commons/lib/environment";
 import {
   errorsToReadableMessages,
   readableReport
-} from "italia-ts-commons/lib/reporters";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+} from "@pagopa/ts-commons/lib/reporters";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import {
   IApplicationConfig,
@@ -24,16 +24,17 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
-import { rights } from "fp-ts/lib/Array";
+import * as A from "fp-ts/lib/Array";
 import {
   AbortableFetch,
   setFetchTimeout,
   toFetch
-} from "italia-ts-commons/lib/fetch";
-import { IntegerFromString } from "italia-ts-commons/lib/numbers";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { Millisecond, Second } from "italia-ts-commons/lib/units";
+} from "@pagopa/ts-commons/lib/fetch";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
+import { pipe } from "fp-ts/lib/function";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -66,25 +67,37 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
-export const ENABLE_NOTICE_EMAIL_CACHE: boolean = fromNullable(
-  process.env.ENABLE_NOTICE_EMAIL_CACHE
-)
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
+export const ENABLE_NOTICE_EMAIL_CACHE: boolean = pipe(
+  process.env.ENABLE_NOTICE_EMAIL_CACHE,
+  O.fromNullable,
+  O.map(_ => _.toLowerCase() === "true"),
+  O.getOrElseW(() => false)
+);
 
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () =>
-  fromNullable(process.env.SAML_KEY).getOrElseL(() =>
-    readFile(process.env.SAML_KEY_PATH || "./certs/key.pem", "SAML private key")
+  pipe(
+    process.env.SAML_KEY,
+    O.fromNullable,
+    O.getOrElse(() =>
+      readFile(
+        process.env.SAML_KEY_PATH || "./certs/key.pem",
+        "SAML private key"
+      )
+    )
   );
 export const SAML_KEY = samlKey();
 
 // Public certificate used in SAML authentication to a SPID IDP.
 const samlCert = () =>
-  fromNullable(process.env.SAML_CERT).getOrElseL(() =>
-    readFile(
-      process.env.SAML_CERT_PATH || "./certs/cert.pem",
-      "SAML certificate"
+  pipe(
+    process.env.SAML_CERT,
+    O.fromNullable,
+    O.getOrElse(() =>
+      readFile(
+        process.env.SAML_CERT_PATH || "./certs/cert.pem",
+        "SAML certificate"
+      )
     )
   );
 
@@ -93,9 +106,9 @@ export const SAML_CERT = samlCert();
 // SAML settings.
 const SAML_CALLBACK_URL =
   process.env.SAML_CALLBACK_URL ||
-  "http://italia-backend/assertionConsumerService";
+  "http://@pagopa/backend/assertionConsumerService";
 const SAML_LOGOUT_CALLBACK_URL =
-  process.env.SAML_LOGOUT_CALLBACK_URL || "http://italia-backend/slo";
+  process.env.SAML_LOGOUT_CALLBACK_URL || "http://@pagopa/backend/slo";
 const SAML_ISSUER = process.env.SAML_ISSUER || "https://spid.agid.gov.it/cd";
 const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
 const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
@@ -114,19 +127,24 @@ const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 
-export const STARTUP_IDPS_METADATA:
-  | Record<string, string>
-  | undefined = fromNullable(process.env.STARTUP_IDPS_METADATA)
-  .map(_ =>
-    parseJSON(_, toError)
-      .chain<Record<string, string> | undefined>(_1 =>
-        STRINGS_RECORD.decode(_1).mapLeft(
-          err => new Error(errorsToReadableMessages(err).join(" / "))
+export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
+  process.env.STARTUP_IDPS_METADATA,
+  O.fromNullable,
+  O.map(_ =>
+    pipe(
+      E.parseJSON(_, E.toError),
+      E.chain(_1 =>
+        pipe(
+          _1,
+          STRINGS_RECORD.decode,
+          E.mapLeft(err => new Error(errorsToReadableMessages(err).join(" / ")))
         )
-      )
-      .getOrElse(undefined)
-  )
-  .getOrElse(undefined);
+      ),
+      E.getOrElseW(() => undefined)
+    )
+  ),
+  O.getOrElseW(() => undefined)
+);
 
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
@@ -134,27 +152,34 @@ export const CLIENT_ERROR_REDIRECTION_URL =
 export const CLIENT_REDIRECTION_URL =
   process.env.CLIENT_REDIRECTION_URL || "/login";
 
-const SPID_LEVEL_WHITELIST = fromNullable(process.env.SPID_LEVEL_WHITELIST)
-  .map(_ => _.split(","))
-  .foldL(
+const SPID_LEVEL_WHITELIST = pipe(
+  process.env.SPID_LEVEL_WHITELIST,
+  O.fromNullable,
+  O.map(_ => _.split(",")),
+  O.fold(
     // SPID_LEVEL_WHITELIST is unset
     () => {
       if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
         // default config for development, all the spid levels are allowed
-        return right<t.Errors, SpidLevelArray>(["SpidL1", "SpidL2", "SpidL3"]);
+        return E.right<t.Errors, SpidLevelArray>([
+          "SpidL1",
+          "SpidL2",
+          "SpidL3"
+        ]);
       }
       // default config for production, only L2 and L3 are allowed
-      return right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
+      return E.right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
     },
     _ => SpidLevelArray.decode(_)
-  )
-  .getOrElseL(err => {
+  ),
+  E.getOrElseW(err => {
     log.error(
       "Invalid value for SPID_LEVEL_WHITELIST env [%s]",
       readableReport(err)
     );
     return process.exit(1);
-  });
+  })
+);
 
 export const appConfig: IApplicationConfig = {
   assertionConsumerServicePath: "/assertionConsumerService",
@@ -167,12 +192,18 @@ export const appConfig: IApplicationConfig = {
   startupIdpsMetadata: STARTUP_IDPS_METADATA
 };
 
-const maybeSpidValidatorUrlOption = fromNullable(
-  process.env.SPID_VALIDATOR_URL
-).map(_ => ({ [_]: true }));
-const maybeSpidTestenvOption = fromNullable(SPID_TESTENV_URL).map(_ => ({
-  [_]: true
-}));
+const maybeSpidValidatorUrlOption = pipe(
+  process.env.SPID_VALIDATOR_URL,
+  O.fromNullable,
+  O.map(_ => ({ [_]: true }))
+);
+const maybeSpidTestenvOption = pipe(
+  SPID_TESTENV_URL,
+  O.fromNullable,
+  O.map(_ => ({
+    [_]: true
+  }))
+);
 
 // Set default idp metadata refresh time to 7 days
 export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 7;
@@ -208,8 +239,8 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   spidTestEnvUrl: SPID_TESTENV_URL,
   spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
   strictResponseValidation: {
-    ...(isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
-    ...(isSome(maybeSpidValidatorUrlOption)
+    ...(O.isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
+    ...(O.isSome(maybeSpidValidatorUrlOption)
       ? maybeSpidValidatorUrlOption.value
       : {})
   }
@@ -237,64 +268,74 @@ if (!clientProfileRedirectionUrl.includes("{token}")) {
 }
 
 // IP(s) or CIDR(s) allowed for notification
-export const ALLOW_NOTIFY_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for payment manager endpoint
-export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_PAGOPA_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for myportal endpoint
-export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for bpd endpoint
-export const ALLOW_BPD_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_BPD_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_BPD_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for handling sessions
-export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
@@ -417,20 +458,23 @@ export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";
 export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
 
-export const BARCODE_ALGORITHM = NonEmptyString.decode(
-  process.env.BARCODE_ALGORITHM
-).getOrElse("code128" as NonEmptyString);
+export const BARCODE_ALGORITHM = pipe(
+  process.env.BARCODE_ALGORITHM,
+  NonEmptyString.decode,
+  E.getOrElse(() => "code128" as NonEmptyString)
+);
 
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 
 // Password login params
-export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
-  process.env.TEST_LOGIN_FISCAL_CODES
-)
-  .map(_ => _.split(","))
-  .map(_ => rights(_.map(FiscalCode.decode)))
-  .getOrElse([]);
+export const TEST_LOGIN_FISCAL_CODES = pipe(
+  process.env.TEST_LOGIN_FISCAL_CODES,
+  NonEmptyString.decode,
+  E.map(_ => _.split(",")),
+  E.map(_ => A.rights(_.map(FiscalCode.decode))),
+  E.getOrElseW(() => [])
+);
 
 export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
   process.env.TEST_LOGIN_PASSWORD
@@ -446,82 +490,100 @@ export const FF_MIT_VOUCHER_ENABLED =
   process.env.FF_MIT_VOUCHER_ENABLED === "1";
 
 // Support Token
-export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
-  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
-export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.JWT_SUPPORT_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
+  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const JWT_SUPPORT_TOKEN_ISSUER = pipe(
+  process.env.JWT_SUPPORT_TOKEN_ISSUER,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.JWT_SUPPORT_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION) as Second;
+export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
+  process.env.JWT_SUPPORT_TOKEN_EXPIRATION,
+  IntegerFromString.decode,
+  E.getOrElseW(() => DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION)
+) as Second;
+
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
 
 // Mit  Voucher Token
-export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = NonEmptyString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
-export const JWT_MIT_VOUCHER_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const JWT_MIT_VOUCHER_TOKEN_ISSUER = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION = 600 as Second;
-export const JWT_MIT_VOUCHER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION) as Second;
+export const JWT_MIT_VOUCHER_TOKEN_EXPIRATION: Second = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_EXPIRATION,
+  IntegerFromString.decode,
+  E.getOrElseW(() => DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION)
+) as Second;
+
 log.info(
   "JWT Mit Voucher expiration set to %s seconds",
   JWT_MIT_VOUCHER_TOKEN_EXPIRATION
 );
 
-export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = NonEmptyString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
-export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
-  .decode(process.env.TEST_CGN_FISCAL_CODES || "")
-  .getOrElseL(err => {
+export const TEST_CGN_FISCAL_CODES = pipe(
+  process.env.TEST_CGN_FISCAL_CODES || "",
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW(err => {
     throw new Error(
       `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
     );
-  });
+  })
+);
