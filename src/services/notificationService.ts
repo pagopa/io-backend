@@ -11,6 +11,7 @@ import {
 
 import { QueueClient } from "@azure/storage-queue";
 import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
@@ -31,7 +32,6 @@ import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
 import { toFiscalCodeHash } from "../types/notification";
 import { base64EncodeObject } from "../utils/messages";
-import { pipe } from "fp-ts/lib/function";
 
 export default class NotificationService {
   private readonly notificationQueueClient: QueueClient;

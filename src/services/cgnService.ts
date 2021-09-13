@@ -21,6 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 import { EycaActivationDetail } from "../../generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "../../generated/io-cgn-api/EycaCard";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
@@ -36,7 +37,6 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
-import { pipe } from "fp-ts/lib/function";
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 

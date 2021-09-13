@@ -19,6 +19,8 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../generated/io-api/NewProfile";
 import { Profile as ProfileApi } from "../../generated/io-api/Profile";
@@ -34,8 +36,6 @@ import {
   withValidatedOrInternalError
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/lib/Either";
 
 export default class ProfileService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}

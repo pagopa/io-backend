@@ -20,6 +20,7 @@ import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -37,7 +38,6 @@ import {
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-import { pipe } from "fp-ts/lib/function";
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
