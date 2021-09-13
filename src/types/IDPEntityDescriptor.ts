@@ -1,6 +1,6 @@
 import * as t from "io-ts";
-import { createNonEmptyArrayFromArray } from "io-ts-types/lib/fp-ts/createNonEmptyArrayFromArray";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { nonEmptyArray as createNonEmptyArrayFromArray } from "io-ts-types/lib/nonEmptyArray";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 export const IDPEntityDescriptor = t.interface({
   cert: createNonEmptyArrayFromArray(NonEmptyString),
