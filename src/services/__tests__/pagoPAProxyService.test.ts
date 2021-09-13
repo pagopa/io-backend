@@ -1,5 +1,5 @@
 import * as t from "io-ts";
-import { TypeofApiResponse } from "italia-ts-commons/lib/requests";
+import { TypeofApiResponse } from "@pagopa/ts-commons/lib/requests";
 
 import PagoPAClientFactory from "../pagoPAClientFactory";
 import PagoPAProxyService from "../pagoPAProxyService";
@@ -10,6 +10,8 @@ import { PaymentActivationsPostRequest } from "../../../generated/pagopa-proxy/P
 import { PaymentFaultEnum } from "../../../generated/pagopa-proxy/PaymentFault";
 import { GetPaymentInfoT } from "../../../generated/pagopa-proxy/requestTypes";
 import { PagoPAEnvironment } from "../IPagoPAClientFactory";
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 
 const aRptId = "123456";
 const acodiceContestoPagamento = "01234567890123456789012345678901" as CodiceContestoPagamento;
@@ -48,15 +50,17 @@ const proxyPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   }
 };
 
-const validPaymentActivation: PaymentActivationsPostRequest = PaymentActivationsPostRequest.decode(
+const validPaymentActivation: PaymentActivationsPostRequest = pipe(
   {
     codiceContestoPagamento: acodiceContestoPagamento,
     importoSingoloVersamento: 200,
     rptId: "12345678901012123456789012312"
-  }
-).getOrElseL(errors => {
-  throw Error(`Invalid RptId to decode: ${JSON.stringify(errors)}`);
-});
+  },
+  PaymentActivationsPostRequest.decode,
+  E.getOrElseW(errors => {
+    throw Error(`Invalid RptId to decode: ${JSON.stringify(errors)}`);
+  })
+);
 
 const validActivatePaymentResponse = {
   status: 200,
