@@ -8,11 +8,12 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { toError } from "fp-ts/lib/Either";
-import { fromEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { Millisecond } from "italia-ts-commons/lib/units";
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { Millisecond } from "@pagopa/ts-commons/lib/units";
+import { pipe } from "fp-ts/lib/function";
 import { Installation } from "../../generated/backend/Installation";
 import { InstallationID } from "../../generated/backend/InstallationID";
 
@@ -53,15 +54,16 @@ export default class NotificationController {
       withValidatedOrValidationError(
         Notification.decode(req.body),
         (data: Notification) =>
-          tryCatch(
-            async () =>
-              await this.sessionStorage.userHasActiveSessions(
-                data.message.fiscal_code
-              ),
-            toError
-          )
-            .chain(fromEither)
-            .map(async userHasActiveSessions =>
+          pipe(
+            TE.tryCatch(
+              async () =>
+                await this.sessionStorage.userHasActiveSessions(
+                  data.message.fiscal_code
+                ),
+              E.toError
+            ),
+            TE.chain(TE.fromEither),
+            TE.map(async userHasActiveSessions =>
               userHasActiveSessions && "content" in data.message
                 ? // send the full message only if the user has an
                   // active session and the message content is defined
@@ -77,11 +79,11 @@ export default class NotificationController {
                     this.opts.notificationDefaultSubject,
                     this.opts.notificationDefaultTitle
                   )
-            )
-            .getOrElseL(async error => {
+            ),
+            TE.getOrElse(error => {
               throw error;
             })
-            .run()
+          )()
       )
     );
 
