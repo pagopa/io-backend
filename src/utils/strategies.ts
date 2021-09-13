@@ -1,4 +1,7 @@
+import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import { IVerifyOptions } from "passport-http-bearer";
 import { User } from "../types/user";
@@ -20,8 +23,11 @@ export function fulfill(
   errorOrUser: Either<Error, Option<User>>,
   done: StrategyDoneFunction
 ): void {
-  errorOrUser.fold(
-    error => done(error),
-    user => done(undefined, user.isNone() ? false : user.value)
+  pipe(
+    errorOrUser,
+    E.fold(
+      error => done(error),
+      user => done(undefined, O.isNone(user) ? false : user.value)
+    )
   );
 }
