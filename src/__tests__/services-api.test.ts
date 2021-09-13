@@ -1,13 +1,13 @@
 import * as apicache from "apicache";
 import { Express, NextFunction, Request, Response } from "express";
-import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import {
   CIDR,
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 import * as passport from "passport";
 import * as request from "supertest";
 
