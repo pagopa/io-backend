@@ -14,10 +14,12 @@ import {
   ResponseErrorTooManyRequests,
   ResponseErrorValidation,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { fromNullable } from "fp-ts/lib/Option";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import * as T from "fp-ts/lib/Task";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -35,6 +37,7 @@ import {
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
+import { pipe } from "fp-ts/lib/function";
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -87,28 +90,30 @@ export default class MessagesService {
         id: messageId
       });
 
-      const resMessageContent = res.map(_ =>
-        _.status === 200 ? { ..._, value: _.value.message } : _
+      const resMessageContent = pipe(
+        res,
+        E.map(_ => (_.status === 200 ? { ..._, value: _.value.message } : _))
       );
 
       return withValidatedOrInternalError(resMessageContent, async response => {
         if (response.status === 200) {
-          const maybePrescriptionData = fromNullable(
+          const maybePrescriptionData = O.fromNullable(
             response.value.content.prescription_data
           );
 
-          return maybePrescriptionData.isNone()
+          return O.isNone(maybePrescriptionData)
             ? ResponseSuccessJson(response.value)
-            : getPrescriptionAttachments(maybePrescriptionData.value)
-                .map(attachments => ({
+            : pipe(
+                getPrescriptionAttachments(maybePrescriptionData.value),
+                T.map(attachments => ({
                   ...response.value,
                   content: {
                     ...response.value.content,
                     attachments
                   }
-                }))
-                .map(ResponseSuccessJson)
-                .run();
+                })),
+                T.map(ResponseSuccessJson)
+              )();
         }
 
         return response.status === 404
