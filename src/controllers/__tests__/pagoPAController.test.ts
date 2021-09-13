@@ -1,6 +1,6 @@
 import * as redis from "redis";
 
-import { EmailString, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -9,8 +9,8 @@ import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
 
-import { left, right } from "fp-ts/lib/Either";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import * as E from "fp-ts/lib/Either";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
 import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/io-api/IsWebhookEnabled";
@@ -87,14 +87,12 @@ const userInitializedProfile: InitializedProfile = {
 const mockGetPagoPaNoticeEmail = jest
   .fn()
   .mockImplementation((_, __) =>
-    Promise.resolve(
-      left<Error, EmailString>(new Error("Notify email value not found"))
-    )
+    Promise.resolve(E.left(new Error("Notify email value not found")))
   );
 
 const mockSetPagoPaNoticeEmail = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve(right<Error, boolean>(true)));
+  .mockImplementation(_ => Promise.resolve(E.right(true)));
 
 jest.mock("../../services/redisSessionStorage", () => {
   return {
@@ -195,7 +193,7 @@ describe("PagoPaController#getUser", () => {
     const req = mockReq();
 
     mockGetPagoPaNoticeEmail.mockImplementationOnce(() =>
-      Promise.resolve(right(aCustomEmailAddress))
+      Promise.resolve(E.right(aCustomEmailAddress))
     );
 
     // tslint:disable-next-line: no-object-mutation
