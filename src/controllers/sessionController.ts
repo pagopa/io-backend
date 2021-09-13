@@ -9,11 +9,12 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
+import * as E from "fp-ts/lib/Either";
 
-import { isLeft } from "fp-ts/lib/Either";
 import TokenService from "src/services/tokenService";
 import { BPDToken, MyPortalToken } from "src/types/token";
+import { pipe } from "fp-ts/lib/function";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { PublicSession } from "../../generated/backend/PublicSession";
 import RedisSessionStorage from "../services/redisSessionStorage";
@@ -60,22 +61,23 @@ export default class SessionController {
             ) as MyPortalToken)
       };
 
-      return (await this.sessionStorage.update(updatedUser)).fold<
-        IResponseErrorInternal | IResponseSuccessJson<PublicSession>
-      >(
-        err => {
+      return pipe(
+        await this.sessionStorage.update(updatedUser),
+        E.mapLeft(err => {
           log.error(`getSessionState: ${err.message}`);
           return ResponseErrorInternal(
             `Error updating user session [${err.message}]`
           );
-        },
-        _ =>
+        }),
+        E.map(_ =>
           ResponseSuccessJson({
             bpdToken: updatedUser.bpd_token,
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token
           })
+        ),
+        E.toUnion
       );
     });
 
@@ -88,12 +90,12 @@ export default class SessionController {
   > =>
     withUserFromRequest(req, async user => {
       const sessionsList = await this.sessionStorage.listUserSessions(user);
-      if (isLeft(sessionsList)) {
-        return ResponseErrorInternal(sessionsList.value.message);
+      if (E.isLeft(sessionsList)) {
+        return ResponseErrorInternal(sessionsList.left.message);
       }
-      if (sessionsList.value.sessions.length === 0) {
+      if (sessionsList.right.sessions.length === 0) {
         return ResponseErrorInternal("No valid sessions found for the user");
       }
-      return ResponseSuccessJson<SessionsList>(sessionsList.value);
+      return ResponseSuccessJson<SessionsList>(sessionsList.right);
     });
 }
