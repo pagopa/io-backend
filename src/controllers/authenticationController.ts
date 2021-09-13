@@ -5,14 +5,8 @@
  */
 
 import * as express from "express";
-import {
-  fromNullable as fromNullableE,
-  isLeft,
-  left,
-  right,
-  toError
-} from "fp-ts/lib/Either";
-import { fromNullable } from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -24,14 +18,15 @@ import {
   ResponseErrorValidation,
   ResponsePermanentRedirect,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+} from "@pagopa/ts-commons/lib/responses";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import { NewProfile } from "generated/io-api/NewProfile";
 
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import UsersLoginLogService from "src/services/usersLoginLogService";
+import { pipe } from "fp-ts/lib/function";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -92,16 +87,16 @@ export default class AuthenticationController {
 
     const errorOrSpidUser = validateSpidUser(userPayload);
 
-    if (isLeft(errorOrSpidUser)) {
+    if (E.isLeft(errorOrSpidUser)) {
       log.error(
         "acs: error validating the SPID user [%O] [%s]",
         userPayload,
-        errorOrSpidUser.value
+        errorOrSpidUser.left
       );
-      return ResponseErrorValidation("Bad request", errorOrSpidUser.value);
+      return ResponseErrorValidation("Bad request", errorOrSpidUser.left);
     }
 
-    const spidUser = errorOrSpidUser.value;
+    const spidUser = errorOrSpidUser.right;
 
     //
     // create a new user object
@@ -131,14 +126,14 @@ export default class AuthenticationController {
       this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
     ]);
 
-    if (isLeft(errorOrIsBlockedUser)) {
+    if (E.isLeft(errorOrIsBlockedUser)) {
       // the query to the session store failed
-      const err = errorOrIsBlockedUser.value;
+      const err = errorOrIsBlockedUser.left;
       log.error(`acs: error checking blocked user [${err.message}]`);
       return ResponseErrorInternal("Error while validating user");
     }
 
-    const isBlockedUser = errorOrIsBlockedUser.value;
+    const isBlockedUser = errorOrIsBlockedUser.right;
     if (isBlockedUser) {
       return ResponseErrorForbiddenNotAuthorized;
     }
@@ -159,15 +154,15 @@ export default class AuthenticationController {
       this.profileService.getProfile(user)
     ]);
 
-    if (isLeft(errorOrIsSessionCreated)) {
-      const error = errorOrIsSessionCreated.value;
+    if (E.isLeft(errorOrIsSessionCreated)) {
+      const error = errorOrIsSessionCreated.left;
       log.error(
         `acs: error while creating the user session [${error.message}]`
       );
       return ResponseErrorInternal("Error while creating the user session");
     }
 
-    const isSessionCreated = errorOrIsSessionCreated.value;
+    const isSessionCreated = errorOrIsSessionCreated.right;
 
     if (isSessionCreated === false) {
       log.error("Error creating the user session");
@@ -182,9 +177,12 @@ export default class AuthenticationController {
       );
       const newProfile: NewProfile = {
         email: spidUser.email,
-        is_email_validated: fromNullable(spidUser.email)
-          .map(() => true)
-          .getOrElse(false),
+        is_email_validated: pipe(
+          spidUser.email,
+          O.fromNullable,
+          O.map(_ => true),
+          O.getOrElseW(() => false)
+        ),
         is_test_profile: isTestProfile
       };
       const createProfileResponse = await this.profileService.createProfile(
@@ -219,7 +217,7 @@ export default class AuthenticationController {
       });
     } catch (e) {
       // Fire & forget, so just print a debug message
-      log.debug("Cannot notify userLogin: %s", toError(e).message);
+      log.debug("Cannot notify userLogin: %s", E.toError(e).message);
     }
 
     // async fire & forget
@@ -265,24 +263,31 @@ export default class AuthenticationController {
     // Ref: https://www.pivotaltracker.com/story/show/173847889
     if (acsResponse.kind === "IResponsePermanentRedirect") {
       const REDIRECT_URL = clientProfileRedirectionUrl.replace("{token}", "");
-      return fromNullableE(
-        new Error("Missing detail in ResponsePermanentRedirect")
-      )(acsResponse.detail)
-        .chain<string>(_ => {
+      return pipe(
+        acsResponse.detail,
+        E.fromNullable(
+          new Error("Missing detail in ResponsePermanentRedirect")
+        ),
+        E.chain(_ => {
           if (_.includes(REDIRECT_URL)) {
-            return right(_.replace(REDIRECT_URL, ""));
+            return E.right(_.replace(REDIRECT_URL, ""));
           }
-          return left(new Error("Unexpected redirection url"));
-        })
-        .chain(token =>
-          NonEmptyString.decode(token).mapLeft(
-            err => new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
+          return E.left(new Error("Unexpected redirection url"));
+        }),
+        E.chain(token =>
+          pipe(
+            token,
+            NonEmptyString.decode,
+            E.mapLeft(
+              err =>
+                new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
+            )
           )
-        )
-        .fold<IResponseSuccessJson<AccessToken> | IResponseErrorInternal>(
-          err => ResponseErrorInternal(err.message),
-          token => ResponseSuccessJson({ token })
-        );
+        ),
+        E.map(token => ResponseSuccessJson({ token })),
+        E.mapLeft(err => ResponseErrorInternal(err.message)),
+        E.toUnion
+      );
     }
     return acsResponse;
   }
@@ -300,12 +305,12 @@ export default class AuthenticationController {
       withCatchAsInternalError(async () => {
         const errorOrResponse = await this.sessionStorage.del(user);
 
-        if (isLeft(errorOrResponse)) {
-          const error = errorOrResponse.value;
+        if (E.isLeft(errorOrResponse)) {
+          const error = errorOrResponse.left;
           return ResponseErrorInternal(error.message);
         }
 
-        const response = errorOrResponse.value;
+        const response = errorOrResponse.right;
 
         if (!response) {
           return ResponseErrorInternal("Error destroying the user session");
@@ -338,17 +343,22 @@ export default class AuthenticationController {
     | IResponseSuccessJson<UserIdentity>
   > =>
     withUserFromRequest(req, async user =>
-      UserIdentity.decode(user).fold<
-        IResponseErrorInternal | IResponseSuccessJson<UserIdentity>
-      >(
-        _ => ResponseErrorInternal("Unexpected User Identity data format."),
-        _ =>
-          exactUserIdentityDecode(_).fold<
-            IResponseErrorInternal | IResponseSuccessJson<UserIdentity>
-          >(
-            _1 => ResponseErrorInternal("Exact decode failed."),
-            _1 => ResponseSuccessJson<UserIdentity>(_1)
+      pipe(
+        user,
+        UserIdentity.decode,
+        E.mapLeft(_ =>
+          ResponseErrorInternal("Unexpected User Identity data format.")
+        ),
+        E.map(_ =>
+          pipe(
+            _,
+            exactUserIdentityDecode,
+            E.mapLeft(_1 => ResponseErrorInternal("Exact decode failed.")),
+            E.map(_1 => ResponseSuccessJson<UserIdentity>(_1)),
+            E.toUnion
           )
+        ),
+        E.toUnion
       )
     );
 }
