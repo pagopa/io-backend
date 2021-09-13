@@ -1,17 +1,19 @@
 import { QueueClient } from "@azure/storage-queue";
 import { format as dateFnsFormat } from "date-fns";
-import { isLeft, tryCatch2v } from "fp-ts/lib/Either";
-import { fromEither, fromNullable, isNone, Option } from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { UTCISODateFromString } from "italia-ts-commons/lib/dates";
-import { readableReport } from "italia-ts-commons/lib/reporters";
+import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   FiscalCode,
   IPString,
   NonEmptyString,
   PatternString
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
+import { Option } from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 import { log } from "./logger";
 import { base64EncodeObject } from "./messages";
 
@@ -21,24 +23,29 @@ const SAML_NAMESPACE = {
 };
 
 export const getFiscalNumberFromPayload = (doc: Document): Option<FiscalCode> =>
-  fromNullable(
-    doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
-  )
-    .mapNullable(collection =>
+  pipe(
+    O.fromNullable(
+      doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
+    ),
+    O.chainNullableK(collection =>
       Array.from(collection).find(
         elem => elem.getAttribute("Name") === "fiscalNumber"
       )
-    )
-    .mapNullable(_ => _.textContent?.trim().replace("TINIT-", ""))
-    .chain(_ => fromEither(FiscalCode.decode(_)));
+    ),
+    O.chainNullableK(_ => _.textContent?.trim().replace("TINIT-", "")),
+    O.chain(_ => O.fromEither(FiscalCode.decode(_)))
+  );
 
 const getRequestIDFromPayload = (tagName: string, attrName: string) => (
   doc: Document
 ): Option<string> =>
-  fromNullable(
-    doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
-  ).chain(element =>
-    fromEither(NonEmptyString.decode(element.getAttribute(attrName)))
+  pipe(
+    O.fromNullable(
+      doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
+    ),
+    O.chain(element =>
+      O.fromEither(NonEmptyString.decode(element.getAttribute(attrName)))
+    )
   );
 
 export const getRequestIDFromRequest = getRequestIDFromPayload(
@@ -82,7 +89,7 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
   responsePayload: string
 ): void => {
   const logPrefix = `SpidLogCallback`;
-  tryCatch2v(
+  E.tryCatch(
     () => {
       const responseXML = new DOMParser().parseFromString(
         responsePayload,
@@ -94,14 +101,14 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
       }
 
       const maybeRequestId = getRequestIDFromResponse(responseXML);
-      if (isNone(maybeRequestId)) {
+      if (O.isNone(maybeRequestId)) {
         log.error(`${logPrefix}|ERROR=Cannot get Request ID from SPID XML`);
         return;
       }
       const requestId = maybeRequestId.value;
 
       const maybeFiscalCode = getFiscalNumberFromPayload(responseXML);
-      if (isNone(maybeFiscalCode)) {
+      if (O.isNone(maybeFiscalCode)) {
         log.error(
           `${logPrefix}|ERROR=Cannot get user's fiscal Code from SPID XML`
         );
@@ -119,14 +126,14 @@ export const makeSpidLogCallback = (queueClient: QueueClient) => (
         spidRequestId: requestId
       } as SpidMsg);
 
-      if (isLeft(errorOrSpidMsg)) {
+      if (E.isLeft(errorOrSpidMsg)) {
         log.error(`${logPrefix}|ERROR=Invalid format for SPID log payload`);
         log.debug(
-          `${logPrefix}|ERROR_DETAILS=${readableReport(errorOrSpidMsg.value)}`
+          `${logPrefix}|ERROR_DETAILS=${readableReport(errorOrSpidMsg.left)}`
         );
         return;
       }
-      const spidMsg = errorOrSpidMsg.value;
+      const spidMsg = errorOrSpidMsg.right;
 
       // encode to base64 since the queue payload is an XML
       // and cannot contain markup characters
