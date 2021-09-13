@@ -1,9 +1,9 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -53,7 +53,7 @@ describe("SupportController#getSupportToken", () => {
   it("should return a valid support token by calling TokenService with valid values", async () => {
     const req = mockReq();
 
-    mockGetSupportToken.mockReturnValue(taskEither.of(aSupportToken));
+    mockGetSupportToken.mockReturnValue(TE.of(aSupportToken));
 
     req.user = mockedUser;
 
@@ -72,7 +72,7 @@ describe("SupportController#getSupportToken", () => {
     const req = mockReq();
 
     mockGetSupportToken.mockReturnValue(
-      fromLeft(new Error("ERROR while generating JWT support token"))
+      TE.left(new Error("ERROR while generating JWT support token"))
     );
     req.user = mockedUser;
 
