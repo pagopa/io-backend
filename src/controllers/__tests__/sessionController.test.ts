@@ -5,7 +5,7 @@
 /* tslint:disable:no-big-function */
 /* tslint:disable:no-object-mutation */
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -20,6 +20,7 @@ import TokenService from "../../services/tokenService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import SessionController from "../sessionController";
+import * as E from "fp-ts/lib/Either";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -171,6 +172,9 @@ describe("SessionController#listSessions", () => {
     const expectedResponse = SessionsList.decode({
       sessions: [expectedSessionInfo]
     });
-    expect(res.json).toHaveBeenCalledWith(expectedResponse.value);
+    expect(E.isRight(expectedResponse)).toBeTruthy();
+    if (E.isRight(expectedResponse)) {
+      expect(res.json).toHaveBeenCalledWith(expectedResponse.right);
+    }
   });
 });
