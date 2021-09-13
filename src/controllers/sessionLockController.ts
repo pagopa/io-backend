@@ -10,15 +10,14 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-
-import { sequenceT } from "fp-ts/lib/Apply";
-import { toError } from "fp-ts/lib/Either";
-import { identity } from "fp-ts/lib/function";
-import { fromEither, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/responses";
+import * as E from "fp-ts/lib/Either";
+import * as AP from "fp-ts/lib/Apply";
+import * as TE from "fp-ts/lib/TaskEither";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { SuccessResponse } from "src/types/commons";
+import { pipe } from "fp-ts/lib/function";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 
@@ -42,39 +41,52 @@ export default class SessionLockController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
   > =>
-    taskEither
-      .of<IResponseErrorInternal | IResponseErrorValidation, void>(void 0)
-      .chain(_ =>
-        fromEither(
-          FiscalCode.decode(req.params.fiscal_code).mapLeft(err =>
+    pipe(
+      TE.of(void 0),
+      TE.chainW(_ =>
+        pipe(
+          req.params.fiscal_code,
+          FiscalCode.decode,
+          E.mapLeft(err =>
             ResponseErrorValidation("Invalid fiscal code", readableReport(err))
-          )
+          ),
+          TE.fromEither
         )
-      )
-      .chain(fiscalCode =>
-        sequenceT(taskEither)(
-          // lock the account
-          tryCatch(
-            () => this.sessionStorage.setBlockedUser(fiscalCode),
-            toError
-          ).chain(fromEither),
-          // removes all sessions
-          tryCatch(
-            () => this.sessionStorage.delUserAllSessions(fiscalCode),
-            toError
-          ).chain(fromEither),
-          // removes all metadata
-          tryCatch(() => this.metadataStorage.del(fiscalCode), toError).chain(
-            fromEither
-          )
-        ).mapLeft(err => ResponseErrorInternal(err.message))
-      )
-      .fold<
-        | IResponseErrorInternal
-        | IResponseErrorValidation
-        | IResponseSuccessJson<SuccessResponse>
-      >(identity, _ => ResponseSuccessJson({ message: "ok" }))
-      .run();
+      ),
+      TE.chainW(fiscalCode =>
+        pipe(
+          AP.sequenceT(TE.ApplicativeSeq)(
+            // lock the account
+            pipe(
+              TE.tryCatch(
+                () => this.sessionStorage.setBlockedUser(fiscalCode),
+                E.toError
+              ),
+              TE.chain(TE.fromEither)
+            ),
+            // removes all sessions
+            pipe(
+              TE.tryCatch(
+                () => this.sessionStorage.delUserAllSessions(fiscalCode),
+                E.toError
+              ),
+              TE.chain(TE.fromEither)
+            ),
+            // removes all metadata
+            pipe(
+              TE.tryCatch(
+                () => this.metadataStorage.del(fiscalCode),
+                E.toError
+              ),
+              TE.chain(TE.fromEither)
+            )
+          ),
+          TE.mapLeft(err => ResponseErrorInternal(err.message))
+        )
+      ),
+      TE.map(_ => ResponseSuccessJson({ message: "ok" })),
+      TE.toUnion
+    )();
 
   /**
    * Unlock a user account
@@ -90,29 +102,31 @@ export default class SessionLockController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
   > =>
-    taskEither
-      .of<IResponseErrorInternal | IResponseErrorValidation, void>(void 0)
+    pipe(
+      TE.of(void 0),
       // eslint-disable-next-line sonarjs/no-identical-functions
-      .chain(_ =>
-        fromEither(
-          FiscalCode.decode(req.params.fiscal_code).mapLeft(err =>
+      TE.chain(_ =>
+        pipe(
+          req.params.fiscal_code,
+          FiscalCode.decode,
+          E.mapLeft(err =>
             ResponseErrorValidation("Invalid fiscal code", readableReport(err))
-          )
+          ),
+          TE.fromEither
         )
-      )
-      .chain(fiscalCode =>
+      ),
+      TE.chainW(fiscalCode =>
         // unlock the account
-        tryCatch(
-          () => this.sessionStorage.unsetBlockedUser(fiscalCode),
-          toError
+        pipe(
+          TE.tryCatch(
+            () => this.sessionStorage.unsetBlockedUser(fiscalCode),
+            E.toError
+          ),
+          TE.chain(TE.fromEither),
+          TE.mapLeft(err => ResponseErrorInternal(err.message))
         )
-          .chain(fromEither)
-          .mapLeft(err => ResponseErrorInternal(err.message))
-      )
-      .fold<
-        | IResponseErrorInternal
-        | IResponseErrorValidation
-        | IResponseSuccessJson<SuccessResponse>
-      >(identity, _ => ResponseSuccessJson({ message: "ok" }))
-      .run();
+      ),
+      TE.map(_ => ResponseSuccessJson({ message: "ok" })),
+      TE.toUnion
+    )();
 }

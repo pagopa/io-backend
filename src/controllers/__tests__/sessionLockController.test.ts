@@ -1,31 +1,36 @@
-import { left, right } from "fp-ts/lib/Either";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../../services/redisUserMetadataStorage";
 import SessionLockController from "../sessionLockController";
+import { pipe } from "fp-ts/lib/function";
 
-const aFiscalCode = FiscalCode.decode("AAABBB80A01C123D").getOrElseL(() => {
-  throw new Error("invalid mock FiscalCode");
-});
+const aFiscalCode = pipe(
+  "AAABBB80A01C123D",
+  FiscalCode.decode,
+  E.getOrElseW(() => {
+    throw new Error("invalid mock FiscalCode");
+  })
+);
 
 const mockDelUserAllSessions = jest
   .fn()
-  .mockImplementation(async () => right(true));
+  .mockImplementation(async () => E.right(true));
 const mockSetBlockedUser = jest
   .fn()
-  .mockImplementation(async () => right(true));
+  .mockImplementation(async () => E.right(true));
 const mockUnsetBlockedUser = jest
   .fn()
-  .mockImplementation(async () => right(true));
+  .mockImplementation(async () => E.right(true));
 const mockRedisSessionStorage = ({
   delUserAllSessions: mockDelUserAllSessions,
   setBlockedUser: mockSetBlockedUser,
   unsetBlockedUser: mockUnsetBlockedUser
 } as unknown) as RedisSessionStorage;
 
-const mockDel = jest.fn().mockImplementation(async () => right(true));
+const mockDel = jest.fn().mockImplementation(async () => E.right(true));
 const mockRedisUserMetadataStorage = ({
   del: mockDel
 } as unknown) as RedisUserMetadataStorage;
@@ -83,7 +88,7 @@ describe("SessionLockController#lockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockSetBlockedUser.mockImplementationOnce(async () => left("any error"));
+    mockSetBlockedUser.mockImplementationOnce(async () => E.left("any error"));
 
     const controller = new SessionLockController(
       mockRedisSessionStorage,
@@ -101,7 +106,7 @@ describe("SessionLockController#lockUserSession", () => {
     const res = mockRes();
 
     mockDelUserAllSessions.mockImplementationOnce(async () =>
-      left("any error")
+      E.left("any error")
     );
 
     const controller = new SessionLockController(
@@ -119,7 +124,7 @@ describe("SessionLockController#lockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockDel.mockImplementationOnce(async () => left("any error"));
+    mockDel.mockImplementationOnce(async () => E.left("any error"));
 
     const controller = new SessionLockController(
       mockRedisSessionStorage,
@@ -132,8 +137,6 @@ describe("SessionLockController#lockUserSession", () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
-
-
 
 describe("SessionLockController#unlockUserSession", () => {
   it("should fail on invalid fiscal code", async () => {
@@ -188,7 +191,9 @@ describe("SessionLockController#unlockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockUnsetBlockedUser.mockImplementationOnce(async () => left("any error"));
+    mockUnsetBlockedUser.mockImplementationOnce(async () =>
+      E.left("any error")
+    );
 
     const controller = new SessionLockController(
       mockRedisSessionStorage,
