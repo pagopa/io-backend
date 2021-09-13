@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as t from "io-ts";
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import * as E from "fp-ts/lib/Either";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
@@ -10,7 +11,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 /**
  * Interface for a no content response returning a empty object.
@@ -64,11 +65,11 @@ export const withValidatedOrInternalError = <T, U>(
   validated: t.Validation<T>,
   f: (p: T) => U
 ): U | IResponseErrorInternal =>
-  validated.isLeft()
+  E.isLeft(validated)
     ? ResponseErrorInternal(
-        errorsToReadableMessages(validated.value).join(" / ")
+        errorsToReadableMessages(validated.left).join(" / ")
       )
-    : f(validated.value);
+    : f(validated.right);
 
 /**
  * Calls the provided function with the valid response, or else returns an
@@ -78,12 +79,12 @@ export const withValidatedOrValidationError = <T, U>(
   response: t.Validation<T>,
   f: (p: T) => U
 ): U | IResponseErrorValidation =>
-  response.isLeft()
+  E.isLeft(response)
     ? ResponseErrorValidation(
         "Bad request",
-        errorsToReadableMessages(response.value).join(" / ")
+        errorsToReadableMessages(response.left).join(" / ")
       )
-    : f(response.value);
+    : f(response.right);
 
 /**
  * Interface for unauthorized error response.
