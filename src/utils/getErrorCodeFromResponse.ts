@@ -1,6 +1,8 @@
 import { DOMParser } from "xmldom";
 
-import { none, Option, some, tryCatch } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 
 type SpidError = string;
 
@@ -13,22 +15,24 @@ type SpidError = string;
 export default function getErrorCodeFromResponse(
   xml: string
 ): Option<SpidError> {
-  return tryCatch(() => new DOMParser().parseFromString(xml))
-    .chain(xmlResponse =>
+  return pipe(
+    O.tryCatch(() => new DOMParser().parseFromString(xml)),
+    O.chain(xmlResponse =>
       xmlResponse
-        ? some(xmlResponse.getElementsByTagName("StatusMessage"))
-        : none
-    )
-    .chain(responseStatusMessageEl =>
+        ? O.some(xmlResponse.getElementsByTagName("StatusMessage"))
+        : O.none
+    ),
+    O.chain(responseStatusMessageEl =>
       responseStatusMessageEl?.[0]?.textContent
-        ? some(responseStatusMessageEl[0].textContent.trim())
-        : none
-    )
-    .chain(errorString => {
+        ? O.some(responseStatusMessageEl[0].textContent.trim())
+        : O.none
+    ),
+    O.chain(errorString => {
       const indexString = "ErrorCode nr";
       const errorCode = errorString.slice(
         errorString.indexOf(indexString) + indexString.length
       );
-      return errorCode ? some(errorCode) : none;
-    });
+      return errorCode ? O.some(errorCode) : O.none;
+    })
+  );
 }
