@@ -58,7 +58,10 @@ export default class PagoPAProxyService {
               // eslint-disable-next-line sonarjs/no-duplicate-string
               response.value.detail || "Bad request response from upstream API"
             )
-          : ResponsePaymentError(response.value.detail, response.value.detail_v2)
+          : ResponsePaymentError(
+              response.value.detail,
+              response.value.detail_v2
+            )
       );
     });
 
@@ -93,7 +96,10 @@ export default class PagoPAProxyService {
               response.value.title || "Bad request (upstream)",
               response.value.detail || "Bad request response from upstream API"
             )
-          : ResponsePaymentError(response.value.detail, response.value.detail_v2)
+          : ResponsePaymentError(
+              response.value.detail,
+              response.value.detail_v2
+            )
       );
     });
 

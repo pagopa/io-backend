@@ -37,7 +37,7 @@ const errorPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   status: 500,
   value: {
     detail: PaymentFaultEnum.PAYMENT_UNAVAILABLE,
-    detail_v2 : PaymentFaultV2Enum.PPT_IBAN_NON_CENSITO
+    detail_v2: PaymentFaultV2Enum.PPT_IBAN_NON_CENSITO
   }
 };
 
