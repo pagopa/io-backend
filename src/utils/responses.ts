@@ -3,7 +3,10 @@ import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
 import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
 import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
 import * as t from "io-ts";
-import { IWithinRangeIntegerTag, WithinRangeInteger } from "italia-ts-commons/lib/numbers";
+import {
+  IWithinRangeIntegerTag,
+  WithinRangeInteger
+} from "italia-ts-commons/lib/numbers";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
@@ -122,15 +125,13 @@ export const ResponseErrorUnexpectedAuthProblem = () =>
   // This case can only happen because of misconfiguration, thus it might be considered an error
   ResponseErrorInternal("Underlying API fails with an unexpected 401");
 
-
 export type HttpStatusCode = t.TypeOf<typeof HttpStatusCode>;
 export const HttpStatusCode = t.union([
   WithinRangeInteger<100, 599, IWithinRangeIntegerTag<100, 599>>(100, 599),
   t.literal(599)
 ]);
 
-export interface IResponsePaymentInternalError
-  extends IResponse<"IResponseErrorInternal"> {}
+export type IResponsePaymentInternalError = IResponse<"IResponseErrorInternal">;
 
 /**
  * Returns a 500 with json response.
@@ -140,10 +141,10 @@ export const ResponsePaymentError = (
   detailV2: PaymentFaultV2Enum
 ): IResponsePaymentInternalError => {
   const problem: PaymentProblemJson = {
-    status: HttpStatusCodeEnum.HTTP_STATUS_500 as HttpStatusCode,
-    title: "Internal server error",
     detail,
-    detail_v2: detailV2
+    detail_v2: detailV2,
+    status: HttpStatusCodeEnum.HTTP_STATUS_500 as HttpStatusCode,
+    title: "Internal server error"
   };
   return {
     apply: res =>
