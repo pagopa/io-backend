@@ -164,7 +164,10 @@ paths:
   "/messages":
     x-swagger-router-controller: MessagesController
     parameters:
-      - $ref: "#/parameters/PaginationRequest"
+      - $ref: "#/parameters/PageSize"
+      - $ref: "#/parameters/EnrichResultData"
+      - $ref: "#/parameters/MaximumId"
+      - $ref: "#/parameters/MinimumId"
     get:
       operationId: getUserMessages
       summary: Get user's messages
@@ -1132,6 +1135,33 @@ definitions:
       - expires_in
 responses: {}
 parameters:
+  EnrichResultData:
+    type: boolean
+    name: enrich_result_data
+    in: query
+    required: false
+    description: Indicates whether result data should be enriched or not.
+  PageSize:
+    type: integer
+    name: page_size
+    in: query
+    minimum: 1
+    required: false
+    description: How many items a page should include.
+  MaximumId:
+    type: string
+    name: maximum_id
+    in: query
+    required: false
+    description: >-
+      The maximum id to get messages until to.
+  MinimumId:
+    type: string
+    name: minimum_id
+    in: query
+    required: false
+    description: >-
+      The minimum id to get messages from.
   PaginationRequest:
     type: string
     name: cursor

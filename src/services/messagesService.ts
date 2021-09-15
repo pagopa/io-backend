@@ -14,10 +14,10 @@ import {
   ResponseErrorTooManyRequests,
   ResponseErrorValidation,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -35,6 +35,7 @@ import {
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
+import { GetMessagesParameters } from "src/types/parameters";
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -43,7 +44,8 @@ export default class MessagesService {
    * Retrieves all messages for a specific user.
    */
   public readonly getMessagesByUser = (
-    user: User
+    user: User,
+    params: GetMessagesParameters
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -53,7 +55,10 @@ export default class MessagesService {
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
       const validated = await client.getMessagesByUser({
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
+        page_size: params.pageSize,
+        enrich_result_data: params.enrichResultData,
+        continuation_token: params.continuationToken
       });
 
       return withValidatedOrInternalError(validated, response =>

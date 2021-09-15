@@ -9,7 +9,8 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  ResponseErrorValidation
 } from "italia-ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
@@ -17,6 +18,8 @@ import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
 import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
+import { identity } from "fp-ts/lib/function";
+import { GetMessagesParameters } from "../types/parameters";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -32,7 +35,32 @@ export default class MessagesController {
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
-  > => withUserFromRequest(req, this.messagesService.getMessagesByUser);
+  > =>
+    GetMessagesParameters.decode({
+      pageSize: req.query.page_size,
+      continuationToken: req.query.continuation_token,
+      enrichResultData: req.query.enrich_result_data
+    })
+      .map(params =>
+        withUserFromRequest(req, user =>
+          this.messagesService.getMessagesByUser(user, params)
+        )
+      )
+      .fold<
+        Promise<
+          | IResponseErrorInternal
+          | IResponseErrorValidation
+          | IResponseErrorNotFound
+          | IResponseErrorTooManyRequests
+          | IResponseSuccessJson<
+              PaginatedCreatedMessageWithoutContentCollection
+            >
+        >
+      >(
+        async _ =>
+          ResponseErrorValidation("Decode error", "Cannot decode query params"),
+        identity
+      );
 
   /**
    * Returns the message identified by the message id.

@@ -59,6 +59,12 @@ const mockedUser: User = {
   wallet_token: "123hexToken" as WalletToken
 };
 
+const mockedDefaultParameters = {
+  continuationToken: undefined,
+  enrichResultData: false,
+  pageSize: 100
+};
+
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
@@ -97,7 +103,10 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const response = await controller.getMessagesByUser(req);
 
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+      mockedUser,
+      mockedDefaultParameters
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
