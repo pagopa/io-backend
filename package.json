@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "7.19.1",
+  "version": "7.19.3",
   "min_app_version": {
     "ios": "1.27.0",
     "android": "1.27.0"
@@ -11,9 +11,6 @@
   },
   "description": "IO app and web backend",
   "main": "index.js",
-  "engines": {
-    "node": "10.14.2"
-  },
   "scripts": {
     "watch": "tsc -w",
     "prebuild": "yarn generate:proxy-models",
