@@ -18,7 +18,6 @@ import {
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -36,6 +35,7 @@ import {
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 import { GetMessagesParameters } from "src/types/parameters";
+import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -50,7 +50,7 @@ export default class MessagesService {
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
+    | IResponseSuccessJson<PaginatedPublicMessagesCollection>
   > =>
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
@@ -58,7 +58,8 @@ export default class MessagesService {
         fiscal_code: user.fiscal_code,
         page_size: params.pageSize,
         enrich_result_data: params.enrichResultData,
-        continuation_token: params.continuationToken
+        maximum_id: params.maximumId,
+        minimum_id: params.minimumId
       });
 
       return withValidatedOrInternalError(validated, response =>
