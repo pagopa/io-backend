@@ -381,9 +381,10 @@
     unified "^9.2.2"
     winston "^3.1.0"
 
-"@pagopa/io-spid-commons@../../../clean/io-spid-commons/pagopa-io-spid-commons-6.5.1.tgz":
-  version "6.5.1"
-  resolved "../../../clean/io-spid-commons/pagopa-io-spid-commons-6.5.1.tgz#c9d4c4a53af52e713787b44c2e6602c93a60e72f"
+"@pagopa/io-spid-commons@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-7.0.0.tgz#2e85b8e4078eb35b52270efc4da527fd848da7fe"
+  integrity sha512-3/Win6vKsEmIuc981COj3odk9SxSTbTpweDAwC58lOwZCqTQRVx2t0p61wFXBmyjMV8vBHTg7AQeyZL1u+7XsA==
   dependencies:
     "@pagopa/ts-commons" "^10.0.0"
     "@types/redis" "^2.8.14"
