@@ -18,6 +18,8 @@ import {
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { GetMessagesParameters } from "src/types/parameters";
+import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -34,8 +36,6 @@ import {
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-import { GetMessagesParameters } from "src/types/parameters";
-import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 
 export default class MessagesService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -55,11 +55,13 @@ export default class MessagesService {
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
       const validated = await client.getMessagesByUser({
+        /* eslint-disable sort-keys */
         fiscal_code: user.fiscal_code,
         page_size: params.pageSize,
         enrich_result_data: params.enrichResultData,
         maximum_id: params.maximumId,
         minimum_id: params.minimumId
+        /* eslint-enable sort-keys */
       });
 
       return withValidatedOrInternalError(validated, response =>

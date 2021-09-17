@@ -14,11 +14,11 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
+import { identity } from "fp-ts/lib/function";
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
-import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
-import { identity } from "fp-ts/lib/function";
+import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../types/parameters";
 
 export default class MessagesController {
@@ -34,12 +34,15 @@ export default class MessagesController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
+    | IResponseSuccessJson<PaginatedPublicMessagesCollection>
   > =>
     GetMessagesParameters.decode({
+      /* eslint-disable sort-keys */
       pageSize: req.query.page_size,
-      continuationToken: req.query.continuation_token,
-      enrichResultData: req.query.enrich_result_data
+      enrichResultData: req.query.enrich_result_data,
+      maximumId: req.query.maximum_id,
+      minimumId: req.query.minimum_id
+      /* eslint-enable sort-keys */
     })
       .map(params =>
         withUserFromRequest(req, user =>
@@ -52,9 +55,7 @@ export default class MessagesController {
           | IResponseErrorValidation
           | IResponseErrorNotFound
           | IResponseErrorTooManyRequests
-          | IResponseSuccessJson<
-              PaginatedCreatedMessageWithoutContentCollection
-            >
+          | IResponseSuccessJson<PaginatedPublicMessagesCollection>
         >
       >(
         async _ =>
