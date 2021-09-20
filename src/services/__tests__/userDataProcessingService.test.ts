@@ -1,23 +1,15 @@
 /* tslint:disable:no-identical-functions */
 
 import * as t from "io-ts";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
-
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-import { EmailAddress } from "../../../generated/io-api/EmailAddress";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
 } from "../../../generated/io-api/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "../../../generated/io-api/UserDataProcessingChoiceRequest";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import UserDataProcessingService from "../userDataProcessingService";
 
-const aValidEmail = "test@example.com" as EmailAddress;
-const aValidFiscalCode = "SPNDNL80A13Y555X" as FiscalCode;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aUserDataProcessingResponse = {
   _etag: "bdb8f644-132c-4f3c-a051-5887fc8058b1",
   _rid: "AAAAAQAAAAgAAAAAAAAAAQ==",
@@ -25,10 +17,10 @@ const aUserDataProcessingResponse = {
   _ts: 1582553174,
   choice: "DOWNLOAD",
   createdAt: "2020-02-24T14:06:14.513Z",
-  fiscalCode: "SPNDNL80A13Y555X",
-  id: "SPNDNL80A13Y555X-DOWNLOAD-0000000000000000",
+  fiscalCode: mockedUser.fiscal_code,
+  id: `${mockedUser.fiscal_code}-DOWNLOAD-0000000000000000`,
   status: "PENDING",
-  userDataProcessingId: "SPNDNL80A13Y555X-DOWNLOAD",
+  userDataProcessingId: `${mockedUser.fiscal_code}-DOWNLOAD`,
   version: 0
 };
 
@@ -54,19 +46,6 @@ const conflictApiUserDataProcessingResponse = {
 };
 const problemJson = {
   status: 500
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: 1183518855,
-  family_name: "Garibaldi",
-  fiscal_code: aValidFiscalCode,
-  name: "Giuseppe Maria",
-  session_token: "HexToKen" as SessionToken,
-  spid_email: aValidEmail,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "HexToKen" as WalletToken
 };
 
 const mockedUserDataProcessingChoice: UserDataProcessingChoice =
