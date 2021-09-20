@@ -282,7 +282,6 @@ paths:
               is_webhook_enabled: true
               name: "Mario"
               spid_email: "preferred@example.com"
-              spid_mobile_phone: "1234567890"
               service_preferences_settings:
                 - mode: LEGACY
               version: 1
@@ -333,7 +332,6 @@ paths:
               is_webhook_enabled: true
               name: "Mario"
               spid_email: "preferred@example.com"
-              spid_mobile_phone: "1234567890"
               version: 0
         "400":
           description: Invalid payload.
@@ -988,9 +986,6 @@ definitions:
         type: string
       spid_email:
         $ref: '#/definitions/EmailAddress'
-      spid_mobile_phone:
-        type: string
-        minLength: 1
       date_of_birth:
         type: string
         format: date

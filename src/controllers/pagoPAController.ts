@@ -115,7 +115,6 @@ export default class PagoPAController {
       return PagoPAUser.decode({
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
-        mobile_phone: user.spid_mobile_phone,
         name: user.name,
         notice_email: errorResponseOrNoticeEmail.value.toUndefined(),
         spid_email: user.spid_email
