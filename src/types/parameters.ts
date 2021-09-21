@@ -1,4 +1,3 @@
-
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
