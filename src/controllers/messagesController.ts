@@ -9,17 +9,16 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
-  IResponseSuccessJson,
-  ResponseErrorValidation
+  IResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import { identity } from "fp-ts/lib/function";
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../types/parameters";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -36,32 +35,19 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedPublicMessagesCollection>
   > =>
-    GetMessagesParameters.decode({
-      /* eslint-disable sort-keys */
-      pageSize: req.query.page_size,
-      enrichResultData: req.query.enrich_result_data,
-      maximumId: req.query.maximum_id,
-      minimumId: req.query.minimum_id
-      /* eslint-enable sort-keys */
-    })
-      .map(params =>
-        withUserFromRequest(req, user =>
-          this.messagesService.getMessagesByUser(user, params)
-        )
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        GetMessagesParameters.decode({
+          /* eslint-disable sort-keys */
+          pageSize: req.query.page_size,
+          enrichResultData: req.query.enrich_result_data,
+          maximumId: req.query.maximum_id,
+          minimumId: req.query.minimum_id
+          /* eslint-enable sort-keys */
+        }),
+        params => this.messagesService.getMessagesByUser(user, params)
       )
-      .fold<
-        Promise<
-          | IResponseErrorInternal
-          | IResponseErrorValidation
-          | IResponseErrorNotFound
-          | IResponseErrorTooManyRequests
-          | IResponseSuccessJson<PaginatedPublicMessagesCollection>
-        >
-      >(
-        async _ =>
-          ResponseErrorValidation("Decode error", "Cannot decode query params"),
-        identity
-      );
+    );
 
   /**
    * Returns the message identified by the message id.

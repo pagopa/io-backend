@@ -60,9 +60,10 @@ const mockedUser: User = {
 };
 
 const mockedDefaultParameters = {
-  continuationToken: undefined,
+  pageSize: 100,
   enrichResultData: false,
-  pageSize: 100
+  maximumId: undefined,
+  minimumId: undefined
 };
 
 const badRequestErrorResponse = {
@@ -88,7 +89,7 @@ describe("MessagesController#getMessagesByUser", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getMessagesByUser on the messagesController with valid values", async () => {
+  it("calls the getMessagesByUser on the messagesController with user only", async () => {
     const req = mockReq();
 
     mockGetMessagesByUser.mockReturnValue(
@@ -106,6 +107,94 @@ describe("MessagesController#getMessagesByUser", () => {
     expect(mockGetMessagesByUser).toHaveBeenCalledWith(
       mockedUser,
       mockedDefaultParameters
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
+  });
+
+  it("calls the getMessagesByUser on the messagesController with user and partial pagination parameters", async () => {
+    const req = mockReq();
+
+    mockGetMessagesByUser.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+    );
+
+    req.user = mockedUser;
+
+    const pageSize = 2;
+    const enrichResultData = false;
+    const maximumId = undefined;
+    const minimumId = undefined;
+
+    req.query = {
+      page_size: pageSize,
+      enrich_result_data: enrichResultData
+    };
+
+    const mockedParameters = {
+      pageSize: pageSize,
+      enrichResultData: enrichResultData,
+      maximumId: maximumId,
+      minimumId: minimumId
+    };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(apiClient);
+    const controller = new MessagesController(messageService);
+
+    const response = await controller.getMessagesByUser(req);
+
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+      mockedUser,
+      mockedParameters
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
+  });
+
+  it("calls the getMessagesByUser on the messagesController with user and all pagination parameters", async () => {
+    const req = mockReq();
+
+    mockGetMessagesByUser.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+    );
+
+    req.user = mockedUser;
+
+    const pageSize = 2;
+    const enrichResultData = false;
+    const maximumId = "AAAA";
+    const minimumId = "BBBB";
+
+    req.query = {
+      page_size: pageSize,
+      enrich_result_data: enrichResultData,
+      maximum_id: maximumId,
+      minimum_id: minimumId 
+    };
+
+    const mockedParameters = {
+      pageSize: pageSize,
+      enrichResultData: enrichResultData,
+      maximumId: maximumId,
+      minimumId: minimumId
+    };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(apiClient);
+    const controller = new MessagesController(messageService);
+
+    const response = await controller.getMessagesByUser(req);
+
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+      mockedUser,
+      mockedParameters
     );
     expect(response).toEqual({
       apply: expect.any(Function),

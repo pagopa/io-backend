@@ -33,7 +33,7 @@
     "generate:proxy:myportal-models": "rimraf generated/myportal && gen-api-models --api-spec api_myportal.yaml --out-dir generated/myportal",
     "generate:proxy:bpd-models": "rimraf generated/bpd && gen-api-models --api-spec api_bpd.yaml --out-dir generated/bpd",
     "generate:proxy:public-models": "rimraf generated/public  && gen-api-models --api-spec api_public.yaml --out-dir generated/public",
-    "generate:api:io": "rimraf generated/io-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app/master/openapi/index.yaml --no-strict --out-dir generated/io-api --request-types --response-decoders --client",
+    "generate:api:io": "rimraf generated/io-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app/v3.1.0/openapi/index.yaml --no-strict --out-dir generated/io-api --request-types --response-decoders --client",
     "generate:proxy:bonus-models": "rimraf generated/bonus && gen-api-models --api-spec api_bonus.yaml --out-dir generated/bonus",
     "generate:proxy:cgn-models": "rimraf generated/cgn && gen-api-models --api-spec api_cgn.yaml --out-dir generated/cgn",
     "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
