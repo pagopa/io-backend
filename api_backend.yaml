@@ -876,31 +876,31 @@ definitions:
   
   # Definitions from pagopa-proxy
   PaymentProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/PaymentProblemJson"
   CodiceContestoPagamento:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
   EnteBeneficiario:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/EnteBeneficiario"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/EnteBeneficiario"
   Iban:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/Iban"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/Iban"
   ImportoEuroCents:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/ImportoEuroCents"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/ImportoEuroCents"
   PaymentActivationsGetResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
   PaymentActivationsPostRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
   PaymentActivationsPostResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
   PaymentRequestsGetResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
   RptId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/RptId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/RptId"
   SpezzoneStrutturatoCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
   SpezzoniCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.14.1/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   
   MessageContentWithAttachments:
     allOf:
