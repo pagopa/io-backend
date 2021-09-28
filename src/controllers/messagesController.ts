@@ -16,7 +16,9 @@ import { CreatedMessageWithContentAndAttachments } from "generated/backend/Creat
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
-import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
+import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
+import { GetMessagesParameters } from "../types/parameters";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -31,8 +33,21 @@ export default class MessagesController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
-  > => withUserFromRequest(req, this.messagesService.getMessagesByUser);
+    | IResponseSuccessJson<PaginatedPublicMessagesCollection>
+  > =>
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        GetMessagesParameters.decode({
+          /* eslint-disable sort-keys */
+          pageSize: req.query.page_size,
+          enrichResultData: req.query.enrich_result_data,
+          maximumId: req.query.maximum_id,
+          minimumId: req.query.minimum_id
+          /* eslint-enable sort-keys */
+        }),
+        params => this.messagesService.getMessagesByUser(user, params)
+      )
+    );
 
   /**
    * Returns the message identified by the message id.

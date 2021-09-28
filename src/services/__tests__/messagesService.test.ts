@@ -21,6 +21,7 @@ import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { GetMessagesParameters } from "src/types/parameters";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidEmail = "test@example.com" as EmailAddress;
@@ -161,6 +162,13 @@ const mockedUser: User = {
   wallet_token: "HexToKen" as WalletToken
 };
 
+const mockParameters: GetMessagesParameters = {
+  pageSize: undefined,
+  enrichResultData: undefined,
+  maximumId: undefined,
+  minimumId: undefined
+};
+
 const mockGetMessages = jest.fn();
 const mockGetServices = jest.fn();
 const mockGetMessage = jest.fn();
@@ -196,7 +204,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
@@ -214,7 +222,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
@@ -229,7 +237,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
@@ -239,7 +247,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
     });
@@ -253,7 +261,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
     });
