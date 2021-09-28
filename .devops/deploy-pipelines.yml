@@ -214,7 +214,9 @@ stages:
           steps:  
             - checkout: none
             - script: |
+                # fails if response status is not 2xx
                 curl -f 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
+              displayName: 'Healthcheck'
 
   # Promote the staging instance to production
   - ${{ each app in parameters.PRODUCTION_APPS }}:
