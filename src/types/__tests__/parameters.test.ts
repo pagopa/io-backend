@@ -9,10 +9,11 @@ const decodingCases: ReadonlyArray<[
   [{}, true],
   [{ pageSize: "1" }, true],
   [{ pageSize: NaN }, false],
-  // must be a natural integer
+  // must be a string representing a natural integer
   [{ pageSize: -1 }, false],
   [{ pageSize: 1.2 }, false],
   [{ pageSize: 1 }, false],
+  // must be a string representing a boolean value
   [{ enrichResultData: true }, false],
   [{ enrichResultData: "true" }, true],
   [{ enrichResultData: "Falze" }, false],
