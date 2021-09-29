@@ -1078,10 +1078,6 @@ definitions:
   Version:
     type: integer
     description: The entity version.
-  PageSize:
-    type: integer
-    minimum: 0
-    description: Number of items returned for each page.
   Platform:
     type: string
     description: The platform type where the installation happened.
@@ -1143,28 +1139,29 @@ definitions:
 responses: {}
 parameters:
   EnrichResultData:
-    type: boolean
     name: enrich_result_data
+    type: boolean
     in: query
     required: false
     description: Indicates whether result data should be enriched or not.
   PageSize:
-    type: integer
     name: page_size
+    type: integer
     in: query
     minimum: 1
+    maximum: 100
     required: false
     description: How many items a page should include.
   MaximumId:
-    type: string
     name: maximum_id
+    type: string
     in: query
     required: false
     description: >-
       The maximum id to get messages until to.
   MinimumId:
-    type: string
     name: minimum_id
+    type: string
     in: query
     required: false
     description: >-
