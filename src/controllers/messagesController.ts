@@ -39,8 +39,8 @@ export default class MessagesController {
       withValidatedOrValidationError(
         GetMessagesParameters.decode({
           /* eslint-disable sort-keys */
-          pageSize: req.query.page_size,
-          enrichResultData: req.query.enrich_result_data,
+          pageSize: parseInt(req.query.page_size, 10),
+          enrichResultData: req.query.enrich_result_data === "true",
           maximumId: req.query.maximum_id,
           minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
