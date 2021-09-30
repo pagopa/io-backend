@@ -1,6 +1,3 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
@@ -60,8 +57,8 @@ const mockedUser: User = {
 };
 
 const mockedDefaultParameters = {
-  pageSize: 100,
-  enrichResultData: false,
+  pageSize: undefined,
+  enrichResultData: undefined,
   maximumId: undefined,
   minimumId: undefined
 };
@@ -75,6 +72,7 @@ const badRequestErrorResponse = {
 
 const mockGetMessage = jest.fn();
 const mockGetMessagesByUser = jest.fn();
+
 jest.mock("../../services/messagesService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -129,9 +127,10 @@ describe("MessagesController#getMessagesByUser", () => {
     const maximumId = undefined;
     const minimumId = undefined;
 
+    // query params should be strings
     req.query = {
-      page_size: pageSize,
-      enrich_result_data: enrichResultData
+      page_size: `${pageSize}`,
+      enrich_result_data: `${enrichResultData}`
     };
 
     const mockedParameters = {
@@ -172,11 +171,12 @@ describe("MessagesController#getMessagesByUser", () => {
     const maximumId = "AAAA";
     const minimumId = "BBBB";
 
+    // query params should be strings
     req.query = {
-      page_size: pageSize,
-      enrich_result_data: enrichResultData,
+      page_size: `${pageSize}`,
+      enrich_result_data: `${enrichResultData}`,
       maximum_id: maximumId,
-      minimum_id: minimumId 
+      minimum_id: minimumId
     };
 
     const mockedParameters = {

@@ -5,7 +5,7 @@ import { NonNegativeIntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 /**
  * This codec is defined in ts-commons, but since ts-commons is at io-ts 1.8.x
  * we cannot import because it generates an error on types.
- * 
+ *
  * TODO: import from ts-commons when io-backend will be upgraded to new fp-ts and io-ts
  */
 type BooleanFromString = t.Type<boolean, string, unknown>;
