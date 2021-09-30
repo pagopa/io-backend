@@ -323,7 +323,7 @@
     xmldom "^0.1.27"
     yargs "^15.3.0"
 
-"@pagopa/openapi-codegen-ts@^10.0.1":
+"@pagopa/openapi-codegen-ts@10.0.1":
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-10.0.1.tgz#b3028e605a226bfab2f7db7cf14e58cdd07d3123"
   integrity sha512-UbT7LdPDIbwyr/0HxQGBxXsB+e1szY/Y8kVnW2dt2yunNooSRT0EB07lbFRW+8F79LllyNVj47/NkXJgA8wrjA==
