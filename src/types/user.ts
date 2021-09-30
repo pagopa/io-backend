@@ -79,7 +79,6 @@ export type User = t.TypeOf<typeof User>;
 export const SpidUser = t.intersection([
   t.interface({
     authnContextClassRef: SpidLevel,
-    dateOfBirth: t.string,
     familyName: t.string,
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
@@ -87,6 +86,7 @@ export const SpidUser = t.intersection([
     name: t.string
   }),
   t.partial({
+    dateOfBirth: t.string,
     email: EmailAddress,
     nameID: t.string,
     nameIDFormat: t.string,
@@ -111,7 +111,8 @@ export function toAppUser(
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
-    date_of_birth: formatDate(from.dateOfBirth),
+    date_of_birth:
+      from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     myportal_token: myPortalToken,
