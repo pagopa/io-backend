@@ -111,8 +111,9 @@ export function toAppUser(
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
-    date_of_birth:
-      from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
+    date_of_birth: fromNullable(from.dateOfBirth)
+      .map(formatDate)
+      .toUndefined(),
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     myportal_token: myPortalToken,
