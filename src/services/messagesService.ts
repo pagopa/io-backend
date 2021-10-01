@@ -18,8 +18,8 @@ import {
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
+import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";

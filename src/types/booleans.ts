@@ -1,10 +1,11 @@
 import * as t from "io-ts";
 
 /**
- * This module is temporary, it's here because we cannot upgrade 
+ * This module is temporary, it's here because we cannot upgrade
+ *
  * @pagopa/ts-commons yet, because this repo it's not ft-ts 2.x
  * compliant yet.
- * 
+ *
  * TODO: Remove this, and point ts-commons' one when ready.
  */
 
