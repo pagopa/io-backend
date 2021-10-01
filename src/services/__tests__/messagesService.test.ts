@@ -21,7 +21,7 @@ import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { GetMessagesParameters } from "src/types/parameters";
+import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
 
 const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
 const aValidEmail = "test@example.com" as EmailAddress;

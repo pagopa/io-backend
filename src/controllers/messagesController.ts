@@ -17,7 +17,7 @@ import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
-import { GetMessagesParameters } from "../types/parameters";
+import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 export default class MessagesController {
