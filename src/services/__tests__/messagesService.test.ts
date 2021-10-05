@@ -16,7 +16,7 @@ import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { GetMessagesParameters } from "../../types/parameters";
+import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
 
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";

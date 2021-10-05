@@ -1,0 +1,44 @@
+swagger: "2.0"
+info:
+  title: "IO APIs, shared specs"
+  version: "0.1"
+paths:
+  "/dummy":
+    get:
+      responses:
+        "200":
+          description: "ok"
+definitions:
+  GetMessagesParameters:
+    type: object
+    title: GetMessagesParameters
+    description: Describes the GetMessages api query parameters
+    properties:
+      pageSize:
+        $ref: "#/definitions/NonNegativeIntegerFromString"
+      enrichResultData:
+        $ref: "#/definitions/BooleanFromString"
+      maximumId:
+        $ref: "#/definitions/NonEmptyString"
+      minimumId:
+        $ref: "#/definitions/NonEmptyString"
+  NonNegativeIntegerFromString:
+    type: string
+    description: Represents a non negative integer parsed from a string
+    format: NonNegativeIntegerFromString
+    x-import: '@pagopa/ts-commons/lib/numbers'
+    example: 10
+  BooleanFromString:
+    type: string
+    description: Represents a boolean parsed from a string
+    format: BooleanFromString
+    # TODO: Import from ts-commons when it will be updated during the
+    # update of backend to fp-ts 2.x
+    x-import: '../../src/types/booleans'
+    example: true
+  NonEmptyString:
+    type: string
+    description: Represents a non empty string
+    format: NonEmptyString
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: "xxxxxxxx"
