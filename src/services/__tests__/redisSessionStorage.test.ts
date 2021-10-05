@@ -6,7 +6,6 @@
 /* tslint:disable:no-object-mutation */
 
 import { Either, isLeft, isRight, left, Left, right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 
@@ -59,7 +58,6 @@ const aValidUser: UserV3 = {
   session_token: aSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: aWalletToken
 };
 

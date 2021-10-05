@@ -22,6 +22,7 @@ export const localStrategy = (
       // Fake test user for password based logins
       const testUser: SpidUser = {
         authnContextClassRef: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
+        dateOfBirth: "02/06/2000",
         familyName: "Rossi",
         fiscalNumber: username,
         getAssertionXml: () => "",

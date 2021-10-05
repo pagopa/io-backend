@@ -1,23 +1,14 @@
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
 import MessagesController from "../messagesController";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 
-const aTimestamp = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anId: string = "string-id";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyMessagesResponse = {
   items: [
@@ -41,19 +32,6 @@ const proxyMessageResponse = {
   created_at: new Date(),
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",
   sender_service_id: "5a563817fcc896087002ea46c49a"
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "123hexToken" as WalletToken
 };
 
 const mockedDefaultParameters = {
