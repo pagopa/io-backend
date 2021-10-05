@@ -6,7 +6,6 @@
 /* tslint:disable:no-object-mutation */
 
 import { isRight, left, right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
@@ -64,7 +63,7 @@ const mockedUser: User = {
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
+  date_of_birth: "2000-06-02",
   wallet_token: mockWalletToken as WalletToken
 };
 
@@ -76,7 +75,7 @@ const validUserPayload = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: "xxx",
-  mobilePhone: "3222222222222",
+  dateOfBirth: "2000-06-02",
   name: aValidname
 };
 // invalidUser lacks the required familyName and optional email fields.
@@ -85,7 +84,7 @@ const invalidUserPayload = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: "xxx",
-  mobilePhone: "3222222222222",
+  dateOfBirth: "2000-06-02",
   name: aValidname
 };
 
@@ -100,7 +99,6 @@ const proxyInitializedProfileResponse = {
   name: aValidname,
   preferred_languages: ["it_IT"],
   spid_email: anEmailAddress,
-  spid_mobile_phone: "3222222222222",
   version: 42
 };
 

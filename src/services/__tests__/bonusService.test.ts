@@ -3,9 +3,7 @@
 import * as t from "io-ts";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
@@ -13,13 +11,8 @@ import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import BonusService from "../bonusService";
-
-const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
-const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const aBonusId = "aBonusId" as NonEmptyString & BonusCode;
 
@@ -69,19 +62,6 @@ const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection =
       is_applicant: true
     }
   ]
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: 1183518855,
-  family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
-  name: "Luca",
-  session_token: "HexToKen" as SessionToken,
-  spid_email: aValidSPIDEmail,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "HexToKen" as WalletToken
 };
 
 // mock for a not adult User

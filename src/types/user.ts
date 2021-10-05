@@ -12,7 +12,6 @@ import {
   readableReport
 } from "italia-ts-commons/lib/reporters";
 import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 
 import { EmailAddress } from "../../generated/backend/EmailAddress";
@@ -45,8 +44,7 @@ export const UserWithoutTokens = t.intersection([
     sessionIndex: t.string,
     session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
-    spid_idp: t.string,
-    spid_mobile_phone: NonEmptyString
+    spid_idp: t.string
   })
 ]);
 const RequiredUserTokensV1 = t.interface({
@@ -90,7 +88,6 @@ export const SpidUser = t.intersection([
   t.partial({
     dateOfBirth: t.string,
     email: EmailAddress,
-    mobilePhone: NonEmptyString,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string
@@ -114,8 +111,9 @@ export function toAppUser(
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
-    date_of_birth:
-      from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
+    date_of_birth: fromNullable(from.dateOfBirth)
+      .map(formatDate)
+      .toUndefined(),
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     myportal_token: myPortalToken,
@@ -124,7 +122,6 @@ export function toAppUser(
     session_tracking_id: sessionTrackingId,
     spid_email: from.email,
     spid_level: from.authnContextClassRef,
-    spid_mobile_phone: from.mobilePhone,
     wallet_token: walletToken
   };
 }
