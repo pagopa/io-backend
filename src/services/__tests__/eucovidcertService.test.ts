@@ -12,7 +12,7 @@ const mockClientGetCertificate = jest.fn();
 
 const client = {
   getCertificate: mockClientGetCertificate
-} as ReturnType<EUCovidCertAPIClient>;
+} as unknown as ReturnType<EUCovidCertAPIClient>;
 
 const aMockedAuthCode = "000";
 

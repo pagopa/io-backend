@@ -931,7 +931,7 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/MessageAttachment"
-      - $ref: "#/definitions/MessageContent"
+      - $ref: "#/definitions/NewMessageContent"
   MessageAttachment:
     type: object
     title: MessageAttachment
