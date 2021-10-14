@@ -206,7 +206,7 @@ stages:
   - ${{ each app in parameters.PRODUCTION_APPS }}:
     - stage: Healthcheck_${{ app.Key }}
       pool:
-        name: $(AGENT_POOL)
+        name: io-prod-linux
       dependsOn:
         - Deploy_${{ app.Key }}_to_staging
       jobs:
