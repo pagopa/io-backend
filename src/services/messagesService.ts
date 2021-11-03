@@ -148,6 +148,7 @@ export default class MessagesService {
       return withValidatedOrInternalError(validated, response =>
         response.status === 200
           ? withValidatedOrInternalError(
+              // TODO: This decode will fail untill the fn-app specifications will be updated
               ServicePublic.decode(response.value),
               ResponseSuccessJson
             )

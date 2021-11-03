@@ -846,11 +846,25 @@ definitions:
   ServiceName:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.7.3/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.7.3/openapi/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/ServicePublic"
+  ServiceMetadata:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/ServiceMetadata"
+  CommonServiceMetadata:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/CommonServiceMetadata"
+  StandardServiceMetadata:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/StandardServiceMetadata"
+  SpecialServiceMetadata:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/SpecialServiceMetadata"
   ServiceTuple:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.7.3/openapi/definitions.yaml#/ServiceTuple"
   ServiceScope:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.7.3/openapi/definitions.yaml#/ServiceScope"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/ServiceScope"
+  ServiceCategory:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/ServiceCategory"
+  SpecialServiceCategory:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/SpecialServiceCategory"
+  StandardServiceCategory:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/service-category-in-metadata/openapi/definitions.yaml#/StandardServiceCategory"
   PaginatedServiceTupleCollection:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.7.3/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   Timestamp:
