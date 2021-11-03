@@ -1,16 +1,9 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
 import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import * as E from "fp-ts/lib/Either";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
@@ -20,11 +13,9 @@ import UserDataProcessingService from "../../../src/services/userDataProcessingS
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import UserDataProcessingController from "../userDataProcessingController";
 
-const aTimestamp = 1518010929530;
 const aUserDataProcessingChoice = "DOWNLOAD";
 
 const aUserDataProcessingResponse = {
@@ -44,29 +35,11 @@ const aUserDataProcessingResponse = {
   }
 };
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidName = "Giuseppe Maria";
-const aValidFamilyname = "Garibaldi";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const userDataProcessingMissingErrorResponse = ResponseErrorNotFound(
   "Not Found",
   "User data processing not found"
 );
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "123hexToken" as WalletToken
-};
 
 const mockedUserDataProcessingChoice: UserDataProcessingChoice =
   UserDataProcessingChoiceEnum.DOWNLOAD;

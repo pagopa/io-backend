@@ -21,7 +21,8 @@ import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
-import { PaginatedCreatedMessageWithoutContentCollection } from "../../generated/backend/PaginatedCreatedMessageWithoutContentCollection";
+import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
+import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -46,17 +47,24 @@ export default class MessagesService {
    * Retrieves all messages for a specific user.
    */
   public readonly getMessagesByUser = (
-    user: User
+    user: User,
+    params: GetMessagesParameters
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<PaginatedCreatedMessageWithoutContentCollection>
+    | IResponseSuccessJson<PaginatedPublicMessagesCollection>
   > =>
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
       const validated = await client.getMessagesByUser({
-        fiscal_code: user.fiscal_code
+        /* eslint-disable sort-keys */
+        fiscal_code: user.fiscal_code,
+        page_size: params.pageSize,
+        enrich_result_data: params.enrichResultData,
+        maximum_id: params.maximumId,
+        minimum_id: params.minimumId
+        /* eslint-enable sort-keys */
       });
 
       return withValidatedOrInternalError(validated, response =>

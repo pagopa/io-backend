@@ -9,26 +9,17 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 
 import { DepartmentName } from "../../../generated/backend/DepartmentName";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { OrganizationName } from "../../../generated/backend/OrganizationName";
 import { ServiceName } from "../../../generated/backend/ServiceName";
 import { ServicePublic } from "../../../generated/backend/ServicePublic";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { NotificationChannelEnum } from "../../../generated/io-api/NotificationChannel";
 import mockReq from "../../__mocks__/request";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import ServicesController from "../servicesController";
 
-const aTimestamp = 1518010929530;
-
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aServiceId: string = "service-id";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyService: ServicePublic = {
   available_notification_channels: [NotificationChannelEnum.EMAIL],
@@ -38,19 +29,6 @@ const proxyService: ServicePublic = {
   service_id: "5a563817fcc896087002ea46c49a" as NonEmptyString,
   service_name: "Service name" as ServiceName,
   version: 42 as NonNegativeInteger
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "123hexToken" as WalletToken
 };
 
 const mockGetService = jest.fn();

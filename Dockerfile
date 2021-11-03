@@ -17,6 +17,11 @@ COPY /api_bonus.yaml /usr/src/app/api_bonus.yaml
 COPY /api_session.yaml /usr/src/app/api_session.yaml
 COPY /api_myportal.yaml /usr/src/app/api_myportal.yaml
 COPY /api_bpd.yaml /usr/src/app/api_bpd.yaml
+COPY /api_cgn.yaml /usr/src/app/api_cgn.yaml
+COPY /api_eucovidcert.yaml /usr/src/app/api_eucovidcert.yaml
+COPY /api_mit_voucher.yaml /usr/src/app/api_mit_voucher.yaml
+COPY /api_auth.yaml /usr/src/app/api_auth.yaml
+
 
 COPY /.npmrc /usr/src/app/.npmrc
 RUN sudo chmod -R 777 /usr/src/app \

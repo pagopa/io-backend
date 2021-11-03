@@ -1,5 +1,4 @@
 import * as t from "io-ts";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -63,7 +62,6 @@ const proxyInitializedProfileResponse = {
   name: "Luca",
   preferred_languages: aPreferredLanguages,
   spid_email: aValidSPIDEmail,
-  spid_mobile_phone: "3222222222222",
   version: 42
 };
 
@@ -108,7 +106,6 @@ const mockedUser: User = {
   session_token: "HexToKen" as SessionToken,
   spid_email: aValidSPIDEmail,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
 };
 

@@ -1,6 +1,5 @@
 /* tslint:disable:no-object-mutation */
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -38,7 +37,6 @@ const mockedUser: User = {
   session_token: "123hexToken" as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
 };
 
@@ -50,7 +48,6 @@ const mockedInvalidUser: User = {
   session_token: "123hexToken" as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
 };
 

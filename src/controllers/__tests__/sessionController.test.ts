@@ -1,12 +1,3 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-duplicate-string */
-/* tslint:disable:no-let */
-/* tslint:disable:no-identical-functions */
-/* tslint:disable:no-big-function */
-/* tslint:disable:no-object-mutation */
-
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -47,7 +38,6 @@ const mockedUser: User = {
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: mockWalletToken as WalletToken
 };
 

@@ -3,9 +3,6 @@
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation";
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
@@ -15,21 +12,11 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { BonusAPIClient } from "../../clients/bonus";
 import BonusService from "../../services/bonusService";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
 import BonusController from "../bonusController";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 
 const API_KEY = "";
 const API_URL = "";
-
-const aTimestamp = 1518010929530;
-const aDate = new Date();
-const aBonusId = "aBonusId" as BonusCode & NonEmptyString;
-const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidName = "Giuseppe Maria" as NonEmptyString;
-const aValidFamilyname = "Garibaldi" as NonEmptyString;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
@@ -38,18 +25,7 @@ const badRequestErrorResponse = {
   type: undefined
 };
 
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalCode,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "123hexToken" as WalletToken
-};
+const aBonusId = "bonusId" as BonusCode & NonEmptyString;
 
 const aEligibilityCheck: EligibilityCheck = {
   dsu_request: {
@@ -67,13 +43,13 @@ const aEligibilityCheck: EligibilityCheck = {
 };
 
 const aBonusActivation: BonusActivation = {
-  applicant_fiscal_code: aFiscalCode,
-  created_at: aDate,
+  applicant_fiscal_code: mockedUser.fiscal_code,
+  created_at: new Date(mockedUser.created_at),
   dsu_request: {
     dsu_created_at: new Date(),
     dsu_protocol_id: "dsuprotid" as NonEmptyString,
     family_members: [
-      { fiscal_code: aFiscalCode, name: aValidName, surname: aValidFamilyname }
+      { fiscal_code: mockedUser.fiscal_code, name: mockedUser.name as NonEmptyString, surname: mockedUser.family_name as NonEmptyString}
     ],
     has_discrepancies: false,
     isee_type: "iseetype",

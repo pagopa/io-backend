@@ -225,15 +225,8 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   },
   publicCert: samlCert(),
   requiredAttributes: {
-    attributes: [
-      "address",
-      "email",
-      "name",
-      "familyName",
-      "fiscalNumber",
-      "mobilePhone"
-    ],
-    name: "Required attributes"
+    attributes: ["email", "name", "familyName", "fiscalNumber", "dateOfBirth"],
+    name: "IO - l'app dei servizi pubblici BETA"
   },
   spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,

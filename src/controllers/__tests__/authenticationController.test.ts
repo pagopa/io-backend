@@ -1,12 +1,4 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-duplicate-string */
-/* tslint:disable:no-let */
-/* tslint:disable:no-identical-functions */
-/* tslint:disable:no-big-function */
-/* tslint:disable:no-object-mutation */
-
 import * as E from "fp-ts/lib/Either";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
@@ -35,6 +27,7 @@ import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
+import { pipe } from "fp-ts/function";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -64,7 +57,7 @@ const mockedUser: User = {
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
+  date_of_birth: "2000-06-02",
   wallet_token: mockWalletToken as WalletToken
 };
 
@@ -76,7 +69,7 @@ const validUserPayload = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: "xxx",
-  mobilePhone: "3222222222222",
+  dateOfBirth: "2000-06-02",
   name: aValidname
 };
 // invalidUser lacks the required familyName and optional email fields.
@@ -85,7 +78,7 @@ const invalidUserPayload = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: "xxx",
-  mobilePhone: "3222222222222",
+  dateOfBirth: "2000-06-02",
   name: aValidname
 };
 
@@ -100,7 +93,6 @@ const proxyInitializedProfileResponse = {
   name: aValidname,
   preferred_languages: ["it_IT"],
   spid_email: anEmailAddress,
-  spid_mobile_phone: "3222222222222",
   version: 42
 };
 
@@ -497,8 +489,16 @@ describe("AuthenticationController#getUserIdentity", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    /* tslint:disable-next-line:no-useless-cast */
-    const expectedValue = exactUserIdentityDecode(mockedUser as UserIdentity);
+
+    const mockedUserIdentity = pipe(
+      mockedUser,
+      UserIdentity.decode,
+      E.getOrElseW(_ => {
+        throw _;
+      })
+    );
+
+    const expectedValue = exactUserIdentityDecode(mockedUserIdentity);
     expect(E.isRight(expectedValue)).toBeTruthy();
     if (E.isRight(expectedValue)) {
       expect(response).toEqual({

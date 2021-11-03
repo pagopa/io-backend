@@ -8,6 +8,7 @@ import { CodiceContestoPagamento } from "../../../generated/pagopa-proxy/CodiceC
 import { ImportoEuroCents } from "../../../generated/pagopa-proxy/ImportoEuroCents";
 import { PaymentActivationsPostRequest } from "../../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 import { PaymentFaultEnum } from "../../../generated/pagopa-proxy/PaymentFault";
+import { PaymentFaultV2Enum } from "../../../generated/pagopa-proxy/PaymentFaultV2";
 import { GetPaymentInfoT } from "../../../generated/pagopa-proxy/requestTypes";
 import { PagoPAEnvironment } from "../IPagoPAClientFactory";
 import { pipe } from "fp-ts/lib/function";
@@ -37,7 +38,8 @@ const errorPaymentInfoResponse: TypeofApiResponse<GetPaymentInfoT> = {
   headers: {},
   status: 500,
   value: {
-    detail: PaymentFaultEnum.PAYMENT_UNAVAILABLE
+    detail: PaymentFaultEnum.PAYMENT_UNAVAILABLE,
+    detail_v2: PaymentFaultV2Enum.PPT_IBAN_NON_CENSITO
   }
 };
 

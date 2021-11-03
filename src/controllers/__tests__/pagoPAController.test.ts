@@ -1,10 +1,6 @@
 import * as redis from "redis";
 
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
@@ -21,42 +17,20 @@ import {
 import ApiClientFactory from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
-import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 
-const aTimestamp = 1518010929530;
-
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const aSpidEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aCustomEmailAddress = "giuseppe.garibaldi@example.com" as EmailAddress;
-const aMobilePhone = "3222222222222" as NonEmptyString;
-const aValidName = "Giuseppe Maria";
-const aValidFamilyname = "Garibaldi";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: aSpidEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: aMobilePhone,
-  wallet_token: "123hexToken" as WalletToken
-};
+const aCustomEmailAddress = "custom-email@example.com" as EmailAddress;
 
 const proxyUserResponse: PagoPAUser = {
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  mobile_phone: aMobilePhone,
-  name: aValidName,
+  family_name: mockedUser.family_name,
+  fiscal_code: mockedUser.fiscal_code,
+  name: mockedUser.name,
   notice_email: aCustomEmailAddress,
-  spid_email: aSpidEmailAddress
+  spid_email: mockedUser.spid_email
 };
 
 const anIsInboxEnabled = true as IsInboxEnabled;
@@ -70,16 +44,15 @@ const aServicePreferencesSettings: ServicePreferencesSettings = {
 
 const userInitializedProfile: InitializedProfile = {
   email: aCustomEmailAddress,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
+  family_name: mockedUser.family_name,
+  fiscal_code: mockedUser.fiscal_code,
   has_profile: true,
   is_email_enabled: true,
   is_email_validated: true,
   is_inbox_enabled: anIsInboxEnabled,
   is_webhook_enabled: anIsWebookEnabled,
-  name: aValidName,
+  name: mockedUser.name,
   preferred_languages: aPreferredLanguages,
-  spid_mobile_phone: aMobilePhone,
   service_preferences_settings: aServicePreferencesSettings,
   version: 42
 };

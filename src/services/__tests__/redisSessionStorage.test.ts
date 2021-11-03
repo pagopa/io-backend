@@ -30,7 +30,6 @@ import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -60,7 +59,6 @@ const aValidUser: UserV3 = {
   session_token: aSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: aWalletToken
 };
 

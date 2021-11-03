@@ -1,42 +1,9 @@
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { BPDUser } from "../../../generated/bpd/BPDUser";
 import { MyPortalUser } from "../../../generated/myportal/MyPortalUser";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import {
-  BPDToken,
-  MyPortalToken,
-  SessionToken,
-  WalletToken
-} from "../../types/token";
-import { UserV3 } from "../../types/user";
 import { getUserForBPD, getUserForMyPortal } from "../ssoController";
-
-const aTimestamp = 1518010929530;
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const aSpidEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aMobilePhone = "3222222222222" as NonEmptyString;
-const aValidName = "Giuseppe Maria";
-const aValidFamilyname = "Garibaldi";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-// mock for a valid User
-const mockedUser: UserV3 = {
-  bpd_token: "12hexToken" as BPDToken,
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  myportal_token: "123hexToken" as MyPortalToken,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: aSpidEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: aMobilePhone,
-  wallet_token: "123hexToken" as WalletToken
-};
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 
 const myPortalUserResponse: MyPortalUser = {
   family_name: mockedUser.family_name,

@@ -15,7 +15,7 @@ import { PaymentRequestsGetResponse } from "../../generated/backend/PaymentReque
 import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/PaymentActivationsPostRequest";
 
 import {
-  unhandledResponseStatus,
+  ResponsePaymentError,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
@@ -58,7 +58,10 @@ export default class PagoPAProxyService {
               // eslint-disable-next-line sonarjs/no-duplicate-string
               response.value.detail || "Bad request response from upstream API"
             )
-          : ResponseErrorInternal(response.value.detail)
+          : ResponsePaymentError(
+              response.value.detail,
+              response.value.detail_v2
+            )
       );
     });
 
@@ -93,7 +96,10 @@ export default class PagoPAProxyService {
               response.value.title || "Bad request (upstream)",
               response.value.detail || "Bad request response from upstream API"
             )
-          : unhandledResponseStatus(response.status)
+          : ResponsePaymentError(
+              response.value.detail,
+              response.value.detail_v2
+            )
       );
     });
 

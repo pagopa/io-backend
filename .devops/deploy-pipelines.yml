@@ -88,7 +88,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v15
+      ref: refs/tags/v18
       endpoint: 'pagopa'
 
 stages:
@@ -205,21 +205,18 @@ stages:
   # Check that the staging instance is healthy
   - ${{ each app in parameters.PRODUCTION_APPS }}:
     - stage: Healthcheck_${{ app.Key }}
+      pool:
+        name: $(AGENT_POOL)
       dependsOn:
         - Deploy_${{ app.Key }}_to_staging
       jobs:
         - job: 'do_healthcheck_${{ app.Key }}'       
           steps:  
             - checkout: none
-            - template: templates/rest-healthcheck/template.yaml@pagopaCommons 
-              parameters:
-                azureSubscription: '$(PRODUCTION_AZURE_SUBSCRIPTION)'
-                appName: '${{ app.Value.appname }}'
-                endpoint: 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
-                endpointType: 'private'
-                containerInstanceResourceGroup: '$(HEALTHCHECK_CONTAINER_RG)'
-                containerInstanceVNet: '$(HEALTHCHECK_CONTAINER_VNET)'
-                containerInstanceSubnet: '$(HEALTHCHECK_CONTAINER_SUBNET)'
+            - script: |
+                # fails if response status is not 2xx
+                curl -f 'https://${{ app.Value.appname }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
+              displayName: 'Healthcheck'
 
   # Promote the staging instance to production
   - ${{ each app in parameters.PRODUCTION_APPS }}:

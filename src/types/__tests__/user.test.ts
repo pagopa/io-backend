@@ -3,12 +3,8 @@
 /* tslint:disable:no-inferred-empty-object-type */
 
 import * as E from "fp-ts/lib/Either";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { Issuer } from "../issuer";
 import { BPDToken, MyPortalToken, SessionToken, WalletToken } from "../token";
 import {
@@ -17,42 +13,27 @@ import {
   User,
   validateSpidUser
 } from "../user";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "x@example.com" as EmailAddress;
 const anIssuer = "onelogin_saml" as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid SpidUser
 const mockedSpidUser: any = {
-  authnContextClassRef: aValidSpidLevel,
-  email: anEmailAddress,
-  familyName: "Garibaldi",
-  fiscalNumber: aFiscalNumber,
+  authnContextClassRef: mockedUser.spid_level,
+  dateOfBirth: "2000-06-02",
+  email: mockedUser.spid_email,
+  familyName: mockedUser.family_name,
+  fiscalNumber: mockedUser.fiscal_code,
   getAssertionXml: () => "",
   issuer: anIssuer,
-  mobilePhone: "3222222222222",
-  name: "Giuseppe Maria"
+  name: mockedUser.name
 };
 
 // mock for a invalid SpidUser
 const mockedInvalidSpidUser: any = {
   aKey: "aValue"
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: 1183518855,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "HexToKen" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "HexToKen" as WalletToken
 };
 
 const mockSessionToken = "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b" as SessionToken;

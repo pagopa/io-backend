@@ -3,7 +3,6 @@
 /* tslint:disable:no-inferred-empty-object-type */
 
 import * as E from "fp-ts/lib/Either";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -58,7 +57,6 @@ const mockedUser: User = {
   session_token: "HexToKen" as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "HexToKen" as WalletToken
 };
 

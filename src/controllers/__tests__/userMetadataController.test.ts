@@ -1,7 +1,3 @@
-/* tslint:disable:no-object-mutation */
-
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { left, right } from "fp-ts/lib/Either";
 import * as redis from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
@@ -32,7 +28,6 @@ const mockedUser: User = {
   session_token: "123hexToken" as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
 };
 

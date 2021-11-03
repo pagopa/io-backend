@@ -105,7 +105,6 @@ export default class PagoPAController {
         {
           family_name: user.family_name,
           fiscal_code: user.fiscal_code,
-          mobile_phone: user.spid_mobile_phone,
           name: user.name,
           notice_email: O.toUndefined(errorResponseOrNoticeEmail.right),
           spid_email: user.spid_email

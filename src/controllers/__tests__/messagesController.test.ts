@@ -1,26 +1,14 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
 import MessagesController from "../messagesController";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 
-const aTimestamp = 1518010929530;
 
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const anId: string = "string-id";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const proxyMessagesResponse = {
   items: [
@@ -46,17 +34,11 @@ const proxyMessageResponse = {
   sender_service_id: "5a563817fcc896087002ea46c49a"
 };
 
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "123hexToken" as WalletToken
+const mockedDefaultParameters = {
+  pageSize: undefined,
+  enrichResultData: undefined,
+  maximumId: undefined,
+  minimumId: undefined
 };
 
 const badRequestErrorResponse = {
@@ -68,6 +50,7 @@ const badRequestErrorResponse = {
 
 const mockGetMessage = jest.fn();
 const mockGetMessagesByUser = jest.fn();
+
 jest.mock("../../services/messagesService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -82,7 +65,7 @@ describe("MessagesController#getMessagesByUser", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getMessagesByUser on the messagesController with valid values", async () => {
+  it("calls the getMessagesByUser on the messagesController with user only", async () => {
     const req = mockReq();
 
     mockGetMessagesByUser.mockReturnValue(
@@ -97,7 +80,100 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const response = await controller.getMessagesByUser(req);
 
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+      mockedUser,
+      mockedDefaultParameters
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
+  });
+
+  it("calls the getMessagesByUser on the messagesController with user and partial pagination parameters", async () => {
+    const req = mockReq();
+
+    mockGetMessagesByUser.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+    );
+
+    req.user = mockedUser;
+
+    const pageSize = 2;
+    const enrichResultData = false;
+    const maximumId = undefined;
+    const minimumId = undefined;
+
+    // query params should be strings
+    req.query = {
+      page_size: `${pageSize}`,
+      enrich_result_data: `${enrichResultData}`
+    };
+
+    const mockedParameters = {
+      pageSize: pageSize,
+      enrichResultData: enrichResultData,
+      maximumId: maximumId,
+      minimumId: minimumId
+    };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(apiClient);
+    const controller = new MessagesController(messageService);
+
+    const response = await controller.getMessagesByUser(req);
+
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+      mockedUser,
+      mockedParameters
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessagesResponse
+    });
+  });
+
+  it("calls the getMessagesByUser on the messagesController with user and all pagination parameters", async () => {
+    const req = mockReq();
+
+    mockGetMessagesByUser.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
+    );
+
+    req.user = mockedUser;
+
+    const pageSize = 2;
+    const enrichResultData = false;
+    const maximumId = "AAAA";
+    const minimumId = "BBBB";
+
+    // query params should be strings
+    req.query = {
+      page_size: `${pageSize}`,
+      enrich_result_data: `${enrichResultData}`,
+      maximum_id: maximumId,
+      minimum_id: minimumId
+    };
+
+    const mockedParameters = {
+      pageSize: pageSize,
+      enrichResultData: enrichResultData,
+      maximumId: maximumId,
+      minimumId: minimumId
+    };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(apiClient);
+    const controller = new MessagesController(messageService);
+
+    const response = await controller.getMessagesByUser(req);
+
+    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+      mockedUser,
+      mockedParameters
+    );
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
