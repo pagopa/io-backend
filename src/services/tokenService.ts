@@ -6,7 +6,11 @@ import * as crypto from "crypto";
 import { promisify } from "util";
 import { toError } from "fp-ts/lib/Either";
 import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import { Second } from "italia-ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
@@ -53,6 +57,46 @@ export default class TokenService {
           expiresIn: `${tokenTtl} seconds`,
           issuer,
           jwtid: ulid()
+        },
+        cb
+      )
+    )().mapLeft(toError);
+  }
+
+  /**
+   * Generates a new zendesk support token containing the logged user's fiscalCode and email address.
+   *
+   * @param secret: The shared secret used to sign this JWT token
+   * @param name: The logged user's first name
+   * @param familyName: The logged user's last name
+   * @param fiscalCode: The logged user's fiscal code
+   * @param emailAddress: The logged user's email address
+   * @param tokenTtl: Token Time To live (expressed in seconds)
+   * @param issuer: The Token issuer
+   */
+  public getJwtZendeskSupportToken(
+    secret: NonEmptyString,
+    name: NonEmptyString,
+    familyName: NonEmptyString,
+    fiscalCode: FiscalCode,
+    emailAddress: EmailString,
+    tokenTtl: Second,
+    issuer: NonEmptyString
+  ): TaskEither<Error, string> {
+    return taskify<Error, string>(cb =>
+      jwt.sign(
+        {
+          name: `${familyName} ${name}`,
+          email: emailAddress,
+          external_id: fiscalCode,
+          iat: new Date().getTime() / 1000,
+          jti: ulid()
+        },
+        secret,
+        {
+          algorithm: "HS256",
+          expiresIn: `${tokenTtl} seconds`,
+          issuer
         },
         cb
       )

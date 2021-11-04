@@ -469,6 +469,37 @@ log.info(
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
 
+// Zendesk support Token
+export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = NonEmptyString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
+export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION) as Second;
+log.info(
+  "JWT Zendesk support token expiration set to %s seconds",
+  JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
+);
+
 // Mit  Voucher Token
 export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = NonEmptyString.decode(
   process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY

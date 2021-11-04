@@ -1144,6 +1144,18 @@ definitions:
     required:
       - access_token
       - expires_in
+  ZendeskToken:
+    title: Zendesk support token
+    description: A Support Token response to authenticate to Zendesk
+    type: object
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: number
+    required:
+      - access_token
+      - expires_in
 responses: {}
 parameters:
   EnrichResultData:

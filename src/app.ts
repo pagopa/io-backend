@@ -76,6 +76,7 @@ import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
+import ZendeskController from "./controllers/zendeskController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
@@ -713,6 +714,11 @@ function registerAPIRoutes(
     tokenService
   );
 
+  const zendeskController: ZendeskController = new ZendeskController(
+    profileService,
+    tokenService
+  );
+
   app.get(
     `${basePath}/profile`,
     bearerSessionTokenAuth,
@@ -885,6 +891,12 @@ function registerAPIRoutes(
     `${basePath}/token/support`,
     bearerSessionTokenAuth,
     toExpressHandler(supportController.getSupportToken, supportController)
+  );
+
+  app.get(
+    `${basePath}/token/zendesk`,
+    bearerSessionTokenAuth,
+    toExpressHandler(zendeskController.getZendeskSupportToken, zendeskController)
   );
 }
 
