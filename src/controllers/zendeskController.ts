@@ -61,25 +61,32 @@ export default class ZendeskController {
             return taskEither.of(response.value);
           }
         )
-        .chain(u =>
-          this.tokenService
+        .chain(u => {
+          const userEmail =
+            u.email && u.is_email_validated
+              ? u.email
+              : (u.spid_email as EmailString);
+          if (!userEmail) {
+            return fromLeft<IResponseErrorInternal, string>(
+              ResponseErrorInternal("User does not have an email address")
+            );
+          }
+          return this.tokenService
             .getJwtZendeskSupportToken(
               JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
               u.name as NonEmptyString,
               u.family_name as NonEmptyString,
               user.fiscal_code,
-              u.email && u.is_email_validated
-                ? u.email
-                : (user.spid_email as EmailString),
+              userEmail,
               JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
               JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
             )
-            .mapLeft(e => ResponseErrorInternal(e.message))
-        )
+            .mapLeft(e => ResponseErrorInternal(e.message));
+        })
         .map(token =>
           ZendeskToken.encode({
-            access_token: token,
-            expires_in: JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
+            expires_in: JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
+            jwt: token
           })
         )
         .fold<

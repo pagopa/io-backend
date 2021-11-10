@@ -1149,12 +1149,12 @@ definitions:
     description: A Support Token response to authenticate to Zendesk
     type: object
     properties:
-      access_token:
+      jwt:
         type: string
       expires_in:
         type: number
     required:
-      - access_token
+      - jwt
       - expires_in
 responses: {}
 parameters:

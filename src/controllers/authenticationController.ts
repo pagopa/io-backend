@@ -44,7 +44,8 @@ import {
   BPDToken,
   MyPortalToken,
   SessionToken,
-  WalletToken
+  WalletToken,
+  ZendeskToken
 } from "../types/token";
 import {
   exactUserIdentityDecode,
@@ -115,6 +116,7 @@ export default class AuthenticationController {
       walletToken,
       myPortalToken,
       bpdToken,
+      zendeskToken,
       sessionTrackingId
     ] = await Promise.all([
       // ask the session storage whether this user is blocked
@@ -126,6 +128,8 @@ export default class AuthenticationController {
       // authentication token for MyPortal
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // authentication token for BPD
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for Zendesk
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // unique ID for tracking the user session
       this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
@@ -149,6 +153,7 @@ export default class AuthenticationController {
       walletToken as WalletToken,
       myPortalToken as MyPortalToken,
       bpdToken as BPDToken,
+      zendeskToken as ZendeskToken,
       sessionTrackingId
     );
 

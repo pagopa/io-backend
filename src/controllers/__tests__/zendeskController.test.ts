@@ -12,7 +12,12 @@ import ProfileService from "../../services/profileService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ZendeskController from "../zendeskController";
-import { ResponseErrorInternal, ResponseErrorNotFound, ResponseErrorTooManyRequests, ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import {
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseErrorTooManyRequests,
+  ResponseSuccessJson
+} from "italia-ts-commons/lib/responses";
 import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
 import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/io-api/IsWebhookEnabled";
@@ -119,7 +124,38 @@ describe("ZendeskController#getZendeskSupportToken", () => {
 
     expect(response.kind).toEqual("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value.access_token).toEqual(aZendeskSupportToken);
+      expect(response.value.jwt).toEqual(aZendeskSupportToken);
+    }
+  });
+
+  it("should return an IResponseErrorInternal if user does not have an email", async () => {
+    const req = mockReq();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson({
+          ...mockedInitializedProfile,
+          email: undefined,
+          is_email_enabled: false,
+          spid_email: undefined
+        })
+      )
+    );
+
+    req.user = mockedRequestUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const tokenService = new TokenService();
+    const controller = new ZendeskController(profileService, tokenService);
+
+    const response = await controller.getZendeskSupportToken(req);
+
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
+      expect(response.detail).toEqual(
+        "Internal server error: User does not have an email address"
+      );
     }
   });
 
@@ -154,9 +190,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
   it("should return a IResponseErrorInternal if getProfile promise gets rejected", async () => {
     const req = mockReq();
 
-    mockGetProfile.mockReturnValue(
-      Promise.reject()
-    );
+    mockGetProfile.mockReturnValue(Promise.reject());
 
     req.user = mockedRequestUser;
 
@@ -194,9 +228,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     // getUserDataProcessing is not called
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
-      expect(response.detail).toEqual(
-        "Internal server error: Any Error"
-      );
+      expect(response.detail).toEqual("Internal server error: Any Error");
     }
   });
 
@@ -229,7 +261,9 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseErrorNotFound("User not found", "Cannot find user"))
+      Promise.resolve(
+        ResponseErrorNotFound("User not found", "Cannot find user")
+      )
     );
 
     req.user = mockedRequestUser;
@@ -243,9 +277,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
 
     expect(response.kind).toEqual("IResponseErrorNotFound");
     if (response.kind === "IResponseErrorNotFound") {
-      expect(response.detail).toEqual(
-        "User not found: Cannot find user"
-      );
+      expect(response.detail).toEqual("User not found: Cannot find user");
     }
   });
 

@@ -13,13 +13,13 @@ import { fulfill, StrategyDoneFunction } from "../utils/strategies";
 
 const bearerWalletTokenStrategy = (
   sessionStorage: ISessionStorage
-): passport.Strategy => {
+): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
     passReqToCallback: true,
     realm: "Proxy API",
     scope: "request"
   };
-  return new passport.Strategy(
+  return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
     (_: express.Request, token: string, done: StrategyDoneFunction) => {
       sessionStorage.getByWalletToken(token as WalletToken).then(

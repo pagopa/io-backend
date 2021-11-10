@@ -85,6 +85,7 @@
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
+    "passport-http-custom-bearer": "^1.0.15",
     "passport-local": "^1.0.0",
     "passport-strategy": "^1.0.0",
     "qr-image": "^3.2.0",

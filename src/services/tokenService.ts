@@ -74,6 +74,7 @@ export default class TokenService {
    * @param tokenTtl: Token Time To live (expressed in seconds)
    * @param issuer: The Token issuer
    */
+  // eslint-disable-next-line max-params
   public getJwtZendeskSupportToken(
     secret: NonEmptyString,
     name: NonEmptyString,
@@ -86,11 +87,11 @@ export default class TokenService {
     return taskify<Error, string>(cb =>
       jwt.sign(
         {
-          name: `${familyName} ${name}`,
           email: emailAddress,
           external_id: fiscalCode,
           iat: new Date().getTime() / 1000,
-          jti: ulid()
+          jti: ulid(),
+          name: `${familyName} ${name}`
         },
         secret,
         {

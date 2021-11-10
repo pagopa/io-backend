@@ -24,3 +24,9 @@ interface IBPDTokenTag {
 }
 export const BPDToken = tag<IBPDTokenTag>()(t.string);
 export type BPDToken = t.TypeOf<typeof BPDToken>;
+
+interface IZendeskTokenTag {
+  readonly kind: "ZendeskToken";
+}
+export const ZendeskToken = tag<IZendeskTokenTag>()(t.string);
+export type ZendeskToken = t.TypeOf<typeof ZendeskToken>;
