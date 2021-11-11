@@ -16,8 +16,9 @@ const bearerZendeskTokenStrategy = (
 ): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
     bodyName: "user_token",
-    passReqToCallback: true,
+    headerName: "user_token",
     queryName: "user_token",
+    passReqToCallback: true,
     realm: "Proxy API",
     scope: "request"
   };

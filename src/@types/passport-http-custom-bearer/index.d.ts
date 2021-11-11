@@ -9,6 +9,7 @@ declare module "passport-http-custom-bearer" {
 
   interface IStrategyOptions {
     bodyName?: string;
+    headerName?: string;
     queryName?: string;
     scope?: string | Array<string> | undefined;
     realm?: string | undefined;
