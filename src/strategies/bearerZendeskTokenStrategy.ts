@@ -17,8 +17,8 @@ const bearerZendeskTokenStrategy = (
   const options = {
     bodyName: "user_token",
     headerName: "user_token",
-    queryName: "user_token",
     passReqToCallback: true,
+    queryName: "user_token",
     realm: "Proxy API",
     scope: "request"
   };
