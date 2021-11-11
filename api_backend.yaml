@@ -1040,11 +1040,14 @@ definitions:
         type: string
       bpdToken:
         type: string
+      zendeskToken:
+        type: string
     required:
       - spidLevel
       - walletToken
       - myPortalToken
       - bpdToken
+      - zendeskToken
   SessionInfo:
     type: object
     title: Session info of a user
@@ -1143,18 +1146,6 @@ definitions:
         type: number
     required:
       - access_token
-      - expires_in
-  ZendeskToken:
-    title: Zendesk support token
-    description: A Support Token response to authenticate to Zendesk
-    type: object
-    properties:
-      jwt:
-        type: string
-      expires_in:
-        type: number
-    required:
-      - jwt
       - expires_in
 responses: {}
 parameters:

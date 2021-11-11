@@ -19,7 +19,7 @@ import {
 import { EmailString, NonEmptyString } from "italia-ts-commons/lib/strings";
 import ProfileService from "src/services/profileService";
 
-import { ZendeskToken } from "../../generated/backend/ZendeskToken";
+import { ZendeskToken } from "../../generated/zendesk/ZendeskToken";
 import {
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
   JWT_ZENDESK_SUPPORT_TOKEN_ISSUER,
