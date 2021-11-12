@@ -646,7 +646,7 @@ function registerZendeskRoutes(
     tokenService
   );
 
-  app.get(
+  app.post(
     `${basePath}/jwt`,
     checkIP(allowZendeskIPSourceRange),
     bearerZendeskTokenAuth,

@@ -7,15 +7,17 @@ host: localhost
 basePath: /api/backend/zendesk/v1/
 schemes:
   - https
-security:
-  - Bearer: []
 paths:
   "/jwt":
     x-swagger-router-controller: ZendeskController
-    get:
+    post:
       operationId: getJwtForZendesk
       summary: Get jwt with user's data for zendesk
       description: Returns jwt with user's data for zendesk backend.
+      parameters:
+        - in: formData
+          name: user_token
+          type: string
       responses:
         "200":
           description: Found.
@@ -37,19 +39,11 @@ definitions:
     properties:
       jwt:
         type: string
-      expires_in:
-        type: number
     required:
       - jwt
-      - expires_in
 responses: {}
 parameters: {}
 consumes:
-  - application/json
+  - application/x-www-form-urlencoded
 produces:
   - application/json
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: user_token
-    in: body

@@ -85,7 +85,6 @@ export default class ZendeskController {
         })
         .map(token =>
           ZendeskToken.encode({
-            expires_in: JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
             jwt: token
           })
         )
