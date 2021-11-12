@@ -8,7 +8,7 @@ basePath: /api/backend/zendesk/v1/
 schemes:
   - https
 security:
-  - UserToken: []
+  - Bearer: []
 paths:
   "/jwt":
     x-swagger-router-controller: ZendeskController
@@ -49,7 +49,7 @@ consumes:
 produces:
   - application/json
 securityDefinitions:
-  UserToken:
+  Bearer:
     type: apiKey
     name: user_token
     in: body
