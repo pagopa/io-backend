@@ -34,6 +34,7 @@ const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
 const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
 const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416";
+const mockZendeskToken = "aaaaee213b64955212ea59e3beeaad1e5fdb3a36d2210417";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -82,7 +83,8 @@ describe("SessionController#getSessionState", () => {
     req.user = {
       ...mockedUser,
       bpd_token: mockBPDToken,
-      myportal_token: mockMyPortalToken
+      myportal_token: mockMyPortalToken,
+      zendesk_token: mockZendeskToken
     };
 
     const response = await controller.getSessionState(req);
@@ -94,16 +96,21 @@ describe("SessionController#getSessionState", () => {
       bpdToken: mockBPDToken,
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
-      walletToken: mockedUser.wallet_token
+      walletToken: mockedUser.wallet_token,
+      zendeskToken: mockZendeskToken
     });
   });
   it("create a new myportal_token if missing for current session", async () => {
     req.user = mockedUser;
-
-    mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
+    
+    mockGetNewToken.mockImplementationOnce(() => mockZendeskToken);
     mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
+    mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
 
     mockTtl.mockImplementationOnce((_, callback) => callback(undefined, 2000));
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
+      callback(undefined, "OK")
+    );
     mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
       callback(undefined, "OK")
     );
@@ -124,13 +131,14 @@ describe("SessionController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGetNewToken).toBeCalledTimes(2);
+    expect(mockGetNewToken).toBeCalledTimes(3);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
-      walletToken: mockWalletToken
+      walletToken: mockWalletToken,
+      zendeskToken: mockZendeskToken
     });
   });
 });

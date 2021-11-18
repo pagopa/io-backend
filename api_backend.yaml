@@ -1040,11 +1040,14 @@ definitions:
         type: string
       bpdToken:
         type: string
+      zendeskToken:
+        type: string
     required:
       - spidLevel
       - walletToken
       - myPortalToken
       - bpdToken
+      - zendeskToken
   SessionInfo:
     type: object
     title: Session info of a user
