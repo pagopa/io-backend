@@ -4,8 +4,14 @@
  */
 
 import * as express from "express";
+import { fromNullable } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
-import { fromLeft, taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import {
+  fromEither,
+  fromLeft,
+  taskEither,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import { InitializedProfile } from "generated/backend/InitializedProfile";
 import {
   IResponseErrorInternal,
@@ -33,6 +39,7 @@ export default class ZendeskController {
     private readonly profileService: ProfileService,
     private readonly tokenService: TokenService
   ) {}
+
   public readonly getZendeskSupportToken = (
     req: express.Request
   ): Promise<
@@ -47,42 +54,42 @@ export default class ZendeskController {
         () => this.profileService.getProfile(user),
         () => ResponseErrorInternal("Cannot retrieve profile")
       )
-        .foldTaskEither(
-          e => fromLeft<IResponseErrorInternal, InitializedProfile>(e),
-          response => {
-            if (response.kind !== "IResponseSuccessJson") {
-              return fromLeft<
-                | IResponseErrorInternal
-                | IResponseErrorTooManyRequests
-                | IResponseErrorNotFound,
-                InitializedProfile
-              >(response);
-            }
-            return taskEither.of(response.value);
-          }
+        .mapLeft<
+          | IResponseErrorInternal
+          | IResponseErrorTooManyRequests
+          | IResponseErrorNotFound
+        >(identity)
+        .chain<IResponseSuccessJson<InitializedProfile>>(r =>
+          r.kind === "IResponseSuccessJson" ? taskEither.of(r) : fromLeft(r)
         )
-        .chain(u => {
-          const userEmail =
+        .map(r => r.value)
+        .map(u => ({
+          fromProfileUser: u,
+          userEmail:
             u.email && u.is_email_validated
               ? u.email
-              : (u.spid_email as EmailString);
-          if (!userEmail) {
-            return fromLeft<IResponseErrorInternal, string>(
+              : (u.spid_email as EmailString)
+        }))
+        .chain(({ fromProfileUser, userEmail }) =>
+          fromEither(
+            fromNullable(
               ResponseErrorInternal("User does not have an email address")
-            );
-          }
-          return this.tokenService
+            )(userEmail)
+          ).map(email => ({ fromProfileUser, userEmail: email }))
+        )
+        .chain(({ fromProfileUser, userEmail }) =>
+          this.tokenService
             .getJwtZendeskSupportToken(
               JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
-              u.name as NonEmptyString,
-              u.family_name as NonEmptyString,
+              fromProfileUser.name as NonEmptyString,
+              fromProfileUser.family_name as NonEmptyString,
               user.fiscal_code,
               userEmail,
               JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
               JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
             )
-            .mapLeft(e => ResponseErrorInternal(e.message));
-        })
+            .mapLeft(e => ResponseErrorInternal(e.message))
+        )
         .map(token =>
           ZendeskToken.encode({
             jwt: token
