@@ -31,7 +31,9 @@ import { NewProfile } from "generated/io-api/NewProfile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
-import UsersLoginLogService from "src/services/usersLoginLogService";
+import { parse } from "date-fns";
+import UsersLoginLogService from "../services/usersLoginLogService";
+import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -103,6 +105,14 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrSpidUser.value;
+
+    if (!isOlderThan(14)(parse(spidUser.dateOfBirth), new Date())) {
+      log.error(
+        "acs: the age of the user is less than 14 yo [%s]",
+        spidUser.dateOfBirth
+      );
+      return ResponseErrorForbiddenNotAuthorized;
+    }
 
     //
     // create a new user object

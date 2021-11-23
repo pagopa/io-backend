@@ -32,8 +32,9 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
-import { exactUserIdentityDecode, User } from "../../types/user";
+import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
 import AuthenticationController from "../authenticationController";
+import { addDays, format, subYears } from "date-fns";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -419,6 +420,61 @@ describe("AuthenticationController#acs", () => {
       detail: "Error while creating the user session"
     });
   });
+
+  it("should return unauthorized if the user is younger than 14 yo", async () => {
+    const res = mockRes();
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(addDays(subYears(new Date(), 14), 1), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockSet).not.toBeCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it("should redirects to the correct url if the user has 14 yo", async() => {
+    const res = mockRes();
+    const expectedNewProfile: NewProfile = {
+      email: validUserPayload.email,
+      is_email_validated: true,
+      is_test_profile: false
+    };
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
+
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(proxyInitializedProfileResponse)
+    );
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(subYears(new Date(), 14), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      "/profile.html?token=" + mockSessionToken
+    );
+    expect(mockSet).toHaveBeenCalledWith({...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth});
+    expect(mockGetProfile).toHaveBeenCalledWith({...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth});
+    expect(mockCreateProfile).toHaveBeenCalledWith(
+      {...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth},
+      expectedNewProfile
+    );
+  })
 });
 
 describe("AuthenticationController#acsTest", () => {
@@ -497,7 +553,7 @@ describe("AuthenticationController#getUserIdentity", () => {
 
     expect(controller).toBeTruthy();
     /* tslint:disable-next-line:no-useless-cast */
-    const expectedValue = exactUserIdentityDecode(mockedUser as UserIdentity);
+    const expectedValue = exactUserIdentityDecode(mockedUser as unknown as UserIdentity);
     expect(isRight(expectedValue)).toBeTruthy();
     expect(response).toEqual({
       apply: expect.any(Function),

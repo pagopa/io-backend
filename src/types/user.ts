@@ -94,6 +94,7 @@ export type User = t.TypeOf<typeof User>;
 export const SpidUser = t.intersection([
   t.interface({
     authnContextClassRef: SpidLevel,
+    dateOfBirth: t.string,
     familyName: t.string,
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
@@ -101,7 +102,6 @@ export const SpidUser = t.intersection([
     name: t.string
   }),
   t.partial({
-    dateOfBirth: t.string,
     email: EmailAddress,
     nameID: t.string,
     nameIDFormat: t.string,
