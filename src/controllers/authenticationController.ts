@@ -65,7 +65,9 @@ export const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_ID_LENGTH_BYTES = 32;
 
 export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
+// Custom error code handled by the client to show a specific error page
 export const AGE_LIMIT_ERROR_CODE = 1001;
+// Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
 
 export default class AuthenticationController {
@@ -121,7 +123,7 @@ export default class AuthenticationController {
     ) {
       const redirectionUrl = this.getClientErrorRedirectionUrl(
         AGE_LIMIT_ERROR_MESSAGE,
-        AGE_LIMIT_ERROR_CODE // Custom error code handled by the client to show a specific error page
+        AGE_LIMIT_ERROR_CODE
       );
       log.error(
         "acs: the age of the user is less than 14 yo [%s]",
