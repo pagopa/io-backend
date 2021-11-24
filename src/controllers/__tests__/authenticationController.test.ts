@@ -33,7 +33,7 @@ import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
-import AuthenticationController, { AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
+import AuthenticationController, { AGE_LIMIT, AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
 import { addDays, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
 
@@ -424,12 +424,12 @@ describe("AuthenticationController#acs", () => {
     });
   });
 
-  it("should return unauthorized if the user is younger than 14 yo", async () => {
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo`, async () => {
     const res = mockRes();
 
     const aYoungUserPayload: SpidUser = {
       ...validUserPayload,
-      dateOfBirth: format(addDays(subYears(new Date(), 14), 1), "YYYY-MM-DD")
+      dateOfBirth: format(addDays(subYears(new Date(), AGE_LIMIT), 1), "YYYY-MM-DD")
     }
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
@@ -442,7 +442,7 @@ describe("AuthenticationController#acs", () => {
     );
   });
 
-  it("should redirects to the correct url if the user has 14 yo", async() => {
+  it(`should redirects to the correct url if the user has ${AGE_LIMIT} yo`, async() => {
     const res = mockRes();
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
@@ -464,7 +464,7 @@ describe("AuthenticationController#acs", () => {
     );
     const aYoungUserPayload: SpidUser = {
       ...validUserPayload,
-      dateOfBirth: format(subYears(new Date(), 14), "YYYY-MM-DD")
+      dateOfBirth: format(subYears(new Date(), AGE_LIMIT), "YYYY-MM-DD")
     }
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);

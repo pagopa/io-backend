@@ -66,6 +66,7 @@ const SESSION_ID_LENGTH_BYTES = 32;
 
 export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
 export const AGE_LIMIT_ERROR_CODE = 1001;
+export const AGE_LIMIT = 14;
 
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
@@ -116,7 +117,7 @@ export default class AuthenticationController {
 
     if (
       this.hasUserAgeLimitEnabled &&
-      !isOlderThan(14)(parse(spidUser.dateOfBirth), new Date())
+      !isOlderThan(AGE_LIMIT)(parse(spidUser.dateOfBirth), new Date())
     ) {
       const redirectionUrl = this.getClientErrorRedirectionUrl(
         AGE_LIMIT_ERROR_MESSAGE,
