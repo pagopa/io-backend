@@ -34,7 +34,7 @@ import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
 import AuthenticationController, { AGE_LIMIT, AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
-import { addDays, format, subYears } from "date-fns";
+import { addDays, addMonths, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
 
 // user constant
@@ -430,6 +430,27 @@ describe("AuthenticationController#acs", () => {
     const aYoungUserPayload: SpidUser = {
       ...validUserPayload,
       dateOfBirth: format(addDays(subYears(new Date(), AGE_LIMIT), 1), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo with CIE date format`, async () => {
+    const res = mockRes();
+
+    const limitDate = subYears(new Date(), AGE_LIMIT);
+    const dateOfBirth = limitDate.getDate() > 8 ? addDays(limitDate, 1) : addMonths(limitDate, 1);
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(dateOfBirth, "YYYY-MM-D")
     }
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
