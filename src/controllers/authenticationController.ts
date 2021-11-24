@@ -31,7 +31,10 @@ import { NewProfile } from "generated/io-api/NewProfile";
 
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
-import UsersLoginLogService from "src/services/usersLoginLogService";
+import { parse } from "date-fns";
+import * as appInsights from "applicationinsights";
+import UsersLoginLogService from "../services/usersLoginLogService";
+import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -62,6 +65,12 @@ export const SESSION_TOKEN_LENGTH_BYTES = 48;
 // how many random bytes to generate for each session ID
 const SESSION_ID_LENGTH_BYTES = 32;
 
+export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
+// Custom error code handled by the client to show a specific error page
+export const AGE_LIMIT_ERROR_CODE = 1001;
+// Minimum user age allowed to login if the Age limit is enabled
+export const AGE_LIMIT = 14;
+
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
   constructor(
@@ -70,10 +79,16 @@ export default class AuthenticationController {
     private readonly getClientProfileRedirectionUrl: (
       token: string
     ) => UrlFromString,
+    private readonly getClientErrorRedirectionUrl: (
+      errorMessage: string,
+      errorCode?: number
+    ) => UrlFromString,
     private readonly profileService: ProfileService,
     private readonly notificationService: NotificationService,
     private readonly usersLoginLogService: UsersLoginLogService,
-    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
+    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
+    private readonly hasUserAgeLimitEnabled: boolean,
+    private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
@@ -103,6 +118,28 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrSpidUser.value;
+
+    if (
+      this.hasUserAgeLimitEnabled &&
+      !isOlderThan(AGE_LIMIT)(parse(spidUser.dateOfBirth), new Date())
+    ) {
+      const redirectionUrl = this.getClientErrorRedirectionUrl(
+        AGE_LIMIT_ERROR_MESSAGE,
+        AGE_LIMIT_ERROR_CODE
+      );
+      log.error(
+        `acs: the age of the user is less than ${AGE_LIMIT} yo [%s]`,
+        spidUser.dateOfBirth
+      );
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: "spid.error.generic",
+        properties: {
+          message: "User login blocked for reached age limits",
+          type: "INFO"
+        }
+      });
+      return ResponsePermanentRedirect(redirectionUrl);
+    }
 
     //
     // create a new user object
