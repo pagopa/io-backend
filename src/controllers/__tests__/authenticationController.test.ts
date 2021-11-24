@@ -33,8 +33,9 @@ import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
-import AuthenticationController from "../authenticationController";
+import AuthenticationController, { AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
 import { addDays, format, subYears } from "date-fns";
+import { getClientErrorRedirectionUrl } from "../../config";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -203,10 +204,12 @@ beforeAll(async () => {
     redisSessionStorage,
     tokenService,
     getClientProfileRedirectionUrl,
+    getClientErrorRedirectionUrl,
     profileService,
     notificationService,
     usersLoginLogService,
-    []
+    [],
+    true
   );
 });
 
@@ -433,7 +436,10 @@ describe("AuthenticationController#acs", () => {
 
     expect(controller).toBeTruthy();
     expect(mockSet).not.toBeCalled();
-    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
   });
 
   it("should redirects to the correct url if the user has 14 yo", async() => {

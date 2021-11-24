@@ -64,6 +64,9 @@ export const SESSION_TOKEN_LENGTH_BYTES = 48;
 // how many random bytes to generate for each session ID
 const SESSION_ID_LENGTH_BYTES = 32;
 
+export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
+export const AGE_LIMIT_ERROR_CODE = 1001;
+
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
   constructor(
@@ -72,10 +75,15 @@ export default class AuthenticationController {
     private readonly getClientProfileRedirectionUrl: (
       token: string
     ) => UrlFromString,
+    private readonly getClientErrorRedirectionUrl: (
+      errorMessage: string,
+      errorCode?: number
+    ) => UrlFromString,
     private readonly profileService: ProfileService,
     private readonly notificationService: NotificationService,
     private readonly usersLoginLogService: UsersLoginLogService,
-    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
+    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
+    private readonly hasUserAgeLimitEnabled: boolean
   ) {}
 
   /**
@@ -106,12 +114,19 @@ export default class AuthenticationController {
 
     const spidUser = errorOrSpidUser.value;
 
-    if (!isOlderThan(14)(parse(spidUser.dateOfBirth), new Date())) {
+    if (
+      this.hasUserAgeLimitEnabled &&
+      !isOlderThan(14)(parse(spidUser.dateOfBirth), new Date())
+    ) {
+      const redirectionUrl = this.getClientErrorRedirectionUrl(
+        AGE_LIMIT_ERROR_MESSAGE,
+        AGE_LIMIT_ERROR_CODE // Custom error code handled by the client to show a specific error page
+      );
       log.error(
         "acs: the age of the user is less than 14 yo [%s]",
         spidUser.dateOfBirth
       );
-      return ResponseErrorForbiddenNotAuthorized;
+      return ResponsePermanentRedirect(redirectionUrl);
     }
 
     //
