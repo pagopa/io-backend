@@ -126,7 +126,7 @@ export default class AuthenticationController {
         AGE_LIMIT_ERROR_CODE
       );
       log.error(
-        "acs: the age of the user is less than 14 yo [%s]",
+        `acs: the age of the user is less than ${AGE_LIMIT} yo [%s]`,
         spidUser.dateOfBirth
       );
       return ResponsePermanentRedirect(redirectionUrl);
