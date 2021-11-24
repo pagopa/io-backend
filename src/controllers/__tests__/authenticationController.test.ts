@@ -36,6 +36,7 @@ import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
 import AuthenticationController, { AGE_LIMIT, AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
 import { addDays, addMonths, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
+import * as appInsights from "applicationinsights";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -175,6 +176,10 @@ jest.mock("../../services/usersLoginLogService", () => {
   };
 });
 
+const mockTelemetryClient = {
+  trackEvent: jest.fn()
+} as unknown as appInsights.TelemetryClient;
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -209,7 +214,8 @@ beforeAll(async () => {
     notificationService,
     usersLoginLogService,
     [],
-    true
+    true,
+    mockTelemetryClient
   );
 });
 
@@ -435,6 +441,13 @@ describe("AuthenticationController#acs", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(expect.objectContaining({
+      name: "spid.error.generic",
+      properties: {
+        message: expect.any(String),
+        type: "INFO"
+      }
+    }));
     expect(mockSet).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
@@ -456,6 +469,13 @@ describe("AuthenticationController#acs", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(expect.objectContaining({
+      name: "spid.error.generic",
+      properties: {
+        message: expect.any(String),
+        type: "INFO"
+      }
+    }));
     expect(mockSet).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
@@ -491,6 +511,7 @@ describe("AuthenticationController#acs", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
       "/profile.html?token=" + mockSessionToken

@@ -371,7 +371,8 @@ export function newApp({
         NOTIFICATION_SERVICE,
         USERS_LOGIN_LOG_SERVICE,
         TEST_LOGIN_FISCAL_CODES,
-        FF_USER_AGE_LIMIT_ENABLED
+        FF_USER_AGE_LIMIT_ENABLED,
+        appInsightsClient
       );
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define

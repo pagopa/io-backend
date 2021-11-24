@@ -32,6 +32,7 @@ import { NewProfile } from "generated/io-api/NewProfile";
 import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { parse } from "date-fns";
+import * as appInsights from "applicationinsights";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
@@ -86,7 +87,8 @@ export default class AuthenticationController {
     private readonly notificationService: NotificationService,
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
-    private readonly hasUserAgeLimitEnabled: boolean
+    private readonly hasUserAgeLimitEnabled: boolean,
+    private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
@@ -129,6 +131,13 @@ export default class AuthenticationController {
         `acs: the age of the user is less than ${AGE_LIMIT} yo [%s]`,
         spidUser.dateOfBirth
       );
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: "spid.error.generic",
+        properties: {
+          message: "User login blocked for reached age limits",
+          type: "INFO"
+        }
+      });
       return ResponsePermanentRedirect(redirectionUrl);
     }
 
