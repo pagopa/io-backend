@@ -56,7 +56,9 @@ import {
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
   EUCOVIDCERT_API_CLIENT,
-  FF_MIT_VOUCHER_ENABLED
+  FF_MIT_VOUCHER_ENABLED,
+  getClientErrorRedirectionUrl,
+  FF_USER_AGE_LIMIT_ENABLED
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -364,10 +366,13 @@ export function newApp({
         SESSION_STORAGE,
         TOKEN_SERVICE,
         getClientProfileRedirectionUrl,
+        getClientErrorRedirectionUrl,
         PROFILE_SERVICE,
         NOTIFICATION_SERVICE,
         USERS_LOGIN_LOG_SERVICE,
-        TEST_LOGIN_FISCAL_CODES
+        TEST_LOGIN_FISCAL_CODES,
+        FF_USER_AGE_LIMIT_ENABLED,
+        appInsightsClient
       );
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define

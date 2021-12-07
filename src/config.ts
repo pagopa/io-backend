@@ -396,6 +396,19 @@ export const getClientProfileRedirectionUrl = (
     href: url
   };
 };
+export const getClientErrorRedirectionUrl = (
+  errorMessage: string,
+  errorCode?: number
+): UrlFromString => {
+  const maybeErrorCodeParam = fromNullable(errorCode).map(
+    _ => `&errorCode=${errorCode}`
+  );
+  const errorParams = `?errorMessage=${errorMessage}${maybeErrorCodeParam.getOrElse(
+    ""
+  )}`;
+  const url = CLIENT_ERROR_REDIRECTION_URL.concat(errorParams);
+  return { href: url };
+};
 
 // Needed to forward SPID requests for logging
 export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
@@ -451,6 +464,9 @@ export const FF_EUCOVIDCERT_ENABLED =
 
 export const FF_MIT_VOUCHER_ENABLED =
   process.env.FF_MIT_VOUCHER_ENABLED === "1";
+
+export const FF_USER_AGE_LIMIT_ENABLED =
+  process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(

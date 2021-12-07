@@ -32,8 +32,11 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
-import { exactUserIdentityDecode, User } from "../../types/user";
-import AuthenticationController from "../authenticationController";
+import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
+import AuthenticationController, { AGE_LIMIT, AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
+import { addDays, addMonths, format, subYears } from "date-fns";
+import { getClientErrorRedirectionUrl } from "../../config";
+import * as appInsights from "applicationinsights";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -173,6 +176,10 @@ jest.mock("../../services/usersLoginLogService", () => {
   };
 });
 
+const mockTelemetryClient = {
+  trackEvent: jest.fn()
+} as unknown as appInsights.TelemetryClient;
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -202,10 +209,13 @@ beforeAll(async () => {
     redisSessionStorage,
     tokenService,
     getClientProfileRedirectionUrl,
+    getClientErrorRedirectionUrl,
     profileService,
     notificationService,
     usersLoginLogService,
-    []
+    [],
+    true,
+    mockTelemetryClient
   );
 });
 
@@ -419,6 +429,100 @@ describe("AuthenticationController#acs", () => {
       detail: "Error while creating the user session"
     });
   });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo`, async () => {
+    const res = mockRes();
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(addDays(subYears(new Date(), AGE_LIMIT), 1), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(expect.objectContaining({
+      name: "spid.error.generic",
+      properties: {
+        message: expect.any(String),
+        type: "INFO"
+      }
+    }));
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo with CIE date format`, async () => {
+    const res = mockRes();
+
+    const limitDate = subYears(new Date(), AGE_LIMIT);
+    const dateOfBirth = limitDate.getDate() > 8 ? addDays(limitDate, 1) : addMonths(limitDate, 1);
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(dateOfBirth, "YYYY-MM-D")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(expect.objectContaining({
+      name: "spid.error.generic",
+      properties: {
+        message: expect.any(String),
+        type: "INFO"
+      }
+    }));
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should redirects to the correct url if the user has ${AGE_LIMIT} yo`, async() => {
+    const res = mockRes();
+    const expectedNewProfile: NewProfile = {
+      email: validUserPayload.email,
+      is_email_validated: true,
+      is_test_profile: false
+    };
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
+
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(proxyInitializedProfileResponse)
+    );
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(subYears(new Date(), AGE_LIMIT), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      "/profile.html?token=" + mockSessionToken
+    );
+    expect(mockSet).toHaveBeenCalledWith({...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth});
+    expect(mockGetProfile).toHaveBeenCalledWith({...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth});
+    expect(mockCreateProfile).toHaveBeenCalledWith(
+      {...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth},
+      expectedNewProfile
+    );
+  })
 });
 
 describe("AuthenticationController#acsTest", () => {
@@ -497,7 +601,7 @@ describe("AuthenticationController#getUserIdentity", () => {
 
     expect(controller).toBeTruthy();
     /* tslint:disable-next-line:no-useless-cast */
-    const expectedValue = exactUserIdentityDecode(mockedUser as UserIdentity);
+    const expectedValue = exactUserIdentityDecode(mockedUser as unknown as UserIdentity);
     expect(isRight(expectedValue)).toBeTruthy();
     expect(response).toEqual({
       apply: expect.any(Function),
