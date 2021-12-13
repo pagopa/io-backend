@@ -102,7 +102,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     jest.clearAllMocks();
   });
 
-  it("should return a valid Zendesk support token when everything is fine", async () => {
+  it("should return a valid Zendesk support token when user has a validated email", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -128,7 +128,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     }
   });
 
-  it("should return an IResponseErrorInternal if user does not have an email", async () => {
+  it("should return an IResponseErrorInternal if user does not have any email address", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -138,6 +138,36 @@ describe("ZendeskController#getZendeskSupportToken", () => {
           email: undefined,
           is_email_enabled: false,
           spid_email: undefined
+        })
+      )
+    );
+
+    req.user = mockedRequestUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const tokenService = new TokenService();
+    const controller = new ZendeskController(profileService, tokenService);
+
+    const response = await controller.getZendeskSupportToken(req);
+
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
+      expect(response.detail).toEqual(
+        "Internal server error: User does not have an email address"
+      );
+    }
+  });
+
+  it("should return an IResponseErrorInternal if user has only the spid email", async () => {
+    const req = mockReq();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson({
+          ...mockedInitializedProfile,
+          email: undefined,
+          is_email_enabled: false
         })
       )
     );

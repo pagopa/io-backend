@@ -4,13 +4,12 @@
  */
 
 import * as express from "express";
-import { fromNullable } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
 import {
-  fromEither,
   fromLeft,
   taskEither,
-  tryCatch
+  tryCatch,
+  fromPredicate
 } from "fp-ts/lib/TaskEither";
 import { InitializedProfile } from "generated/backend/InitializedProfile";
 import {
@@ -22,9 +21,8 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { EmailString, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import ProfileService from "src/services/profileService";
-
 import { ZendeskToken } from "../../generated/zendesk/ZendeskToken";
 import {
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
@@ -33,6 +31,11 @@ import {
 } from "../../src/config";
 import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
+
+const isProfileWithValidEmailAddress = (userProfile =>
+  userProfile.email && userProfile.is_email_validated) as (
+  a: InitializedProfile
+) => a is InitializedProfile;
 
 export default class ZendeskController {
   constructor(
@@ -63,28 +66,20 @@ export default class ZendeskController {
           r.kind === "IResponseSuccessJson" ? taskEither.of(r) : fromLeft(r)
         )
         .map(r => r.value)
-        .map(u => ({
-          fromProfileUser: u,
-          userEmail:
-            u.email && u.is_email_validated
-              ? u.email
-              : (u.spid_email as EmailString)
-        }))
-        .chain(({ fromProfileUser, userEmail }) =>
-          fromEither(
-            fromNullable(
-              ResponseErrorInternal("User does not have an email address")
-            )(userEmail)
-          ).map(email => ({ fromProfileUser, userEmail: email }))
+        .chain(fromProfileUser =>
+          fromPredicate(isProfileWithValidEmailAddress, _ =>
+            ResponseErrorInternal("User does not have an email address")
+          )(fromProfileUser)
         )
-        .chain(({ fromProfileUser, userEmail }) =>
+        .chain(profileWithValidEmailAddress =>
           this.tokenService
             .getJwtZendeskSupportToken(
               JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
-              fromProfileUser.name as NonEmptyString,
-              fromProfileUser.family_name as NonEmptyString,
-              user.fiscal_code,
-              userEmail,
+              profileWithValidEmailAddress.name as NonEmptyString,
+              profileWithValidEmailAddress.family_name as NonEmptyString,
+              profileWithValidEmailAddress.fiscal_code,
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              profileWithValidEmailAddress.email!,
               JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
               JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
             )
