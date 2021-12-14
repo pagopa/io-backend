@@ -189,6 +189,36 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     }
   });
 
+  it("should return an IResponseErrorInternal if user has an empty name", async () => {
+    const req = mockReq();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson({
+          ...mockedInitializedProfile,
+          name: undefined,
+          family_name: undefined
+        })
+      )
+    );
+
+    req.user = mockedRequestUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const tokenService = new TokenService();
+    const controller = new ZendeskController(profileService, tokenService);
+
+    const response = await controller.getZendeskSupportToken(req);
+
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
+      expect(response.detail).toEqual(
+        "Internal server error: Cannot create a valid Zendesk user from this profile"
+      );
+    }
+  });
+
   it("should return a IResponseErrorInternal if getJwtZendeskSupportToken returns an Error", async () => {
     const req = mockReq();
 

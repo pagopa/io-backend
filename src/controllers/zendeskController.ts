@@ -9,7 +9,8 @@ import {
   fromLeft,
   taskEither,
   tryCatch,
-  fromPredicate
+  fromPredicate,
+  fromEither
 } from "fp-ts/lib/TaskEither";
 import { InitializedProfile } from "generated/backend/InitializedProfile";
 import {
@@ -21,8 +22,13 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import ProfileService from "src/services/profileService";
+import * as t from "io-ts/lib";
 import { ZendeskToken } from "../../generated/zendesk/ZendeskToken";
 import {
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
@@ -32,10 +38,20 @@ import {
 import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
 
-const isProfileWithValidEmailAddress = (userProfile =>
-  userProfile.email && userProfile.is_email_validated) as (
-  a: InitializedProfile
-) => a is InitializedProfile;
+// define a predicate to validate a profile by email confirmation
+const isProfileWithValidEmailAddress = (
+  userProfile: InitializedProfile
+): userProfile is InitializedProfile =>
+  !!(userProfile.email && userProfile.is_email_validated);
+
+// define a ValidZendeskProfile as a subset of InitializedProfile model
+const ValidZendeskProfile = t.interface({
+  email: EmailString,
+  family_name: NonEmptyString,
+  fiscal_code: FiscalCode,
+  name: NonEmptyString
+});
+type ValidZendeskProfile = t.TypeOf<typeof ValidZendeskProfile>;
 
 export default class ZendeskController {
   constructor(
@@ -66,20 +82,30 @@ export default class ZendeskController {
           r.kind === "IResponseSuccessJson" ? taskEither.of(r) : fromLeft(r)
         )
         .map(r => r.value)
-        .chain(fromProfileUser =>
+        .chain(profile =>
           fromPredicate(isProfileWithValidEmailAddress, _ =>
             ResponseErrorInternal("User does not have an email address")
-          )(fromProfileUser)
+          )(profile)
         )
         .chain(profileWithValidEmailAddress =>
+          fromEither(
+            ValidZendeskProfile.decode(
+              profileWithValidEmailAddress
+            ).mapLeft(_ =>
+              ResponseErrorInternal(
+                "Cannot create a valid Zendesk user from this profile"
+              )
+            )
+          )
+        )
+        .chain(validZendeskProfile =>
           this.tokenService
             .getJwtZendeskSupportToken(
               JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
-              profileWithValidEmailAddress.name as NonEmptyString,
-              profileWithValidEmailAddress.family_name as NonEmptyString,
-              profileWithValidEmailAddress.fiscal_code,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              profileWithValidEmailAddress.email!,
+              validZendeskProfile.name,
+              validZendeskProfile.family_name,
+              validZendeskProfile.fiscal_code,
+              validZendeskProfile.email,
               JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
               JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
             )
