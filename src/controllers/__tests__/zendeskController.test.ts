@@ -136,8 +136,37 @@ describe("ZendeskController#getZendeskSupportToken", () => {
         ResponseSuccessJson({
           ...mockedInitializedProfile,
           email: undefined,
-          is_email_enabled: false,
+          is_email_validated: false,
           spid_email: undefined
+        })
+      )
+    );
+
+    req.user = mockedRequestUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const tokenService = new TokenService();
+    const controller = new ZendeskController(profileService, tokenService);
+
+    const response = await controller.getZendeskSupportToken(req);
+
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
+      expect(response.detail).toEqual(
+        "Internal server error: User does not have an email address"
+      );
+    }
+  });
+
+  it("should return an IResponseErrorInternal if user does not have a valid email address", async () => {
+    const req = mockReq();
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson({
+          ...mockedInitializedProfile,
+          is_email_validated: false
         })
       )
     );
@@ -167,7 +196,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
         ResponseSuccessJson({
           ...mockedInitializedProfile,
           email: undefined,
-          is_email_enabled: false
+          is_email_validated: false
         })
       )
     );
