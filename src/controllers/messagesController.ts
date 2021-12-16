@@ -19,6 +19,7 @@ import { withUserFromRequest } from "../types/user";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { withValidatedOrValidationError } from "../utils/responses";
+import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
@@ -63,5 +64,21 @@ export default class MessagesController {
   > =>
     withUserFromRequest(req, user =>
       this.messagesService.getMessage(user, req.params.id)
+    );
+
+  /**
+   * Returns the legal message identified by the message id.
+   */
+  public readonly getLegalMessage = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<LegalMessageWithContent>
+  > =>
+    withUserFromRequest(req, user =>
+      this.messagesService.getLegalMessage(user, req.params.id)
     );
 }
