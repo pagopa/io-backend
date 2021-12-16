@@ -45,6 +45,7 @@ import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
+import * as pecClient from "./clients/pecserver";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -311,6 +312,30 @@ const fetchWithTimeout = setFetchTimeout(
   abortableFetch
 );
 const httpApiFetch = toFetch(fetchWithTimeout);
+
+const bearerAuthFetch = (
+  origFetch: typeof fetch = fetch,
+  bearerToken: string
+): typeof fetch => (input: RequestInfo, init: RequestInit | undefined) =>
+  origFetch(input, {
+    ...init,
+    headers: { Authorization: `Bearer ${bearerToken}` }
+  });
+
+const getHttpApiFetchWithBerar = (bearer: string) =>
+  toFetch(
+    setFetchTimeout(
+      DEFAULT_REQUEST_TIMEOUT_MS,
+      AbortableFetch(bearerAuthFetch(agent.getHttpFetch(process.env), bearer))
+    )
+  );
+
+export const PECSERVER_URL = getRequiredENVVar("PECSERVER_URL");
+export const PECSERVER_BASE_PATH = getRequiredENVVar("PECSERVER_BASE_PATH");
+export const PECSERVER_CLIENT = {
+  getClient: (bearer: string) =>
+    pecClient.pecServerClient(PECSERVER_URL, getHttpApiFetchWithBerar(bearer))
+};
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
