@@ -7,35 +7,9 @@ basePath: /v1
 schemes:
   - https
 paths:
-  /createInbox:
-    put:
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: body
-          required: true
-          schema:
-            properties:
-              fiscal_code:
-                type: string
-            type: object
-      responses:
-        '204':
-          description: Success
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '429':
-          description: Too Many Requests
-        '500':
-          description: Internal Server Error
-      summary: Create an inbox for the provided fiscal code
   '/messages/{id}':
     get:
+      operationId: getMessage
       produces:
         - application/json
       parameters:
@@ -63,6 +37,7 @@ paths:
       summary: Retrieve a legal message
   '/messages/{id}/attachments/{attachment_id}':
     get:
+      operationId: getMessageAttachment
       produces:
         - application/octet-stream
       parameters:
@@ -95,6 +70,7 @@ paths:
       summary: Retrieve an attachment of a legal message
   '/messages/{id}/{format}':
     get:
+      operationId: getMessagePart
       produces:
         - text/plain
       parameters:
@@ -215,10 +191,6 @@ definitions:
       - html_content
       - attachments
     type: object
-securityDefinitions:
-  bearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
+
 x-components: {}
 
