@@ -1,0 +1,224 @@
+swagger: '2.0'
+info:
+  title: Poste Italiane - PEC to IO circuit
+  version: '1'
+host: iopec.postecert.poste.it
+basePath: /v1
+schemes:
+  - https
+paths:
+  /createInbox:
+    put:
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            properties:
+              fiscal_code:
+                type: string
+            type: object
+      responses:
+        '204':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+      summary: Create an inbox for the provided fiscal code
+  '/messages/{id}':
+    get:
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/LegalMessage'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+      summary: Retrieve a legal message
+  '/messages/{id}/attachments/{attachment_id}':
+    get:
+      produces:
+        - application/octet-stream
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+        - in: path
+          name: attachment_id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            format: binary
+            type: string
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+      summary: Retrieve an attachment of a legal message
+  '/messages/{id}/{format}':
+    get:
+      produces:
+        - text/plain
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+        - enum:
+            - eml
+            - smime
+            - daticert
+          in: path
+          name: format
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+      security:
+        - bearerAuth: []
+      summary: Retrieve the original part of a legal message
+definitions:
+  Attachment:
+    properties:
+      content_type:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+    type: object
+  CertData:
+    properties:
+      envelope_id:
+        minLength: 1
+        type: string
+      msg_id:
+        minLength: 1
+        type: string
+      receipt_type:
+        type: string
+      sender_provider:
+        minLength: 1
+        type: string
+      timestamp:
+        format: date-time
+        type: string
+    required:
+      - sender_provider
+      - timestamp
+      - envelope_id
+      - msg_id
+      - receipt_type
+    type: object
+  CertDataHeader:
+    properties:
+      object:
+        minLength: 1
+        type: string
+      recipients:
+        minLength: 1
+        type: string
+      replies:
+        minLength: 1
+        type: string
+      sender:
+        minLength: 1
+        type: string
+    type: object
+  LegalMessage:
+    properties:
+      cert_data:
+        $ref: '#/definitions/LegalMessageCertData'
+      eml:
+        $ref: '#/definitions/LegalMessageEml'
+    required:
+      - eml
+      - cert_data
+    type: object
+  LegalMessageCertData:
+    properties:
+      data:
+        $ref: '#/definitions/CertData'
+      header:
+        $ref: '#/definitions/CertDataHeader'
+    required:
+      - header
+      - data
+    type: object
+  LegalMessageEml:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/Attachment'
+        type: array
+      html_content:
+        type: string
+      plain_text_content:
+        type: string
+      subject:
+        type: string
+    required:
+      - subject
+      - plain_text_content
+      - html_content
+      - attachments
+    type: object
+securityDefinitions:
+  bearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+x-components: {}
+
