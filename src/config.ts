@@ -597,6 +597,38 @@ export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = NonEmptyString.decode(
   return process.exit(1);
 });
 
+// PEC Server  Voucher Token
+export const PEC_SERVER_TOKEN_SECRET = NonEmptyString.decode(
+  process.env.PEC_SERVER_TOKEN_SECRET
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid PEC_SERVER_TOKEN_SECRET environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const PEC_SERVER_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.PEC_SERVER_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid PEC_SERVER_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_PEC_SERVER_TOKEN_EXPIRATION = 600 as Second;
+export const PEC_SERVER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.PEC_SERVER_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_PEC_SERVER_TOKEN_EXPIRATION) as Second;
+log.info(
+  "PEC Server expiration set to %s seconds",
+  PEC_SERVER_TOKEN_EXPIRATION
+);
+//
+
 export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
   .decode(process.env.TEST_CGN_FISCAL_CODES || "")
   .getOrElseL(err => {

@@ -45,8 +45,14 @@ import {
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import { LegalMessage } from "../../generated/pecserver/LegalMessage";
+import {
+  PEC_SERVER_TOKEN_SECRET,
+  PEC_SERVER_TOKEN_ISSUER,
+  PEC_SERVER_TOKEN_EXPIRATION
+} from "../../src/config";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
+import TokenService from "./tokenService";
 
 // IResponseType<200, MessageResponseWithContent, never>
 
@@ -58,6 +64,10 @@ const isGetMessageSuccess = (
 const isPecServerGetMessageSuccess = (
   res: IResponseType<number, unknown, never>
 ): res is IResponseType<200, LegalMessage, never> => res.status === 200;
+
+const youShouldNotBeHere = (message?: string) => {
+  throw new Error(`You should not be here: ${message}`);
+};
 
 export default class MessagesService {
   constructor(
@@ -208,39 +218,56 @@ export default class MessagesService {
         )
         // Enrich the message with legal_message retrieved from pec-server
         .chain(message =>
-          new TE.TaskEither(
-            new T.Task(() =>
-              // FIXME: add JWT bearer implmenetation
-              this.pecClient.getClient("dummy-bearer-token").getMessage({
-                id: message.content.legal_data?.message_unique_id || "ERROR" // Workaround: legal_data esistence has already be checked
-              })
+          new TokenService()
+            .getPecServerToken(
+              message.fiscal_code,
+              PEC_SERVER_TOKEN_SECRET,
+              PEC_SERVER_TOKEN_EXPIRATION,
+              PEC_SERVER_TOKEN_ISSUER
             )
-              .map(response =>
-                response.mapLeft(_ =>
-                  ResponseErrorInternal(
-                    "Error decoding pecServer getMessage response"
-                  )
-                )
+            .mapLeft(e =>
+              ResponseErrorInternal(
+                `Error computing the PEC Server JWT: ${e.message}`
               )
-              .map(response =>
-                response.map(
-                  E.fromPredicate(isPecServerGetMessageSuccess, e =>
-                    ResponseErrorInternal(
-                      `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // TODO: disjoint the errors
+            )
+            .chain(pecServerJwt =>
+              new TE.TaskEither(
+                new T.Task(() =>
+                  this.pecClient.getClient(pecServerJwt).getMessage({
+                    id:
+                      message.content.legal_data?.message_unique_id ||
+                      youShouldNotBeHere(
+                        "legal_data esistence has already been checked"
+                      )
+                  })
+                )
+                  .map(response =>
+                    response.mapLeft(_ =>
+                      ResponseErrorInternal(
+                        "Error decoding pecServer getMessage response"
+                      )
                     )
                   )
-                )
-              )
-              .map(responseOrError => responseOrError.chain(identity))
-              .map(successResponseOrError =>
-                successResponseOrError.map(
-                  successResponse => successResponse.value
-                )
-              )
-          ).map(legalMessageResponse => ({
-            ...message,
-            legal_message: legalMessageResponse
-          }))
+                  .map(response =>
+                    response.map(
+                      E.fromPredicate(isPecServerGetMessageSuccess, e =>
+                        ResponseErrorInternal(
+                          `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // TODO: disjoint the errors
+                        )
+                      )
+                    )
+                  )
+                  .map(responseOrError => responseOrError.chain(identity))
+                  .map(successResponseOrError =>
+                    successResponseOrError.map(
+                      successResponse => successResponse.value
+                    )
+                  )
+              ).map(legalMessageResponse => ({
+                ...message,
+                legal_message: legalMessageResponse
+              }))
+            )
         )
         .map(ResponseSuccessJson)
         .fold<
