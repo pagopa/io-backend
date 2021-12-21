@@ -18,6 +18,7 @@ import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import ServicesController from "../servicesController";
+import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 
 const aServiceId: string = "service-id";
 
@@ -56,7 +57,10 @@ describe("serviceController#getService", () => {
     req.params = { id: aServiceId };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
     const controller = new ServicesController(messageService);
 
     const response = await controller.getService(req);
