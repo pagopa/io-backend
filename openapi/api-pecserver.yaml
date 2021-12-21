@@ -53,8 +53,7 @@ paths:
         '200':
           description: Success
           schema:
-            format: binary
-            type: string
+            $ref: '#/definitions/AttachmentContent'
         '400':
           description: Bad Request
         '401':
@@ -104,6 +103,9 @@ paths:
         - bearerAuth: []
       summary: Retrieve the original part of a legal message
 definitions:
+  AttachmentContent:
+    type: string
+    format: binary
   Attachment:
     properties:
       content_type:
@@ -193,4 +195,3 @@ definitions:
     type: object
 
 x-components: {}
-
