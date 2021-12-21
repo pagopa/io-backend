@@ -1,4 +1,17 @@
 import nodeFetch from "node-fetch";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
+import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { Second } from "italia-ts-commons/lib/units";
+import {
+  getHttpApiFetchWithBerar,
+  PECSERVER_BASE_PATH,
+  PECSERVER_URL,
+  PECSERVER_TOKEN_SECRET,
+  PECSERVER_TOKEN_EXPIRATION,
+  PECSERVER_TOKEN_ISSUER
+} from "../config";
 import * as pecClient from "../../generated/pecserver/client";
 
 export const pecServerClient = (
@@ -12,3 +25,47 @@ export const pecServerClient = (
   });
 
 export type IPecServerClient = typeof pecServerClient;
+
+export const getPecServerJwt = (
+  tokenService: {
+    readonly getPecServerTokenHandler: (
+      fiscalCode: FiscalCode,
+      secret: NonEmptyString,
+      tokenTtl: Second,
+      issuer: NonEmptyString
+    ) => () => TE.TaskEither<Error, string>;
+  },
+  fiscalCode: FiscalCode
+) =>
+  tokenService
+    .getPecServerTokenHandler(
+      fiscalCode,
+      PECSERVER_TOKEN_SECRET,
+      PECSERVER_TOKEN_EXPIRATION,
+      PECSERVER_TOKEN_ISSUER
+    )()
+    .mapLeft(e =>
+      ResponseErrorInternal(`Error computing the PEC Server JWT: ${e.message}`)
+    );
+
+export const getAttachmentBody = (
+  bearer: string,
+  legalMessageId: string,
+  attachmentId: string
+): TE.TaskEither<Error, string> =>
+  TE.tryCatch(
+    () =>
+      getHttpApiFetchWithBerar(bearer)(
+        `${PECSERVER_URL}${PECSERVER_BASE_PATH}/messages/${legalMessageId}/attachments/${attachmentId}`
+      ),
+    E.toError
+  )
+    .chain(
+      TE.fromPredicate(
+        r => r.status === 200,
+        r => new Error(`failed to fetch attachment: ${r.status}`)
+      )
+    )
+    .chain<string>(rawResponse =>
+      TE.tryCatch(() => rawResponse.text(), E.toError)
+    );

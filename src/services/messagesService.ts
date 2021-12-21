@@ -20,13 +20,12 @@ import { fromNullable } from "fp-ts/lib/Option";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
-import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { MessageResponseWithContent } from "generated/io-api/MessageResponseWithContent";
 import { identity } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -40,21 +39,22 @@ import {
   ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
+  wrapValidationWithInternalError
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import { LegalMessage } from "../../generated/pecserver/LegalMessage";
 import {
-  PEC_SERVER_TOKEN_SECRET,
-  PEC_SERVER_TOKEN_ISSUER,
-  PEC_SERVER_TOKEN_EXPIRATION
-} from "../../src/config";
-import { IApiClientFactoryInterface } from "./IApiClientFactory";
+  ResponseSuccessOctet,
+  IResponseSuccessOctet
+} from "../utils/responses";
+import { getAttachmentBody, getPecServerJwt } from "../clients/pecserver";
+import { CreatedMessageWithContent } from "../../generated/io-api/CreatedMessageWithContent";
+import { LegalData } from "../../generated/io-api/LegalData";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
+import { IApiClientFactoryInterface } from "./IApiClientFactory";
 import TokenService from "./tokenService";
-
-// IResponseType<200, MessageResponseWithContent, never>
 
 const isGetMessageSuccess = (
   res: IResponseType<number, unknown, never>
@@ -65,9 +65,10 @@ const isPecServerGetMessageSuccess = (
   res: IResponseType<number, unknown, never>
 ): res is IResponseType<200, LegalMessage, never> => res.status === 200;
 
-const youShouldNotBeHere = (message?: string) => {
-  throw new Error(`You should not be here: ${message}`);
-};
+const MessageWithLegalData = t.intersection([
+  CreatedMessageWithContent,
+  t.interface({ content: t.interface({ legal_data: LegalData }) })
+]);
 
 export default class MessagesService {
   constructor(
@@ -174,107 +175,83 @@ export default class MessagesService {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<LegalMessageWithContent>
   > =>
-    withCatchAsInternalError(async () =>
-      // Retrieve the requested message from fn-app
-      new TE.TaskEither(
-        new T.Task(() =>
-          this.apiClient.getClient().getMessage({
-            fiscal_code: user.fiscal_code,
-            id: messageId
-          })
+    TE.tryCatch(
+      () =>
+        this.apiClient.getClient().getMessage({
+          fiscal_code: user.fiscal_code,
+          id: messageId
+        }),
+      e => ResponseErrorInternal(E.toError(e).message)
+    )
+      .chain(wrapValidationWithInternalError)
+      .chain(
+        TE.fromPredicate(isGetMessageSuccess, e =>
+          ResponseErrorInternal(
+            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+          )
         )
-          .map(response =>
-            response.mapLeft(_ =>
-              ResponseErrorInternal("Error decoding getMessage response")
-            )
-          )
-          .map(response =>
-            response.map(
-              E.fromPredicate(isGetMessageSuccess, e =>
-                ResponseErrorInternal(
-                  `Error getting the message from getMessage endpoint (received a ${e.status})` // TODO: disjoint the errors
-                )
-              )
-            )
-          )
-          .map(responseOrError => responseOrError.chain(identity))
-          .map(successResponseOrError =>
-            successResponseOrError.map(successResponse => successResponse.value)
-          )
       )
-        .map(messageResponse => messageResponse.message)
-        // Check if legal_data is missing
-        .chain(maybeMessageWithLegalData =>
-          TE.fromEither(
-            E.fromOption(
-              ResponseErrorInternal(
-                "Missing legal_data in the retrieved message"
-              )
-            )(O.fromNullable(maybeMessageWithLegalData.content.legal_data))
-          ).map(legalData => ({
-            ...maybeMessageWithLegalData,
-            legal_data: legalData
-          }))
+      .map(successResponse => successResponse.value.message)
+      .chain(
+        TE.fromPredicate(MessageWithLegalData.is, () =>
+          ResponseErrorInternal(
+            "The message retrieved is not a valid message with legal data"
+          )
         )
-        // Enrich the message with legal_message retrieved from pec-server
-        .chain(message =>
-          new TokenService()
-            .getPecServerToken(
-              message.fiscal_code,
-              PEC_SERVER_TOKEN_SECRET,
-              PEC_SERVER_TOKEN_EXPIRATION,
-              PEC_SERVER_TOKEN_ISSUER
+      )
+      .chain(message =>
+        getPecServerJwt(new TokenService(), user.fiscal_code).chain(
+          pecServerJwt =>
+            TE.tryCatch(
+              () =>
+                this.pecClient.getClient(pecServerJwt).getMessage({
+                  id: message.content.legal_data?.message_unique_id
+                }),
+              e => ResponseErrorInternal(E.toError(e).message)
             )
-            .mapLeft(e =>
-              ResponseErrorInternal(
-                `Error computing the PEC Server JWT: ${e.message}`
-              )
-            )
-            .chain(pecServerJwt =>
-              new TE.TaskEither(
-                new T.Task(() =>
-                  this.pecClient.getClient(pecServerJwt).getMessage({
-                    id:
-                      message.content.legal_data?.message_unique_id ||
-                      youShouldNotBeHere(
-                        "legal_data esistence has already been checked"
-                      )
-                  })
+              .chain(wrapValidationWithInternalError)
+              .chain(
+                TE.fromPredicate(isPecServerGetMessageSuccess, e =>
+                  ResponseErrorInternal(
+                    `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+                  )
                 )
-                  .map(response =>
-                    response.mapLeft(_ =>
-                      ResponseErrorInternal(
-                        "Error decoding pecServer getMessage response"
-                      )
-                    )
-                  )
-                  .map(response =>
-                    response.map(
-                      E.fromPredicate(isPecServerGetMessageSuccess, e =>
-                        ResponseErrorInternal(
-                          `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // TODO: disjoint the errors
-                        )
-                      )
-                    )
-                  )
-                  .map(responseOrError => responseOrError.chain(identity))
-                  .map(successResponseOrError =>
-                    successResponseOrError.map(
-                      successResponse => successResponse.value
-                    )
-                  )
-              ).map(legalMessageResponse => ({
+              )
+              .map(successResponse => successResponse.value)
+              .map(legalMessageResponse => ({
                 ...message,
                 legal_message: legalMessageResponse
               }))
-            )
         )
-        .map(ResponseSuccessJson)
-        .fold<
-          IResponseErrorInternal | IResponseSuccessJson<LegalMessageWithContent>
-        >(identity, identity)
-        .run()
-    );
+      )
+      .map(ResponseSuccessJson)
+      .fold<
+        IResponseErrorInternal | IResponseSuccessJson<LegalMessageWithContent>
+      >(identity, r => r as IResponseSuccessJson<LegalMessageWithContent>)
+      .run();
+
+  /**
+   * Retrieves a specific legal message attachment.
+   */
+  public readonly getLegalMessageAttachment = (
+    user: User,
+    legalMessageId: string,
+    attachmentId: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessOctet
+  > =>
+    getPecServerJwt(new TokenService(), user.fiscal_code)
+      .chain(jwt =>
+        getAttachmentBody(jwt, legalMessageId, attachmentId).mapLeft(e =>
+          ResponseErrorInternal(`${e.message}`)
+        )
+      )
+      .map(ResponseSuccessOctet)
+      .fold<IResponseErrorInternal | IResponseSuccessOctet>(identity, identity)
+      .run();
 
   /**
    * Retrieve all the information about the service that has sent a message.

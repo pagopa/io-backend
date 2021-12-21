@@ -144,12 +144,12 @@ export default class TokenService {
    * @param tokenTtl: Token Time To live (expressed in seconds)
    * @param issuer: The Token issuer
    */
-  public getPecServerToken(
+  public getPecServerTokenHandler(
     fiscalCode: FiscalCode,
     secret: NonEmptyString,
-    tokenTtl: Second,
+    tokenTtlSec: Second,
     issuer: NonEmptyString
-  ): TaskEither<Error, string> {
+  ): () => TaskEither<Error, string> {
     return taskify<Error, string>(cb =>
       jwt.sign(
         {
@@ -158,11 +158,11 @@ export default class TokenService {
         secret,
         {
           algorithm: "HS256",
-          expiresIn: `${tokenTtl} seconds`,
+          expiresIn: `${tokenTtlSec} seconds`,
           issuer
         },
         cb
       )
-    )().mapLeft(toError);
+    );
   }
 }

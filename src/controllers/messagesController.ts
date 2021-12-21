@@ -18,7 +18,10 @@ import { withUserFromRequest } from "../types/user";
 
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
-import { withValidatedOrValidationError } from "../utils/responses";
+import {
+  withValidatedOrValidationError,
+  IResponseSuccessOctet
+} from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 
 export default class MessagesController {
@@ -80,5 +83,25 @@ export default class MessagesController {
   > =>
     withUserFromRequest(req, user =>
       this.messagesService.getLegalMessage(user, req.params.id)
+    );
+
+  /**
+   * Returns the legal message attachments identified by the legal message id and the attachment id.
+   */
+  public readonly getLegalMessageAttachment = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessOctet
+  > =>
+    withUserFromRequest(req, user =>
+      this.messagesService.getLegalMessageAttachment(
+        user,
+        req.params.legal_message_unique_id,
+        req.params.attachment_id
+      )
     );
 }

@@ -18,6 +18,8 @@ import {
   ResponseErrorNotFound,
   ResponseErrorValidation
 } from "italia-ts-commons/lib/responses";
+import * as TE from "fp-ts/lib/TaskEither";
+import { errorsToError } from "./errorsFormatter";
 
 /**
  * Interface for a no content response returning a empty object.
@@ -155,3 +157,33 @@ export const ResponsePaymentError = (
     kind: "IResponseErrorInternal"
   };
 };
+
+/**
+ * Interface for a successful response returning a octet stream object.
+ */
+export interface IResponseSuccessOctet
+  extends IResponse<"IResponseSuccessOctet"> {
+  readonly value: unknown;
+}
+
+/**
+ * Returns a successful octet stream response.
+ *
+ * @param o The object to return to the client
+ */
+export const ResponseSuccessOctet = (o: unknown): IResponseSuccessOctet => ({
+  apply: res =>
+    res
+      .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+      .set("Content-Type", "application/octet-stream")
+      .send(o),
+  kind: "IResponseSuccessOctet",
+  value: o
+});
+
+export const wrapValidationWithInternalError: <A>(
+  fa: t.Validation<A>
+) => TE.TaskEither<IResponseErrorInternal, A> = fa =>
+  TE.fromEither(fa)
+    .mapLeft(errorsToError)
+    .mapLeft(e => ResponseErrorInternal(e.message));

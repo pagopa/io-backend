@@ -857,6 +857,15 @@ function registerAPIRoutes(
   );
 
   app.get(
+    `${basePath}/legal-messages/:legal_message_unique_id/attachments/:attachment_id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getLegalMessageAttachment,
+      messagesController
+    )
+  );
+
+  app.get(
     `${basePath}/services/:id`,
     bearerSessionTokenAuth,
     cachingMiddleware(),
