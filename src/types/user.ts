@@ -12,7 +12,6 @@ import {
   readableReport
 } from "italia-ts-commons/lib/reporters";
 import { IResponseErrorValidation } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 
 import { EmailAddress } from "../../generated/backend/EmailAddress";
@@ -27,7 +26,13 @@ import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
-import { BPDToken, MyPortalToken, SessionToken, WalletToken } from "./token";
+import {
+  BPDToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken,
+  ZendeskToken
+} from "./token";
 
 // required attributes
 export const UserWithoutTokens = t.intersection([
@@ -45,8 +50,7 @@ export const UserWithoutTokens = t.intersection([
     sessionIndex: t.string,
     session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
-    spid_idp: t.string,
-    spid_mobile_phone: NonEmptyString
+    spid_idp: t.string
   })
 ]);
 const RequiredUserTokensV1 = t.interface({
@@ -74,13 +78,23 @@ const RequiredUserTokensV3 = t.intersection([
 export const UserV3 = t.intersection([UserWithoutTokens, RequiredUserTokensV3]);
 export type UserV3 = t.TypeOf<typeof UserV3>;
 
-export const User = t.union([UserV1, UserV2, UserV3], "User");
+const RequiredUserTokensV4 = t.intersection([
+  RequiredUserTokensV3,
+  t.interface({
+    zendesk_token: ZendeskToken
+  })
+]);
+export const UserV4 = t.intersection([UserWithoutTokens, RequiredUserTokensV4]);
+export type UserV4 = t.TypeOf<typeof UserV4>;
+
+export const User = t.union([UserV1, UserV2, UserV3, UserV4], "User");
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
 export const SpidUser = t.intersection([
   t.interface({
     authnContextClassRef: SpidLevel,
+    dateOfBirth: t.string,
     familyName: t.string,
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
@@ -88,9 +102,7 @@ export const SpidUser = t.intersection([
     name: t.string
   }),
   t.partial({
-    dateOfBirth: t.string,
     email: EmailAddress,
-    mobilePhone: NonEmptyString,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string
@@ -109,13 +121,15 @@ export function toAppUser(
   walletToken: WalletToken,
   myPortalToken: MyPortalToken,
   bpdToken: BPDToken,
+  zendeskToken: ZendeskToken,
   sessionTrackingId: string
-): UserV3 {
+): UserV4 {
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
-    date_of_birth:
-      from.dateOfBirth !== undefined ? formatDate(from.dateOfBirth) : undefined,
+    date_of_birth: fromNullable(from.dateOfBirth)
+      .map(formatDate)
+      .toUndefined(),
     family_name: from.familyName,
     fiscal_code: from.fiscalNumber,
     myportal_token: myPortalToken,
@@ -124,8 +138,8 @@ export function toAppUser(
     session_tracking_id: sessionTrackingId,
     spid_email: from.email,
     spid_level: from.authnContextClassRef,
-    spid_mobile_phone: from.mobilePhone,
-    wallet_token: walletToken
+    wallet_token: walletToken,
+    zendesk_token: zendeskToken
   };
 }
 

@@ -58,7 +58,9 @@ import {
   CGN_OPERATOR_SEARCH_API_CLIENT,
   CGN_MERCHANT_CACHE_MAX_AGE_SECONDS,
   EUCOVIDCERT_API_CLIENT,
-  FF_MIT_VOUCHER_ENABLED
+  FF_MIT_VOUCHER_ENABLED,
+  getClientErrorRedirectionUrl,
+  FF_USER_AGE_LIMIT_ENABLED
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -78,6 +80,7 @@ import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
 import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
+import ZendeskController from "./controllers/zendeskController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
@@ -95,6 +98,7 @@ import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
+import bearerZendeskTokenStrategy from "./strategies/bearerZendeskTokenStrategy";
 import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
 import {
@@ -146,6 +150,7 @@ export interface IAppFactoryParameters {
   readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowBPDIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowZendeskIPSourceRange: ReadonlyArray<CIDR>;
   readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly BonusAPIBasePath: string;
@@ -156,6 +161,7 @@ export interface IAppFactoryParameters {
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly MitVoucherBasePath: string;
+  readonly ZendeskBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -166,6 +172,7 @@ export function newApp({
   allowMyPortalIPSourceRange,
   allowBPDIPSourceRange,
   allowSessionHandleIPSourceRange,
+  allowZendeskIPSourceRange,
   appInsightsClient,
   authenticationBasePath,
   APIBasePath,
@@ -176,7 +183,8 @@ export function newApp({
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
-  MitVoucherBasePath
+  MitVoucherBasePath,
+  ZendeskBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -207,6 +215,9 @@ export function newApp({
   // Add the strategy to authenticate BPD clients.
   passport.use("bearer.bpd", bearerBPDTokenStrategy(SESSION_STORAGE));
 
+  // Add the strategy to authenticate Zendesk clients.
+  passport.use("bearer.zendesk", bearerZendeskTokenStrategy(SESSION_STORAGE));
+
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
@@ -222,6 +233,9 @@ export function newApp({
       session: false
     }),
     bearerWallet: passport.authenticate("bearer.wallet", {
+      session: false
+    }),
+    bearerZendesk: passport.authenticate("bearer.zendesk", {
       session: false
     }),
     local: passport.authenticate("local", {
@@ -363,10 +377,13 @@ export function newApp({
         SESSION_STORAGE,
         TOKEN_SERVICE,
         getClientProfileRedirectionUrl,
+        getClientErrorRedirectionUrl,
         PROFILE_SERVICE,
         NOTIFICATION_SERVICE,
         USERS_LOGIN_LOG_SERVICE,
-        TEST_LOGIN_FISCAL_CODES
+        TEST_LOGIN_FISCAL_CODES,
+        FF_USER_AGE_LIMIT_ENABLED,
+        appInsightsClient
       );
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -480,6 +497,15 @@ export function newApp({
         BPDBasePath,
         allowBPDIPSourceRange,
         authMiddlewares.bearerBPD
+      );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerZendeskRoutes(
+        app,
+        ZendeskBasePath,
+        allowZendeskIPSourceRange,
+        PROFILE_SERVICE,
+        TOKEN_SERVICE,
+        authMiddlewares.bearerZendesk
       );
       return { acsController, app };
     },
@@ -626,6 +652,32 @@ function registerBPDRoutes(
     checkIP(allowBPDIPSourceRange),
     bearerBPDTokenAuth,
     toExpressHandler(getUserForBPD)
+  );
+}
+
+// eslint-disable-next-line max-params
+function registerZendeskRoutes(
+  app: Express,
+  basePath: string,
+  allowZendeskIPSourceRange: ReadonlyArray<CIDR>,
+  profileService: ProfileService,
+  tokenService: TokenService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerZendeskTokenAuth: any
+): void {
+  const zendeskController: ZendeskController = new ZendeskController(
+    profileService,
+    tokenService
+  );
+
+  app.post(
+    `${basePath}/jwt`,
+    checkIP(allowZendeskIPSourceRange),
+    bearerZendeskTokenAuth,
+    toExpressHandler(
+      zendeskController.getZendeskSupportToken,
+      zendeskController
+    )
   );
 }
 

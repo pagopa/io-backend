@@ -86,11 +86,13 @@ describe("GET /services/:id", () => {
       CGNOperatorSearchAPIBasePath: "/api/v1",
       MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",
+      ZendeskBasePath: "/api/backend/zendesk/v1",
       allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
+      allowZendeskIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });

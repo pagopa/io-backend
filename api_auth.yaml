@@ -84,15 +84,14 @@ definitions:
         type: string
       spid_email:
         $ref: '#/definitions/EmailAddress'
-      spid_mobile_phone:
+      date_of_birth:
         type: string
-        minLength: 1
+        format: date
     required:
       - family_name
       - fiscal_code
       - name
       - spid_email
-      - spid_mobile_phone
   CieUserIdentity:
     type: object
     title: CIE User Identity

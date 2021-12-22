@@ -9,16 +9,17 @@ import {
   BPDToken,
   MyPortalToken,
   SessionToken,
-  WalletToken
+  WalletToken,
+  ZendeskToken
 } from "../types/token";
-import { User, UserV3 } from "../types/user";
+import { User, UserV4 } from "../types/user";
 
 export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    */
   readonly set: (
-    user: UserV3,
+    user: UserV4,
     expireSec?: number
   ) => Promise<Either<Error, boolean>>;
 
@@ -51,6 +52,13 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
+   * Retrieves a value from the cache using the zendesk token.
+   */
+  readonly getByZendeskToken: (
+    token: ZendeskToken
+  ) => Promise<Either<Error, Option<User>>>;
+
+  /**
    * Removes a value from the cache.
    */
   readonly del: (user: User) => Promise<Either<Error, boolean>>;
@@ -59,7 +67,7 @@ export interface ISessionStorage {
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 
-  readonly update: (updatedUser: UserV3) => Promise<Either<Error, boolean>>;
+  readonly update: (updatedUser: UserV4) => Promise<Either<Error, boolean>>;
 
   readonly setPagoPaNoticeEmail: (
     user: User,

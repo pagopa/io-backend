@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "7.19.1",
+  "version": "7.27.2",
   "min_app_version": {
     "ios": "1.27.0",
     "android": "1.27.0"
@@ -11,9 +11,6 @@
   },
   "description": "IO app and web backend",
   "main": "index.js",
-  "engines": {
-    "node": "10.14.2"
-  },
   "scripts": {
     "watch": "tsc -w",
     "prebuild": "yarn generate:proxy-models",
@@ -29,6 +26,7 @@
     "start": "node src/server.js",
     "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
+    "generate:proxy:api-message-models": "gen-api-models --api-spec api_messages_temp.yaml --out-dir generated/backend",
     "generate:proxy:auth-models": "rimraf generated/auth && gen-api-models --api-spec api_auth.yaml --out-dir generated/auth",
     "generate:proxy:notification-models": "rimraf generated/notifications && gen-api-models --api-spec api_notifications.yaml --out-dir generated/notifications",
     "generate:messages:notifications": "rimraf generated/messages && gen-api-models --api-spec notification_queue_messages.yaml --out-dir generated/messages",
@@ -36,17 +34,18 @@
     "generate:proxy:myportal-models": "rimraf generated/myportal && gen-api-models --api-spec api_myportal.yaml --out-dir generated/myportal",
     "generate:proxy:bpd-models": "rimraf generated/bpd && gen-api-models --api-spec api_bpd.yaml --out-dir generated/bpd",
     "generate:proxy:public-models": "rimraf generated/public  && gen-api-models --api-spec api_public.yaml --out-dir generated/public",
-    "generate:api:io": "rimraf generated/io-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app/v1.43.0/openapi/index.yaml --no-strict --out-dir generated/io-api --request-types --response-decoders --client",
+    "generate:api:io": "rimraf generated/io-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-app/v3.5.0/openapi/index.yaml --no-strict --out-dir generated/io-api --request-types --response-decoders --client",
     "generate:proxy:bonus-models": "rimraf generated/bonus && gen-api-models --api-spec api_bonus.yaml --out-dir generated/bonus",
     "generate:proxy:cgn-models": "rimraf generated/cgn && gen-api-models --api-spec api_cgn.yaml --out-dir generated/cgn",
     "generate:proxy:cgn-operator-search-models": "rimraf generated/cgn-operator-search && gen-api-models --api-spec api_cgn_operator_search.yaml --out-dir generated/cgn-operator-search",
     "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
     "generate:api:io-cgn": "rimraf generated/io-cgn-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-cgn/v0.2.0/openapi/index.yaml --no-strict --out-dir generated/io-cgn-api --request-types --response-decoders --client",
     "generate:api:io-cgn-operator-search": "rimraf generated/io-cgn-operator-search-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/pe-193/openapi/index.yaml --no-strict --out-dir generated/io-cgn-operator-search-api --request-types --response-decoders --client",
-    "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.8.6/api_pagopa.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders --client",
+    "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders --client",
     "generate:proxy:eucovidcert-models": "rimraf generated/eucovidcert && gen-api-models --api-spec api_eucovidcert.yaml --out-dir generated/eucovidcert",
     "generate:api:eucovidcert": "rimraf generated/eucovidcert-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml --no-strict --out-dir generated/eucovidcert-api --request-types --response-decoders --client",
     "generate:proxy:mitvoucher": "rimraf generated/mitvoucher && gen-api-models --api-spec api_mit_voucher.yaml --out-dir generated/mitvoucher",
+    "generate:proxy:zendesk-models": "rimraf generated/zendesk && gen-api-models --api-spec api_zendesk.yaml --out-dir generated/zendesk",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
@@ -89,6 +88,7 @@
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
+    "passport-http-custom-bearer": "^1.0.15",
     "passport-local": "^1.0.0",
     "passport-strategy": "^1.0.0",
     "qr-image": "^3.2.0",
@@ -98,10 +98,11 @@
     "ulid": "^2.2.2",
     "validator": "^10.8.0",
     "winston": "^3.3.3",
-    "xmldom": "^0.1.27"
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^1.1.1",
+    "@pagopa/openapi-codegen-ts": "^10.0.6",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.16.0",
@@ -134,7 +135,6 @@
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "italia-utils": "^6.3.0",
     "jest": "^23.6.0",
     "lolex": "4.2.0",
     "mock-redis-client": "^0.91.13",
@@ -149,7 +149,7 @@
     "swagger-parser": "^5.0.5",
     "ts-jest": "^23.10.4",
     "ts-node": "^7.0.1",
-    "typescript": "^3.6.2"
+    "typescript": "^4.3.5"
   },
   "jest": {
     "testEnvironment": "node",

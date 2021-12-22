@@ -3,19 +3,19 @@
  */
 
 import * as express from "express";
-import { Either, isRight } from "fp-ts/lib/Either";
-import { isSome, Option } from "fp-ts/lib/Option";
-import * as passport from "passport-http-bearer";
+import { Either } from "fp-ts/lib/Either";
+import { Option } from "fp-ts/lib/Option";
+import * as passport from "passport-http-custom-bearer";
 import { ISessionStorage } from "../services/ISessionStorage";
-import { SessionToken } from "../types/token";
+import { ZendeskToken } from "../types/token";
 import { User } from "../types/user";
 import { fulfill, StrategyDoneFunction } from "../utils/strategies";
 
-const bearerSessionTokenStrategy = (
-  sessionStorage: ISessionStorage,
-  onValidUser?: (user: User) => void
+const bearerZendeskTokenStrategy = (
+  sessionStorage: ISessionStorage
 ): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
+    bodyName: "user_token",
     passReqToCallback: true,
     realm: "Proxy API",
     scope: "request"
@@ -23,16 +23,9 @@ const bearerSessionTokenStrategy = (
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
     (_: express.Request, token: string, done: StrategyDoneFunction) => {
-      sessionStorage.getBySessionToken(token as SessionToken).then(
+      sessionStorage.getByZendeskToken(token as ZendeskToken).then(
         (errorOrUser: Either<Error, Option<User>>) => {
           try {
-            if (
-              onValidUser !== undefined &&
-              isRight(errorOrUser) &&
-              isSome(errorOrUser.value)
-            ) {
-              onValidUser(errorOrUser.value.value);
-            }
             fulfill(errorOrUser, done);
           } catch (e) {
             // The error is forwarded to the express error middleware
@@ -52,4 +45,4 @@ const bearerSessionTokenStrategy = (
   );
 };
 
-export default bearerSessionTokenStrategy;
+export default bearerZendeskTokenStrategy;

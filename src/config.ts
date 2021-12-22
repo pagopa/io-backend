@@ -205,15 +205,8 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   },
   publicCert: samlCert(),
   requiredAttributes: {
-    attributes: [
-      "address",
-      "email",
-      "name",
-      "familyName",
-      "fiscalNumber",
-      "mobilePhone"
-    ],
-    name: "Required attributes"
+    attributes: ["email", "name", "familyName", "fiscalNumber", "dateOfBirth"],
+    name: "IO - l'app dei servizi pubblici BETA"
   },
   spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,
@@ -289,6 +282,18 @@ export const ALLOW_BPD_IP_SOURCE_RANGE = decodeCIDRs(
 ).getOrElseL(errs => {
   log.error(
     `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+// IP(s) or CIDR(s) allowed for zendesk endpoint
+export const ALLOW_ZENDESK_IP_SOURCE_RANGE = decodeCIDRs(
+  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
       errs
     )}`
   );
@@ -401,6 +406,8 @@ export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
 
 export const BPD_BASE_PATH = getRequiredENVVar("BPD_BASE_PATH");
 
+export const ZENDESK_BASE_PATH = getRequiredENVVar("ZENDESK_BASE_PATH");
+
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 
@@ -414,6 +421,19 @@ export const getClientProfileRedirectionUrl = (
   return {
     href: url
   };
+};
+export const getClientErrorRedirectionUrl = (
+  errorMessage: string,
+  errorCode?: number
+): UrlFromString => {
+  const maybeErrorCodeParam = fromNullable(errorCode).map(
+    _ => `&errorCode=${errorCode}`
+  );
+  const errorParams = `?errorMessage=${errorMessage}${maybeErrorCodeParam.getOrElse(
+    ""
+  )}`;
+  const url = CLIENT_ERROR_REDIRECTION_URL.concat(errorParams);
+  return { href: url };
 };
 
 // Needed to forward SPID requests for logging
@@ -471,6 +491,9 @@ export const FF_EUCOVIDCERT_ENABLED =
 export const FF_MIT_VOUCHER_ENABLED =
   process.env.FF_MIT_VOUCHER_ENABLED === "1";
 
+export const FF_USER_AGE_LIMIT_ENABLED =
+  process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
+
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
   process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
@@ -500,6 +523,37 @@ export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
+);
+
+// Zendesk support Token
+export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = NonEmptyString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
+export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION) as Second;
+log.info(
+  "JWT Zendesk support token expiration set to %s seconds",
+  JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
 );
 
 // Mit  Voucher Token

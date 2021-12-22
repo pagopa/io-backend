@@ -22,6 +22,8 @@ export function fulfill(
 ): void {
   errorOrUser.fold(
     error => done(error),
-    user => done(undefined, user.isNone() ? false : user.value)
+    // passport-http-custom-bearer uses the last options parameter
+    // we need to pass it as an empty string or we get an error
+    user => done(undefined, user.isNone() ? false : user.value, "")
   );
 }

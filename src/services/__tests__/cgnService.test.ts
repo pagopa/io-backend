@@ -1,5 +1,5 @@
 import * as t from "io-ts";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { EmailAddress } from "../../../generated/auth/EmailAddress";
 import { CgnAPIClient } from "../../clients/cgn";
 import { SessionToken, WalletToken } from "../../types/token";
@@ -78,7 +78,6 @@ const mockedUser: User = {
     session_token: "HexToKen" as SessionToken,
     spid_email: aValidSPIDEmail,
     spid_level: aValidSpidLevel,
-    spid_mobile_phone: "3222222222222" as NonEmptyString,
     wallet_token: "HexToKen" as WalletToken
   };
 

@@ -66,6 +66,7 @@ const aBPDBasePath = "/bpd/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
+const aZendeskBasePath = "/api/backend/zendesk/v1";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -81,11 +82,13 @@ describe("Success app start", () => {
       MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
+      ZendeskBasePath:aZendeskBasePath,
       allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
       allowPagoPAIPSourceRange: [aValidCIDR],
       allowSessionHandleIPSourceRange: [aValidCIDR],
+      allowZendeskIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
       env: NodeEnvironmentEnum.PRODUCTION
     });
@@ -185,11 +188,13 @@ describe("Failure app start", () => {
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        ZendeskBasePath:aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
+        allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION
       });
@@ -215,11 +220,13 @@ describe("Failure app start", () => {
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        ZendeskBasePath:aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
+        allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION
       });
@@ -245,11 +252,13 @@ describe("Failure app start", () => {
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
+        ZendeskBasePath:aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
         allowPagoPAIPSourceRange: [aValidCIDR],
         allowSessionHandleIPSourceRange: [aValidCIDR],
+        allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
         env: NodeEnvironmentEnum.PRODUCTION
       });

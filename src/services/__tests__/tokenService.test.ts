@@ -1,9 +1,17 @@
 import { isLeft, isRight } from "fp-ts/lib/Either";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import { Second } from "italia-ts-commons/lib/units";
 import TokenService from "../tokenService";
 
+const aFirstname = "Mario" as NonEmptyString;
+const aLastname = "Rossi" as NonEmptyString;
 const aFiscalCode = "AAAAAAAAAAAAAAA" as FiscalCode;
+const anEmailAddress = "mario.rossi@test.it" as EmailString;
+const aSharedSecret = "ASHAREDSECRET123" as NonEmptyString;
 const aPrivateRsaKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIBOgIBAAJBAPX91rBDbLk5Pr0/lf4y1a8oz75sYa+slTqpfVHUrYb22qy4rY6Z
 B0rXvTeLPgCAXUfGFJu4qSJcbu7yhBrPx30CAwEAAQJBALRCvEVUU2L0IRabdvXd
@@ -99,5 +107,41 @@ describe("TokenService#getJwtMitVoucherToken", () => {
       .run();
 
     expect(isLeft(mitVoucherToken)).toBeTruthy();
+  });
+});
+
+describe("TokenService#getZendeskSupportToken", () => {
+  it("should generate a new zendesk support token", async () => {
+    // generate new token
+    const tokenService = new TokenService();
+    const errorOrNewJwtToken = await tokenService
+      .getJwtZendeskSupportToken(
+        aSharedSecret,
+        aFirstname,
+        aLastname,
+        aFiscalCode,
+        anEmailAddress,
+        tokenTtl,
+        aTokenIssuer
+      )
+      .run();
+    expect(isRight(errorOrNewJwtToken)).toBeTruthy();
+  });
+
+  it("should return an error if an error occurs during token generation", async () => {
+    // generate new token
+    const tokenService = new TokenService();
+    const errorOrNewJwtToken = await tokenService
+      .getJwtZendeskSupportToken(
+        "" as NonEmptyString,
+        aFirstname,
+        aLastname,
+        aFiscalCode,
+        anEmailAddress,
+        tokenTtl,
+        aTokenIssuer
+      )
+      .run();
+    expect(isLeft(errorOrNewJwtToken)).toBeTruthy();
   });
 });

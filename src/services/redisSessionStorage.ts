@@ -33,9 +33,10 @@ import {
   BPDToken,
   MyPortalToken,
   SessionToken,
-  WalletToken
+  WalletToken,
+  ZendeskToken
 } from "../types/token";
-import { User, UserV1, UserV2, UserV3 } from "../types/user";
+import { User, UserV1, UserV2, UserV3, UserV4 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
@@ -45,6 +46,7 @@ const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
 const myPortalTokenPrefix = "MYPORTAL-";
 const bpdTokenPrefix = "BPD-";
+const zendeskTokenPrefix = "ZENDESK-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
@@ -76,7 +78,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async set(
-    user: UserV3,
+    user: UserV4,
     expireSec: number = this.tokenDurationSecs
   ): Promise<Either<Error, boolean>> {
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
@@ -151,6 +153,24 @@ export default class RedisSessionStorage extends RedisStorageUtils
       );
     });
 
+    const setZendeskToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
+      this.redisClient.set(
+        `${zendeskTokenPrefix}${user.zendesk_token}`,
+        user.session_token,
+        "EX",
+        expireSec,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting Zendesk token")
+            )
+          )
+      );
+    });
+
     // If is a session update, the session info key doesn't must be updated.
     // eslint-disable-next-line functional/no-let
     let saveSessionInfoPromise: Promise<Either<
@@ -175,6 +195,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       setWalletToken,
       setMyPortalToken,
       setBPDToken,
+      setZendeskToken,
       saveSessionInfoPromise,
       removeOtherUserSessionsPromise
     ]);
@@ -263,6 +284,29 @@ export default class RedisSessionStorage extends RedisStorageUtils
     token: BPDToken
   ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionByToken(bpdTokenPrefix, token);
+
+    if (isLeft(errorOrSession)) {
+      if (errorOrSession.value === sessionNotFoundError) {
+        return right(none);
+      }
+      return left(errorOrSession.value);
+    }
+
+    const user = errorOrSession.value;
+
+    return right(some(user));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getByZendeskToken(
+    token: ZendeskToken
+  ): Promise<Either<Error, Option<User>>> {
+    const errorOrSession = await this.loadSessionByToken(
+      zendeskTokenPrefix,
+      token
+    );
 
     if (isLeft(errorOrSession)) {
       if (errorOrSession.value === sessionNotFoundError) {
@@ -540,7 +584,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    *
    * @param updatedUser
    */
-  public async update(updatedUser: UserV3): Promise<Either<Error, boolean>> {
+  public async update(updatedUser: UserV4): Promise<Either<Error, boolean>> {
     const errorOrSessionTtl = await this.getSessionTtl(
       updatedUser.session_token
     );
@@ -767,7 +811,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   private loadSessionByToken(
     prefix: string,
-    token: WalletToken | MyPortalToken | BPDToken
+    token: WalletToken | MyPortalToken | BPDToken | ZendeskToken
   ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
       this.redisClient.get(`${prefix}${token}`, (err, value) => {
@@ -801,7 +845,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * Remove other user sessions and wallet tokens
    */
   private async removeOtherUserSessions(
-    user: UserV3
+    user: UserV4
   ): Promise<Either<Error, boolean>> {
     const errorOrSessionInfoKeys = await this.readSessionInfoKeys(
       user.fiscal_code
@@ -855,7 +899,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
                     p.prefix === myPortalTokenPrefix &&
                     p.value === user.myportal_token
                   ) &&
-                  !(p.prefix === bpdTokenPrefix && p.value === user.bpd_token)
+                  !(
+                    p.prefix === bpdTokenPrefix && p.value === user.bpd_token
+                  ) &&
+                  !(
+                    p.prefix === zendeskTokenPrefix &&
+                    p.value === user.zendesk_token
+                  )
               ),
               (_1, { prefix, value }) => `${prefix}${value}`
             )
@@ -959,6 +1009,23 @@ export default class RedisSessionStorage extends RedisStorageUtils
         value: user.wallet_token
       }
     };
+    if (UserV4.is(user)) {
+      return new StrMap({
+        ...requiredTokens,
+        bpd_token: {
+          prefix: bpdTokenPrefix,
+          value: user.bpd_token
+        },
+        myportal_token: {
+          prefix: myPortalTokenPrefix,
+          value: user.myportal_token
+        },
+        zendesk_token: {
+          prefix: zendeskTokenPrefix,
+          value: user.zendesk_token
+        }
+      });
+    }
     if (UserV3.is(user)) {
       return new StrMap({
         ...requiredTokens,

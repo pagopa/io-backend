@@ -6,7 +6,6 @@
 /* tslint:disable:no-object-mutation */
 
 import { isRight, left, right } from "fp-ts/lib/Either";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { UrlFromString } from "italia-ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
@@ -33,8 +32,11 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
-import { exactUserIdentityDecode, User } from "../../types/user";
-import AuthenticationController from "../authenticationController";
+import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
+import AuthenticationController, { AGE_LIMIT, AGE_LIMIT_ERROR_CODE, AGE_LIMIT_ERROR_MESSAGE } from "../authenticationController";
+import { addDays, addMonths, format, subYears } from "date-fns";
+import { getClientErrorRedirectionUrl } from "../../config";
+import * as appInsights from "applicationinsights";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -54,6 +56,7 @@ const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
 const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
 const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416";
+const mockZendeskToken = "aaaaee213b64955212ea59e3beeaad1e5fdb3a36d2210417";
 
 // mock for a valid User
 const mockedUser: User = {
@@ -64,7 +67,7 @@ const mockedUser: User = {
   session_token: mockSessionToken as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
+  date_of_birth: "2000-06-02",
   wallet_token: mockWalletToken as WalletToken
 };
 
@@ -76,7 +79,7 @@ const validUserPayload = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: "xxx",
-  mobilePhone: "3222222222222",
+  dateOfBirth: "2000-06-02",
   name: aValidname
 };
 // invalidUser lacks the required familyName and optional email fields.
@@ -85,7 +88,7 @@ const invalidUserPayload = {
   fiscalNumber: aFiscalNumber,
   getAssertionXml: () => "",
   issuer: "xxx",
-  mobilePhone: "3222222222222",
+  dateOfBirth: "2000-06-02",
   name: aValidname
 };
 
@@ -100,7 +103,6 @@ const proxyInitializedProfileResponse = {
   name: aValidname,
   preferred_languages: ["it_IT"],
   spid_email: anEmailAddress,
-  spid_mobile_phone: "3222222222222",
   version: 42
 };
 
@@ -174,6 +176,10 @@ jest.mock("../../services/usersLoginLogService", () => {
   };
 });
 
+const mockTelemetryClient = {
+  trackEvent: jest.fn()
+} as unknown as appInsights.TelemetryClient;
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -203,10 +209,13 @@ beforeAll(async () => {
     redisSessionStorage,
     tokenService,
     getClientProfileRedirectionUrl,
+    getClientErrorRedirectionUrl,
     profileService,
     notificationService,
     usersLoginLogService,
-    []
+    [],
+    true,
+    mockTelemetryClient
   );
 });
 
@@ -420,6 +429,100 @@ describe("AuthenticationController#acs", () => {
       detail: "Error while creating the user session"
     });
   });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo`, async () => {
+    const res = mockRes();
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(addDays(subYears(new Date(), AGE_LIMIT), 1), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(expect.objectContaining({
+      name: "spid.error.generic",
+      properties: {
+        message: expect.any(String),
+        type: "INFO"
+      }
+    }));
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo with CIE date format`, async () => {
+    const res = mockRes();
+
+    const limitDate = subYears(new Date(), AGE_LIMIT);
+    const dateOfBirth = limitDate.getDate() > 8 ? addDays(limitDate, 1) : addMonths(limitDate, 1);
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(dateOfBirth, "YYYY-MM-D")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(expect.objectContaining({
+      name: "spid.error.generic",
+      properties: {
+        message: expect.any(String),
+        type: "INFO"
+      }
+    }));
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should redirects to the correct url if the user has ${AGE_LIMIT} yo`, async() => {
+    const res = mockRes();
+    const expectedNewProfile: NewProfile = {
+      email: validUserPayload.email,
+      is_email_validated: true,
+      is_test_profile: false
+    };
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken);
+
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(proxyInitializedProfileResponse)
+    );
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(subYears(new Date(), AGE_LIMIT), "YYYY-MM-DD")
+    }
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      "/profile.html?token=" + mockSessionToken
+    );
+    expect(mockSet).toHaveBeenCalledWith({...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth});
+    expect(mockGetProfile).toHaveBeenCalledWith({...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth});
+    expect(mockCreateProfile).toHaveBeenCalledWith(
+      {...mockedUser, date_of_birth: aYoungUserPayload.dateOfBirth},
+      expectedNewProfile
+    );
+  })
 });
 
 describe("AuthenticationController#acsTest", () => {
@@ -498,7 +601,7 @@ describe("AuthenticationController#getUserIdentity", () => {
 
     expect(controller).toBeTruthy();
     /* tslint:disable-next-line:no-useless-cast */
-    const expectedValue = exactUserIdentityDecode(mockedUser as UserIdentity);
+    const expectedValue = exactUserIdentityDecode(mockedUser as unknown as UserIdentity);
     expect(isRight(expectedValue)).toBeTruthy();
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -577,7 +680,8 @@ describe("AuthenticationController#logout", () => {
     const userWithExternalToken = {
       ...mockedUser,
       bpd_token: mockBPDToken,
-      myportal_token: mockMyPortalToken
+      myportal_token: mockMyPortalToken,
+      zendesk_token: mockZendeskToken
     };
     req.user = userWithExternalToken;
 

@@ -3,27 +3,21 @@
 import * as e from "express";
 import * as t from "io-ts";
 import {
-  NonEmptyString,
   OrganizationFiscalCode
 } from "italia-ts-commons/lib/strings";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { ServiceId } from "../../../generated/io-api/ServiceId";
 
 import { APIClient } from "../../clients/api";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
-const aValidEmail = "test@example.com" as EmailAddress;
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
 const aValidMarkdown =
@@ -33,7 +27,6 @@ const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
 const aValidOrganizationFiscalCode = "01234567891" as OrganizationFiscalCode;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 const validApiMessagesResponse = {
   status: 200,
@@ -148,17 +141,12 @@ const proxyServiceResponse = {
   version: 0
 };
 
-// mock for a valid User
-const mockedUser: User = {
-  created_at: 1183518855,
-  family_name: "Garibaldi",
-  fiscal_code: aValidFiscalCode,
-  name: "Giuseppe Maria",
-  session_token: "HexToKen" as SessionToken,
-  spid_email: aValidEmail,
-  spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
-  wallet_token: "HexToKen" as WalletToken
+
+const mockParameters: GetMessagesParameters = {
+  pageSize: undefined,
+  enrichResultData: undefined,
+  maximumId: undefined,
+  minimumId: undefined
 };
 
 const mockGetMessages = jest.fn();
@@ -196,7 +184,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
@@ -214,7 +202,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
@@ -229,7 +217,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
@@ -239,7 +227,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
     });
@@ -253,7 +241,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new MessageService(api);
 
-    const res = await service.getMessagesByUser(mockedUser);
+    const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code
     });
@@ -270,7 +258,7 @@ describe("MessageService#getMessage", () => {
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: aValidFiscalCode,
+      fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
     });
     expect(res).toMatchObject({
@@ -289,7 +277,7 @@ describe("MessageService#getMessage", () => {
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: aValidFiscalCode,
+      fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
     });
     expect(res).toMatchSnapshot();
@@ -301,7 +289,7 @@ describe("MessageService#getMessage", () => {
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: aValidFiscalCode,
+      fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
@@ -316,7 +304,7 @@ describe("MessageService#getMessage", () => {
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
     expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: aValidFiscalCode,
+      fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
@@ -412,7 +400,7 @@ describe("MessageService#getServicePreferences", () => {
 
     const service = new MessageService(api);
     const res = await service.getServicePreferences(
-      aValidFiscalCode,
+      mockedUser.fiscal_code,
       aValidServiceID as ServiceId
     );
 
@@ -422,7 +410,7 @@ describe("MessageService#getServicePreferences", () => {
     });
 
     expect(mockGetServicePreferences).toHaveBeenCalledWith({
-      fiscal_code: aValidFiscalCode,
+      fiscal_code: mockedUser.fiscal_code,
       service_id: aValidServiceID as ServiceId
     });
   });
@@ -454,7 +442,7 @@ describe("MessageService#getServicePreferences", () => {
 
       const service = new MessageService(api);
       const res = await service.getServicePreferences(
-        aValidFiscalCode,
+        mockedUser.fiscal_code,
         aValidServiceID as ServiceId
       );
 
@@ -493,7 +481,7 @@ describe("MessageService#upsertServicePreferences", () => {
 
     const service = new MessageService(api);
     const res = await service.upsertServicePreferences(
-      aValidFiscalCode,
+      mockedUser.fiscal_code,
       aValidServiceID as ServiceId,
       aServicePreferences
     );
@@ -504,7 +492,7 @@ describe("MessageService#upsertServicePreferences", () => {
     });
 
     expect(mockUpsertServicePreferences).toHaveBeenCalledWith({
-      fiscal_code: aValidFiscalCode,
+      fiscal_code: mockedUser.fiscal_code,
       service_id: aValidServiceID as ServiceId,
       body: aServicePreferences
     });
@@ -537,7 +525,7 @@ describe("MessageService#upsertServicePreferences", () => {
 
       const service = new MessageService(api);
       const res = await service.upsertServicePreferences(
-        aValidFiscalCode,
+        mockedUser.fiscal_code,
         aValidServiceID as ServiceId,
         aServicePreferences
       );
