@@ -91,7 +91,7 @@ export default class TokenService {
           external_id: fiscalCode,
           iat: new Date().getTime() / 1000,
           jti: ulid(),
-          name: `${familyName} ${name}`
+          name: `${name} ${familyName}`
         },
         secret,
         {
