@@ -82,6 +82,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
   Merchant:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.0.2/openapi/index.yaml#/definitions/Merchant"
+  DiscountCodeType:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.0.2/openapi/index.yaml#/definitions/DiscountCodeType"
   OfflineMerchants:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.0.2/openapi/index.yaml#/definitions/OfflineMerchants"
   OfflineMerchant:
