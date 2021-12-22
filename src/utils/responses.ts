@@ -171,12 +171,12 @@ export interface IResponseSuccessOctet
  *
  * @param o The object to return to the client
  */
-export const ResponseSuccessOctet = (o: unknown): IResponseSuccessOctet => ({
+export const ResponseSuccessOctet = (o: Buffer): IResponseSuccessOctet => ({
   apply: res =>
     res
       .status(HttpStatusCodeEnum.HTTP_STATUS_200)
       .set("Content-Type", "application/octet-stream")
-      .send(o),
+      .end(o),
   kind: "IResponseSuccessOctet",
   value: o
 });

@@ -52,6 +52,8 @@ import {
 import { getAttachmentBody, getPecServerJwt } from "../clients/pecserver";
 import { CreatedMessageWithContent } from "../../generated/io-api/CreatedMessageWithContent";
 import { LegalData } from "../../generated/io-api/LegalData";
+import { StrictUTCISODateFromString } from "../utils/date";
+import { errorsToError } from "../utils/errorsFormatter";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 import TokenService from "./tokenService";
@@ -218,6 +220,26 @@ export default class MessagesService {
                 )
               )
               .map(successResponse => successResponse.value)
+              .chain(legalMessageMetadata =>
+                // Decode the timestamp with timezone from string (UTCISODateFromString currently support only Z time)
+                TE.fromEither(
+                  StrictUTCISODateFromString.decode(
+                    legalMessageMetadata.cert_data.data.timestamp
+                  )
+                    .map(timestamp => ({
+                      ...legalMessageMetadata,
+                      cert_data: {
+                        ...legalMessageMetadata.cert_data,
+                        data: {
+                          ...legalMessageMetadata.cert_data.data,
+                          timestamp
+                        }
+                      }
+                    }))
+                    .mapLeft(errorsToError)
+                    .mapLeft(es => ResponseErrorInternal(es.message))
+                )
+              )
               .map(legalMessageResponse => ({
                 ...message,
                 legal_message: legalMessageResponse

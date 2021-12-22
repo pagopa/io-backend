@@ -52,7 +52,7 @@ export const getAttachmentBody = (
   bearer: string,
   legalMessageId: string,
   attachmentId: string
-): TE.TaskEither<Error, string> =>
+): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(
     () =>
       getHttpApiFetchWithBerar(bearer)(
@@ -66,6 +66,6 @@ export const getAttachmentBody = (
         r => new Error(`failed to fetch attachment: ${r.status}`)
       )
     )
-    .chain<string>(rawResponse =>
-      TE.tryCatch(() => rawResponse.text(), E.toError)
+    .chain<Buffer>(rawResponse =>
+      TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError).map(Buffer.from)
     );

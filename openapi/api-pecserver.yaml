@@ -131,7 +131,6 @@ definitions:
         minLength: 1
         type: string
       timestamp:
-        format: date-time
         type: string
     required:
       - sender_provider
