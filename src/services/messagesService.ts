@@ -49,14 +49,13 @@ import {
   ResponseSuccessOctet,
   IResponseSuccessOctet
 } from "../utils/responses";
-import { getAttachmentBody, getPecServerJwt } from "../clients/pecserver";
+import { getAttachmentBody } from "../clients/pecserver";
 import { CreatedMessageWithContent } from "../../generated/io-api/CreatedMessageWithContent";
 import { LegalData } from "../../generated/io-api/LegalData";
 import { StrictUTCISODateFromString } from "../utils/date";
 import { errorsToError } from "../utils/errorsFormatter";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
-import TokenService from "./tokenService";
 
 const isGetMessageSuccess = (
   res: IResponseType<number, unknown, never>
@@ -170,7 +169,8 @@ export default class MessagesService {
    */
   public readonly getLegalMessage = (
     user: User,
-    messageId: string
+    messageId: string,
+    pecServerJwt: string
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -202,49 +202,46 @@ export default class MessagesService {
         )
       )
       .chain(message =>
-        getPecServerJwt(new TokenService(), user.fiscal_code).chain(
-          pecServerJwt =>
-            TE.tryCatch(
-              () =>
-                this.pecClient.getClient(pecServerJwt).getMessage({
-                  id: message.content.legal_data?.message_unique_id
-                }),
-              e => ResponseErrorInternal(E.toError(e).message)
-            )
-              .chain(wrapValidationWithInternalError)
-              .chain(
-                TE.fromPredicate(isPecServerGetMessageSuccess, e =>
-                  ResponseErrorInternal(
-                    `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
-                  )
-                )
-              )
-              .map(successResponse => successResponse.value)
-              .chain(legalMessageMetadata =>
-                // Decode the timestamp with timezone from string (UTCISODateFromString currently support only Z time)
-                TE.fromEither(
-                  StrictUTCISODateFromString.decode(
-                    legalMessageMetadata.cert_data.data.timestamp
-                  )
-                    .map(timestamp => ({
-                      ...legalMessageMetadata,
-                      cert_data: {
-                        ...legalMessageMetadata.cert_data,
-                        data: {
-                          ...legalMessageMetadata.cert_data.data,
-                          timestamp
-                        }
-                      }
-                    }))
-                    .mapLeft(errorsToError)
-                    .mapLeft(es => ResponseErrorInternal(es.message))
-                )
-              )
-              .map(legalMessageResponse => ({
-                ...message,
-                legal_message: legalMessageResponse
-              }))
+        TE.tryCatch(
+          () =>
+            this.pecClient.getClient(pecServerJwt).getMessage({
+              id: message.content.legal_data?.message_unique_id
+            }),
+          e => ResponseErrorInternal(E.toError(e).message)
         )
+          .chain(wrapValidationWithInternalError)
+          .chain(
+            TE.fromPredicate(isPecServerGetMessageSuccess, e =>
+              ResponseErrorInternal(
+                `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+              )
+            )
+          )
+          .map(successResponse => successResponse.value)
+          .chain(legalMessageMetadata =>
+            // Decode the timestamp with timezone from string (UTCISODateFromString currently support only Z time)
+            TE.fromEither(
+              StrictUTCISODateFromString.decode(
+                legalMessageMetadata.cert_data.data.timestamp
+              )
+                .map(timestamp => ({
+                  ...legalMessageMetadata,
+                  cert_data: {
+                    ...legalMessageMetadata.cert_data,
+                    data: {
+                      ...legalMessageMetadata.cert_data.data,
+                      timestamp
+                    }
+                  }
+                }))
+                .mapLeft(errorsToError)
+                .mapLeft(es => ResponseErrorInternal(es.message))
+            )
+          )
+          .map(legalMessageResponse => ({
+            ...message,
+            legal_message: legalMessageResponse
+          }))
       )
       .map(ResponseSuccessJson)
       .fold<
@@ -256,21 +253,17 @@ export default class MessagesService {
    * Retrieves a specific legal message attachment.
    */
   public readonly getLegalMessageAttachment = (
-    user: User,
     legalMessageId: string,
-    attachmentId: string
+    attachmentId: string,
+    pecServerJwt: string
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
     | IResponseSuccessOctet
   > =>
-    getPecServerJwt(new TokenService(), user.fiscal_code)
-      .chain(jwt =>
-        getAttachmentBody(jwt, legalMessageId, attachmentId).mapLeft(e =>
-          ResponseErrorInternal(`${e.message}`)
-        )
-      )
+    getAttachmentBody(pecServerJwt, legalMessageId, attachmentId)
+      .mapLeft(e => ResponseErrorInternal(`${e.message}`))
       .map(ResponseSuccessOctet)
       .fold<IResponseErrorInternal | IResponseSuccessOctet>(identity, identity)
       .run();

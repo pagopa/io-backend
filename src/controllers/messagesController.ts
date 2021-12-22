@@ -13,6 +13,10 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
+import { tryCatch } from "fp-ts/lib/TaskEither";
+import { toError } from "fp-ts/lib/Either";
+import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
+import { identity } from "fp-ts/lib/function";
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
@@ -23,9 +27,28 @@ import {
   IResponseSuccessOctet
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
+import TokenService from "../services/tokenService";
+import { PECSERVER_TOKEN_SECRET } from "../config";
+
+type IGetLegalMessageResponse =
+  | IResponseErrorInternal
+  | IResponseErrorValidation
+  | IResponseErrorNotFound
+  | IResponseErrorTooManyRequests
+  | IResponseSuccessJson<LegalMessageWithContent>;
+
+type IGetLegalMessageAttachmentResponse =
+  | IResponseErrorInternal
+  | IResponseErrorValidation
+  | IResponseErrorNotFound
+  | IResponseErrorTooManyRequests
+  | IResponseSuccessOctet;
 
 export default class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(
+    private readonly messagesService: MessagesService,
+    private readonly tokenService: TokenService
+  ) {}
 
   /**
    * Returns the messages for the user identified by the provided fiscal code.
@@ -74,15 +97,24 @@ export default class MessagesController {
    */
   public readonly getLegalMessage = (
     req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<LegalMessageWithContent>
-  > =>
+  ): Promise<IGetLegalMessageResponse> =>
     withUserFromRequest(req, user =>
-      this.messagesService.getLegalMessage(user, req.params.id)
+      this.tokenService
+        .getPecServerTokenHandler(user.fiscal_code, PECSERVER_TOKEN_SECRET)()
+        .mapLeft(e => ResponseErrorInternal(e.message))
+        .chain(pecServerJwt =>
+          tryCatch(
+            () =>
+              this.messagesService.getLegalMessage(
+                user,
+                req.params.id,
+                pecServerJwt
+              ),
+            e => ResponseErrorInternal(toError(e).message)
+          )
+        )
+        .fold<IGetLegalMessageResponse>(identity, identity)
+        .run()
     );
 
   /**
@@ -90,18 +122,23 @@ export default class MessagesController {
    */
   public readonly getLegalMessageAttachment = (
     req: express.Request
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessOctet
-  > =>
+  ): Promise<IGetLegalMessageAttachmentResponse> =>
     withUserFromRequest(req, user =>
-      this.messagesService.getLegalMessageAttachment(
-        user,
-        req.params.legal_message_unique_id,
-        req.params.attachment_id
-      )
+      this.tokenService
+        .getPecServerTokenHandler(user.fiscal_code, PECSERVER_TOKEN_SECRET)()
+        .mapLeft(e => ResponseErrorInternal(e.message))
+        .chain(pecServerJwt =>
+          tryCatch(
+            () =>
+              this.messagesService.getLegalMessageAttachment(
+                req.params.legal_message_unique_id,
+                req.params.attachment_id,
+                pecServerJwt
+              ),
+            e => ResponseErrorInternal(toError(e).message)
+          )
+        )
+        .fold<IGetLegalMessageAttachmentResponse>(identity, identity)
+        .run()
     );
 }

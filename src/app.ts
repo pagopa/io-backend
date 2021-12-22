@@ -732,7 +732,8 @@ function registerAPIRoutes(
   );
 
   const messagesController: MessagesController = new MessagesController(
-    messagesService
+    messagesService,
+    tokenService
   );
 
   const servicesController: ServicesController = new ServicesController(
