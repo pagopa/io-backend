@@ -5,7 +5,7 @@ import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "italia-ts-commons/lib/units";
 import {
-  getHttpApiFetchWithBerar,
+  getHttpApiFetchWithBearer,
   PECSERVER_BASE_PATH,
   PECSERVER_URL,
   PECSERVER_TOKEN_SECRET,
@@ -55,7 +55,7 @@ export const getAttachmentBody = (
 ): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(
     () =>
-      getHttpApiFetchWithBerar(bearer)(
+      getHttpApiFetchWithBearer(bearer)(
         `${PECSERVER_URL}${PECSERVER_BASE_PATH}/messages/${legalMessageId}/attachments/${attachmentId}`
       ),
     E.toError
