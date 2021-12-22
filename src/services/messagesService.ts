@@ -205,7 +205,7 @@ export default class MessagesService {
         TE.tryCatch(
           () =>
             this.pecClient.getClient(pecServerJwt).getMessage({
-              id: message.content.legal_data?.message_unique_id
+              id: message.content.legal_data.message_unique_id
             }),
           e => ResponseErrorInternal(E.toError(e).message)
         )
