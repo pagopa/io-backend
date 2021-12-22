@@ -116,6 +116,10 @@ definitions:
         type: string
       url:
         type: string
+    required:
+      - content_type
+      - id
+      - name
     type: object
   CertData:
     properties:
@@ -153,6 +157,9 @@ definitions:
       sender:
         minLength: 1
         type: string
+    required:
+      - sender
+      - recipients
     type: object
   LegalMessage:
     properties:

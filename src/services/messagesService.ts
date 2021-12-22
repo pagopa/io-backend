@@ -246,7 +246,7 @@ export default class MessagesService {
       .map(ResponseSuccessJson)
       .fold<
         IResponseErrorInternal | IResponseSuccessJson<LegalMessageWithContent>
-      >(identity, r => r as IResponseSuccessJson<LegalMessageWithContent>)
+      >(identity, identity)
       .run();
 
   /**
