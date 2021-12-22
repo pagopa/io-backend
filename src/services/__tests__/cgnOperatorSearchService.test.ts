@@ -35,13 +35,13 @@ const anApiResult = { items: [] };
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
-  productCategories: [ProductCategoryEnum.books]
+  productCategories: [ProductCategoryEnum.entertainment]
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
-  productCategories: [ProductCategoryEnum.books],
+  productCategories: [ProductCategoryEnum.entertainment],
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,

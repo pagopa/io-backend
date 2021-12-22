@@ -36,7 +36,6 @@ const mockedUser: User = {
   session_token: "123hexToken" as SessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  spid_mobile_phone: "3222222222222" as NonEmptyString,
   wallet_token: "123hexToken" as WalletToken
 };
 
@@ -69,7 +68,7 @@ const aMerchant: Merchant = {
   discounts: [
     {
       name: "a Discount" as NonEmptyString,
-      productCategories: [ProductCategoryEnum.arts],
+      productCategories: [ProductCategoryEnum.entertainment],
       startDate: new Date(),
       endDate: new Date,
       discount: 20
@@ -81,14 +80,14 @@ const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: [ProductCategoryEnum.books]
+  productCategories: [ProductCategoryEnum.entertainment]
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: [ProductCategoryEnum.books],
+  productCategories: [ProductCategoryEnum.entertainment],
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,
