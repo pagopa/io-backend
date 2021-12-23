@@ -326,7 +326,7 @@ export const getHttpApiFetchWithBearer = (bearer: string) =>
   toFetch(
     setFetchTimeout(
       DEFAULT_REQUEST_TIMEOUT_MS,
-      AbortableFetch(bearerAuthFetch(agent.getHttpFetch(process.env), bearer))
+      AbortableFetch(bearerAuthFetch(agent.getHttpsFetch(process.env), bearer))
     )
   );
 
