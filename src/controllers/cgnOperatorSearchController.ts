@@ -27,7 +27,7 @@ export default class CgnOperatorSearchController {
   ) {}
 
   /**
-   * Get the CGN operator/merchant identified by its identifier.
+   * Get the CGN operator/merchant by its identifier.
    */
   public readonly getMerchant = (
     req: express.Request
