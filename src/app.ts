@@ -120,7 +120,7 @@ import {
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
-import CgnOperatorController from "./controllers/cgnOperatorController";
+import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
 import EUCovidCertService from "./services/eucovidcertService";
 import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
@@ -1057,7 +1057,7 @@ function registerCgnOperatorSearchAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const cgnOperatorController: CgnOperatorController = new CgnOperatorController(
+  const cgnOperatorController: CgnOperatorSearchController = new CgnOperatorSearchController(
     cgnOperatorSearchService
   );
 

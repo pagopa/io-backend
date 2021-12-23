@@ -9,7 +9,7 @@ import mockReq from "../../__mocks__/request";
 import CgnOperatorSearchService from "../../services/cgnOperatorSearchService";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
-import CgnOperatorController from "../cgnOperatorController";
+import CgnOperatorSearchController from "../cgnOperatorSearchController";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { Merchant } from "../../../generated/cgn-operator-search/Merchant";
 import { ProductCategoryEnum } from "../../../generated/cgn-operator-search/ProductCategory";
@@ -114,7 +114,7 @@ describe("CgnOperatorController#getMerchant", () => {
     const req = { ...mockReq({params: { merchantId: aMerchantId }}), user: mockedUser };
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
     await controller.getMerchant(req);
 
     expect(mockGetMerchant).toHaveBeenCalledWith(aMerchantId);
@@ -127,7 +127,7 @@ describe("CgnOperatorController#getMerchant", () => {
     
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
 
     const response = await controller.getMerchant(req);
 
@@ -143,7 +143,7 @@ describe("CgnOperatorController#getMerchant", () => {
     const res = mockRes();
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
 
     const response = await controller.getMerchant(req);
 
@@ -165,7 +165,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
     const req = { ...mockReq({ body: anOnlineMerchantSearchRequest }), user: mockedUser };
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
     await controller.getOnlineMerchants(req);
 
     expect(mockGetOnlineMerchants).toHaveBeenCalledWith(anOnlineMerchantSearchRequest);
@@ -178,7 +178,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
     
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
 
     const response = await controller.getOnlineMerchants(req);
 
@@ -194,7 +194,7 @@ describe("CgnOperatorController#getOnlineMerchants", () => {
     const res = mockRes();
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
 
     const response = await controller.getOnlineMerchants(req);
 
@@ -216,7 +216,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
     const req = { ...mockReq({ body: anOfflineMerchantSearchRequest }), user: mockedUser };
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
     await controller.getOfflineMerchants(req);
 
     expect(mockGetOfflineMerchants).toHaveBeenCalledWith(anOfflineMerchantSearchRequest);
@@ -229,7 +229,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
     
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
 
     const response = await controller.getOfflineMerchants(req);
 
@@ -245,7 +245,7 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
     const res = mockRes();
     const client = CgnOperatorSearchAPIClient("", anAPIKey);
     const cgnOperatorSearchService = new CgnOperatorSearchService(client);
-    const controller = new CgnOperatorController(cgnOperatorSearchService);
+    const controller = new CgnOperatorSearchController(cgnOperatorSearchService);
 
     const response = await controller.getOfflineMerchants(req);
 

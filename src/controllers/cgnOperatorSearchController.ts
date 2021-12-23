@@ -21,7 +21,7 @@ import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 
-export default class CgnOperatorController {
+export default class CgnOperatorSearchController {
   constructor(
     private readonly cgnOperatorSearchService: CgnOperatorSearchService
   ) {}
