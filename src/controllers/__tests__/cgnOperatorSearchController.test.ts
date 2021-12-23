@@ -2,13 +2,9 @@
 /* tslint:disable:no-object-mutation */
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import CgnOperatorSearchService from "../../services/cgnOperatorSearchService";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { mockedUser } from "../../__mocks__/user_mock";
 import CgnOperatorSearchController from "../cgnOperatorSearchController";
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import { Merchant } from "../../../generated/cgn-operator-search/Merchant";
@@ -20,24 +16,6 @@ import { OfflineMerchantSearchRequest, OrderingEnum } from "../../../generated/c
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 
 const anAPIKey = "";
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidName = "Giuseppe Maria";
-const aValidFamilyname = "Garibaldi";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-const aTimestamp = 1518010929530;
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
-};
 
 const mockGetMerchant = jest.fn();
 const mockGetOnlineMerchants = jest.fn();

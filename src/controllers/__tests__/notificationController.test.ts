@@ -1,14 +1,11 @@
 /* tslint:disable:no-object-mutation */
 import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
-
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { InstallationID } from "../../../generated/backend/InstallationID";
 import { PlatformEnum } from "../../../generated/backend/Platform";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
-
 import { Notification } from "../../../generated/notifications/Notification";
-
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
@@ -16,7 +13,7 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
-
+import { mockedUser } from "../../__mocks__/user_mock";
 import { right } from "fp-ts/lib/Either";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
@@ -28,17 +25,6 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidInstallationID = "550e8400e29b41d4a716446655440000" as InstallationID;
 const anInvalidInstallationID = "" as InstallationID;
-
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
-};
 
 const mockedInvalidUser: User = {
   created_at: aTimestamp,

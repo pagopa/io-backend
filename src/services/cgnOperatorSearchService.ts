@@ -1,7 +1,6 @@
 /**
- * This service interactsnwith the Bonus API
+ * This service interacts with the GCN operator search API
  */
-
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,

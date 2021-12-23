@@ -2,36 +2,14 @@
 
 import { left, right } from "fp-ts/lib/Either";
 import * as redis from "redis";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { UserMetadata } from "../../../generated/backend/UserMetadata";
 import mockReq from "../../__mocks__/request";
 import RedisUserMetadataStorage, {
   invalidVersionNumberError,
   metadataNotFoundError
 } from "../../services/redisUserMetadataStorage";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { mockedUser } from "../../__mocks__/user_mock";
 import UserMetadataController from "../userMetadataController";
-
-const aTimestamp = 1518010929530;
-
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
-};
 
 const mockMetadata: UserMetadata = {
   metadata: "TEST-METADATA-GENERIC-STRING",

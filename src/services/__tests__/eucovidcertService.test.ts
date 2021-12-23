@@ -2,7 +2,7 @@ import * as e from "express";
 import * as t from "io-ts";
 import EUCovidCertService from "../eucovidcertService";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
-import { aMockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { StatusEnum as RevokedStatusEnum } from "../../../generated/eucovidcert-api/RevokedCertificate";
 import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
@@ -31,12 +31,12 @@ describe("EUCovidCertService", () => {
   it("should make the correct api call", async () => {
     const service = new EUCovidCertService(client);
 
-    await service.getEUCovidCertificate(aMockedUser, aMockedAuthCode);
+    await service.getEUCovidCertificate(mockedUser, aMockedAuthCode);
 
     expect(mockClientGetCertificate).toHaveBeenCalledWith({
       accessData: {
         auth_code: aMockedAuthCode,
-        fiscal_code: aMockedUser.fiscal_code
+        fiscal_code: mockedUser.fiscal_code
       }
     });
   });
@@ -49,7 +49,7 @@ describe("EUCovidCertService", () => {
     );
 
     const res = await service.getEUCovidCertificate(
-      aMockedUser,
+      mockedUser,
       aMockedAuthCode
     );
 
@@ -76,7 +76,7 @@ describe("EUCovidCertService", () => {
       const service = new EUCovidCertService(client);
 
       const res = await service.getEUCovidCertificate(
-        aMockedUser,
+        mockedUser,
         aMockedAuthCode
       );
 

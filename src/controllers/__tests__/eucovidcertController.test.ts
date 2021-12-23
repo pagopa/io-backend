@@ -1,5 +1,5 @@
 import mockReq from "../../__mocks__/request";
-import { aMockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
 import EUCovidCertController from "../eucovidcertController";
 import EUCovidCertService from "../../services/eucovidcertService";
@@ -31,7 +31,7 @@ const aRevokedCertificate: RevokedCertificate = {
 
 const aMockedRequestWithRightParams = {
   ...mockReq(),
-  user: aMockedUser,
+  user: mockedUser,
   body: {
     accessData: { auth_code: aMockedAuthCode }
   }
@@ -57,7 +57,7 @@ describe("EUCovidCertificateController", () => {
     await controller.getEUCovidCertificate(aMockedRequestWithRightParams);
 
     expect(aMockedGetCertificate).toHaveBeenCalledWith(
-      aMockedUser,
+      mockedUser,
       aMockedAuthCode,
       undefined
     );

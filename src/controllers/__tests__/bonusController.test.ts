@@ -13,7 +13,7 @@ import mockRes from "../../__mocks__/response";
 import { BonusAPIClient } from "../../clients/bonus";
 import BonusService from "../../services/bonusService";
 import BonusController from "../bonusController";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 
 const API_KEY = "";
 const API_URL = "";

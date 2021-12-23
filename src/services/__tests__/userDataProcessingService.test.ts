@@ -6,7 +6,7 @@ import {
   UserDataProcessingChoiceEnum
 } from "../../../generated/io-api/UserDataProcessingChoice";
 import { UserDataProcessingChoiceRequest } from "../../../generated/io-api/UserDataProcessingChoiceRequest";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import UserDataProcessingService from "../userDataProcessingService";
 
