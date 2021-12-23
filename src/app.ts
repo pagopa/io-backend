@@ -56,7 +56,7 @@ import {
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
   CGN_OPERATOR_SEARCH_API_CLIENT,
-  CGN_MERCHANT_CACHE_MAX_AGE_SECONDS,
+  CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   EUCOVIDCERT_API_CLIENT,
   FF_MIT_VOUCHER_ENABLED,
   getClientErrorRedirectionUrl,
@@ -1028,43 +1028,43 @@ function registerCgnAPIRoutes(
   );
 
   app.get(
-    `${basePath}/cgn/status`,
+    `${basePath}/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/eyca/status`,
+    `${basePath}/eyca/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getEycaStatus, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/activation`,
+    `${basePath}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startCgnActivation, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/activation`,
+    `${basePath}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnActivation, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/eyca/activation`,
+    `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startEycaActivation, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/eyca/activation`,
+    `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getEycaActivation, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/otp`,
+    `${basePath}/otp`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.generateOtp, cgnController)
   );
@@ -1081,27 +1081,27 @@ function registerCgnOperatorSearchAPIRoutes(
     cgnOperatorSearchService
   );
 
-  const cgnMerchantCacheDuration = `${CGN_MERCHANT_CACHE_MAX_AGE_SECONDS} seconds`;
+  const cgnOperatorSearchCacheDuration = `${CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS} seconds`;
 
-  const cgnMerchantCachingMiddleware = apicache.options({
+  const cgnOperatorSearchCachingMiddleware = apicache.options({
     debug:
       process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
       process.env.APICACHE_DEBUG === "true",
-    defaultDuration: cgnMerchantCacheDuration,
+    defaultDuration: cgnOperatorSearchCacheDuration,
     statusCodes: {
       include: [200]
     }
   }).middleware;
 
   app.get(
-    `${basePath}/cgn-operator-search/merchants/:merchantId`,
+    `${basePath}/merchants/:merchantId`,
     bearerSessionTokenAuth,
-    cgnMerchantCachingMiddleware(),
+    cgnOperatorSearchCachingMiddleware(),
     toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
   );
 
   app.post(
-    `${basePath}/cgn-operator-search/online-merchants`,
+    `${basePath}/online-merchants`,
     bearerSessionTokenAuth,
     toExpressHandler(
       cgnOperatorController.getOnlineMerchants,
@@ -1110,7 +1110,7 @@ function registerCgnOperatorSearchAPIRoutes(
   );
 
   app.post(
-    `${basePath}/cgn-operator-search/offline-merchants`,
+    `${basePath}/offline-merchants`,
     bearerSessionTokenAuth,
     toExpressHandler(
       cgnOperatorController.getOfflineMerchants,
