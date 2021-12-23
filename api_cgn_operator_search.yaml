@@ -79,7 +79,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v17.3.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
   Merchant:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.1.0/openapi/index.yaml#/definitions/Merchant"
   DiscountCodeType:
