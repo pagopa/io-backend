@@ -135,4 +135,29 @@ export default class TokenService {
       )
     )().mapLeft(toError);
   }
+
+  /**
+   * Generates a new PEC-SERVER support token containing the logged user's fiscalCode.
+   *
+   * @param secret: The shared secret used to sign this JWT token
+   * @param fiscalCode: The logged user's fiscal code
+   */
+  public getPecServerTokenHandler(
+    fiscalCode: FiscalCode,
+    secret: NonEmptyString
+  ): () => TaskEither<Error, string> {
+    return taskify<Error, string>(cb =>
+      jwt.sign(
+        {
+          account: fiscalCode
+        },
+        secret,
+        {
+          algorithm: "HS256",
+          noTimestamp: true
+        },
+        cb
+      )
+    );
+  }
 }

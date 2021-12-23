@@ -2,9 +2,7 @@
 
 import * as e from "express";
 import * as t from "io-ts";
-import {
-  OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+import { OrganizationFiscalCode } from "italia-ts-commons/lib/strings";
 
 import { ServiceId } from "../../../generated/io-api/ServiceId";
 
@@ -17,6 +15,7 @@ import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
+import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
@@ -141,7 +140,6 @@ const proxyServiceResponse = {
   version: 0
 };
 
-
 const mockParameters: GetMessagesParameters = {
   pageSize: undefined,
   enrichResultData: undefined,
@@ -182,7 +180,10 @@ describe("MessageService#getMessagesByUser", () => {
       return t.success(validApiMessagesResponse);
     });
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -200,7 +201,10 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(emptyApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -215,7 +219,10 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -225,7 +232,10 @@ describe("MessageService#getMessagesByUser", () => {
   it("returns an error if the getMessagesByUser API returns an error", async () => {
     mockGetMessages.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
@@ -239,7 +249,10 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(invalidApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
@@ -253,7 +266,10 @@ describe("MessageService#getMessage", () => {
   it("returns a message from the API", async () => {
     mockGetMessage.mockImplementation(() => t.success(validApiMessageResponse));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
@@ -272,7 +288,10 @@ describe("MessageService#getMessage", () => {
       t.success(validApiMessageResponseWithPrescriptionMetadata)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
@@ -285,7 +304,10 @@ describe("MessageService#getMessage", () => {
   it("returns an error if the getMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -300,7 +322,10 @@ describe("MessageService#getMessage", () => {
       t.success(invalidApiMessageResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -315,7 +340,10 @@ describe("MessageService#getMessage", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
@@ -327,7 +355,10 @@ describe("MessageService#getService", () => {
   it("returns a service from the API", async () => {
     mockGetService.mockImplementation(() => t.success(validApiServiceResponse));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getService(aValidServiceID);
 
@@ -343,7 +374,10 @@ describe("MessageService#getService", () => {
   it("returns an error if the API returns an error", async () => {
     mockGetService.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
       service_id: aValidServiceID
@@ -356,7 +390,10 @@ describe("MessageService#getService", () => {
       t.success(invalidApiServiceResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
@@ -370,7 +407,10 @@ describe("MessageService#getService", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getService(aValidServiceID);
 
@@ -398,7 +438,10 @@ describe("MessageService#getServicePreferences", () => {
       });
     });
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
     const res = await service.getServicePreferences(
       mockedUser.fiscal_code,
       aValidServiceID as ServiceId
@@ -440,7 +483,10 @@ describe("MessageService#getServicePreferences", () => {
         });
       });
 
-      const service = new MessageService(api);
+      const service = new MessageService(
+        api,
+        {} as IPecServerClientFactoryInterface
+      );
       const res = await service.getServicePreferences(
         mockedUser.fiscal_code,
         aValidServiceID as ServiceId
@@ -479,7 +525,10 @@ describe("MessageService#upsertServicePreferences", () => {
       });
     });
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
     const res = await service.upsertServicePreferences(
       mockedUser.fiscal_code,
       aValidServiceID as ServiceId,
@@ -523,7 +572,10 @@ describe("MessageService#upsertServicePreferences", () => {
         });
       });
 
-      const service = new MessageService(api);
+      const service = new MessageService(
+        api,
+        {} as IPecServerClientFactoryInterface
+      );
       const res = await service.upsertServicePreferences(
         mockedUser.fiscal_code,
         aValidServiceID as ServiceId,
