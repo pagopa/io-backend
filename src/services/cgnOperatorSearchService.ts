@@ -33,7 +33,7 @@ export default class CgnService {
   ) {}
 
   /**
-   * Get the CGN operator/merchant identified by its identifier.
+   * Get the CGN operator/merchant by its identifier.
    */
   public readonly getMerchant = (
     merchantId: NonEmptyString
