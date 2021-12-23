@@ -58,7 +58,8 @@ import {
   EUCOVIDCERT_API_CLIENT,
   FF_MIT_VOUCHER_ENABLED,
   getClientErrorRedirectionUrl,
-  FF_USER_AGE_LIMIT_ENABLED
+  FF_USER_AGE_LIMIT_ENABLED,
+  PECSERVER_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -387,7 +388,10 @@ export function newApp({
         authMiddlewares.local
       );
       // Create the messages service.
-      const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
+      const MESSAGES_SERVICE = new MessagesService(
+        API_CLIENT,
+        PECSERVER_CLIENT
+      );
       const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
       // Register the user metadata storage service.
       const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
@@ -728,7 +732,8 @@ function registerAPIRoutes(
   );
 
   const messagesController: MessagesController = new MessagesController(
-    messagesService
+    messagesService,
+    tokenService
   );
 
   const servicesController: ServicesController = new ServicesController(
@@ -844,6 +849,21 @@ function registerAPIRoutes(
     `${basePath}/messages/:id`,
     bearerSessionTokenAuth,
     toExpressHandler(messagesController.getMessage, messagesController)
+  );
+
+  app.get(
+    `${basePath}/legal-messages/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.getLegalMessage, messagesController)
+  );
+
+  app.get(
+    `${basePath}/legal-messages/:legal_message_unique_id/attachments/:attachment_id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getLegalMessageAttachment,
+      messagesController
+    )
   );
 
   app.get(

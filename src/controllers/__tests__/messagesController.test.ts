@@ -6,7 +6,8 @@ import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import MessagesController from "../messagesController";
 import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
-
+import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
+import TokenService from "../../services/tokenService";
 
 const anId: string = "string-id";
 
@@ -75,8 +76,14 @@ describe("MessagesController#getMessagesByUser", () => {
     req.user = mockedUser;
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
 
@@ -119,8 +126,14 @@ describe("MessagesController#getMessagesByUser", () => {
     };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
 
@@ -165,8 +178,14 @@ describe("MessagesController#getMessagesByUser", () => {
     };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
 
@@ -192,8 +211,14 @@ describe("MessagesController#getMessagesByUser", () => {
     req.user = "";
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
     response.apply(res);
@@ -219,8 +244,14 @@ describe("MessagesController#getMessage", () => {
     req.params = { id: anId };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessage(req);
 
@@ -244,8 +275,14 @@ describe("MessagesController#getMessage", () => {
     req.params = { id: anId };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const controller = new MessagesController(messageService);
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessage(req);
     response.apply(res);

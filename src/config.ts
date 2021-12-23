@@ -45,6 +45,7 @@ import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
+import * as pecClient from "./clients/pecserver";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -312,6 +313,30 @@ const fetchWithTimeout = setFetchTimeout(
 );
 const httpApiFetch = toFetch(fetchWithTimeout);
 
+const bearerAuthFetch = (
+  origFetch: typeof fetch = fetch,
+  bearerToken: string
+): typeof fetch => (input: RequestInfo, init: RequestInit | undefined) =>
+  origFetch(input, {
+    ...init,
+    headers: { Authorization: `Bearer ${bearerToken}` }
+  });
+
+export const getHttpApiFetchWithBearer = (bearer: string) =>
+  toFetch(
+    setFetchTimeout(
+      DEFAULT_REQUEST_TIMEOUT_MS,
+      AbortableFetch(bearerAuthFetch(agent.getHttpFetch(process.env), bearer))
+    )
+  );
+
+export const PECSERVER_URL = getRequiredENVVar("PECSERVER_URL");
+export const PECSERVER_BASE_PATH = getRequiredENVVar("PECSERVER_BASE_PATH");
+export const PECSERVER_CLIENT = {
+  getClient: (bearer: string) =>
+    pecClient.pecServerClient(PECSERVER_URL, getHttpApiFetchWithBearer(bearer))
+};
+
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
@@ -571,6 +596,35 @@ export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = NonEmptyString.decode(
   );
   return process.exit(1);
 });
+
+// PEC Server  Voucher Token
+export const PECSERVER_TOKEN_SECRET = NonEmptyString.decode(
+  process.env.PECSERVER_TOKEN_SECRET
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid PECSERVER_TOKEN_SECRET environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const PECSERVER_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.PECSERVER_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid PECSERVER_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_PECSERVER_TOKEN_EXPIRATION = 600 as Second;
+export const PECSERVER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.PECSERVER_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_PECSERVER_TOKEN_EXPIRATION) as Second;
+log.info("PEC Server expiration set to %s seconds", PECSERVER_TOKEN_EXPIRATION);
+//
 
 export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
   .decode(process.env.TEST_CGN_FISCAL_CODES || "")

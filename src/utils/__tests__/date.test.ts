@@ -1,6 +1,11 @@
 import { isNone, isSome } from "fp-ts/lib/Option";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { formatDate, isOlderThan, toBirthDate } from "../date";
+import {
+  formatDate,
+  isOlderThan,
+  toBirthDate,
+  StrictUTCISODateFromString
+} from "../date";
 
 const toDate = new Date("2020-01-01");
 const olderThanValue = 18;
@@ -53,5 +58,20 @@ describe("Pad date string", () => {
   it("should pad an invalid format", () => {
     const parsed = formatDate("1980-2-3");
     expect(parsed).toEqual("1980-02-03");
+  });
+});
+
+describe("StrictUTCISODateFromString", () => {
+  it("should decode a valid format", () => {
+    const parsed = StrictUTCISODateFromString.decode(
+      "2021-12-22T10:56:03+01:00"
+    );
+    console.log(JSON.stringify(parsed));
+    expect(parsed.isRight()).toBeTruthy();
+  });
+
+  it("should not decode an invalid format", () => {
+    const parsed = StrictUTCISODateFromString.decode("2021-12-22T10:56:03Z");
+    expect(parsed.isLeft()).toBeTruthy();
   });
 });

@@ -19,6 +19,13 @@ import {
 import { fromNullable } from "fp-ts/lib/Option";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
+import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { MessageResponseWithContent } from "generated/io-api/MessageResponseWithContent";
+import { identity } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -32,13 +39,43 @@ import {
   ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
+  wrapValidationWithInternalError
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
+import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
+import { LegalMessage } from "../../generated/pecserver/LegalMessage";
+import {
+  ResponseSuccessOctet,
+  IResponseSuccessOctet
+} from "../utils/responses";
+import { getAttachmentBody } from "../clients/pecserver";
+import { CreatedMessageWithContent } from "../../generated/io-api/CreatedMessageWithContent";
+import { LegalData } from "../../generated/io-api/LegalData";
+import { StrictUTCISODateFromString } from "../utils/date";
+import { errorsToError } from "../utils/errorsFormatter";
+import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
+const isGetMessageSuccess = (
+  res: IResponseType<number, unknown, never>
+): res is IResponseType<200, MessageResponseWithContent, never> =>
+  res.status === 200;
+
+const isPecServerGetMessageSuccess = (
+  res: IResponseType<number, unknown, never>
+): res is IResponseType<200, LegalMessage, never> => res.status === 200;
+
+const MessageWithLegalData = t.intersection([
+  CreatedMessageWithContent,
+  t.interface({ content: t.interface({ legal_data: LegalData }) })
+]);
+
 export default class MessagesService {
-  constructor(private readonly apiClient: IApiClientFactoryInterface) {}
+  constructor(
+    private readonly apiClient: IApiClientFactoryInterface,
+    private readonly pecClient: IPecServerClientFactoryInterface
+  ) {}
 
   /**
    * Retrieves all messages for a specific user.
@@ -126,6 +163,110 @@ export default class MessagesService {
           : unhandledResponseStatus(response.status);
       });
     });
+
+  /**
+   * Retrieves a specific legal message.
+   */
+  public readonly getLegalMessage = (
+    user: User,
+    messageId: string,
+    pecServerJwt: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<LegalMessageWithContent>
+  > =>
+    TE.tryCatch(
+      () =>
+        this.apiClient.getClient().getMessage({
+          fiscal_code: user.fiscal_code,
+          id: messageId
+        }),
+      e => ResponseErrorInternal(E.toError(e).message)
+    )
+      .chain(wrapValidationWithInternalError)
+      .chain(
+        TE.fromPredicate(isGetMessageSuccess, e =>
+          ResponseErrorInternal(
+            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+          )
+        )
+      )
+      .map(successResponse => successResponse.value.message)
+      .chain(
+        TE.fromPredicate(MessageWithLegalData.is, () =>
+          ResponseErrorInternal(
+            "The message retrieved is not a valid message with legal data"
+          )
+        )
+      )
+      .chain(message =>
+        TE.tryCatch(
+          () =>
+            this.pecClient.getClient(pecServerJwt).getMessage({
+              id: message.content.legal_data.message_unique_id
+            }),
+          e => ResponseErrorInternal(E.toError(e).message)
+        )
+          .chain(wrapValidationWithInternalError)
+          .chain(
+            TE.fromPredicate(isPecServerGetMessageSuccess, e =>
+              ResponseErrorInternal(
+                `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+              )
+            )
+          )
+          .map(successResponse => successResponse.value)
+          .chain(legalMessageMetadata =>
+            // Decode the timestamp with timezone from string (UTCISODateFromString currently support only Z time)
+            TE.fromEither(
+              StrictUTCISODateFromString.decode(
+                legalMessageMetadata.cert_data.data.timestamp
+              )
+                .map(timestamp => ({
+                  ...legalMessageMetadata,
+                  cert_data: {
+                    ...legalMessageMetadata.cert_data,
+                    data: {
+                      ...legalMessageMetadata.cert_data.data,
+                      timestamp
+                    }
+                  }
+                }))
+                .mapLeft(errorsToError)
+                .mapLeft(es => ResponseErrorInternal(es.message))
+            )
+          )
+          .map(legalMessageResponse => ({
+            ...message,
+            legal_message: legalMessageResponse
+          }))
+      )
+      .map(ResponseSuccessJson)
+      .fold<
+        IResponseErrorInternal | IResponseSuccessJson<LegalMessageWithContent>
+      >(identity, identity)
+      .run();
+
+  /**
+   * Retrieves a specific legal message attachment.
+   */
+  public readonly getLegalMessageAttachment = (
+    legalMessageId: string,
+    attachmentId: string,
+    pecServerJwt: string
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessOctet
+  > =>
+    getAttachmentBody(pecServerJwt, legalMessageId, attachmentId)
+      .mapLeft(e => ResponseErrorInternal(`${e.message}`))
+      .map(ResponseSuccessOctet)
+      .fold<IResponseErrorInternal | IResponseSuccessOctet>(identity, identity)
+      .run();
 
   /**
    * Retrieve all the information about the service that has sent a message.
