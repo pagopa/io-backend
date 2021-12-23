@@ -608,16 +608,11 @@ export const PECSERVER_TOKEN_SECRET = NonEmptyString.decode(
   );
   return process.exit(1);
 });
+const DEFAULT_PECSERVER_TOKEN_ISSUER = "appbackend" as NonEmptyString;
 export const PECSERVER_TOKEN_ISSUER = NonEmptyString.decode(
   process.env.PECSERVER_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid PECSERVER_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+).getOrElse(DEFAULT_PECSERVER_TOKEN_ISSUER);
+log.info("PEC Server token issuer set to %s seconds", PECSERVER_TOKEN_ISSUER);
 
 const DEFAULT_PECSERVER_TOKEN_EXPIRATION = 600 as Second;
 export const PECSERVER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
