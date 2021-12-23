@@ -53,6 +53,7 @@ export default class CgnOperatorSearchController {
   ): Promise<
     | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorNotFound
     | IResponseSuccessJson<OnlineMerchants>
   > =>
     withUserFromRequest(req, async _ =>
@@ -72,6 +73,7 @@ export default class CgnOperatorSearchController {
   ): Promise<
     | IResponseErrorValidation
     | IResponseErrorInternal
+    | IResponseErrorNotFound
     | IResponseSuccessJson<OfflineMerchants>
   > =>
     withUserFromRequest(req, async _ =>

@@ -1,6 +1,11 @@
+import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
+import { DiscountCodeTypeEnumModel } from "../../../../io-functions-cgn-operator-search/models/DiscountCodeTypes";
+import { ProductCategoryEnumModelType } from "../../../../io-functions-cgn-operator-search/models/ProductCategories";
+import { DiscountCodeTypeEnum } from "../../../generated/io-cgn-operator-search-api/DiscountCodeType";
 import {
   OfflineMerchantSearchRequest,
   OrderingEnum
@@ -14,10 +19,98 @@ const mockGetMerchant = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
 
-mockGetMerchant.mockImplementation(() => t.success({ status: 200, value: {} }));
+const anAgreementId = "abc-123-def";
+const aMerchantProfileWithStaticDiscountTypeModel = {
+  agreement_fk: anAgreementId,
+  description: "description something",
+  image_url: "/images/1.png",
+  name: "PagoPa",
+  profile_k: 123,
+  website_url: "https://pagopa.it",
+  discount_code_type: DiscountCodeTypeEnumModel.static
+};
+
+const anAddress = {
+  full_address: "la rue 17, 1231, roma (rm)",
+  latitude: 1,
+  longitude: 2
+};
+const anAddressModelList = [anAddress, { ...anAddress, city: "milano" }];
+
+const aDiscountModelWithStaticCode = {
+  condition: null,
+  description: "something something",
+  discount_value: 20,
+  end_date: new Date("2021-01-01"),
+  name: "name 1",
+  product_categories: [
+    ProductCategoryEnumModelType.entertainment,
+    ProductCategoryEnumModelType.learning
+  ],
+  start_date: new Date("2020-01-01"),
+  static_code: "xxx",
+  landing_page_url: undefined,
+  landing_page_referrer: undefined
+};
+
+const aDiscountModelWithLandingPage = {
+  condition: null,
+  description: "something something",
+  discount_value: 20,
+  end_date: new Date("2021-01-01"),
+  name: "name 1",
+  product_categories: [
+    ProductCategoryEnumModelType.entertainment,
+    ProductCategoryEnumModelType.learning
+  ],
+  start_date: new Date("2020-01-01"),
+  static_code: undefined,
+  landing_page_url: "xxx",
+  landing_page_referrer: "xxx"
+};
+
+const aDiscountModelList = [
+  aDiscountModelWithStaticCode,
+  aDiscountModelWithLandingPage
+];
+
+const anExpectedResponse = {
+  description: aMerchantProfileWithStaticDiscountTypeModel.description,
+  name: aMerchantProfileWithStaticDiscountTypeModel.name,
+  id: anAgreementId,
+  imageUrl: `/${aMerchantProfileWithStaticDiscountTypeModel.image_url}`,
+  websiteUrl: aMerchantProfileWithStaticDiscountTypeModel.website_url,
+  discountCodeType: DiscountCodeTypeEnum.static,
+  addresses: anAddressModelList.map(address => ({
+    full_address: address.full_address,
+    latitude: address.latitude,
+    longitude: address.longitude
+  })),
+  discounts: aDiscountModelList.map(discount =>
+    withoutUndefinedValues({
+      condition: fromNullable(discount.condition).toUndefined(),
+      description: fromNullable(discount.description).toUndefined(),
+      name: discount.name,
+      endDate: discount.end_date,
+      discount: fromNullable(discount.discount_value).toUndefined(),
+      startDate: discount.start_date,
+      staticCode: discount.static_code,
+      landingPageUrl: discount.landing_page_url,
+      landingPageReferrer: discount.landing_page_referrer,
+      productCategories: [
+        ProductCategoryEnum.entertainment,
+        ProductCategoryEnum.learning
+      ]
+    })
+  )
+};
+
+mockGetMerchant.mockImplementation(() =>
+  t.success({ status: 200, value: anExpectedResponse })
+);
 
 mockGetOfflineMerchants.mockImplementation(() =>
-  t.success({ status: 200, value: mockGetOnlineMerchants })
+  t.success({ status: 200, value: anApiResult })
 );
 
 mockGetOnlineMerchants.mockImplementation(() =>
@@ -31,7 +124,7 @@ const api = {
 } as ReturnType<CgnOperatorSearchAPIClient>;
 
 const aMerchantId = "aMerchantId" as NonEmptyString;
-const anApiResult = { items: [] };
+const anApiResult = { items: [anExpectedResponse] };
 
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
@@ -80,6 +173,9 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
     });
+
+    // @ts-ignore
+    expect(res.value).toMatchObject(anExpectedResponse);
   });
 
   it("should handle a not found error when the CGN is not found", async () => {
@@ -156,6 +252,9 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
     });
+
+    // @ts-ignore
+    expect(res.value).toMatchObject(anApiResult);
   });
 
   it("should handle an internal error response", async () => {
@@ -225,6 +324,9 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
     });
+
+    // @ts-ignore
+    expect(res.value).toMatchObject(anApiResult);
   });
 
   it("should handle an internal error response", async () => {

@@ -6,6 +6,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  ProblemJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
@@ -24,6 +25,7 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
+import { IResponseType } from "italia-ts-commons/lib/requests";
 export default class CgnService {
   constructor(
     private readonly cgnOperatorSearchApiClient: ReturnType<
@@ -31,8 +33,30 @@ export default class CgnService {
     >
   ) {}
 
+  private readonly toResponse = <T>(
+    response:
+      | IResponseType<200, T>
+      | IResponseType<404, undefined>
+      | IResponseType<500, ProblemJson>
+  ):
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<T> => {
+    switch (response.status) {
+      case 200:
+        return ResponseSuccessJson(response.value);
+      case 404:
+        return ResponseErrorNotFound("Not Found", "Operator Not found");
+      case 500:
+        return ResponseErrorInternal(readableProblem(response.value));
+      default:
+        return ResponseErrorStatusNotDefinedInSpec(response);
+    }
+  };
+
   /**
-   * Get the CGN operator/merchant identified by its identifier.
+   * Get the CGN operator/merchant by its identifier.
    */
   public readonly getMerchant = (
     merchantId: NonEmptyString
@@ -47,18 +71,9 @@ export default class CgnService {
         merchantId
       });
 
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 404:
-            return ResponseErrorNotFound("Not Found", "Operator Not found");
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
+      return withValidatedOrInternalError(validated, response =>
+        this.toResponse<Merchant>(response)
+      );
     });
 
   /**
@@ -69,6 +84,7 @@ export default class CgnService {
     onlineMerchantSearchRequest: OnlineMerchantSearchRequest
   ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorNotFound
     | IResponseErrorValidation
     | IResponseSuccessJson<OnlineMerchants>
   > =>
@@ -79,16 +95,9 @@ export default class CgnService {
         }
       );
 
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
+      return withValidatedOrInternalError(validated, response =>
+        this.toResponse<OnlineMerchants>(response)
+      );
     });
 
   /**
@@ -99,6 +108,7 @@ export default class CgnService {
     offlineMerchantSearchRequest: OfflineMerchantSearchRequest
   ): Promise<
     | IResponseErrorInternal
+    | IResponseErrorNotFound
     | IResponseErrorValidation
     | IResponseSuccessJson<OfflineMerchants>
   > =>
@@ -109,16 +119,8 @@ export default class CgnService {
         }
       );
 
-      // eslint-disable-next-line sonarjs/no-identical-functions
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 500:
-            return ResponseErrorInternal(readableProblem(response.value));
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
+      return withValidatedOrInternalError(validated, response =>
+        this.toResponse<OfflineMerchants>(response)
+      );
     });
 }
