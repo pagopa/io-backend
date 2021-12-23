@@ -3,13 +3,13 @@ info:
   version: 1.0.0
   title: Carta Giovani Nazionale Operator Search API
 host: localhost
-basePath: /api/v1
+basePath: /api/v1/cgn-operator-search
 schemes:
   - https
 security:
   - Bearer: []
 paths:
-  "/cgn-operator-search/online-merchants":
+  "/online-merchants":
     post:
       operationId: getOnlineMerchants
       summary: List of online merchants
@@ -31,7 +31,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson" 
 
-  "/cgn-operator-search/offline-merchants":
+  "/offline-merchants":
     post:
       operationId: getOfflineMerchants
       summary: List of merchants with a physical address
@@ -53,7 +53,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
-  "/cgn-operator-search/merchants/{merchantId}":
+  "/merchants/{merchantId}":
     parameters:
       - name: merchantId
         in: path
