@@ -59,11 +59,13 @@ const aValidNotification = {
 };
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
+const aAPIBasePath = "/api/v1";
 const aBonusAPIBasePath = "/bonus/api/v1";
 const aPagoPABasePath = "/pagopa/api/v1";
 const aMyPortalBasePath = "/myportal/api/v1";
 const aBPDBasePath = "/bpd/api/v1";
 const aCgnAPIBasePath = "/api/v1/cgn";
+const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
 const aZendeskBasePath = "/api/backend/zendesk/v1";
@@ -73,16 +75,16 @@ describe("Success app start", () => {
   let app: Express;
   beforeAll(async () => {
     app = await appModule.newApp({
-      APIBasePath: "/api/v1",
+      APIBasePath: aAPIBasePath,
       BPDBasePath: aBPDBasePath,
       BonusAPIBasePath: aBonusAPIBasePath,
       CGNAPIBasePath: aCgnAPIBasePath,
-      CGNOperatorSearchAPIBasePath: "/api/v1",
+      CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
       MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
-      ZendeskBasePath:aZendeskBasePath,
+      ZendeskBasePath: aZendeskBasePath,
       allowBPDIPSourceRange: [aValidCIDR],
       allowMyPortalIPSourceRange: [aValidCIDR],
       allowNotifyIPSourceRange: [aValidCIDR],
@@ -179,16 +181,16 @@ describe("Failure app start", () => {
     expect.assertions(1);
     try {
       await appModule.newApp({
-        APIBasePath: "/api/v1",
+        APIBasePath: aAPIBasePath,
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
-        CGNOperatorSearchAPIBasePath: "/api/v1",
+        CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
-        ZendeskBasePath:aZendeskBasePath,
+        ZendeskBasePath: aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
@@ -211,16 +213,16 @@ describe("Failure app start", () => {
     expect.assertions(1);
     try {
       await appModule.newApp({
-        APIBasePath: "/api/v1",
+        APIBasePath: aAPIBasePath,
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
-        CGNOperatorSearchAPIBasePath: "/api/v1",
+        CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
-        ZendeskBasePath:aZendeskBasePath,
+        ZendeskBasePath: aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
@@ -243,16 +245,16 @@ describe("Failure app start", () => {
     expect.assertions(1);
     try {
       await appModule.newApp({
-        APIBasePath: "/api/v1",
+        APIBasePath: aAPIBasePath,
         BPDBasePath: aBPDBasePath,
         BonusAPIBasePath: aBonusAPIBasePath,
         CGNAPIBasePath: aCgnAPIBasePath,
-        CGNOperatorSearchAPIBasePath: "/api/v1",
+        CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
-        ZendeskBasePath:aZendeskBasePath,
+        ZendeskBasePath: aZendeskBasePath,
         allowBPDIPSourceRange: [aValidCIDR],
         allowMyPortalIPSourceRange: [aValidCIDR],
         allowNotifyIPSourceRange: [aValidCIDR],
