@@ -7,6 +7,7 @@ import MessagesService from "../../services/messagesService";
 import MessagesController from "../messagesController";
 import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
+import TokenService from "../../services/tokenService";
 
 const anId: string = "string-id";
 
@@ -79,7 +80,10 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(messageService);
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
 
@@ -126,7 +130,10 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(messageService);
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
 
@@ -175,7 +182,10 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(messageService);
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
 
@@ -205,7 +215,10 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(messageService);
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessagesByUser(req);
     response.apply(res);
@@ -235,7 +248,10 @@ describe("MessagesController#getMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(messageService);
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessage(req);
 
@@ -263,7 +279,10 @@ describe("MessagesController#getMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(messageService);
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
 
     const response = await controller.getMessage(req);
     response.apply(res);
