@@ -13,6 +13,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { IResponseType } from "italia-ts-commons/lib/requests";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -25,7 +26,6 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
-import { IResponseType } from "italia-ts-commons/lib/requests";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
@@ -44,21 +44,6 @@ export default class CgnService {
       CgnOperatorSearchAPIClient
     >
   ) {}
-
-  private readonly mapResponse = <T>(
-    response: ClientResponses<T>
-  ): ServiceResponses<T> => {
-    switch (response.status) {
-      case 200:
-        return ResponseSuccessJson(response.value);
-      case 404:
-        return ResponseErrorNotFound("Not Found", "Operator Not found");
-      case 500:
-        return ResponseErrorInternal(readableProblem(response.value));
-      default:
-        return ResponseErrorStatusNotDefinedInSpec(response);
-    }
-  };
 
   /**
    * Get the CGN operator/merchant by its identifier.
@@ -113,4 +98,19 @@ export default class CgnService {
         this.mapResponse<OfflineMerchants>(response)
       );
     });
+
+  private readonly mapResponse = <T>(
+    response: ClientResponses<T>
+  ): ServiceResponses<T> => {
+    switch (response.status) {
+      case 200:
+        return ResponseSuccessJson(response.value);
+      case 404:
+        return ResponseErrorNotFound("Not Found", "Operator Not found");
+      case 500:
+        return ResponseErrorInternal(readableProblem(response.value));
+      default:
+        return ResponseErrorStatusNotDefinedInSpec(response);
+    }
+  };
 }

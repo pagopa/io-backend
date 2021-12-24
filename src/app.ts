@@ -453,6 +453,7 @@ export function newApp({
         registerCgnOperatorSearchAPIRoutes(
           app,
           CGNOperatorSearchAPIBasePath,
+          CGN_SERVICE,
           CGN_OPERATOR_SEARCH_SERVICE,
           authMiddlewares.bearerSession
         );
@@ -1073,11 +1074,13 @@ function registerCgnAPIRoutes(
 function registerCgnOperatorSearchAPIRoutes(
   app: Express,
   basePath: string,
+  cgnService: CgnService,
   cgnOperatorSearchService: CgnOperatorSearchService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
   const cgnOperatorController: CgnOperatorSearchController = new CgnOperatorSearchController(
+    cgnService,
     cgnOperatorSearchService
   );
 
