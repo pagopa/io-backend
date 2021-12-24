@@ -173,9 +173,9 @@ describe("CgnOperatorSearchService#getMerchant", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
     });
-
-    // @ts-ignore
-    expect(res.value).toMatchObject(anExpectedResponse);
+    expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
+      anExpectedResponse
+    );
   });
 
   it("should handle a not found error when the CGN is not found", async () => {
@@ -253,8 +253,9 @@ describe("CgnOperatorSearchService#getOnlineMerchants", () => {
       kind: "IResponseSuccessJson"
     });
 
-    // @ts-ignore
-    expect(res.value).toMatchObject(anApiResult);
+    expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
+      anApiResult
+    );
   });
 
   it("should handle an internal error response", async () => {
@@ -325,8 +326,9 @@ describe("CgnOperatorSearchService#getOfflineMerchants", () => {
       kind: "IResponseSuccessJson"
     });
 
-    // @ts-ignore
-    expect(res.value).toMatchObject(anApiResult);
+    expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
+      anApiResult
+    );
   });
 
   it("should handle an internal error response", async () => {

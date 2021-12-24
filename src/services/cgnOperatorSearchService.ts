@@ -26,6 +26,18 @@ import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerch
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { IResponseType } from "italia-ts-commons/lib/requests";
+
+type ClientResponses<T> =
+  | IResponseType<200, T>
+  | IResponseType<404, undefined>
+  | IResponseType<500, ProblemJson>;
+
+type ServiceResponses<T> =
+  | IResponseErrorInternal
+  | IResponseErrorValidation
+  | IResponseErrorNotFound
+  | IResponseSuccessJson<T>;
+
 export default class CgnService {
   constructor(
     private readonly cgnOperatorSearchApiClient: ReturnType<
@@ -33,16 +45,9 @@ export default class CgnService {
     >
   ) {}
 
-  private readonly toResponse = <T>(
-    response:
-      | IResponseType<200, T>
-      | IResponseType<404, undefined>
-      | IResponseType<500, ProblemJson>
-  ):
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<T> => {
+  private readonly mapResponse = <T>(
+    response: ClientResponses<T>
+  ): ServiceResponses<T> => {
     switch (response.status) {
       case 200:
         return ResponseSuccessJson(response.value);
@@ -60,19 +65,14 @@ export default class CgnService {
    */
   public readonly getMerchant = (
     merchantId: NonEmptyString
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorValidation
-    | IResponseErrorNotFound
-    | IResponseSuccessJson<Merchant>
-  > =>
+  ): Promise<ServiceResponses<Merchant>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.getMerchant({
         merchantId
       });
 
       return withValidatedOrInternalError(validated, response =>
-        this.toResponse<Merchant>(response)
+        this.mapResponse<Merchant>(response)
       );
     });
 
@@ -82,12 +82,7 @@ export default class CgnService {
    */
   public readonly getOnlineMerchants = (
     onlineMerchantSearchRequest: OnlineMerchantSearchRequest
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseSuccessJson<OnlineMerchants>
-  > =>
+  ): Promise<ServiceResponses<OnlineMerchants>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.getOnlineMerchants(
         {
@@ -96,7 +91,7 @@ export default class CgnService {
       );
 
       return withValidatedOrInternalError(validated, response =>
-        this.toResponse<OnlineMerchants>(response)
+        this.mapResponse<OnlineMerchants>(response)
       );
     });
 
@@ -106,12 +101,7 @@ export default class CgnService {
    */
   public readonly getOfflineMerchants = (
     offlineMerchantSearchRequest: OfflineMerchantSearchRequest
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorValidation
-    | IResponseSuccessJson<OfflineMerchants>
-  > =>
+  ): Promise<ServiceResponses<OfflineMerchants>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.getOfflineMerchants(
         {
@@ -120,7 +110,7 @@ export default class CgnService {
       );
 
       return withValidatedOrInternalError(validated, response =>
-        this.toResponse<OfflineMerchants>(response)
+        this.mapResponse<OfflineMerchants>(response)
       );
     });
 }
