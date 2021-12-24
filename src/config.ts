@@ -322,7 +322,7 @@ const bearerAuthFetch = (
     headers: { Authorization: `Bearer ${bearerToken}` }
   });
 
-export const getHttpApiFetchWithBearer = (bearer: string) =>
+export const getHttpsApiFetchWithBearer = (bearer: string) =>
   toFetch(
     setFetchTimeout(
       DEFAULT_REQUEST_TIMEOUT_MS,
@@ -334,7 +334,7 @@ export const PECSERVER_URL = getRequiredENVVar("PECSERVER_URL");
 export const PECSERVER_BASE_PATH = getRequiredENVVar("PECSERVER_BASE_PATH");
 export const PECSERVER_CLIENT = {
   getClient: (bearer: string) =>
-    pecClient.pecServerClient(PECSERVER_URL, getHttpApiFetchWithBearer(bearer))
+    pecClient.pecServerClient(PECSERVER_URL, getHttpsApiFetchWithBearer(bearer))
 };
 
 export const API_KEY = getRequiredENVVar("API_KEY");
