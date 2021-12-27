@@ -3,8 +3,6 @@ import * as t from "io-ts";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
-import { DiscountCodeTypeEnumModel } from "../../../../io-functions-cgn-operator-search/models/DiscountCodeTypes";
-import { ProductCategoryEnumModelType } from "../../../../io-functions-cgn-operator-search/models/ProductCategories";
 import { DiscountCodeTypeEnum } from "../../../generated/io-cgn-operator-search-api/DiscountCodeType";
 import {
   OfflineMerchantSearchRequest,
@@ -27,7 +25,7 @@ const aMerchantProfileWithStaticDiscountTypeModel = {
   name: "PagoPa",
   profile_k: 123,
   website_url: "https://pagopa.it",
-  discount_code_type: DiscountCodeTypeEnumModel.static
+  discount_code_type: "static"
 };
 
 const anAddress = {
@@ -44,8 +42,8 @@ const aDiscountModelWithStaticCode = {
   end_date: new Date("2021-01-01"),
   name: "name 1",
   product_categories: [
-    ProductCategoryEnumModelType.entertainment,
-    ProductCategoryEnumModelType.learning
+    "entertainment",
+    "learning"
   ],
   start_date: new Date("2020-01-01"),
   static_code: "xxx",
@@ -60,8 +58,8 @@ const aDiscountModelWithLandingPage = {
   end_date: new Date("2021-01-01"),
   name: "name 1",
   product_categories: [
-    ProductCategoryEnumModelType.entertainment,
-    ProductCategoryEnumModelType.learning
+    "entertainment",
+    "learning"
   ],
   start_date: new Date("2020-01-01"),
   static_code: undefined,
