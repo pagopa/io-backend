@@ -324,6 +324,10 @@ const fetchWithTimeout = setFetchTimeout(
 );
 const httpApiFetch = toFetch(fetchWithTimeout);
 
+// HTTPs-only fetch with optional keepalive agent
+// @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
+const httpsApiFetch = agent.getHttpsFetch(process.env);
+
 const bearerAuthFetch = (
   origFetch: typeof fetch = fetch,
   bearerToken: string
@@ -383,7 +387,7 @@ export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
 export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
   CGN_OPERATOR_SEARCH_API_URL,
   CGN_OPERATOR_SEARCH_API_KEY,
-  httpApiFetch
+  httpsApiFetch
 );
 
 export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
@@ -407,10 +411,6 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
-
-// HTTPs-only fetch with optional keepalive agent
-// @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const httpsApiFetch = agent.getHttpsFetch(process.env);
 
 // Register a factory service to create PagoPA client.
 const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
