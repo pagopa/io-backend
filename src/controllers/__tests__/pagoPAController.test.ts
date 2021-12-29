@@ -23,7 +23,7 @@ import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 
 const aCustomEmailAddress = "custom-email@example.com" as EmailAddress;
 

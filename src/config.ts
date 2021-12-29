@@ -44,6 +44,7 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
+import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import * as pecClient from "./clients/pecserver";
 
@@ -64,6 +65,16 @@ const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
 // Resolve cache control default max-age value
 export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
+  10
+);
+
+// Default cache control max-age value is 1 hour
+const DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: string = "3600";
+
+// Resolve cache control default max-age value
+export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
+  process.env.CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS ||
+    DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   10
 );
 
@@ -357,6 +368,21 @@ export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
 export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
+  httpApiFetch
+);
+
+export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_KEY"
+);
+export const CGN_OPERATOR_SEARCH_API_URL = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_URL"
+);
+export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_BASE_PATH"
+);
+export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
+  CGN_OPERATOR_SEARCH_API_URL,
+  CGN_OPERATOR_SEARCH_API_KEY,
   httpApiFetch
 );
 

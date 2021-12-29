@@ -3,7 +3,7 @@ import { MyPortalUser } from "../../../generated/myportal/MyPortalUser";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { getUserForBPD, getUserForMyPortal } from "../ssoController";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 
 const myPortalUserResponse: MyPortalUser = {
   family_name: mockedUser.family_name,

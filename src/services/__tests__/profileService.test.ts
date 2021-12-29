@@ -1,7 +1,4 @@
 import * as t from "io-ts";
-
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
@@ -11,21 +8,22 @@ import {
 import { Profile } from "../../../generated/backend/Profile";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 import { APIClient } from "../../clients/api";
-
 import { toInitializedProfile } from "../../types/profile";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
-import ApiClientFactory from "../apiClientFactory";
+import {
+  mockedUser,
+  aFiscalCode,
+  anEmailAddress,
+  aSpidEmailAddress,
+  aValidName,
+  aValidFamilyname
+} from "../../__mocks__/user_mock";import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
-const aValidAPIEmail = "from_api@example.com" as EmailAddress;
-const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
+const aValidAPIEmail = anEmailAddress;
+const aValidSPIDEmail = aSpidEmailAddress;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
@@ -53,13 +51,13 @@ const validApiProfileResponse = {
 const proxyInitializedProfileResponse = {
   blocked_inbox_or_channels: undefined,
   email: aValidAPIEmail,
-  family_name: "Lusso",
-  fiscal_code: "XUZTCT88A51Y311X",
+  family_name: aValidFamilyname,
+  fiscal_code: aFiscalCode,
   has_profile: true,
   is_email_validated: true,
   is_inbox_enabled: true,
   is_webhook_enabled: true,
-  name: "Luca",
+  name: aValidName,
   preferred_languages: aPreferredLanguages,
   spid_email: aValidSPIDEmail,
   version: 42
@@ -95,18 +93,6 @@ const tooManyReqApiMessagesResponse = {
 
 const conflictApiMessagesResponse = {
   status: 409
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: 1183518855,
-  family_name: "Lusso",
-  fiscal_code: aValidFiscalCode,
-  name: "Luca",
-  session_token: "HexToKen" as SessionToken,
-  spid_email: aValidSPIDEmail,
-  spid_level: aValidSpidLevel,
-  wallet_token: "HexToKen" as WalletToken
 };
 
 const expectedApiError = new Error("Api error.");
