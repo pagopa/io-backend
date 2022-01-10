@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: Carta Giovani Nazionale Operator Search API
 host: localhost
-basePath: /api/v1/cgn-operator-search
+basePath: /api/v1/cgn/operator-search
 schemes:
   - https
 security:

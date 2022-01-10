@@ -118,9 +118,9 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
 
 const aSearchResponse = { items: [] };
 
-const clientCgn = CgnAPIClient(anAPIKey, "");
+const clientCgn = CgnAPIClient(anAPIKey, "", "");
 const cgnService = new CgnService(clientCgn);
-const clientOperatorSearch = CgnOperatorSearchAPIClient("", anAPIKey);
+const clientOperatorSearch = CgnOperatorSearchAPIClient(anAPIKey, "", "");
 const cgnOperatorSearchService = new CgnOperatorSearchService(
   clientOperatorSearch
 );
@@ -168,7 +168,8 @@ describe("CgnOperatorController#getMerchant", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseErrorForbiddenNotAuthorized",
-      detail: "You are not allowed here: You do not have enough permission to complete the operation you requested"
+      detail:
+        "You are not allowed here: You do not have enough permission to complete the operation you requested"
     });
   });
 
