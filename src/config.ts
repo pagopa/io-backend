@@ -6,6 +6,7 @@ import * as dotenv from "dotenv";
 import { parseJSON, right, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import * as t from "io-ts";
+import { record } from "fp-ts";
 import { agent } from "italia-ts-commons";
 
 import {
@@ -447,17 +448,40 @@ export const getClientProfileRedirectionUrl = (
     href: url
   };
 };
+
+export const ClientErrorRedirectionUrlParams = t.union([
+  t.intersection([
+    t.interface({
+      errorMessage: NonEmptyString
+    }),
+    t.partial({
+      errorCode: t.number
+    })
+  ]),
+  t.intersection([
+    t.partial({
+      errorMessage: NonEmptyString
+    }),
+    t.interface({
+      errorCode: t.number
+    })
+  ]),
+  t.interface({
+    errorCode: t.number,
+    errorMessage: NonEmptyString
+  })
+]);
+export type ClientErrorRedirectionUrlParams = t.TypeOf<
+  typeof ClientErrorRedirectionUrlParams
+>;
+
 export const getClientErrorRedirectionUrl = (
-  errorMessage: string,
-  errorCode?: number
+  params: ClientErrorRedirectionUrlParams
 ): UrlFromString => {
-  const maybeErrorCodeParam = fromNullable(errorCode).map(
-    _ => `&errorCode=${errorCode}`
-  );
-  const errorParams = `?errorMessage=${errorMessage}${maybeErrorCodeParam.getOrElse(
-    ""
-  )}`;
-  const url = CLIENT_ERROR_REDIRECTION_URL.concat(errorParams);
+  const errorParams = record
+    .collect(params, (key, value) => `${key}=${value}`)
+    .join("&");
+  const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
   return { href: url };
 };
 
