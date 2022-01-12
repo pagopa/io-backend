@@ -38,7 +38,10 @@ import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
-import { clientProfileRedirectionUrl } from "../config";
+import {
+  ClientErrorRedirectionUrlParams,
+  clientProfileRedirectionUrl
+} from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
@@ -80,8 +83,7 @@ export default class AuthenticationController {
       token: string
     ) => UrlFromString,
     private readonly getClientErrorRedirectionUrl: (
-      errorMessage: string,
-      errorCode?: number
+      params: ClientErrorRedirectionUrlParams
     ) => UrlFromString,
     private readonly profileService: ProfileService,
     private readonly notificationService: NotificationService,
@@ -123,10 +125,13 @@ export default class AuthenticationController {
       this.hasUserAgeLimitEnabled &&
       !isOlderThan(AGE_LIMIT)(parse(spidUser.dateOfBirth), new Date())
     ) {
-      const redirectionUrl = this.getClientErrorRedirectionUrl(
-        AGE_LIMIT_ERROR_MESSAGE,
-        AGE_LIMIT_ERROR_CODE
-      );
+      // The IO App show the proper error screen if only the `errorCode`
+      // query param is provided and `errorMessage` is missing.
+      // this constraint could be ignored when this PR https://github.com/pagopa/io-app/pull/3642 is merged,
+      // released in a certain app version and that version become the minimum version supported.
+      const redirectionUrl = this.getClientErrorRedirectionUrl({
+        errorCode: AGE_LIMIT_ERROR_CODE
+      });
       log.error(
         `acs: the age of the user is less than ${AGE_LIMIT} yo [%s]`,
         spidUser.dateOfBirth

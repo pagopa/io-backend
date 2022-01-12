@@ -45,8 +45,7 @@ import UsersLoginLogService from "../../services/usersLoginLogService";
 import { exactUserIdentityDecode, SpidUser } from "../../types/user";
 import AuthenticationController, {
   AGE_LIMIT,
-  AGE_LIMIT_ERROR_CODE,
-  AGE_LIMIT_ERROR_MESSAGE
+  AGE_LIMIT_ERROR_CODE
 } from "../authenticationController";
 import { addDays, addMonths, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
@@ -452,7 +451,7 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+      `/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`
     );
   });
 
@@ -483,7 +482,7 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      `/error.html?errorMessage=${AGE_LIMIT_ERROR_MESSAGE}&errorCode=${AGE_LIMIT_ERROR_CODE}`
+      `/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`
     );
   });
 
