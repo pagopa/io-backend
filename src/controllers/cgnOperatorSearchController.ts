@@ -15,13 +15,15 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
+import { Either, left, right } from "fp-ts/lib/Either";
+import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
-import { withUserFromRequest } from "../types/user";
+import { User, withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Card } from "../../generated/io-cgn-api/Card";
 
@@ -44,19 +46,9 @@ export default class CgnOperatorSearchController {
     | IResponseSuccessJson<Merchant>
   > =>
     withUserFromRequest(req, async user => {
-      const cgnStatusResponse = await this.cgnService.getCgnStatus(user);
-
-      if (cgnStatusResponse.kind !== "IResponseSuccessJson") {
-        return ResponseErrorInternal("Cannot retrieve cgn card status");
-      }
-
-      const eligible = Card.decode(cgnStatusResponse.value).fold(
-        _ => false,
-        card => (card.status === "ACTIVATED" ? true : false)
-      );
-
-      if (!eligible) {
-        return ResponseErrorForbiddenNotAuthorized;
+      const eligibleUserOrErrorResult = await this.eligibleUserOrError(user);
+      if (eligibleUserOrErrorResult.isLeft()) {
+        return eligibleUserOrErrorResult.value;
       }
 
       return withValidatedOrValidationError(
@@ -106,4 +98,52 @@ export default class CgnOperatorSearchController {
           )
       )
     );
+
+  /**
+   * Get a discount bucket code by discount identifier.
+   */
+  public readonly getDiscountBucketCode = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseSuccessJson<DiscountBucketCode>
+  > =>
+    withUserFromRequest(req, async user => {
+      const eligibleUserOrErrorResult = await this.eligibleUserOrError(user);
+      if (eligibleUserOrErrorResult.isLeft()) {
+        return eligibleUserOrErrorResult.value;
+      }
+
+      return withValidatedOrValidationError(
+        NonEmptyString.decode(req.params.discountId),
+        discountId =>
+          this.cgnOperatorSearchService.getDiscountBucketCode(discountId)
+      );
+    });
+
+  private readonly eligibleUserOrError = async (
+    user: User
+  ): Promise<
+    Either<IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized, void>
+  > => {
+    const cgnStatusResponse = await this.cgnService.getCgnStatus(user);
+
+    if (cgnStatusResponse.kind !== "IResponseSuccessJson") {
+      return left(ResponseErrorInternal("Cannot retrieve cgn card status"));
+    }
+
+    const eligible = Card.decode(cgnStatusResponse.value).fold(
+      _ => false,
+      card => (card.status === "ACTIVATED" ? true : false)
+    );
+
+    if (!eligible) {
+      return left(ResponseErrorForbiddenNotAuthorized);
+    }
+
+    return right(void 0);
+  };
 }

@@ -1120,6 +1120,15 @@ function registerCgnOperatorSearchAPIRoutes(
       cgnOperatorController
     )
   );
+
+  app.get(
+    `${basePath}/discount-bucket-code/:discountId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getDiscountBucketCode,
+      cgnOperatorController
+    )
+  );
 }
 
 function registerBonusAPIRoutes(

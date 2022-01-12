@@ -21,18 +21,21 @@ import {
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { CardActivated } from "../../../generated/io-cgn-api/CardActivated";
 import { CardExpired } from "../../../generated/io-cgn-api/CardExpired";
+import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";
 
 const anAPIKey = "";
 
 const mockGetMerchant = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
+const mockGetDiscountBucketCode = jest.fn();
 jest.mock("../../services/cgnOperatorSearchService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getMerchant: mockGetMerchant,
       getOnlineMerchants: mockGetOnlineMerchants,
-      getOfflineMerchants: mockGetOfflineMerchants
+      getOfflineMerchants: mockGetOfflineMerchants,
+      getDiscountBucketCode: mockGetDiscountBucketCode
     }))
   };
 });
@@ -115,6 +118,9 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
     deltaLongitude: 8
   }
 };
+const aDiscountId = "a_discount_id" as NonEmptyString;
+
+const aDiscountBucketCode = { code: "asdfgh" } as DiscountBucketCode;
 
 const aSearchResponse = { items: [] };
 
@@ -336,6 +342,108 @@ describe("CgnOperatorController#getOfflineMerchants", () => {
 
     // service method is not called
     expect(mockGetOfflineMerchants).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("CgnOperatorController#getDiscountBucketCode", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = {
+      ...mockReq({ params: { discountId: aDiscountId } }),
+      user: mockedUser
+    };
+
+    await controller.getDiscountBucketCode(req);
+
+    expect(mockGetDiscountBucketCode).toHaveBeenCalledWith(aDiscountId);
+  });
+
+  it("should not call getDiscountBucketCode method on the CgnOperatorSearchService if cgn card is expired", async () => {
+    const req = {
+      ...mockReq({ params: { discountId: aDiscountId } }),
+      user: mockedUser
+    };
+
+    mockGetDiscountBucketCode.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aDiscountBucketCode))
+    );
+
+    mockGetCgnStatus.mockReturnValueOnce(
+      ResponseSuccessJson<CardExpired>({
+        activation_date: new Date(),
+        expiration_date: new Date(),
+        status: "EXPIRED"
+      })
+    );
+
+    const response = await controller.getDiscountBucketCode(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseErrorForbiddenNotAuthorized",
+      detail:
+        "You are not allowed here: You do not have enough permission to complete the operation you requested"
+    });
+  });
+
+  it("should not call getDiscountBucketCode method on the CgnOperatorSearchService if cgn card status cannot be retrieved", async () => {
+    const req = {
+      ...mockReq({ params: { discountId: aDiscountId } }),
+      user: mockedUser
+    };
+
+    mockGetDiscountBucketCode.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aDiscountBucketCode))
+    );
+
+    mockGetCgnStatus.mockReturnValueOnce(ResponseErrorInternal("An error"));
+
+    const response = await controller.getDiscountBucketCode(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseErrorInternal",
+      detail: "Internal server error: Cannot retrieve cgn card status"
+    });
+  });
+
+  it("should call getDiscountBucketCode method on the CgnOperatorSearchService with valid values", async () => {
+    const req = {
+      ...mockReq({ params: { discountId: aDiscountId } }),
+      user: mockedUser
+    };
+
+    mockGetDiscountBucketCode.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aDiscountBucketCode))
+    );
+
+    const response = await controller.getDiscountBucketCode(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aDiscountBucketCode
+    });
+  });
+
+  it("should not call getDiscountBucketCode method on the CgnOperatorSearchService with empty user", async () => {
+    const req = {
+      ...mockReq({ params: { discountId: aDiscountId } }),
+      user: undefined
+    };
+    const res = mockRes();
+
+    const response = await controller.getDiscountBucketCode(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGetDiscountBucketCode).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
