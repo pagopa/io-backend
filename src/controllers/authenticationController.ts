@@ -127,6 +127,8 @@ export default class AuthenticationController {
     ) {
       // The IO App show the proper error screen if only the `errorCode`
       // query param is provided and `errorMessage` is missing.
+      // this constraint could be ignored when this PR https://github.com/pagopa/io-app/pull/3642 is merged,
+      // released in a certain app version and that version become the minimum version supported.
       const redirectionUrl = this.getClientErrorRedirectionUrl({
         errorCode: AGE_LIMIT_ERROR_CODE
       });
