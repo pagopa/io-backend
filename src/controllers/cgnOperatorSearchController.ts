@@ -25,7 +25,6 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
 import { User, withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
-import { Card } from "../../generated/io-cgn-api/Card";
 
 export default class CgnOperatorSearchController {
   constructor(
@@ -135,15 +134,8 @@ export default class CgnOperatorSearchController {
       return left(ResponseErrorInternal("Cannot retrieve cgn card status"));
     }
 
-    const eligible = Card.decode(cgnStatusResponse.value).fold(
-      _ => false,
-      card => (card.status === "ACTIVATED" ? true : false)
-    );
-
-    if (!eligible) {
-      return left(ResponseErrorForbiddenNotAuthorized);
-    }
-
-    return right(void 0);
+    return cgnStatusResponse.value.status === "ACTIVATED"
+      ? right(void 0)
+      : left(ResponseErrorForbiddenNotAuthorized);
   };
 }
