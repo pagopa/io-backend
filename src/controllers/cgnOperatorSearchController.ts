@@ -126,7 +126,7 @@ export default class CgnOperatorSearchController {
       );
     });
 
-  private readonly isResponseSuccess = (
+  private readonly isCgnStatusResponseSuccess = (
     res: IResponse<unknown>
   ): res is IResponseSuccessJson<Card> => res.kind === "IResponseSuccessJson";
 
@@ -137,7 +137,7 @@ export default class CgnOperatorSearchController {
   > => {
     const cgnStatusResponse = await this.cgnService.getCgnStatus(user);
 
-    return fromPredicate(this.isResponseSuccess, () =>
+    return fromPredicate(this.isCgnStatusResponseSuccess, () =>
       ResponseErrorInternal("Cannot retrieve cgn card status")
     )(cgnStatusResponse)
       .mapLeft<IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized>(
