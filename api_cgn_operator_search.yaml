@@ -77,6 +77,37 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
+
+  "/discount-bucket-code/{discountId}":
+    parameters:
+      - name: discountId
+        in: path
+        type: string
+        minLength: 1
+        required: true
+        description: Discount Identifier
+    get:
+      operationId: getDiscountBucketCode
+      summary: Retrieve a discount bucket code
+      description: |
+        Retrieve a discount bucket code and burns it
+      responses:
+        "200":
+          description: Found
+          schema:
+            $ref: "#/definitions/DiscountBucketCode"
+        "404":
+          description: Bucket code Not Found
+        '401':
+          description: Bearer token null or expired
+        '403':
+          description: Access data provided are invalid or CGN not valid
+        '410':
+          description: Endpoint no longer available
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
@@ -106,6 +137,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.2.0/openapi/index.yaml#/definitions/Coordinates"
   BoundingBox:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.2.0/openapi/index.yaml#/definitions/BoundingBox"
+  DiscountBucketCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.2.0/openapi/index.yaml#/definitions/DiscountBucketCode"
 securityDefinitions:
   Bearer:
     type: apiKey
