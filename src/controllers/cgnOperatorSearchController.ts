@@ -6,6 +6,7 @@
 import { IResponseErrorForbiddenNotAuthorized } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import {
+  IResponse,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -15,8 +16,10 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, fromPredicate } from "fp-ts/lib/Either";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
+import { identity } from "fp-ts/lib/function";
+import { Card } from "generated/cgn/Card";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
@@ -123,6 +126,10 @@ export default class CgnOperatorSearchController {
       );
     });
 
+  private readonly isResponseSuccess = (
+    res: IResponse<unknown>
+  ): res is IResponseSuccessJson<Card> => res.kind === "IResponseSuccessJson";
+
   private readonly eligibleUserOrError = async (
     user: User
   ): Promise<
@@ -130,12 +137,19 @@ export default class CgnOperatorSearchController {
   > => {
     const cgnStatusResponse = await this.cgnService.getCgnStatus(user);
 
-    if (cgnStatusResponse.kind !== "IResponseSuccessJson") {
-      return left(ResponseErrorInternal("Cannot retrieve cgn card status"));
-    }
-
-    return cgnStatusResponse.value.status === "ACTIVATED"
-      ? right(void 0)
-      : left(ResponseErrorForbiddenNotAuthorized);
+    return fromPredicate(this.isResponseSuccess, () =>
+      ResponseErrorInternal("Cannot retrieve cgn card status")
+    )(cgnStatusResponse)
+      .mapLeft<IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized>(
+        identity
+      )
+      .map(res => res.value.status)
+      .chain(
+        fromPredicate(
+          status => status === "ACTIVATED",
+          () => ResponseErrorForbiddenNotAuthorized
+        )
+      )
+      .map(() => void 0);
   };
 }
