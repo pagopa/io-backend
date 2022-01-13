@@ -77,12 +77,17 @@ const badRequestErrorResponse = {
 
 const aMerchantId = "a_merchant_id" as NonEmptyString;
 
+const aDiscountId = "a_discount_id" as NonEmptyString;
+
+const aDiscountBucketCode = { code: "asdfgh" } as DiscountBucketCode;
+
 const aMerchant: Merchant = {
   description: "a Merchant description" as NonEmptyString,
   id: aMerchantId,
   name: "A merchant name" as NonEmptyString,
   discounts: [
     {
+      id: aDiscountId,
       name: "a Discount" as NonEmptyString,
       productCategories: [ProductCategoryEnum.entertainment],
       startDate: new Date(),
@@ -118,9 +123,6 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
     deltaLongitude: 8
   }
 };
-const aDiscountId = "a_discount_id" as NonEmptyString;
-
-const aDiscountBucketCode = { code: "asdfgh" } as DiscountBucketCode;
 
 const aSearchResponse = { items: [] };
 
