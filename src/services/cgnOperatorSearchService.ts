@@ -14,6 +14,7 @@ import {
 
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { IResponseType } from "italia-ts-commons/lib/requests";
+import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -96,6 +97,24 @@ export default class CgnService {
 
       return withValidatedOrInternalError(validated, response =>
         this.mapResponse<OfflineMerchants>(response)
+      );
+    });
+
+  /**
+   * Get a discount bucket code by discount identifier.
+   */
+  public readonly getDiscountBucketCode = (
+    discountId: NonEmptyString
+  ): Promise<ServiceResponses<DiscountBucketCode>> =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.getDiscountBucketCode(
+        {
+          discountId
+        }
+      );
+
+      return withValidatedOrInternalError(validated, response =>
+        this.mapResponse<DiscountBucketCode>(response)
       );
     });
 
