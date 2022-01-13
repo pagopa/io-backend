@@ -18,7 +18,6 @@ import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
 import { Either, fromPredicate } from "fp-ts/lib/Either";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
-import { identity } from "fp-ts/lib/function";
 import { Card } from "generated/cgn/Card";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
@@ -133,23 +132,26 @@ export default class CgnOperatorSearchController {
   private readonly eligibleUserOrError = async (
     user: User
   ): Promise<
-    Either<IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized, void>
+    Either<
+      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+      string
+    >
   > => {
     const cgnStatusResponse = await this.cgnService.getCgnStatus(user);
 
-    return fromPredicate(this.isCgnStatusResponseSuccess, () =>
+    return fromPredicate<
+      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+      IResponse<unknown>,
+      IResponseSuccessJson<Card>
+    >(this.isCgnStatusResponseSuccess, () =>
       ResponseErrorInternal("Cannot retrieve cgn card status")
     )(cgnStatusResponse)
-      .mapLeft<IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized>(
-        identity
-      )
       .map(res => res.value.status)
       .chain(
         fromPredicate(
           status => status === "ACTIVATED",
           () => ResponseErrorForbiddenNotAuthorized
         )
-      )
-      .map(() => void 0);
+      );
   };
 }
