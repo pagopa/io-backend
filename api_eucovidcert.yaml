@@ -54,17 +54,19 @@ definitions:
     required:
       - auth_code
   Certificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/Certificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/Certificate"
   ValidCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ValidCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/RevokedCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/RevokedCertificate"
   ExpiredCertificate:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/ExpiredCertificate"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/ExpiredCertificate"
+  HeaderInfo:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/HeaderInfo"
   QRCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/QRCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/QRCode"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/master/openapi/index.yaml#/definitions/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/IC-204--add-header-info-to-certificate/openapi/index.yaml#/definitions/PreferredLanguages"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.5.3/openapi/definitions.yaml#/ProblemJson"
  
