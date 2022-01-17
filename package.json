@@ -85,7 +85,7 @@
     "italia-ts-commons": "^8.3.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
