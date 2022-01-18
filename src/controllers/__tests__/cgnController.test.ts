@@ -39,6 +39,7 @@ const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 const mockGetEycaActivation = jest.fn();
 const mockStartEycaActivation = jest.fn();
+const mockStartCgnUnsubscription = jest.fn();
 
 const mockGenerateOtp = jest.fn();
 jest.mock("../../services/cgnService", () => {
@@ -50,6 +51,7 @@ jest.mock("../../services/cgnService", () => {
       startCgnActivation: mockStartCgnActivation,
       startEycaActivation: mockStartEycaActivation,
       getEycaStatus: mockGetEycaStatus,
+      startCgnUnsubscription: mockStartCgnUnsubscription,
       generateOtp: mockGenerateOtp
     }))
   };
@@ -557,6 +559,86 @@ describe("CgnController#startEycaActivation", () => {
 
     // service method is not called
     expect(mockStartEycaActivation).not.toBeCalled();
+    expect(response).toMatchObject({
+      kind: "IResponseErrorForbiddenNotAuthorized"
+    });
+  });
+});
+
+describe("CgnController#startCgnUnsubscription", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
+    await controller.startCgnUnsubscription(req);
+
+    expect(mockStartCgnUnsubscription).toHaveBeenCalledWith(mockedUser);
+  });
+
+  it("should call startCgnUnsubscription method on the CgnService with valid values", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    mockStartCgnUnsubscription.mockReturnValue(
+      Promise.resolve(ResponseSuccessAccepted())
+    );
+
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
+    const response = await controller.startCgnUnsubscription(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessAccepted",
+      value: undefined
+    });
+  });
+
+  it("should not call startCgnUnsubscription method on the CgnService with empty user", async () => {
+    const req = { ...mockReq(), user: undefined };
+    const res = mockRes();
+
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
+    const response = await controller.startCgnUnsubscription(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockStartCgnUnsubscription).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should not call startCgnUnsubscription method on the CgnService with Not allowed user", async () => {
+    const req = { ...mockReq(), user: mockedUser };
+
+    allowedTestFiscalCodesMock.mockImplementationOnce(() => [
+      "GRBGPP87L04L741Z" as FiscalCode
+    ]);
+
+    const controller = new CgnController(
+      cgnService,
+      allowedTestFiscalCodesMock()
+    );
+
+    const response = await controller.startCgnUnsubscription(req);
+
+    // service method is not called
+    expect(mockStartCgnUnsubscription).not.toBeCalled();
     expect(response).toMatchObject({
       kind: "IResponseErrorForbiddenNotAuthorized"
     });
