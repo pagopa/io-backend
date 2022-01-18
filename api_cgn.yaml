@@ -236,37 +236,37 @@ definitions:
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/InstanceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/InstanceId"
   CommonCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CommonCard"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CommonCard"
   CardPending:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CardPending"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardPending"
   CardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CardActivated"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardActivated"
   CardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CardRevoked"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardRevoked"
   CardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CardExpired"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardExpired"
   Card:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/Card"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/Card"
   CgnActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CgnActivationDetail"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CgnActivationDetail"
   EycaActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/EycaActivationDetail"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaActivationDetail"
   EycaCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/EycaCard"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCard"
   EycaCardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/EycaCardActivated"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCardActivated"
   EycaCardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/EycaCardExpired"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCardExpired"
   EycaCardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/EycaCardRevoked"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCardRevoked"
   CcdbNumber:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/CcdbNumber"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CcdbNumber"
   Otp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/Otp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/Otp"
   OtpCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v1.0.1/openapi/index.yaml#/definitions/OtpCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/OtpCode"
 
 securityDefinitions:
   Bearer:
