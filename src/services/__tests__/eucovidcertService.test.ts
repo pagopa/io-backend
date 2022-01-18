@@ -10,14 +10,19 @@ import mockRes from "../../__mocks__/response";
 
 const mockClientGetCertificate = jest.fn();
 
-const client = {
+const client = ({
   getCertificate: mockClientGetCertificate
-} as unknown as ReturnType<EUCovidCertAPIClient>;
+} as unknown) as ReturnType<EUCovidCertAPIClient>;
 
 const aMockedAuthCode = "000";
 
 const aRevokedCertificate: RevokedCertificate = {
   uvci: "000",
+  header_info: {
+    logo_id: "aLogoId",
+    title: "a Title",
+    subtitle: "a Subtitle"
+  },
   info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
   status: RevokedStatusEnum.revoked
@@ -69,7 +74,13 @@ describe("EUCovidCertService", () => {
     ${"return IResponseErrorInternal if status code is not in spec"}     | ${418}      | ${null}                                                                                   | ${500}               | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `(
     "should $title",
-    async ({ status_code, value, expected_status_code, expected_kind, expected_detail }) => {
+    async ({
+      status_code,
+      value,
+      expected_status_code,
+      expected_kind,
+      expected_detail
+    }) => {
       mockClientGetCertificate.mockImplementation(() =>
         t.success({ status: status_code, value })
       );
