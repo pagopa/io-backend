@@ -186,9 +186,10 @@ paths:
           headers:
             Location:
               type: string
-              description: |-
-                Location (URL) of created request resource.
-                A GET request to this URL returns the request status and details.
+              description: |
+                Location (URL) of created request resource
+                This location actually points to a not existing api, but semantically 201
+                means that the request has been taken in charge
         "202":
           description: Processing request.
           schema:
