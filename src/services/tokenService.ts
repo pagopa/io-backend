@@ -14,6 +14,8 @@ import {
 import { Second } from "italia-ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
+import { PecServerConfig } from "src/config";
+import * as TE from "fp-ts/lib/TaskEither";
 
 const asyncRandomBytes = promisify(crypto.randomBytes);
 
@@ -139,25 +141,23 @@ export default class TokenService {
   /**
    * Generates a new PEC-SERVER support token containing the logged user's fiscalCode.
    *
-   * @param secret: The shared secret used to sign this JWT token
+   * @param config: The Pec Server configuration
    * @param fiscalCode: The logged user's fiscal code
    */
-  public getPecServerTokenHandler(
-    fiscalCode: FiscalCode,
-    secret: NonEmptyString
-  ): () => TaskEither<Error, string> {
-    return taskify<Error, string>(cb =>
+  public readonly getPecServerTokenHandler = (fiscalCode: string) => (
+    config: PecServerConfig
+  ): TE.TaskEither<Error, string> =>
+    taskify<Error, string>(cb =>
       jwt.sign(
         {
           account: fiscalCode
         },
-        secret,
+        config.secret,
         {
           algorithm: "HS256",
           noTimestamp: true
         },
         cb
       )
-    );
-  }
+    )().mapLeft(toError);
 }

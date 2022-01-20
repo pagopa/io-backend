@@ -47,7 +47,7 @@ import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
-import * as pecClient from "./clients/pecserver";
+import { ognlTypeFor } from "./utils/ognl";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -342,16 +342,9 @@ export const getHttpApiFetchWithBearer = (bearer: string) =>
   toFetch(
     setFetchTimeout(
       DEFAULT_REQUEST_TIMEOUT_MS,
-      AbortableFetch(bearerAuthFetch(agent.getHttpsFetch(process.env), bearer))
+      AbortableFetch(bearerAuthFetch(httpsApiFetch, bearer))
     )
   );
-
-export const PECSERVER_URL = getRequiredENVVar("PECSERVER_URL");
-export const PECSERVER_BASE_PATH = getRequiredENVVar("PECSERVER_BASE_PATH");
-export const PECSERVER_CLIENT = {
-  getClient: (bearer: string) =>
-    pecClient.pecServerClient(PECSERVER_URL, getHttpApiFetchWithBearer(bearer))
-};
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
@@ -649,33 +642,34 @@ export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = NonEmptyString.decode(
   return process.exit(1);
 });
 
-// PEC Server  Voucher Token
-export const PECSERVER_TOKEN_SECRET = NonEmptyString.decode(
-  process.env.PECSERVER_TOKEN_SECRET
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid PECSERVER_TOKEN_SECRET environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
+// PEC SERVER config
+export const PecServerConfig = t.interface({
+  basePath: t.string,
+  secret: NonEmptyString,
+  serviceId: NonEmptyString,
+  url: NonEmptyString
 });
-export const PECSERVER_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.PECSERVER_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid PECSERVER_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export type PecServerConfig = t.TypeOf<typeof PecServerConfig>;
 
-const DEFAULT_PECSERVER_TOKEN_EXPIRATION = 600 as Second;
-export const PECSERVER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.PECSERVER_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_PECSERVER_TOKEN_EXPIRATION) as Second;
-log.info("PEC Server expiration set to %s seconds", PECSERVER_TOKEN_EXPIRATION);
+export const PecServersConfig = t.interface({
+  aruba: PecServerConfig,
+  poste: PecServerConfig
+});
+export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
+
+export const PECSERVERS = ognlTypeFor<PecServersConfig>(
+  PecServersConfig,
+  "PECSERVERS"
+)
+  .decode(process.env)
+  .getOrElseL(errs => {
+    log.error(
+      `Missing or invalid PECSERVERS environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  });
 //
 
 export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
