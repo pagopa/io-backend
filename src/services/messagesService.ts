@@ -21,6 +21,7 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { MessageResponseWithContent } from "generated/io-api/MessageResponseWithContent";
@@ -227,24 +228,22 @@ export default class MessagesService {
     | IResponseSuccessOctet
   > =>
     this.getLegalMessageFromFnApp(user, messageId)
-      .chain(message =>
-        this.getLegalMessageFromPecServer(message, bearerGenerator).chain(
-          legalMessageMetadata =>
-            this.pecClient
-              .getClient(
-                bearerGenerator,
-                message.content.legal_data.message_unique_id
+      .map(message => message.content.legal_data)
+      .chain(messageLegalData =>
+        this.pecClient
+          .getClient(
+            bearerGenerator,
+            O.fromNullable(messageLegalData.pec_server_service_id)
+          )
+          .mapLeft(e => ResponseErrorInternal(e.message))
+          .chain(client =>
+            client
+              .getAttachmentBody(
+                messageLegalData.message_unique_id,
+                attachmentId
               )
               .mapLeft(e => ResponseErrorInternal(e.message))
-              .chain(client =>
-                client
-                  .getAttachmentBody(
-                    legalMessageMetadata.cert_data.data.envelope_id,
-                    attachmentId
-                  )
-                  .mapLeft(e => ResponseErrorInternal(e.message))
-              )
-        )
+          )
       )
       .map(ResponseSuccessOctet)
       .fold<IResponseErrorInternal | IResponseSuccessOctet>(identity, identity)
@@ -442,7 +441,7 @@ export default class MessagesService {
     this.pecClient
       .getClient(
         bearerGenerator,
-        message.content.legal_data.pec_server_service_id
+        O.fromNullable(message.content.legal_data.pec_server_service_id)
       )
       .mapLeft(e => ResponseErrorInternal(e.message))
       .chain(client =>

@@ -1,3 +1,4 @@
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IPecServerClient, pecServerClient } from "../clients/pecserver";
@@ -8,7 +9,7 @@ import {
 } from "../config";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
-const findById = (sources: PecServersConfig, serviceId: string) =>
+const findById = (sources: PecServersConfig, serviceId: NonEmptyString) =>
   O.fromNullable(
     Object.values(sources)
       .filter(PecServerConfig.is)
@@ -24,16 +25,16 @@ export default class PecServerClientFactory
    */
   public getClient(
     bearerGenerator: (config: PecServerConfig) => TE.TaskEither<Error, string>,
-    maybeServiceId: string | undefined
+    maybeServiceId: O.Option<NonEmptyString>
   ): TE.TaskEither<Error, ReturnType<IPecServerClient>> {
-    const pecserver = O.fromNullable(maybeServiceId)
+    const pecServerConfig = maybeServiceId
       .chain(serviceId => findById(this.pecConfigs, serviceId))
       .getOrElse(this.pecConfigs.poste);
 
-    return bearerGenerator(pecserver).map(token =>
+    return bearerGenerator(pecServerConfig).map(token =>
       pecServerClient(
-        pecserver.url,
-        pecserver.basePath,
+        pecServerConfig.url,
+        pecServerConfig.basePath,
         getHttpApiFetchWithBearer(token)
       )
     );

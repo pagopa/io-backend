@@ -2,6 +2,8 @@
  * Interface for the API client factories.
  */
 
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IPecServerClient } from "../clients/pecserver";
 import { PecServerConfig } from "../config";
@@ -12,6 +14,6 @@ export interface IPecServerClientFactoryInterface {
    */
   readonly getClient: (
     bearerGenerator: (config: PecServerConfig) => TE.TaskEither<Error, string>,
-    serviceId: string | undefined
+    serviceId: O.Option<NonEmptyString>
   ) => TE.TaskEither<Error, ReturnType<IPecServerClient>>;
 }
