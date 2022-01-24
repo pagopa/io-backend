@@ -16,7 +16,7 @@ import UserDataProcessingService from "../../../src/services/userDataProcessingS
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import UserDataProcessingController from "../userDataProcessingController";
 
 const aUserDataProcessingChoice = "DOWNLOAD";

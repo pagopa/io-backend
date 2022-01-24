@@ -4,21 +4,16 @@
 
 import { isLeft, isRight } from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
-
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile as ExtendedProfileBackend } from "../../../generated/backend/ExtendedProfile";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { IsInboxEnabled } from "../../../generated/backend/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/backend/IsWebhookEnabled";
 import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { Version } from "../../../generated/backend/Version";
-
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
-
 import { ResponseErrorNotFound } from "italia-ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
@@ -28,13 +23,11 @@ import {
   profileMissingErrorResponse,
   toInitializedProfile
 } from "../profile";
-import { SessionToken, WalletToken } from "../token";
-import { User } from "../user";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 
 const aTosVersion = 1 as AcceptedTosVersion;
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
@@ -43,21 +36,8 @@ const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsEmailEnabled = true as IsEmailEnabled;
 const anIsEmailValidated = true as IsEmailValidated;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
   mode: ServicesPreferencesModeEnum.LEGACY
-};
-
-// mock for a valid User extracted from SPID
-const mockedUser: User = {
-  created_at: 1183518855,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: "Giuseppe Maria",
-  session_token: "HexToKen" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: "HexToKen" as WalletToken
 };
 
 // mock for a valid ExtendedProfile profile

@@ -6,6 +6,7 @@ import * as dotenv from "dotenv";
 import { parseJSON, right, toError } from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import * as t from "io-ts";
+import { record } from "fp-ts";
 import { agent } from "italia-ts-commons";
 
 import {
@@ -44,6 +45,7 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
+import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import * as pecClient from "./clients/pecserver";
 
@@ -64,6 +66,16 @@ const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
 // Resolve cache control default max-age value
 export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
+  10
+);
+
+// Default cache control max-age value is 1 hour
+const DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: string = "3600";
+
+// Resolve cache control default max-age value
+export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
+  process.env.CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS ||
+    DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   10
 );
 
@@ -313,6 +325,10 @@ const fetchWithTimeout = setFetchTimeout(
 );
 const httpApiFetch = toFetch(fetchWithTimeout);
 
+// HTTPs-only fetch with optional keepalive agent
+// @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
+const httpsApiFetch = agent.getHttpsFetch(process.env);
+
 const bearerAuthFetch = (
   origFetch: typeof fetch = fetch,
   bearerToken: string
@@ -357,7 +373,24 @@ export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
 export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
+  CGN_API_BASE_PATH,
   httpApiFetch
+);
+
+export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_KEY"
+);
+export const CGN_OPERATOR_SEARCH_API_URL = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_URL"
+);
+export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_BASE_PATH"
+);
+export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
+  CGN_OPERATOR_SEARCH_API_KEY,
+  CGN_OPERATOR_SEARCH_API_URL,
+  CGN_OPERATOR_SEARCH_API_BASE_PATH,
+  httpsApiFetch
 );
 
 export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
@@ -381,10 +414,6 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
-
-// HTTPs-only fetch with optional keepalive agent
-// @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const httpsApiFetch = agent.getHttpsFetch(process.env);
 
 // Register a factory service to create PagoPA client.
 const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
@@ -421,17 +450,40 @@ export const getClientProfileRedirectionUrl = (
     href: url
   };
 };
+
+export const ClientErrorRedirectionUrlParams = t.union([
+  t.intersection([
+    t.interface({
+      errorMessage: NonEmptyString
+    }),
+    t.partial({
+      errorCode: t.number
+    })
+  ]),
+  t.intersection([
+    t.partial({
+      errorMessage: NonEmptyString
+    }),
+    t.interface({
+      errorCode: t.number
+    })
+  ]),
+  t.interface({
+    errorCode: t.number,
+    errorMessage: NonEmptyString
+  })
+]);
+export type ClientErrorRedirectionUrlParams = t.TypeOf<
+  typeof ClientErrorRedirectionUrlParams
+>;
+
 export const getClientErrorRedirectionUrl = (
-  errorMessage: string,
-  errorCode?: number
+  params: ClientErrorRedirectionUrlParams
 ): UrlFromString => {
-  const maybeErrorCodeParam = fromNullable(errorCode).map(
-    _ => `&errorCode=${errorCode}`
-  );
-  const errorParams = `?errorMessage=${errorMessage}${maybeErrorCodeParam.getOrElse(
-    ""
-  )}`;
-  const url = CLIENT_ERROR_REDIRECTION_URL.concat(errorParams);
+  const errorParams = record
+    .collect(params, (key, value) => `${key}=${value}`)
+    .join("&");
+  const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
   return { href: url };
 };
 

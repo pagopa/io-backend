@@ -2,7 +2,7 @@ import * as e from "express";
 import * as t from "io-ts";
 import EUCovidCertService from "../eucovidcertService";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
-import { aMockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { StatusEnum as RevokedStatusEnum } from "../../../generated/eucovidcert-api/RevokedCertificate";
 import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
@@ -10,14 +10,19 @@ import mockRes from "../../__mocks__/response";
 
 const mockClientGetCertificate = jest.fn();
 
-const client = {
+const client = ({
   getCertificate: mockClientGetCertificate
-} as unknown as ReturnType<EUCovidCertAPIClient>;
+} as unknown) as ReturnType<EUCovidCertAPIClient>;
 
 const aMockedAuthCode = "000";
 
 const aRevokedCertificate: RevokedCertificate = {
   uvci: "000",
+  header_info: {
+    logo_id: "aLogoId",
+    title: "a Title",
+    subtitle: "a Subtitle"
+  },
   info: "bla bla bla",
   revoked_on: new Date("2018-10-13T00:00:00.000Z"),
   status: RevokedStatusEnum.revoked
@@ -31,12 +36,12 @@ describe("EUCovidCertService", () => {
   it("should make the correct api call", async () => {
     const service = new EUCovidCertService(client);
 
-    await service.getEUCovidCertificate(aMockedUser, aMockedAuthCode);
+    await service.getEUCovidCertificate(mockedUser, aMockedAuthCode);
 
     expect(mockClientGetCertificate).toHaveBeenCalledWith({
       accessData: {
         auth_code: aMockedAuthCode,
-        fiscal_code: aMockedUser.fiscal_code
+        fiscal_code: mockedUser.fiscal_code
       }
     });
   });
@@ -49,7 +54,7 @@ describe("EUCovidCertService", () => {
     );
 
     const res = await service.getEUCovidCertificate(
-      aMockedUser,
+      mockedUser,
       aMockedAuthCode
     );
 
@@ -69,14 +74,20 @@ describe("EUCovidCertService", () => {
     ${"return IResponseErrorInternal if status code is not in spec"}     | ${418}      | ${null}                                                                                   | ${500}               | ${"IResponseErrorInternal"}   | ${"Internal server error: unhandled API response status [418]"}
   `(
     "should $title",
-    async ({ status_code, value, expected_status_code, expected_kind, expected_detail }) => {
+    async ({
+      status_code,
+      value,
+      expected_status_code,
+      expected_kind,
+      expected_detail
+    }) => {
       mockClientGetCertificate.mockImplementation(() =>
         t.success({ status: status_code, value })
       );
       const service = new EUCovidCertService(client);
 
       const res = await service.getEUCovidCertificate(
-        aMockedUser,
+        mockedUser,
         aMockedAuthCode
       );
 

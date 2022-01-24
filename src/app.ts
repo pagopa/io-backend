@@ -55,6 +55,8 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
+  CGN_OPERATOR_SEARCH_API_CLIENT,
+  CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   EUCOVIDCERT_API_CLIENT,
   FF_MIT_VOUCHER_ENABLED,
   getClientErrorRedirectionUrl,
@@ -83,6 +85,7 @@ import ZendeskController from "./controllers/zendeskController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
+import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -118,6 +121,7 @@ import {
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
+import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
 import EUCovidCertService from "./services/eucovidcertService";
 import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
@@ -155,6 +159,7 @@ export interface IAppFactoryParameters {
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
   readonly CGNAPIBasePath: string;
+  readonly CGNOperatorSearchAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly MitVoucherBasePath: string;
   readonly ZendeskBasePath: string;
@@ -177,6 +182,7 @@ export function newApp({
   MyPortalBasePath,
   BPDBasePath,
   CGNAPIBasePath,
+  CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   MitVoucherBasePath,
   ZendeskBasePath
@@ -325,6 +331,11 @@ export function newApp({
       // Create the cgn service
       const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
+      // Create the cgn operator search service
+      const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
+        CGN_OPERATOR_SEARCH_API_CLIENT
+      );
+
       // Create the EUCovidCert service
       const EUCOVIDCERT_SERVICE = new EUCovidCertService(
         EUCOVIDCERT_API_CLIENT
@@ -435,6 +446,15 @@ export function newApp({
           app,
           CGNAPIBasePath,
           CGN_SERVICE,
+          authMiddlewares.bearerSession
+        );
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerCgnOperatorSearchAPIRoutes(
+          app,
+          CGNOperatorSearchAPIBasePath,
+          CGN_SERVICE,
+          CGN_OPERATOR_SEARCH_SERVICE,
           authMiddlewares.bearerSession
         );
       }
@@ -1009,45 +1029,111 @@ function registerCgnAPIRoutes(
   );
 
   app.get(
-    `${basePath}/cgn/status`,
+    `${basePath}/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/eyca/status`,
+    `${basePath}/eyca/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getEycaStatus, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/activation`,
+    `${basePath}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startCgnActivation, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/activation`,
+    `${basePath}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnActivation, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/eyca/activation`,
+    `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startEycaActivation, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/eyca/activation`,
+    `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getEycaActivation, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/otp`,
+    `${basePath}/delete`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.startCgnUnsubscription, cgnController)
+  );
+
+  app.post(
+    `${basePath}/otp`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.generateOtp, cgnController)
+  );
+}
+
+function registerCgnOperatorSearchAPIRoutes(
+  app: Express,
+  basePath: string,
+  cgnService: CgnService,
+  cgnOperatorSearchService: CgnOperatorSearchService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const cgnOperatorController: CgnOperatorSearchController = new CgnOperatorSearchController(
+    cgnService,
+    cgnOperatorSearchService
+  );
+
+  const cgnOperatorSearchCacheDuration = `${CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS} seconds`;
+
+  const cgnOperatorSearchCachingMiddleware = apicache.options({
+    debug:
+      process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
+      process.env.APICACHE_DEBUG === "true",
+    defaultDuration: cgnOperatorSearchCacheDuration,
+    statusCodes: {
+      include: [200]
+    }
+  }).middleware;
+
+  app.get(
+    `${basePath}/merchants/:merchantId`,
+    bearerSessionTokenAuth,
+    cgnOperatorSearchCachingMiddleware(),
+    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
+  );
+
+  app.post(
+    `${basePath}/online-merchants`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getOnlineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.post(
+    `${basePath}/offline-merchants`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getOfflineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.get(
+    `${basePath}/discount-bucket-code/:discountId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getDiscountBucketCode,
+      cgnOperatorController
+    )
   );
 }
 

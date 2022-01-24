@@ -1,7 +1,10 @@
 import nodeFetch from "node-fetch";
-import { Client, createClient } from "../../generated/io-cgn-api/client";
+import {
+  Client,
+  createClient
+} from "../../generated/io-cgn-operator-search-api/client";
 
-export function CgnAPIClient(
+export function CgnOperatorSearchAPIClient(
   token: string,
   baseUrl: string,
   basePath: string,
@@ -20,4 +23,4 @@ export function CgnAPIClient(
   });
 }
 
-export type CgnAPIClient = typeof CgnAPIClient;
+export type CgnOperatorSearchAPIClient = typeof CgnOperatorSearchAPIClient;

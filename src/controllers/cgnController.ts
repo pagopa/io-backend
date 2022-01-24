@@ -166,6 +166,27 @@ export default class CgnController {
     );
 
   /**
+   * Start a Cgn unsubscription for the current user.
+   */
+  public readonly startCgnUnsubscription = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withUserFromRequest(req, user =>
+      withAllowedUser(
+        user,
+        this.allowedFiscalCodes,
+        this.cgnService.startCgnUnsubscription
+      )
+    );
+
+  /**
    * Generate a CGN OTP for the current user.
    */
   public readonly generateOtp = (

@@ -7,7 +7,7 @@ import { OrganizationFiscalCode } from "italia-ts-commons/lib/strings";
 import { ServiceId } from "../../../generated/io-api/ServiceId";
 
 import { APIClient } from "../../clients/api";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 import mockRes from "../../__mocks__/response";

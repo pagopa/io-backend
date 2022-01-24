@@ -13,7 +13,7 @@ import {
   User,
   validateSpidUser
 } from "../user";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 
 const anIssuer = "onelogin_saml" as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;

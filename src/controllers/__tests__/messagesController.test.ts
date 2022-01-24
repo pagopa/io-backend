@@ -5,7 +5,7 @@ import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
 import MessagesController from "../messagesController";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 import TokenService from "../../services/tokenService";
 import * as TE from "fp-ts/lib/TaskEither";

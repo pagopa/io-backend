@@ -16,7 +16,7 @@ import { NotificationChannelEnum } from "../../../generated/io-api/NotificationC
 import mockReq from "../../__mocks__/request";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import ServicesController from "../servicesController";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 
