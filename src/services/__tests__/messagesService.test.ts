@@ -525,7 +525,7 @@ describe("MessageService#getLegalMessage", () => {
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
-  it("returns an error response if the response if the response from the getLegalMessage API returns an error", async () => {
+  it("returns an error response if the response from the getLegalMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(async () =>
       t.success(validApiLegalMessageResponse)
     );
