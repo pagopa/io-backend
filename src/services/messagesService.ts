@@ -27,6 +27,7 @@ import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { MessageResponseWithContent } from "generated/io-api/MessageResponseWithContent";
 import { identity } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { PecBearerGeneratorT } from "src/types/token";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -54,7 +55,6 @@ import { CreatedMessageWithContent } from "../../generated/io-api/CreatedMessage
 import { LegalData } from "../../generated/io-api/LegalData";
 import { StrictUTCISODateFromString } from "../utils/date";
 import { errorsToError } from "../utils/errorsFormatter";
-import { PecServerConfig } from "../config";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -172,7 +172,7 @@ export default class MessagesService {
   public readonly getLegalMessage = (
     user: User,
     messageId: string,
-    bearerGenerator: (config: PecServerConfig) => TE.TaskEither<Error, string>
+    bearerGenerator: PecBearerGeneratorT
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -219,7 +219,7 @@ export default class MessagesService {
   public readonly getLegalMessageAttachment = (
     user: User,
     messageId: string,
-    bearerGenerator: (config: PecServerConfig) => TE.TaskEither<Error, string>,
+    bearerGenerator: PecBearerGeneratorT,
     attachmentId: string
   ): Promise<
     | IResponseErrorInternal
@@ -436,7 +436,7 @@ export default class MessagesService {
 
   private readonly getLegalMessageFromPecServer = (
     message: MessageWithLegalData,
-    bearerGenerator: (config: PecServerConfig) => TE.TaskEither<Error, string>
+    bearerGenerator: PecBearerGeneratorT
   ): TE.TaskEither<IResponseErrorInternal, LegalMessage> =>
     this.pecClient
       .getClient(

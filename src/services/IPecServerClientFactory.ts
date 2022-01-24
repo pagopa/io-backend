@@ -5,15 +5,15 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { PecBearerGeneratorT } from "src/types/token";
 import { IPecServerClient } from "../clients/pecserver";
-import { PecServerConfig } from "../config";
 
 export interface IPecServerClientFactoryInterface {
   /**
    * Retrieves a configured instance of the API client.
    */
   readonly getClient: (
-    bearerGenerator: (config: PecServerConfig) => TE.TaskEither<Error, string>,
+    bearerGenerator: PecBearerGeneratorT,
     serviceId: O.Option<NonEmptyString>
   ) => TE.TaskEither<Error, ReturnType<IPecServerClient>>;
 }
