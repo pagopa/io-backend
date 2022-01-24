@@ -1066,6 +1066,12 @@ function registerCgnAPIRoutes(
   );
 
   app.post(
+    `${basePath}/delete`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.startCgnUnsubscription, cgnController)
+  );
+
+  app.post(
     `${basePath}/otp`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.generateOtp, cgnController)

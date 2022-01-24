@@ -338,7 +338,7 @@ const bearerAuthFetch = (
     headers: { Authorization: `Bearer ${bearerToken}` }
   });
 
-export const getHttpApiFetchWithBearer = (bearer: string) =>
+export const getHttpsApiFetchWithBearer = (bearer: string) =>
   toFetch(
     setFetchTimeout(
       DEFAULT_REQUEST_TIMEOUT_MS,

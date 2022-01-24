@@ -275,6 +275,52 @@ export default class CgnService {
     });
 
   /**
+   * Start a CGN unsubscription process for the logged user.
+   */
+  public readonly startCgnUnsubscription = (
+    user: User
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorConflict
+    | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
+    | IResponseSuccessAccepted
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnApiClient.startCgnUnsubscription({
+        fiscalcode: user.fiscal_code
+      });
+
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 201:
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              fromNullable(response.headers.Location).getOrElse(
+                "/api/v1/cgn/delete"
+              ),
+              response.value
+            );
+          case 202:
+            return ResponseSuccessAccepted();
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
+          case 409:
+            return ResponseErrorConflict(
+              "Cannot start a new CGN unsubscription"
+            );
+          case 500:
+            return ResponseErrorInternal(readableProblem(response.value));
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
    * generate a CGN OTP
    */
   public readonly generateOtp = (

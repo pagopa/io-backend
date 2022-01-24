@@ -16,7 +16,8 @@ import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
 import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
-
+import { IPecServerClient } from "../../clients/pecserver";
+import * as config from "../../config";
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
 const aValidMarkdown =
@@ -26,7 +27,12 @@ const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
 const aValidOrganizationFiscalCode = "01234567891" as OrganizationFiscalCode;
-
+const aValidLegalData = {
+  sender_mail_from: "test@legal.it",
+  has_attachment: false,
+  message_unique_id: "A_MSG_UNIQUE_ID"
+};
+const aValidPecServerJwtToken = "aValidToken";
 const validApiMessagesResponse = {
   status: 200,
   value: {
@@ -93,6 +99,61 @@ const validApiMessageResponseWithPrescriptionMetadata = {
     status: "PROCESSED"
   }
 };
+const validApiMessageResponseWithLegalData = {
+  status: 200,
+  value: {
+    message: {
+      content: {
+        markdown: "a".repeat(81),
+        subject: aValidSubject,
+        legal_data: aValidLegalData
+      },
+      created_at: new Date(),
+      fiscal_code: "LSSLCU79B24L219P",
+      id: "01CFSP4XYK3Y0VZTKHW9FKS1XM",
+      sender_service_id: "5a563817fcc896087002ea46c49a"
+    },
+    notification: {
+      email: "SENT",
+      webhook: "SENT"
+    },
+    status: "PROCESSED"
+  }
+};
+
+const validApiLegalMessageResponse = {
+  status: 200,
+  value: {
+    cert_data: {
+      data: {
+        envelope_id: "anEnvelopeId",
+        msg_id: "<msgId@pec.it>",
+        receipt_type: "completa",
+        sender_provider: "aProvider",
+        timestamp: new Date()
+      },
+      header: {
+        object: "anObject",
+        recipients: "aRecipient@pec.it",
+        replies: "sender@pec.it",
+        sender: "sender@pec.it"
+      }
+    },
+    eml: {
+      attachments: [
+        {
+          content_type: "application/pdf",
+          id: "0",
+          name: "attachment_name",
+          url: "/messages/message_unique_id/attachments/0"
+        }
+      ],
+      html_content: "",
+      plain_text_content: "aPlainTextContent",
+      subject: "A Legal Subject"
+    }
+  }
+};
 
 const validApiServiceResponse = {
   status: 200,
@@ -130,6 +191,8 @@ const proxyMessagesResponse = {
   page_size: validApiMessagesResponse.value.page_size
 };
 const proxyMessageResponse = validApiMessageResponse.value.message;
+const proxyLegalMessageResponse =
+  validApiMessageResponseWithLegalData.value.message;
 
 const proxyServiceResponse = {
   department_name: aValidDepartmentName,
@@ -173,6 +236,36 @@ jest
   .mockImplementation(() => (mockClient as unknown) as ReturnType<APIClient>);
 
 const api = new ApiClientFactory("", "");
+const mockGetLegalMessage = jest.fn();
+const mockGetLegalMessageAttachment = jest.fn();
+const mockPecServerApiClient: Partial<ReturnType<IPecServerClient>> = {
+  getMessage: mockGetLegalMessage,
+  getMessageAttachment: mockGetLegalMessageAttachment
+};
+const pecServerClientFactoryMock = {
+  getClient: jest.fn().mockReturnValue(mockPecServerApiClient)
+} as IPecServerClientFactoryInterface;
+
+const getHttpsApiFetchWithBearerMock = jest.fn();
+jest
+  .spyOn(config, "getHttpsApiFetchWithBearer")
+  .mockImplementation(() => getHttpsApiFetchWithBearerMock);
+
+const aValidAttachmentResponse = {
+  status: 200,
+  arrayBuffer: jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(Buffer.from("anAttachment")))
+};
+
+const anInvalidAttachmentResponse = {
+  status: 200,
+  arrayBuffer: jest
+    .fn()
+    .mockImplementation(() =>
+      Promise.reject(new Error("Cannot retrieve response buffer"))
+    )
+};
 
 describe("MessageService#getMessagesByUser", () => {
   it("returns a list of messages from the API", async () => {
@@ -348,6 +441,171 @@ describe("MessageService#getMessage", () => {
     const res = await service.getMessage(mockedUser, aValidMessageId);
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+});
+
+describe("MessageService#getLegalMessage", () => {
+  it("returns a legal message from the API", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessage.mockImplementation(async () =>
+      t.success(validApiLegalMessageResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyLegalMessageResponse
+    });
+  });
+  it("returns an error if the getMessage API returns an error", async () => {
+    mockGetMessage.mockImplementation(async () => t.success(problemJson));
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns unknown response if the response from the getMessage API returns something wrong", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(invalidApiMessageResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error response if the response from the getMessage API returns a message without legal data", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error response if the response from the getLegalMessage API returns an error", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiLegalMessageResponse)
+    );
+
+    mockGetLegalMessage.mockImplementation(async () => t.success(problemJson));
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+});
+
+describe("MessageService#getLegalMessageAttachment", () => {
+  it("returns a legal message attachment from the API", async () => {
+    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
+      Promise.resolve(aValidAttachmentResponse)
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      aValidMessageId,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessOctet",
+      value: aValidAttachmentResponse.arrayBuffer()
+    });
+  });
+
+  it("returns an error if there are connectivity error on getLegalMessageAttachment API", async () => {
+    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
+      Promise.reject(new Error("Connection timeout"))
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      aValidMessageId,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+  it("returns an error if the getLegalMessageAttachment API returns an error", async () => {
+    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
+      Promise.resolve(problemJson)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      aValidMessageId,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error if there are errors while retrieving response buffer", async () => {
+    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
+      Promise.resolve(anInvalidAttachmentResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      aValidMessageId,
+      aValidMessageId,
+      aValidPecServerJwtToken
+    );
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
