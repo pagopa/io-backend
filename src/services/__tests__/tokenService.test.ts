@@ -31,6 +31,10 @@ const mitVoucher_privateKey_mock = `-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIPNK
 const mitVoucher_audience_mock = "69b3d5a9c935fac3d60c" as NonEmptyString;
 const mitVoucher_tokenIssuer_mock = "app-backend.io.italia.it" as NonEmptyString;
 
+const aPecServerSecretCode = "dummy-code" as NonEmptyString;
+const aPecServerJwt =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50IjoiQUFBQUFBQUFBQUFBQUFBIn0.--ycAy9bJ9SYmTJs0TEU0fgLNk9PNCzhkucKUcg0gso";
+
 describe("TokenService#getNewToken", () => {
   it("generate a new token", () => {
     // generate new token
@@ -143,5 +147,26 @@ describe("TokenService#getZendeskSupportToken", () => {
       )
       .run();
     expect(isLeft(errorOrNewJwtToken)).toBeTruthy();
+  });
+});
+
+describe("TokenService#getPecServerTokenHandler", () => {
+  it("should generate a jwt token for Pec Server", async () => {
+    const tokenService = new TokenService();
+    const pecServerJwt = await tokenService
+      .getPecServerTokenHandler(aFiscalCode, aPecServerSecretCode)()
+      .run();
+
+    expect(pecServerJwt.isRight()).toBeTruthy();
+    expect(pecServerJwt.getOrElse("")).toBe(aPecServerJwt);
+  });
+
+  it("should return an error if an error occurs during token generation", async () => {
+    const tokenService = new TokenService();
+    const pecServerJwt = await tokenService
+      .getPecServerTokenHandler(aFiscalCode, "" as NonEmptyString)()
+      .run();
+
+    expect(pecServerJwt.isLeft()).toBeTruthy();
   });
 });
