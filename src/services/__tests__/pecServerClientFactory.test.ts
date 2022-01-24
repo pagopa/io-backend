@@ -1,8 +1,10 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import { PecServersConfig, PecServerConfig } from "../../config";
 import PecServerClientFactory from "../pecServerClientFactory";
 import * as P from "../../clients/pecserver";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const validPecConfigs = {
   poste: {
@@ -30,7 +32,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with poste id THEN the client returned is configured with poste info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, "1")
+      .getClient(dummyBearerGenerator, O.some("1" as NonEmptyString))
       .run();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
@@ -43,7 +45,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with aruba id THEN the client returned is configured with aruba info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, "2")
+      .getClient(dummyBearerGenerator, O.some("2" as NonEmptyString))
       .run();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
@@ -56,7 +58,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with not existing id THEN the client returned is configured with poste info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, "3")
+      .getClient(dummyBearerGenerator, O.some("3" as NonEmptyString))
       .run();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
@@ -69,7 +71,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with an undefined id THEN the client returned is configured with poste info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, undefined)
+      .getClient(dummyBearerGenerator, O.none)
       .run();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
