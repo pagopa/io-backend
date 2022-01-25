@@ -22,6 +22,8 @@ export default class PecServerClientFactory
   constructor(private readonly pecConfigs: PecServersConfig) {}
 
   /**
+   * This method returns a specific pec server client based on
+   * provider serviceId
    * {@inheritDoc}
    */
   public getClient(
