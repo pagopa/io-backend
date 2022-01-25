@@ -517,6 +517,28 @@ describe("MessageService#getLegalMessage", () => {
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
+  it("returns an error response if bearer generator fails to generate a valid jwt", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponse)
+    );
+
+    aBearerGenerator.mockImplementation(() =>
+      fromLeft(new Error("Cannot generate jwt"))
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
   it("returns an error response if the response from the getLegalMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(async () =>
       t.success(validApiLegalMessageResponse)
@@ -560,6 +582,30 @@ describe("MessageService#getLegalMessageAttachment", () => {
     });
   });
 
+  it("returns a response error if bearerGenerator fails to generate a valid jwt", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      taskEither.of(aValidAttachmentResponse)
+    );
+
+    aBearerGenerator.mockImplementation(() =>
+      fromLeft(new Error("Cannot generate jwt"))
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator,
+      aValidMessageId
+    );
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessOctet",
+      value: aValidAttachmentResponse.arrayBuffer()
+    });
+  });
   it("returns an error if there are connectivity error on getLegalMessageAttachment API", async () => {
     mockGetMessage.mockImplementation(async () =>
       t.success(validApiMessageResponseWithLegalData)
