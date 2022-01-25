@@ -308,7 +308,7 @@ paths:
           description: There was an error in retrieving the message.
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/legal-messages/{legal_message_unique_id}/attachments/{attachment_id}":
+  "/legal-messages/{id}/attachments/{attachment_id}":
     x-swagger-router-controller: MessagesController
     get:
       operationId: getLegalMessageAttachment
@@ -316,10 +316,11 @@ paths:
       produces:
         - application/octet-stream
       parameters:
-        - in: path
-          name: legal_message_unique_id
-          required: true
+        - name: id
+          in: path
           type: string
+          required: true
+          description: The ID of the message.
         - in: path
           name: attachment_id
           required: true
