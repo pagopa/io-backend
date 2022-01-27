@@ -42,7 +42,7 @@ const aDiscountModelWithStaticCode = {
   discount_value: 20,
   end_date: new Date("2021-01-01"),
   name: "name 1",
-  product_categories: ["entertainment", "learning"],
+  product_categories: ["cultureAndEntertainment", "learning"],
   start_date: new Date("2020-01-01"),
   static_code: "xxx",
   landing_page_url: undefined,
@@ -55,7 +55,7 @@ const aDiscountModelWithLandingPage = {
   discount_value: 20,
   end_date: new Date("2021-01-01"),
   name: "name 1",
-  product_categories: ["entertainment", "learning"],
+  product_categories: ["cultureAndEntertainment", "learning"],
   start_date: new Date("2020-01-01"),
   static_code: undefined,
   landing_page_url: "xxx",
@@ -91,7 +91,7 @@ const anExpectedResponse = {
       landingPageUrl: discount.landing_page_url,
       landingPageReferrer: discount.landing_page_referrer,
       productCategories: [
-        ProductCategoryEnum.entertainment,
+        ProductCategoryEnum.cultureAndEntertainment,
         ProductCategoryEnum.learning
       ]
     })
@@ -133,13 +133,13 @@ const anApiResult = { items: [anExpectedResponse] };
 const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
-  productCategories: [ProductCategoryEnum.entertainment]
+  productCategories: [ProductCategoryEnum.cultureAndEntertainment]
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
-  productCategories: [ProductCategoryEnum.entertainment],
+  productCategories: [ProductCategoryEnum.cultureAndEntertainment],
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,
