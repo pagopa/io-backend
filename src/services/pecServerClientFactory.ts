@@ -19,6 +19,8 @@ const findById = (sources: PecServersConfig, serviceId: NonEmptyString) =>
 
 export default class PecServerClientFactory
   implements IPecServerClientFactoryInterface {
+  private readonly DEFAULT_PEC_CONFIG = this.pecConfigs.poste;
+
   constructor(private readonly pecConfigs: PecServersConfig) {}
 
   /**
@@ -28,11 +30,11 @@ export default class PecServerClientFactory
    */
   public getClient(
     bearerGenerator: PecBearerGeneratorT,
-    maybeServiceId: O.Option<NonEmptyString>
+    maybeServiceId?: NonEmptyString
   ): TE.TaskEither<Error, ReturnType<IPecServerClient>> {
-    const pecServerConfig = maybeServiceId
+    const pecServerConfig = O.fromNullable(maybeServiceId)
       .chain(serviceId => findById(this.pecConfigs, serviceId))
-      .getOrElse(this.pecConfigs.poste);
+      .getOrElse(this.DEFAULT_PEC_CONFIG);
 
     return bearerGenerator(pecServerConfig).map(token =>
       pecServerClient(

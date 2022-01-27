@@ -19,6 +19,14 @@ export const pecServerClient = (
     fetchApi
   }),
   ...{
+    /**
+     * This method is used in substitution of generated one, due to a wrong management of
+     * octet stream responses in auto-generated code.
+     *
+     * @param legalMessageId: The MVL unique identifier on PEC's provider platform
+     * @param attachmentId: The MVL attacchment's unique identifier on PEC's provider platform
+     * @returns Either a Buffer for the retrieved attachment or an error
+     */
     getAttachmentBody: (legalMessageId: string, attachmentId: string) =>
       TE.tryCatch(
         () =>
@@ -27,14 +35,24 @@ export const pecServerClient = (
           ),
         E.toError
       )
+        .mapLeft(
+          fetchError =>
+            new Error(
+              `Failed to perform fetch call for MVL attachment|ERROR=${fetchError.message}`
+            )
+        )
         .chain(
           TE.fromPredicate(
             r => r.status === 200,
-            r => new Error(`failed to fetch attachment: ${r.status}`)
+            r => new Error(`Failed to fetch MVL attachment: ${r.status}`)
           )
         )
         .chain<Buffer>(rawResponse =>
-          TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError).map(
+          TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError).bimap(
+            bufferError =>
+              new Error(
+                `Failed to parse MVL attachment's buffer|ERROR=${bufferError.message}`
+              ),
             Buffer.from
           )
         )

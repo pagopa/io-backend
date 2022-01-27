@@ -144,7 +144,7 @@ export default class TokenService {
    * @param config: The Pec Server configuration
    * @param fiscalCode: The logged user's fiscal code
    */
-  public readonly getPecServerTokenHandler = (fiscalCode: string) => (
+  public readonly getPecServerTokenHandler = (fiscalCode: FiscalCode) => (
     config: PecServerConfig
   ): TE.TaskEither<Error, string> =>
     taskify<Error, string>(cb =>

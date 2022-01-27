@@ -21,7 +21,6 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { ResponseErrorInternal } from "italia-ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { MessageResponseWithContent } from "generated/io-api/MessageResponseWithContent";
@@ -231,10 +230,7 @@ export default class MessagesService {
       .map(message => message.content.legal_data)
       .chain(messageLegalData =>
         this.pecClient
-          .getClient(
-            bearerGenerator,
-            O.fromNullable(messageLegalData.pec_server_service_id)
-          )
+          .getClient(bearerGenerator, messageLegalData.pec_server_service_id)
           .mapLeft(e => ResponseErrorInternal(e.message))
           .chain(client =>
             client
@@ -441,7 +437,7 @@ export default class MessagesService {
     this.pecClient
       .getClient(
         bearerGenerator,
-        O.fromNullable(message.content.legal_data.pec_server_service_id)
+        message.content.legal_data.pec_server_service_id
       )
       .mapLeft(e => ResponseErrorInternal(e.message))
       .chain(client =>
