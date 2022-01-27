@@ -89,7 +89,7 @@ const aMerchant: Merchant = {
     {
       id: aDiscountId,
       name: "a Discount" as NonEmptyString,
-      productCategories: [ProductCategoryEnum.entertainment],
+      productCategories: [ProductCategoryEnum.cultureAndEntertainment],
       startDate: new Date(),
       endDate: new Date(),
       discount: 20
@@ -101,14 +101,14 @@ const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: [ProductCategoryEnum.entertainment]
+  productCategories: [ProductCategoryEnum.cultureAndEntertainment]
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: [ProductCategoryEnum.entertainment],
+  productCategories: [ProductCategoryEnum.cultureAndEntertainment],
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,
