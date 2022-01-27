@@ -3,16 +3,18 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as pecClient from "../../generated/pecserver/client";
 
-export const pecServerClient = (
-  baseUrl: string,
-  basePath: string,
-  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch // TODO: customize fetch with timeout
-): pecClient.Client & {
+interface GetAttachmentBodyT {
   readonly getAttachmentBody: (
     legalMessageId: string,
     attachmentId: string
   ) => TE.TaskEither<Error, Buffer>;
-} => ({
+}
+
+export const pecServerClient = (
+  baseUrl: string,
+  basePath: string,
+  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch // TODO: customize fetch with timeout
+): pecClient.Client & GetAttachmentBodyT => ({
   ...pecClient.createClient({
     basePath,
     baseUrl,
