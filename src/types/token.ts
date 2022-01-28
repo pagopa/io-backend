@@ -1,5 +1,7 @@
 import * as t from "io-ts";
 import { tag } from "italia-ts-commons/lib/types";
+import { PecServerConfig } from "src/config";
+import * as TE from "fp-ts/lib/TaskEither";
 
 interface ISessionTokenTag {
   readonly kind: "SessionToken";
@@ -30,3 +32,7 @@ interface IZendeskTokenTag {
 }
 export const ZendeskToken = tag<IZendeskTokenTag>()(t.string);
 export type ZendeskToken = t.TypeOf<typeof ZendeskToken>;
+
+export type PecBearerGeneratorT = (
+  config: PecServerConfig
+) => TE.TaskEither<Error, string>;

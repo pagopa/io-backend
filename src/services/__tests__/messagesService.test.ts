@@ -17,7 +17,7 @@ import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
 import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 import { IPecServerClient } from "../../clients/pecserver";
-import * as config from "../../config";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
 const aValidMarkdown =
@@ -240,16 +240,13 @@ const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
 const mockPecServerApiClient: Partial<ReturnType<IPecServerClient>> = {
   getMessage: mockGetLegalMessage,
-  getMessageAttachment: mockGetLegalMessageAttachment
+  getAttachmentBody: mockGetLegalMessageAttachment
 };
 const pecServerClientFactoryMock = {
-  getClient: jest.fn().mockReturnValue(mockPecServerApiClient)
+  getClient: jest
+    .fn()
+    .mockImplementation(() => taskEither.of(mockPecServerApiClient))
 } as IPecServerClientFactoryInterface;
-
-const getHttpsApiFetchWithBearerMock = jest.fn();
-jest
-  .spyOn(config, "getHttpsApiFetchWithBearer")
-  .mockImplementation(() => getHttpsApiFetchWithBearerMock);
 
 const aValidAttachmentResponse = {
   status: 200,
@@ -258,14 +255,9 @@ const aValidAttachmentResponse = {
     .mockImplementation(() => Promise.resolve(Buffer.from("anAttachment")))
 };
 
-const anInvalidAttachmentResponse = {
-  status: 200,
-  arrayBuffer: jest
-    .fn()
-    .mockImplementation(() =>
-      Promise.reject(new Error("Cannot retrieve response buffer"))
-    )
-};
+const aBearerGenerator = jest
+  .fn()
+  .mockImplementation(() => taskEither.of(aValidPecServerJwtToken));
 
 describe("MessageService#getMessagesByUser", () => {
   it("returns a list of messages from the API", async () => {
@@ -458,7 +450,7 @@ describe("MessageService#getLegalMessage", () => {
     const res = await service.getLegalMessage(
       mockedUser,
       aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -478,7 +470,7 @@ describe("MessageService#getLegalMessage", () => {
     const res = await service.getLegalMessage(
       mockedUser,
       aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -497,7 +489,7 @@ describe("MessageService#getLegalMessage", () => {
     const res = await service.getLegalMessage(
       mockedUser,
       aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -516,7 +508,29 @@ describe("MessageService#getLegalMessage", () => {
     const res = await service.getLegalMessage(
       mockedUser,
       aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error response if bearer generator fails to generate a valid jwt", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponse)
+    );
+
+    aBearerGenerator.mockImplementation(() =>
+      fromLeft(new Error("Cannot generate jwt"))
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -536,7 +550,7 @@ describe("MessageService#getLegalMessage", () => {
     const res = await service.getLegalMessage(
       mockedUser,
       aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -548,15 +562,19 @@ describe("MessageService#getLegalMessage", () => {
 
 describe("MessageService#getLegalMessageAttachment", () => {
   it("returns a legal message attachment from the API", async () => {
-    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
-      Promise.resolve(aValidAttachmentResponse)
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      taskEither.of(aValidAttachmentResponse)
     );
     const service = new MessageService(api, pecServerClientFactoryMock);
 
     const res = await service.getLegalMessageAttachment(
+      mockedUser,
       aValidMessageId,
-      aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator,
+      aValidMessageId
     );
     expect(res).toMatchObject({
       kind: "IResponseSuccessOctet",
@@ -564,46 +582,64 @@ describe("MessageService#getLegalMessageAttachment", () => {
     });
   });
 
+  it("returns a response error if bearerGenerator fails to generate a valid jwt", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      taskEither.of(aValidAttachmentResponse)
+    );
+
+    aBearerGenerator.mockImplementation(() =>
+      fromLeft(new Error("Cannot generate jwt"))
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator,
+      aValidMessageId
+    );
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessOctet",
+      value: aValidAttachmentResponse.arrayBuffer()
+    });
+  });
   it("returns an error if there are connectivity error on getLegalMessageAttachment API", async () => {
-    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
-      Promise.reject(new Error("Connection timeout"))
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      fromLeft(new Error("Connection timeout"))
     );
 
     const service = new MessageService(api, pecServerClientFactoryMock);
 
     const res = await service.getLegalMessageAttachment(
+      mockedUser,
       aValidMessageId,
-      aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator,
+      aValidMessageId
     );
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
   it("returns an error if the getLegalMessageAttachment API returns an error", async () => {
-    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
-      Promise.resolve(problemJson)
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      fromLeft(new Error("Problem"))
     );
 
     const service = new MessageService(api, pecServerClientFactoryMock);
 
     const res = await service.getLegalMessageAttachment(
+      mockedUser,
       aValidMessageId,
-      aValidMessageId,
-      aValidPecServerJwtToken
-    );
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error if there are errors while retrieving response buffer", async () => {
-    getHttpsApiFetchWithBearerMock.mockImplementationOnce(() =>
-      Promise.resolve(anInvalidAttachmentResponse)
-    );
-
-    const service = new MessageService(api, pecServerClientFactoryMock);
-
-    const res = await service.getLegalMessageAttachment(
-      aValidMessageId,
-      aValidMessageId,
-      aValidPecServerJwtToken
+      aBearerGenerator,
+      aValidMessageId
     );
     expect(res.kind).toEqual("IResponseErrorInternal");
   });

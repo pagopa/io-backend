@@ -28,7 +28,6 @@ import {
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
-import { PECSERVER_TOKEN_SECRET } from "../config";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -99,20 +98,15 @@ export default class MessagesController {
     req: express.Request
   ): Promise<IGetLegalMessageResponse> =>
     withUserFromRequest(req, user =>
-      this.tokenService
-        .getPecServerTokenHandler(user.fiscal_code, PECSERVER_TOKEN_SECRET)()
-        .mapLeft(e => ResponseErrorInternal(e.message))
-        .chain(pecServerJwt =>
-          tryCatch(
-            () =>
-              this.messagesService.getLegalMessage(
-                user,
-                req.params.id,
-                pecServerJwt
-              ),
-            e => ResponseErrorInternal(toError(e).message)
-          )
-        )
+      tryCatch(
+        () =>
+          this.messagesService.getLegalMessage(
+            user,
+            req.params.id,
+            this.tokenService.getPecServerTokenHandler(user.fiscal_code)
+          ),
+        e => ResponseErrorInternal(toError(e).message)
+      )
         .fold<IGetLegalMessageResponse>(identity, identity)
         .run()
     );
@@ -124,20 +118,16 @@ export default class MessagesController {
     req: express.Request
   ): Promise<IGetLegalMessageAttachmentResponse> =>
     withUserFromRequest(req, user =>
-      this.tokenService
-        .getPecServerTokenHandler(user.fiscal_code, PECSERVER_TOKEN_SECRET)()
-        .mapLeft(e => ResponseErrorInternal(e.message))
-        .chain(pecServerJwt =>
-          tryCatch(
-            () =>
-              this.messagesService.getLegalMessageAttachment(
-                req.params.legal_message_unique_id,
-                req.params.attachment_id,
-                pecServerJwt
-              ),
-            e => ResponseErrorInternal(toError(e).message)
-          )
-        )
+      tryCatch(
+        () =>
+          this.messagesService.getLegalMessageAttachment(
+            user,
+            req.params.id,
+            this.tokenService.getPecServerTokenHandler(user.fiscal_code),
+            req.params.attachment_id
+          ),
+        e => ResponseErrorInternal(toError(e).message)
+      )
         .fold<IGetLegalMessageAttachmentResponse>(identity, identity)
         .run()
     );

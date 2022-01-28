@@ -8,7 +8,6 @@ import MessagesController from "../messagesController";
 import { mockedUser } from "../../__mocks__/user_mock";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 import TokenService from "../../services/tokenService";
-import * as TE from "fp-ts/lib/TaskEither";
 import { ResponseSuccessOctet } from "../../utils/responses";
 
 const anId: string = "string-id";
@@ -336,10 +335,6 @@ describe("MessagesController#getLegalMessage", () => {
       Promise.resolve(ResponseSuccessJson(proxyLegalMessageResponse))
     );
 
-    mockGetPecServerTokenHandler.mockImplementationOnce(() =>
-      TE.taskEither.of("aValidJwt")
-    );
-
     req.user = mockedUser;
     req.params = { id: anId };
 
@@ -355,11 +350,10 @@ describe("MessagesController#getLegalMessage", () => {
 
     const response = await controller.getLegalMessage(req);
 
-    expect(mockGetPecServerTokenHandler).toHaveBeenCalled();
     expect(mockGetLegalMessage).toHaveBeenCalledWith(
       mockedUser,
       anId,
-      "aValidJwt"
+      expect.any(Function)
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -392,42 +386,8 @@ describe("MessagesController#getLegalMessage", () => {
     const response = await controller.getLegalMessage(req);
     response.apply(res);
 
-    expect(mockGetPecServerTokenHandler).not.toBeCalled();
     expect(mockGetLegalMessage).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-
-  it("should return Internal Error if PecServer Jwt generation fails", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetLegalMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    mockGetPecServerTokenHandler.mockImplementationOnce(() =>
-      TE.fromLeft(new Error("Cannot generate JWT"))
-    );
-
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const controller = new MessagesController(
-      messageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessage(req);
-    response.apply(res);
-
-    expect(mockGetPecServerTokenHandler).toHaveBeenCalled();
-    expect(mockGetLegalMessage).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });
 
   it("should fail Internal Error if GetLegalMessage fails", async () => {
@@ -438,10 +398,6 @@ describe("MessagesController#getLegalMessage", () => {
       Promise.reject(new Error("Cannot call GetLegalMessage"))
     );
 
-    mockGetPecServerTokenHandler.mockImplementationOnce(() =>
-      TE.taskEither.of("aValidJwt")
-    );
-
     req.user = mockedUser;
     req.params = { id: anId };
 
@@ -458,11 +414,10 @@ describe("MessagesController#getLegalMessage", () => {
     const response = await controller.getLegalMessage(req);
     response.apply(res);
 
-    expect(mockGetPecServerTokenHandler).toHaveBeenCalled();
     expect(mockGetLegalMessage).toHaveBeenCalledWith(
       mockedUser,
       anId,
-      "aValidJwt"
+      expect.any(Function)
     );
     expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });
@@ -480,13 +435,9 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       Promise.resolve(ResponseSuccessOctet(proxyLegalAttachmentResponse))
     );
 
-    mockGetPecServerTokenHandler.mockImplementationOnce(() =>
-      TE.taskEither.of("aValidJwt")
-    );
-
     req.user = mockedUser;
     req.params = {
-      legal_message_unique_id: anId,
+      id: anId,
       attachment_id: "anAttachemntId"
     };
 
@@ -502,11 +453,11 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 
     const response = await controller.getLegalMessageAttachment(req);
 
-    expect(mockGetPecServerTokenHandler).toHaveBeenCalled();
     expect(mockGetLegalMessageAttachment).toHaveBeenCalledWith(
-      req.params.legal_message_unique_id,
-      req.params.attachment_id,
-      "aValidJwt"
+      mockedUser,
+      req.params.id,
+      expect.any(Function),
+      req.params.attachment_id
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -525,7 +476,7 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 
     req.user = "";
     req.params = {
-      legal_message_unique_id: anId,
+      id: anId,
       attachment_id: "anAttachemntId"
     };
 
@@ -542,45 +493,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     const response = await controller.getLegalMessageAttachment(req);
     response.apply(res);
 
-    expect(mockGetPecServerTokenHandler).not.toBeCalled();
     expect(mockGetLegalMessageAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-
-  it("should return Internal Error if PecServer Jwt generation fails", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetLegalMessageAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(proxyLegalAttachmentResponse))
-    );
-
-    mockGetPecServerTokenHandler.mockImplementationOnce(() =>
-      TE.fromLeft(new Error("Cannot generate JWT"))
-    );
-
-    req.user = mockedUser;
-    req.params = {
-      legal_message_unique_id: anId,
-      attachment_id: "anAttachemntId"
-    };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const controller = new MessagesController(
-      messageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessageAttachment(req);
-    response.apply(res);
-
-    expect(mockGetPecServerTokenHandler).toHaveBeenCalled();
-    expect(mockGetLegalMessageAttachment).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });
 
   it("should fail with Internal Error if GetLegalMessageAttachment fails", async () => {
@@ -591,12 +505,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       Promise.reject(new Error("Cannot call GetLegalMessageAttachment"))
     );
 
-    mockGetPecServerTokenHandler.mockImplementationOnce(() =>
-      TE.taskEither.of("aValidJwt")
-    );
-
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: anId, attachment_id: "anAttachemntId" };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const messageService = new MessagesService(
@@ -610,12 +520,11 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 
     const response = await controller.getLegalMessageAttachment(req);
     response.apply(res);
-
-    expect(mockGetPecServerTokenHandler).toHaveBeenCalled();
     expect(mockGetLegalMessageAttachment).toHaveBeenCalledWith(
-      req.params.legal_message_unique_id,
-      req.params.attachment_id,
-      "aValidJwt"
+      mockedUser,
+      req.params.id,
+      expect.any(Function),
+      req.params.attachment_id
     );
     expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });

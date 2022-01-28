@@ -1,71 +1,63 @@
 import nodeFetch from "node-fetch";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
-import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { Second } from "italia-ts-commons/lib/units";
-import {
-  getHttpsApiFetchWithBearer,
-  PECSERVER_BASE_PATH,
-  PECSERVER_URL,
-  PECSERVER_TOKEN_SECRET,
-  PECSERVER_TOKEN_EXPIRATION,
-  PECSERVER_TOKEN_ISSUER
-} from "../config";
 import * as pecClient from "../../generated/pecserver/client";
+
+interface GetAttachmentBodyT {
+  readonly getAttachmentBody: (
+    legalMessageId: string,
+    attachmentId: string
+  ) => TE.TaskEither<Error, Buffer>;
+}
 
 export const pecServerClient = (
   baseUrl: string,
+  basePath: string,
   fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch // TODO: customize fetch with timeout
-): pecClient.Client =>
-  pecClient.createClient({
-    basePath: "",
+): pecClient.Client & GetAttachmentBodyT => ({
+  ...pecClient.createClient({
+    basePath,
     baseUrl,
     fetchApi
-  });
-
-export type IPecServerClient = typeof pecServerClient;
-
-export const getPecServerJwt = (
-  tokenService: {
-    readonly getPecServerTokenHandler: (
-      fiscalCode: FiscalCode,
-      secret: NonEmptyString,
-      tokenTtl: Second,
-      issuer: NonEmptyString
-    ) => () => TE.TaskEither<Error, string>;
-  },
-  fiscalCode: FiscalCode
-) =>
-  tokenService
-    .getPecServerTokenHandler(
-      fiscalCode,
-      PECSERVER_TOKEN_SECRET,
-      PECSERVER_TOKEN_EXPIRATION,
-      PECSERVER_TOKEN_ISSUER
-    )()
-    .mapLeft(e =>
-      ResponseErrorInternal(`Error computing the PEC Server JWT: ${e.message}`)
-    );
-
-export const getAttachmentBody = (
-  bearer: string,
-  legalMessageId: string,
-  attachmentId: string
-): TE.TaskEither<Error, Buffer> =>
-  TE.tryCatch(
-    () =>
-      getHttpsApiFetchWithBearer(bearer)(
-        `${PECSERVER_URL}${PECSERVER_BASE_PATH}/messages/${legalMessageId}/attachments/${attachmentId}`
-      ),
-    E.toError
-  )
-    .chain(
-      TE.fromPredicate(
-        r => r.status === 200,
-        r => new Error(`failed to fetch attachment: ${r.status}`)
+  }),
+  ...{
+    /**
+     * This method is used in substitution of generated one, due to a wrong management of
+     * octet stream responses in auto-generated code.
+     *
+     * @param legalMessageId: The MVL unique identifier on PEC's provider platform
+     * @param attachmentId: The MVL attacchment's unique identifier on PEC's provider platform
+     * @returns Either a Buffer for the retrieved attachment or an error
+     */
+    getAttachmentBody: (legalMessageId: string, attachmentId: string) =>
+      TE.tryCatch(
+        () =>
+          fetchApi(
+            `${baseUrl}${basePath}/messages/${legalMessageId}/attachments/${attachmentId}`
+          ),
+        E.toError
       )
-    )
-    .chain(rawResponse =>
-      TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError).map(Buffer.from)
-    );
+        .mapLeft(
+          fetchError =>
+            new Error(
+              `Failed to perform fetch call for MVL attachment|ERROR=${fetchError.message}`
+            )
+        )
+        .chain(
+          TE.fromPredicate(
+            r => r.status === 200,
+            r => new Error(`Failed to fetch MVL attachment: ${r.status}`)
+          )
+        )
+        .chain<Buffer>(rawResponse =>
+          TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError).bimap(
+            bufferError =>
+              new Error(
+                `Failed to parse MVL attachment's buffer|ERROR=${bufferError.message}`
+              ),
+            Buffer.from
+          )
+        )
+  }
+});
+export type IPecServerClient = typeof pecServerClient;

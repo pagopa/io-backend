@@ -154,7 +154,9 @@ describe("TokenService#getPecServerTokenHandler", () => {
   it("should generate a jwt token for Pec Server", async () => {
     const tokenService = new TokenService();
     const pecServerJwt = await tokenService
-      .getPecServerTokenHandler(aFiscalCode, aPecServerSecretCode)()
+      .getPecServerTokenHandler(aFiscalCode)({
+        secret: aPecServerSecretCode
+      } as any)
       .run();
 
     expect(pecServerJwt.isRight()).toBeTruthy();
@@ -164,7 +166,7 @@ describe("TokenService#getPecServerTokenHandler", () => {
   it("should return an error if an error occurs during token generation", async () => {
     const tokenService = new TokenService();
     const pecServerJwt = await tokenService
-      .getPecServerTokenHandler(aFiscalCode, "" as NonEmptyString)()
+      .getPecServerTokenHandler(aFiscalCode)({ secret: "" } as any)
       .run();
 
     expect(pecServerJwt.isLeft()).toBeTruthy();
