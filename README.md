@@ -11,7 +11,7 @@ This repository contains the code of the backend used by the
 
 ## Table of content
 
-- [IO mobile backend](#io-mobile-backend)
+- [Digital citizenship web and mobile backend](#digital-citizenship-web-and-mobile-backend)
   - [Table of content](#table-of-content)
   - [What is this?](#what-is-this)
   - [Authentication process](#authentication-process)
@@ -39,6 +39,7 @@ This repository contains the code of the backend used by the
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
+  - [| 6   | Backend is deployed on more than one instance |                    |](#-6----backend-is-deployed-on-more-than-one-instance---------------------)
   - [Troubleshooting](#troubleshooting)
 
 ---
@@ -159,6 +160,7 @@ Those are all Environment variables needed by the application:
 | SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
 | SAML_KEY                               | Private Key used by SAML protocol                                                 | string |
 | SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
+| SAML_REQUEST_EXPIRATION_PERIOD_MS      | (Optional) The TTL in milliseconds that the SAML Request was stored in cache (defaults to `600.000`) | number |
 | PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages           | string |
