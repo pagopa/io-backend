@@ -499,9 +499,9 @@ export const getClientProfileRedirectionUrl = (
   token: string
 ): UrlFromString => {
   const url = clientProfileRedirectionUrl.replace("{token}", token);
-  return {
-    href: url
-  };
+  return UrlFromString.decode(url).getOrElseL(() => {
+    throw new Error("Invalid url");
+  });
 };
 
 export const ClientErrorRedirectionUrlParams = t.union([
@@ -537,7 +537,9 @@ export const getClientErrorRedirectionUrl = (
     .collect(params, (key, value) => `${key}=${value}`)
     .join("&");
   const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
-  return { href: url };
+  return UrlFromString.decode(url).getOrElseL(() => {
+    throw new Error("Invalid url");
+  });
 };
 
 // Needed to forward SPID requests for logging
