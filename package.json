@@ -13,7 +13,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -w",
-    "prebuild": "exit 0 || yarn generate:proxy-models",
+    "prebuild": "yarn generate:proxy-models",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5859 --nolazy src/server.js",
