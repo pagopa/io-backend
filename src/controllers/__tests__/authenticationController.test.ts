@@ -5,7 +5,7 @@
 /* tslint:disable:no-big-function */
 /* tslint:disable:no-object-mutation */
 import { isRight, left, right } from "fp-ts/lib/Either";
-import { UrlFromString } from "@pagopa/ts-commons/lib/url";
+import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
@@ -584,7 +584,7 @@ describe("AuthenticationController#acsTest", () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
         href: "http://invalid-url"
-      });
+      } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
