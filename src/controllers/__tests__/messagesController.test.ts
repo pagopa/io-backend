@@ -1,4 +1,4 @@
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";

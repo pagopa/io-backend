@@ -13,7 +13,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -w",
-    "prebuild": "yarn generate:proxy-models",
+    "prebuild": "exit 0 || yarn generate:proxy-models",
     "build": "tsc",
     "build-noemit": "tsc --noEmit",
     "hot-reload": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5859 --nolazy src/server.js",
@@ -106,7 +106,7 @@
     "@pagopa/openapi-codegen-ts": "^10.0.6",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
-    "@types/express": "4.16.0",
+    "@types/express": "4.17.11",
     "@types/express-enforces-ssl": "^1.1.1",
     "@types/glob": "^5.0.35",
     "@types/helmet": "^0.0.43",
@@ -179,6 +179,7 @@
   },
   "resolutions": {
     "fp-ts": "1.17.4",
-    "handlebars": "~4.5.3"
+    "handlebars": "~4.5.3",
+    "@types/serve-static": "1.13.10"
   }
 }

@@ -11,7 +11,7 @@ import { createMockRedis } from "mock-redis-client";
 
 import { none, some } from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { RedisClient } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";

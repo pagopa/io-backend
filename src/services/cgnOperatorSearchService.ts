@@ -10,10 +10,10 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { IResponseType } from "italia-ts-commons/lib/requests";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { PublishedProductCategories } from "generated/io-cgn-operator-search-api/PublishedProductCategories";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";

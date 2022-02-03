@@ -14,11 +14,11 @@ import {
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
   ResponseErrorForbiddenNotAuthorized
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "generated/io-cgn-api/EycaCard";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Otp } from "generated/cgn/Otp";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";

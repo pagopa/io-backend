@@ -1,8 +1,8 @@
 import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";

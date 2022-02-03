@@ -1,5 +1,5 @@
 /* tslint:disable:no-object-mutation */
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { InstallationID } from "../../../generated/backend/InstallationID";

@@ -14,7 +14,7 @@ import {
 } from "../../../generated/backend/PreferredLanguage";
 import { Version } from "../../../generated/backend/Version";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
-import { ResponseErrorNotFound } from "italia-ts-commons/lib/responses";
+import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";
 import { IsEmailValidated } from "../../../generated/backend/IsEmailValidated";

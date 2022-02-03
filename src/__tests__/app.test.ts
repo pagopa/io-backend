@@ -3,9 +3,9 @@ import { Express } from "express";
 import { isRight } from "fp-ts/lib/Either";
 import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import { NodeEnvironmentEnum } from "italia-ts-commons/lib/environment";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { CIDR } from "italia-ts-commons/lib/strings";
+import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 

@@ -1,6 +1,6 @@
 import * as redis from "redis";
 
-import { EmailString } from "italia-ts-commons/lib/strings";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
@@ -8,7 +8,7 @@ import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 import mockReq from "../../__mocks__/request";
 
 import { left, right } from "fp-ts/lib/Either";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
 import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/io-api/IsWebhookEnabled";

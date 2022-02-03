@@ -13,8 +13,8 @@ import {
   IResponseSuccessJson,
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal
-} from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
 import { Either, fromPredicate } from "fp-ts/lib/Either";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
