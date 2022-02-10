@@ -15,6 +15,7 @@ import {
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { IResponseType } from "italia-ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
+import { PublishedProductCategories } from "generated/io-cgn-operator-search-api/PublishedProductCategories";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -27,7 +28,6 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
-import { PublishedProductCategories } from "generated/io-cgn-operator-search-api/PublishedProductCategories";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
@@ -54,7 +54,9 @@ export default class CgnService {
     ServiceResponses<PublishedProductCategories>
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnOperatorSearchApiClient.getPublishedProductCategories({});
+      const validated = await this.cgnOperatorSearchApiClient.getPublishedProductCategories(
+        {}
+      );
 
       return withValidatedOrInternalError(validated, response =>
         this.mapResponse<PublishedProductCategories>(response)
