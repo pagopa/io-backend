@@ -22,6 +22,7 @@ import { Card } from "generated/cgn/Card";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
+import { PublishedProductCategories } from "../../generated/cgn-operator-search/PublishedProductCategories";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
@@ -33,6 +34,21 @@ export default class CgnOperatorSearchController {
     private readonly cgnService: CgnService,
     private readonly cgnOperatorSearchService: CgnOperatorSearchService
   ) {}
+
+  /**
+   * Get an array of CGN product categories that have at least a published discount
+   */
+  public readonly getPublishedProductCategories = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<PublishedProductCategories>
+  > =>
+    withUserFromRequest(req, async _ =>
+      this.cgnOperatorSearchService.getPublishedProductCategories()
+    );
 
   /**
    * Get the CGN operator/merchant by its identifier.

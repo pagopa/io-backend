@@ -27,6 +27,7 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
+import { PublishedProductCategories } from "generated/io-cgn-operator-search-api/PublishedProductCategories";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
@@ -45,6 +46,20 @@ export default class CgnService {
       CgnOperatorSearchAPIClient
     >
   ) {}
+
+  /**
+   * Get an array of CGN product categories that have at least a published discount
+   */
+  public readonly getPublishedProductCategories = (): Promise<
+    ServiceResponses<PublishedProductCategories>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.getPublishedProductCategories({});
+
+      return withValidatedOrInternalError(validated, response =>
+        this.mapResponse<PublishedProductCategories>(response)
+      );
+    });
 
   /**
    * Get the CGN operator/merchant by its identifier.

@@ -13,6 +13,7 @@ import { ProductCategoryEnum } from "../../../generated/io-cgn-operator-search-a
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import CgnOperatorSearchService from "../cgnOperatorSearchService";
 
+const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
@@ -36,13 +37,18 @@ const anAddress = {
 };
 const anAddressModelList = [anAddress, { ...anAddress, city: "milano" }];
 
+const productCategories = [
+  ProductCategoryEnum.cultureAndEntertainment,
+  ProductCategoryEnum.learning
+];
+
 const aDiscountModelWithStaticCode = {
   condition: null,
   description: "something something",
   discount_value: 20,
   end_date: new Date("2021-01-01"),
   name: "name 1",
-  product_categories: ["cultureAndEntertainment", "learning"],
+  product_categories: productCategories,
   start_date: new Date("2020-01-01"),
   static_code: "xxx",
   landing_page_url: undefined,
@@ -55,7 +61,7 @@ const aDiscountModelWithLandingPage = {
   discount_value: 20,
   end_date: new Date("2021-01-01"),
   name: "name 1",
-  product_categories: ["cultureAndEntertainment", "learning"],
+  product_categories: productCategories,
   start_date: new Date("2020-01-01"),
   static_code: undefined,
   landing_page_url: "xxx",
@@ -90,10 +96,7 @@ const anExpectedResponse = {
       staticCode: discount.static_code,
       landingPageUrl: discount.landing_page_url,
       landingPageReferrer: discount.landing_page_referrer,
-      productCategories: [
-        ProductCategoryEnum.cultureAndEntertainment,
-        ProductCategoryEnum.learning
-      ]
+      productCategories: productCategories
     })
   )
 };
@@ -103,6 +106,10 @@ const aDiscountId = "a_discount_id" as NonEmptyString;
 const anExpectedBucketCodeResponse = {
   code: "asdfgh"
 };
+
+mockGetPublishedProductCategories.mockImplementation(() =>
+  t.success({ status: 200, value: productCategories })
+);
 
 mockGetMerchant.mockImplementation(() =>
   t.success({ status: 200, value: anExpectedResponse })
@@ -121,10 +128,11 @@ mockGetDiscountBucketCode.mockImplementation(() =>
 );
 
 const api = {
+  getPublishedProductCategories: mockGetPublishedProductCategories,
   getMerchant: mockGetMerchant,
   getOfflineMerchants: mockGetOfflineMerchants,
   getOnlineMerchants: mockGetOnlineMerchants,
-  getDiscountBucketCode: mockGetDiscountBucketCode,
+  getDiscountBucketCode: mockGetDiscountBucketCode
 } as ReturnType<CgnOperatorSearchAPIClient>;
 
 const aMerchantId = "aMerchantId" as NonEmptyString;
@@ -154,6 +162,76 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
     deltaLongitude: 8
   }
 };
+
+describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new CgnOperatorSearchService(api);
+
+    await service.getPublishedProductCategories();
+
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledWith({});
+  });
+
+  it("should handle a success response", async () => {
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.getPublishedProductCategories();
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+
+    expect(res.kind === "IResponseSuccessJson" && res.value).toMatchObject(
+      productCategories
+    );
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGetPublishedProductCategories.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.getPublishedProductCategories();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetPublishedProductCategories.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.getPublishedProductCategories();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetPublishedProductCategories.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new CgnOperatorSearchService(api);
+
+    const res = await service.getPublishedProductCategories();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
 describe("CgnOperatorSearchService#getMerchant", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -413,7 +491,9 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
   });
 
   it("should handle a not found error when the CGN is not found", async () => {
-    mockGetDiscountBucketCode.mockImplementationOnce(() => t.success({ status: 404 }));
+    mockGetDiscountBucketCode.mockImplementationOnce(() =>
+      t.success({ status: 404 })
+    );
 
     const service = new CgnOperatorSearchService(api);
 
@@ -440,7 +520,9 @@ describe("CgnOperatorSearchService#getDiscountBucketCode", () => {
   });
 
   it("should return an error for unhandled response status code", async () => {
-    mockGetDiscountBucketCode.mockImplementationOnce(() => t.success({ status: 123 }));
+    mockGetDiscountBucketCode.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
     const service = new CgnOperatorSearchService(api);
 
     const res = await service.getDiscountBucketCode(aDiscountId);
