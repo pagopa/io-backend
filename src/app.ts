@@ -1107,7 +1107,10 @@ function registerCgnOperatorSearchAPIRoutes(
     `${basePath}/published-product-categories`,
     bearerSessionTokenAuth,
     cgnOperatorSearchCachingMiddleware(),
-    toExpressHandler(cgnOperatorController.getPublishedProductCategories, cgnOperatorController)
+    toExpressHandler(
+      cgnOperatorController.getPublishedProductCategories,
+      cgnOperatorController
+    )
   );
 
   app.get(
