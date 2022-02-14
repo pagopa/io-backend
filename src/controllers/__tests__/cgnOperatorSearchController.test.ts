@@ -25,13 +25,16 @@ import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-ap
 
 const anAPIKey = "";
 
+const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
 const mockGetOnlineMerchants = jest.fn();
 const mockGetOfflineMerchants = jest.fn();
 const mockGetDiscountBucketCode = jest.fn();
+
 jest.mock("../../services/cgnOperatorSearchService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
+      getPublishedProductCategories: mockGetPublishedProductCategories,
       getMerchant: mockGetMerchant,
       getOnlineMerchants: mockGetOnlineMerchants,
       getOfflineMerchants: mockGetOfflineMerchants,
@@ -52,8 +55,8 @@ const mockStartCgnActivation = jest.fn();
 const mockGetCgnActivation = jest.fn();
 const mockGetEycaActivation = jest.fn();
 const mockStartEycaActivation = jest.fn();
-
 const mockGenerateOtp = jest.fn();
+
 jest.mock("../../services/cgnService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -81,6 +84,11 @@ const aDiscountId = "a_discount_id" as NonEmptyString;
 
 const aDiscountBucketCode = { code: "asdfgh" } as DiscountBucketCode;
 
+const productCategories = [
+  ProductCategoryEnum.cultureAndEntertainment,
+  ProductCategoryEnum.learning
+];
+
 const aMerchant: Merchant = {
   description: "a Merchant description" as NonEmptyString,
   id: aMerchantId,
@@ -89,7 +97,7 @@ const aMerchant: Merchant = {
     {
       id: aDiscountId,
       name: "a Discount" as NonEmptyString,
-      productCategories: [ProductCategoryEnum.cultureAndEntertainment],
+      productCategories: productCategories,
       startDate: new Date(),
       endDate: new Date(),
       discount: 20
@@ -101,14 +109,14 @@ const anOnlineMerchantSearchRequest: OnlineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: [ProductCategoryEnum.cultureAndEntertainment]
+  productCategories: productCategories
 };
 
 const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   merchantName: "aMerchantName" as NonEmptyString,
   page: 0 as NonNegativeInteger,
   pageSize: 100,
-  productCategories: [ProductCategoryEnum.cultureAndEntertainment],
+  productCategories: productCategories,
   ordering: OrderingEnum.distance,
   userCoordinates: {
     latitude: 34.56,
@@ -136,6 +144,59 @@ const controller = new CgnOperatorSearchController(
   cgnService,
   cgnOperatorSearchService
 );
+
+describe("CgnOperatorController#getPublishedProductCategories", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const req = {
+      ...mockReq(),
+      user: mockedUser
+    };
+
+    await controller.getPublishedProductCategories(req);
+
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledTimes(1);
+  });
+
+  it("should call getPublishedProductCategories method on the CgnOperatorSearchService with valid values", async () => {
+    const req = {
+      ...mockReq(),
+      user: mockedUser
+    };
+
+    mockGetPublishedProductCategories.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(productCategories))
+    );
+
+    const response = await controller.getPublishedProductCategories(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: productCategories
+    });
+  });
+
+  it("should not call getPublishedProductCategories method on the CgnOperatorSearchService with empty user", async () => {
+    const req = {
+      ...mockReq(),
+      user: undefined
+    };
+    const res = mockRes();
+
+    const response = await controller.getPublishedProductCategories(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockGetPublishedProductCategories).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
 
 describe("CgnOperatorController#getMerchant", () => {
   beforeEach(() => {

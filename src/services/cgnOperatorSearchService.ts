@@ -15,6 +15,7 @@ import {
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { IResponseType } from "italia-ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
+import { PublishedProductCategories } from "generated/io-cgn-operator-search-api/PublishedProductCategories";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -45,6 +46,22 @@ export default class CgnService {
       CgnOperatorSearchAPIClient
     >
   ) {}
+
+  /**
+   * Get an array of CGN product categories that have at least a published discount
+   */
+  public readonly getPublishedProductCategories = (): Promise<
+    ServiceResponses<PublishedProductCategories>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.cgnOperatorSearchApiClient.getPublishedProductCategories(
+        {}
+      );
+
+      return withValidatedOrInternalError(validated, response =>
+        this.mapResponse<PublishedProductCategories>(response)
+      );
+    });
 
   /**
    * Get the CGN operator/merchant by its identifier.

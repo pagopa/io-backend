@@ -1104,6 +1104,16 @@ function registerCgnOperatorSearchAPIRoutes(
   }).middleware;
 
   app.get(
+    `${basePath}/published-product-categories`,
+    bearerSessionTokenAuth,
+    cgnOperatorSearchCachingMiddleware(),
+    toExpressHandler(
+      cgnOperatorController.getPublishedProductCategories,
+      cgnOperatorController
+    )
+  );
+
+  app.get(
     `${basePath}/merchants/:merchantId`,
     bearerSessionTokenAuth,
     cgnOperatorSearchCachingMiddleware(),
