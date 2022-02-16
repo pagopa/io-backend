@@ -3,12 +3,18 @@ import { Client, createClient } from "../../generated/pagopa-proxy/client";
 
 export function PagoPAClient(
   baseUrl: string,
+  apiKey: string,
   fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch
-): Client {
-  return createClient({
+): Client<"apiKeyHeader"> {
+  return createClient<"apiKeyHeader">({
     basePath: "",
     baseUrl,
-    fetchApi
+    fetchApi,
+    withDefaults: op => params =>
+      op({
+        ...params,
+        apiKeyHeader: apiKey
+      })
   });
 }
 

@@ -82,7 +82,7 @@ export default class PagoPAProxyService {
         isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.activatePayment({
-        body: paymentActivationsPostRequest
+        paymentActivationsPostRequest
       });
 
       return withValidatedOrInternalError(validated, response =>

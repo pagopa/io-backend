@@ -411,9 +411,13 @@ log.info("Session token duration set to %s seconds", tokenDurationSecs);
 // Register a factory service to create PagoPA client.
 const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
 const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
+const pagoPAApiKeyProd = getRequiredENVVar("PAGOPA_API_KEY_PROD");
+const pagoPAApiKeyTest = getRequiredENVVar("PAGOPA_API_KEY_UAT");
 export const PAGOPA_CLIENT = new PagoPAClientFactory(
   pagoPAApiUrlProd,
+  pagoPAApiKeyProd,
   pagoPAApiUrlTest,
+  pagoPAApiKeyTest,
   httpsApiFetch
 );
 
