@@ -4,14 +4,14 @@
 
 [![codecov](https://codecov.io/gh/pagopa/io-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-backend)
 
-# Digital citizenship web and mobile backend
+# IO mobile backend
 
 This repository contains the code of the backend used by the
 [mobile](https://github.com/pagopa/io-app) applications of the [IO project](https://io.italia.it).
 
 ## Table of content
 
-- [Digital citizenship web and mobile backend](#digital-citizenship-web-and-mobile-backend)
+- [IO mobile backend](#io-mobile-backend)
   - [Table of content](#table-of-content)
   - [What is this?](#what-is-this)
   - [Authentication process](#authentication-process)
@@ -39,7 +39,6 @@ This repository contains the code of the backend used by the
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
-  - [| 6   | Backend is deployed on more than one instance |                    |](#-6----backend-is-deployed-on-more-than-one-instance---------------------)
   - [Troubleshooting](#troubleshooting)
 
 ---
@@ -351,6 +350,7 @@ Here's the decisions we taken so far:
 | 4   | [Use a dependency injection container](doc/architecture/decisions/0004-use-a-dependency-injection-container.md)                   |                    |
 | 5   | [Use a GUID as Installation ID](doc/architecture/decisions/0005-use-a-guid-as-installation-id.md)                                 |                    |
 | 6   | [Backend is deployed on more than one instance](doc/architecture/decisions/0006-backend-is-deployed-on-more-than-one-instance.md) |                    |
+
 ---
 
 ## Troubleshooting
