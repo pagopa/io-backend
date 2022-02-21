@@ -4,7 +4,7 @@
 
 [![codecov](https://codecov.io/gh/pagopa/io-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-backend)
 
-# Digital citizenship web and mobile backend
+# IO mobile backend
 
 This repository contains the code of the backend used by the
 [mobile](https://github.com/pagopa/io-app) applications of the [IO project](https://io.italia.it).
@@ -40,7 +40,6 @@ This repository contains the code of the backend used by the
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
   - [Troubleshooting](#troubleshooting)
-  - [License](#license)
 
 ---
 
@@ -172,7 +171,9 @@ Those are all Environment variables needed by the application:
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE  | The range in CIDR form of IPs of service allowed to handle user sessions          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
+| PAGOPA_API_KEY_PROD                    | The api-key needed to call the pagopa proxy API                                  | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
+| PAGOPA_API_KEY_UAT                     | The api-key needed to call the pagopa proxy API for UAT instance                     | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | MYPORTAL_BASE_PATH                     | The root path for the MyPortal endpoints                                          | string |
 | BPD_BASE_PATH                          | The root path for the BPD endpoints                                               | string |
@@ -349,6 +350,7 @@ Here's the decisions we taken so far:
 | 4   | [Use a dependency injection container](doc/architecture/decisions/0004-use-a-dependency-injection-container.md)                   |                    |
 | 5   | [Use a GUID as Installation ID](doc/architecture/decisions/0005-use-a-guid-as-installation-id.md)                                 |                    |
 | 6   | [Backend is deployed on more than one instance](doc/architecture/decisions/0006-backend-is-deployed-on-more-than-one-instance.md) |                    |
+
 ---
 
 ## Troubleshooting

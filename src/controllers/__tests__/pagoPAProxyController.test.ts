@@ -68,6 +68,14 @@ jest.mock("../../services/pagoPAProxyService", () => {
   };
 });
 
+const pagoPAClientFactory = new PagoPAClientFactory(
+  process.env.PAGOPA_API_URL_PROD as string,
+  process.env.PAGOPA_API_KEY_PROD as string,
+  process.env.PAGOPA_API_URL_TEST as string,
+  process.env.PAGOPA_API_KEY_UAT as string
+);
+const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
+
 describe("PagoPAProxyController#getPaymentInfo", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,11 +91,6 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     req.params = { rptId: aRptId };
     req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getPaymentInfo(req);
@@ -110,11 +113,6 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     req.params = { rptId: aRptId };
     req.query = { test: "true" };
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getPaymentInfo(req);
@@ -137,11 +135,6 @@ describe("PagoPAProxyController#getPaymentInfo", () => {
     req.params = { rptId: aRptId };
     req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getPaymentInfo(req);
@@ -166,11 +159,6 @@ describe("PagoPAProxyController#activatePayment", () => {
     req.body = paymentActivationsPostRequest;
     req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.activatePayment(req);
@@ -197,11 +185,6 @@ describe("PagoPAProxyController#activatePayment", () => {
     req.body = paymentActivationsPostRequest;
     req.query = { test: "true" };
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.activatePayment(req);
@@ -227,11 +210,6 @@ describe("PagoPAProxyController#activatePayment", () => {
     req.body = paymentActivationsPostRequest;
     req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.activatePayment(req);
@@ -259,11 +237,6 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
     req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getActivationStatus(req);
@@ -289,11 +262,6 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
     req.query = { test: "true" };
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getActivationStatus(req);
@@ -319,11 +287,6 @@ describe("PagoPAProxyController#getActivationStatus", () => {
     req.params = { codiceContestoPagamento: aCodiceContestoPagamento };
     req.query = {};
 
-    const pagoPAClientFactory = new PagoPAClientFactory(
-      process.env.PAGOPA_API_URL_PROD as string,
-      process.env.PAGOPA_API_URL_TEST as string
-    );
-    const pagoPAProxyService = new PagoPAProxyService(pagoPAClientFactory);
     const controller = new PagoPAProxyController(pagoPAProxyService);
 
     const response = await controller.getActivationStatus(req);

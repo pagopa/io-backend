@@ -117,7 +117,9 @@ jest.mock("../../services/pagoPAClientFactory", () => {
 
 const pagoPAProxy = new PagoPAClientFactory(
   process.env.PAGOPA_API_URL_PROD as string,
-  process.env.PAGOPA_API_URL_TEST as string
+  process.env.PAGOPA_API_KEY_PROD as string,
+  process.env.PAGOPA_API_URL_TEST as string,
+  process.env.PAGOPA_API_KEY_UAT as string
 );
 
 describe("PagoPAProxyService#getPaymentInfo", () => {
@@ -230,7 +232,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      body: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -250,7 +252,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.TEST);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      body: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation
     });
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -270,7 +272,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      body: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation
     });
     expect(res.kind).toEqual("IResponseErrorValidation");
   });
@@ -286,7 +288,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      body: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
@@ -302,7 +304,7 @@ describe("PagoPAProxyService#activatePayment", () => {
 
     expect(mockGetClient).toHaveBeenCalledWith(PagoPAEnvironment.PRODUCTION);
     expect(mockActivatePayment).toHaveBeenCalledWith({
-      body: validPaymentActivation
+      paymentActivationsPostRequest: validPaymentActivation
     });
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
