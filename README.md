@@ -11,7 +11,7 @@ This repository contains the code of the backend used by the
 
 ## Table of content
 
-- [Digital citizenship web and mobile backend](#digital-citizenship-web-and-mobile-backend)
+- [IO mobile backend](#io-mobile-backend)
   - [Table of content](#table-of-content)
   - [What is this?](#what-is-this)
   - [Authentication process](#authentication-process)
@@ -39,7 +39,6 @@ This repository contains the code of the backend used by the
     - [SPID Identity Providers Metadata](#spid-identity-providers-metadata)
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
-  - [| 6   | Backend is deployed on more than one instance |                    |](#-6----backend-is-deployed-on-more-than-one-instance---------------------)
   - [Troubleshooting](#troubleshooting)
 
 ---
