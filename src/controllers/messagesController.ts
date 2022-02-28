@@ -67,6 +67,7 @@ export default class MessagesController {
           /* eslint-disable sort-keys */
           pageSize: req.query.page_size,
           enrichResultData: req.query.enrich_result_data,
+          getArchivedMessages: req.query.archived,
           maximumId: req.query.maximum_id,
           minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
