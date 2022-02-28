@@ -1280,11 +1280,11 @@ parameters:
     required: false
     description: Indicates whether result data should be enriched or not.
   GetArchivedMessages:
-    name: get_archived
+    name: archived
     type: boolean
     in: query
     required: false
-    description: Indicates whether retrieve archived/not archived messages.
+    description: Indicates whether retrieve archived/not archived messages. Default is false
   PageSize:
     name: page_size
     type: integer
