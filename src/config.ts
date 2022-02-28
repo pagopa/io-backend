@@ -3,7 +3,12 @@
  */
 
 import * as dotenv from "dotenv";
-import { parseJSON, right, toError } from "fp-ts/lib/Either";
+import {
+  parseJSON,
+  right,
+  toError,
+  fromNullable as fromNullableE
+} from "fp-ts/lib/Either";
 import { fromNullable, isSome } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { record } from "fp-ts";
@@ -35,6 +40,7 @@ import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Millisecond, Second } from "italia-ts-commons/lib/units";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -114,6 +120,13 @@ const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
 const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
   process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
   DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX;
+// Default SAML Request cache is 10 minutes
+const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
+const SAML_REQUEST_EXPIRATION_PERIOD_MS = fromNullableE(
+  new Error("Missing Environment configuration")
+)(process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS)
+  .chain(_ => NumberFromString.decode(_).mapLeft(toError))
+  .getOrElse(DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS);
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
@@ -231,7 +244,8 @@ export const samlConfig: SamlConfig = {
   identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   issuer: SAML_ISSUER,
   logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
-  privateCert: samlKey()
+  privateCert: samlKey(),
+  requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS
 };
 
 // Redirection urls
