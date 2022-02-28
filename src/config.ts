@@ -36,10 +36,7 @@ import {
   setFetchTimeout,
   toFetch
 } from "@pagopa/ts-commons/lib/fetch";
-import {
-  IntegerFromString,
-  NumberFromString
-} from "@pagopa/ts-commons/lib/numbers";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
@@ -128,7 +125,7 @@ const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
 const SAML_REQUEST_EXPIRATION_PERIOD_MS = fromNullableE(
   new Error("Missing Environment configuration")
 )(process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS)
-  .chain(_ => NumberFromString.decode(_).mapLeft(toError))
+  .chain(_ => IntegerFromString.decode(_).mapLeft(toError))
   .getOrElse(DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS);
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
