@@ -260,7 +260,7 @@ paths:
           description: There was an error in retrieving the message.
           schema:
             $ref: "#/definitions/ProblemJson"
-  "/message-status/{id}":
+  "/messages/{id}/message-status":
     x-swagger-router-controller: MessagesController          
     put:
       operationId: upsertMessageStatusAttributes
