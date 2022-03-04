@@ -260,6 +260,8 @@ paths:
           description: There was an error in retrieving the message.
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/message-status/{id}":
+    x-swagger-router-controller: MessagesController          
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -273,12 +275,13 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: "#/definitions/MessageStatusAttributes"
+            $ref: "#/definitions/MessageStatusChange"
           required: true
           x-examples:
             application/json: |
+              operation: "bulk",
               is_archived: true,
-              is_read: false
+              is_read: true
       responses:
         "200":
           description: Success.
@@ -1065,6 +1068,14 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/LegalData"
   MessageStatusAttributes:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusAttributes"
+  MessageStatusReadingChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusReadingChange"
+  MessageStatusArchivingChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusArchivingChange"
+  MessageStatusBulkChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusBulkChange"
+  MessageStatusChange:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusChange"
 
   # Definitions from pagopa-proxy
   PaymentProblemJson:
