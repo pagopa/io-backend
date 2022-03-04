@@ -279,7 +279,7 @@ paths:
           required: true
           x-examples:
             application/json: |
-              operation: "bulk",
+              change_type: "bulk",
               is_archived: true,
               is_read: true
       responses:
