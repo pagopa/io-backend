@@ -97,6 +97,7 @@ export default class MessagesService {
         fiscal_code: user.fiscal_code,
         page_size: params.pageSize,
         enrich_result_data: params.enrichResultData,
+        archived: params.getArchivedMessages,
         maximum_id: params.maximumId,
         minimum_id: params.minimumId
         /* eslint-enable sort-keys */

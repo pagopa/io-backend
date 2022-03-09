@@ -18,6 +18,8 @@ definitions:
         $ref: "#/definitions/NonNegativeIntegerFromString"
       enrichResultData:
         $ref: "#/definitions/BooleanFromString"
+      getArchivedMessages:
+        $ref: "#/definitions/BooleanFromString"
       maximumId:
         $ref: "#/definitions/NonEmptyString"
       minimumId:
