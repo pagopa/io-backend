@@ -1067,15 +1067,15 @@ definitions:
   LegalData:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/LegalData"
   MessageStatusAttributes:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusAttributes"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/MessageStatusAttributes"
   MessageStatusReadingChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusReadingChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/MessageStatusReadingChange"
   MessageStatusArchivingChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusArchivingChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/MessageStatusArchivingChange"
   MessageStatusBulkChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusBulkChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/MessageStatusBulkChange"
   MessageStatusChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ic-329-add-message-status-update-model/openapi/definitions.yaml#/MessageStatusChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v22.5.0/openapi/definitions.yaml#/MessageStatusChange"
 
   # Definitions from pagopa-proxy
   PaymentProblemJson:
