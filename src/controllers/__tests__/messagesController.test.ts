@@ -591,13 +591,13 @@ describe("MessagesController#upsertMessageStatus", () => {
   });
 
   it.each`
-    user          | path_params     | body
+    user          | pathParams     | body
     ${""}         | ${{ id: anId }} | ${aMessageStatusChange}
     ${mockedUser} | ${{}}           | ${aMessageStatusChange}
     ${mockedUser} | ${{ id: anId }} | ${{}}
   `(
     "should not call the upsertMessage on the messagesController with wrong parameters",
-    async ({ user, path_params, body }) => {
+    async ({ user, pathParams, body }) => {
       const req = mockReq();
       const res = mockRes();
 
@@ -606,7 +606,7 @@ describe("MessagesController#upsertMessageStatus", () => {
       );
 
       req.user = user;
-      req.params = path_params;
+      req.params = pathParams;
       req.body = body;
 
       const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
