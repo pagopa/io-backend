@@ -17,9 +17,12 @@ import { tryCatch } from "fp-ts/lib/TaskEither";
 import { toError } from "fp-ts/lib/Either";
 import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 import { identity } from "fp-ts/lib/function";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
+import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
+import { MessageStatus } from "../../generated/io-api/MessageStatus";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import {
@@ -131,5 +134,30 @@ export default class MessagesController {
       )
         .fold<IGetLegalMessageAttachmentResponse>(identity, identity)
         .run()
+    );
+
+  public readonly upsertMessageStatus = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<MessageStatus>
+  > =>
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        NonEmptyString.decode(req.params.id),
+        messageId =>
+          withValidatedOrValidationError(
+            MessageStatusChange.decode(req.body),
+            change =>
+              this.messagesService.upsertMessageStatus(
+                user.fiscal_code,
+                messageId,
+                change
+              )
+          )
+      )
     );
 }
