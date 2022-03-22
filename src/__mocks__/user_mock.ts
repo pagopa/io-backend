@@ -3,6 +3,7 @@ import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 import {
   BPDToken,
+  FIMSToken,
   MyPortalToken,
   SessionToken,
   WalletToken,
@@ -28,6 +29,8 @@ export const mockMyPortalToken =
 export const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416" as BPDToken;
 export const mockZendeskToken =
   "aaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210abc" as ZendeskToken;
+export const mockFIMSToken =
+  "aaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210bcd" as FIMSToken;
 
 // mock for a valid User
 export const mockedUser: User = {
@@ -43,5 +46,6 @@ export const mockedUser: User = {
   myportal_token: mockMyPortalToken,
   bpd_token: mockBPDToken,
   zendesk_token: mockZendeskToken,
+  fims_token: mockFIMSToken,
   session_tracking_id: aSessionTrackingId
 };

@@ -7,19 +7,20 @@ import { Option } from "fp-ts/lib/Option";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
   BPDToken,
+  FIMSToken,
   MyPortalToken,
   SessionToken,
   WalletToken,
   ZendeskToken
 } from "../types/token";
-import { User, UserV4 } from "../types/user";
+import { User, UserV5 } from "../types/user";
 
 export interface ISessionStorage {
   /**
    * Stores a value to the cache.
    */
   readonly set: (
-    user: UserV4,
+    user: UserV5,
     expireSec?: number
   ) => Promise<Either<Error, boolean>>;
 
@@ -59,6 +60,13 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
+   * Retrieves a value from the cache using the FISM token.
+   */
+  readonly getByFIMSToken: (
+    token: FIMSToken
+  ) => Promise<Either<Error, Option<User>>>;
+
+  /**
    * Removes a value from the cache.
    */
   readonly del: (user: User) => Promise<Either<Error, boolean>>;
@@ -67,7 +75,7 @@ export interface ISessionStorage {
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 
-  readonly update: (updatedUser: UserV4) => Promise<Either<Error, boolean>>;
+  readonly update: (updatedUser: UserV5) => Promise<Either<Error, boolean>>;
 
   readonly setPagoPaNoticeEmail: (
     user: User,

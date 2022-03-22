@@ -48,6 +48,7 @@ import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
 import {
   BPDToken,
+  FIMSToken,
   MyPortalToken,
   SessionToken,
   WalletToken,
@@ -96,6 +97,7 @@ export default class AuthenticationController {
   /**
    * The Assertion consumer service.
    */
+  // eslint-disable-next-line max-lines-per-function
   public async acs(
     userPayload: unknown
   ): Promise<
@@ -159,6 +161,7 @@ export default class AuthenticationController {
       myPortalToken,
       bpdToken,
       zendeskToken,
+      fimsToken,
       sessionTrackingId
     ] = await Promise.all([
       // ask the session storage whether this user is blocked
@@ -172,6 +175,8 @@ export default class AuthenticationController {
       // authentication token for BPD
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // authentication token for Zendesk
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for FISM
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // unique ID for tracking the user session
       this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
@@ -196,6 +201,7 @@ export default class AuthenticationController {
       myPortalToken as MyPortalToken,
       bpdToken as BPDToken,
       zendeskToken as ZendeskToken,
+      fimsToken as FIMSToken,
       sessionTrackingId
     );
 

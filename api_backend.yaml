@@ -1227,12 +1227,15 @@ definitions:
         type: string
       zendeskToken:
         type: string
+      fimsToken:
+        type: string
     required:
       - spidLevel
       - walletToken
       - myPortalToken
       - bpdToken
       - zendeskToken
+      - fimsToken
   SessionInfo:
     type: object
     title: Session info of a user

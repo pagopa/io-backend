@@ -25,12 +25,12 @@ import {
   WalletToken,
   ZendeskToken
 } from "../../types/token";
-import { User, UserV2, UserV3, UserV4 } from "../../types/user";
+import { User, UserV2, UserV3, UserV4, UserV5 } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
-import { mockBPDToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
+import { mockBPDToken, mockFIMSToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -47,10 +47,11 @@ const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid User
-const aValidUser: UserV4 = {
+const aValidUser: UserV5 = {
   bpd_token: mockBPDToken,
   created_at: 1183518855,
   family_name: "Garibaldi",
+  fims_token: mockFIMSToken,
   fiscal_code: aFiscalCode,
   myportal_token: mockMyPortalToken,
   name: "Giuseppe Maria",
@@ -83,7 +84,7 @@ const mockGet = jest.fn().mockImplementation((_, callback) => {
 const mockMget = jest.fn();
 const mockDel = jest.fn().mockImplementation(
   // as del() can be can be called with variable arguments number, we extract the last as callback
-  callCallback(undefined, 6)
+  callCallback(undefined, 7)
 );
 
 const mockSadd = jest.fn();
@@ -333,40 +334,54 @@ describe("RedisSessionStorage#set", () => {
       // tslint:disable-next-line: parameters-max-number
     ) => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("1: session");
         callback(sessionSetErr, sessionSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("2: wallet");
         callback(walletSetErr, walletSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("3: myportal");
         callback(myPortalSetError, myPortalSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("4: bpd");
         callback(bpdSetError, bpdSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("5: zendesk");
         callback(zendeskSetError, zendeskSetSuccess);
       });
 
+      // FIMS Token
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("6: fims");
+        callback(undefined, "OK");
+      });
+
+      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
+        console.log("7:");
         callback(undefined, "OK");
       });
 
       mockSadd.mockImplementation((_, __, callback) => {
+        console.log("1: SADD");
         callback(undefined, 1);
       });
 
       mockSmembers.mockImplementationOnce((_, callback) => {
+        console.log("1: SMEMBERS");
         callback(undefined, []);
       });
 
       const response = await sessionStorage.set(aValidUser);
 
-      expect(mockSet).toHaveBeenCalledTimes(6);
+      expect(mockSet).toHaveBeenCalledTimes(7);
 
       expect(mockSet.mock.calls[0][0]).toBe(
         `SESSION-${aValidUser.session_token}`
@@ -389,11 +404,11 @@ describe("RedisSessionStorage#set", () => {
       expect(mockSet.mock.calls[4][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
       expect(mockSet.mock.calls[4][1]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[5][0]).toBe(
+      expect(mockSet.mock.calls[6][0]).toBe(
         `SESSIONINFO-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[5][1]).toBeDefined();
-      expect(JSON.parse(mockSet.mock.calls[5][1])).toHaveProperty("createdAt");
+      expect(mockSet.mock.calls[6][1]).toBeDefined();
+      expect(JSON.parse(mockSet.mock.calls[6][1])).toHaveProperty("createdAt");
       expect(response).toEqual(expected);
     }
   );
@@ -989,7 +1004,7 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelError = new Error("del error");
 
   it.each([
-    [undefined, 6, right(true), "should delete al user tokens"],
+    [undefined, 7, right(true), "should delete al user tokens"],
     [
       expectedRedisDelError,
       undefined,
@@ -1002,7 +1017,7 @@ describe("RedisSessionStorage#del", () => {
     ],
     [
       undefined,
-      3,
+      4,
       left(
         new Error(
           `value [${
@@ -1037,13 +1052,16 @@ describe("RedisSessionStorage#del", () => {
         `BPD-${aValidUserWithExternalTokens.bpd_token}`
       );
       expect(mockDel.mock.calls[0][1]).toBe(
+        `FISM-${aValidUserWithExternalTokens.fims_token}`
+      );
+      expect(mockDel.mock.calls[0][2]).toBe(
         `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
       );
-      expect(mockDel.mock.calls[0][2]).toBe(expectedSessionInfoKey);
-      expect(mockDel.mock.calls[0][3]).toBe(
+      expect(mockDel.mock.calls[0][3]).toBe(expectedSessionInfoKey);
+      expect(mockDel.mock.calls[0][4]).toBe(
         `SESSION-${aValidUserWithExternalTokens.session_token}`
       );
-      expect(mockDel.mock.calls[0][4]).toBe(
+      expect(mockDel.mock.calls[0][5]).toBe(
         `WALLET-${aValidUserWithExternalTokens.wallet_token}`
       );
       if (isRight(expected)) {

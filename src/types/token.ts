@@ -33,6 +33,12 @@ interface IZendeskTokenTag {
 export const ZendeskToken = tag<IZendeskTokenTag>()(t.string);
 export type ZendeskToken = t.TypeOf<typeof ZendeskToken>;
 
+interface IFIMSTokenTag {
+  readonly kind: "FIMSTokenTag";
+}
+export const FIMSToken = tag<IFIMSTokenTag>()(t.string);
+export type FIMSToken = t.TypeOf<typeof FIMSToken>;
+
 export type PecBearerGeneratorT = (
   config: PecServerConfig
 ) => TE.TaskEither<Error, string>;

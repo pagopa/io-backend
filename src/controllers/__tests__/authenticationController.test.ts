@@ -34,7 +34,8 @@ import {
   mockBPDToken,
   mockZendeskToken,
   aSpidEmailAddress,
-  aSessionTrackingId
+  aSessionTrackingId,
+  mockFIMSToken
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../../services/apiClientFactory";
 import NotificationService from "../../services/notificationService";
@@ -226,6 +227,7 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockMyPortalToken)
       .mockReturnValueOnce(mockBPDToken)
       .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
@@ -261,6 +263,7 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockMyPortalToken)
       .mockReturnValueOnce(mockBPDToken)
       .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
@@ -295,6 +298,7 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockMyPortalToken)
       .mockReturnValueOnce(mockBPDToken)
       .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
@@ -332,6 +336,7 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockMyPortalToken)
       .mockReturnValueOnce(mockBPDToken)
       .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
@@ -502,6 +507,7 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockMyPortalToken)
       .mockReturnValueOnce(mockBPDToken)
       .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(

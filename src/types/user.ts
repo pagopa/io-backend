@@ -28,6 +28,7 @@ import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
 import {
   BPDToken,
+  FIMSToken,
   MyPortalToken,
   SessionToken,
   WalletToken,
@@ -87,7 +88,16 @@ const RequiredUserTokensV4 = t.intersection([
 export const UserV4 = t.intersection([UserWithoutTokens, RequiredUserTokensV4]);
 export type UserV4 = t.TypeOf<typeof UserV4>;
 
-export const User = t.union([UserV1, UserV2, UserV3, UserV4], "User");
+const RequiredUserTokensV5 = t.intersection([
+  RequiredUserTokensV4,
+  t.interface({
+    fims_token: FIMSToken
+  })
+]);
+export const UserV5 = t.intersection([UserWithoutTokens, RequiredUserTokensV5]);
+export type UserV5 = t.TypeOf<typeof UserV5>;
+
+export const User = t.union([UserV1, UserV2, UserV3, UserV4, UserV5], "User");
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
@@ -122,8 +132,9 @@ export function toAppUser(
   myPortalToken: MyPortalToken,
   bpdToken: BPDToken,
   zendeskToken: ZendeskToken,
+  fimsToken: FIMSToken,
   sessionTrackingId: string
-): UserV4 {
+): UserV5 {
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
@@ -131,6 +142,7 @@ export function toAppUser(
       .map(formatDate)
       .toUndefined(),
     family_name: from.familyName,
+    fims_token: fimsToken,
     fiscal_code: from.fiscalNumber,
     myportal_token: myPortalToken,
     name: from.name,
