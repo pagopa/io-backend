@@ -439,7 +439,10 @@ export default class MessagesService {
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
           case 404:
-            return ResponseErrorNotFound("Not Found", "Message status not found");
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Message status not found"
+            );
           case 429:
             return ResponseErrorTooManyRequests();
           default:
