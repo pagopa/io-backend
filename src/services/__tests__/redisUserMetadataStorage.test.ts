@@ -6,8 +6,8 @@ import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { UserMetadata } from "../../../generated/backend/UserMetadata";
-import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
+import { mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
 import RedisUserMetadataStorage, {
   invalidVersionNumberError,
   metadataNotFoundError
@@ -23,10 +23,10 @@ const aValidUser: User = {
   family_name: "Garibaldi",
   fiscal_code: aFiscalNumber,
   name: "Giuseppe Maria",
-  session_token: "HexToKen" as SessionToken,
+  session_token: mockSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  wallet_token: "HexToKen" as WalletToken
+  wallet_token: mockWalletToken
 };
 
 const metadata: string = "GENERIC-USER-METADATA";

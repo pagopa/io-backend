@@ -30,6 +30,7 @@ import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
+import { mockBPDToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -44,25 +45,20 @@ const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalCode = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-const aSessionToken = "HexToKen" as SessionToken;
-const aWalletToken = "HexToKen" as WalletToken;
-const aMyportalToken = "HexToKen" as MyPortalToken;
-const aBPDToken = "HexToKen" as BPDToken;
-const aZendeskToken = "HexToKen" as ZendeskToken;
 
 // mock for a valid User
 const aValidUser: UserV4 = {
-  bpd_token: aBPDToken,
+  bpd_token: mockBPDToken,
   created_at: 1183518855,
   family_name: "Garibaldi",
   fiscal_code: aFiscalCode,
-  myportal_token: aMyportalToken,
+  myportal_token: mockMyPortalToken,
   name: "Giuseppe Maria",
-  session_token: aSessionToken,
+  session_token: mockSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  wallet_token: aWalletToken,
-  zendesk_token: aZendeskToken
+  wallet_token: mockWalletToken,
+  zendesk_token: mockZendeskToken
 };
 
 // mock for a invalid User
@@ -94,7 +90,7 @@ const mockSadd = jest.fn();
 const mockSrem = jest.fn();
 const mockSmembers = jest
   .fn()
-  .mockImplementation((_, callback) => callback(null, [aSessionToken]));
+  .mockImplementation((_, callback) => callback(null, [mockSessionToken]));
 const mockExists = jest.fn();
 const mockSismember = jest.fn();
 const mockTtl = jest.fn();
@@ -380,18 +376,18 @@ describe("RedisSessionStorage#set", () => {
       expect(mockSet.mock.calls[1][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
-      expect(mockSet.mock.calls[1][1]).toBe(aValidUser.wallet_token);
+      expect(mockSet.mock.calls[1][1]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[2][0]).toBe(
         `MYPORTAL-${aValidUser.myportal_token}`
       );
-      expect(mockSet.mock.calls[2][1]).toBe(aValidUser.myportal_token);
+      expect(mockSet.mock.calls[2][1]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
-      expect(mockSet.mock.calls[3][1]).toBe(aValidUser.bpd_token);
+      expect(mockSet.mock.calls[3][1]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[4][0]).toBe(`ZENDESK-${aValidUser.bpd_token}`);
-      expect(mockSet.mock.calls[4][1]).toBe(aValidUser.zendesk_token);
+      expect(mockSet.mock.calls[4][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+      expect(mockSet.mock.calls[4][1]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[5][0]).toBe(
         `SESSIONINFO-${aValidUser.session_token}`
@@ -718,7 +714,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
 
   it("should fail getting a session with invalid value", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
@@ -746,7 +742,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
 
   it("should fail parse of user payload", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, "Invalid JSON");
@@ -782,7 +778,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
 
   it("should get a session with valid values", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(aValidUser));
@@ -816,7 +812,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
 
   it("should fail getting a session with invalid value", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
@@ -842,7 +838,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
 
   it("should fail parse of user payload", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, "Invalid JSON");
@@ -876,7 +872,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
 
   it("should get a session with valid values", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(aValidUser));
@@ -908,7 +904,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
 
   it("should fail getting a session with invalid value", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
@@ -934,7 +930,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
 
   it("should fail parse of user payload", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, "Invalid JSON");
@@ -968,7 +964,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
 
   it("should get a session with valid values", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, aSessionToken);
+      callback(undefined, mockSessionToken);
     });
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(aValidUser));
@@ -1027,8 +1023,8 @@ describe("RedisSessionStorage#del", () => {
     ) => {
       const aValidUserWithExternalTokens = {
         ...aValidUser,
-        bpd_token: aBPDToken,
-        myportal_token: aMyportalToken
+        bpd_token: mockBPDToken,
+        myportal_token: mockMyPortalToken
       };
       const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
       mockDel.mockImplementationOnce(callCallback(tokenDelErr, tokenDelResponse));
