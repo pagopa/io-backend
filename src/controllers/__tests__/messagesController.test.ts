@@ -9,6 +9,10 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
+import { MessageStatus } from "../../../generated/io-api/MessageStatus";
+import { MessageStatusValueEnum } from "../../../generated/io-api/MessageStatusValue";
+import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
+import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
 
 const anId: string = "string-id";
 
@@ -75,6 +79,7 @@ const mockGetMessage = jest.fn();
 const mockGetMessagesByUser = jest.fn();
 const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
+const mockUpsertMessageStatus = jest.fn();
 
 jest.mock("../../services/messagesService", () => {
   return {
@@ -82,7 +87,8 @@ jest.mock("../../services/messagesService", () => {
       getMessage: mockGetMessage,
       getMessagesByUser: mockGetMessagesByUser,
       getLegalMessage: mockGetLegalMessage,
-      getLegalMessageAttachment: mockGetLegalMessageAttachment
+      getLegalMessageAttachment: mockGetLegalMessageAttachment,
+      upsertMessageStatus: mockUpsertMessageStatus
     }))
   };
 });
@@ -528,4 +534,96 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     );
     expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });
+});
+
+describe("MessagesController#upsertMessageStatus", () => {
+  const proxyUpsertMessageStatusResponse: MessageStatus = {
+    status: MessageStatusValueEnum.PROCESSED,
+    updated_at: new Date(),
+    version: 1
+  };
+
+  const aMessageStatusChange: MessageStatusChange = {
+    change_type: Reading_Change_typeEnum.reading,
+    is_read: true
+  };
+
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the upsertMessage on the messagesService with valid values", async () => {
+    const req = mockReq();
+
+    mockUpsertMessageStatus.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyUpsertMessageStatusResponse))
+    );
+
+    req.user = mockedUser;
+    req.params = { id: anId };
+    req.body = aMessageStatusChange;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const controller = new MessagesController(
+      messageService,
+      {} as TokenService
+    );
+
+    const response = await controller.upsertMessageStatus(req);
+
+    console.log(response);
+
+    expect(mockUpsertMessageStatus).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      anId,
+      aMessageStatusChange
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyUpsertMessageStatusResponse
+    });
+  });
+
+  it.each`
+    user          | path_params     | body
+    ${""}         | ${{ id: anId }} | ${aMessageStatusChange}
+    ${mockedUser} | ${{}}           | ${aMessageStatusChange}
+    ${mockedUser} | ${{ id: anId }} | ${{}}
+  `(
+    "should not call the upsertMessage on the messagesController with wrong parameters",
+    async ({ user, path_params, body }) => {
+      const req = mockReq();
+      const res = mockRes();
+
+      mockUpsertMessageStatus.mockReturnValue(
+        Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+      );
+
+      req.user = user;
+      req.params = path_params;
+      req.body = body;
+
+      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+      const messageService = new MessagesService(
+        apiClient,
+        {} as IPecServerClientFactoryInterface
+      );
+      const controller = new MessagesController(
+        messageService,
+        {} as TokenService
+      );
+
+      const response = await controller.upsertMessageStatus(req);
+      response.apply(res);
+
+      expect(mockUpsertMessageStatus).not.toBeCalled();
+      expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+    }
+  );
 });
