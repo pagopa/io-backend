@@ -9,7 +9,6 @@ import mockReq from "../../__mocks__/request";
 import TokenService from "../../services/tokenService";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
-import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import ZendeskController from "../zendeskController";
 import {
@@ -29,6 +28,7 @@ import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { HasProfile } from "../../../generated/backend/HasProfile";
 import { ServicePreferencesSettings } from "../../../generated/io-api/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/io-api/ServicesPreferencesMode";
+import { mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -52,10 +52,10 @@ const mockedRequestUser: User = {
   family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
   name: aValidName,
-  session_token: "123hexToken" as SessionToken,
+  session_token: mockSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
+  wallet_token: mockWalletToken
 };
 
 // mock for a valid InitializedProfile

@@ -10,10 +10,9 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import NotificationService from "../../services/notificationService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
-import { SessionToken, WalletToken } from "../../types/token";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
-import { mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
 import { right } from "fp-ts/lib/Either";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
@@ -31,10 +30,10 @@ const mockedInvalidUser: User = {
   family_name: "Garibaldi",
   fiscal_code: anInvalidFiscalNumber,
   name: "Giuseppe Maria",
-  session_token: "123hexToken" as SessionToken,
+  session_token: mockSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
+  wallet_token: mockWalletToken
 };
 
 const aNotificationSubject = "this is a notification subject" as MessageSubject;
