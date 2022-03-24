@@ -60,7 +60,7 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, Option<User>>>;
 
   /**
-   * Retrieves a value from the cache using the FISM token.
+   * Retrieves a value from the cache using the FIMS token.
    */
   readonly getByFIMSToken: (
     token: FIMSToken

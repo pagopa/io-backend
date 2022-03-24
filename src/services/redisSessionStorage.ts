@@ -48,7 +48,7 @@ const walletKeyPrefix = "WALLET-";
 const myPortalTokenPrefix = "MYPORTAL-";
 const bpdTokenPrefix = "BPD-";
 const zendeskTokenPrefix = "ZENDESK-";
-const fimsTokenPrefix = "FISM-";
+const fimsTokenPrefix = "FIMS-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
@@ -185,7 +185,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
           resolve(
             this.falsyResponseToError(
               this.singleStringReply(err, response),
-              new Error("Error setting FISM token")
+              new Error("Error setting FIMS token")
             )
           )
       );

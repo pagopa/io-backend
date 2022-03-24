@@ -1052,7 +1052,7 @@ describe("RedisSessionStorage#del", () => {
         `BPD-${aValidUserWithExternalTokens.bpd_token}`
       );
       expect(mockDel.mock.calls[0][1]).toBe(
-        `FISM-${aValidUserWithExternalTokens.fims_token}`
+        `FIMS-${aValidUserWithExternalTokens.fims_token}`
       );
       expect(mockDel.mock.calls[0][2]).toBe(
         `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
