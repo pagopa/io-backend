@@ -377,8 +377,8 @@ export const FF_MESSAGES_BETA_TESTER_LIST = CommaSeparatedListOf(NonEmptyString)
   .decode(process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "")
   .getOrElse([]);
 
-export const FF_MESSAGES_CARARY_USERS_REGEX = NonEmptyString.decode(
-  process.env.FF_MESSAGES_CARARY_USERS_REGEX
+export const FF_MESSAGES_CANARY_USERS_REGEX = NonEmptyString.decode(
+  process.env.FF_MESSAGES_CANARY_USERS_REGEX
 ).getOrElse(
   // XYZ will never be verified by an hashed fiscal code
   // used as default

@@ -65,7 +65,7 @@ import {
   APP_MESSAGES_API_CLIENT,
   FF_MESSAGES_TYPE,
   FF_MESSAGES_BETA_TESTER_LIST,
-  FF_MESSAGES_CARARY_USERS_REGEX
+  FF_MESSAGES_CANARY_USERS_REGEX
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -412,7 +412,7 @@ export function newApp({
         new PecServerClientFactory(PECSERVERS)
       );
       // Create the new messages service.
-      const NEW_MESSAGES_SERVICE = new NewMessagesService(
+      const APP_MESSAGES_SERVICE = new NewMessagesService(
         APP_MESSAGES_API_CLIENT
       );
       const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
@@ -426,7 +426,7 @@ export function newApp({
         authMiddlewares.urlToken,
         PROFILE_SERVICE,
         MESSAGES_SERVICE,
-        NEW_MESSAGES_SERVICE,
+        APP_MESSAGES_SERVICE,
         NOTIFICATION_SERVICE,
         SESSION_STORAGE,
         PAGOPA_PROXY_SERVICE,
@@ -750,7 +750,7 @@ function registerAPIRoutes(
   urlTokenAuth: any,
   profileService: ProfileService,
   messagesService: MessagesService,
-  newMessagesService: NewMessagesService,
+  appMessagesService: NewMessagesService,
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
@@ -767,10 +767,10 @@ function registerAPIRoutes(
 
   const messageServiceSelector = getMessagesServiceSelector(
     messagesService,
-    newMessagesService,
+    appMessagesService,
     FF_MESSAGES_TYPE,
     FF_MESSAGES_BETA_TESTER_LIST,
-    FF_MESSAGES_CARARY_USERS_REGEX
+    FF_MESSAGES_CANARY_USERS_REGEX
   );
   const messagesController: MessagesController = new MessagesController(
     messageServiceSelector,
