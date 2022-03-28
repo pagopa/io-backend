@@ -645,6 +645,10 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 });
 
 describe("MessagesController#upsertMessageStatus", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const proxyUpsertMessageStatusResponse = {
     is_read: true,
     is_archived: false

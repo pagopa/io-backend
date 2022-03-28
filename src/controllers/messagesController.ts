@@ -110,7 +110,7 @@ export default class MessagesController {
     withUserFromRequest(req, user =>
       tryCatch(
         () =>
-          // getLesageMessage is not yet implemented in new fn-app-messages
+          // getLegalMessage is not yet implemented in new fn-app-messages
           // just skip new implementation and take fn-app one
           this.messageServiceSelector
             .getOldMessageService()
@@ -166,7 +166,7 @@ export default class MessagesController {
           withValidatedOrValidationError(
             MessageStatusChange.decode(req.body),
             change =>
-              this.messageServicSelector
+              this.messageServiceSelector
                 .getNewMessageService()
                 .upsertMessageStatus(user.fiscal_code, messageId, change)
           )
