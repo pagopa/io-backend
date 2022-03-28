@@ -9,8 +9,6 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
-import { MessageStatus } from "../../../generated/io-api/MessageStatus";
-import { MessageStatusValueEnum } from "../../../generated/io-api/MessageStatusValue";
 import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
 
@@ -537,17 +535,15 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 });
 
 describe("MessagesController#upsertMessageStatus", () => {
-  const proxyUpsertMessageStatusResponse: MessageStatus = {
-    status: MessageStatusValueEnum.PROCESSED,
-    updated_at: new Date(),
-    version: 1
+  const proxyUpsertMessageStatusResponse = {
+    is_read: true,
+    is_archived: false
   };
 
   const aMessageStatusChange: MessageStatusChange = {
     change_type: Reading_Change_typeEnum.reading,
     is_read: true
   };
-
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -591,7 +587,7 @@ describe("MessagesController#upsertMessageStatus", () => {
   });
 
   it.each`
-    user          | pathParams     | body
+    user          | pathParams      | body
     ${""}         | ${{ id: anId }} | ${aMessageStatusChange}
     ${mockedUser} | ${{}}           | ${aMessageStatusChange}
     ${mockedUser} | ${{ id: anId }} | ${{}}

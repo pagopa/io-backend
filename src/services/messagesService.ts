@@ -56,7 +56,7 @@ import { LegalData } from "../../generated/io-api/LegalData";
 import { StrictUTCISODateFromString } from "../utils/date";
 import { errorsToError } from "../utils/errorsFormatter";
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
-import { MessageStatus } from "../../generated/io-api/MessageStatus";
+import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -420,7 +420,7 @@ export default class MessagesService {
     | IResponseErrorNotFound
     | IResponseErrorValidation
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<MessageStatus>
+    | IResponseSuccessJson<MessageStatusAttributes>
   > =>
     withCatchAsInternalError(async () => {
       const client = this.apiClient.getClient();
@@ -435,7 +435,10 @@ export default class MessagesService {
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
-            return ResponseSuccessJson(response.value);
+            return ResponseSuccessJson({
+              is_archived: response.value.is_archived,
+              is_read: response.value.is_read
+            });
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
           case 404:

@@ -22,7 +22,7 @@ import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
-import { MessageStatus } from "../../generated/io-api/MessageStatus";
+import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import {
@@ -143,7 +143,7 @@ export default class MessagesController {
     | IResponseErrorValidation
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<MessageStatus>
+    | IResponseSuccessJson<MessageStatusAttributes>
   > =>
     withUserFromRequest(req, async user =>
       withValidatedOrValidationError(

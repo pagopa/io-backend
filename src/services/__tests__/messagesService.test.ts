@@ -20,9 +20,10 @@ import { IPecServerClient } from "../../clients/pecserver";
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
-import { MessageStatus } from "../../../generated/io-api/MessageStatus";
 import { MessageStatusValueEnum } from "../../../generated/io-api/MessageStatusValue";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { MessageStatusAttributes } from "../../../generated/io-api/MessageStatusAttributes";
+import { MessageStatusWithAttributes } from "../../../generated/io-api/MessageStatusWithAttributes";
 
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
 const aValidSubject = "Lorem ipsum";
@@ -903,10 +904,17 @@ describe("MessageService#upsertMessageStatus", () => {
     is_read: true
   };
 
-  const aMessageStatus: MessageStatus = {
+  const aMessageStatusAttributes: MessageStatusAttributes = {
+    is_read: true,
+    is_archived: false
+  };
+
+  const aMessageStatusWithAttributes: MessageStatusWithAttributes = {
+    is_read: true,
+    is_archived: false,
     status: MessageStatusValueEnum.PROCESSED,
-    updated_at: new Date(),
-    version: 1
+    version: 1,
+    updated_at: new Date()
   };
 
   beforeEach(() => {
@@ -917,7 +925,7 @@ describe("MessageService#upsertMessageStatus", () => {
     mockUpsertMessageStatus.mockImplementation(() => {
       return t.success({
         status: 200,
-        value: aMessageStatus
+        value: aMessageStatusWithAttributes
       });
     });
 
@@ -933,8 +941,14 @@ describe("MessageService#upsertMessageStatus", () => {
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: aMessageStatus
+      value: aMessageStatusAttributes
     });
+
+    if (res.kind === "IResponseSuccessJson") {
+      expect(res.value).not.toHaveProperty("version");
+      expect(res.value).not.toHaveProperty("status");
+      expect(res.value).not.toHaveProperty("updated_at");
+    }
 
     expect(mockUpsertMessageStatus).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
