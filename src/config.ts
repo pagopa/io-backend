@@ -361,12 +361,14 @@ export const getHttpsApiFetchWithBearer = (bearer: string) =>
     )
   );
 
-export const MessagesFeatureFlagType = t.union([
-  t.literal("none"),
-  t.literal("beta"),
-  t.literal("canary"),
-  t.literal("prod")
-]);
+export const MessagesFeatureFlagType = t.keyof({
+  /* eslint-disable sort-keys */
+  none: null,
+  beta: null,
+  canary: null,
+  prod: null
+  /* eslint-enable sort-keys */
+});
 export type MessagesFeatureFlagType = t.TypeOf<typeof MessagesFeatureFlagType>;
 
 export const FF_MESSAGES_TYPE = MessagesFeatureFlagType.decode(

@@ -49,7 +49,7 @@ type IGetLegalMessageAttachmentResponse =
 export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
-    private readonly messageServicSelector: MessageServiceSelector,
+    private readonly messageServiceSelector: MessageServiceSelector,
     private readonly tokenService: TokenService
   ) {}
 
@@ -77,7 +77,7 @@ export default class MessagesController {
           /* eslint-enable sort-keys */
         }),
         params =>
-          this.messageServicSelector
+          this.messageServiceSelector
             .select(user.fiscal_code)
             .getMessagesByUser(user, params)
       )
@@ -96,7 +96,7 @@ export default class MessagesController {
     | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
     withUserFromRequest(req, user =>
-      this.messageServicSelector
+      this.messageServiceSelector
         .select(user.fiscal_code)
         .getMessage(user, req.params.id)
     );
@@ -110,7 +110,9 @@ export default class MessagesController {
     withUserFromRequest(req, user =>
       tryCatch(
         () =>
-          this.messageServicSelector
+          // getLesageMessage is not yet implemented in new fn-app-messages
+          // just skip new implementation and take fn-app one
+          this.messageServiceSelector
             .getOldMessageService()
             .getLegalMessage(
               user,
@@ -132,7 +134,9 @@ export default class MessagesController {
     withUserFromRequest(req, user =>
       tryCatch(
         () =>
-          this.messageServicSelector
+          // getLegalMessageAttachment is not yet implemented in new fn-app-messages
+          // just skip new implementation and take fn-app one
+          this.messageServiceSelector
             .getOldMessageService()
             .getLegalMessageAttachment(
               user,
