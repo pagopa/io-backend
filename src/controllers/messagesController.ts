@@ -18,7 +18,6 @@ import { toError } from "fp-ts/lib/Either";
 import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
 import { identity } from "fp-ts/lib/function";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import MessagesService from "../services/messagesService";
 import { withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
@@ -31,6 +30,7 @@ import {
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
+import { MessageServiceSelector } from "../services/messagesServiceSelector";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -47,8 +47,9 @@ type IGetLegalMessageAttachmentResponse =
   | IResponseSuccessOctet;
 
 export default class MessagesController {
+  // eslint-disable-next-line max-params
   constructor(
-    private readonly messagesService: MessagesService,
+    private readonly messageServicSelector: MessageServiceSelector,
     private readonly tokenService: TokenService
   ) {}
 
@@ -75,7 +76,10 @@ export default class MessagesController {
           minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
         }),
-        params => this.messagesService.getMessagesByUser(user, params)
+        params =>
+          this.messageServicSelector
+            .select(user.fiscal_code)
+            .getMessagesByUser(user, params)
       )
     );
 
@@ -92,7 +96,9 @@ export default class MessagesController {
     | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
     withUserFromRequest(req, user =>
-      this.messagesService.getMessage(user, req.params.id)
+      this.messageServicSelector
+        .select(user.fiscal_code)
+        .getMessage(user, req.params.id)
     );
 
   /**
@@ -104,11 +110,13 @@ export default class MessagesController {
     withUserFromRequest(req, user =>
       tryCatch(
         () =>
-          this.messagesService.getLegalMessage(
-            user,
-            req.params.id,
-            this.tokenService.getPecServerTokenHandler(user.fiscal_code)
-          ),
+          this.messageServicSelector
+            .getOldMessageService()
+            .getLegalMessage(
+              user,
+              req.params.id,
+              this.tokenService.getPecServerTokenHandler(user.fiscal_code)
+            ),
         e => ResponseErrorInternal(toError(e).message)
       )
         .fold<IGetLegalMessageResponse>(identity, identity)
@@ -124,12 +132,14 @@ export default class MessagesController {
     withUserFromRequest(req, user =>
       tryCatch(
         () =>
-          this.messagesService.getLegalMessageAttachment(
-            user,
-            req.params.id,
-            this.tokenService.getPecServerTokenHandler(user.fiscal_code),
-            req.params.attachment_id
-          ),
+          this.messageServicSelector
+            .getOldMessageService()
+            .getLegalMessageAttachment(
+              user,
+              req.params.id,
+              this.tokenService.getPecServerTokenHandler(user.fiscal_code),
+              req.params.attachment_id
+            ),
         e => ResponseErrorInternal(toError(e).message)
       )
         .fold<IGetLegalMessageAttachmentResponse>(identity, identity)
@@ -152,11 +162,9 @@ export default class MessagesController {
           withValidatedOrValidationError(
             MessageStatusChange.decode(req.body),
             change =>
-              this.messagesService.upsertMessageStatus(
-                user.fiscal_code,
-                messageId,
-                change
-              )
+              this.messageServicSelector
+                .getNewMessageService()
+                .upsertMessageStatus(user.fiscal_code, messageId, change)
           )
       )
     );

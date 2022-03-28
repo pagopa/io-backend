@@ -6,6 +6,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
@@ -15,16 +16,21 @@ import {
 import { fromNullable } from "fp-ts/lib/Option";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
 import { User } from "../types/user";
 import {
+  ResponseErrorStatusNotDefinedInSpec,
+  ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
+import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 
 export default class NewMessagesService {
   constructor(
@@ -113,6 +119,50 @@ export default class NewMessagesService {
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status);
+      });
+    });
+
+  /**
+   * Retrieve the service preferences fot the defined user and service
+   */
+  public readonly upsertMessageStatus = (
+    fiscalCode: FiscalCode,
+    messageId: NonEmptyString,
+    messageStatusChange: MessageStatusChange
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<MessageStatusAttributes>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.apiClient.upsertMessageStatusAttributes({
+        body: messageStatusChange,
+        fiscal_code: fiscalCode,
+        id: messageId
+      });
+
+      // eslint-disable-next-line sonarjs/no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson({
+              is_archived: response.value.is_archived,
+              is_read: response.value.is_read
+            });
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Message status not found"
+            );
+          case 429:
+            return ResponseErrorTooManyRequests();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
       });
     });
 }

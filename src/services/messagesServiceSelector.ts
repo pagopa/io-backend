@@ -31,6 +31,7 @@ export const getMessagesServiceSelector = (
 ) => {
   const isCanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
   return {
+    getNewMessageService: () => newMessageService,
     getOldMessageService: () => oldMessagesService,
     select: (fiscalCode: FiscalCode) => {
       switch (ffType) {
