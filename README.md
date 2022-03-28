@@ -199,6 +199,13 @@ Those are all Environment variables needed by the application:
 | FETCH_KEEPALIVE_TIMEOUT                | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL      | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
+| FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
+| APP_MESSAGES_API_KEY                   | The key used to authenticate to the io-functions-app-messages API                 | string |
+| APP_MESSAGES_API_URL                   | The io-functions-app-messages URL                                                 | string |
+| FF_MESSAGES_TYPE                       | (Optional, default `none`) FF type for new messages implementations               | string |
+| FF_MESSAGES_BETA_TESTER_LIST           | (Optional, default empty) A list of hashed fiscal codes of beta testers           | string |
+| FF_MESSAGES_CARARY_USERS_REGEX         | (Optional, default `XYZ`) A regex for choosing canary users                       | string |
+
 
 Notes:
 
