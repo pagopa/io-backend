@@ -27,6 +27,7 @@ import { MessageResponseWithContent } from "generated/io-api/MessageResponseWith
 import { identity } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { PecBearerGeneratorT } from "src/types/token";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -54,6 +55,8 @@ import { CreatedMessageWithContent } from "../../generated/io-api/CreatedMessage
 import { LegalData } from "../../generated/io-api/LegalData";
 import { StrictUTCISODateFromString } from "../utils/date";
 import { errorsToError } from "../utils/errorsFormatter";
+import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
+import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -403,6 +406,52 @@ export default class MessagesService {
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status)
       );
+    });
+
+  /**
+   * Retrieve the service preferences fot the defined user and service
+   */
+  public readonly upsertMessageStatus = (
+    fiscalCode: FiscalCode,
+    messageId: NonEmptyString,
+    messageStatusChange: MessageStatusChange
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<MessageStatusAttributes>
+  > =>
+    withCatchAsInternalError(async () => {
+      const client = this.apiClient.getClient();
+
+      const validated = await client.upsertMessageStatusAttributes({
+        body: messageStatusChange,
+        fiscal_code: fiscalCode,
+        id: messageId
+      });
+
+      // eslint-disable-next-line sonarjs/no-identical-functions
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson({
+              is_archived: response.value.is_archived,
+              is_read: response.value.is_read
+            });
+          case 401:
+            return ResponseErrorUnexpectedAuthProblem();
+          case 404:
+            return ResponseErrorNotFound(
+              "Not Found",
+              "Message status not found"
+            );
+          case 429:
+            return ResponseErrorTooManyRequests();
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
     });
 
   private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>

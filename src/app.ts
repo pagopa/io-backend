@@ -872,6 +872,12 @@ function registerAPIRoutes(
     toExpressHandler(messagesController.getMessage, messagesController)
   );
 
+  app.put(
+    `${basePath}/messages/:id/message-status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
+  );
+
   app.get(
     `${basePath}/legal-messages/:id`,
     bearerSessionTokenAuth,
