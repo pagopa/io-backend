@@ -4,6 +4,7 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import MessagesService from "../../services/messagesService";
+import NewMessagesService from "../../services/newMessagesService";
 import MessagesController from "../messagesController";
 import { mockedUser } from "../../__mocks__/user_mock";
 import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
@@ -11,6 +12,9 @@ import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
+import { toFiscalCodeHash } from "../../types/notification";
+import { getMessagesServiceSelector } from "../../services/messagesServiceSelector";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const anId: string = "string-id";
 
@@ -73,6 +77,16 @@ const internalErrorResponse = {
   type: undefined
 };
 
+const mockFnAppGetMessage = jest.fn();
+const mockFnAppGetMessagesByUser = jest.fn();
+const mockFnAppUpsertMessageStatus = jest.fn();
+
+const newMessageService = ({
+  getMessage: mockFnAppGetMessage,
+  getMessagesByUser: mockFnAppGetMessagesByUser,
+  upsertMessageStatus: mockFnAppUpsertMessageStatus
+} as any) as NewMessagesService;
+
 const mockGetMessage = jest.fn();
 const mockGetMessagesByUser = jest.fn();
 const mockGetLegalMessage = jest.fn();
@@ -115,8 +129,17 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -165,8 +188,17 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -217,8 +249,16 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -250,8 +290,15 @@ describe("MessagesController#getMessagesByUser", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -283,8 +330,15 @@ describe("MessagesController#getMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -314,8 +368,16 @@ describe("MessagesController#getMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -347,8 +409,16 @@ describe("MessagesController#getLegalMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       tokenServiceMock as any
     );
 
@@ -382,8 +452,16 @@ describe("MessagesController#getLegalMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       tokenServiceMock as any
     );
 
@@ -410,8 +488,16 @@ describe("MessagesController#getLegalMessage", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       tokenServiceMock as any
     );
 
@@ -450,8 +536,16 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       tokenServiceMock as any
     );
 
@@ -489,8 +583,16 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       tokenServiceMock as any
     );
 
@@ -517,8 +619,16 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       tokenServiceMock as any
     );
 
@@ -535,6 +645,10 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 });
 
 describe("MessagesController#upsertMessageStatus", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const proxyUpsertMessageStatusResponse = {
     is_read: true,
     is_archived: false
@@ -545,14 +659,10 @@ describe("MessagesController#upsertMessageStatus", () => {
     is_read: true
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("calls the upsertMessage on the messagesService with valid values", async () => {
     const req = mockReq();
 
-    mockUpsertMessageStatus.mockReturnValue(
+    mockFnAppUpsertMessageStatus.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyUpsertMessageStatusResponse))
     );
 
@@ -565,8 +675,17 @@ describe("MessagesController#upsertMessageStatus", () => {
       apiClient,
       {} as IPecServerClientFactoryInterface
     );
-    const controller = new MessagesController(
+
+    const messageServiceSelector = getMessagesServiceSelector(
       messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
       {} as TokenService
     );
 
@@ -574,7 +693,8 @@ describe("MessagesController#upsertMessageStatus", () => {
 
     console.log(response);
 
-    expect(mockUpsertMessageStatus).toHaveBeenCalledWith(
+    expect(mockUpsertMessageStatus).not.toHaveBeenCalled();
+    expect(mockFnAppUpsertMessageStatus).toHaveBeenCalledWith(
       mockedUser.fiscal_code,
       anId,
       aMessageStatusChange
@@ -597,7 +717,7 @@ describe("MessagesController#upsertMessageStatus", () => {
       const req = mockReq();
       const res = mockRes();
 
-      mockUpsertMessageStatus.mockReturnValue(
+      mockFnAppUpsertMessageStatus.mockReturnValue(
         Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
       );
 
@@ -610,16 +730,204 @@ describe("MessagesController#upsertMessageStatus", () => {
         apiClient,
         {} as IPecServerClientFactoryInterface
       );
-      const controller = new MessagesController(
+      const messageServiceSelector = getMessagesServiceSelector(
         messageService,
+        newMessageService,
+        "none",
+        [],
+        "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+      );
+
+      const controller = new MessagesController(
+        messageServiceSelector,
         {} as TokenService
       );
 
       const response = await controller.upsertMessageStatus(req);
       response.apply(res);
 
-      expect(mockUpsertMessageStatus).not.toBeCalled();
+      expect(mockFnAppUpsertMessageStatus).not.toBeCalled();
       expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
     }
   );
+});
+
+describe("MessagesController#Feature Flags", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+  const messageService = new MessagesService(
+    apiClient,
+    {} as IPecServerClientFactoryInterface
+  );
+
+  it("it should switch to OLD function when FF is beta and user is NOT a beta tester", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "beta",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockFnAppGetMessage).not.toHaveBeenCalled();
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
+  it("it should switch to NEW function when FF is beta and user is a beta tester", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    mockFnAppGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "beta",
+      [toFiscalCodeHash(mockedUser.fiscal_code)],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockGetMessage).not.toHaveBeenCalled();
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
+  it("it should switch to OLD function when FF is canary and user is NOT a canary user", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    // Hashed Fiscal Code is: d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52
+    // So we use a regex expecting "2" as last char
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "canary",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockFnAppGetMessage).not.toHaveBeenCalled();
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
+  it("it should switch to NEW function when FF is canary and user is a canary tester", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    mockFnAppGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    // Hashed Fiscal Code is: d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52
+    // So we use a regex expecting "2" as last char
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "canary",
+      [toFiscalCodeHash(mockedUser.fiscal_code)],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}2)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockGetMessage).not.toHaveBeenCalled();
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
+  it("it should switch to new function when FF is prod", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    mockFnAppGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "prod",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockGetMessage).not.toHaveBeenCalled();
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
 });

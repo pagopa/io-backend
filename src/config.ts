@@ -54,6 +54,7 @@ import { decodeCIDRs } from "./utils/cidrs";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
+import { AppMessagesAPIClient } from "./clients/app-messages.client";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -360,10 +361,45 @@ export const getHttpsApiFetchWithBearer = (bearer: string) =>
     )
   );
 
+export const MessagesFeatureFlagType = t.keyof({
+  /* eslint-disable sort-keys */
+  none: null,
+  beta: null,
+  canary: null,
+  prod: null
+  /* eslint-enable sort-keys */
+});
+export type MessagesFeatureFlagType = t.TypeOf<typeof MessagesFeatureFlagType>;
+
+export const FF_MESSAGES_TYPE = MessagesFeatureFlagType.decode(
+  process.env.FF_MESSAGES_TYPE
+).getOrElse("none");
+
+export const FF_MESSAGES_BETA_TESTER_LIST = CommaSeparatedListOf(NonEmptyString)
+  .decode(process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "")
+  .getOrElse([]);
+
+export const FF_MESSAGES_CANARY_USERS_REGEX = NonEmptyString.decode(
+  process.env.FF_MESSAGES_CANARY_USERS_REGEX
+).getOrElse(
+  // XYZ will never be verified by an hashed fiscal code
+  // used as default
+  "XYZ" as NonEmptyString
+);
+
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
 export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
+
+export const APP_MESSAGES_API_KEY = getRequiredENVVar("APP_MESSAGES_API_KEY");
+export const APP_MESSAGES_API_URL = getRequiredENVVar("APP_MESSAGES_API_URL");
+
+export const APP_MESSAGES_API_CLIENT = AppMessagesAPIClient(
+  APP_MESSAGES_API_KEY,
+  APP_MESSAGES_API_URL,
+  httpApiFetch
+);
 
 export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
 export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");

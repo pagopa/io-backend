@@ -61,7 +61,11 @@ import {
   FF_MIT_VOUCHER_ENABLED,
   getClientErrorRedirectionUrl,
   FF_USER_AGE_LIMIT_ENABLED,
-  PECSERVERS
+  PECSERVERS,
+  APP_MESSAGES_API_CLIENT,
+  FF_MESSAGES_TYPE,
+  FF_MESSAGES_BETA_TESTER_LIST,
+  FF_MESSAGES_CANARY_USERS_REGEX
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -126,6 +130,8 @@ import EUCovidCertService from "./services/eucovidcertService";
 import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
 import PecServerClientFactory from "./services/pecServerClientFactory";
+import NewMessagesService from "./services/newMessagesService";
+import { getMessagesServiceSelector } from "./services/messagesServiceSelector";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -319,6 +325,7 @@ export function newApp({
   // Setup routes
   //
   return tryCatch(
+    // eslint-disable-next-line max-lines-per-function
     async () => {
       // Ceate the Token Service
       const TOKEN_SERVICE = new TokenService();
@@ -404,6 +411,10 @@ export function newApp({
         API_CLIENT,
         new PecServerClientFactory(PECSERVERS)
       );
+      // Create the new messages service.
+      const APP_MESSAGES_SERVICE = new NewMessagesService(
+        APP_MESSAGES_API_CLIENT
+      );
       const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
       // Register the user metadata storage service.
       const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
@@ -415,6 +426,7 @@ export function newApp({
         authMiddlewares.urlToken,
         PROFILE_SERVICE,
         MESSAGES_SERVICE,
+        APP_MESSAGES_SERVICE,
         NOTIFICATION_SERVICE,
         SESSION_STORAGE,
         PAGOPA_PROXY_SERVICE,
@@ -738,6 +750,7 @@ function registerAPIRoutes(
   urlTokenAuth: any,
   profileService: ProfileService,
   messagesService: MessagesService,
+  appMessagesService: NewMessagesService,
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
@@ -752,8 +765,15 @@ function registerAPIRoutes(
     sessionStorage
   );
 
-  const messagesController: MessagesController = new MessagesController(
+  const messageServiceSelector = getMessagesServiceSelector(
     messagesService,
+    appMessagesService,
+    FF_MESSAGES_TYPE,
+    FF_MESSAGES_BETA_TESTER_LIST,
+    FF_MESSAGES_CANARY_USERS_REGEX
+  );
+  const messagesController: MessagesController = new MessagesController(
+    messageServiceSelector,
     tokenService
   );
 
