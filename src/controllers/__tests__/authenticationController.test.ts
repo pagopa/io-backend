@@ -23,7 +23,6 @@ import {
   mockedUser,
   aTimestamp,
   aFiscalCode,
-  anEmailAddress,
   aValidName,
   aValidFamilyname,
   aValidDateofBirth,
@@ -35,7 +34,8 @@ import {
   mockZendeskToken,
   aSpidEmailAddress,
   aSessionTrackingId,
-  mockFIMSToken
+  mockFIMSToken,
+  mockedInitializedProfile
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../../services/apiClientFactory";
 import NotificationService from "../../services/notificationService";
@@ -71,20 +71,6 @@ const invalidUserPayload = {
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
   name: aValidName
-};
-
-const proxyInitializedProfileResponse = {
-  blocked_inbox_or_channels: undefined,
-  email: anEmailAddress,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalCode,
-  has_profile: true,
-  is_inbox_enabled: true,
-  is_webhook_enabled: true,
-  name: aValidName,
-  preferred_languages: ["it_IT"],
-  spid_email: anEmailAddress,
-  version: 42
 };
 
 const anErrorResponse = {
@@ -234,7 +220,7 @@ describe("AuthenticationController#acs", () => {
       ResponseErrorNotFound("Not Found.", "Profile not found")
     );
     mockCreateProfile.mockReturnValue(
-      ResponseSuccessJson(proxyInitializedProfileResponse)
+      ResponseSuccessJson(mockedInitializedProfile)
     );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
@@ -267,7 +253,7 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
-      ResponseSuccessJson(proxyInitializedProfileResponse)
+      ResponseSuccessJson(mockedInitializedProfile)
     );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
@@ -514,7 +500,7 @@ describe("AuthenticationController#acs", () => {
       ResponseErrorNotFound("Not Found.", "Profile not found")
     );
     mockCreateProfile.mockReturnValue(
-      ResponseSuccessJson(proxyInitializedProfileResponse)
+      ResponseSuccessJson(mockedInitializedProfile)
     );
     const aYoungUserPayload: SpidUser = {
       ...validUserPayload,

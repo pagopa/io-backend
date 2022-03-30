@@ -17,33 +17,13 @@ import {
   ResponseErrorTooManyRequests,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
-import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../../generated/io-api/IsWebhookEnabled";
-import {
-  PreferredLanguage,
-  PreferredLanguageEnum
-} from "../../../generated/io-api/PreferredLanguage";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { HasProfile } from "../../../generated/backend/HasProfile";
-import { ServicePreferencesSettings } from "../../../generated/io-api/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "../../../generated/io-api/ServicesPreferencesMode";
-import { mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
+import { mockedInitializedProfile, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidName = "Giuseppe Maria";
 const aValidFamilyname = "Garibaldi";
-const anIsInboxEnabled = true as IsInboxEnabled;
-const anIsWebookEnabled = true as IsWebhookEnabled;
-const aHasProfile = true as HasProfile;
-const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT
-];
-const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO
-};
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 
 // mock for a valid request User
@@ -57,23 +37,6 @@ const mockedRequestUser: User = {
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
   wallet_token: mockWalletToken
-};
-
-// mock for a valid InitializedProfile
-const mockedInitializedProfile: InitializedProfile = {
-  name: aValidName,
-  family_name: aValidFamilyname,
-  email: anEmailAddress,
-  fiscal_code: aFiscalNumber,
-  is_email_validated: true,
-  is_email_enabled: true,
-  is_inbox_enabled: anIsInboxEnabled,
-  is_webhook_enabled: anIsWebookEnabled,
-  preferred_languages: aPreferredLanguages,
-  spid_email: anEmailAddress,
-  has_profile: aHasProfile,
-  service_preferences_settings: aServicePreferencesSettings,
-  version: 1 as NonNegativeInteger
 };
 
 const mockGetProfile = jest.fn();
