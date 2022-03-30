@@ -298,6 +298,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Bearer token null or expired.
+        "403":
+          description: Operation forbidden.
         "404":
           description: No message found for the provided ID.
           schema:
