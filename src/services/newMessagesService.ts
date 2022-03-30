@@ -3,6 +3,7 @@
  */
 
 import {
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
@@ -10,7 +11,8 @@ import {
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
-  ResponseSuccessJson
+  ResponseSuccessJson,
+  ResponseErrorForbiddenNotAuthorized
 } from "@pagopa/ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
@@ -133,6 +135,7 @@ export default class NewMessagesService {
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<MessageStatusAttributes>
   > =>
@@ -153,6 +156,8 @@ export default class NewMessagesService {
             });
           case 401:
             return ResponseErrorUnexpectedAuthProblem();
+          case 403:
+            return ResponseErrorForbiddenNotAuthorized;
           case 404:
             return ResponseErrorNotFound(
               "Not Found",
