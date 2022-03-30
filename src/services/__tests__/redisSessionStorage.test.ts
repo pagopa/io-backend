@@ -50,6 +50,7 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aValidUser: UserV5 = {
   bpd_token: mockBPDToken,
   created_at: 1183518855,
+  date_of_birth: "2002-01-01",
   family_name: "Garibaldi",
   fims_token: mockFIMSToken,
   fiscal_code: aFiscalCode,
@@ -334,48 +335,39 @@ describe("RedisSessionStorage#set", () => {
       // tslint:disable-next-line: parameters-max-number
     ) => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("1: session");
         callback(sessionSetErr, sessionSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("2: wallet");
         callback(walletSetErr, walletSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("3: myportal");
         callback(myPortalSetError, myPortalSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("4: bpd");
         callback(bpdSetError, bpdSetSuccess);
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("5: zendesk");
         callback(zendeskSetError, zendeskSetSuccess);
       });
 
       // FIMS Token
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("6: fims");
         callback(undefined, "OK");
       });
 
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        console.log("7:");
         callback(undefined, "OK");
       });
 
       mockSadd.mockImplementation((_, __, callback) => {
-        console.log("1: SADD");
         callback(undefined, 1);
       });
 
       mockSmembers.mockImplementationOnce((_, callback) => {
-        console.log("1: SMEMBERS");
         callback(undefined, []);
       });
 

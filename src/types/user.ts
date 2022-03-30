@@ -39,13 +39,15 @@ import {
 export const UserWithoutTokens = t.intersection([
   t.interface({
     created_at: t.number,
+    // date_of_birth become required with https://github.com/pagopa/io-backend/pull/831.
+    // We assume that all valid sessions have now the date_of_birth parameter
+    date_of_birth: t.string,
     family_name: t.string,
     fiscal_code: FiscalCode,
     name: t.string,
     spid_level: SpidLevel
   }),
   t.partial({
-    date_of_birth: t.string,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
@@ -138,9 +140,7 @@ export function toAppUser(
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
-    date_of_birth: fromNullable(from.dateOfBirth)
-      .map(formatDate)
-      .toUndefined(),
+    date_of_birth: formatDate(from.dateOfBirth),
     family_name: from.familyName,
     fims_token: fimsToken,
     fiscal_code: from.fiscalNumber,

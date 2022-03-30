@@ -645,6 +645,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
     }
 
+    // We here update all the token but we can optimize it updating only missing tokens
     const errorOrIsSessionUpdated = await this.set(updatedUser, sessionTtl);
     if (isLeft(errorOrIsSessionUpdated)) {
       return left(

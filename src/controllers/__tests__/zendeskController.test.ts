@@ -49,6 +49,7 @@ const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 // mock for a valid request User
 const mockedRequestUser: User = {
   created_at: aTimestamp,
+  date_of_birth: "2002-01-01",
   family_name: aValidFamilyname,
   fiscal_code: aFiscalNumber,
   name: aValidName,

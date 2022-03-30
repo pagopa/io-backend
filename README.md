@@ -172,12 +172,13 @@ Those are all Environment variables needed by the application:
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE  | The range in CIDR form of IPs of service allowed to handle user sessions          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
-| PAGOPA_API_KEY_PROD                    | The api-key needed to call the pagopa proxy API                                  | string |
+| PAGOPA_API_KEY_PROD                    | The api-key needed to call the pagopa proxy API                                   | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
-| PAGOPA_API_KEY_UAT                     | The api-key needed to call the pagopa proxy API for UAT instance                     | string |
+| PAGOPA_API_KEY_UAT                     | The api-key needed to call the pagopa proxy API for UAT instance                  | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | MYPORTAL_BASE_PATH                     | The root path for the MyPortal endpoints                                          | string |
 | BPD_BASE_PATH                          | The root path for the BPD endpoints                                               | string |
+| FIMS_BASE_PATH                         | The root path for the FIMS endpoints                                              | string |
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
