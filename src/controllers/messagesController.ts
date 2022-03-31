@@ -15,7 +15,10 @@ import {
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import { tryCatch } from "fp-ts/lib/TaskEither";
 import { toError } from "fp-ts/lib/Either";
-import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
+import {
+  IResponseErrorForbiddenNotAuthorized,
+  ResponseErrorInternal
+} from "@pagopa/ts-commons/lib/responses";
 import { identity } from "fp-ts/lib/function";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { withUserFromRequest } from "../types/user";
@@ -156,6 +159,7 @@ export default class MessagesController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
+    | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<MessageStatusAttributes>
   > =>
