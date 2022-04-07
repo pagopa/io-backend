@@ -110,6 +110,7 @@ export const getUserForFIMS = (profileService: ProfileService) => (
             acr: user.spid_level,
             auth_time: user.created_at,
             date_of_birth: user.date_of_birth,
+            // If the email is not validated yet, the value returned will be undefined
             email: fromNullable(userProfile.is_email_validated)
               .chain(fromPredicate(identity))
               .chain<EmailString | undefined>(() =>
