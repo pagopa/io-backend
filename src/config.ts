@@ -397,7 +397,7 @@ export const APP_MESSAGES_API_URL = getRequiredENVVar("APP_MESSAGES_API_URL");
 export const APP_MESSAGES_API_CLIENT = AppMessagesAPIClient(
   APP_MESSAGES_API_KEY,
   APP_MESSAGES_API_URL,
-  httpsApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
