@@ -5,7 +5,7 @@
 /* tslint:disable:no-big-function */
 /* tslint:disable:no-object-mutation */
 import { isRight, left, right } from "fp-ts/lib/Either";
-import { UrlFromString } from "italia-ts-commons/lib/url";
+import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
@@ -15,7 +15,7 @@ import {
   ResponseErrorValidation,
   ResponsePermanentRedirect,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import { UserIdentity } from "../../../generated/auth/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -584,7 +584,7 @@ describe("AuthenticationController#acsTest", () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
         href: "http://invalid-url"
-      });
+      } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);

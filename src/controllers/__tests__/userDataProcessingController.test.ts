@@ -4,7 +4,7 @@
 import {
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 import { isRight } from "fp-ts/lib/Either";
 import {

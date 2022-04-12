@@ -1,11 +1,11 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import * as redis from "redis";
 import { mockedUser } from "../../__mocks__/user_mock";
 import { isRight, right } from "fp-ts/lib/Either";

@@ -18,7 +18,7 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson,
   ResponseSuccessRedirectToResource
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { EycaActivationDetail } from "../../generated/io-cgn-api/EycaActivationDetail";

@@ -21,12 +21,12 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import {
   EmailString,
   FiscalCode,
   NonEmptyString
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 import ProfileService from "src/services/profileService";
 import * as t from "io-ts/lib";
 import { ZendeskToken } from "../../generated/zendesk/ZendeskToken";

@@ -6,8 +6,8 @@ import * as t from "io-ts";
 import {
   IWithinRangeIntegerTag,
   WithinRangeInteger
-} from "italia-ts-commons/lib/numbers";
-import { errorsToReadableMessages } from "italia-ts-commons/lib/reporters";
+} from "@pagopa/ts-commons/lib/numbers";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
@@ -17,7 +17,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToError } from "./errorsFormatter";
 

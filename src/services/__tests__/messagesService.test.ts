@@ -2,7 +2,7 @@
 
 import * as e from "express";
 import * as t from "io-ts";
-import { OrganizationFiscalCode } from "italia-ts-commons/lib/strings";
+import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { ServiceId } from "../../../generated/io-api/ServiceId";
 
@@ -13,7 +13,7 @@ import MessageService from "../messagesService";
 import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
 import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 import { IPecServerClient } from "../../clients/pecserver";

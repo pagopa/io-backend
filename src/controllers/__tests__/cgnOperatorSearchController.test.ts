@@ -1,4 +1,4 @@
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import mockReq from "../../__mocks__/request";
 import CgnOperatorSearchService from "../../services/cgnOperatorSearchService";
 import { mockedUser } from "../../__mocks__/user_mock";
@@ -6,7 +6,7 @@ import CgnOperatorSearchController from "../cgnOperatorSearchController";
 import {
   ResponseErrorInternal,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import { Merchant } from "../../../generated/cgn-operator-search/Merchant";
 import { ProductCategoryEnum } from "../../../generated/cgn-operator-search/ProductCategory";
 import { CgnAPIClient } from "../../clients/cgn";
@@ -18,7 +18,7 @@ import {
   OfflineMerchantSearchRequest,
   OrderingEnum
 } from "../../../generated/cgn-operator-search/OfflineMerchantSearchRequest";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { CardActivated } from "../../../generated/io-cgn-api/CardActivated";
 import { CardExpired } from "../../../generated/io-cgn-api/CardExpired";
 import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";

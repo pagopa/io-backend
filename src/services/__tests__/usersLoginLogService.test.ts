@@ -1,4 +1,4 @@
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { base64EncodeObject } from "../../utils/messages";
 import UsersLoginLogService, { UserLogin } from "../usersLoginLogService";

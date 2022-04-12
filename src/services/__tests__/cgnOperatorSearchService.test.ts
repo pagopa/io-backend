@@ -1,8 +1,8 @@
 import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { withoutUndefinedValues } from "italia-ts-commons/lib/types";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { DiscountCodeTypeEnum } from "../../../generated/io-cgn-operator-search-api/DiscountCodeType";
 import {
   OfflineMerchantSearchRequest,

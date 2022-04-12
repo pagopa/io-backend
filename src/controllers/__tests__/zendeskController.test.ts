@@ -16,7 +16,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
 import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
 import { IsWebhookEnabled } from "../../../generated/io-api/IsWebhookEnabled";
@@ -24,7 +24,7 @@ import {
   PreferredLanguage,
   PreferredLanguageEnum
 } from "../../../generated/io-api/PreferredLanguage";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { HasProfile } from "../../../generated/backend/HasProfile";
 import { ServicePreferencesSettings } from "../../../generated/io-api/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/io-api/ServicesPreferencesMode";

@@ -1,6 +1,6 @@
 /* tslint:disable:no-null-keyword */
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { MessageBodyMarkdown } from "../../../generated/backend/MessageBodyMarkdown";

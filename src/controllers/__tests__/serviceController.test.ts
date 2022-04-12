@@ -1,12 +1,12 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
-import { ResponseSuccessJson } from "italia-ts-commons/lib/responses";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import {
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
 import { DepartmentName } from "../../../generated/backend/DepartmentName";
 import { OrganizationName } from "../../../generated/backend/OrganizationName";

@@ -1,5 +1,5 @@
 import { isNone, isSome } from "fp-ts/lib/Option";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
   formatDate,
   isOlderThan,
