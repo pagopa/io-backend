@@ -829,7 +829,7 @@ describe("MessagesController#Feature Flags", () => {
     });
   });
 
-  it("it should switch to OLD function when FF is canary and user is NOT a canary user", async () => {
+  it("it should switch to OLD function when FF is canary and user is NOT a canary user neither a beta tester", async () => {
     const req = mockReq();
     req.user = mockedUser;
     req.params = { id: anId };
@@ -863,7 +863,43 @@ describe("MessagesController#Feature Flags", () => {
       value: proxyMessageResponse
     });
   });
+  
 
+  it("it should switch to NEW function when FF is canary and user is NOT a canary user, but is a beta tester", async () => {
+    const req = mockReq();
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    mockFnAppGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    // Hashed Fiscal Code is: d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52
+    // So we use a regex expecting "2" as last char
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "canary",
+      [toFiscalCodeHash(mockedUser.fiscal_code)],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockGetMessage).not.toHaveBeenCalled();
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+  
   it("it should switch to NEW function when FF is canary and user is a canary tester", async () => {
     const req = mockReq();
     req.user = mockedUser;

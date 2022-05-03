@@ -42,7 +42,8 @@ export const getMessagesServiceSelector = (
             ? newMessageService
             : oldMessagesService;
         case "canary":
-          return isCanaryTestUser(toFiscalCodeHash(fiscalCode))
+          return isCanaryTestUser(toFiscalCodeHash(fiscalCode)) ||
+            betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
             ? newMessageService
             : oldMessagesService;
         case "prod":
