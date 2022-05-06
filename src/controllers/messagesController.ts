@@ -27,6 +27,7 @@ import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange"
 import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
+import { GetMessageParameters } from "../../generated/backend/GetMessageParameters";
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet
@@ -98,10 +99,17 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
-    withUserFromRequest(req, user =>
-      this.messageServiceSelector
-        .select(user.fiscal_code)
-        .getMessage(user, req.params.id)
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        GetMessageParameters.decode({
+          id: req.params.id,
+          public_message: req.query.public_message
+        }),
+        params =>
+          this.messageServiceSelector
+            .select(user.fiscal_code)
+            .getMessage(user, params)
+      )
     );
 
   /**
