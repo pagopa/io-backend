@@ -14,7 +14,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusAttributes } from "../../../generated/io-api/MessageStatusAttributes";
 import { MessageStatusWithAttributes } from "../../../generated/io-api/MessageStatusWithAttributes";
 import { AppMessagesAPIClient } from "../../clients/app-messages.client";
-import * as date_fns from "date-fns";
 
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
 const aPublicMessageParam = true;
@@ -126,8 +125,7 @@ const proxyMessagesResponse = {
   page_size: validApiMessagesResponse.value.page_size
 };
 const proxyMessageResponse = {
-  ...validApiMessageResponse.value.message,
-  created_at: date_fns.parse(validApiMessageResponse.value.message.created_at)
+  ...validApiMessageResponse.value.message
 };
 
 const mockParameters: GetMessagesParameters = {
