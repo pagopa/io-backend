@@ -18,8 +18,6 @@ import {
 import { fromNullable } from "fp-ts/lib/Option";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as t from "io-ts";
-import { NewMessageContent } from "../../generated/io-messages-api/NewMessageContent";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/backend/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
@@ -36,12 +34,6 @@ import {
 } from "../utils/responses";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
-
-const SimpleMessageWithContent = t.interface({
-  content: NewMessageContent
-});
-
-type SimpleMessageWithContent = t.TypeOf<typeof SimpleMessageWithContent>;
 
 export default class NewMessagesService {
   constructor(
@@ -108,30 +100,23 @@ export default class NewMessagesService {
 
       return withValidatedOrInternalError(resMessageContent, async response => {
         if (response.status === 200) {
-          if (SimpleMessageWithContent.is(response.value)) {
-            const messageWithContent = response.value;
-            const maybePrescriptionData = fromNullable(
-              messageWithContent.content.prescription_data
-            );
+          const messageWithContent = response.value;
+          const maybePrescriptionData = fromNullable(
+            messageWithContent.content.prescription_data
+          );
 
-            return maybePrescriptionData.isNone()
-              ? ResponseSuccessJson(messageWithContent)
-              : getPrescriptionAttachments(maybePrescriptionData.value)
-                  .map(attachments => ({
-                    ...messageWithContent,
-                    content: {
-                      ...messageWithContent.content,
-                      attachments
-                    }
-                  }))
-                  .map(ResponseSuccessJson)
-                  .run();
-          } else {
-            return ResponseErrorNotFound(
-              "Not found",
-              "Message Content not found"
-            );
-          }
+          return maybePrescriptionData.isNone()
+            ? ResponseSuccessJson(messageWithContent)
+            : getPrescriptionAttachments(maybePrescriptionData.value)
+                .map(attachments => ({
+                  ...messageWithContent,
+                  content: {
+                    ...messageWithContent.content,
+                    attachments
+                  }
+                }))
+                .map(ResponseSuccessJson)
+                .run();
         }
 
         return response.status === 404
