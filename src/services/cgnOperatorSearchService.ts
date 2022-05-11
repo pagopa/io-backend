@@ -16,7 +16,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-search-api/PublishedProductCategoriesResult";
-import { GetPublishedCategoriesParameters } from "generated/cgn-operator-search/GetPublishedCategoriesParameters";
+import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,

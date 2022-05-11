@@ -26,7 +26,7 @@
     "start": "node src/server.js",
     "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
-    "generate:proxy:api-message-models": "gen-api-models --api-spec api_messages_temp.yaml --out-dir generated/backend",
+    "generate:proxy:api-parameters": "gen-api-models --api-spec api_parameters.yaml --out-dir generated/parameters",
     "generate:proxy:auth-models": "rimraf generated/auth && gen-api-models --api-spec api_auth.yaml --out-dir generated/auth",
     "generate:proxy:notification-models": "rimraf generated/notifications && gen-api-models --api-spec api_notifications.yaml --out-dir generated/notifications",
     "generate:messages:notifications": "rimraf generated/messages && gen-api-models --api-spec notification_queue_messages.yaml --out-dir generated/messages",
