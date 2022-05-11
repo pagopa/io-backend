@@ -10,6 +10,7 @@ import {
 } from "../../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import { ProductCategoryEnum } from "../../../generated/io-cgn-operator-search-api/ProductCategory";
+import { GetPublishedCategoriesParameters } from "../../../generated/cgn-operator-search/GetPublishedCategoriesParameters";
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import CgnOperatorSearchService from "../cgnOperatorSearchService";
 
@@ -163,6 +164,10 @@ const anOfflineMerchantSearchRequest: OfflineMerchantSearchRequest = {
   }
 };
 
+const params = {
+  count_new_discounts: true
+} as GetPublishedCategoriesParameters;
+
 describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -171,15 +176,15 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
   it("should make the correct api call", async () => {
     const service = new CgnOperatorSearchService(api);
 
-    await service.getPublishedProductCategories();
+    await service.getPublishedProductCategories(params);
 
-    expect(mockGetPublishedProductCategories).toHaveBeenCalledWith({});
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledWith(params);
   });
 
   it("should handle a success response", async () => {
     const service = new CgnOperatorSearchService(api);
 
-    const res = await service.getPublishedProductCategories();
+    const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
@@ -198,7 +203,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
 
     const service = new CgnOperatorSearchService(api);
 
-    const res = await service.getPublishedProductCategories();
+    const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -211,7 +216,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
     );
     const service = new CgnOperatorSearchService(api);
 
-    const res = await service.getPublishedProductCategories();
+    const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -224,7 +229,7 @@ describe("CgnOperatorSearchService#getPublishedProductCategories", () => {
     });
     const service = new CgnOperatorSearchService(api);
 
-    const res = await service.getPublishedProductCategories();
+    const res = await service.getPublishedProductCategories(params);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

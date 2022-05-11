@@ -51,9 +51,7 @@ export default class CgnOperatorSearchController {
       withValidatedOrValidationError(
         GetPublishedCategoriesParameters.decode(req.query),
         params =>
-          this.cgnOperatorSearchService.getPublishedProductCategories(
-            params
-          )
+          this.cgnOperatorSearchService.getPublishedProductCategories(params)
       )
     );
 

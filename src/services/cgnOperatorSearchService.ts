@@ -16,6 +16,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-search-api/PublishedProductCategoriesResult";
+import { GetPublishedCategoriesParameters } from "generated/cgn-operator-search/GetPublishedCategoriesParameters";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -28,7 +29,6 @@ import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-sea
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
-import { GetPublishedCategoriesParameters } from "generated/cgn-operator-search/GetPublishedCategoriesParameters";
 
 type ClientResponses<T> =
   | IResponseType<200, T>
