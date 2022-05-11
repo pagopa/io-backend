@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  title: "IO APIs, shared specs"
+  title: "IO API parameters"
   version: "0.1"
 paths:
   "/dummy":
@@ -24,6 +24,13 @@ definitions:
         $ref: "#/definitions/NonEmptyString"
       minimumId:
         $ref: "#/definitions/NonEmptyString"
+  GetPublishedCategoriesParameters:
+    type: object
+    title: GetPublishedCategoriesParameters
+    description: Describes the GetMessages api query parameters
+    properties:
+      count_new_discounts:
+        $ref: "#/definitions/BooleanFromString"
   NonNegativeIntegerFromString:
     type: string
     description: Represents a non negative integer parsed from a string

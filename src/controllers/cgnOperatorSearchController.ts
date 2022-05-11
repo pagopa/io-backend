@@ -22,7 +22,8 @@ import { Card } from "generated/cgn/Card";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
-import { PublishedProductCategories } from "../../generated/cgn-operator-search/PublishedProductCategories";
+import { GetPublishedCategoriesParameters } from "../../generated/parameters/GetPublishedCategoriesParameters";
+import { PublishedProductCategoriesResult } from "../../generated/cgn-operator-search/PublishedProductCategoriesResult";
 import { OfflineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import CgnOperatorSearchService from "../services/cgnOperatorSearchService";
@@ -44,10 +45,14 @@ export default class CgnOperatorSearchController {
     | IResponseErrorValidation
     | IResponseErrorInternal
     | IResponseErrorNotFound
-    | IResponseSuccessJson<PublishedProductCategories>
+    | IResponseSuccessJson<PublishedProductCategoriesResult>
   > =>
     withUserFromRequest(req, async _ =>
-      this.cgnOperatorSearchService.getPublishedProductCategories()
+      withValidatedOrValidationError(
+        GetPublishedCategoriesParameters.decode(req.query),
+        params =>
+          this.cgnOperatorSearchService.getPublishedProductCategories(params)
+      )
     );
 
   /**

@@ -15,7 +15,8 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
-import { PublishedProductCategories } from "generated/io-cgn-operator-search-api/PublishedProductCategories";
+import { PublishedProductCategoriesResult } from "generated/io-cgn-operator-search-api/PublishedProductCategoriesResult";
+import { GetPublishedCategoriesParameters } from "generated/parameters/GetPublishedCategoriesParameters";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -50,16 +51,16 @@ export default class CgnService {
   /**
    * Get an array of CGN product categories that have at least a published discount
    */
-  public readonly getPublishedProductCategories = (): Promise<
-    ServiceResponses<PublishedProductCategories>
-  > =>
+  public readonly getPublishedProductCategories = (
+    params: GetPublishedCategoriesParameters
+  ): Promise<ServiceResponses<PublishedProductCategoriesResult>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.getPublishedProductCategories(
-        {}
+        params
       );
 
       return withValidatedOrInternalError(validated, response =>
-        this.mapResponse<PublishedProductCategories>(response)
+        this.mapResponse<PublishedProductCategoriesResult>(response)
       );
     });
 

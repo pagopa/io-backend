@@ -28,7 +28,7 @@ import { identity } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { PecBearerGeneratorT } from "src/types/token";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
+import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
