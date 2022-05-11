@@ -10,7 +10,7 @@ import {
 } from "../../../generated/io-cgn-operator-search-api/OfflineMerchantSearchRequest";
 import { OnlineMerchantSearchRequest } from "../../../generated/io-cgn-operator-search-api/OnlineMerchantSearchRequest";
 import { ProductCategoryEnum } from "../../../generated/io-cgn-operator-search-api/ProductCategory";
-import { GetPublishedCategoriesParameters } from "../../../generated/cgn-operator-search/GetPublishedCategoriesParameters";
+import { GetPublishedCategoriesParameters } from "../../../generated/parameters/GetPublishedCategoriesParameters";
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import CgnOperatorSearchService from "../cgnOperatorSearchService";
 

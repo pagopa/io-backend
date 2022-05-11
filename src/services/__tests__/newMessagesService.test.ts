@@ -6,7 +6,7 @@ import * as t from "io-ts";
 import { mockedUser } from "../../__mocks__/user_mock";
 import NewMessageService from "../newMessagesService";
 import mockRes from "../../__mocks__/response";
-import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
+import { GetMessagesParameters } from "../../../generated/parameters/GetMessagesParameters";
 import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
 import { MessageStatusValueEnum } from "../../../generated/io-api/MessageStatusValue";
