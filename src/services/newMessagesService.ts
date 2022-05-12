@@ -19,8 +19,8 @@ import { fromNullable } from "fp-ts/lib/Option";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-api/PaginatedPublicMessagesCollection";
-import { GetMessageParameters } from "../../generated/backend/GetMessageParameters";
-import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
+import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";

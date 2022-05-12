@@ -26,8 +26,8 @@ import { withUserFromRequest } from "../types/user";
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
-import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
-import { GetMessageParameters } from "../../generated/backend/GetMessageParameters";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
+import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet

@@ -14,7 +14,7 @@ import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
+import { GetMessagesParameters } from "../../../generated/parameters/GetMessagesParameters";
 import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 import { IPecServerClient } from "../../clients/pecserver";
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";

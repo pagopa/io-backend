@@ -150,7 +150,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
     jest.clearAllMocks();
   });
 
-  it("should make the correct service method call", async () => {
+  it("should make the correct service method call without any query params", async () => {
     const req = {
       ...mockReq(),
       user: mockedUser
@@ -159,6 +159,46 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
     await controller.getPublishedProductCategories(req);
 
     expect(mockGetPublishedProductCategories).toHaveBeenCalledTimes(1);
+  });
+
+  it("should make the correct service method call with the correct query param", async () => {
+    const req = {
+      ...mockReq(),
+      user: mockedUser
+    };
+
+    req.query.count_new_discounts = "true"; // the query param is a string
+
+    await controller.getPublishedProductCategories(req);
+
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledTimes(1);
+  });
+
+  it("should  make the correct service method call with a wrong query param name", async () => {
+    const req = {
+      ...mockReq(),
+      user: mockedUser
+    };
+
+    req.query.not_a_valid_param = "a_not_boolean_value"; // this will be stripped
+
+    await controller.getPublishedProductCategories(req);
+
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledTimes(1);
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledWith({});
+  });
+
+  it("should fail with a wrong query param value", async () => {
+    const req = {
+      ...mockReq(),
+      user: mockedUser
+    };
+
+    req.query.count_new_discounts = "a_not_boolean_value"; 
+
+    await controller.getPublishedProductCategories(req);
+
+    expect(mockGetPublishedProductCategories).toHaveBeenCalledTimes(0);
   });
 
   it("should call getPublishedProductCategories method on the CgnOperatorSearchService with valid values", async () => {

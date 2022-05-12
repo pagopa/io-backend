@@ -28,7 +28,7 @@ import { identity } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { PecBearerGeneratorT } from "src/types/token";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { GetMessagesParameters } from "../../generated/backend/GetMessagesParameters";
+import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -57,7 +57,7 @@ import { StrictUTCISODateFromString } from "../utils/date";
 import { errorsToError } from "../utils/errorsFormatter";
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
-import { GetMessageParameters } from "../../generated/backend/GetMessageParameters";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
