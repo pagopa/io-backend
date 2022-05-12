@@ -1083,6 +1083,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageStatusChange"
   CreatedMessageWithContentResponse:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithContentResponse"
+  CreatedMessageWithContentAndEnrichedData:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithContentAndEnrichedData"
   # Definitions from pagopa-proxy
   PaymentProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentProblemJson"
