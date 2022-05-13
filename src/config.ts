@@ -484,6 +484,8 @@ export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
 
 export const BPD_BASE_PATH = getRequiredENVVar("BPD_BASE_PATH");
 
+export const FIMS_BASE_PATH = getRequiredENVVar("FIMS_BASE_PATH");
+
 export const ZENDESK_BASE_PATH = getRequiredENVVar("ZENDESK_BASE_PATH");
 
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services

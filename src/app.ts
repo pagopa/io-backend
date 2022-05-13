@@ -83,7 +83,11 @@ import checkIP from "./utils/middleware/checkIP";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
-import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
+import {
+  getUserForBPD,
+  getUserForFIMS,
+  getUserForMyPortal
+} from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
 import ZendeskController from "./controllers/zendeskController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
@@ -132,6 +136,7 @@ import MitVoucherController from "./controllers/mitVoucherController";
 import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import { getMessagesServiceSelector } from "./services/messagesServiceSelector";
+import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -165,6 +170,7 @@ export interface IAppFactoryParameters {
   readonly PagoPABasePath: string;
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
+  readonly FIMSBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
@@ -188,6 +194,7 @@ export function newApp({
   PagoPABasePath,
   MyPortalBasePath,
   BPDBasePath,
+  FIMSBasePath,
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
@@ -226,12 +233,18 @@ export function newApp({
   // Add the strategy to authenticate Zendesk clients.
   passport.use("bearer.zendesk", bearerZendeskTokenStrategy(SESSION_STORAGE));
 
+  // Add the strategy to authenticate FIMS clients.
+  passport.use("bearer.fims", bearerFIMSTokenStrategy(SESSION_STORAGE));
+
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
     bearerBPD: passport.authenticate("bearer.bpd", {
+      session: false
+    }),
+    bearerFIMS: passport.authenticate("bearer.fims", {
       session: false
     }),
     bearerMyPortal: passport.authenticate("bearer.myportal", {
@@ -516,6 +529,15 @@ export function newApp({
         allowBPDIPSourceRange,
         authMiddlewares.bearerBPD
       );
+
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerFIMSRoutes(
+        app,
+        FIMSBasePath,
+        PROFILE_SERVICE,
+        authMiddlewares.bearerFIMS
+      );
+
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       registerZendeskRoutes(
         app,
@@ -670,6 +692,21 @@ function registerBPDRoutes(
     checkIP(allowBPDIPSourceRange),
     bearerBPDTokenAuth,
     toExpressHandler(getUserForBPD)
+  );
+}
+
+function registerFIMSRoutes(
+  app: Express,
+  basePath: string,
+  profileService: ProfileService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerFIMSTokenAuth: any
+): void {
+  // TODO: Do we need a IP filtering for this API?
+  app.get(
+    `${basePath}/user`,
+    bearerFIMSTokenAuth,
+    toExpressHandler(getUserForFIMS(profileService))
   );
 }
 
