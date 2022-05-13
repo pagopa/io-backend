@@ -57,6 +57,7 @@ import { StrictUTCISODateFromString } from "../utils/date";
 import { errorsToError } from "../utils/errorsFormatter";
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -122,7 +123,7 @@ export default class MessagesService {
    */
   public readonly getMessage = (
     user: User,
-    messageId: string
+    params: GetMessageParameters
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -134,7 +135,7 @@ export default class MessagesService {
 
       const res = await client.getMessage({
         fiscal_code: user.fiscal_code,
-        id: messageId
+        id: params.id
       });
 
       const resMessageContent = res.map(_ =>

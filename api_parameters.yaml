@@ -24,6 +24,17 @@ definitions:
         $ref: "#/definitions/NonEmptyString"
       minimumId:
         $ref: "#/definitions/NonEmptyString"
+  GetMessageParameters:
+    type: object
+    title: GetMessageParameters
+    description: Describes the GetMessage api parameters
+    properties:
+      id:
+        $ref: "#/definitions/NonEmptyString"
+      public_message:
+        $ref: "#/definitions/BooleanFromString"
+    required:
+      - id
   GetPublishedCategoriesParameters:
     type: object
     title: GetPublishedCategoriesParameters

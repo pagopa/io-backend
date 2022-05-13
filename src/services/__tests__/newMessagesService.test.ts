@@ -15,7 +15,16 @@ import { MessageStatusAttributes } from "../../../generated/io-api/MessageStatus
 import { MessageStatusWithAttributes } from "../../../generated/io-api/MessageStatusWithAttributes";
 import { AppMessagesAPIClient } from "../../clients/app-messages.client";
 
-const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
+const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
+const aPublicMessageParam = true;
+const getMessageParamOnlyWithMessageId = {
+  id: aValidMessageId
+};
+
+const getMessageParam = {
+  ...getMessageParamOnlyWithMessageId,
+  public_message: aPublicMessageParam
+};
 const aValidSubject = "Lorem ipsum";
 const aValidMarkdown =
   "# This is a markdown header\n\nto show how easily markdown can be converted to **HTML**\n\nRemember: this has to be a long text.";
@@ -60,6 +69,40 @@ const validApiMessageResponse = {
   }
 };
 
+const aService = {
+  service_name: "a Service",
+  organization_name: "a Organization"
+};
+
+const aMessageStatusAttributes: MessageStatusAttributes = {
+  is_read: true,
+  is_archived: false
+};
+
+const validApiMessageWithEnrichedDataResponse = {
+  status: 200,
+  value: {
+    message: {
+      content: {
+        markdown: aValidMarkdown,
+        subject: aValidSubject
+      },
+      created_at: "2018-06-12T09:45:06.771Z",
+      fiscal_code: "LSSLCU79B24L219P",
+      id: "01CFSP4XYK3Y0VZTKHW9FKS1XM",
+      sender_service_id: "5a563817fcc896087002ea46c49a",
+      ...aService,
+      message_title: aValidSubject,
+      ...aMessageStatusAttributes
+    },
+    notification: {
+      email: "SENT",
+      webhook: "SENT"
+    },
+    status: "PROCESSED"
+  }
+};
+
 const emptyApiMessagesResponse = {
   status: 404
 };
@@ -81,7 +124,9 @@ const proxyMessagesResponse = {
   items: validApiMessagesResponse.value.items,
   page_size: validApiMessagesResponse.value.page_size
 };
-const proxyMessageResponse = validApiMessageResponse.value.message;
+const proxyMessageResponse = {
+  ...validApiMessageResponse.value.message
+};
 
 const mockParameters: GetMessagesParameters = {
   pageSize: undefined,
@@ -183,11 +228,34 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(api);
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(
+      mockedUser,
+      getMessageParamOnlyWithMessageId
+    );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
+  it("returns an enriched message from the API", async () => {
+    mockGetMessage.mockImplementation(() =>
+      t.success(validApiMessageWithEnrichedDataResponse)
+    );
+
+    const service = new NewMessageService(api);
+
+    const res = await service.getMessage(mockedUser, getMessageParam);
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId,
+      public_message: aPublicMessageParam
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -200,7 +268,10 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(api);
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(
+      mockedUser,
+      getMessageParamOnlyWithMessageId
+    );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
@@ -215,7 +286,10 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(api);
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(
+      mockedUser,
+      getMessageParamOnlyWithMessageId
+    );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
@@ -230,7 +304,10 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(api);
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(
+      mockedUser,
+      getMessageParamOnlyWithMessageId
+    );
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
@@ -240,11 +317,6 @@ describe("MessageService#upsertMessageStatus", () => {
   const aMessageStatusChange: MessageStatusChange = {
     change_type: Reading_Change_typeEnum.reading,
     is_read: true
-  };
-
-  const aMessageStatusAttributes: MessageStatusAttributes = {
-    is_read: true,
-    is_archived: false
   };
 
   const aMessageStatusWithAttributes: MessageStatusWithAttributes = {

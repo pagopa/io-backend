@@ -221,6 +221,7 @@ paths:
         type: string
         required: true
         description: The ID of the message.
+      - $ref: "#/parameters/PublicMessage"
     get:
       operationId: getUserMessage
       summary: Get message
@@ -917,170 +918,173 @@ paths:
 definitions:
   # Definitions from the digital citizenship APIs
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/AcceptedTosVersion"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/AcceptedTosVersion"
   BlockedInboxOrChannels:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/DepartmentName"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/DepartmentName"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/EmailAddress"
   PreferredLanguage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PreferredLanguage"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PreferredLanguage"
   PreferredLanguages:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PreferredLanguages"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PreferredLanguages"
   Profile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/Profile"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/Profile"
   ExtendedProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ExtendedProfile"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/FiscalCode"
   IsEmailEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/IsEmailEnabled"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/IsEmailEnabled"
   IsInboxEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/IsInboxEnabled"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/IsInboxEnabled"
   IsEmailValidated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/IsEmailValidated"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/IsEmailValidated"
   IsTestProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/IsTestProfile"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/IsTestProfile"
   IsWebhookEnabled:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/IsWebhookEnabled"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/IsWebhookEnabled"
   LimitedProfile:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/LimitedProfile"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/LimitedProfile"
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageBodyMarkdown"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageBodyMarkdown"
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageContent"
   MessageResponseNotificationStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageResponseNotificationStatus"
   NotificationChannelStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/NotificationChannelStatusValue"
   NotificationChannel:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/NotificationChannel"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/NotificationChannel"
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageSubject"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageSubject"
   MessageContentBase:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageContentBase"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageContentBase"
   EUCovidCert:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/EUCovidCert"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/EUCovidCert"
   OrganizationFiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/OrganizationFiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/OrganizationFiscalCode"
   NewMessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/NewMessageContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/NewMessageContent"
   Payee:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/Payee"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/Payee"
   PaymentDataBase:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaymentDataBase"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaymentDataBase"
   PaymentDataWithRequiredPayee:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaymentDataWithRequiredPayee"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaymentDataWithRequiredPayee"
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/OrganizationName"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/OrganizationName"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaginationResponse"
   PrescriptionData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PrescriptionData"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PrescriptionData"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ProblemJson"
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServiceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServiceId"
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServiceName"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServiceName"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServicePublic"
   ServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServiceMetadata"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServiceMetadata"
   CommonServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/CommonServiceMetadata"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CommonServiceMetadata"
   StandardServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/StandardServiceMetadata"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/StandardServiceMetadata"
   SpecialServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/SpecialServiceMetadata"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/SpecialServiceMetadata"
   ServiceTuple:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServiceTuple"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServiceTuple"
   ServiceScope:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServiceScope"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServiceScope"
   ServiceCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServiceCategory"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServiceCategory"
   SpecialServiceCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/SpecialServiceCategory"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/SpecialServiceCategory"
   StandardServiceCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/StandardServiceCategory"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/StandardServiceCategory"
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/Timestamp"
   PaymentNoticeNumber:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaymentNoticeNumber"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaymentNoticeNumber"
   PaymentAmount:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaymentAmount"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaymentAmount"
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaymentData"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaymentData"
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/TimeToLiveSeconds"
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/CreatedMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithContent"
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
   CreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithoutContentCollection"
   PaginatedCreatedMessageWithoutContentCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaginatedCreatedMessageWithoutContentCollection"
   UserDataProcessingStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/UserDataProcessingStatus"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/UserDataProcessingStatus"
   UserDataProcessingChoice:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/UserDataProcessingChoice"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/UserDataProcessingChoice"
   UserDataProcessingChoiceRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
   UserDataProcessing:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/UserDataProcessing"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/UserDataProcessing"
   MessageResponseWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageResponseWithContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageResponseWithContent"
   ServicePreferencesSettings:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServicePreferencesSettings"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServicePreferencesSettings"
   ServicesPreferencesMode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServicesPreferencesMode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServicesPreferencesMode"
   ServicePreference:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/ServicePreference"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/ServicePreference"
   EnrichedMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/EnrichedMessage"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/EnrichedMessage"
   PublicMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PublicMessage"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PublicMessage"
   PublicMessagesCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PublicMessagesCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PublicMessagesCollection"
   PaginatedPublicMessagesCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/PaginatedPublicMessagesCollection"
   MessageCategory:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageCategory"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageCategory"
   MessageCategoryBase:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageCategoryBase"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageCategoryBase"
   MessageCategoryPayment:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageCategoryPayment"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageCategoryPayment"
   LegalMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/LegalMessageWithContent"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/LegalMessageWithContent"
   LegalMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/LegalMessage"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/LegalMessage"
   LegalMessageEml:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/LegalMessageEml"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/LegalMessageEml"
   LegalMessageCertData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/LegalMessageCertData"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/LegalMessageCertData"
   CertData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/CertData"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CertData"
   CertDataHeader:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/CertDataHeader"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CertDataHeader"
   Attachment:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/Attachment"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/Attachment"
   LegalData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/LegalData"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/LegalData"
   MessageStatusAttributes:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageStatusAttributes"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageStatusAttributes"
   MessageStatusReadingChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageStatusReadingChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageStatusReadingChange"
   MessageStatusArchivingChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageStatusArchivingChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageStatusArchivingChange"
   MessageStatusBulkChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageStatusBulkChange"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageStatusBulkChange"
   MessageStatusChange:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v23.7.0/openapi/definitions.yaml#/MessageStatusChange"
-
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/MessageStatusChange"
+  CreatedMessageWithContentResponse:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithContentResponse"
+  CreatedMessageWithContentAndEnrichedData:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v24.3.0/openapi/definitions.yaml#/CreatedMessageWithContentAndEnrichedData"
   # Definitions from pagopa-proxy
   PaymentProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentProblemJson"
@@ -1140,7 +1144,7 @@ definitions:
             $ref: "#/definitions/MessageContentWithAttachments"
         required:
           - content
-      - $ref: "#/definitions/CreatedMessageWithoutContent"
+      - $ref: "#/definitions/CreatedMessageWithContentResponse"
   Installation:
     type: object
     title: Installation
@@ -1337,6 +1341,11 @@ definitions:
       - expires_in
 responses: {}
 parameters:
+  PublicMessage:
+    name: public_message
+    in: query
+    type: boolean
+    description: Discriminate when to return public message shape. Default to false.
   EnrichResultData:
     name: enrich_result_data
     type: boolean

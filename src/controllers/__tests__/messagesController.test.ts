@@ -324,6 +324,7 @@ describe("MessagesController#getMessage", () => {
 
     req.user = mockedUser;
     req.params = { id: anId };
+    req.query = { public_message: "true" };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
     const messageService = new MessagesService(
@@ -344,7 +345,49 @@ describe("MessagesController#getMessage", () => {
 
     const response = await controller.getMessage(req);
 
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: true
+    });
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
+  it("calls the getMessage on the messagesController with empty opional parameters", async () => {
+    const req = mockReq();
+
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -788,7 +831,10 @@ describe("MessagesController#Feature Flags", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).not.toHaveBeenCalled();
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: undefined
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -820,7 +866,10 @@ describe("MessagesController#Feature Flags", () => {
 
     const response = await controller.getMessage(req);
 
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: undefined
+    });
     expect(mockGetMessage).not.toHaveBeenCalled();
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -856,14 +905,16 @@ describe("MessagesController#Feature Flags", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).not.toHaveBeenCalled();
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: undefined
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: proxyMessageResponse
     });
   });
-  
 
   it("it should switch to NEW function when FF is canary and user is NOT a canary user, but is a beta tester", async () => {
     const req = mockReq();
@@ -892,14 +943,17 @@ describe("MessagesController#Feature Flags", () => {
     const response = await controller.getMessage(req);
 
     expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: undefined
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: proxyMessageResponse
     });
   });
-  
+
   it("it should switch to NEW function when FF is canary and user is a canary tester", async () => {
     const req = mockReq();
     req.user = mockedUser;
@@ -927,7 +981,10 @@ describe("MessagesController#Feature Flags", () => {
     const response = await controller.getMessage(req);
 
     expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: undefined
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -959,7 +1016,10 @@ describe("MessagesController#Feature Flags", () => {
     const response = await controller.getMessage(req);
 
     expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, anId);
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId,
+      public_message: undefined
+    });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",

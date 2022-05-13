@@ -16,9 +16,10 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
-import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { PaginatedPublicMessagesCollection } from "../../generated/io-api/PaginatedPublicMessagesCollection";
+import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
@@ -77,9 +78,9 @@ export default class NewMessagesService {
   /**
    * Retrieves a specific message.
    */
-  public readonly getMessage = (
+  public readonly getMessage = async (
     user: User,
-    messageId: string
+    params: GetMessageParameters
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -89,7 +90,8 @@ export default class NewMessagesService {
     withCatchAsInternalError(async () => {
       const res = await this.apiClient.getMessage({
         fiscal_code: user.fiscal_code,
-        id: messageId
+        id: params.id,
+        public_message: params.public_message
       });
 
       const resMessageContent = res.map(_ =>
@@ -98,17 +100,18 @@ export default class NewMessagesService {
 
       return withValidatedOrInternalError(resMessageContent, async response => {
         if (response.status === 200) {
+          const messageWithContent = response.value;
           const maybePrescriptionData = fromNullable(
-            response.value.content.prescription_data
+            messageWithContent.content.prescription_data
           );
 
           return maybePrescriptionData.isNone()
-            ? ResponseSuccessJson(response.value)
+            ? ResponseSuccessJson(messageWithContent)
             : getPrescriptionAttachments(maybePrescriptionData.value)
                 .map(attachments => ({
-                  ...response.value,
+                  ...messageWithContent,
                   content: {
-                    ...response.value.content,
+                    ...messageWithContent.content,
                     attachments
                   }
                 }))

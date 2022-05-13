@@ -25,7 +25,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusAttributes } from "../../../generated/io-api/MessageStatusAttributes";
 import { MessageStatusWithAttributes } from "../../../generated/io-api/MessageStatusWithAttributes";
 
-const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
+const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
 const aValidSubject = "Lorem ipsum";
 const aValidMarkdown =
   "# This is a markdown header\n\nto show how easily markdown can be converted to **HTML**\n\nRemember: this has to be a long text.";
@@ -365,7 +365,7 @@ describe("MessageService#getMessage", () => {
       {} as IPecServerClientFactoryInterface
     );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -387,7 +387,7 @@ describe("MessageService#getMessage", () => {
       {} as IPecServerClientFactoryInterface
     );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -403,7 +403,7 @@ describe("MessageService#getMessage", () => {
       {} as IPecServerClientFactoryInterface
     );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
@@ -421,7 +421,7 @@ describe("MessageService#getMessage", () => {
       {} as IPecServerClientFactoryInterface
     );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
@@ -439,7 +439,7 @@ describe("MessageService#getMessage", () => {
       {} as IPecServerClientFactoryInterface
     );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
   });
