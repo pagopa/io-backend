@@ -31,12 +31,13 @@ import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
 import {
   BPDToken,
+  FIMSToken,
   MyPortalToken,
   SessionToken,
   WalletToken,
   ZendeskToken
 } from "../types/token";
-import { User, UserV1, UserV2, UserV3, UserV4 } from "../types/user";
+import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
@@ -47,6 +48,7 @@ const walletKeyPrefix = "WALLET-";
 const myPortalTokenPrefix = "MYPORTAL-";
 const bpdTokenPrefix = "BPD-";
 const zendeskTokenPrefix = "ZENDESK-";
+const fimsTokenPrefix = "FIMS-";
 const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
@@ -78,7 +80,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async set(
-    user: UserV4,
+    user: UserV5,
     expireSec: number = this.tokenDurationSecs
   ): Promise<Either<Error, boolean>> {
     const setSessionToken = new Promise<Either<Error, boolean>>(resolve => {
@@ -171,6 +173,24 @@ export default class RedisSessionStorage extends RedisStorageUtils
       );
     });
 
+    const setFIMSToken = new Promise<Either<Error, boolean>>(resolve => {
+      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+      // @see https://redis.io/commands/set
+      this.redisClient.set(
+        `${fimsTokenPrefix}${user.fims_token}`,
+        user.session_token,
+        "EX",
+        expireSec,
+        (err, response) =>
+          resolve(
+            this.falsyResponseToError(
+              this.singleStringReply(err, response),
+              new Error("Error setting FIMS token")
+            )
+          )
+      );
+    });
+
     // If is a session update, the session info key doesn't must be updated.
     // eslint-disable-next-line functional/no-let
     let saveSessionInfoPromise: Promise<Either<
@@ -196,6 +216,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       setMyPortalToken,
       setBPDToken,
       setZendeskToken,
+      setFIMSToken,
       saveSessionInfoPromise,
       removeOtherUserSessionsPromise
     ]);
@@ -305,6 +326,29 @@ export default class RedisSessionStorage extends RedisStorageUtils
   ): Promise<Either<Error, Option<User>>> {
     const errorOrSession = await this.loadSessionByToken(
       zendeskTokenPrefix,
+      token
+    );
+
+    if (isLeft(errorOrSession)) {
+      if (errorOrSession.value === sessionNotFoundError) {
+        return right(none);
+      }
+      return left(errorOrSession.value);
+    }
+
+    const user = errorOrSession.value;
+
+    return right(some(user));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getByFIMSToken(
+    token: FIMSToken
+  ): Promise<Either<Error, Option<User>>> {
+    const errorOrSession = await this.loadSessionByToken(
+      fimsTokenPrefix,
       token
     );
 
@@ -584,7 +628,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    *
    * @param updatedUser
    */
-  public async update(updatedUser: UserV4): Promise<Either<Error, boolean>> {
+  public async update(updatedUser: UserV5): Promise<Either<Error, boolean>> {
     const errorOrSessionTtl = await this.getSessionTtl(
       updatedUser.session_token
     );
@@ -601,6 +645,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
     }
 
+    // We here update all the token but we can optimize it updating only missing tokens
     const errorOrIsSessionUpdated = await this.set(updatedUser, sessionTtl);
     if (isLeft(errorOrIsSessionUpdated)) {
       return left(
@@ -729,7 +774,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
       return error === sessionNotFoundError
         ? right<Error, boolean>(true)
-        : left(error);
+        : left(toError(error));
     }
   }
 
@@ -811,7 +856,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   private loadSessionByToken(
     prefix: string,
-    token: WalletToken | MyPortalToken | BPDToken | ZendeskToken
+    token: WalletToken | MyPortalToken | BPDToken | ZendeskToken | FIMSToken
   ): Promise<Either<Error, User>> {
     return new Promise(resolve => {
       this.redisClient.get(`${prefix}${token}`, (err, value) => {
@@ -845,7 +890,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * Remove other user sessions and wallet tokens
    */
   private async removeOtherUserSessions(
-    user: UserV4
+    user: UserV5
   ): Promise<Either<Error, boolean>> {
     const errorOrSessionInfoKeys = await this.readSessionInfoKeys(
       user.fiscal_code
@@ -905,7 +950,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
                   !(
                     p.prefix === zendeskTokenPrefix &&
                     p.value === user.zendesk_token
-                  )
+                  ) &&
+                  !(p.prefix === fimsTokenPrefix && p.value === user.fims_token)
               ),
               (_1, { prefix, value }) => `${prefix}${value}`
             )
@@ -1009,6 +1055,27 @@ export default class RedisSessionStorage extends RedisStorageUtils
         value: user.wallet_token
       }
     };
+    if (UserV5.is(user)) {
+      return new StrMap({
+        ...requiredTokens,
+        bpd_token: {
+          prefix: bpdTokenPrefix,
+          value: user.bpd_token
+        },
+        fims_token: {
+          prefix: fimsTokenPrefix,
+          value: user.fims_token
+        },
+        myportal_token: {
+          prefix: myPortalTokenPrefix,
+          value: user.myportal_token
+        },
+        zendesk_token: {
+          prefix: zendeskTokenPrefix,
+          value: user.zendesk_token
+        }
+      });
+    }
     if (UserV4.is(user)) {
       return new StrMap({
         ...requiredTokens,

@@ -12,7 +12,7 @@ import {
   User,
   validateSpidUser
 } from "../user";
-import { mockBPDToken, mockedUser, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
+import { mockBPDToken, mockedUser, mockFIMSToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
 
 const anIssuer = "onelogin_saml" as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -48,6 +48,7 @@ describe("user type", () => {
       mockMyPortalToken,
       mockBPDToken,
       mockZendeskToken,
+      mockFIMSToken,
       mockSessionTrackingId
     );
 

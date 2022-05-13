@@ -17,9 +17,11 @@ import {
   mockWalletToken,
   mockMyPortalToken,
   mockBPDToken,
-  mockZendeskToken
+  mockZendeskToken,
+  mockFIMSToken
 } from "../../__mocks__/user_mock";
 import SessionController from "../sessionController";
+import { User } from "../../types/user";
 
 const aTokenDurationSecs = 3600;
 const mockGet = jest.fn();
@@ -56,6 +58,7 @@ describe("SessionController#getSessionState", () => {
     req.user = {
       ...mockedUser,
       bpd_token: mockBPDToken,
+      fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
       zendesk_token: mockZendeskToken
     };
@@ -67,6 +70,7 @@ describe("SessionController#getSessionState", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
+      fimsToken: mockFIMSToken,
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token,
@@ -74,19 +78,24 @@ describe("SessionController#getSessionState", () => {
     });
   });
 
-  it("create a new myportal_token if missing for current session", async () => {
+  it("create new tokens if missing for current session", async () => {
     req.user = req.user = {
       ...mockedUser,
       bpd_token: undefined,
+      fims_token: undefined,
       myportal_token: undefined,
       zendesk_token: undefined
-    };;
+    } as User;
 
-    mockGetNewToken.mockImplementationOnce(() => mockZendeskToken);
     mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
+    mockGetNewToken.mockImplementationOnce(() => mockFIMSToken);
     mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
+    mockGetNewToken.mockImplementationOnce(() => mockZendeskToken);
 
     mockTtl.mockImplementationOnce((_, callback) => callback(undefined, 2000));
+    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
+      callback(undefined, "OK")
+    );
     mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
       callback(undefined, "OK")
     );
@@ -110,10 +119,11 @@ describe("SessionController#getSessionState", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    expect(mockGetNewToken).toBeCalledTimes(3);
+    expect(mockGetNewToken).toBeCalledTimes(4);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
+      fimsToken: mockFIMSToken,
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockWalletToken,

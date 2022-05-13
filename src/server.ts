@@ -23,6 +23,7 @@ import {
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   EUCOVIDCERT_API_BASE_PATH,
+  FIMS_BASE_PATH,
   MIT_VOUCHER_API_BASE_PATH,
   MYPORTAL_BASE_PATH,
   PAGOPA_BASE_PATH,
@@ -48,6 +49,7 @@ const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const PagoPABasePath = PAGOPA_BASE_PATH;
 const MyPortalBasePath = MYPORTAL_BASE_PATH;
 const BPDBasePath = BPD_BASE_PATH;
+const FIMSBasePath = FIMS_BASE_PATH;
 const CGNAPIBasePath = CGN_API_BASE_PATH;
 const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
 const EUCovidCertBasePath = EUCOVIDCERT_API_BASE_PATH;
@@ -96,6 +98,7 @@ newApp({
   CGNAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
+  FIMSBasePath,
   MitVoucherBasePath,
   MyPortalBasePath,
   PagoPABasePath,

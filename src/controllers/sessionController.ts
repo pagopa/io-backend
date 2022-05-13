@@ -13,11 +13,22 @@ import {
 
 import { isLeft } from "fp-ts/lib/Either";
 import TokenService from "src/services/tokenService";
-import { BPDToken, MyPortalToken, ZendeskToken } from "src/types/token";
+import {
+  BPDToken,
+  FIMSToken,
+  MyPortalToken,
+  ZendeskToken
+} from "src/types/token";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { PublicSession } from "../../generated/backend/PublicSession";
 import RedisSessionStorage from "../services/redisSessionStorage";
-import { UserV2, UserV3, UserV4, withUserFromRequest } from "../types/user";
+import {
+  UserV2,
+  UserV3,
+  UserV4,
+  UserV5,
+  withUserFromRequest
+} from "../types/user";
 
 import { log } from "../utils/logger";
 import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
@@ -35,10 +46,11 @@ export default class SessionController {
     | IResponseSuccessJson<PublicSession>
   > =>
     withUserFromRequest(req, async user => {
-      if (UserV4.is(user)) {
+      if (UserV5.is(user)) {
         // All required tokens are present on the current session, no update is required
         return ResponseSuccessJson({
           bpdToken: user.bpd_token,
+          fimsToken: user.fims_token,
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
@@ -48,21 +60,26 @@ export default class SessionController {
 
       // If the myportal_token, zendesk_token or bpd_token are missing into the user session,
       // new tokens are generated and the session is updated
-      const updatedUser: UserV4 = {
+      const updatedUser: UserV5 = {
         ...user,
         bpd_token: UserV3.is(user)
           ? user.bpd_token
           : (this.tokenService.getNewToken(
               SESSION_TOKEN_LENGTH_BYTES
             ) as BPDToken),
+        fims_token: this.tokenService.getNewToken(
+          SESSION_TOKEN_LENGTH_BYTES
+        ) as FIMSToken,
         myportal_token: UserV2.is(user)
           ? user.myportal_token
           : (this.tokenService.getNewToken(
               SESSION_TOKEN_LENGTH_BYTES
             ) as MyPortalToken),
-        zendesk_token: this.tokenService.getNewToken(
-          SESSION_TOKEN_LENGTH_BYTES
-        ) as ZendeskToken
+        zendesk_token: UserV4.is(user)
+          ? user.zendesk_token
+          : (this.tokenService.getNewToken(
+              SESSION_TOKEN_LENGTH_BYTES
+            ) as ZendeskToken)
       };
 
       return (await this.sessionStorage.update(updatedUser)).fold<
@@ -77,6 +94,7 @@ export default class SessionController {
         _ =>
           ResponseSuccessJson({
             bpdToken: updatedUser.bpd_token,
+            fimsToken: updatedUser.fims_token,
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,

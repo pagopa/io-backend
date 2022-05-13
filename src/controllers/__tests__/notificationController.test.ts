@@ -27,6 +27,7 @@ const anInvalidInstallationID = "" as InstallationID;
 
 const mockedInvalidUser: User = {
   created_at: aTimestamp,
+  date_of_birth: "2002-01-01",
   family_name: "Garibaldi",
   fiscal_code: anInvalidFiscalNumber,
   name: "Giuseppe Maria",
