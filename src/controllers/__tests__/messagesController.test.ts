@@ -356,6 +356,45 @@ describe("MessagesController#getMessage", () => {
     });
   });
 
+  it("calls the getMessage on the messagesController with empty opional parameters", async () => {
+    const req = mockReq();
+
+    mockGetMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
+    );
+
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getMessage(req);
+
+    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+      id: anId
+    });
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyMessageResponse
+    });
+  });
+
   it("calls the getMessage on the messagesController with empty user", async () => {
     const req = mockReq();
     const res = mockRes();
