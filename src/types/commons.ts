@@ -2,6 +2,9 @@
  * Common response message type.
  */
 
+import { identity } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
+
 import * as t from "io-ts";
 
 export const SuccessResponse = t.interface({
@@ -41,3 +44,21 @@ export const CommaSeparatedListOf = (decoder: t.Mixed) =>
       ),
     String
   );
+
+/**
+ * Parses a string into a deserialized json
+ */
+export type JSONFromString = t.TypeOf<typeof jsonFromString>;
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const jsonFromString = new t.Type<object, string>(
+  "JSONFromString",
+  t.UnknownRecord.is,
+  (m, c) =>
+    t.string.validate(m, c).chain(s =>
+      E.tryCatch2v(
+        () => t.success(JSON.parse(s)),
+        _ => t.failure(s, c, E.toError(_).message + "stringa " + s)
+      ).fold(identity, identity)
+    ),
+  String
+);
