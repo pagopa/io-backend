@@ -54,6 +54,7 @@ import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
+import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -741,3 +742,7 @@ export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
       `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
     );
   });
+
+export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
+  process.env.THIRD_PARTY_CONFIG_LIST
+);
