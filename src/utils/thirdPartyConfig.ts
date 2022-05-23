@@ -1,11 +1,10 @@
 /* eslint-disable sort-keys */
 
 import * as t from "io-ts";
-import { fallback } from "io-ts-types";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { jsonFromString } from "../types/commons";
+import { fallback, jsonFromString } from "../types/commons";
 
 export type AuthenticationConfig = t.TypeOf<typeof AuthenticationConfig>;
 export const AuthenticationConfig = t.interface({
