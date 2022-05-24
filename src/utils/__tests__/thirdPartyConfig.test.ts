@@ -1,5 +1,4 @@
 import {
-  ThirdPartyConfigList,
   ThirdPartyConfigListFromString
 } from "../thirdPartyConfig";
 
@@ -7,8 +6,8 @@ import * as E from "fp-ts/lib/Either";
 
 const aValidDetailAuthentication = {
   type: "API_KEY",
-  parameterName: "aParamName",
-  required: true
+  header_key_name: "aParamName",
+  key: "aKey"
 };
 
 const aValidThirdPartyConfig = {
@@ -18,38 +17,6 @@ const aValidThirdPartyConfig = {
   jsonSchema: "aJsonSchema",
   detailsAuthentication: aValidDetailAuthentication
 };
-
-describe("ThirdPartyConfigList", () => {
-  it("should decode an empty array", async () => {
-    const decoded = ThirdPartyConfigList.decode([]);
-    expect(E.isRight(decoded)).toBeTruthy();
-
-    if (E.isRight(decoded)) {
-      const right = decoded.value;
-      expect(right).toEqual([]);
-    }
-  });
-
-  it("should decode an array with a valid config", async () => {
-    const decoded = ThirdPartyConfigList.decode([aValidThirdPartyConfig]);
-    expect(E.isRight(decoded)).toBeTruthy();
-
-    if (E.isRight(decoded)) {
-      const right = decoded.value;
-      expect(right).toEqual([aValidThirdPartyConfig]);
-    }
-  });
-
-  it("should fail decoding an invalid config", async () => {
-    const {
-      detailsAuthentication,
-      ...anInvalidConfig
-    } = aValidThirdPartyConfig;
-
-    const decoded = ThirdPartyConfigList.decode([anInvalidConfig]);
-    expect(E.isRight(decoded)).toBeFalsy();
-  });
-});
 
 describe("ThirdPartyConfigListFromString", () => {
   it("should decode an empty array from an undefined string", async () => {
@@ -84,5 +51,22 @@ describe("ThirdPartyConfigListFromString", () => {
       const right = decoded.value;
       expect(right).toEqual([aValidThirdPartyConfig]);
     }
+  });
+
+  it("should fail decoding a config with missing client_cert fields", async () => {
+    const aValidThirdPartyConfigString = JSON.stringify([
+      {
+        ...aValidThirdPartyConfig,
+        detailsAuthentication: {
+          ...aValidThirdPartyConfig.detailsAuthentication,
+          cert: { client_cert: "aClientCert" }
+        }
+      }
+    ]);
+
+    const decoded = ThirdPartyConfigListFromString.decode(
+      aValidThirdPartyConfigString
+    );
+    expect(E.isRight(decoded)).toBeFalsy();
   });
 });
