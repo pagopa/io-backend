@@ -57,7 +57,7 @@ export const jsonFromString = new t.Type<object, string>(
     t.string.validate(m, c).chain(s =>
       E.tryCatch2v(
         () => t.success(JSON.parse(s)),
-        _ => t.failure(s, c, E.toError(_).message + "stringa " + s)
+        _ => t.failure(s, c, "Error parsing the string into a valid JSON")
       ).fold(identity, identity)
     ),
   String
