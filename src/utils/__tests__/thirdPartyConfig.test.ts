@@ -1,8 +1,8 @@
-import {
-  ThirdPartyConfigListFromString
-} from "../thirdPartyConfig";
-
 import * as E from "fp-ts/lib/Either";
+
+import { ThirdPartyConfigListFromString } from "../thirdPartyConfig";
+
+import { aFiscalCode } from "../../__mocks__/user_mock";
 
 const aValidDetailAuthentication = {
   type: "API_KEY",
@@ -10,12 +10,31 @@ const aValidDetailAuthentication = {
   key: "aKey"
 };
 
-const aValidThirdPartyConfig = {
+const aValidProdThirdPartyConfig = {
+  type: "PROD_ENV",
   serviceId: "aServiceId",
-  baseUrl: "aBaseUrl",
-  kind: "PN",
+  schemaKind: "PN",
   jsonSchema: "aJsonSchema",
-  detailsAuthentication: aValidDetailAuthentication
+  prodEndpoint: {
+    baseUrl: "aBaseUrl",
+    detailsAuthentication: aValidDetailAuthentication
+  }
+};
+
+const aValidTestAndProdThirdPartyConfig = {
+  type: "TEST_PROD_ENV",
+  serviceId: "aServiceId",
+  schemaKind: "PN",
+  jsonSchema: "aJsonSchema",
+  prodEndpoint: {
+    baseUrl: "aBaseUrl",
+    detailsAuthentication: aValidDetailAuthentication
+  },
+  testUsers: [aFiscalCode],
+  testEndpoint: {
+    baseUrl: "anotherBaseUrl",
+    detailsAuthentication: aValidDetailAuthentication
+  }
 };
 
 describe("ThirdPartyConfigListFromString", () => {
@@ -37,9 +56,10 @@ describe("ThirdPartyConfigListFromString", () => {
       expect(right).toEqual([]);
     }
   });
-  it("should decode an array with a valid config", async () => {
+
+  it("should decode an array with a valid PROD config", async () => {
     const aValidThirdPartyConfigString = JSON.stringify([
-      aValidThirdPartyConfig
+      aValidProdThirdPartyConfig
     ]);
 
     const decoded = ThirdPartyConfigListFromString.decode(
@@ -49,17 +69,35 @@ describe("ThirdPartyConfigListFromString", () => {
 
     if (E.isRight(decoded)) {
       const right = decoded.value;
-      expect(right).toEqual([aValidThirdPartyConfig]);
+      expect(right).toEqual([aValidProdThirdPartyConfig]);
+    }
+  });
+
+  it("should decode an array with a valid TEST and PROD config", async () => {
+    const aValidThirdPartyConfigString = JSON.stringify([
+      aValidTestAndProdThirdPartyConfig
+    ]);
+
+    const decoded = ThirdPartyConfigListFromString.decode(
+      aValidThirdPartyConfigString
+    );
+    expect(E.isRight(decoded)).toBeTruthy();
+
+    if (E.isRight(decoded)) {
+      const right = decoded.value;
+      expect(right).toEqual([aValidTestAndProdThirdPartyConfig]);
     }
   });
 
   it("should fail decoding a config with missing client_cert fields", async () => {
     const aValidThirdPartyConfigString = JSON.stringify([
       {
-        ...aValidThirdPartyConfig,
-        detailsAuthentication: {
-          ...aValidThirdPartyConfig.detailsAuthentication,
-          cert: { client_cert: "aClientCert" }
+        ...aValidProdThirdPartyConfig,
+        prodEndpoint: {
+          detailsAuthentication: {
+            ...aValidProdThirdPartyConfig.prodEndpoint.detailsAuthentication,
+            cert: { client_cert: "aClientCert" }
+          }
         }
       }
     ]);

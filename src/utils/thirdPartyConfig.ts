@@ -2,7 +2,7 @@
 
 import * as t from "io-ts";
 
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { fallback, jsonFromString } from "../types/commons";
 
@@ -27,18 +27,34 @@ export const AuthenticationConfig = t.intersection([
   t.partial({ cert: ClientCert })
 ]);
 
+export type EnvironmentConfig = t.TypeOf<typeof EnvironmentConfig>;
+export const EnvironmentConfig = t.interface({
+  baseUrl: NonEmptyString,
+  detailsAuthentication: AuthenticationConfig
+});
+
+export type ThirdPartyConfigBase = t.TypeOf<typeof ThirdPartyConfigBase>;
+export const ThirdPartyConfigBase = t.interface({
+  serviceId: NonEmptyString,
+  schemaKind: NonEmptyString,
+  jsonSchema: NonEmptyString,
+  prodEndpoint: EnvironmentConfig
+});
+
 export type ThirdPartyConfig = t.TypeOf<typeof ThirdPartyConfig>;
-export const ThirdPartyConfig = t.intersection([
-  t.interface({
-    serviceId: NonEmptyString,
-    baseUrl: NonEmptyString,
-    kind: NonEmptyString,
-    jsonSchema: NonEmptyString,
-    detailsAuthentication: AuthenticationConfig
-  }),
-  t.partial({
-    attachmentsAuthentication: AuthenticationConfig
-  })
+export const ThirdPartyConfig = t.taggedUnion("type", [
+  t.intersection([
+    t.interface({ type: t.literal("PROD_ENV") }),
+    ThirdPartyConfigBase
+  ]),
+  t.intersection([
+    t.interface({
+      type: t.literal("TEST_PROD_ENV"),
+      testUsers: t.readonlyArray(FiscalCode),
+      testEndpoint: EnvironmentConfig
+    }),
+    ThirdPartyConfigBase
+  ])
 ]);
 
 export type ThirdPartyConfigList = t.TypeOf<typeof ThirdPartyConfigList>;
