@@ -1,19 +1,53 @@
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
+import nodeFetch from "node-fetch";
+
 import { FiscalCode } from "generated/io-api/FiscalCode";
 import { ServiceId } from "generated/io-api/ServiceId";
-import nodeFetch from "node-fetch";
 import {
   ThirdPartyConfig,
-  ThirdPartyConfigListFromString
+  ThirdPartyConfigListFromString,
+  ApiKeyAuthenticationConfig
 } from "src/utils/thirdPartyConfig";
+
 import {
   Client,
   createClient
 } from "../../generated/third-party-service/client";
 
+type Fetch = (
+  input: RequestInfo | URL,
+  init?: RequestInit | undefined
+) => Promise<Response>;
 export type ThirdPartyServiceClient = typeof getThirdPartyServiceClient;
+
+/**
+ * Enrich a fetch api with header apiKey-value
+ *
+ * @param apiKey
+ * @returns
+ */
+const withApiKey = (apiKey: ApiKeyAuthenticationConfig) => (
+  fetchApi: Fetch
+): Fetch => async (input, init) =>
+  fetchApi(input, {
+    ...init,
+    headers: {
+      ...(init?.headers ?? {}),
+      ...{ [apiKey.header_key_name]: apiKey.key }
+    }
+  });
+
+/**
+ * Enrich a fetch api with manual redirect configuration
+ *
+ * @param apiKey
+ * @returns
+ */
+const withoutRedirect = (fetchApi: Fetch): Fetch => async (input, init) =>
+  fetchApi(input, { ...init, redirect: "manual" });
+
 /**
  *
  * @param thirdPartyConfig
@@ -23,7 +57,7 @@ export type ThirdPartyServiceClient = typeof getThirdPartyServiceClient;
  */
 export const getThirdPartyServiceClient = (
   thirdPartyConfig: ThirdPartyConfig,
-  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch
+  fetchApi: Fetch = (nodeFetch as unknown) as Fetch
 ) => (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
   const config = thirdPartyConfig.testEnvironment?.testUsers.includes(
     fiscalCode
@@ -33,15 +67,16 @@ export const getThirdPartyServiceClient = (
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       thirdPartyConfig.prodEnvironment ?? thirdPartyConfig.testEnvironment!;
 
-  const fetchApiWithAuthentication = (
-    input: RequestInfo,
-    init?: RequestInit | undefined
-  ) => fetchApi(input, { ...init, redirect: "manual" });
+  const fetchApiWithRedirectAndAuthentication = pipe(
+    fetchApi,
+    withoutRedirect,
+    withApiKey(config.detailsAuthentication)
+  );
 
   return createClient<"fiscal_code">({
     basePath: "",
     baseUrl: config.baseUrl,
-    fetchApi: fetchApiWithAuthentication,
+    fetchApi: fetchApiWithRedirectAndAuthentication,
     withDefaults: op => params => op({ ...params, fiscal_code: fiscalCode })
   });
 };
@@ -59,7 +94,7 @@ export type ThirdPartyServiceClientFactory = ReturnType<
  */
 export const getThirdPartyServiceClientFactory = (
   thirdPartyConfigList: ThirdPartyConfigListFromString,
-  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch
+  fetchApi: Fetch = (nodeFetch as unknown) as Fetch
 ): ((
   serviceId: ServiceId
 ) => E.Either<Error, ReturnType<ThirdPartyServiceClient>>) => serviceId =>
