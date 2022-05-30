@@ -33,27 +33,38 @@ export const EnvironmentConfig = t.interface({
   detailsAuthentication: AuthenticationConfig
 });
 
+export type TestEnvironmentConfig = t.TypeOf<typeof TestEnvironmentConfig>;
+export const TestEnvironmentConfig = t.union([
+  t.interface({
+    testUsers: t.readonlyArray(FiscalCode)
+  }),
+  EnvironmentConfig
+]);
+
 export type ThirdPartyConfigBase = t.TypeOf<typeof ThirdPartyConfigBase>;
 export const ThirdPartyConfigBase = t.interface({
   serviceId: NonEmptyString,
   schemaKind: NonEmptyString,
-  jsonSchema: NonEmptyString,
-  prodEndpoint: EnvironmentConfig
+  jsonSchema: NonEmptyString
 });
 
+/**
+ * ThirdPartyConfig
+ *
+ * At least one between prodEndpoint and testEndpoint must be defined
+ */
 export type ThirdPartyConfig = t.TypeOf<typeof ThirdPartyConfig>;
-export const ThirdPartyConfig = t.taggedUnion("type", [
-  t.intersection([
-    t.interface({ type: t.literal("PROD_ENV") }),
-    ThirdPartyConfigBase
-  ]),
-  t.intersection([
-    t.interface({
-      type: t.literal("TEST_PROD_ENV"),
-      testUsers: t.readonlyArray(FiscalCode),
-      testEndpoint: EnvironmentConfig
-    }),
-    ThirdPartyConfigBase
+export const ThirdPartyConfig = t.intersection([
+  ThirdPartyConfigBase,
+  t.union([
+    t.intersection([
+      t.interface({ prodEnvironment: EnvironmentConfig }),
+      t.partial({ testEnvironment: TestEnvironmentConfig })
+    ]),
+    t.intersection([
+      t.partial({ prodEnvironment: EnvironmentConfig }),
+      t.interface({ testEnvironment: TestEnvironmentConfig })
+    ])
   ])
 ]);
 
