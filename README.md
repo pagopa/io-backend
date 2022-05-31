@@ -206,6 +206,7 @@ Those are all Environment variables needed by the application:
 | FF_MESSAGES_TYPE                       | (Optional, default `none`) FF type for new messages implementations               | string |
 | FF_MESSAGES_BETA_TESTER_LIST           | (Optional, default empty) A list of hashed fiscal codes of beta testers           | string |
 | FF_MESSAGES_CANARY_USERS_REGEX         | (Optional, default `XYZ`) A regex for choosing canary users                       | string |
+| THIRD_PARTY_CONFIG_LIST                | (Optional, default empty) A list of ThirdParty Configuration                      | stringified JSON |
 
 
 Notes:
