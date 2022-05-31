@@ -34,7 +34,7 @@ export const EnvironmentConfig = t.interface({
 });
 
 export type TestEnvironmentConfig = t.TypeOf<typeof TestEnvironmentConfig>;
-export const TestEnvironmentConfig = t.union([
+export const TestEnvironmentConfig = t.intersection([
   t.interface({
     testUsers: t.readonlyArray(FiscalCode)
   }),
