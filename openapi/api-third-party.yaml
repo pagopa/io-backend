@@ -1,0 +1,45 @@
+swagger: '2.0'
+info:
+  title: Third Party Messages - Server implementation
+  version: '1'
+basePath: /
+schemes:
+  - https
+paths:
+  '/messages/{id}':
+    get:
+      operationId: getThirdPartyMessageDetails
+      summary: Retrieve a Third Party message
+      description: |-
+        Returns the Third Party message with the provided message ID.
+        User's fiscal code is required as header parameter.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: fiscal_code
+          required: true
+          type: string
+        - in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ThirdPartyMessageDetail'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+definitions:
+  ThirdPartyMessageDetail:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/ICC-87--add-third-party-message-endpoint/openapi/definitions.yaml#/ThirdPartyMessage"
+  
