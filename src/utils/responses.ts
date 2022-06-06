@@ -196,7 +196,7 @@ export interface IResponseErrorNotImplemented
   readonly detail: string;
 }
 /**
- * Returns an unauthorized error response with status code 501.
+ * Returns a Not Implemented error response with status code 501.
  */
 export const ResponseErrorNotImplemented = (
   detail: string
