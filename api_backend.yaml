@@ -398,7 +398,7 @@ paths:
     x-swagger-router-controller: MessagesController
     get:
       operationId: getThirdPartyMessage
-      summary: Eetrieve Third Party message
+      summary: Retrieve Third Party message
       description: |-
         Returns the Third Party message with the provided message ID.
       parameters:
