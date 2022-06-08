@@ -951,6 +951,24 @@ function registerAPIRoutes(
   );
 
   app.get(
+    `${basePath}/third-party-messages/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessage,
+      messagesController
+    )
+  );
+
+  app.get(
+    `${basePath}/third-party-messages/:id/attachments/:attachment_url`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessageAttachment,
+      messagesController
+    )
+  );
+
+  app.get(
     `${basePath}/services/:id`,
     bearerSessionTokenAuth,
     cachingMiddleware(),
