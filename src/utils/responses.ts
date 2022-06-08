@@ -187,3 +187,27 @@ export const wrapValidationWithInternalError: <A>(
   TE.fromEither(fa)
     .mapLeft(errorsToError)
     .mapLeft(e => ResponseErrorInternal(e.message));
+
+/**
+ * Interface for NotImplemented error response.
+ */
+export interface IResponseErrorNotImplemented
+  extends IResponse<"IResponseErrorNotImplemented"> {
+  readonly detail: string;
+}
+/**
+ * Returns a Not Implemented error response with status code 501.
+ */
+export const ResponseErrorNotImplemented = (
+  detail: string
+): IResponseErrorNotImplemented => ({
+  ...ResponseErrorGeneric(
+    HttpStatusCodeEnum.HTTP_STATUS_501,
+    "Not Implemented",
+    detail
+  ),
+  ...{
+    detail: `Not Implemented: ${detail}`,
+    kind: "IResponseErrorNotImplemented"
+  }
+});

@@ -30,7 +30,9 @@ import { GetMessageParameters } from "../../generated/parameters/GetMessageParam
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import {
   withValidatedOrValidationError,
-  IResponseSuccessOctet
+  IResponseSuccessOctet,
+  IResponseErrorNotImplemented,
+  ResponseErrorNotImplemented
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
@@ -183,5 +185,26 @@ export default class MessagesController {
                 .upsertMessageStatus(user.fiscal_code, messageId, change)
           )
       )
+    );
+
+  /**
+   * Returns the Third Party message identified by the message id.
+   */
+  public readonly getThirdPartyMessage = (
+    req: express.Request
+  ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
+    withUserFromRequest(req, _user =>
+      Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+    );
+
+  /**
+   * Returns the Third Party message attachments identified by the Third Party message id and the attachment relative url.
+   */
+  public readonly getThirdPartyMessageAttachment = (
+    req: express.Request
+    // eslint-disable-next-line sonarjs/no-identical-functions
+  ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
+    withUserFromRequest(req, _user =>
+      Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
     );
 }
