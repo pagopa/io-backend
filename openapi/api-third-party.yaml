@@ -16,16 +16,8 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: header
-          name: fiscal_code
-          required: true
-          type: string
-        - in: path
-          name: id
-          type: string
-          minLength: 1
-          required: true
-          description: ID of the Third Party message.
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/ThirdPartyMessageId"
       responses:
         '200':
           description: Found
@@ -64,14 +56,10 @@ paths:
       produces:
         - application/octet-stream
       parameters:
-        - name: id
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/ThirdPartyMessageId"
+        - name: attachment_url
           in: path
-          type: string
-          minLength: 1
-          required: true
-          description: ID of the IO message.
-        - in: path
-          name: attachment_url
           type: string
           minLength: 1
           required: true
@@ -99,6 +87,24 @@ paths:
           description: Internal Server Error
           schema:
             $ref: "#/definitions/ProblemJson"
+parameters:
+  FiscalCode:
+    name: fiscal_code
+    in: header
+    type: string
+    maxLength: 16
+    minLength: 16
+    required: true
+    description: The fiscal code of the user, all upper case.
+    pattern: >-
+      [A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]
+  ThirdPartyMessageId:
+    name: id
+    in: path
+    type: string
+    minLength: 1
+    required: true
+    description: ID of the Third Party message.
 definitions:
   ThirdPartyMessageDetail:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ThirdPartyMessage"
