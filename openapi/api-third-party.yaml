@@ -101,7 +101,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   ThirdPartyMessageDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.1.0/openapi/definitions.yaml#/ThirdPartyMessage"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ThirdPartyMessage"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.1.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ProblemJson"
   
