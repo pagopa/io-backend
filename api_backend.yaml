@@ -75,7 +75,7 @@ paths:
             "$ref": "#/definitions/ServicePreference"
           examples:
             application/json:
-              is_allowed_send_read_message_status: true
+              can_access_message_read_status: true
               is_inbox_enabled: true
               is_email_enabled: false
               is_webhook_enabled: true
@@ -112,7 +112,7 @@ paths:
             "$ref": "#/definitions/ServicePreference"
           examples:
             application/json:
-              is_allowed_send_read_message_status: true
+              can_access_message_read_status: true
               is_inbox_enabled: true
               is_email_enabled: false
               is_webhook_enabled: true
