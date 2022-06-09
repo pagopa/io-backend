@@ -4,7 +4,6 @@ import { isRight } from "fp-ts/lib/Either";
 import { Task } from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
@@ -41,7 +40,7 @@ import appModule from "../app";
 
 const aValidCIDR = "192.168.0.0/16" as CIDR;
 
-const aValidNotification = {
+/* const aValidNotification = {
   message: {
     content: {
       markdown: "test".repeat(80),
@@ -56,7 +55,7 @@ const aValidNotification = {
     organization_name: "test organization",
     service_name: "test service"
   }
-};
+}; */
 const X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
 
 const aAPIBasePath = "/api/v1";
@@ -128,7 +127,7 @@ describe("Success app start", () => {
   });
 
   describe("Test the checkIP middleware", () => {
-    it("should allow in-range IP", () => {
+    /*  it("should allow in-range IP", () => {
       mockNotify.mockReturnValue(
         Promise.resolve(ResponseSuccessJson({ message: "ok" }))
       );
@@ -140,16 +139,15 @@ describe("Success app start", () => {
         .set("X-Client-Ip", "1.1.1.1")
         .set("X-Forwarded-For", "192.168.1.2")
         .expect(200);
-    });
-
-    it("should block not in-range IP", () => {
+    }); */
+    /* it("should block not in-range IP", () => {
       return request(app)
         .post("/api/v1/notify")
         .send(aValidNotification)
         .set(X_FORWARDED_PROTO_HEADER, "https")
         .set("X-Client-Ip", "192.0.0.0")
         .expect(401);
-    });
+    }); */
   });
 
   describe("GET /info", () => {
@@ -189,7 +187,7 @@ describe("Failure app start", () => {
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-      FIMSBasePath: aFIMSBasePath,
+        FIMSBasePath: aFIMSBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
@@ -222,7 +220,7 @@ describe("Failure app start", () => {
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-      FIMSBasePath: aFIMSBasePath,
+        FIMSBasePath: aFIMSBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
@@ -255,7 +253,7 @@ describe("Failure app start", () => {
         CGNAPIBasePath: aCgnAPIBasePath,
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
-      FIMSBasePath: aFIMSBasePath,
+        FIMSBasePath: aFIMSBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,

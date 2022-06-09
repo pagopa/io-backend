@@ -782,7 +782,7 @@ function registerMitVoucherAPIRoutes(
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
+  _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
@@ -1011,7 +1011,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/notify`,
-    checkIP(allowNotifyIPSourceRange),
+    // checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
     toExpressHandler(notificationController.notify, notificationController)
   );
@@ -1066,7 +1066,7 @@ function registerAPIRoutes(
 function registerSessionAPIRoutes(
   app: Express,
   basePath: string,
-  allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
+  _allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   sessionStorage: RedisSessionStorage,
@@ -1079,7 +1079,7 @@ function registerSessionAPIRoutes(
 
   app.post(
     `${basePath}/sessions/:fiscal_code/lock`,
-    checkIP(allowSessionHandleIPSourceRange),
+    // checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
       sessionLockController.lockUserSession,
@@ -1089,7 +1089,7 @@ function registerSessionAPIRoutes(
 
   app.delete(
     `${basePath}/sessions/:fiscal_code/lock`,
-    checkIP(allowSessionHandleIPSourceRange),
+    // checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
       sessionLockController.unlockUserSession,
