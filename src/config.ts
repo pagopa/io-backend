@@ -746,3 +746,22 @@ export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
 export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
   process.env.THIRD_PARTY_CONFIG_LIST
 );
+
+// -------------------------------
+// FF Appbackendli
+// -------------------------------
+
+// Enable /notify and session/:fiscal_code/lock endpoint
+// only if code is deployed on appbackendli
+
+export const FF_ENABLE_NOTIFY_ENDPOINT = fromNullable(
+  process.env.IS_APPBACKENDLI
+)
+  .map(_ => _.toLowerCase() === "true")
+  .getOrElse(false);
+
+export const FF_ENABLE_SESSION_LOCK_ENDPOINT = fromNullable(
+  process.env.IS_APPBACKENDLI
+)
+  .map(_ => _.toLowerCase() === "true")
+  .getOrElse(false);
