@@ -67,7 +67,7 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/ServicePreference"
+            $ref: "#/definitions/UpsertServicePreference"
       responses:
         "200":
           description: Service Preference found.
@@ -75,6 +75,7 @@ paths:
             "$ref": "#/definitions/ServicePreference"
           examples:
             application/json:
+              is_allowed_send_read_message_status: true
               is_inbox_enabled: true
               is_email_enabled: false
               is_webhook_enabled: true
@@ -111,6 +112,7 @@ paths:
             "$ref": "#/definitions/ServicePreference"
           examples:
             application/json:
+              is_allowed_send_read_message_status: true
               is_inbox_enabled: true
               is_email_enabled: false
               is_webhook_enabled: true
@@ -1145,8 +1147,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ServicePreferencesSettings"
   ServicesPreferencesMode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ServicesPreferencesMode"
+  BasicServicePreference:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-458-read-status-preferences/openapi/definitions.yaml#/BasicServicePreference"
   ServicePreference:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ServicePreference"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-458-read-status-preferences/openapi/definitions.yaml#/ServicePreference"
+  UpsertServicePreference:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/IC-458-read-status-preferences/openapi/definitions.yaml#/UpsertServicePreference"
   EnrichedMessage:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/EnrichedMessage"
   PublicMessage:
