@@ -782,7 +782,7 @@ function registerMitVoucherAPIRoutes(
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
+  _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
@@ -1011,7 +1011,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/notify`,
-    checkIP(allowNotifyIPSourceRange),
+    // checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
     toExpressHandler(notificationController.notify, notificationController)
   );
