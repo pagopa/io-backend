@@ -195,8 +195,23 @@ export default class MessagesController {
   public readonly getThirdPartyMessage = (
     req: express.Request
   ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
-    withUserFromRequest(req, _user =>
-      Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        NonEmptyString.decode(req.params.id),
+        messageId => {
+          tryCatch(
+            () =>
+              this.messageServiceSelector
+                .select(user.fiscal_code)
+                .getMessage(user, { id: messageId }),
+            _err => ResponseErrorInternal("Error retrieving message")
+          );
+
+          return Promise.resolve(
+            ResponseErrorNotImplemented("Not implemented yet")
+          );
+        }
+      )
     );
 
   /**
