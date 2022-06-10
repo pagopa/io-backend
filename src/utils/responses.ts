@@ -20,6 +20,7 @@ import {
   ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { errorsToError } from "./errorsFormatter";
 
 /**
@@ -185,9 +186,11 @@ export const ResponseSuccessOctet = (o: Buffer): IResponseSuccessOctet => ({
 export const wrapValidationWithInternalError: <A>(
   fa: t.Validation<A>
 ) => TE.TaskEither<IResponseErrorInternal, A> = fa =>
-  TE.fromEither(fa)
-    .mapLeft(errorsToError)
-    .mapLeft(e => ResponseErrorInternal(e.message));
+  pipe(
+    TE.fromEither(fa),
+    TE.mapLeft(errorsToError),
+    TE.mapLeft(e => ResponseErrorInternal(e.message))
+  );
 
 /**
  * Interface for NotImplemented error response.
