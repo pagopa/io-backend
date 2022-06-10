@@ -1161,11 +1161,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/MessageCategoryBase"
   MessageCategoryPayment:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/MessageCategoryPayment"
+  MessageCategoryPN:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/MessageCategoryPN"
   LegalMessageWithContent:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/LegalMessageWithContent"
   LegalMessage:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/LegalMessage"
-  
   ThirdPartyData:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ThirdPartyData"
   ThirdPartyMessageWithContent:
