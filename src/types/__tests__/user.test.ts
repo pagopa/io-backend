@@ -6,14 +6,13 @@ import * as E from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
 import { Issuer } from "../issuer";
-import { BPDToken, MyPortalToken, SessionToken, WalletToken } from "../token";
 import {
   extractUserFromJson,
   toAppUser,
   User,
   validateSpidUser
 } from "../user";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockBPDToken, mockedUser, mockFIMSToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
 
 const anIssuer = "onelogin_saml" as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -36,10 +35,6 @@ const mockedInvalidSpidUser: any = {
   aKey: "aValue"
 };
 
-const mockSessionToken = "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b" as SessionToken;
-const mockWalletToken = "b1d8fbe93cc465e9dac98ff77018062d83d5f276279c0eea41960ed6e4199d4ce7ac51fcde4ea4a4755d09f621723388" as WalletToken;
-const mockMyPortalToken = "e9dac98ff7c465e9dac98ff77018062d83d5f276279c0eea4196cebed620488a4f932a62de4ea4a4755d09f6217fcde4" as MyPortalToken;
-const mockBPDToken = "eb6f94618021f75690c964ec63d5b27f2c7fd4f50a75fcea4256a9d96b43dcbb2a635530d8d63ec11eec3df6a0575268" as BPDToken;
 const mockSessionTrackingId = "324e25dcecebed6fewf2";
 
 describe("user type", () => {
@@ -52,6 +47,8 @@ describe("user type", () => {
       mockWalletToken,
       mockMyPortalToken,
       mockBPDToken,
+      mockZendeskToken,
+      mockFIMSToken,
       mockSessionTrackingId
     );
 

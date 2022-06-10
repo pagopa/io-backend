@@ -2,23 +2,29 @@
 
 import * as e from "express";
 import * as t from "io-ts";
-import {
-  OrganizationFiscalCode
-} from "@pagopa/ts-commons/lib/strings";
+import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { ServiceId } from "../../../generated/io-api/ServiceId";
 
 import { APIClient } from "../../clients/api";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import MessageService from "../messagesService";
 import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { GetMessagesParameters } from "../../../generated/backend/GetMessagesParameters";
+import { GetMessagesParameters } from "../../../generated/parameters/GetMessagesParameters";
+import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
+import { IPecServerClient } from "../../clients/pecserver";
+import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
+import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
+import { MessageStatusValueEnum } from "../../../generated/io-api/MessageStatusValue";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { MessageStatusAttributes } from "../../../generated/io-api/MessageStatusAttributes";
+import { MessageStatusWithAttributes } from "../../../generated/io-api/MessageStatusWithAttributes";
 
-const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q";
+const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
 const aValidSubject = "Lorem ipsum";
 const aValidMarkdown =
   "# This is a markdown header\n\nto show how easily markdown can be converted to **HTML**\n\nRemember: this has to be a long text.";
@@ -27,7 +33,12 @@ const aValidOrganizationName = "Organization name";
 const aValidServiceID = "5a563817fcc896087002ea46c49a";
 const aValidServiceName = "Service name";
 const aValidOrganizationFiscalCode = "01234567891" as OrganizationFiscalCode;
-
+const aValidLegalData = {
+  sender_mail_from: "test@legal.it",
+  has_attachment: false,
+  message_unique_id: "A_MSG_UNIQUE_ID"
+};
+const aValidPecServerJwtToken = "aValidToken";
 const validApiMessagesResponse = {
   status: 200,
   value: {
@@ -94,6 +105,61 @@ const validApiMessageResponseWithPrescriptionMetadata = {
     status: "PROCESSED"
   }
 };
+const validApiMessageResponseWithLegalData = {
+  status: 200,
+  value: {
+    message: {
+      content: {
+        markdown: "a".repeat(81),
+        subject: aValidSubject,
+        legal_data: aValidLegalData
+      },
+      created_at: new Date(),
+      fiscal_code: "LSSLCU79B24L219P",
+      id: "01CFSP4XYK3Y0VZTKHW9FKS1XM",
+      sender_service_id: "5a563817fcc896087002ea46c49a"
+    },
+    notification: {
+      email: "SENT",
+      webhook: "SENT"
+    },
+    status: "PROCESSED"
+  }
+};
+
+const validApiLegalMessageResponse = {
+  status: 200,
+  value: {
+    cert_data: {
+      data: {
+        envelope_id: "anEnvelopeId",
+        msg_id: "<msgId@pec.it>",
+        receipt_type: "completa",
+        sender_provider: "aProvider",
+        timestamp: new Date()
+      },
+      header: {
+        object: "anObject",
+        recipients: "aRecipient@pec.it",
+        replies: "sender@pec.it",
+        sender: "sender@pec.it"
+      }
+    },
+    eml: {
+      attachments: [
+        {
+          content_type: "application/pdf",
+          id: "0",
+          name: "attachment_name",
+          url: "/messages/message_unique_id/attachments/0"
+        }
+      ],
+      html_content: "",
+      plain_text_content: "aPlainTextContent",
+      subject: "A Legal Subject"
+    }
+  }
+};
 
 const validApiServiceResponse = {
   status: 200,
@@ -131,6 +197,8 @@ const proxyMessagesResponse = {
   page_size: validApiMessagesResponse.value.page_size
 };
 const proxyMessageResponse = validApiMessageResponse.value.message;
+const proxyLegalMessageResponse =
+  validApiMessageResponseWithLegalData.value.message;
 
 const proxyServiceResponse = {
   department_name: aValidDepartmentName,
@@ -140,7 +208,6 @@ const proxyServiceResponse = {
   service_name: aValidServiceName,
   version: 0
 };
-
 
 const mockParameters: GetMessagesParameters = {
   pageSize: undefined,
@@ -155,6 +222,7 @@ const mockGetMessage = jest.fn();
 const mockGetService = jest.fn();
 const mockGetServicePreferences = jest.fn();
 const mockUpsertServicePreferences = jest.fn();
+const mockUpsertMessageStatus = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -168,13 +236,36 @@ const mockClient: Partial<ReturnType<APIClient>> = {
   getService: mockGetService,
   getVisibleServices: mockGetServices,
   getServicePreferences: mockGetServicePreferences,
-  upsertServicePreferences: mockUpsertServicePreferences
+  upsertServicePreferences: mockUpsertServicePreferences,
+  upsertMessageStatusAttributes: mockUpsertMessageStatus
 };
 jest
   .spyOn(ApiClientFactory.prototype, "getClient")
   .mockImplementation(() => (mockClient as unknown) as ReturnType<APIClient>);
 
 const api = new ApiClientFactory("", "");
+const mockGetLegalMessage = jest.fn();
+const mockGetLegalMessageAttachment = jest.fn();
+const mockPecServerApiClient: Partial<ReturnType<IPecServerClient>> = {
+  getMessage: mockGetLegalMessage,
+  getAttachmentBody: mockGetLegalMessageAttachment
+};
+const pecServerClientFactoryMock = {
+  getClient: jest
+    .fn()
+    .mockImplementation(() => taskEither.of(mockPecServerApiClient))
+} as IPecServerClientFactoryInterface;
+
+const aValidAttachmentResponse = {
+  status: 200,
+  arrayBuffer: jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(Buffer.from("anAttachment")))
+};
+
+const aBearerGenerator = jest
+  .fn()
+  .mockImplementation(() => taskEither.of(aValidPecServerJwtToken));
 
 describe("MessageService#getMessagesByUser", () => {
   it("returns a list of messages from the API", async () => {
@@ -182,7 +273,10 @@ describe("MessageService#getMessagesByUser", () => {
       return t.success(validApiMessagesResponse);
     });
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -200,7 +294,10 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(emptyApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -215,7 +312,10 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
 
@@ -225,7 +325,10 @@ describe("MessageService#getMessagesByUser", () => {
   it("returns an error if the getMessagesByUser API returns an error", async () => {
     mockGetMessages.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
@@ -239,7 +342,10 @@ describe("MessageService#getMessagesByUser", () => {
       t.success(invalidApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
     expect(mockGetMessages).toHaveBeenCalledWith({
@@ -253,9 +359,12 @@ describe("MessageService#getMessage", () => {
   it("returns a message from the API", async () => {
     mockGetMessage.mockImplementation(() => t.success(validApiMessageResponse));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -272,9 +381,12 @@ describe("MessageService#getMessage", () => {
       t.success(validApiMessageResponseWithPrescriptionMetadata)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -285,9 +397,12 @@ describe("MessageService#getMessage", () => {
   it("returns an error if the getMessage API returns an error", async () => {
     mockGetMessage.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
@@ -300,9 +415,12 @@ describe("MessageService#getMessage", () => {
       t.success(invalidApiMessageResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageId
@@ -315,11 +433,223 @@ describe("MessageService#getMessage", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
-    const res = await service.getMessage(mockedUser, aValidMessageId);
+    const res = await service.getMessage(mockedUser, { id: aValidMessageId });
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
+  });
+});
+
+describe("MessageService#getLegalMessage", () => {
+  it("returns a legal message from the API", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessage.mockImplementation(async () =>
+      t.success(validApiLegalMessageResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: proxyLegalMessageResponse
+    });
+  });
+  it("returns an error if the getMessage API returns an error", async () => {
+    mockGetMessage.mockImplementation(async () => t.success(problemJson));
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns unknown response if the response from the getMessage API returns something wrong", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(invalidApiMessageResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error response if the response from the getMessage API returns a message without legal data", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponse)
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error response if bearer generator fails to generate a valid jwt", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponse)
+    );
+
+    aBearerGenerator.mockImplementation(() =>
+      fromLeft(new Error("Cannot generate jwt"))
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("returns an error response if the response from the getLegalMessage API returns an error", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiLegalMessageResponse)
+    );
+
+    mockGetLegalMessage.mockImplementation(async () => t.success(problemJson));
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessage(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId
+    });
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+});
+
+describe("MessageService#getLegalMessageAttachment", () => {
+  it("returns a legal message attachment from the API", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      taskEither.of(aValidAttachmentResponse)
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator,
+      aValidMessageId
+    );
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessOctet",
+      value: aValidAttachmentResponse.arrayBuffer()
+    });
+  });
+
+  it("returns a response error if bearerGenerator fails to generate a valid jwt", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      taskEither.of(aValidAttachmentResponse)
+    );
+
+    aBearerGenerator.mockImplementation(() =>
+      fromLeft(new Error("Cannot generate jwt"))
+    );
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator,
+      aValidMessageId
+    );
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessOctet",
+      value: aValidAttachmentResponse.arrayBuffer()
+    });
+  });
+  it("returns an error if there are connectivity error on getLegalMessageAttachment API", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      fromLeft(new Error("Connection timeout"))
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator,
+      aValidMessageId
+    );
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+  it("returns an error if the getLegalMessageAttachment API returns an error", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponseWithLegalData)
+    );
+    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
+      fromLeft(new Error("Problem"))
+    );
+
+    const service = new MessageService(api, pecServerClientFactoryMock);
+
+    const res = await service.getLegalMessageAttachment(
+      mockedUser,
+      aValidMessageId,
+      aBearerGenerator,
+      aValidMessageId
+    );
+    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
@@ -327,7 +657,10 @@ describe("MessageService#getService", () => {
   it("returns a service from the API", async () => {
     mockGetService.mockImplementation(() => t.success(validApiServiceResponse));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getService(aValidServiceID);
 
@@ -343,7 +676,10 @@ describe("MessageService#getService", () => {
   it("returns an error if the API returns an error", async () => {
     mockGetService.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
       service_id: aValidServiceID
@@ -356,7 +692,10 @@ describe("MessageService#getService", () => {
       t.success(invalidApiServiceResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
@@ -370,7 +709,10 @@ describe("MessageService#getService", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
 
     const res = await service.getService(aValidServiceID);
 
@@ -398,7 +740,10 @@ describe("MessageService#getServicePreferences", () => {
       });
     });
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
     const res = await service.getServicePreferences(
       mockedUser.fiscal_code,
       aValidServiceID as ServiceId
@@ -440,7 +785,10 @@ describe("MessageService#getServicePreferences", () => {
         });
       });
 
-      const service = new MessageService(api);
+      const service = new MessageService(
+        api,
+        {} as IPecServerClientFactoryInterface
+      );
       const res = await service.getServicePreferences(
         mockedUser.fiscal_code,
         aValidServiceID as ServiceId
@@ -479,7 +827,10 @@ describe("MessageService#upsertServicePreferences", () => {
       });
     });
 
-    const service = new MessageService(api);
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
     const res = await service.upsertServicePreferences(
       mockedUser.fiscal_code,
       aValidServiceID as ServiceId,
@@ -523,7 +874,10 @@ describe("MessageService#upsertServicePreferences", () => {
         });
       });
 
-      const service = new MessageService(api);
+      const service = new MessageService(
+        api,
+        {} as IPecServerClientFactoryInterface
+      );
       const res = await service.upsertServicePreferences(
         mockedUser.fiscal_code,
         aValidServiceID as ServiceId,
@@ -538,6 +892,110 @@ describe("MessageService#upsertServicePreferences", () => {
       expect(res).toMatchObject({
         kind: expected_kind,
         detail: expected_detail
+      });
+    }
+  );
+});
+
+describe("MessageService#upsertMessageStatus", () => {
+  const aMessageStatusChange: MessageStatusChange = {
+    change_type: Reading_Change_typeEnum.reading,
+    is_read: true
+  };
+
+  const aMessageStatusAttributes: MessageStatusAttributes = {
+    is_read: true,
+    is_archived: false
+  };
+
+  const aMessageStatusWithAttributes: MessageStatusWithAttributes = {
+    is_read: true,
+    is_archived: false,
+    status: MessageStatusValueEnum.PROCESSED,
+    version: 1,
+    updated_at: new Date()
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    mockUpsertMessageStatus.mockImplementation(() => {
+      return t.success({
+        status: 200,
+        value: aMessageStatusWithAttributes
+      });
+    });
+
+    const service = new MessageService(
+      api,
+      {} as IPecServerClientFactoryInterface
+    );
+    const res = await service.upsertMessageStatus(
+      mockedUser.fiscal_code,
+      aValidMessageId as NonEmptyString,
+      aMessageStatusChange
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aMessageStatusAttributes
+    });
+
+    if (res.kind === "IResponseSuccessJson") {
+      expect(res.value).not.toHaveProperty("version");
+      expect(res.value).not.toHaveProperty("status");
+      expect(res.value).not.toHaveProperty("updated_at");
+    }
+
+    expect(mockUpsertMessageStatus).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageId,
+      body: aMessageStatusChange
+    });
+  });
+
+  it.each`
+    title                                                            | statusCode | value   | expectedStatusCode | expectedKind                       | expectedDetail
+    ${"return IResponseErrorInternal if status is 401"}              | ${401}     | ${null} | ${500}             | ${"IResponseErrorInternal"}        | ${"Internal server error: Underlying API fails with an unexpected 401"}
+    ${"return IResponseErrorNotFound if status is 404"}              | ${404}     | ${null} | ${404}             | ${"IResponseErrorNotFound"}        | ${"Not Found: Message status not found"}
+    ${"return IResponseErrorTooManyRequests if status is 429"}       | ${429}     | ${null} | ${429}             | ${"IResponseErrorTooManyRequests"} | ${"Too many requests: "}
+    ${"return IResponseErrorInternal if status code is not in spec"} | ${418}     | ${null} | ${500}             | ${"IResponseErrorInternal"}        | ${"Internal server error: unhandled API response status [418]"}
+  `(
+    "should $title",
+    async ({
+      statusCode,
+      value,
+      expectedStatusCode,
+      expectedKind,
+      expectedDetail
+    }) => {
+      mockUpsertMessageStatus.mockImplementation(() => {
+        return t.success({
+          status: statusCode,
+          value
+        });
+      });
+
+      const service = new MessageService(
+        api,
+        {} as IPecServerClientFactoryInterface
+      );
+      const res = await service.upsertMessageStatus(
+        mockedUser.fiscal_code,
+        aValidMessageId as NonEmptyString,
+        aMessageStatusChange
+      );
+
+      // Check status code
+      const responseMock: e.Response = mockRes();
+      res.apply(responseMock);
+      expect(responseMock.status).toHaveBeenCalledWith(expectedStatusCode);
+
+      expect(res).toMatchObject({
+        kind: expectedKind,
+        detail: expectedDetail
       });
     }
   );

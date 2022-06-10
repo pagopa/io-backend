@@ -1,13 +1,8 @@
 import * as E from "fp-ts/lib/Either";
-import { UrlFromString } from "@pagopa/ts-commons/lib/url";
+import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
-
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
-
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
@@ -18,6 +13,24 @@ import {
 import { UserIdentity } from "../../../generated/auth/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
+import {
+  mockedUser,
+  aTimestamp,
+  aFiscalCode,
+  aValidName,
+  aValidFamilyname,
+  aValidDateofBirth,
+  aValidSpidLevel,
+  mockSessionToken,
+  mockWalletToken,
+  mockMyPortalToken,
+  mockBPDToken,
+  mockZendeskToken,
+  aSpidEmailAddress,
+  aSessionTrackingId,
+  mockFIMSToken,
+  mockedInitializedProfile
+} from "../../__mocks__/user_mock";
 import ApiClientFactory from "../../services/apiClientFactory";
 import NotificationService from "../../services/notificationService";
 import ProfileService from "../../services/profileService";
@@ -25,9 +38,15 @@ import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
 import { SessionToken, WalletToken } from "../../types/token";
-import { exactUserIdentityDecode, User } from "../../types/user";
-import AuthenticationController from "../authenticationController";
 import { pipe } from "fp-ts/function";
+import { exactUserIdentityDecode, SpidUser, User } from "../../types/user";
+import AuthenticationController, {
+  AGE_LIMIT,
+  AGE_LIMIT_ERROR_CODE
+} from "../authenticationController";
+import { addDays, addMonths, format, subYears } from "date-fns";
+import { getClientErrorRedirectionUrl } from "../../config";
+import * as appInsights from "applicationinsights";
 
 // user constant
 const aTimestamp = 1518010929530;
@@ -61,39 +80,26 @@ const mockedUser: User = {
   wallet_token: mockWalletToken as WalletToken
 };
 
+
 // validUser has all every field correctly set.
 const validUserPayload = {
   authnContextClassRef: aValidSpidLevel,
-  email: anEmailAddress,
-  familyName: aValidsurname,
-  fiscalNumber: aFiscalNumber,
+  email: aSpidEmailAddress,
+  familyName: aValidFamilyname,
+  fiscalNumber: aFiscalCode,
   getAssertionXml: () => "",
   issuer: "xxx",
-  dateOfBirth: "2000-06-02",
-  name: aValidname
+  dateOfBirth: aValidDateofBirth,
+  name: aValidName
 };
 // invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
-  fiscalNumber: aFiscalNumber,
+  fiscalNumber: aFiscalCode,
   getAssertionXml: () => "",
   issuer: "xxx",
-  dateOfBirth: "2000-06-02",
-  name: aValidname
-};
-
-const proxyInitializedProfileResponse = {
-  blocked_inbox_or_channels: undefined,
-  email: anEmailAddress,
-  family_name: aValidsurname,
-  fiscal_code: aFiscalNumber,
-  has_profile: true,
-  is_inbox_enabled: true,
-  is_webhook_enabled: true,
-  name: aValidname,
-  preferred_languages: ["it_IT"],
-  spid_email: anEmailAddress,
-  version: 42
+  dateOfBirth: aValidDateofBirth,
+  name: aValidName
 };
 
 const anErrorResponse = {
@@ -166,6 +172,10 @@ jest.mock("../../services/usersLoginLogService", () => {
   };
 });
 
+const mockTelemetryClient = ({
+  trackEvent: jest.fn()
+} as unknown) as appInsights.TelemetryClient;
+
 const redisClient = {} as redis.RedisClient;
 
 const tokenService = new TokenService();
@@ -178,10 +188,9 @@ const redisSessionStorage = new RedisSessionStorage(
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   const url = "/profile.html?token={token}".replace("{token}", token);
-
   return {
     href: url
-  };
+  } as UrlFromString;
 };
 
 let controller: AuthenticationController;
@@ -195,17 +204,20 @@ beforeAll(async () => {
     redisSessionStorage,
     tokenService,
     getClientProfileRedirectionUrl,
+    getClientErrorRedirectionUrl,
     profileService,
     notificationService,
     usersLoginLogService,
-    []
+    [],
+    true,
+    mockTelemetryClient
   );
 });
 
 let clock: any;
 beforeEach(() => {
   // We need to mock time to test token expiration.
-  clock = lolex.install({ now: theCurrentTimestampMillis });
+  clock = lolex.install({ now: aTimestamp });
 
   jest.clearAllMocks();
 });
@@ -226,13 +238,18 @@ describe("AuthenticationController#acs", () => {
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken);
+      .mockReturnValueOnce(mockWalletToken)
+      .mockReturnValueOnce(mockMyPortalToken)
+      .mockReturnValueOnce(mockBPDToken)
+      .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
+      .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
     );
     mockCreateProfile.mockReturnValue(
-      ResponseSuccessJson(proxyInitializedProfileResponse)
+      ResponseSuccessJson(mockedInitializedProfile)
     );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
@@ -257,10 +274,15 @@ describe("AuthenticationController#acs", () => {
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken);
+      .mockReturnValueOnce(mockWalletToken)
+      .mockReturnValueOnce(mockMyPortalToken)
+      .mockReturnValueOnce(mockBPDToken)
+      .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
+      .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
-      ResponseSuccessJson(proxyInitializedProfileResponse)
+      ResponseSuccessJson(mockedInitializedProfile)
     );
     const response = await controller.acs(validUserPayload);
     response.apply(res);
@@ -287,7 +309,12 @@ describe("AuthenticationController#acs", () => {
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken);
+      .mockReturnValueOnce(mockWalletToken)
+      .mockReturnValueOnce(mockMyPortalToken)
+      .mockReturnValueOnce(mockBPDToken)
+      .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
+      .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -320,7 +347,12 @@ describe("AuthenticationController#acs", () => {
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken);
+      .mockReturnValueOnce(mockWalletToken)
+      .mockReturnValueOnce(mockMyPortalToken)
+      .mockReturnValueOnce(mockBPDToken)
+      .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
+      .mockReturnValueOnce(aSessionTrackingId);
 
     mockGetProfile.mockReturnValue(
       ResponseErrorInternal("Error reading the user profile")
@@ -412,6 +444,122 @@ describe("AuthenticationController#acs", () => {
       detail: "Error while creating the user session"
     });
   });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo`, async () => {
+    const res = mockRes();
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(
+        addDays(subYears(new Date(), AGE_LIMIT), 1),
+        "YYYY-MM-DD"
+      )
+    };
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(
+      expect.objectContaining({
+        name: "spid.error.generic",
+        properties: {
+          message: expect.any(String),
+          type: "INFO"
+        }
+      })
+    );
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should return unauthorized if the user is younger than ${AGE_LIMIT} yo with CIE date format`, async () => {
+    const res = mockRes();
+
+    const limitDate = subYears(new Date(), AGE_LIMIT);
+    const dateOfBirth =
+      limitDate.getDate() > 8 ? addDays(limitDate, 1) : addMonths(limitDate, 1);
+
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(dateOfBirth, "YYYY-MM-D")
+    };
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).toBeCalledWith(
+      expect.objectContaining({
+        name: "spid.error.generic",
+        properties: {
+          message: expect.any(String),
+          type: "INFO"
+        }
+      })
+    );
+    expect(mockSet).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      `/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`
+    );
+  });
+
+  it(`should redirects to the correct url if the user has ${AGE_LIMIT} yo`, async () => {
+    const res = mockRes();
+    const expectedNewProfile: NewProfile = {
+      email: validUserPayload.email,
+      is_email_validated: true,
+      is_test_profile: false
+    };
+
+    mockSet.mockReturnValue(Promise.resolve(right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockGetNewToken
+      .mockReturnValueOnce(mockSessionToken)
+      .mockReturnValueOnce(mockWalletToken)
+      .mockReturnValueOnce(mockMyPortalToken)
+      .mockReturnValueOnce(mockBPDToken)
+      .mockReturnValueOnce(mockZendeskToken)
+      .mockReturnValueOnce(mockFIMSToken)
+      .mockReturnValueOnce(aSessionTrackingId);
+
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(mockedInitializedProfile)
+    );
+    const aYoungUserPayload: SpidUser = {
+      ...validUserPayload,
+      dateOfBirth: format(subYears(new Date(), AGE_LIMIT), "YYYY-MM-DD")
+    };
+    const response = await controller.acs(aYoungUserPayload);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(mockTelemetryClient.trackEvent).not.toBeCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      "/profile.html?token=" + mockSessionToken
+    );
+    expect(mockSet).toHaveBeenCalledWith({
+      ...mockedUser,
+      date_of_birth: aYoungUserPayload.dateOfBirth
+    });
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      ...mockedUser,
+      date_of_birth: aYoungUserPayload.dateOfBirth
+    });
+    expect(mockCreateProfile).toHaveBeenCalledWith(
+      {
+        ...mockedUser,
+        date_of_birth: aYoungUserPayload.dateOfBirth
+      },
+      expectedNewProfile
+    );
+  });
 });
 
 describe("AuthenticationController#acsTest", () => {
@@ -457,7 +605,7 @@ describe("AuthenticationController#acsTest", () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
         href: "http://invalid-url"
-      });
+      } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
@@ -490,15 +638,9 @@ describe("AuthenticationController#getUserIdentity", () => {
 
     expect(controller).toBeTruthy();
 
-    const mockedUserIdentity = pipe(
-      mockedUser,
-      UserIdentity.decode,
-      E.getOrElseW(_ => {
-        throw _;
-      })
+    const expectedValue = exactUserIdentityDecode(
+      (mockedUser as unknown) as UserIdentity
     );
-
-    const expectedValue = exactUserIdentityDecode(mockedUserIdentity);
     expect(E.isRight(expectedValue)).toBeTruthy();
     if (E.isRight(expectedValue)) {
       expect(response).toEqual({
@@ -579,7 +721,8 @@ describe("AuthenticationController#logout", () => {
     const userWithExternalToken = {
       ...mockedUser,
       bpd_token: mockBPDToken,
-      myportal_token: mockMyPortalToken
+      myportal_token: mockMyPortalToken,
+      zendesk_token: mockZendeskToken
     };
     req.user = userWithExternalToken;
 

@@ -11,7 +11,7 @@ import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
 import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import BonusService from "../bonusService";
 
 const aBonusId = "aBonusId" as NonEmptyString & BonusCode;

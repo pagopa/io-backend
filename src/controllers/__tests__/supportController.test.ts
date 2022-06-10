@@ -4,28 +4,8 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import TokenService from "../../services/tokenService";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { mockedUser } from "../../__mocks__/user_mock";
 import SupportController from "../supportController";
-
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidName = "Giuseppe Maria";
-const aValidFamilyname = "Garibaldi";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-const aTimestamp = 1518010929530;
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
-};
 
 const mockGetSupportToken = jest.fn();
 jest.mock("../../services/tokenService", () => {

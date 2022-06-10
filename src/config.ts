@@ -6,6 +6,14 @@ import * as dotenv from "dotenv";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
+import {
+  parseJSON,
+  right,
+  toError,
+  fromNullable as fromNullableE
+} from "fp-ts/lib/Either";
+import { fromNullable, isSome } from "fp-ts/lib/Option";
+import { record } from "fp-ts";
 import { agent } from "@pagopa/ts-commons";
 
 import {
@@ -45,7 +53,11 @@ import { BonusAPIClient } from "./clients/bonus";
 import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
+import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
+import { ognlTypeFor } from "./utils/ognl";
+import { AppMessagesAPIClient } from "./clients/app-messages.client";
+import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -72,6 +84,16 @@ export const ENABLE_NOTICE_EMAIL_CACHE: boolean = pipe(
   O.fromNullable,
   O.map(_ => _.toLowerCase() === "true"),
   O.getOrElseW(() => false)
+);
+
+// Default cache control max-age value is 1 hour
+const DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: string = "3600";
+
+// Resolve cache control default max-age value
+export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
+  process.env.CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS ||
+    DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
+  10
 );
 
 // Private key used in SAML authentication to a SPID IDP.
@@ -114,6 +136,13 @@ const DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX = "1";
 const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
   process.env.SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX ||
   DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX;
+// Default SAML Request cache is 10 minutes
+const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
+const SAML_REQUEST_EXPIRATION_PERIOD_MS = fromNullableE(
+  new Error("Missing Environment configuration")
+)(process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS)
+  .chain(_ => IntegerFromString.decode(_).mapLeft(toError))
+  .getOrElse(DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS);
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
@@ -249,7 +278,8 @@ export const samlConfig: SamlConfig = {
   identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
   issuer: SAML_ISSUER,
   logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
-  privateCert: samlKey()
+  privateCert: samlKey(),
+  requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS
 };
 
 // Redirection urls
@@ -316,6 +346,18 @@ export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
   })
 );
 
+// IP(s) or CIDR(s) allowed for zendesk endpoint
+export const ALLOW_ZENDESK_IP_SOURCE_RANGE = decodeCIDRs(
+  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
 // IP(s) or CIDR(s) allowed for handling sessions
 export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
@@ -332,19 +374,75 @@ export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
-// HTTP-only fetch with optional keepalive agent
+// Generic HTTP/HTTPS fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const abortableFetch = AbortableFetch(agent.getHttpFetch(process.env));
+const abortableFetch = AbortableFetch(agent.getFetch(process.env));
 const fetchWithTimeout = setFetchTimeout(
   DEFAULT_REQUEST_TIMEOUT_MS,
   abortableFetch
 );
-const httpApiFetch = toFetch(fetchWithTimeout);
+const httpOrHttpsApiFetch = toFetch(fetchWithTimeout);
+
+const bearerAuthFetch = (
+  origFetch: typeof fetch = fetch,
+  bearerToken: string
+): typeof fetch => (input: RequestInfo, init: RequestInit | undefined) =>
+  origFetch(input, {
+    ...init,
+    headers: { Authorization: `Bearer ${bearerToken}` }
+  });
+
+export const getHttpsApiFetchWithBearer = (bearer: string) =>
+  toFetch(
+    setFetchTimeout(
+      DEFAULT_REQUEST_TIMEOUT_MS,
+      AbortableFetch(bearerAuthFetch(httpOrHttpsApiFetch, bearer))
+    )
+  );
+
+export const MessagesFeatureFlagType = t.keyof({
+  /* eslint-disable sort-keys */
+  none: null,
+  beta: null,
+  canary: null,
+  prod: null
+  /* eslint-enable sort-keys */
+});
+export type MessagesFeatureFlagType = t.TypeOf<typeof MessagesFeatureFlagType>;
+
+export const FF_MESSAGES_TYPE = MessagesFeatureFlagType.decode(
+  process.env.FF_MESSAGES_TYPE
+).getOrElse("none");
+
+export const FF_MESSAGES_BETA_TESTER_LIST = CommaSeparatedListOf(NonEmptyString)
+  .decode(process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "")
+  .getOrElse([]);
+
+export const FF_MESSAGES_CANARY_USERS_REGEX = NonEmptyString.decode(
+  process.env.FF_MESSAGES_CANARY_USERS_REGEX
+).getOrElse(
+  // XYZ will never be verified by an hashed fiscal code
+  // used as default
+  "XYZ" as NonEmptyString
+);
 
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
-export const API_CLIENT = new ApiClientFactory(API_KEY, API_URL, httpApiFetch);
+export const API_CLIENT = new ApiClientFactory(
+  API_KEY,
+  API_URL,
+  httpOrHttpsApiFetch
+);
+
+export const APP_MESSAGES_API_KEY = getRequiredENVVar("APP_MESSAGES_API_KEY");
+export const APP_MESSAGES_API_URL = getRequiredENVVar("APP_MESSAGES_API_URL");
+
+export const APP_MESSAGES_API_CLIENT = AppMessagesAPIClient(
+  APP_MESSAGES_API_KEY,
+  APP_MESSAGES_API_URL,
+  httpOrHttpsApiFetch
+);
 
 export const BONUS_API_KEY = getRequiredENVVar("BONUS_API_KEY");
 export const BONUS_API_URL = getRequiredENVVar("BONUS_API_URL");
@@ -352,7 +450,7 @@ export const BONUS_API_BASE_PATH = getRequiredENVVar("BONUS_API_BASE_PATH");
 export const BONUS_API_CLIENT = BonusAPIClient(
   BONUS_API_KEY,
   BONUS_API_URL,
-  httpApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
@@ -361,7 +459,24 @@ export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
 export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
-  httpApiFetch
+  CGN_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+
+export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_KEY"
+);
+export const CGN_OPERATOR_SEARCH_API_URL = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_URL"
+);
+export const CGN_OPERATOR_SEARCH_API_BASE_PATH = getRequiredENVVar(
+  "CGN_OPERATOR_SEARCH_API_BASE_PATH"
+);
+export const CGN_OPERATOR_SEARCH_API_CLIENT = CgnOperatorSearchAPIClient(
+  CGN_OPERATOR_SEARCH_API_KEY,
+  CGN_OPERATOR_SEARCH_API_URL,
+  CGN_OPERATOR_SEARCH_API_BASE_PATH,
+  httpOrHttpsApiFetch
 );
 
 export const EUCOVIDCERT_API_KEY = getRequiredENVVar("EUCOVIDCERT_API_KEY");
@@ -372,7 +487,7 @@ export const EUCOVIDCERT_API_BASE_PATH = getRequiredENVVar(
 export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
   EUCOVIDCERT_API_KEY,
   EUCOVIDCERT_API_URL,
-  httpApiFetch
+  httpOrHttpsApiFetch
 );
 
 export const MIT_VOUCHER_API_BASE_PATH = getRequiredENVVar(
@@ -388,15 +503,19 @@ log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
-const httpsApiFetch = agent.getHttpsFetch(process.env);
+const simpleHttpsApiFetch = agent.getHttpsFetch(process.env);
 
 // Register a factory service to create PagoPA client.
 const pagoPAApiUrlProd = getRequiredENVVar("PAGOPA_API_URL_PROD");
 const pagoPAApiUrlTest = getRequiredENVVar("PAGOPA_API_URL_TEST");
+const pagoPAApiKeyProd = getRequiredENVVar("PAGOPA_API_KEY_PROD");
+const pagoPAApiKeyTest = getRequiredENVVar("PAGOPA_API_KEY_UAT");
 export const PAGOPA_CLIENT = new PagoPAClientFactory(
   pagoPAApiUrlProd,
+  pagoPAApiKeyProd,
   pagoPAApiUrlTest,
-  httpsApiFetch
+  pagoPAApiKeyTest,
+  simpleHttpsApiFetch
 );
 
 // API endpoint mount.
@@ -409,6 +528,10 @@ export const MYPORTAL_BASE_PATH = getRequiredENVVar("MYPORTAL_BASE_PATH");
 
 export const BPD_BASE_PATH = getRequiredENVVar("BPD_BASE_PATH");
 
+export const FIMS_BASE_PATH = getRequiredENVVar("FIMS_BASE_PATH");
+
+export const ZENDESK_BASE_PATH = getRequiredENVVar("ZENDESK_BASE_PATH");
+
 // Token needed to receive API calls (notifications, metadata update) from io-functions-services
 export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 
@@ -419,9 +542,47 @@ export const getClientProfileRedirectionUrl = (
   token: string
 ): UrlFromString => {
   const url = clientProfileRedirectionUrl.replace("{token}", token);
-  return {
-    href: url
-  };
+  return UrlFromString.decode(url).getOrElseL(() => {
+    throw new Error("Invalid url");
+  });
+};
+
+export const ClientErrorRedirectionUrlParams = t.union([
+  t.intersection([
+    t.interface({
+      errorMessage: NonEmptyString
+    }),
+    t.partial({
+      errorCode: t.number
+    })
+  ]),
+  t.intersection([
+    t.partial({
+      errorMessage: NonEmptyString
+    }),
+    t.interface({
+      errorCode: t.number
+    })
+  ]),
+  t.interface({
+    errorCode: t.number,
+    errorMessage: NonEmptyString
+  })
+]);
+export type ClientErrorRedirectionUrlParams = t.TypeOf<
+  typeof ClientErrorRedirectionUrlParams
+>;
+
+export const getClientErrorRedirectionUrl = (
+  params: ClientErrorRedirectionUrlParams
+): UrlFromString => {
+  const errorParams = record
+    .collect(params, (key, value) => `${key}=${value}`)
+    .join("&");
+  const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
+  return UrlFromString.decode(url).getOrElseL(() => {
+    throw new Error("Invalid url");
+  });
 };
 
 // Needed to forward SPID requests for logging
@@ -482,6 +643,9 @@ export const FF_EUCOVIDCERT_ENABLED =
 export const FF_MIT_VOUCHER_ENABLED =
   process.env.FF_MIT_VOUCHER_ENABLED === "1";
 
+export const FF_USER_AGE_LIMIT_ENABLED =
+  process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
+
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
   process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
@@ -518,6 +682,37 @@ export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
+);
+
+// Zendesk support Token
+export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = NonEmptyString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
+).getOrElseL(errs => {
+  log.error(
+    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+      errs
+    )}`
+  );
+  return process.exit(1);
+});
+
+const DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
+export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
+).getOrElse(DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION) as Second;
+log.info(
+  "JWT Zendesk support token expiration set to %s seconds",
+  JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
 );
 
 // Mit  Voucher Token
@@ -571,6 +766,7 @@ export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
   })
 );
 
+
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",
   CommaSeparatedListOf(FiscalCode).decode,
@@ -578,5 +774,38 @@ export const TEST_CGN_FISCAL_CODES = pipe(
     throw new Error(
       `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
     );
-  })
+  }));
+
+// PEC SERVER config
+export const PecServerConfig = t.interface({
+  basePath: t.string,
+  secret: NonEmptyString,
+  serviceId: NonEmptyString,
+  url: NonEmptyString
+});
+export type PecServerConfig = t.TypeOf<typeof PecServerConfig>;
+
+export const PecServersConfig = t.interface({
+  aruba: PecServerConfig,
+  poste: PecServerConfig
+});
+export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
+
+export const PECSERVERS = ognlTypeFor<PecServersConfig>(
+  PecServersConfig,
+  "PECSERVERS"
+)
+  .decode(process.env)
+  .getOrElseL(errs => {
+    log.error(
+      `Missing or invalid PECSERVERS environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  });
+//
+
+export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
+  process.env.THIRD_PARTY_CONFIG_LIST
 );

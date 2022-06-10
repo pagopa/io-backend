@@ -19,6 +19,8 @@ import {
   ResponseErrorNotFound,
   ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
+import * as TE from "fp-ts/TaskEither";
+import { errorsToError } from "./errorsFormatter";
 
 /**
  * Interface for a no content response returning a empty object.
@@ -156,3 +158,57 @@ export const ResponsePaymentError = (
     kind: "IResponseErrorInternal"
   };
 };
+
+/**
+ * Interface for a successful response returning a octet stream object.
+ */
+export interface IResponseSuccessOctet
+  extends IResponse<"IResponseSuccessOctet"> {
+  readonly value: unknown;
+}
+
+/**
+ * Returns a successful octet stream response.
+ *
+ * @param o The object to return to the client
+ */
+export const ResponseSuccessOctet = (o: Buffer): IResponseSuccessOctet => ({
+  apply: res =>
+    res
+      .status(HttpStatusCodeEnum.HTTP_STATUS_200)
+      .set("Content-Type", "application/octet-stream")
+      .end(o),
+  kind: "IResponseSuccessOctet",
+  value: o
+});
+
+export const wrapValidationWithInternalError: <A>(
+  fa: t.Validation<A>
+) => TE.TaskEither<IResponseErrorInternal, A> = fa =>
+  TE.fromEither(fa)
+    .mapLeft(errorsToError)
+    .mapLeft(e => ResponseErrorInternal(e.message));
+
+/**
+ * Interface for NotImplemented error response.
+ */
+export interface IResponseErrorNotImplemented
+  extends IResponse<"IResponseErrorNotImplemented"> {
+  readonly detail: string;
+}
+/**
+ * Returns a Not Implemented error response with status code 501.
+ */
+export const ResponseErrorNotImplemented = (
+  detail: string
+): IResponseErrorNotImplemented => ({
+  ...ResponseErrorGeneric(
+    HttpStatusCodeEnum.HTTP_STATUS_501,
+    "Not Implemented",
+    detail
+  ),
+  ...{
+    detail: `Not Implemented: ${detail}`,
+    kind: "IResponseErrorNotImplemented"
+  }
+});

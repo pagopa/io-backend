@@ -25,21 +25,29 @@ import { NewProfile } from "generated/io-api/NewProfile";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import UsersLoginLogService from "src/services/usersLoginLogService";
 import { pipe } from "fp-ts/lib/function";
+import { parse } from "date-fns";
+import * as appInsights from "applicationinsights";
+import UsersLoginLogService from "../services/usersLoginLogService";
+import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
-import { clientProfileRedirectionUrl } from "../config";
+import {
+  ClientErrorRedirectionUrlParams,
+  clientProfileRedirectionUrl
+} from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
 import {
   BPDToken,
+  FIMSToken,
   MyPortalToken,
   SessionToken,
-  WalletToken
+  WalletToken,
+  ZendeskToken
 } from "../types/token";
 import {
   exactUserIdentityDecode,
@@ -56,6 +64,12 @@ export const SESSION_TOKEN_LENGTH_BYTES = 48;
 // how many random bytes to generate for each session ID
 const SESSION_ID_LENGTH_BYTES = 32;
 
+export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
+// Custom error code handled by the client to show a specific error page
+export const AGE_LIMIT_ERROR_CODE = 1001;
+// Minimum user age allowed to login if the Age limit is enabled
+export const AGE_LIMIT = 14;
+
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
   constructor(
@@ -64,15 +78,21 @@ export default class AuthenticationController {
     private readonly getClientProfileRedirectionUrl: (
       token: string
     ) => UrlFromString,
+    private readonly getClientErrorRedirectionUrl: (
+      params: ClientErrorRedirectionUrlParams
+    ) => UrlFromString,
     private readonly profileService: ProfileService,
     private readonly notificationService: NotificationService,
     private readonly usersLoginLogService: UsersLoginLogService,
-    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>
+    private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
+    private readonly hasUserAgeLimitEnabled: boolean,
+    private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
    * The Assertion consumer service.
    */
+  // eslint-disable-next-line max-lines-per-function
   public async acs(
     userPayload: unknown
   ): Promise<
@@ -98,6 +118,31 @@ export default class AuthenticationController {
 
     const spidUser = errorOrSpidUser.right;
 
+    if (
+      this.hasUserAgeLimitEnabled &&
+      !isOlderThan(AGE_LIMIT)(parse(spidUser.dateOfBirth), new Date())
+    ) {
+      // The IO App show the proper error screen if only the `errorCode`
+      // query param is provided and `errorMessage` is missing.
+      // this constraint could be ignored when this PR https://github.com/pagopa/io-app/pull/3642 is merged,
+      // released in a certain app version and that version become the minimum version supported.
+      const redirectionUrl = this.getClientErrorRedirectionUrl({
+        errorCode: AGE_LIMIT_ERROR_CODE
+      });
+      log.error(
+        `acs: the age of the user is less than ${AGE_LIMIT} yo [%s]`,
+        spidUser.dateOfBirth
+      );
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: "spid.error.generic",
+        properties: {
+          message: "User login blocked for reached age limits",
+          type: "INFO"
+        }
+      });
+      return ResponsePermanentRedirect(redirectionUrl);
+    }
+
     //
     // create a new user object
     //
@@ -110,6 +155,8 @@ export default class AuthenticationController {
       walletToken,
       myPortalToken,
       bpdToken,
+      zendeskToken,
+      fimsToken,
       sessionTrackingId
     ] = await Promise.all([
       // ask the session storage whether this user is blocked
@@ -121,6 +168,10 @@ export default class AuthenticationController {
       // authentication token for MyPortal
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // authentication token for BPD
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for Zendesk
+      this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
+      // authentication token for FIMS
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // unique ID for tracking the user session
       this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
@@ -144,6 +195,8 @@ export default class AuthenticationController {
       walletToken as WalletToken,
       myPortalToken as MyPortalToken,
       bpdToken as BPDToken,
+      zendeskToken as ZendeskToken,
+      fimsToken as FIMSToken,
       sessionTrackingId
     );
 
@@ -325,11 +378,9 @@ export default class AuthenticationController {
    * The Single logout service.
    */
   public async slo(): Promise<IResponsePermanentRedirect> {
-    const url: UrlFromString = {
-      href: "/"
-    };
-
-    return ResponsePermanentRedirect(url);
+    return UrlFromString.decode("/").fold(_ => {
+      throw new Error("Unexpected redirect url decoding");
+    }, ResponsePermanentRedirect);
   }
 
   /**

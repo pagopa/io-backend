@@ -1,16 +1,14 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
-
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-
-import * as redis from "redis";
-
 import * as E from "fp-ts/lib/Either";
+import * as redis from "redis";
+import { mockedUser } from "../../__mocks__/user_mock";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -21,15 +19,12 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import { profileMissingErrorResponse } from "../../types/profile";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
 import ProfileController from "../profileController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
@@ -45,7 +40,6 @@ const anIsWebookEnabled = true as IsWebhookEnabled;
 const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
   PreferredLanguageEnum.it_IT
 ];
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
 const aServicePreferencesSettings: ServicePreferencesSettings = {
   mode: ServicesPreferencesModeEnum.AUTO
 };
@@ -72,18 +66,6 @@ const apiUserProfileResponse = {
   is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
   version: 42
-};
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: aValidFamilyname,
-  fiscal_code: aFiscalNumber,
-  name: aValidName,
-  session_token: "123hexToken" as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: "123hexToken" as WalletToken
 };
 
 // mock for upsert user (Extended Profile)

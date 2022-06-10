@@ -1,5 +1,5 @@
 import mockReq from "../../__mocks__/request";
-import { aMockedUser } from "../../__mocks__/user_mock";
+import { mockedUser } from "../../__mocks__/user_mock";
 import TokenService from "../../services/tokenService";
 import MitVoucherController from "../mitVoucherController";
 import * as e from "express";
@@ -8,7 +8,7 @@ import * as E from "fp-ts/lib/TaskEither";
 
 const aMockedRequestWithRightParams = {
   ...mockReq(),
-  user: aMockedUser
+  user: mockedUser
 } as e.Request;
 
 const mockGetJwtMitVoucherToken = jest.fn();

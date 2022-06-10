@@ -2,8 +2,7 @@ import * as t from "io-ts";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { EmailAddress } from "../../../generated/auth/EmailAddress";
 import { CgnAPIClient } from "../../clients/cgn";
-import { SessionToken, WalletToken } from "../../types/token";
-import { User } from "../../types/user";
+import { mockedUser } from "../../__mocks__/user_mock";
 import CgnService from "../cgnService";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import {
@@ -13,10 +12,6 @@ import {
 import { Otp } from "../../../generated/cgn/Otp";
 import { OtpCode } from "../../../generated/cgn/OtpCode";
 
-const aValidFiscalCode = "XUZTCT88A51Y311X" as FiscalCode;
-const aValidSPIDEmail = "from_spid@example.com" as EmailAddress;
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
 const mockGetCgnStatus = jest.fn();
 const mockGetEycaStatus = jest.fn();
 const mockStartCgnActivation = jest.fn();
@@ -24,6 +19,7 @@ const mockGetCgnActivation = jest.fn();
 const mockStartEycaActivation = jest.fn();
 const mockGetEycaActivation = jest.fn();
 const mockGenerateOtp = jest.fn();
+const mockStartCgnUnsubscription = jest.fn();
 
 mockGetCgnStatus.mockImplementation(() =>
   t.success({ status: 200, value: aPendingCgn })
@@ -61,6 +57,18 @@ mockStartEycaActivation.mockImplementation(() =>
   })
 );
 
+mockStartCgnUnsubscription.mockImplementation(() =>
+  t.success({
+    status: 201,
+    headers: { Location: "/api/v1/cgn/delete" },
+    value: {
+      id: {
+        id: "AnInstanceId"
+      }
+    }
+  })
+);
+
 mockGenerateOtp.mockImplementation(() =>
   t.success({ status: 200, value: aGeneratedOtp })
 );
@@ -73,19 +81,9 @@ const api = {
   getEycaActivation: mockGetEycaActivation,
   startCgnActivation: mockStartCgnActivation,
   startEycaActivation: mockStartEycaActivation,
+  startCgnUnsubscription: mockStartCgnUnsubscription,
   upsertCgnStatus: jest.fn()
 } as ReturnType<CgnAPIClient>;
-
-const mockedUser: User = {
-    created_at: 1183518855,
-    family_name: "Lusso",
-    fiscal_code: aValidFiscalCode,
-    name: "Luca",
-    session_token: "HexToKen" as SessionToken,
-    spid_email: aValidSPIDEmail,
-    spid_level: aValidSpidLevel,
-    wallet_token: "HexToKen" as WalletToken
-  };
 
 const aPendingCgn: CardPending = {
   status: StatusEnum.PENDING
@@ -728,6 +726,128 @@ describe("CgnService#startEycaActivation", () => {
     const service = new CgnService(api);
 
     const res = await service.startEycaActivation(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("CgnService#startCgnUnsubscription", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new CgnService(api);
+
+    await service.startCgnUnsubscription(mockedUser);
+
+    expect(mockStartCgnUnsubscription).toHaveBeenCalledWith({
+      fiscalcode: mockedUser.fiscal_code
+    });
+  });
+
+  it("should handle a success redirect to resource response", async () => {
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessRedirectToResource"
+    });
+  });
+
+  it("should handle a success Accepted response", async () => {
+    mockStartCgnUnsubscription.mockImplementationOnce(() =>
+      t.success({ status: 202 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessAccepted"
+    });
+  });
+
+  it("should handle an internal error when the client returns 401", async () => {
+    mockStartCgnUnsubscription.mockImplementationOnce(() =>
+      t.success({ status: 401 })
+    );
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should handle a Forbidden error if the user is ineligible for a CGN", async () => {
+    mockStartCgnUnsubscription.mockImplementationOnce(() =>
+      t.success({ status: 403 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorForbiddenNotAuthorized"
+    });
+  });
+
+  it("should handle a conflict error when the CGN is already activated", async () => {
+    mockStartCgnUnsubscription.mockImplementationOnce(() =>
+      t.success({ status: 409 })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorConflict"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockStartCgnUnsubscription.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockStartCgnUnsubscription.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockStartCgnUnsubscription.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new CgnService(api);
+
+    const res = await service.startCgnUnsubscription(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

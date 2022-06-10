@@ -17,7 +17,6 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
-
 import { pipe } from "fp-ts/lib/function";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { EmailAddress } from "../../generated/io-api/EmailAddress";

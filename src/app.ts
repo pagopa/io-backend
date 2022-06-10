@@ -57,8 +57,17 @@ import {
   USERS_LOGIN_QUEUE_NAME,
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
+  CGN_OPERATOR_SEARCH_API_CLIENT,
+  CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   EUCOVIDCERT_API_CLIENT,
-  FF_MIT_VOUCHER_ENABLED
+  FF_MIT_VOUCHER_ENABLED,
+  getClientErrorRedirectionUrl,
+  FF_USER_AGE_LIMIT_ENABLED,
+  PECSERVERS,
+  APP_MESSAGES_API_CLIENT,
+  FF_MESSAGES_TYPE,
+  FF_MESSAGES_BETA_TESTER_LIST,
+  FF_MESSAGES_CANARY_USERS_REGEX
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -76,11 +85,17 @@ import checkIP from "./utils/middleware/checkIP";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
-import { getUserForBPD, getUserForMyPortal } from "./controllers/ssoController";
+import {
+  getUserForBPD,
+  getUserForFIMS,
+  getUserForMyPortal
+} from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
+import ZendeskController from "./controllers/zendeskController";
 import UserDataProcessingController from "./controllers/userDataProcessingController";
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
+import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
 import MessagesService from "./services/messagesService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
@@ -94,6 +109,7 @@ import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
 import bearerWalletTokenStrategy from "./strategies/bearerWalletTokenStrategy";
+import bearerZendeskTokenStrategy from "./strategies/bearerZendeskTokenStrategy";
 import { localStrategy } from "./strategies/localStrategy";
 import { User } from "./types/user";
 import {
@@ -115,9 +131,14 @@ import {
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
+import CgnOperatorSearchController from "./controllers/cgnOperatorSearchController";
 import EUCovidCertService from "./services/eucovidcertService";
 import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
+import PecServerClientFactory from "./services/pecServerClientFactory";
+import NewMessagesService from "./services/newMessagesService";
+import { getMessagesServiceSelector } from "./services/messagesServiceSelector";
+import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -144,15 +165,19 @@ export interface IAppFactoryParameters {
   readonly allowMyPortalIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowBPDIPSourceRange: ReadonlyArray<CIDR>;
   readonly allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>;
+  readonly allowZendeskIPSourceRange: ReadonlyArray<CIDR>;
   readonly authenticationBasePath: string;
   readonly APIBasePath: string;
   readonly BonusAPIBasePath: string;
   readonly PagoPABasePath: string;
   readonly MyPortalBasePath: string;
   readonly BPDBasePath: string;
+  readonly FIMSBasePath: string;
   readonly CGNAPIBasePath: string;
+  readonly CGNOperatorSearchAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly MitVoucherBasePath: string;
+  readonly ZendeskBasePath: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -163,6 +188,7 @@ export function newApp({
   allowMyPortalIPSourceRange,
   allowBPDIPSourceRange,
   allowSessionHandleIPSourceRange,
+  allowZendeskIPSourceRange,
   appInsightsClient,
   authenticationBasePath,
   APIBasePath,
@@ -170,9 +196,12 @@ export function newApp({
   PagoPABasePath,
   MyPortalBasePath,
   BPDBasePath,
+  FIMSBasePath,
   CGNAPIBasePath,
+  CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
-  MitVoucherBasePath
+  MitVoucherBasePath,
+  ZendeskBasePath
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -203,12 +232,21 @@ export function newApp({
   // Add the strategy to authenticate BPD clients.
   passport.use("bearer.bpd", bearerBPDTokenStrategy(SESSION_STORAGE));
 
+  // Add the strategy to authenticate Zendesk clients.
+  passport.use("bearer.zendesk", bearerZendeskTokenStrategy(SESSION_STORAGE));
+
+  // Add the strategy to authenticate FIMS clients.
+  passport.use("bearer.fims", bearerFIMSTokenStrategy(SESSION_STORAGE));
+
   // Add the strategy to authenticate webhook calls.
   passport.use(URL_TOKEN_STRATEGY);
 
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
     bearerBPD: passport.authenticate("bearer.bpd", {
+      session: false
+    }),
+    bearerFIMS: passport.authenticate("bearer.fims", {
       session: false
     }),
     bearerMyPortal: passport.authenticate("bearer.myportal", {
@@ -218,6 +256,9 @@ export function newApp({
       session: false
     }),
     bearerWallet: passport.authenticate("bearer.wallet", {
+      session: false
+    }),
+    bearerZendesk: passport.authenticate("bearer.zendesk", {
       session: false
     }),
     local: passport.authenticate("local", {
@@ -316,10 +357,15 @@ export function newApp({
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
-        // Create the EUCovidCert service
-        const EUCOVIDCERT_SERVICE = new EUCovidCertService(
-          EUCOVIDCERT_API_CLIENT
-        );
+      // Create the cgn operator search service
+      const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
+        CGN_OPERATOR_SEARCH_API_CLIENT
+      );
+
+      // Create the EUCovidCert service
+      const EUCOVIDCERT_SERVICE = new EUCovidCertService(
+        EUCOVIDCERT_API_CLIENT
+      );
 
         // Create the user data processing service
         const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
@@ -343,7 +389,7 @@ export function newApp({
         );
 
         // Create the UsersLoginLogService
-        const USERS_LOGIN_LOG_SERVICE = pipe(
+        const ERROR_OR_USERS_LOGIN_LOG_SERVICE = pipe(
           E.tryCatch(
             () =>
               new UsersLoginLogService(
@@ -357,6 +403,96 @@ export function newApp({
             throw err;
           })
         );
+
+        const acsController: AuthenticationController = new AuthenticationController(
+          SESSION_STORAGE,
+          TOKEN_SERVICE,
+          getClientProfileRedirectionUrl,
+          getClientErrorRedirectionUrl,
+          PROFILE_SERVICE,
+          NOTIFICATION_SERVICE,
+          USERS_LOGIN_LOG_SERVICE,
+          TEST_LOGIN_FISCAL_CODES,
+          FF_USER_AGE_LIMIT_ENABLED,
+          appInsightsClient
+        );
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerPublicRoutes(app);
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerAuthenticationRoutes(
+          app,
+          authenticationBasePath,
+          acsController,
+          authMiddlewares.bearerSession,
+          authMiddlewares.local
+        );
+        // Create the messages service.
+        const MESSAGES_SERVICE = new MessagesService(
+          API_CLIENT,
+          new PecServerClientFactory(PECSERVERS)
+        );
+        // Create the new messages service.
+        const APP_MESSAGES_SERVICE = new NewMessagesService(
+          APP_MESSAGES_API_CLIENT
+        );
+        const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
+        // Register the user metadata storage service.
+        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerAPIRoutes(
+          app,
+          APIBasePath,
+          allowNotifyIPSourceRange,
+          authMiddlewares.urlToken,
+          PROFILE_SERVICE,
+          MESSAGES_SERVICE,
+          APP_MESSAGES_SERVICE,
+          NOTIFICATION_SERVICE,
+          SESSION_STORAGE,
+          PAGOPA_PROXY_SERVICE,
+          USER_METADATA_STORAGE,
+          USER_DATA_PROCESSING_SERVICE,
+          TOKEN_SERVICE,
+          authMiddlewares.bearerSession
+        );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerSessionAPIRoutes(
+          app,
+          APIBasePath,
+          allowSessionHandleIPSourceRange,
+          authMiddlewares.urlToken,
+          SESSION_STORAGE,
+          USER_METADATA_STORAGE
+        );
+        if (FF_BONUS_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerBonusAPIRoutes(
+            app,
+            BonusAPIBasePath,
+            BONUS_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+        if (FF_CGN_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerCgnAPIRoutes(
+            app,
+            CGNAPIBasePath,
+            CGN_SERVICE,
+            authMiddlewares.bearerSession
+          );
+
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerCgnOperatorSearchAPIRoutes(
+            app,
+            CGNOperatorSearchAPIBasePath,
+            CGN_SERVICE,
+            CGN_OPERATOR_SEARCH_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
 
         const acsController: AuthenticationController = new AuthenticationController(
           SESSION_STORAGE,
@@ -449,35 +585,52 @@ export function newApp({
             authMiddlewares.bearerSession
           );
         }
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerPagoPARoutes(
+        app,
+        PagoPABasePath,
+        allowPagoPAIPSourceRange,
+        PROFILE_SERVICE,
+        SESSION_STORAGE,
+        ENABLE_NOTICE_EMAIL_CACHE,
+        authMiddlewares.bearerWallet
+      );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerMyPortalRoutes(
+        app,
+        MyPortalBasePath,
+        allowMyPortalIPSourceRange,
+        authMiddlewares.bearerMyPortal
+      );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerBPDRoutes(
+        app,
+        BPDBasePath,
+        allowBPDIPSourceRange,
+        authMiddlewares.bearerBPD
+      );
 
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerPagoPARoutes(
-          app,
-          PagoPABasePath,
-          allowPagoPAIPSourceRange,
-          PROFILE_SERVICE,
-          SESSION_STORAGE,
-          ENABLE_NOTICE_EMAIL_CACHE,
-          authMiddlewares.bearerWallet
-        );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerMyPortalRoutes(
-          app,
-          MyPortalBasePath,
-          allowMyPortalIPSourceRange,
-          authMiddlewares.bearerMyPortal
-        );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerBPDRoutes(
-          app,
-          BPDBasePath,
-          allowBPDIPSourceRange,
-          authMiddlewares.bearerBPD
-        );
-        return { acsController, app };
-      },
-      err => new Error(`Error on app routes setup: [${err}]`)
-    ),
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerFIMSRoutes(
+        app,
+        FIMSBasePath,
+        PROFILE_SERVICE,
+        authMiddlewares.bearerFIMS
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      registerZendeskRoutes(
+        app,
+        ZendeskBasePath,
+        allowZendeskIPSourceRange,
+        PROFILE_SERVICE,
+        TOKEN_SERVICE,
+        authMiddlewares.bearerZendesk
+      );
+      return { acsController, app };
+    },
+    err => new Error(`Error on app routes setup: [${err}]`)
+  ),
     TE.chain(_ => {
       const spidQueueClient = new QueueClient(
         SPID_LOG_STORAGE_CONNECTION_STRING,
@@ -623,6 +776,47 @@ function registerBPDRoutes(
   );
 }
 
+function registerFIMSRoutes(
+  app: Express,
+  basePath: string,
+  profileService: ProfileService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerFIMSTokenAuth: any
+): void {
+  // TODO: Do we need a IP filtering for this API?
+  app.get(
+    `${basePath}/user`,
+    bearerFIMSTokenAuth,
+    toExpressHandler(getUserForFIMS(profileService))
+  );
+}
+
+// eslint-disable-next-line max-params
+function registerZendeskRoutes(
+  app: Express,
+  basePath: string,
+  allowZendeskIPSourceRange: ReadonlyArray<CIDR>,
+  profileService: ProfileService,
+  tokenService: TokenService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerZendeskTokenAuth: any
+): void {
+  const zendeskController: ZendeskController = new ZendeskController(
+    profileService,
+    tokenService
+  );
+
+  app.post(
+    `${basePath}/jwt`,
+    checkIP(allowZendeskIPSourceRange),
+    bearerZendeskTokenAuth,
+    toExpressHandler(
+      zendeskController.getZendeskSupportToken,
+      zendeskController
+    )
+  );
+}
+
 function registerEUCovidCertAPIRoutes(
   app: Express,
   basePath: string,
@@ -669,11 +863,12 @@ function registerMitVoucherAPIRoutes(
 function registerAPIRoutes(
   app: Express,
   basePath: string,
-  allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
+  _allowNotifyIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
   messagesService: MessagesService,
+  appMessagesService: NewMessagesService,
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
@@ -688,8 +883,16 @@ function registerAPIRoutes(
     sessionStorage
   );
 
+  const messageServiceSelector = getMessagesServiceSelector(
+    messagesService,
+    appMessagesService,
+    FF_MESSAGES_TYPE,
+    FF_MESSAGES_BETA_TESTER_LIST,
+    FF_MESSAGES_CANARY_USERS_REGEX
+  );
   const messagesController: MessagesController = new MessagesController(
-    messagesService
+    messageServiceSelector,
+    tokenService
   );
 
   const servicesController: ServicesController = new ServicesController(
@@ -807,6 +1010,45 @@ function registerAPIRoutes(
     toExpressHandler(messagesController.getMessage, messagesController)
   );
 
+  app.put(
+    `${basePath}/messages/:id/message-status`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.upsertMessageStatus, messagesController)
+  );
+
+  app.get(
+    `${basePath}/legal-messages/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(messagesController.getLegalMessage, messagesController)
+  );
+
+  app.get(
+    `${basePath}/legal-messages/:id/attachments/:attachment_id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getLegalMessageAttachment,
+      messagesController
+    )
+  );
+
+  app.get(
+    `${basePath}/third-party-messages/:id`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessage,
+      messagesController
+    )
+  );
+
+  app.get(
+    `${basePath}/third-party-messages/:id/attachments/:attachment_url`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      messagesController.getThirdPartyMessageAttachment,
+      messagesController
+    )
+  );
+
   app.get(
     `${basePath}/services/:id`,
     bearerSessionTokenAuth,
@@ -850,7 +1092,7 @@ function registerAPIRoutes(
 
   app.post(
     `${basePath}/notify`,
-    checkIP(allowNotifyIPSourceRange),
+    // checkIP(allowNotifyIPSourceRange),
     urlTokenAuth,
     toExpressHandler(notificationController.notify, notificationController)
   );
@@ -905,7 +1147,7 @@ function registerAPIRoutes(
 function registerSessionAPIRoutes(
   app: Express,
   basePath: string,
-  allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
+  _allowSessionHandleIPSourceRange: ReadonlyArray<CIDR>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   sessionStorage: RedisSessionStorage,
@@ -918,7 +1160,7 @@ function registerSessionAPIRoutes(
 
   app.post(
     `${basePath}/sessions/:fiscal_code/lock`,
-    checkIP(allowSessionHandleIPSourceRange),
+    // checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
       sessionLockController.lockUserSession,
@@ -928,7 +1170,7 @@ function registerSessionAPIRoutes(
 
   app.delete(
     `${basePath}/sessions/:fiscal_code/lock`,
-    checkIP(allowSessionHandleIPSourceRange),
+    // checkIP(allowSessionHandleIPSourceRange),
     urlTokenAuth,
     toExpressHandler(
       sessionLockController.unlockUserSession,
@@ -950,45 +1192,121 @@ function registerCgnAPIRoutes(
   );
 
   app.get(
-    `${basePath}/cgn/status`,
+    `${basePath}/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnStatus, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/eyca/status`,
+    `${basePath}/eyca/status`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getEycaStatus, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/activation`,
+    `${basePath}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startCgnActivation, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/activation`,
+    `${basePath}/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getCgnActivation, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/eyca/activation`,
+    `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.startEycaActivation, cgnController)
   );
 
   app.get(
-    `${basePath}/cgn/eyca/activation`,
+    `${basePath}/eyca/activation`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.getEycaActivation, cgnController)
   );
 
   app.post(
-    `${basePath}/cgn/otp`,
+    `${basePath}/delete`,
+    bearerSessionTokenAuth,
+    toExpressHandler(cgnController.startCgnUnsubscription, cgnController)
+  );
+
+  app.post(
+    `${basePath}/otp`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.generateOtp, cgnController)
+  );
+}
+
+function registerCgnOperatorSearchAPIRoutes(
+  app: Express,
+  basePath: string,
+  cgnService: CgnService,
+  cgnOperatorSearchService: CgnOperatorSearchService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const cgnOperatorController: CgnOperatorSearchController = new CgnOperatorSearchController(
+    cgnService,
+    cgnOperatorSearchService
+  );
+
+  const cgnOperatorSearchCacheDuration = `${CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS} seconds`;
+
+  const cgnOperatorSearchCachingMiddleware = apicache.options({
+    debug:
+      process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
+      process.env.APICACHE_DEBUG === "true",
+    defaultDuration: cgnOperatorSearchCacheDuration,
+    statusCodes: {
+      include: [200]
+    }
+  }).middleware;
+
+  app.get(
+    `${basePath}/published-product-categories`,
+    bearerSessionTokenAuth,
+    cgnOperatorSearchCachingMiddleware(),
+    toExpressHandler(
+      cgnOperatorController.getPublishedProductCategories,
+      cgnOperatorController
+    )
+  );
+
+  app.get(
+    `${basePath}/merchants/:merchantId`,
+    bearerSessionTokenAuth,
+    cgnOperatorSearchCachingMiddleware(),
+    toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
+  );
+
+  app.post(
+    `${basePath}/online-merchants`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getOnlineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.post(
+    `${basePath}/offline-merchants`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getOfflineMerchants,
+      cgnOperatorController
+    )
+  );
+
+  app.get(
+    `${basePath}/discount-bucket-code/:discountId`,
+    bearerSessionTokenAuth,
+    toExpressHandler(
+      cgnOperatorController.getDiscountBucketCode,
+      cgnOperatorController
+    )
   );
 }
 

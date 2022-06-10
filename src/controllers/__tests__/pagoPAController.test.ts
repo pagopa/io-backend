@@ -1,6 +1,7 @@
 import * as redis from "redis";
 
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
+
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
@@ -19,11 +20,7 @@ import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
-import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
-import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { aMockedUser as mockedUser } from "../../__mocks__/user_mock";
-
-const aCustomEmailAddress = "custom-email@example.com" as EmailAddress;
+import { aCustomEmailAddress, mockedInitializedProfile, mockedUser } from "../../__mocks__/user_mock";
 
 const proxyUserResponse: PagoPAUser = {
   family_name: mockedUser.family_name,
@@ -31,30 +28,6 @@ const proxyUserResponse: PagoPAUser = {
   name: mockedUser.name,
   notice_email: aCustomEmailAddress,
   spid_email: mockedUser.spid_email
-};
-
-const anIsInboxEnabled = true as IsInboxEnabled;
-const anIsWebookEnabled = true as IsWebhookEnabled;
-const aPreferredLanguages: ReadonlyArray<PreferredLanguage> = [
-  PreferredLanguageEnum.it_IT
-];
-const aServicePreferencesSettings: ServicePreferencesSettings = {
-  mode: ServicesPreferencesModeEnum.AUTO
-};
-
-const userInitializedProfile: InitializedProfile = {
-  email: aCustomEmailAddress,
-  family_name: mockedUser.family_name,
-  fiscal_code: mockedUser.fiscal_code,
-  has_profile: true,
-  is_email_enabled: true,
-  is_email_validated: true,
-  is_inbox_enabled: anIsInboxEnabled,
-  is_webhook_enabled: anIsWebookEnabled,
-  name: mockedUser.name,
-  preferred_languages: aPreferredLanguages,
-  service_preferences_settings: aServicePreferencesSettings,
-  version: 42
 };
 
 const mockGetPagoPaNoticeEmail = jest
@@ -102,7 +75,7 @@ describe("PagoPaController#getUser", () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(userInitializedProfile))
+      Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
     );
 
     // tslint:disable-next-line: no-object-mutation
@@ -121,7 +94,7 @@ describe("PagoPaController#getUser", () => {
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockSetPagoPaNoticeEmail).toBeCalledWith(
       mockedUser,
-      userInitializedProfile.email
+      mockedInitializedProfile.email
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -134,7 +107,7 @@ describe("PagoPaController#getUser", () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(userInitializedProfile))
+      Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
     );
 
     // tslint:disable-next-line: no-object-mutation
@@ -153,7 +126,7 @@ describe("PagoPaController#getUser", () => {
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockSetPagoPaNoticeEmail).toBeCalledWith(
       mockedUser,
-      userInitializedProfile.email
+      mockedInitializedProfile.email
     );
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -197,7 +170,7 @@ describe("PagoPaController#getUser", () => {
       Promise.resolve(
         // Return an InitializedProfile with non validated email
         ResponseSuccessJson({
-          ...userInitializedProfile,
+          ...mockedInitializedProfile,
           is_email_validated: false
         })
       )
@@ -234,7 +207,7 @@ describe("PagoPaController#getUser", () => {
       Promise.resolve(
         // Return an InitializedProfile with non validated email
         ResponseSuccessJson({
-          ...userInitializedProfile,
+          ...mockedInitializedProfile,
           is_email_validated: false
         })
       )

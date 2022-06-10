@@ -18,12 +18,23 @@ export default class PagoPAClientFactory
 
   constructor(
     pagoPAApiUrlProd: string,
-    pagoPAApiUrlTest: string,
+    pagoPAApiKeyProd: string,
+    pagoPAApiUrlUAT: string,
+    pagoPAApiKeyUAT: string,
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
   ) {
-    this.prodApiClient = PagoPAClient(pagoPAApiUrlProd, fetchApi);
-    this.testApiClient = PagoPAClient(pagoPAApiUrlTest, fetchApi);
+    this.prodApiClient = PagoPAClient(
+      pagoPAApiUrlProd,
+      pagoPAApiKeyProd,
+      fetchApi
+    );
+    this.testApiClient = PagoPAClient(
+      pagoPAApiUrlUAT,
+      pagoPAApiKeyUAT,
+      fetchApi
+    );
   }
 
   /**

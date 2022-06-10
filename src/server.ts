@@ -14,20 +14,24 @@ import {
   ALLOW_NOTIFY_IP_SOURCE_RANGE,
   ALLOW_PAGOPA_IP_SOURCE_RANGE,
   ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
+  ALLOW_ZENDESK_IP_SOURCE_RANGE,
   API_BASE_PATH,
   AUTHENTICATION_BASE_PATH,
   BONUS_API_BASE_PATH,
   BPD_BASE_PATH,
   CGN_API_BASE_PATH,
+  CGN_OPERATOR_SEARCH_API_BASE_PATH,
   DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
   ENV,
   EUCOVIDCERT_API_BASE_PATH,
+  FIMS_BASE_PATH,
   MIT_VOUCHER_API_BASE_PATH,
   MYPORTAL_BASE_PATH,
   PAGOPA_BASE_PATH,
   SAML_CERT,
   SAML_KEY,
-  SERVER_PORT
+  SERVER_PORT,
+  ZENDESK_BASE_PATH
 } from "./config";
 import {
   initAppInsights,
@@ -46,9 +50,12 @@ const BonusAPIBasePath = BONUS_API_BASE_PATH;
 const PagoPABasePath = PAGOPA_BASE_PATH;
 const MyPortalBasePath = MYPORTAL_BASE_PATH;
 const BPDBasePath = BPD_BASE_PATH;
+const FIMSBasePath = FIMS_BASE_PATH;
 const CGNAPIBasePath = CGN_API_BASE_PATH;
+const CGNOperatorSearchAPIBasePath = CGN_OPERATOR_SEARCH_API_BASE_PATH;
 const EUCovidCertBasePath = EUCOVIDCERT_API_BASE_PATH;
 const MitVoucherBasePath = MIT_VOUCHER_API_BASE_PATH;
+const ZendeskBasePath = ZENDESK_BASE_PATH;
 
 // Set default for graceful-shutdown
 const DEFAULT_SHUTDOWN_SIGNALS = "SIGINT SIGTERM";
@@ -92,16 +99,20 @@ newApp({
   BPDBasePath,
   BonusAPIBasePath,
   CGNAPIBasePath,
+  CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
+  FIMSBasePath,
   MitVoucherBasePath,
   MyPortalBasePath,
   PagoPABasePath,
+  ZendeskBasePath,
   allowBPDIPSourceRange: ALLOW_BPD_IP_SOURCE_RANGE,
   allowMyPortalIPSourceRange: ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   allowNotifyIPSourceRange: ALLOW_NOTIFY_IP_SOURCE_RANGE,
   allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
+  allowZendeskIPSourceRange: ALLOW_ZENDESK_IP_SOURCE_RANGE,
   authenticationBasePath,
   env: ENV
 })

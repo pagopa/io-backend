@@ -6,12 +6,13 @@ import * as crypto from "crypto";
 import { promisify } from "util";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString, EmailString } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { PecServerConfig } from "src/config";
 
 const asyncRandomBytes = promisify(crypto.randomBytes);
 
@@ -65,6 +66,47 @@ export default class TokenService {
   }
 
   /**
+   * Generates a new zendesk support token containing the logged user's fiscalCode and email address.
+   *
+   * @param secret: The shared secret used to sign this JWT token
+   * @param name: The logged user's first name
+   * @param familyName: The logged user's last name
+   * @param fiscalCode: The logged user's fiscal code
+   * @param emailAddress: The logged user's email address
+   * @param tokenTtl: Token Time To live (expressed in seconds)
+   * @param issuer: The Token issuer
+   */
+  // eslint-disable-next-line max-params
+  public getJwtZendeskSupportToken(
+    secret: NonEmptyString,
+    name: NonEmptyString,
+    familyName: NonEmptyString,
+    fiscalCode: FiscalCode,
+    emailAddress: EmailString,
+    tokenTtl: Second,
+    issuer: NonEmptyString
+  ): TaskEither<Error, string> {
+    return taskify<Error, string>(cb =>
+      jwt.sign(
+        {
+          email: emailAddress,
+          external_id: fiscalCode,
+          iat: new Date().getTime() / 1000,
+          jti: ulid(),
+          name: `${name} ${familyName}`
+        },
+        secret,
+        {
+          algorithm: "HS256",
+          expiresIn: `${tokenTtl} seconds`,
+          issuer
+        },
+        cb
+      )
+    )().mapLeft(toError);
+  }
+
+  /**
    * Generates a new Mit voucher token containing the logged user's fiscalCode.
    *
    * @param privateKey: The RSA's private key used to sign this JWT token
@@ -98,4 +140,27 @@ export default class TokenService {
       TE.mapLeft(E.toError)
     );
   }
+
+  /**
+   * Generates a new PEC-SERVER support token containing the logged user's fiscalCode.
+   *
+   * @param config: The Pec Server configuration
+   * @param fiscalCode: The logged user's fiscal code
+   */
+  public readonly getPecServerTokenHandler = (fiscalCode: FiscalCode) => (
+    config: PecServerConfig
+  ): TE.TaskEither<Error, string> =>
+    taskify<Error, string>(cb =>
+      jwt.sign(
+        {
+          account: fiscalCode
+        },
+        config.secret,
+        {
+          algorithm: "HS256",
+          noTimestamp: true
+        },
+        cb
+      )
+    )().mapLeft(toError);
 }

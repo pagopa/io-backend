@@ -28,19 +28,28 @@ import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
-import { BPDToken, MyPortalToken, SessionToken, WalletToken } from "./token";
+import {
+  BPDToken,
+  FIMSToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken,
+  ZendeskToken
+} from "./token";
 
 // required attributes
 export const UserWithoutTokens = t.intersection([
   t.interface({
     created_at: t.number,
+    // date_of_birth become required with https://github.com/pagopa/io-backend/pull/831.
+    // We assume that all valid sessions have now the date_of_birth parameter
+    date_of_birth: t.string,
     family_name: t.string,
     fiscal_code: FiscalCode,
     name: t.string,
     spid_level: SpidLevel
   }),
   t.partial({
-    date_of_birth: t.string,
     nameID: t.string,
     nameIDFormat: t.string,
     sessionIndex: t.string,
@@ -74,13 +83,32 @@ const RequiredUserTokensV3 = t.intersection([
 export const UserV3 = t.intersection([UserWithoutTokens, RequiredUserTokensV3]);
 export type UserV3 = t.TypeOf<typeof UserV3>;
 
-export const User = t.union([UserV1, UserV2, UserV3], "User");
+const RequiredUserTokensV4 = t.intersection([
+  RequiredUserTokensV3,
+  t.interface({
+    zendesk_token: ZendeskToken
+  })
+]);
+export const UserV4 = t.intersection([UserWithoutTokens, RequiredUserTokensV4]);
+export type UserV4 = t.TypeOf<typeof UserV4>;
+
+const RequiredUserTokensV5 = t.intersection([
+  RequiredUserTokensV4,
+  t.interface({
+    fims_token: FIMSToken
+  })
+]);
+export const UserV5 = t.intersection([UserWithoutTokens, RequiredUserTokensV5]);
+export type UserV5 = t.TypeOf<typeof UserV5>;
+
+export const User = t.union([UserV1, UserV2, UserV3, UserV4, UserV5], "User");
 export type User = t.TypeOf<typeof User>;
 
 // required attributes
 export const SpidUser = t.intersection([
   t.interface({
     authnContextClassRef: SpidLevel,
+    dateOfBirth: t.string,
     familyName: t.string,
     fiscalNumber: FiscalCode,
     getAssertionXml: t.Function,
@@ -88,7 +116,6 @@ export const SpidUser = t.intersection([
     name: t.string
   }),
   t.partial({
-    dateOfBirth: t.string,
     email: EmailAddress,
     nameID: t.string,
     nameIDFormat: t.string,
@@ -108,17 +135,16 @@ export function toAppUser(
   walletToken: WalletToken,
   myPortalToken: MyPortalToken,
   bpdToken: BPDToken,
+  zendeskToken: ZendeskToken,
+  fimsToken: FIMSToken,
   sessionTrackingId: string
-): UserV3 {
+): UserV5 {
   return {
     bpd_token: bpdToken,
     created_at: new Date().getTime(),
-    date_of_birth: pipe(
-      O.fromNullable(from.dateOfBirth),
-      O.map(formatDate),
-      O.toUndefined
-    ),
+    date_of_birth: formatDate(from.dateOfBirth),
     family_name: from.familyName,
+    fims_token: fimsToken,
     fiscal_code: from.fiscalNumber,
     myportal_token: myPortalToken,
     name: from.name,
@@ -126,7 +152,8 @@ export function toAppUser(
     session_tracking_id: sessionTrackingId,
     spid_email: from.email,
     spid_level: from.authnContextClassRef,
-    wallet_token: walletToken
+    wallet_token: walletToken,
+    zendesk_token: zendeskToken
   };
 }
 

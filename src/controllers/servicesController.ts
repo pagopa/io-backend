@@ -9,9 +9,9 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  IResponseErrorConflict
 } from "@pagopa/ts-commons/lib/responses";
-import { IResponseErrorConflict } from "@pagopa/ts-commons/lib/responses";
 import { withUserFromRequest } from "../../src/types/user";
 import { withValidatedOrValidationError } from "../../src/utils/responses";
 

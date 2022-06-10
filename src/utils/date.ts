@@ -1,6 +1,8 @@
+import { PatternString } from "@pagopa/ts-commons/lib/strings";
 import { addYears, format, isAfter } from "date-fns";
 import { Option, tryCatch } from "fp-ts/lib/Option";
 import { FiscalCode } from "generated/backend/FiscalCode";
+import * as t from "io-ts";
 
 /**
  * Returns a comparator of two dates that returns true if
@@ -77,3 +79,38 @@ export function toBirthDate(fiscalCode: FiscalCode): Option<Date> {
 export function formatDate(dateStr: string): string {
   return format(dateStr, "YYYY-MM-DD");
 }
+
+const isDate = (v: t.mixed): v is Date => v instanceof Date;
+
+/**
+ * ISO8601 format for dates.
+ *
+ * Date and time is separated with a capital T.
+ * UTC time is defined with +/-00:00 format
+ *
+ */
+const STRICT_UTC_ISO8601_FULL_REGEX = PatternString(
+  "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?[+-](\\d{2})\\:(\\d{2})$"
+);
+// 2021-12-22T10:56:03+01:00
+/**
+ * Accepts an ISO8601 format with UTC (+/-) timezone
+ *
+ * ie. "2018-10-13T00:00:00.000:+01:00"
+ */
+export const StrictUTCISODateFromString = new t.Type<Date, string>(
+  "StrictUTCISODateFromString",
+  isDate,
+  (v, c) =>
+    isDate(v)
+      ? t.success(v)
+      : STRICT_UTC_ISO8601_FULL_REGEX.validate(v, c).chain(s => {
+          const d = new Date(s);
+          return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
+        }),
+  a => a.toISOString()
+);
+
+export type StrictUTCISODateFromString = t.TypeOf<
+  typeof StrictUTCISODateFromString
+>;

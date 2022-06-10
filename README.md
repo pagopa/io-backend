@@ -4,7 +4,7 @@
 
 [![codecov](https://codecov.io/gh/pagopa/io-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-backend)
 
-# Digital citizenship web and mobile backend
+# IO mobile backend
 
 This repository contains the code of the backend used by the
 [mobile](https://github.com/pagopa/io-app) applications of the [IO project](https://io.italia.it).
@@ -40,7 +40,6 @@ This repository contains the code of the backend used by the
     - [SPID Validator](#spid-validator)
     - [Architecture decision records](#architecture-decision-records)
   - [Troubleshooting](#troubleshooting)
-  - [License](#license)
 
 ---
 
@@ -160,6 +159,7 @@ Those are all Environment variables needed by the application:
 | SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
 | SAML_KEY                               | Private Key used by SAML protocol                                                 | string |
 | SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
+| SAML_REQUEST_EXPIRATION_PERIOD_MS      | (Optional) The TTL in milliseconds that the SAML Request was stored in cache (defaults to `600.000`) | number |
 | PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
 | ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
 | NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages           | string |
@@ -172,10 +172,13 @@ Those are all Environment variables needed by the application:
 | ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE  | The range in CIDR form of IPs of service allowed to handle user sessions          | string |
 | AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
 | PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
+| PAGOPA_API_KEY_PROD                    | The api-key needed to call the pagopa proxy API                                   | string |
 | PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
+| PAGOPA_API_KEY_UAT                     | The api-key needed to call the pagopa proxy API for UAT instance                  | string |
 | PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
 | MYPORTAL_BASE_PATH                     | The root path for the MyPortal endpoints                                          | string |
 | BPD_BASE_PATH                          | The root path for the BPD endpoints                                               | string |
+| FIMS_BASE_PATH                         | The root path for the FIMS endpoints                                              | string |
 | STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
 | CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
 | IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
@@ -197,6 +200,14 @@ Those are all Environment variables needed by the application:
 | FETCH_KEEPALIVE_TIMEOUT                | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL      | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
 | FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
+| FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
+| APP_MESSAGES_API_KEY                   | The key used to authenticate to the io-functions-app-messages API                 | string |
+| APP_MESSAGES_API_URL                   | The io-functions-app-messages URL                                                 | string |
+| FF_MESSAGES_TYPE                       | (Optional, default `none`) FF type for new messages implementations               | string |
+| FF_MESSAGES_BETA_TESTER_LIST           | (Optional, default empty) A list of hashed fiscal codes of beta testers           | string |
+| FF_MESSAGES_CANARY_USERS_REGEX         | (Optional, default `XYZ`) A regex for choosing canary users                       | string |
+| THIRD_PARTY_CONFIG_LIST                | (Optional, default empty) A list of ThirdParty Configuration                      | stringified JSON |
+
 
 Notes:
 
@@ -349,6 +360,7 @@ Here's the decisions we taken so far:
 | 4   | [Use a dependency injection container](doc/architecture/decisions/0004-use-a-dependency-injection-container.md)                   |                    |
 | 5   | [Use a GUID as Installation ID](doc/architecture/decisions/0005-use-a-guid-as-installation-id.md)                                 |                    |
 | 6   | [Backend is deployed on more than one instance](doc/architecture/decisions/0006-backend-is-deployed-on-more-than-one-instance.md) |                    |
+
 ---
 
 ## Troubleshooting

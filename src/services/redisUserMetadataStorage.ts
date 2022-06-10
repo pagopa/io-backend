@@ -1,5 +1,4 @@
 import * as redis from "redis";
-
 import * as E from "fp-ts/lib/Either";
 import { ReadableReporter } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";

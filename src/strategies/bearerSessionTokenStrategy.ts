@@ -16,13 +16,13 @@ import { fulfill, StrategyDoneFunction } from "../utils/strategies";
 const bearerSessionTokenStrategy = (
   sessionStorage: ISessionStorage,
   onValidUser?: (user: User) => void
-): passport.Strategy => {
+): passport.Strategy<passport.VerifyFunctionWithRequest> => {
   const options = {
     passReqToCallback: true,
     realm: "Proxy API",
     scope: "request"
   };
-  return new passport.Strategy(
+  return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
     (_: express.Request, token: string, done: StrategyDoneFunction) => {
       sessionStorage.getBySessionToken(token as SessionToken).then(
