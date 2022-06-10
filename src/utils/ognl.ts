@@ -1,12 +1,7 @@
-/*
- * *********************
- * Replace me with ognl.ts from @pagopa/ts-commons when io-backend will be upgraded to fp-ts 2.x
- * *********************
- */
-
-import * as R from "fp-ts/lib/Record";
+import { pipe } from "fp-ts/function";
+import * as R from "fp-ts/Record";
 import * as t from "io-ts";
-import * as E from "fp-ts/lib/Either";
+import * as E from "fp-ts/Either";
 
 /**
  * Porting of lodash "set" function.
@@ -60,10 +55,10 @@ export const nestifyPrefixedType = (
   env: Record<string, unknown>,
   prefix: string
 ): Record<string, unknown> =>
-  R.reduceWithKey(
-    R.filterWithKey(env, fieldName => fieldName.split("_")[0] === prefix),
-    {},
-    (k, b, a) =>
+  pipe(
+    env,
+    R.filterWithIndex(fieldName => fieldName.split("_")[0] === prefix),
+    R.reduceWithIndex({}, (k, b, a) =>
       set(
         b,
         // eslint-disable-next-line functional/immutable-data
@@ -73,6 +68,7 @@ export const nestifyPrefixedType = (
           .join("."),
         a
       )
+    )
   );
 
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
@@ -105,14 +101,18 @@ export const ognlTypeFor = <T>(
   prefix: string
 ): t.Type<T, T, unknown> =>
   new t.Type<T, T, unknown>(
-    "OGNL",
+    "KafkaProducerCompactConfigFromEnv",
     (u: unknown): u is T => type.is(u),
     (input, context) =>
-      E.fromPredicate(
-        isRecordOfString,
-        createNotRecordOfStringErrorL(input, context)
-      )(input).chain(inputRecord =>
-        type.validate(nestifyPrefixedType(inputRecord, prefix), context)
+      pipe(
+        input,
+        E.fromPredicate(
+          isRecordOfString,
+          createNotRecordOfStringErrorL(input, context)
+        ),
+        E.chainW(inputRecord =>
+          type.validate(nestifyPrefixedType(inputRecord, prefix), context)
+        )
       ),
     t.identity
   );

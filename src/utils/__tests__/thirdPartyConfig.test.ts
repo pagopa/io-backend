@@ -31,7 +31,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([]);
     }
   });
@@ -41,7 +41,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([]);
     }
   });
@@ -61,7 +61,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([aValidProdThirdPartyConfig]);
     }
   });
@@ -81,7 +81,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([aValidTestThirdPartyConfig]);
     }
   });
@@ -97,7 +97,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([aValidTestAndProdThirdPartyConfig]);
     }
   });

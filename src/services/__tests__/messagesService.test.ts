@@ -23,6 +23,7 @@ import { MessageStatusValueEnum } from "../../../generated/io-api/MessageStatusV
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusAttributes } from "../../../generated/io-api/MessageStatusAttributes";
 import { MessageStatusWithAttributes } from "../../../generated/io-api/MessageStatusWithAttributes";
+import * as TE from "fp-ts/TaskEither"
 
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
 const aValidSubject = "Lorem ipsum";
@@ -253,7 +254,7 @@ const mockPecServerApiClient: Partial<ReturnType<IPecServerClient>> = {
 const pecServerClientFactoryMock = {
   getClient: jest
     .fn()
-    .mockImplementation(() => taskEither.of(mockPecServerApiClient))
+    .mockImplementation(() => TE.of(mockPecServerApiClient))
 } as IPecServerClientFactoryInterface;
 
 const aValidAttachmentResponse = {
@@ -265,7 +266,7 @@ const aValidAttachmentResponse = {
 
 const aBearerGenerator = jest
   .fn()
-  .mockImplementation(() => taskEither.of(aValidPecServerJwtToken));
+  .mockImplementation(() => TE.of(aValidPecServerJwtToken));
 
 describe("MessageService#getMessagesByUser", () => {
   it("returns a list of messages from the API", async () => {
@@ -531,7 +532,7 @@ describe("MessageService#getLegalMessage", () => {
     );
 
     aBearerGenerator.mockImplementation(() =>
-      fromLeft(new Error("Cannot generate jwt"))
+      TE.left(new Error("Cannot generate jwt"))
     );
     const service = new MessageService(api, pecServerClientFactoryMock);
 
@@ -574,7 +575,7 @@ describe("MessageService#getLegalMessageAttachment", () => {
       t.success(validApiMessageResponseWithLegalData)
     );
     mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      taskEither.of(aValidAttachmentResponse)
+      TE.of(aValidAttachmentResponse)
     );
     const service = new MessageService(api, pecServerClientFactoryMock);
 
@@ -595,11 +596,11 @@ describe("MessageService#getLegalMessageAttachment", () => {
       t.success(validApiMessageResponseWithLegalData)
     );
     mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      taskEither.of(aValidAttachmentResponse)
+      TE.of(aValidAttachmentResponse)
     );
 
     aBearerGenerator.mockImplementation(() =>
-      fromLeft(new Error("Cannot generate jwt"))
+      TE.left(new Error("Cannot generate jwt"))
     );
     const service = new MessageService(api, pecServerClientFactoryMock);
 
@@ -620,7 +621,7 @@ describe("MessageService#getLegalMessageAttachment", () => {
     );
 
     mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      fromLeft(new Error("Connection timeout"))
+      TE.left(new Error("Connection timeout"))
     );
 
     const service = new MessageService(api, pecServerClientFactoryMock);
@@ -638,7 +639,7 @@ describe("MessageService#getLegalMessageAttachment", () => {
       t.success(validApiMessageResponseWithLegalData)
     );
     mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      fromLeft(new Error("Problem"))
+      TE.left(new Error("Problem"))
     );
 
     const service = new MessageService(api, pecServerClientFactoryMock);

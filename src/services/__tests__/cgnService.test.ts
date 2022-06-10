@@ -1,10 +1,7 @@
 import * as t from "io-ts";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
-import { EmailAddress } from "../../../generated/auth/EmailAddress";
 import { CgnAPIClient } from "../../clients/cgn";
 import { mockedUser } from "../../__mocks__/user_mock";
 import CgnService from "../cgnService";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import {
   CardPending,
   StatusEnum

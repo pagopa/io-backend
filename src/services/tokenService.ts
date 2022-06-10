@@ -6,7 +6,11 @@ import * as crypto from "crypto";
 import { promisify } from "util";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { FiscalCode, NonEmptyString, EmailString } from "@pagopa/ts-commons/lib/strings";
+import {
+  FiscalCode,
+  NonEmptyString,
+  EmailString
+} from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
@@ -86,24 +90,27 @@ export default class TokenService {
     tokenTtl: Second,
     issuer: NonEmptyString
   ): TaskEither<Error, string> {
-    return taskify<Error, string>(cb =>
-      jwt.sign(
-        {
-          email: emailAddress,
-          external_id: fiscalCode,
-          iat: new Date().getTime() / 1000,
-          jti: ulid(),
-          name: `${name} ${familyName}`
-        },
-        secret,
-        {
-          algorithm: "HS256",
-          expiresIn: `${tokenTtl} seconds`,
-          issuer
-        },
-        cb
-      )
-    )().mapLeft(toError);
+    return pipe(
+      TE.taskify<Error, string>(cb =>
+        jwt.sign(
+          {
+            email: emailAddress,
+            external_id: fiscalCode,
+            iat: new Date().getTime() / 1000,
+            jti: ulid(),
+            name: `${name} ${familyName}`
+          },
+          secret,
+          {
+            algorithm: "HS256",
+            expiresIn: `${tokenTtl} seconds`,
+            issuer
+          },
+          cb
+        )
+      )(),
+      TE.mapLeft(E.toError)
+    );
   }
 
   /**
@@ -150,17 +157,20 @@ export default class TokenService {
   public readonly getPecServerTokenHandler = (fiscalCode: FiscalCode) => (
     config: PecServerConfig
   ): TE.TaskEither<Error, string> =>
-    taskify<Error, string>(cb =>
-      jwt.sign(
-        {
-          account: fiscalCode
-        },
-        config.secret,
-        {
-          algorithm: "HS256",
-          noTimestamp: true
-        },
-        cb
-      )
-    )().mapLeft(toError);
+    pipe(
+      TE.taskify<Error, string>(cb =>
+        jwt.sign(
+          {
+            account: fiscalCode
+          },
+          config.secret,
+          {
+            algorithm: "HS256",
+            noTimestamp: true
+          },
+          cb
+        )
+      )(),
+      TE.mapLeft(E.toError)
+    );
 }

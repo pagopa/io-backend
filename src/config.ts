@@ -3,17 +3,10 @@
  */
 
 import * as dotenv from "dotenv";
-import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as t from "io-ts";
-import {
-  parseJSON,
-  right,
-  toError,
-  fromNullable as fromNullableE
-} from "fp-ts/lib/Either";
-import { fromNullable, isSome } from "fp-ts/lib/Option";
-import { record } from "fp-ts";
+import { toError } from "fp-ts/lib/Either";
 import { agent } from "@pagopa/ts-commons";
 
 import {
@@ -43,6 +36,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
+import * as S from "fp-ts/lib/string";
+import { record } from "fp-ts";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -138,11 +133,12 @@ const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
   DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX;
 // Default SAML Request cache is 10 minutes
 const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
-const SAML_REQUEST_EXPIRATION_PERIOD_MS = fromNullableE(
-  new Error("Missing Environment configuration")
-)(process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS)
-  .chain(_ => IntegerFromString.decode(_).mapLeft(toError))
-  .getOrElse(DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS);
+const SAML_REQUEST_EXPIRATION_PERIOD_MS = pipe(
+  process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS,
+  E.fromNullable(new Error("Missing Environment configuration")),
+  E.chain(_ => pipe(IntegerFromString.decode(_), E.mapLeft(toError))),
+  E.getOrElse(() => DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS)
+);
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
@@ -347,16 +343,18 @@ export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
 );
 
 // IP(s) or CIDR(s) allowed for zendesk endpoint
-export const ALLOW_ZENDESK_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_ZENDESK_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for handling sessions
 export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
@@ -410,20 +408,27 @@ export const MessagesFeatureFlagType = t.keyof({
 });
 export type MessagesFeatureFlagType = t.TypeOf<typeof MessagesFeatureFlagType>;
 
-export const FF_MESSAGES_TYPE = MessagesFeatureFlagType.decode(
-  process.env.FF_MESSAGES_TYPE
-).getOrElse("none");
+export const FF_MESSAGES_TYPE = pipe(
+  process.env.FF_MESSAGES_TYPE,
+  MessagesFeatureFlagType.decode,
+  E.getOrElseW(() => "none" as const)
+);
 
-export const FF_MESSAGES_BETA_TESTER_LIST = CommaSeparatedListOf(NonEmptyString)
-  .decode(process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "")
-  .getOrElse([]);
+export const FF_MESSAGES_BETA_TESTER_LIST = pipe(
+  process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "",
+  CommaSeparatedListOf(NonEmptyString).decode,
+  E.getOrElseW(() => [])
+);
 
-export const FF_MESSAGES_CANARY_USERS_REGEX = NonEmptyString.decode(
-  process.env.FF_MESSAGES_CANARY_USERS_REGEX
-).getOrElse(
-  // XYZ will never be verified by an hashed fiscal code
-  // used as default
-  "XYZ" as NonEmptyString
+export const FF_MESSAGES_CANARY_USERS_REGEX = pipe(
+  process.env.FF_MESSAGES_CANARY_USERS_REGEX,
+  NonEmptyString.decode,
+  E.getOrElse(
+    () =>
+      // XYZ will never be verified by an hashed fiscal code
+      // used as default
+      "XYZ" as NonEmptyString
+  )
 );
 
 export const API_KEY = getRequiredENVVar("API_KEY");
@@ -542,9 +547,13 @@ export const getClientProfileRedirectionUrl = (
   token: string
 ): UrlFromString => {
   const url = clientProfileRedirectionUrl.replace("{token}", token);
-  return UrlFromString.decode(url).getOrElseL(() => {
-    throw new Error("Invalid url");
-  });
+  return pipe(
+    url,
+    UrlFromString.decode,
+    E.getOrElseW(() => {
+      throw new Error("Invalid url");
+    })
+  );
 };
 
 export const ClientErrorRedirectionUrlParams = t.union([
@@ -577,12 +586,17 @@ export const getClientErrorRedirectionUrl = (
   params: ClientErrorRedirectionUrlParams
 ): UrlFromString => {
   const errorParams = record
-    .collect(params, (key, value) => `${key}=${value}`)
+    .collect(S.Ord)((key, value) => `${key}=${value}`)(params)
     .join("&");
+
   const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
-  return UrlFromString.decode(url).getOrElseL(() => {
-    throw new Error("Invalid url");
-  });
+  return pipe(
+    url,
+    UrlFromString.decode,
+    E.getOrElseW(() => {
+      throw new Error("Invalid url");
+    })
+  );
 };
 
 // Needed to forward SPID requests for logging
@@ -685,31 +699,38 @@ log.info(
 );
 
 // Zendesk support Token
-export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = NonEmptyString.decode(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
-export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = pipe(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = pipe(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION) as Second;
+export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
+  IntegerFromString.decode,
+  E.getOrElseW(() => DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION)
+) as Second;
+
 log.info(
   "JWT Zendesk support token expiration set to %s seconds",
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
@@ -766,7 +787,6 @@ export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
   })
 );
 
-
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",
   CommaSeparatedListOf(FiscalCode).decode,
@@ -774,7 +794,8 @@ export const TEST_CGN_FISCAL_CODES = pipe(
     throw new Error(
       `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
     );
-  }));
+  })
+);
 
 // PEC SERVER config
 export const PecServerConfig = t.interface({
@@ -791,19 +812,18 @@ export const PecServersConfig = t.interface({
 });
 export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
 
-export const PECSERVERS = ognlTypeFor<PecServersConfig>(
-  PecServersConfig,
-  "PECSERVERS"
-)
-  .decode(process.env)
-  .getOrElseL(errs => {
+export const PECSERVERS = pipe(
+  process.env,
+  ognlTypeFor<PecServersConfig>(PecServersConfig, "PECSERVERS").decode,
+  E.getOrElseW(errs => {
     log.error(
       `Missing or invalid PECSERVERS environment variable: ${readableReport(
         errs
       )}`
     );
     return process.exit(1);
-  });
+  })
+);
 //
 
 export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(

@@ -1,7 +1,6 @@
 /* tslint:disable:no-any */
 /* tslint:disable:no-object-mutation */
 
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -18,6 +17,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { mockedInitializedProfile, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
+import * as TE from "fp-ts/TaskEither"
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -74,7 +74,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     );
 
     mockGetZendeskSupportToken.mockReturnValue(
-      taskEither.of(aZendeskSupportToken)
+      TE.of(aZendeskSupportToken)
     );
 
     req.user = mockedRequestUser;
@@ -220,7 +220,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     );
 
     mockGetZendeskSupportToken.mockReturnValue(
-      fromLeft(new Error("ERROR while generating JWT support token"))
+      TE.left(new Error("ERROR while generating JWT support token"))
     );
 
     req.user = mockedRequestUser;

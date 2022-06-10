@@ -320,16 +320,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
       token
     );
 
-    if (isLeft(errorOrSession)) {
-      if (errorOrSession.value === sessionNotFoundError) {
-        return right(none);
+    if (E.isLeft(errorOrSession)) {
+      if (errorOrSession.left === sessionNotFoundError) {
+        return E.right(O.none);
       }
-      return left(errorOrSession.value);
+      return E.left(errorOrSession.left);
     }
 
-    const user = errorOrSession.value;
+    const user = errorOrSession.right;
 
-    return right(some(user));
+    return E.right(O.some(user));
   }
 
   /**
@@ -343,16 +343,16 @@ export default class RedisSessionStorage extends RedisStorageUtils
       token
     );
 
-    if (isLeft(errorOrSession)) {
-      if (errorOrSession.value === sessionNotFoundError) {
-        return right(none);
+    if (E.isLeft(errorOrSession)) {
+      if (errorOrSession.left === sessionNotFoundError) {
+        return E.right(O.none);
       }
-      return left(errorOrSession.value);
+      return E.left(errorOrSession.left);
     }
 
-    const user = errorOrSession.value;
+    const user = errorOrSession.right;
 
-    return right(some(user));
+    return E.right(O.some(user));
   }
 
   /**
@@ -780,7 +780,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
       return this.del(user);
     } catch (error) {
       // as it's a delete, if the query fails for a NotFoudn error, it might be considered a success
-      return error === sessionNotFoundError ? E.right(true) : E.left(E.toError(error));
+      return error === sessionNotFoundError
+        ? E.right(true)
+        : E.left(E.toError(error));
     }
   }
 
@@ -1077,7 +1079,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       }
     };
     if (UserV5.is(user)) {
-      return new StrMap({
+      return {
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
@@ -1095,10 +1097,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
           prefix: zendeskTokenPrefix,
           value: user.zendesk_token
         }
-      });
+      };
     }
     if (UserV4.is(user)) {
-      return new StrMap({
+      return {
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
@@ -1112,7 +1114,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
           prefix: zendeskTokenPrefix,
           value: user.zendesk_token
         }
-      });
+      };
     }
     if (UserV3.is(user)) {
       return {

@@ -142,7 +142,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      right(true),
+      E.right(true),
       "should set a new session with valid values"
     ],
     [
@@ -156,7 +156,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error")],
           "RedisSessionStorage.set"
@@ -175,7 +175,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("hset error")],
           "RedisSessionStorage.set"
@@ -194,7 +194,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("Error setting wallet token")],
           "RedisSessionStorage.set"
@@ -213,7 +213,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("Error setting session token")],
           "RedisSessionStorage.set"
@@ -232,7 +232,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [
             new Error("Error setting session token"),
@@ -254,7 +254,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hset error")],
           "RedisSessionStorage.set"
@@ -273,7 +273,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("Error setting session token"), new Error("hset error")],
           "RedisSessionStorage.set"
@@ -292,7 +292,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("Error setting wallet token")],
           "RedisSessionStorage.set"
@@ -311,7 +311,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("Error setting wallet token")],
           "RedisSessionStorage.set"
@@ -519,7 +519,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       ]);
     });
 
-    const response: Either<Error, boolean> = await sessionStorage[
+    const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
@@ -558,7 +558,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     expect(mockDel.mock.calls[0][10]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
     );
-    expect(response.isRight());
+    expect(E.isRight(response));
   });
 
   it("should delete only older session token for UserV3 and UserV2 payload", async () => {
@@ -906,7 +906,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     const response = await sessionStorage.getByZendeskToken(
       "inexistent token" as ZendeskToken
     );
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should fail getting a session with invalid value", async () => {
@@ -916,23 +916,23 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
-    const expectedDecodedError = User.decode(anInvalidUser) as Left<
-      ReadonlyArray<ValidationError>,
-      User
-    >;
-    const expectedError = new Error(
-      errorsToReadableMessages(expectedDecodedError.value).join("/")
-    );
-    const response = await sessionStorage.getByZendeskToken(
-      aValidUser.zendesk_token
-    );
+    const expectedDecodedError = User.decode(anInvalidUser);
+    expect(E.isLeft(expectedDecodedError)).toBeTruthy();
+    if(E.isLeft(expectedDecodedError)) {
+      const expectedError = new Error(
+        errorsToReadableMessages(expectedDecodedError.left).join("/")
+      );
+      const response = await sessionStorage.getByZendeskToken(
+        aValidUser.zendesk_token
+      );
 
-    expect(mockGet).toHaveBeenCalledTimes(2);
-    expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
-    expect(mockGet.mock.calls[1][0]).toBe(
-      `SESSION-${aValidUser.session_token}`
-    );
-    expect(response).toEqual(left(expectedError));
+      expect(mockGet).toHaveBeenCalledTimes(2);
+      expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+      expect(mockGet.mock.calls[1][0]).toBe(
+        `SESSION-${aValidUser.session_token}`
+      );
+      expect(response).toEqual(E.left(expectedError));
+      }
   });
 
   it("should fail parse of user payload", async () => {
@@ -953,7 +953,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(
-      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
     );
   });
 
@@ -966,7 +966,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should get a session with valid values", async () => {
@@ -986,7 +986,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(right(some(aValidUser)));
+    expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
 
@@ -996,7 +996,7 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelError = new Error("del error");
 
   it.each([
-    [undefined, 7, right(true), "should delete al user tokens"],
+    [undefined, 7, E.right(true), "should delete al user tokens"],
     [
       expectedRedisDelError,
       undefined,
@@ -1010,7 +1010,7 @@ describe("RedisSessionStorage#del", () => {
     [
       undefined,
       4,
-      left(
+      E.left(
         new Error(
           `value [${
             new Error(

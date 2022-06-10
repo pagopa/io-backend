@@ -19,18 +19,15 @@ import {
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import { PaginatedPublicMessagesCollection } from "generated/io-api/PaginatedPublicMessagesCollection";
 import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
-import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { MessageResponseWithContent } from "generated/io-api/MessageResponseWithContent";
-import { identity } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { PecBearerGeneratorT } from "src/types/token";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
@@ -188,39 +185,45 @@ export default class MessagesService {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<LegalMessageWithContent>
   > =>
-    this.getLegalMessageFromFnApp(user, messageId)
-      .chain(message =>
-        this.getLegalMessageFromPecServer(message, bearerGenerator)
-          .chain(legalMessageMetadata =>
+    pipe(
+      this.getLegalMessageFromFnApp(user, messageId),
+      TE.chain(message =>
+        pipe(
+          this.getLegalMessageFromPecServer(message, bearerGenerator),
+          TE.chain(legalMessageMetadata =>
             // Decode the timestamp with timezone from string (UTCISODateFromString currently support only Z time)
-            TE.fromEither(
-              StrictUTCISODateFromString.decode(
-                legalMessageMetadata.cert_data.data.timestamp
-              )
-                .map(timestamp => ({
-                  ...legalMessageMetadata,
-                  cert_data: {
-                    ...legalMessageMetadata.cert_data,
-                    data: {
-                      ...legalMessageMetadata.cert_data.data,
-                      timestamp
+            pipe(
+              TE.fromEither(
+                pipe(
+                  StrictUTCISODateFromString.decode(
+                    legalMessageMetadata.cert_data.data.timestamp
+                  ),
+                  x => x,
+                  E.map(timestamp => ({
+                    ...legalMessageMetadata,
+                    cert_data: {
+                      ...legalMessageMetadata.cert_data,
+                      data: {
+                        ...legalMessageMetadata.cert_data.data,
+                        timestamp
+                      }
                     }
-                  }
-                }))
-                .mapLeft(errorsToError)
-                .mapLeft(es => ResponseErrorInternal(es.message))
+                  }))
+                )
+              ),
+              TE.mapLeft(errorsToError),
+              TE.mapLeft(es => ResponseErrorInternal(es.message))
             )
-          )
-          .map(legalMessageResponse => ({
+          ),
+          TE.map(legalMessageResponse => ({
             ...message,
             legal_message: legalMessageResponse
           }))
-      )
-      .map(ResponseSuccessJson)
-      .fold<
-        IResponseErrorInternal | IResponseSuccessJson<LegalMessageWithContent>
-      >(identity, identity)
-      .run();
+        )
+      ),
+      TE.map(ResponseSuccessJson),
+      TE.toUnion
+    )();
 
   /**
    * Retrieves a specific legal message attachment.
@@ -236,24 +239,30 @@ export default class MessagesService {
     | IResponseErrorTooManyRequests
     | IResponseSuccessOctet
   > =>
-    this.getLegalMessageFromFnApp(user, messageId)
-      .map(message => message.content.legal_data)
-      .chain(messageLegalData =>
-        this.pecClient
-          .getClient(bearerGenerator, messageLegalData.pec_server_service_id)
-          .mapLeft(e => ResponseErrorInternal(e.message))
-          .chain(client =>
-            client
-              .getAttachmentBody(
+    pipe(
+      this.getLegalMessageFromFnApp(user, messageId),
+      TE.map(message => message.content.legal_data),
+      TE.chain(messageLegalData =>
+        pipe(
+          this.pecClient.getClient(
+            bearerGenerator,
+            messageLegalData.pec_server_service_id
+          ),
+          TE.mapLeft(e => ResponseErrorInternal(e.message)),
+          TE.chain(client =>
+            pipe(
+              client.getAttachmentBody(
                 messageLegalData.message_unique_id,
                 attachmentId
-              )
-              .mapLeft(e => ResponseErrorInternal(e.message))
+              ),
+              TE.mapLeft(e => ResponseErrorInternal(e.message))
+            )
           )
-      )
-      .map(ResponseSuccessOctet)
-      .fold<IResponseErrorInternal | IResponseSuccessOctet>(identity, identity)
-      .run();
+        )
+      ),
+      TE.map(ResponseSuccessOctet),
+      TE.toUnion
+    )();
 
   /**
    * Retrieve all the information about the service that has sent a message.
@@ -461,42 +470,44 @@ export default class MessagesService {
     });
 
   private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
-    TE.tryCatch(
-      () =>
-        this.apiClient.getClient().getMessage({
-          fiscal_code: user.fiscal_code,
-          id: messageId
-        }),
-      e => ResponseErrorInternal(E.toError(e).message)
-    )
-      .chain(wrapValidationWithInternalError)
-      .chain(
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.apiClient.getClient().getMessage({
+            fiscal_code: user.fiscal_code,
+            id: messageId
+          }),
+        e => ResponseErrorInternal(E.toError(e).message)
+      ),
+      TE.chain(wrapValidationWithInternalError),
+      TE.chain(
         TE.fromPredicate(isGetMessageSuccess, e =>
           ResponseErrorInternal(
             `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
           )
         )
-      )
-      .map(successResponse => successResponse.value.message)
-      .chain(
+      ),
+      TE.map(successResponse => successResponse.value.message),
+      TE.chain(
         TE.fromPredicate(MessageWithLegalData.is, () =>
           ResponseErrorInternal(
             "The message retrieved is not a valid message with legal data"
           )
         )
-      );
+      )
+    );
 
   private readonly getLegalMessageFromPecServer = (
     message: MessageWithLegalData,
     bearerGenerator: PecBearerGeneratorT
   ): TE.TaskEither<IResponseErrorInternal, LegalMessage> =>
-    this.pecClient
-      .getClient(
+    pipe(
+      this.pecClient.getClient(
         bearerGenerator,
         message.content.legal_data.pec_server_service_id
-      )
-      .mapLeft(e => ResponseErrorInternal(e.message))
-      .chain(client =>
+      ),
+      TE.mapLeft(e => ResponseErrorInternal(e.message)),
+      TE.chain(client =>
         TE.tryCatch(
           () =>
             client.getMessage({
@@ -504,14 +515,15 @@ export default class MessagesService {
             }),
           e => ResponseErrorInternal(E.toError(e).message)
         )
-      )
-      .chain(wrapValidationWithInternalError)
-      .chain(
+      ),
+      TE.chain(wrapValidationWithInternalError),
+      TE.chain(
         TE.fromPredicate(isPecServerGetMessageSuccess, e =>
           ResponseErrorInternal(
             `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
           )
         )
-      )
-      .map(successResponse => successResponse.value);
+      ),
+      TE.map(successResponse => successResponse.value)
+    );
 }

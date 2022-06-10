@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
@@ -357,15 +358,15 @@ export function newApp({
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
-      // Create the cgn operator search service
-      const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
-        CGN_OPERATOR_SEARCH_API_CLIENT
-      );
+        // Create the cgn operator search service
+        const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
+          CGN_OPERATOR_SEARCH_API_CLIENT
+        );
 
-      // Create the EUCovidCert service
-      const EUCOVIDCERT_SERVICE = new EUCovidCertService(
-        EUCOVIDCERT_API_CLIENT
-      );
+        // Create the EUCovidCert service
+        const EUCOVIDCERT_SERVICE = new EUCovidCertService(
+          EUCOVIDCERT_API_CLIENT
+        );
 
         // Create the user data processing service
         const USER_DATA_PROCESSING_SERVICE = new UserDataProcessingService(
@@ -389,7 +390,7 @@ export function newApp({
         );
 
         // Create the UsersLoginLogService
-        const ERROR_OR_USERS_LOGIN_LOG_SERVICE = pipe(
+        const USERS_LOGIN_LOG_SERVICE = pipe(
           E.tryCatch(
             () =>
               new UsersLoginLogService(
@@ -439,7 +440,9 @@ export function newApp({
         );
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
-        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(REDIS_CLIENT);
+        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
+          REDIS_CLIENT
+        );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAPIRoutes(
           app,
@@ -494,78 +497,6 @@ export function newApp({
           );
         }
 
-        const acsController: AuthenticationController = new AuthenticationController(
-          SESSION_STORAGE,
-          TOKEN_SERVICE,
-          getClientProfileRedirectionUrl,
-          PROFILE_SERVICE,
-          NOTIFICATION_SERVICE,
-          USERS_LOGIN_LOG_SERVICE,
-          TEST_LOGIN_FISCAL_CODES
-        );
-
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerPublicRoutes(app);
-
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerAuthenticationRoutes(
-          app,
-          authenticationBasePath,
-          acsController,
-          authMiddlewares.bearerSession,
-          authMiddlewares.local
-        );
-        // Create the messages service.
-        const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
-        const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
-        // Register the user metadata storage service.
-        const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
-          REDIS_CLIENT
-        );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerAPIRoutes(
-          app,
-          APIBasePath,
-          allowNotifyIPSourceRange,
-          authMiddlewares.urlToken,
-          PROFILE_SERVICE,
-          MESSAGES_SERVICE,
-          NOTIFICATION_SERVICE,
-          SESSION_STORAGE,
-          PAGOPA_PROXY_SERVICE,
-          USER_METADATA_STORAGE,
-          USER_DATA_PROCESSING_SERVICE,
-          TOKEN_SERVICE,
-          authMiddlewares.bearerSession
-        );
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerSessionAPIRoutes(
-          app,
-          APIBasePath,
-          allowSessionHandleIPSourceRange,
-          authMiddlewares.urlToken,
-          SESSION_STORAGE,
-          USER_METADATA_STORAGE
-        );
-        if (FF_BONUS_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          registerBonusAPIRoutes(
-            app,
-            BonusAPIBasePath,
-            BONUS_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
-        if (FF_CGN_ENABLED) {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          registerCgnAPIRoutes(
-            app,
-            CGNAPIBasePath,
-            CGN_SERVICE,
-            authMiddlewares.bearerSession
-          );
-        }
-
         if (FF_EUCOVIDCERT_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerEUCovidCertAPIRoutes(
@@ -585,52 +516,52 @@ export function newApp({
             authMiddlewares.bearerSession
           );
         }
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerPagoPARoutes(
-        app,
-        PagoPABasePath,
-        allowPagoPAIPSourceRange,
-        PROFILE_SERVICE,
-        SESSION_STORAGE,
-        ENABLE_NOTICE_EMAIL_CACHE,
-        authMiddlewares.bearerWallet
-      );
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerMyPortalRoutes(
-        app,
-        MyPortalBasePath,
-        allowMyPortalIPSourceRange,
-        authMiddlewares.bearerMyPortal
-      );
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerBPDRoutes(
-        app,
-        BPDBasePath,
-        allowBPDIPSourceRange,
-        authMiddlewares.bearerBPD
-      );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerPagoPARoutes(
+          app,
+          PagoPABasePath,
+          allowPagoPAIPSourceRange,
+          PROFILE_SERVICE,
+          SESSION_STORAGE,
+          ENABLE_NOTICE_EMAIL_CACHE,
+          authMiddlewares.bearerWallet
+        );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerMyPortalRoutes(
+          app,
+          MyPortalBasePath,
+          allowMyPortalIPSourceRange,
+          authMiddlewares.bearerMyPortal
+        );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerBPDRoutes(
+          app,
+          BPDBasePath,
+          allowBPDIPSourceRange,
+          authMiddlewares.bearerBPD
+        );
 
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerFIMSRoutes(
-        app,
-        FIMSBasePath,
-        PROFILE_SERVICE,
-        authMiddlewares.bearerFIMS
-      );
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerFIMSRoutes(
+          app,
+          FIMSBasePath,
+          PROFILE_SERVICE,
+          authMiddlewares.bearerFIMS
+        );
 
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      registerZendeskRoutes(
-        app,
-        ZendeskBasePath,
-        allowZendeskIPSourceRange,
-        PROFILE_SERVICE,
-        TOKEN_SERVICE,
-        authMiddlewares.bearerZendesk
-      );
-      return { acsController, app };
-    },
-    err => new Error(`Error on app routes setup: [${err}]`)
-  ),
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerZendeskRoutes(
+          app,
+          ZendeskBasePath,
+          allowZendeskIPSourceRange,
+          PROFILE_SERVICE,
+          TOKEN_SERVICE,
+          authMiddlewares.bearerZendesk
+        );
+        return { acsController, app };
+      },
+      err => new Error(`Error on app routes setup: [${err}]`)
+    ),
     TE.chain(_ => {
       const spidQueueClient = new QueueClient(
         SPID_LOG_STORAGE_CONNECTION_STRING,

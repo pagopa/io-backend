@@ -378,9 +378,12 @@ export default class AuthenticationController {
    * The Single logout service.
    */
   public async slo(): Promise<IResponsePermanentRedirect> {
-    return UrlFromString.decode("/").fold(_ => {
-      throw new Error("Unexpected redirect url decoding");
-    }, ResponsePermanentRedirect);
+    return pipe(
+      UrlFromString.decode("/"),
+      E.fold(_ => {
+        throw new Error("Unexpected redirect url decoding");
+      }, ResponsePermanentRedirect)
+    );
   }
 
   /**

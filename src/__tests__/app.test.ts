@@ -3,7 +3,6 @@ import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";

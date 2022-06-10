@@ -15,34 +15,6 @@ import {
 } from "../../__mocks__/user_mock";
 import SessionController from "../sessionController";
 import * as E from "fp-ts/lib/Either";
-
-// user constant
-const aTimestamp = 1518010929530;
-
-const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
-const anEmailAddress = "garibaldi@example.com" as EmailAddress;
-const aValidname = "Giuseppe Maria";
-const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-// authentication constant
-const mockSessionToken =
-  "c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b";
-const mockWalletToken =
-  "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043";
-const mockMyPortalToken = "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d";
-const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416";
-
-// mock for a valid User
-const mockedUser: User = {
-  created_at: aTimestamp,
-  family_name: "Garibaldi",
-  fiscal_code: aFiscalNumber,
-  name: aValidname,
-  session_token: mockSessionToken as SessionToken,
-  spid_email: anEmailAddress,
-  spid_level: aValidSpidLevel,
-  wallet_token: mockWalletToken as WalletToken
-};
 import { User } from "../../types/user";
 
 const aTokenDurationSecs = 3600;

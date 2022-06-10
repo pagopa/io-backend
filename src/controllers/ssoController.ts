@@ -8,17 +8,12 @@ import {
   IResponseErrorTooManyRequests,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
-import { identity } from "fp-ts/lib/function";
-import { fromNullable, fromPredicate } from "fp-ts/lib/Option";
-import {
-  tryCatch,
-  fromLeft,
-  taskEither,
-  fromEither
-} from "fp-ts/lib/TaskEither";
-import { InitializedProfile } from "generated/backend/InitializedProfile";
+import { identity, pipe } from "fp-ts/lib/function";
+import { fromPredicate } from "fp-ts/lib/Option";
+import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
@@ -87,50 +82,39 @@ export const getUserForFIMS = (profileService: ProfileService) => (
   | IResponseSuccessJson<FIMSUser>
 > =>
   withUserFromRequest(req, async user =>
-    taskEither
-      .of<
-        | IResponseErrorInternal
-        | IResponseErrorTooManyRequests
-        | IResponseErrorNotFound
-        | IResponseErrorValidation,
-        undefined
-      >(void 0)
-      .chain(() =>
-        tryCatch(
-          () => profileService.getProfile(user),
-          _ => ResponseErrorInternal("Cannot retrieve profile")
-        )
-      )
-      .chain<InitializedProfile>(r =>
-        r.kind === "IResponseSuccessJson" ? taskEither.of(r.value) : fromLeft(r)
-      )
-      .chain(userProfile =>
-        fromEither(
-          FIMSUser.decode({
-            acr: user.spid_level,
-            auth_time: user.created_at,
-            date_of_birth: user.date_of_birth,
-            // If the email is not validated yet, the value returned will be undefined
-            email: fromNullable(userProfile.is_email_validated)
-              .chain(fromPredicate(identity))
-              .chain<EmailString | undefined>(() =>
-                fromNullable(userProfile.email)
-              )
-              .getOrElse(undefined),
-            family_name: user.family_name,
-            fiscal_code: user.fiscal_code,
-            name: user.name
-          }).mapLeft(_ =>
-            ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
+    pipe(
+      TE.tryCatch(
+        () => profileService.getProfile(user),
+        () => ResponseErrorInternal("Cannot retrieve profile")
+      ),
+      TE.chain(r =>
+        r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
+      ),
+      TE.chainW(userProfile =>
+        TE.fromEither(
+          pipe(
+            FIMSUser.decode({
+              acr: user.spid_level,
+              auth_time: user.created_at,
+              date_of_birth: user.date_of_birth,
+              // If the email is not validated yet, the value returned will be undefined
+              email: pipe(
+                O.fromNullable(userProfile.is_email_validated),
+                O.chain(fromPredicate(identity)),
+                O.chain(() => O.fromNullable(userProfile.email)),
+                O.toUndefined
+              ),
+              family_name: user.family_name,
+              fiscal_code: user.fiscal_code,
+              name: user.name
+            }),
+            E.mapLeft(_ =>
+              ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
+            )
           )
         )
-      )
-      .fold<
-        | IResponseErrorInternal
-        | IResponseErrorTooManyRequests
-        | IResponseErrorNotFound
-        | IResponseErrorValidation
-        | IResponseSuccessJson<FIMSUser>
-      >(identity, ResponseSuccessJson)
-      .run()
+      ),
+      TE.map(ResponseSuccessJson),
+      TE.toUnion
+    )()
   );

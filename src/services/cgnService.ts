@@ -302,8 +302,10 @@ export default class CgnService {
           case 201:
             return ResponseSuccessRedirectToResource(
               response.value,
-              fromNullable(response.headers.Location).getOrElse(
-                "/api/v1/cgn/delete"
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/delete")
               ),
               response.value
             );

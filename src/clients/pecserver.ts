@@ -1,6 +1,7 @@
 import nodeFetch from "node-fetch";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as pecClient from "../../generated/pecserver/client";
 
 interface GetAttachmentBodyT {
@@ -30,34 +31,39 @@ export const pecServerClient = (
      * @returns Either a Buffer for the retrieved attachment or an error
      */
     getAttachmentBody: (legalMessageId: string, attachmentId: string) =>
-      TE.tryCatch(
-        () =>
-          fetchApi(
-            `${baseUrl}${basePath}/messages/${legalMessageId}/attachments/${attachmentId}`
-          ),
-        E.toError
-      )
-        .mapLeft(
+      pipe(
+        TE.tryCatch(
+          () =>
+            fetchApi(
+              `${baseUrl}${basePath}/messages/${legalMessageId}/attachments/${attachmentId}`
+            ),
+          E.toError
+        ),
+        TE.mapLeft(
           fetchError =>
             new Error(
               `Failed to perform fetch call for MVL attachment|ERROR=${fetchError.message}`
             )
-        )
-        .chain(
+        ),
+        TE.chain(
           TE.fromPredicate(
             r => r.status === 200,
             r => new Error(`Failed to fetch MVL attachment: ${r.status}`)
           )
-        )
-        .chain<Buffer>(rawResponse =>
-          TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError).bimap(
-            bufferError =>
-              new Error(
-                `Failed to parse MVL attachment's buffer|ERROR=${bufferError.message}`
-              ),
-            Buffer.from
+        ),
+        TE.chain(rawResponse =>
+          pipe(
+            TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError),
+            TE.mapLeft(
+              bufferError =>
+                new Error(
+                  `Failed to parse MVL attachment's buffer|ERROR=${bufferError.message}`
+                )
+            ),
+            TE.map(attachment => Buffer.from(attachment))
           )
         )
+      )
   }
 });
 export type IPecServerClient = typeof pecServerClient;

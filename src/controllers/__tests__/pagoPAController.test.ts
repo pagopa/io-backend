@@ -1,6 +1,5 @@
 import * as redis from "redis";
 
-import { EmailString } from "@pagopa/ts-commons/lib/strings";
 
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
@@ -8,13 +7,6 @@ import mockReq from "../../__mocks__/request";
 
 import * as E from "fp-ts/lib/Either";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
-import { InitializedProfile } from "../../../generated/backend/InitializedProfile";
-import { IsInboxEnabled } from "../../../generated/io-api/IsInboxEnabled";
-import { IsWebhookEnabled } from "../../../generated/io-api/IsWebhookEnabled";
-import {
-  PreferredLanguage,
-  PreferredLanguageEnum
-} from "../../../generated/io-api/PreferredLanguage";
 import ApiClientFactory from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";

@@ -1,7 +1,4 @@
 import * as TE from "fp-ts/lib/TaskEither";
-import { EmailAddress } from "../../../generated/backend/EmailAddress";
-import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 import mockReq from "../../__mocks__/request";
 import TokenService from "../../services/tokenService";
 import { mockedUser } from "../../__mocks__/user_mock";

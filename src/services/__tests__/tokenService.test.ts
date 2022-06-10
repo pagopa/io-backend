@@ -1,4 +1,4 @@
-import * as E from "fp-ts/lib/Either";
+import * as E from "fp-ts/Either"
 import {
   EmailString,
   FiscalCode,
@@ -6,6 +6,7 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import TokenService from "../tokenService";
+import { pipe } from "fp-ts/lib/function";
 
 const aFirstname = "Mario" as NonEmptyString;
 const aLastname = "Rossi" as NonEmptyString;
@@ -124,9 +125,8 @@ describe("TokenService#getZendeskSupportToken", () => {
         anEmailAddress,
         tokenTtl,
         aTokenIssuer
-      )
-      .run();
-    expect(isRight(errorOrNewJwtToken)).toBeTruthy();
+      )();
+    expect(E.isRight(errorOrNewJwtToken)).toBeTruthy();
   });
 
   it("should return an error if an error occurs during token generation", async () => {
@@ -141,9 +141,8 @@ describe("TokenService#getZendeskSupportToken", () => {
         anEmailAddress,
         tokenTtl,
         aTokenIssuer
-      )
-      .run();
-    expect(isLeft(errorOrNewJwtToken)).toBeTruthy();
+      )();
+    expect(E.isLeft(errorOrNewJwtToken)).toBeTruthy();
   });
 });
 
@@ -153,19 +152,17 @@ describe("TokenService#getPecServerTokenHandler", () => {
     const pecServerJwt = await tokenService
       .getPecServerTokenHandler(aFiscalCode)({
         secret: aPecServerSecretCode
-      } as any)
-      .run();
+      } as any)();
 
-    expect(pecServerJwt.isRight()).toBeTruthy();
-    expect(pecServerJwt.getOrElse("")).toBe(aPecServerJwt);
+    expect(E.isRight(pecServerJwt)).toBeTruthy();
+    expect(pipe(pecServerJwt, E.getOrElse(()=>""))).toBe(aPecServerJwt);
   });
 
   it("should return an error if an error occurs during token generation", async () => {
     const tokenService = new TokenService();
     const pecServerJwt = await tokenService
-      .getPecServerTokenHandler(aFiscalCode)({ secret: "" } as any)
-      .run();
+      .getPecServerTokenHandler(aFiscalCode)({ secret: "" } as any)();
 
-    expect(pecServerJwt.isLeft()).toBeTruthy();
+    expect(E.isLeft(pecServerJwt)).toBeTruthy();
   });
 });

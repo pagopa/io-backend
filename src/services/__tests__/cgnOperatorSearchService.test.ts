@@ -1,4 +1,4 @@
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/Option"
 import * as t from "io-ts";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -13,6 +13,7 @@ import { ProductCategoryEnum } from "../../../generated/io-cgn-operator-search-a
 import { GetPublishedCategoriesParameters } from "../../../generated/parameters/GetPublishedCategoriesParameters";
 import { CgnOperatorSearchAPIClient } from "../../clients/cgn-operator-search";
 import CgnOperatorSearchService from "../cgnOperatorSearchService";
+import { pipe } from "fp-ts/lib/function";
 
 const mockGetPublishedProductCategories = jest.fn();
 const mockGetMerchant = jest.fn();
@@ -88,11 +89,11 @@ const anExpectedResponse = {
   })),
   discounts: aDiscountModelList.map(discount =>
     withoutUndefinedValues({
-      condition: fromNullable(discount.condition).toUndefined(),
-      description: fromNullable(discount.description).toUndefined(),
+      condition: pipe(discount.condition, O.fromNullable, O.toUndefined),
+      description: pipe(discount.description, O.fromNullable, O.toUndefined),
       name: discount.name,
       endDate: discount.end_date,
-      discount: fromNullable(discount.discount_value).toUndefined(),
+      discount: pipe(discount.discount_value, O.fromNullable, O.toUndefined),
       startDate: discount.start_date,
       staticCode: discount.static_code,
       landingPageUrl: discount.landing_page_url,

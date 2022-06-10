@@ -16,7 +16,7 @@ describe("JSONFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      expect(decoded.value).toEqual(aValidJson);
+      expect(decoded.right).toEqual(aValidJson);
     }
   });
 
@@ -32,7 +32,7 @@ describe("JSONFromString", () => {
     expect(E.isLeft(decoded)).toBeTruthy();
 
     if (E.isLeft(decoded)) {
-      expect(decoded.value[0].message).toEqual(
+      expect(decoded.left[0].message).toEqual(
         "Error parsing the string into a valid JSON"
       );
     }
@@ -46,7 +46,9 @@ describe("fallback", () => {
     const decoded = aCodecWithFallback.decode("aWrongValue");
 
     expect(E.isRight(decoded));
-    expect((decoded as E.Right<any, number>).value).toEqual(42);
+    if(E.isRight(decoded)){
+      expect((decoded).right).toEqual(42);
+    }
   });
 
   it("should return decoded value in case no decoding failures happened", () => {
@@ -55,6 +57,8 @@ describe("fallback", () => {
     const decoded = aCodecWithFallback.decode(14);
 
     expect(E.isRight(decoded));
-    expect((decoded as E.Right<any, number>).value).toEqual(14);
+    if(E.isRight(decoded)){
+      expect(decoded.right).toEqual(14);
+    }
   });
 });
