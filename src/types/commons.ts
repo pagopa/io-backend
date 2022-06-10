@@ -2,7 +2,7 @@
  * Common response message type.
  */
 
-import { identity } from "fp-ts/lib/function";
+import { identity, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
 
 import * as t from "io-ts";
@@ -54,11 +54,17 @@ export const jsonFromString = new t.Type<object, string>(
   "JSONFromString",
   t.UnknownRecord.is,
   (m, c) =>
-    t.string.validate(m, c).chain(s =>
-      E.tryCatch2v(
-        () => t.success(JSON.parse(s)),
-        _ => t.failure(s, c, "Error parsing the string into a valid JSON")
-      ).fold(identity, identity)
+    pipe(
+      t.string.validate(m, c),
+      E.chain(s =>
+        pipe(
+          E.tryCatch(
+            () => t.success(JSON.parse(s)),
+            _ => t.failure(s, c, "Error parsing the string into a valid JSON")
+          ),
+          E.fold(identity, identity)
+        )
+      )
     ),
   String
 );
@@ -73,7 +79,9 @@ export const fallback = <A, O, I>(type: t.Type<A, O, I>) => (
     type.is,
     (i, context) => {
       const validation = type.validate(i, context);
-      return validation.isLeft() && isFallbackValid ? t.success(a) : validation;
+      return E.isLeft(validation) && isFallbackValid
+        ? t.success(a)
+        : validation;
     },
     type.encode
   );
