@@ -74,7 +74,6 @@ export const fallback = <A, O, I>(type: t.Type<A, O, I>) => (
   name = `fallback(${type.name})`
 ): t.Type<A, O, I> => {
   const isFallbackValid = type.is(a);
-  console.log("1: " + isFallbackValid);
   return new t.Type<A, O, I>(
     name,
     type.is,
