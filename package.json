@@ -93,7 +93,9 @@
     "io-ts": "^2.2.16",
     "io-ts-types": "^0.5.16",
     "jsonwebtoken": "^8.5.1",
+    "monocle-ts": "^2.3.13",
     "morgan": "^1.9.1",
+    "newtype-ts": "^0.3.5",
     "node-fetch": "^2.6.1",
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
@@ -162,7 +164,9 @@
     "typescript": "^4.3.5"
   },
   "jest": {
-    "setupFiles": ["<rootDir>/src/__mocks__/setupEnvVars.ts"],
+    "setupFiles": [
+      "<rootDir>/src/__mocks__/setupEnvVars.ts"
+    ],
     "testEnvironment": "node",
     "moduleFileExtensions": [
       "ts",

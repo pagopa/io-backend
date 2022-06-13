@@ -827,5 +827,5 @@ export const PECSERVERS = pipe(
 //
 
 export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
-  process.env.THIRD_PARTY_CONFIG_LIST
+  process.env.THIRD_PARTY_CONFIG_LIST ?? ""
 );

@@ -26,16 +26,6 @@ const aValidTestAndProdThirdPartyConfig = {
 };
 
 describe("ThirdPartyConfigListFromString", () => {
-  it("should decode an empty array from an undefined string", async () => {
-    const decoded = ThirdPartyConfigListFromString.decode(undefined);
-    expect(E.isRight(decoded)).toBeTruthy();
-
-    if (E.isRight(decoded)) {
-      const right = decoded.right;
-      expect(right).toEqual([]);
-    }
-  });
-
   it("should decode an empty array from an empty string", async () => {
     const decoded = ThirdPartyConfigListFromString.decode("");
     expect(E.isRight(decoded)).toBeTruthy();

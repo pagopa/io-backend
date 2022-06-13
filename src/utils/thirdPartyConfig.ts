@@ -4,7 +4,7 @@ import * as t from "io-ts";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { fallback, jsonFromString } from "../types/commons";
+import { JsonFromString, withFallback } from "io-ts-types";
 
 export const ClientCert = t.interface({
   client_cert: NonEmptyString,
@@ -74,7 +74,8 @@ export const ThirdPartyConfigList = t.readonlyArray(ThirdPartyConfig);
 export type ThirdPartyConfigListFromString = t.TypeOf<
   typeof ThirdPartyConfigListFromString
 >;
-export const ThirdPartyConfigListFromString = fallback(jsonFromString)([]).pipe(
-  ThirdPartyConfigList
-);
+export const ThirdPartyConfigListFromString = withFallback(
+  JsonFromString,
+  []
+).pipe(ThirdPartyConfigList);
 // ^^^ take [] as fallback if JSON.parse fails, but do not override ThirdPartyConfigList validation
