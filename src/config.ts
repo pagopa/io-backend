@@ -837,9 +837,11 @@ export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
 // Enable /notify and session/:fiscal_code/lock endpoint
 // only if code is deployed on appbackendli
 
-const IS_APPBACKENDLI = fromNullable(process.env.IS_APPBACKENDLI)
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
+const IS_APPBACKENDLI = pipe(
+  O.fromNullable(process.env.IS_APPBACKENDLI),
+  O.map(val => val.toLowerCase() === "true"),
+  O.getOrElse(() => false)
+);
 
 export const FF_ENABLE_NOTIFY_ENDPOINT = IS_APPBACKENDLI;
 export const FF_ENABLE_SESSION_LOCK_ENDPOINT = IS_APPBACKENDLI;
