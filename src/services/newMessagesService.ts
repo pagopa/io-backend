@@ -2,6 +2,12 @@
  * This service retrieves messages from the API system using an API client.
  */
 
+import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
+import { identity } from "fp-ts/lib/function";
+
+import * as t from "io-ts";
+
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -12,11 +18,14 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessJson,
-  ResponseErrorForbiddenNotAuthorized
+  ResponseErrorForbiddenNotAuthorized,
+  ResponseErrorInternal,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 
 import { fromNullable } from "fp-ts/lib/Option";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
+import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
@@ -26,6 +35,7 @@ import { PaginatedPublicMessagesCollection } from "../../generated/io-api/Pagina
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 
+import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
 import { User } from "../types/user";
@@ -34,14 +44,39 @@ import {
   ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
+  wrapValidationWithInternalError
 } from "../utils/responses";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
+import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
+import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
+import { CreatedMessageWithContent } from "../../generated/backend/CreatedMessageWithContent";
+import { MessageResponseWithContent } from "../../generated/io-api/MessageResponseWithContent";
+
+import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
+import { log } from "../utils/logger";
+
+const isGetMessageSuccess = <T>(codec: t.Type<T, any>) => (
+  res: IResponseType<number, unknown, never>
+): res is IResponseType<200, T, never> =>
+  res.status === 200 && E.isRight(codec.decode(res.value));
+
+const MessageWithThirdPartyData = t.intersection([
+  CreatedMessageWithContent,
+  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) })
+]);
+type MessageWithThirdPartyData = t.TypeOf<typeof MessageWithThirdPartyData>;
+
+const isMessageWithThirdPartyData = (
+  value: CreatedMessageWithContent
+): value is MessageWithThirdPartyData =>
+  E.isRight(MessageWithThirdPartyData.decode(value));
 
 export default class NewMessagesService {
   constructor(
-    private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>
+    private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>,
+    private readonly thirdPartyClientFactory: ThirdPartyServiceClientFactory
   ) {}
 
   /**
@@ -179,4 +214,156 @@ export default class NewMessagesService {
         }
       });
     });
+
+  // ------------------------------
+  // THIRD_PARTY MESSAGE
+  // ------------------------------
+
+  /**
+   * Retrieves a specific Third-Party message.
+   */
+  public readonly getThirdPartyMessage = async (
+    fiscalCode: FiscalCode,
+    messageId: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ThirdPartyMessageWithContent>
+  > =>
+    this.getThirdPartyMessageFnApp(fiscalCode, messageId)
+      .chain(message =>
+        this.getThirdPartyMessageFromThirdPartyService(message).map<
+          ThirdPartyMessageWithContent
+        >(thirdPartyMessage => ({
+          ...message,
+          third_party_message: thirdPartyMessage
+        }))
+      )
+      .map(ResponseSuccessJson)
+      .fold<
+        | IResponseErrorInternal
+        | IResponseErrorValidation
+        | IResponseErrorForbiddenNotAuthorized
+        | IResponseErrorNotFound
+        | IResponseErrorTooManyRequests
+        | IResponseSuccessJson<ThirdPartyMessageWithContent>
+      >(identity, identity)
+      .run();
+
+  // ------------------------------------
+
+  private readonly getThirdPartyMessageFnApp = (
+    fiscalCode: FiscalCode,
+    messageId: string
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests,
+    MessageWithThirdPartyData
+  > =>
+    TE.tryCatch(
+      () =>
+        this.apiClient.getMessage({
+          fiscal_code: fiscalCode,
+          id: messageId
+        }),
+      e =>
+        ResponseErrorInternal(E.toError(e).message) as
+          | IResponseErrorInternal
+          | IResponseErrorValidation
+          | IResponseErrorForbiddenNotAuthorized
+          | IResponseErrorNotFound
+          | IResponseErrorTooManyRequests
+    )
+      .chain(wrapValidationWithInternalError)
+      .chain(
+        TE.fromPredicate(
+          isGetMessageSuccess(MessageResponseWithContent),
+          response => {
+            log.error(
+              `newMessagesService|getThirdPartyMessageFnApp|result:${
+                response.status
+              }(${response.value ?? "No details"})`
+            );
+            return response.status === 404
+              ? ResponseErrorNotFound("Not found", "Message not found")
+              : response.status === 429
+              ? ResponseErrorTooManyRequests()
+              : unhandledResponseStatus(response.status);
+          }
+        )
+      )
+      .map(successResponse => successResponse.value.message)
+      .chain(
+        // MessageWithThirdPartyData.is fails, we need to check the decode instead
+        TE.fromPredicate(isMessageWithThirdPartyData, () =>
+          ResponseErrorInternal(
+            "The message retrieved is not a valid message with third-party data"
+          )
+        )
+      );
+
+  // Retrieve a ThirdParty message detail from related service, if exists
+  // return an error otherwise
+  private readonly getThirdPartyMessageFromThirdPartyService = (
+    message: MessageWithThirdPartyData
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests,
+    ThirdPartyMessage
+  > =>
+    TE.fromEither(
+      this.thirdPartyClientFactory(message.sender_service_id).mapLeft(e => {
+        log.error(
+          "newMessagesService|getThirdPartyMessageFromThirdPartyService|%s",
+          e
+        );
+        return ResponseErrorInternal(e.message) as
+          | IResponseErrorInternal
+          | IResponseErrorValidation
+          | IResponseErrorForbiddenNotAuthorized
+          | IResponseErrorNotFound
+          | IResponseErrorTooManyRequests;
+      })
+    )
+      .map(c => c(message.fiscal_code))
+      .chain(client =>
+        TE.tryCatch(
+          () =>
+            client.getThirdPartyMessageDetails({
+              id: message.content.third_party_data.id
+            }),
+          e => ResponseErrorInternal(E.toError(e).message)
+        )
+      )
+      .chain(wrapValidationWithInternalError)
+      .chain(
+        TE.fromPredicate(isGetMessageSuccess(ThirdPartyMessage), response => {
+          log.error(
+            `newMessagesService|getThirdPartyMessageFromThirdPartyService|result:${
+              response.status
+            }(${response.value ?? "No details"})`
+          );
+          return response.status === 400
+            ? ResponseErrorValidation("Bad Request", "")
+            : response.status === 401
+            ? ResponseErrorUnexpectedAuthProblem()
+            : response.status === 403
+            ? ResponseErrorForbiddenNotAuthorized
+            : response.status === 404
+            ? ResponseErrorNotFound("Not found", "Message not found")
+            : response.status === 429
+            ? ResponseErrorTooManyRequests()
+            : unhandledResponseStatus(response.status);
+        })
+      )
+      .map(successResponse => successResponse.value);
 }
