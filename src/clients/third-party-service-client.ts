@@ -1,4 +1,5 @@
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
 import { FiscalCode } from "generated/io-api/FiscalCode";
 import { ServiceId } from "generated/io-api/ServiceId";
@@ -61,6 +62,8 @@ export const getThirdPartyServiceClientFactory = (
 ): ((
   serviceId: ServiceId
 ) => E.Either<Error, ReturnType<ThirdPartyServiceClient>>) => serviceId =>
-  E.fromNullable(Error(`Cannot find configuration for service ${serviceId}`))(
-    thirdPartyConfigList.find(c => c.serviceId === serviceId)
-  ).map(config => getThirdPartyServiceClient(config, fetchApi));
+  pipe(
+    thirdPartyConfigList.find(c => c.serviceId === serviceId),
+    E.fromNullable(Error(`Cannot find configuration for service ${serviceId}`)),
+    E.map(config => getThirdPartyServiceClient(config, fetchApi))
+  );
