@@ -22,7 +22,7 @@ paths:
         '200':
           description: Found
           schema:
-            $ref: '#/definitions/ThirdPartyMessageDetail'
+            $ref: '#/definitions/ThirdPartyMessage'
           examples:
             text/json: |
               attachments: [], 
@@ -106,8 +106,10 @@ parameters:
     required: true
     description: ID of the Third Party message.
 definitions:
-  ThirdPartyMessageDetail:
+  ThirdPartyMessage:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ThirdPartyMessage"
+  ThirdPartyAttachment:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ThirdPartyAttachment"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.2.1/openapi/definitions.yaml#/ProblemJson"
   
