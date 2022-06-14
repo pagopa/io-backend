@@ -52,6 +52,7 @@ export type ThirdPartyServiceClientFactory = ReturnType<
 /**
  * Returns a ThirdParty service client factory
  * it returns the correct client based on thirdPartyConfigList and service id
+ *
  * @param thirdPartyConfigList
  * @param fetchApi
  * @returns

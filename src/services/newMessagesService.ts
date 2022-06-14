@@ -150,7 +150,7 @@ export default class NewMessagesService {
         }
 
         return response.status === 404
-          ? ResponseErrorNotFound("Not found", "Message not found")
+          ? ResponseErrorNotFound("Not found", MESSAGE_NOT_FOUND)
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status);
@@ -360,7 +360,7 @@ export default class NewMessagesService {
                 case 404:
                   return ResponseErrorNotFound(
                     "Not found",
-                    "Message not found"
+                    "Message from Third Party service not found"
                   );
                 case 429:
                   return ResponseErrorTooManyRequests();
