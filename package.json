@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "7.43.1",
+  "version": "7.43.2",
   "min_app_version": {
     "ios": "1.38.0",
     "android": "1.38.0"
@@ -57,6 +57,7 @@
     "generate:proxy:mitvoucher": "rimraf generated/mitvoucher && gen-api-models --api-spec api_mit_voucher.yaml --out-dir generated/mitvoucher",
     "generate:proxy:zendesk-models": "rimraf generated/zendesk && gen-api-models --api-spec api_zendesk.yaml --out-dir generated/zendesk",
     "generate:proxy:api-pecserver": "rimraf generated/pecserver && gen-api-models --api-spec openapi/api-pecserver.yaml --out-dir generated/pecserver --request-types --response-decoders --client",
+    "generate:proxy:third-party-service": "rimraf generated/third-party-service && gen-api-models --api-spec openapi/api-third-party.yaml --out-dir generated/third-party-service --request-types --response-decoders --client",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",

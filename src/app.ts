@@ -68,7 +68,9 @@ import {
   APP_MESSAGES_API_CLIENT,
   FF_MESSAGES_TYPE,
   FF_MESSAGES_BETA_TESTER_LIST,
-  FF_MESSAGES_CANARY_USERS_REGEX
+  FF_MESSAGES_CANARY_USERS_REGEX,
+  FF_ENABLE_NOTIFY_ENDPOINT,
+  FF_ENABLE_SESSION_LOCK_ENDPOINT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -1021,12 +1023,13 @@ function registerAPIRoutes(
     )
   );
 
-  app.post(
-    `${basePath}/notify`,
-    // checkIP(allowNotifyIPSourceRange),
-    urlTokenAuth,
-    toExpressHandler(notificationController.notify, notificationController)
-  );
+  if (FF_ENABLE_NOTIFY_ENDPOINT) {
+    app.post(
+      `${basePath}/notify`,
+      urlTokenAuth,
+      toExpressHandler(notificationController.notify, notificationController)
+    );
+  }
 
   app.get(
     `${basePath}/session`,
@@ -1084,30 +1087,30 @@ function registerSessionAPIRoutes(
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage
 ): void {
-  const sessionLockController: SessionLockController = new SessionLockController(
-    sessionStorage,
-    userMetadataStorage
-  );
+  if (FF_ENABLE_SESSION_LOCK_ENDPOINT) {
+    const sessionLockController: SessionLockController = new SessionLockController(
+      sessionStorage,
+      userMetadataStorage
+    );
 
-  app.post(
-    `${basePath}/sessions/:fiscal_code/lock`,
-    // checkIP(allowSessionHandleIPSourceRange),
-    urlTokenAuth,
-    toExpressHandler(
-      sessionLockController.lockUserSession,
-      sessionLockController
-    )
-  );
+    app.post(
+      `${basePath}/sessions/:fiscal_code/lock`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.lockUserSession,
+        sessionLockController
+      )
+    );
 
-  app.delete(
-    `${basePath}/sessions/:fiscal_code/lock`,
-    // checkIP(allowSessionHandleIPSourceRange),
-    urlTokenAuth,
-    toExpressHandler(
-      sessionLockController.unlockUserSession,
-      sessionLockController
-    )
-  );
+    app.delete(
+      `${basePath}/sessions/:fiscal_code/lock`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.unlockUserSession,
+        sessionLockController
+      )
+    );
+  }
 }
 
 function registerCgnAPIRoutes(
