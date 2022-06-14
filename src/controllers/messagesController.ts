@@ -28,6 +28,7 @@ import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAtt
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
+import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
@@ -194,23 +195,21 @@ export default class MessagesController {
    */
   public readonly getThirdPartyMessage = (
     req: express.Request
-  ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ThirdPartyMessageWithContent>
+  > =>
     withUserFromRequest(req, async user =>
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
-        messageId => {
-          tryCatch(
-            () =>
-              this.messageServiceSelector
-                .select(user.fiscal_code)
-                .getMessage(user, { id: messageId }),
-            _err => ResponseErrorInternal("Error retrieving message")
-          );
-
-          return Promise.resolve(
-            ResponseErrorNotImplemented("Not implemented yet")
-          );
-        }
+        messageId =>
+          this.messageServiceSelector
+            .getNewMessageService()
+            .getThirdPartyMessage(user.fiscal_code, messageId)
       )
     );
 

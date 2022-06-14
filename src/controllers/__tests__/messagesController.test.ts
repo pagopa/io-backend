@@ -80,11 +80,13 @@ const internalErrorResponse = {
 const mockFnAppGetMessage = jest.fn();
 const mockFnAppGetMessagesByUser = jest.fn();
 const mockFnAppUpsertMessageStatus = jest.fn();
+const mockGetThirdPartyMessage = jest.fn();
 
 const newMessageService = ({
   getMessage: mockFnAppGetMessage,
   getMessagesByUser: mockFnAppGetMessagesByUser,
-  upsertMessageStatus: mockFnAppUpsertMessageStatus
+  upsertMessageStatus: mockFnAppUpsertMessageStatus,
+  getThirdPartyMessage: mockGetThirdPartyMessage
 } as any) as NewMessagesService;
 
 const mockGetMessage = jest.fn();
@@ -1025,5 +1027,97 @@ describe("MessagesController#Feature Flags", () => {
       kind: "IResponseSuccessJson",
       value: proxyMessageResponse
     });
+  });
+});
+
+describe("MessagesController#getThirdPartyMessage", () => {
+  const aThirdPartyMessageDetail = { details: { aDetail: "detail" } };
+  const proxyThirdPartyMessageResponse = {
+    ...proxyMessageResponse,
+    content: {
+      ...proxyMessageResponse,
+      third_party_data: { id: "aThirdPartyId" }
+    },
+    third_party_message: aThirdPartyMessageDetail
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the getThirdPartyMessage on the messagesController with valid values", async () => {
+    const req = mockReq();
+
+    mockGetThirdPartyMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyThirdPartyMessageResponse))
+    );
+
+    req.user = mockedUser;
+    req.params = { id: anId };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getThirdPartyMessage(req);
+
+    expect(mockGetThirdPartyMessage).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      anId
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: proxyThirdPartyMessageResponse
+    });
+  });
+
+  it("should not the getMessage on the messagesController with empty user", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetThirdPartyMessage.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(proxyThirdPartyMessageResponse))
+    );
+
+    req.user = "";
+    req.params = { id: anId };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const messageService = new MessagesService(
+      apiClient,
+      {} as IPecServerClientFactoryInterface
+    );
+    const messageServiceSelector = getMessagesServiceSelector(
+      messageService,
+      newMessageService,
+      "none",
+      [],
+      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
+    );
+
+    const controller = new MessagesController(
+      messageServiceSelector,
+      {} as TokenService
+    );
+
+    const response = await controller.getThirdPartyMessage(req);
+    response.apply(res);
+
+    expect(mockGetMessage).not.toBeCalled();
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
