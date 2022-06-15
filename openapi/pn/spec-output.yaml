@@ -167,6 +167,68 @@ components:
       schema:
         type: string
   schemas:
+    ServiceLevel:
+      type: string
+      description: Livello Servizio
+      enum:
+        - SIMPLE_REGISTERED_LETTER
+        - REGISTERED_LETTER_890
+    NotificationDigitalAddress:
+      description: Indirizzo di invio della notifica
+      required:
+      - address
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: tipo di indirizzo PEC, REM, SERCQ, ...
+          enum:
+          - PEC
+        address:
+          type: string
+          example: account@domain
+          description: >-
+            Indirizzo PEC o REM che il mittente della notifica intende utilizzare per 
+            raggiungere il destinatario.
+    NotificationAttachmentBodyRef:
+      description: Riferimento all'allegato precaricato
+      required:
+        - key
+        - versionToken
+      type: object
+      properties:
+        key:
+          type: string
+          description: Chiave in cui è stato salvato l'allegato
+        versionToken:
+          type: string
+          description: Token per recuperare l'esatta istanza dell'allegato
+    NotificationAttachmentDigests:
+      description: Codici per la verifica del corretto caricamento di un allegato
+      type: object
+      required:
+        - sha256
+      properties:
+        sha256:
+          type: string
+          description: Digest "sha256" della codifica binaria dell'allegato
+    NotificationAttachment:
+      description: >-
+        Un allegato della notifica.
+      type: object
+      required:
+        - digests
+        - contentType
+        - ref
+      properties:
+        digests:
+          $ref: "#/components/schemas/NotificationAttachmentDigests"
+        contentType:
+          type: string
+          description: tipo di contenuto dell'allegato, supportato application/pdf
+        ref:
+          $ref: "#/components/schemas/NotificationAttachmentBodyRef"
     NotificationAttachmentDownloadMetadataResponse:
       title: Url e metadati per il download di un allegato di una notifica
       description: >-
@@ -420,23 +482,12 @@ components:
                       creditorTaxId:
                         type: string
                         description: Codice fiscale dell'ente a cui fa riferimento il "numero avviso".
-                      pagoPaForm:
-                        description: Un modulo di pagamento allegato alla notifica
-                        allOf:
-                          - $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                              /content/*~1*/schema/allOf/0/allOf/\
-                              0/properties/documents/items/allOf/\
-                              0"
+                      pagoPaForm: 
+                        $ref: "#/components/schemas/NotificationAttachment"
                       f24flatRate:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/0/allOf/0/pr\
-                          operties/recipients/items/properties/pa\
-                          yment/properties/pagoPaForm"
+                        $ref: "#/components/schemas/NotificationAttachment"
                       f24standard:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/0/allOf/0/pr\
-                          operties/recipients/items/properties/pa\
-                          yment/properties/pagoPaForm"
+                        $ref: "#/components/schemas/NotificationAttachment"
             documents:
               type: array
               description: Documenti notificati
@@ -838,10 +889,7 @@ components:
                         type: integer
                         description: Index destinatario notifica digitale
                       digitalAddress:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/5/properties/digitalAddress"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       physicalAddress:
                         $ref: "#/components/schemas/NotificationPhysicalAddress"
                   - type: object
@@ -868,15 +916,9 @@ components:
                         type: integer
                         description: Informazioni ultimo tentativo effettuato
                       digitalAddress:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/5/properties/digitalAddress"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       digitalAddressSource:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/6/properties/digitalAddressSource"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       sentAttemptMade:
                         type: integer
                       lastAttemptDate:
@@ -893,10 +935,7 @@ components:
                         type: integer
                         description: Index destinatario notifica digitale
                       digitalAddress:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/5/properties/digitalAddress"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       sendDate:
                         type: string
                         description: data invio messaggio di cortesia
@@ -907,15 +946,9 @@ components:
                         type: integer
                         description: Index destinatario notifica digitale
                       digitalAddress:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/5/properties/digitalAddress"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       digitalAddressSource:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/6/properties/digitalAddressSource"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       retryNumber:
                         type: integer
                         description: numero dei tentativi effettuati
@@ -936,10 +969,7 @@ components:
                         type: integer
                         description: Index destinatario notifica digitale
                       digitalAddress:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/5/properties/digitalAddress"
+                        $ref: "#/components/schemas/NotificationDigitalAddress"
                       responseStatus:
                         type: string
                         description: stato risposta ricevuta da externalChannel
@@ -964,11 +994,7 @@ components:
                       physicalAddress:
                         $ref: "#/components/schemas/NotificationPhysicalAddress"
                       serviceLevel:
-                        type: string
-                        description: Livello Servizio
-                        enum:
-                          - SIMPLE_REGISTERED_LETTER
-                          - REGISTERED_LETTER_890
+                        $ref: "#/components/schemas/ServiceLevel"
                       sentAttemptMade:
                         type: integer
                         description: numero dei tentativi effettuati
@@ -983,10 +1009,7 @@ components:
                       physicalAddress:
                         $ref: "#/components/schemas/NotificationPhysicalAddress"
                       serviceLevel:
-                        $ref: "#/paths/~1delivery~1notifications~1received~1%7Biun%7D/get/responses/200\
-                          /content/*~1*/schema/allOf/1/properties\
-                          /timeline/items/properties/details/oneO\
-                          f/18/properties/serviceLevel"
+                        $ref: "#/components/schemas/ServiceLevel"
                       sentAttemptMade:
                         type: integer
                         description: numero dei tentativi effettuati
