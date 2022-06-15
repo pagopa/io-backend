@@ -490,6 +490,10 @@ definitions:
           title:
             description: Titolo del documento allegato
             type: string
+          docIdx:
+              type: string
+              description: >- 
+                Indice del documento partendo da 0.
         type: object
     description: Un documento da notifcare
   NotificationPaymentAttachment:
