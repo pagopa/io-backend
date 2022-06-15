@@ -1,0 +1,40 @@
+components:
+  
+  parameters:
+    ############################################################################################
+    ###                     PARAMETRI DI AUTENTICAZIONE E AUTORIZZAZIONE                     ###
+    ############################################################################################
+    cxTypeAuthFleet:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/49b7f5dbda112680d3c5aa79123388736b1c215f/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxTypeAuthFleet'
+    cxIdAuthFleet:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/49b7f5dbda112680d3c5aa79123388736b1c215f/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxIdAuthFleet'
+    cxGroupsAuthFleet:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/49b7f5dbda112680d3c5aa79123388736b1c215f/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxGroups'
+    uidAuthFleet:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/49b7f5dbda112680d3c5aa79123388736b1c215f/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/uidAuthFleet'
+    cxTaxIdAuthFleet:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/49b7f5dbda112680d3c5aa79123388736b1c215f/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxTaxIdAuthFleet'
+
+    ############################################################################################
+    ###                      PARAMETRI DOWNLOAD ATTI OPPONIBILI A TERZI                      ###
+    ############################################################################################
+    pathLegalFactType:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/a7c30c984170758a801bdd9dab838c63d6d15ecd/docs/openapi/api-internal-pn-delivery-push-v1.yaml#/components/parameters/pathLegalFactType'
+    pathLegalFactId:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/a7c30c984170758a801bdd9dab838c63d6d15ecd/docs/openapi/api-internal-pn-delivery-push-v1.yaml#/components/parameters/pathLegalFactId'
+
+
+  schemas:
+    
+    ############################################################################################
+    ###                          STRUTTURE DATI DI PN-DELIVERY_PUSH                          ###
+    ############################################################################################
+    TimelineElement:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/a7c30c984170758a801bdd9dab838c63d6d15ecd/docs/openapi/schemas-pn-timeline-v1.yaml#/components/schemas/TimelineElement'
+    NotificationStatus:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/a7c30c984170758a801bdd9dab838c63d6d15ecd/docs/openapi/schemas-pn-status-v1.yaml#/components/schemas/NotificationStatus'
+    NotificationStatusHistory:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/a7c30c984170758a801bdd9dab838c63d6d15ecd/docs/openapi/schemas-pn-status-v1.yaml#/components/schemas/NotificationStatusHistory'
+    LegalFactDownloadMetadataResponse:
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/a7c30c984170758a801bdd9dab838c63d6d15ecd/docs/openapi/schemas-pn-legal-facts-v1.yaml#/components/schemas/LegalFactDownloadMetadataResponse'
+

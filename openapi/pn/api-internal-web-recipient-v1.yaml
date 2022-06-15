@@ -1,0 +1,261 @@
+openapi: 3.0.3
+info:
+  title: 'Piattaforma Notifiche: API web per i destinatari'
+  version: v1.0
+  description: >- 
+    ciccio
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: 'https://da-definire/'
+servers:
+- url: https://api.pn.pagopa.it
+  description: Ambiente di produzione
+- url: https://api.uat.pn.pagopa.it
+  description: Ambiente di test
+- url: https://api.dev.pn.pagopa.it
+  description: Ambiente di sviluppo
+tags:
+  - name: RecipientRead
+    description: >-
+      Invocazioni utlizzate dai destinatari per ottenere informazioni sulle notifiche a loro destinate.
+
+
+paths:
+    
+    ###########################################################################################
+    ###                             RICERCA NOTIFICHE RICEVUTE                             ###
+    ###########################################################################################
+  "/delivery/notifications/received":
+    get:    
+      summary: Ricerca notifiche inviate
+      description: >-
+        servizio di consultazione dello stato di invio delle notifiche individuate dai parametri 
+        di ricerca specificati
+      tags:
+        - RecipientRead
+      operationId: searchReceivedNotification
+      parameters:
+        - $ref: '#/components/parameters/uidAuthFleet'
+        - $ref: '#/components/parameters/cxTypeAuthFleet'
+        - $ref: '#/components/parameters/cxIdAuthFleet'
+        - $ref: '#/components/parameters/cxGroupsAuthFleet'        
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchStartDate'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchEndDate'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchMandateId'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchSenderId'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchStatus'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchSubject'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchIun'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchPageSize'
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/notificationSearchNextPagesKey'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-notification-v1.yaml#/components/schemas/NotificationSearchResponse'
+        '400':
+          description: Bad request       
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+  
+  "/delivery/notifications/received/{iun}":
+    get:
+      summary: Accesso notifiche ricevute
+      description: >-
+        Utilizzato da Persone Fisiche e Persone Giuridiche per accedere ai dettagli delle 
+        notifiche ricevute.
+      tags:
+        - RecipientRead
+      operationId: getReceivedNotification
+      parameters:
+        - $ref: '#/components/parameters/uidAuthFleet'            # NO EXTERNAL
+        - $ref: '#/components/parameters/cxTypeAuthFleet'         # NO EXTERNAL
+        - $ref: '#/components/parameters/cxIdAuthFleet'           # NO EXTERNAL
+        - $ref: '#/components/parameters/cxGroupsAuthFleet'       # NO EXTERNAL
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/FullReceivedNotification"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+    
+    ###########################################################################################
+    ###                     DOWNLOAD DOCUMENTI E ALLEGATI PER PAGAMENTO                     ###
+    ###########################################################################################
+
+  "/delivery/notifications/received/{iun}/attachments/documents/{docIdx}":
+    get:
+      summary: Download documento notificato
+      tags:
+        - RecipientRead
+      operationId: getReceivedNotificationDocument
+      parameters:
+        - $ref: '#/components/parameters/uidAuthFleet'           # NO EXTERNAL
+        - $ref: '#/components/parameters/cxTypeAuthFleet'        # NO EXTERNAL
+        - $ref: '#/components/parameters/cxIdAuthFleet'          # NO EXTERNAL
+        - $ref: '#/components/parameters/cxGroupsAuthFleet'      # NO EXTERNAL
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'
+        - $ref: '#/components/parameters/pathDocumentIdx'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-notification-v1.yaml#/components/schemas/NotificationAttachmentDownloadMetadataResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        
+  "/delivery/notifications/received/{iun}/attachments/payment/{attachmentName}":
+    get:
+      summary: Download allegato per pagamento
+      tags:
+        - RecipientRead
+      operationId: getReceivedNotificationAttachment
+      parameters:
+        - $ref: '#/components/parameters/uidAuthFleet'              # NO EXTERNAL
+        - $ref: '#/components/parameters/cxTypeAuthFleet'           # NO EXTERNAL
+        - $ref: '#/components/parameters/cxIdAuthFleet'             # NO EXTERNAL
+        - $ref: '#/components/parameters/cxGroupsAuthFleet'         # NO EXTERNAL
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'
+        - $ref: '#/components/parameters/pathAttachmentName'
+        - $ref: '#/components/parameters/queryMandateId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-notification-v1.yaml#/components/schemas/NotificationAttachmentDownloadMetadataResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+
+
+components:
+  
+  parameters:
+    ############################################################################################
+    ###                     PARAMETRI DI AUTENTICAZIONE E AUTORIZZAZIONE                     ###
+    ############################################################################################
+    cxTypeAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/cxTypeAuthFleet'
+    cxIdAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/cxIdAuthFleet'
+    cxGroupsAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/cxGroupsAuthFleet'
+    uidAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/uidAuthFleet'
+
+    
+    ############################################################################################
+    ###                             PARAMETRI DOWNLOAD DOCUMENTI                             ###
+    ############################################################################################
+    pathDocumentIdx:
+      name: docIdx
+      in: path
+      required: true
+      schema:
+        type: number
+    pathAttachmentName:
+      name: attachmentName
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "PAGOPA|F24"
+        # quella sottostante è quella corretta. Riscritta per problemi con tool usato
+        #    oneOf:
+        #      - type: number
+        #      - type: string
+        #        enum:
+        #          - PAGOPA
+        #          - F24
+    queryMandateId:
+      name: mandateId
+      in: query
+      required: false
+      schema:
+        type: string
+    
+    ############################################################################################
+    ###                      PARAMETRI DOWNLOAD ATTI OPPONIBILI A TERZI                      ###
+    ############################################################################################
+    pathLegalFactType:
+      $ref: './remote-refs.yaml#/components/parameters/pathLegalFactType'
+    pathLegalFactId:
+      $ref: './remote-refs.yaml#/components/parameters/pathLegalFactId'
+
+  schemas:
+    
+        
+    ###########################################################################################
+    ###                              DTO NOTIFICA CON DETTAGLI                              ###
+    ###########################################################################################
+
+    FullReceivedNotification:
+      description: >-
+        Le informazioni riguardanti una richiesta di notifica accettata e il processo di 
+        inoltro della notifica verso i destinatari (Persone Fisiche o Giuridiche).
+      allOf: 
+        - $ref: './schemas-pn-notification-v1.yaml#/components/schemas/SentNotification'
+        - type: object
+          required: 
+            - notificationStatus
+            - notificationStatusHistory
+            - timeline
+          properties:  
+            notificationStatus:
+              $ref: '#/components/schemas/NotificationStatus'
+            notificationStatusHistory:
+              $ref: '#/components/schemas/NotificationStatusHistory'
+            timeline:
+              description: >-
+                elenco dettagliato di tutto ciò che è accaduto durrante il processo di notifica
+              type: array
+              items:
+                $ref: '#/components/schemas/TimelineElement'
+    
+    TimelineElement:
+      $ref: './remote-refs.yaml#/components/schemas/TimelineElement'
+    NotificationStatus:
+      $ref: './remote-refs.yaml#/components/schemas/NotificationStatus'
+    NotificationStatusHistory:
+      $ref: './remote-refs.yaml#/components/schemas/NotificationStatusHistory'
+    LegalFactDownloadMetadataResponse:
+      $ref: './remote-refs.yaml#/components/schemas/LegalFactDownloadMetadataResponse'
+
+   
+#  securitySchemes:        # ONLY EXTERNAL
+#    ApiKeyAuth:           # ONLY EXTERNAL
+#      type: apiKey        # ONLY EXTERNAL
+#      in: header          # ONLY EXTERNAL
+#      name: x-api-key     # ONLY EXTERNAL
+
+#security:                 # ONLY EXTERNAL
+#  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
+              
+
+
+  

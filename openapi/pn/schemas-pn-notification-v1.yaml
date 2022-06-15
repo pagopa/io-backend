@@ -1,0 +1,426 @@
+components:
+  schemas:
+
+    ############################################################################################
+    ###                           IDENTIFICATIVI DELLE NOTIFICHE                             ###
+    ############################################################################################
+    
+    IUN:
+      description: Identificativo Univoco Notifica
+      type: string
+
+    ############################################################################################
+    ###                                 DTO DELLE NOTIFICHE                                  ###
+    ############################################################################################
+    
+    NewNotificationRequest:
+      description: I campi utilizzati per la creazione di una nuova Notifica.
+      type: object
+      required:
+        - paProtocolNumber
+        - subject
+        - recipients
+        - documents
+        - physicalCommunicationType
+        - notificationFeePolicy
+      properties:
+        idempotenceToken:
+          description: >-
+            Identificativo utilizzabile dal chiamante per disambiguare differenti 
+            "richieste di notificazione" effetuate con lo stesso numero di protocollo 
+            (campo _paProtocolNumber_). Questo può essere necessario in caso di 
+            "richiesta di notifica" rifiutata per errori nei codici di verifica degli
+            allegati.
+          type: string
+        paProtocolNumber:
+          description: >-
+            Numero di protocollo che la PA mittente assegna alla notifica stessa
+          type: string
+        subject:
+          type: string
+          description: titolo della notifica
+        abstract:
+          type: string
+          description: descrizione sintetica della notifica
+        recipients:
+          type: array
+          description: Informazioni sui destinatari
+          items:
+            $ref: "#/components/schemas/NotificationRecipient"
+        documents:
+          type: array
+          description: Documenti notificati
+          items:
+            $ref: "#/components/schemas/NotificationDocument"
+        notificationFeePolicy:
+          type: string
+          description: >-
+            Politica di addebitamento dei costi di notifica. <br/>
+            - _FLAT_RATE_: costo forfettario fisso. <br/>
+            - _DELIVERY_MODE_: costo calcolato in base all'effettivo percorso di notifica. <br/>
+          enum:
+          - FLAT_RATE
+          - DELIVERY_MODE
+        cancelledIun:
+          type: string
+          description: IUN della notifica annullata da questa notifica
+        physicalCommunicationType:
+          type: string
+          description: Tipologia comunicazione fisica
+          enum:
+          - SIMPLE_REGISTERED_LETTER
+          - REGISTERED_LETTER_890
+        senderDenomination:
+          description: Denominazione dell'ente mittente
+          type: string
+        senderTaxId:
+          description: Codice Fiscale dell'ente mittente
+          type: string
+        group:
+          type: string
+          description: Gruppo di utenti dell'ente mittente che può visualizzare la notifica
+    
+    SentNotification:
+      description: >-
+        Le informazioni riguardanti una richiesta di notifica accettata
+      allOf: 
+        - $ref: '#/components/schemas/NewNotificationRequest'
+        - type: object
+          required:
+            - iun
+            - sentAt
+          properties:
+            senderPaId:
+              type: string
+              description: Identificativo IPA della PA mittente che ha eseguito l'onborading su SelfCare.
+            iun:
+              type: string
+              description: L'Identificativo Univoco Notifica assegnato da PN
+            sentAt:
+              type: string
+              description: Momento di ricezione della notifica da parte di PN
+              format: date-time
+            cancelledByIun:
+              type: string
+              description: IUN della notifica che ha annullato questa notifica
+            documentsAvailable:
+              type: boolean
+              description: Indica se i documenti notificati sono ancora disponibili.
+
+
+    ############################################################################################
+    ###                                ELEMENTI DI DETTAGLIO                                 ###
+    ############################################################################################
+    
+    NotificationRecipient:
+      description: Informazioni sui destinatari
+      required:
+      - denomination
+      - recipientType
+      - taxId
+      type: object
+      properties:
+        recipientType:
+          type: string
+          description: 'Tipologia di destinatario: Persona Fisica (PF) o Persona Giuridica
+            (PG)'
+          enum:
+          - PF
+          - PG
+        taxId:
+          type: string
+          description: Codice Fiscale del destinatario
+        denomination:
+          type: string
+          description: Nome e cognome / ragione sociale
+        digitalDomicile:
+           $ref: "#/components/schemas/NotificationDigitalAddress"
+        physicalAddress:
+          $ref: "#/components/schemas/NotificationPhysicalAddress"
+        payment:
+          $ref: "#/components/schemas/NotificationPaymentInfo"
+
+    NotificationAttachment:
+      description: >-
+        Un allegato della notifica.
+      type: object
+      required:
+        - digests
+        - contentType
+        - ref
+      properties:
+        digests:
+          $ref: "#/components/schemas/NotificationAttachmentDigests"
+        contentType:
+          type: string
+          description: tipo di contenuto dell'allegato, supportato application/pdf
+        ref:
+          $ref: "#/components/schemas/NotificationAttachmentBodyRef"
+
+    NotificationPaymentAttachment:
+      description: >-
+        Un modulo di pagamento allegato alla notifica
+      allOf: 
+        - $ref: "#/components/schemas/NotificationAttachment"
+    
+    NotificationDocument:
+      description: >-
+        Un documento da notifcare
+      allOf: 
+        - $ref: "#/components/schemas/NotificationAttachment"
+        - type: object
+          properties:
+            title:
+              type: string
+              description: Titolo del documento allegato
+            requiresAck:
+              type: boolean
+              description: >-
+                Se presente e valorizzato __true__ il download del documento 
+                diventa necessario al fine del perfezionamento per presa visione.
+            sendByMail:
+              type: boolean
+              description: >- 
+                Se presente e valorizzato __true__ il documento verrà spedito 
+                nelle comunicazioni cartacee. In MVP questo flag sarà attivabile 
+                solo su un documento.
+            docIdx:
+              type: string
+              description: >- 
+                Indice del documento partendo da 0.
+
+    NotificationAttachmentDigests:
+      description: Codici per la verifica del corretto caricamento di un allegato
+      type: object
+      required:
+        - sha256
+      properties:
+        sha256:
+          type: string
+          description: Digest "sha256" della codifica binaria dell'allegato
+    
+    NotificationAttachmentBodyRef:
+      description: Riferimento all'allegato precaricato
+      required:
+        - key
+        - versionToken
+      type: object
+      properties:
+        key:
+          type: string
+          description: Chiave in cui è stato salvato l'allegato
+        versionToken:
+          type: string
+          description: Token per recuperare l'esatta istanza dell'allegato
+
+
+    NotificationPaymentInfo:
+      title: Informazioni per effettuare il pagamento
+      description: >-
+       Informazioni utili per effettuare il pagamento di una notifica, sono associate al 
+       destinatario perché le spese di notifica possono differire a seconda del canale di 
+       notifica utilizzato. <br/>
+         - _notificationFeePolicy_: indica se il pagamento delle spese di notifica è forfettario o 
+            calcolato puntualmente. <br/>
+         - _noticeCode_: "codice avviso pagoPA" di pagamento del sistema pagoPA, usato per pagamento online.<br/>
+         - _creditorTaxId_: codice fiscale dell'ente a cui fa riferimento il "codice avviso pagoPA". <br/>
+         - _pagoPaForm_: riferimento al PDF contenete il bollettino pagoPA<br/>
+         - _f24flatRate_: riferimento al PDF contenete l'F24 con spese di notifica forfettarie<br/>
+         - _f24standard_: riferimento al PDF contenete l'F24 con spese di notifica standard<br/>
+      type: object
+      required:
+        - noticeNumber
+        - creditorTaxId
+        - pagoPaForm
+      properties:
+        noticeCode:
+          type: string
+          description: Numero Avviso di pagamento del sistema pagoPA, usato per pagamento online
+        creditorTaxId:
+          type: string
+          description: Codice fiscale dell'ente a cui fa riferimento il "numero avviso".
+        pagoPaForm:
+          $ref: "#/components/schemas/NotificationPaymentAttachment"
+        f24flatRate:
+          $ref: "#/components/schemas/NotificationPaymentAttachment"
+        f24standard:
+          $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24digital:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24digitalWithRs:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24digitalWithRi:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24analogRaccSingle:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24analogRaccDouble:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24analogRiSingle:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+        #f24analogRiDouble:
+        #  $ref: "#/components/schemas/NotificationPaymentAttachment"
+
+
+    ############################################################################################
+    ###                              INDIRIZZI DIGITALE E FISICO                             ###
+    ### Ripetuti per non accoppiare i microservizi e avere più facilità di evoluzione, anche ###
+    ### se questo implica un po' di duplicazione.                                            ###
+    ############################################################################################
+    
+    NotificationDigitalAddress:
+      description: Indirizzo di invio della notifica
+      required:
+      - address
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: tipo di indirizzo PEC, REM, SERCQ, ...
+          enum:
+          - PEC
+        address:
+          type: string
+          example: account@domain
+          description: >-
+            Indirizzo PEC o REM che il mittente della notifica intende utilizzare per 
+            raggiungere il destinatario.
+    
+    NotificationPhysicalAddress:
+      description: Indirizzo fisico scoperto durante fase di consegna
+      type: object
+      required:
+        - address
+        - municipality
+        - zip
+      properties:
+        at:
+          type: string
+          description: Campo "presso" dell'indirizzo
+        address:
+          type: string
+          description: Indirizzo del domicilio fisico
+        addressDetails:
+          type: string
+          description: Seconda riga dell'indirizzo fisico
+        zip:
+          type: string
+          description: Codice di avviamento postale
+        municipality:
+          type: string
+          description: Comune
+        municipalityDetails:
+          type: string
+          description: Frazione o località
+        province:
+          type: string
+          description: Provincia
+        foreignState:
+          type: string
+          description: Denominazione paese estero
+    
+    
+    ############################################################################################
+    ###                             RISULTATO RICERCA NOTIFICHE                              ###
+    ############################################################################################
+    
+    NotificationSearchResponse:
+      title: Elenco di notifiche 
+      description: >-
+        Dto contenente i risultati di una ricerca di notifiche. Ogni risposta conterrà solo 
+        una pagina di risultati relativi a una ricerca e le indicazioni per raggiungere alcune
+        pagine successive.
+      type: object
+      properties:
+        resultsPage:
+          description: Una pagina di risultati della query
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationSearchRow'
+        moreResult:
+          description: Indica se sono presenti ulteriori pagine di risultati
+          type: boolean
+        nextPagesKey:
+          description: >-
+            Elenco, non esaustivo, delle chiavi da usare per richiedere le 
+            pagine di risultati successive a quella corrente. <br/>
+            Valorizzato solo se il campo __moreResult__ ha valore __true__.
+          type: array
+          items:
+            type: string
+
+    NotificationSearchRow:
+      type: object
+      properties:
+        iun:
+          type: string
+          description: Identificativo Univoco Notifica
+        paProtocolNumber:
+          type: string
+          description: Numero protocollo associato alla notifica da parte della PA
+        sender:
+          type: string
+          description: Denominazione della PA che ha inviato l'atto.
+        sentAt:
+          type: string
+          description: Data spedizione notifica
+          format: date-time
+        subject:
+          type: string
+          description: Oggetto della notifica
+        notificationStatus:
+          $ref: './remote-refs.yaml#/components/schemas/NotificationStatus'
+        recipients:
+          description: >-
+            Elenco delle denominazioni dei destinatari della notifica. <br/>
+            __N.B:__ campo da utilizzare solo per visualizzazione.
+          type: array
+          items:
+            type: string
+    
+    #NotificationStatus:
+      #$ref: './remote-refs.yaml#/components/schemas/NotificationStatus'
+      #type: string
+
+
+    ############################################################################################
+    ###                                  DOWNLOAD ALLEGATI                                   ###
+    ############################################################################################
+    
+    NotificationAttachmentDownloadMetadataResponse:
+      title: Url e metadati per il download di un allegato di una notifica
+      description: >-
+        I due campi più importanti sono __url__ e __retryAfter__. <br/>
+          - __url__ è presente se il file è pronto per essere scaricato ed indica l'url a cui fare GET.
+          - __retryAfter__ indica che il file è stato archiviato e bisognerà aspettare un numero di
+            secondi non inferiore a quanto indicato dal campo _retryAfter_. <br/>
+      type: object
+      required:
+        - filename
+        - contentType
+        - contentLength
+        - sha256
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+          example: 'application/pdf'
+        contentLength:
+          type: number
+          example: 54092
+          description: dmensione, in byte, del contenuto.
+        sha256:
+          type: string
+          description: >- 
+            SHA256 del contenuto del file.
+        url:
+          type: string
+          description: >-
+            URL preautorizzato a cui effettuare una richiesta GET per ottenere il 
+            contenuto del documento. Presente solo se il documento è pronto per il download.
+        retryAfter:
+          type: number
+          description: >-
+            Stima del numero di secondi da aspettare prima che il contenuto del 
+            documento sia disponibile per il download.

@@ -1,0 +1,568 @@
+openapi: 3.0.3
+info:
+  title: 'Piattaforma Notifiche: API B2B per le Pubbliche Amministrazioni'
+  version: v1.0
+  description: >- 
+    ## Abstract
+      API utilizzate dalle pubbliche amministrazioni per __inviare richieste di notifiche__ e 
+      __ottenere informazioni in modalità pull__ informazioni sullo stato della 
+      _"richiesta di notifica"_ (accettata o rifiutata) e, in caso di richiesta accettata, 
+      sulle comunicazioni effettuate, o solo tentate, nei confronti dei destinatari della notifica.
+    
+    ## Operazioni utilizzate, in sequenza temporale
+
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="531" height="821"><desc>title%20Invio%20notifica%0A%0APA-%3EPN%3A%20presignedUploadRequest%0APN-%3EPA%3A%20presigned%20urls%20%5B%5D%0Aloop%20upload%0APA-%3EAWS%20S3%3A%20attachmentUpload%0AAWS%20S3-%3EPA%3A%20result%0Aend%0APA-%3EPN%3A%20sendNewNotification%0APN-%3EPA%3A%20reqId%0Aalt%20IUN%20async%0APN--%3E(1)PA%3A%20IUN%0Aelse%20IUN%20sync%0APA-%3EPN%3A%20getNotificationRequestStatus(reqId)%0APN-%3EPA%3A%20IUN%0Aend%0A%0A</desc><defs/><g><g/><g/><g/><g/><g/><g/><g/><g/><g/><g><rect fill="white" stroke="none" x="0" y="0" width="531" height="821"/></g><g><text fill="black" stroke="none" font-family="sans-serif" font-size="16.5pt" font-style="normal" font-weight="normal" text-decoration="normal" x="204.4181849127056" y="26.3876361" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">Invio notifica</text></g><g/><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 79.1629083 103.26361593799999 L 79.1629083 821.8027133581371" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray="13.532121076923076,5.863919133333333"/><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 358.57426136666663 103.26361593799999 L 358.57426136666663 821.8027133581371" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray="13.532121076923076,5.863919133333333"/><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 451.94013175246204 103.26361593799999 L 451.94013175246204 821.8027133581371" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray="13.532121076923076,5.863919133333333"/></g><g><path fill="none" stroke="none"/><g><path fill="white" stroke="black" paint-order="fill stroke markers" d=" M 50.84251793335352 55.765870957999994 L 107.48329866664648 55.765870957999994 L 107.48329866664648 103.26361593799999 L 50.84251793335352 103.26361593799999 L 50.84251793335352 55.765870957999994 Z" stroke-miterlimit="10" stroke-width="2.814681184" stroke-dasharray=""/></g><g><g/><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="69.92957471235351" y="85.67185853800001" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">PA</text></g><path fill="none" stroke="none"/><g><path fill="white" stroke="black" paint-order="fill stroke markers" d=" M 329.303871190755 55.765870957999994 L 387.8446515425782 55.765870957999994 L 387.8446515425782 103.26361593799999 L 329.303871190755 103.26361593799999 L 329.303871190755 55.765870957999994 Z" stroke-miterlimit="10" stroke-width="2.814681184" stroke-dasharray=""/></g><g><g/><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="348.390927969755" y="85.67185853800001" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">PN</text></g><path fill="none" stroke="none"/><g><path fill="white" stroke="black" paint-order="fill stroke markers" d=" M 405.4364089425782 55.765870957999994 L 498.4438545623458 55.765870957999994 L 498.4438545623458 103.26361593799999 L 405.4364089425782 103.26361593799999 L 405.4364089425782 55.765870957999994 Z" stroke-miterlimit="10" stroke-width="2.814681184" stroke-dasharray=""/></g><g><g/><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="424.52346572157825" y="85.67185853800001" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">AWS S3</text></g></g><g><g><g><rect fill="white" stroke="none" x="133.3798227492122" y="138.44713073799997" width="170.97752416824218" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="136.0185863592122" y="154.279712398" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">presignedUploadRequest</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 79.1629083 161.31641535799997 L 344.0903811073333 161.31641535799997" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(358.57426136666663,161.31641535799997) translate(-358.57426136666663,-161.31641535799997)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 343.9144635333333 153.9865164413333 L 358.57426136666663 161.31641535799997 L 343.9144635333333 168.64631427466665 Z"/></g></g><g><g><rect fill="white" stroke="none" x="164.01315404804032" y="187.70405145799995" width="109.71086157058593" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="166.65191765804033" y="203.53663311799997" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">presigned urls []</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 358.57426136666663 210.57333607799995 L 93.64678855933333 210.57333607799995" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(79.1629083,210.57333607799995) translate(-79.1629083,-210.57333607799995)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 93.82270613333333 203.24343716133328 L 79.1629083 210.57333607799995 L 93.82270613333333 217.90323499466663 Z"/></g></g><g><g><rect fill="white" stroke="none" x="203.34609076681699" y="284.45871715799996" width="124.41085851882812" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="205.984854376817" y="300.291298818" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">attachmentUpload</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 79.1629083 307.32800177799993 L 437.4562514931287 307.32800177799993" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(451.94013175246204,307.32800177799993) translate(-451.94013175246204,-307.32800177799993)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 437.2803339191287 299.9981028613333 L 451.94013175246204 307.32800177799993 L 437.2803339191287 314.6579006946666 Z"/></g></g><g><g><rect fill="white" stroke="none" x="244.9627556532916" y="333.71563787799994" width="41.1775287458789" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="247.6015192632916" y="349.54821953799996" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">result</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 451.94013175246204 356.5849224979999 L 93.64678855933333 356.5849224979999" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(79.1629083,356.5849224979999) translate(-79.1629083,-356.5849224979999)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 93.82270613333333 349.25502358133326 L 79.1629083 356.5849224979999 L 93.82270613333333 363.91482141466656 Z"/></g></g><g><g><rect fill="white" stroke="none" x="149.32981969745438" y="409.36019469799993" width="139.0775302717578" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="151.9685833074544" y="425.19277635799995" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">sendNewNotification</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 79.1629083 432.2294793179999 L 344.0903811073333 432.2294793179999" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(358.57426136666663,432.2294793179999) translate(-358.57426136666663,-432.2294793179999)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 343.9144635333333 424.89958040133325 L 358.57426136666663 432.2294793179999 L 343.9144635333333 439.55937823466655 Z"/></g></g><g><g><rect fill="white" stroke="none" x="199.4964876356868" y="458.6171154179999" width="38.744194395292965" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="202.13525124568682" y="474.44969707799993" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">reqId</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 358.57426136666663 481.4864000379999 L 93.64678855933333 481.4864000379999" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(79.1629083,481.4864000379999) translate(-79.1629083,-481.4864000379999)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 93.82270613333333 474.15650112133324 L 79.1629083 481.4864000379999 L 93.82270613333333 488.81629895466654 Z"/></g></g><g><g><rect fill="white" stroke="none" x="203.59648801715653" y="555.371781118" width="30.544193632353515" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="206.23525162715654" y="571.2043627779999" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">IUN</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 358.57426136666663 570.240582538137 L 93.61816678983354 586.9222359007869" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray="7.0367029599999995"/><g transform="translate(79.1629083,587.832339938137) rotate(-3.602590928416108,0,0) translate(-79.1629083,-587.832339938137)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 93.82270613333333 580.5024410214703 L 79.1629083 587.832339938137 L 93.82270613333333 595.1622388548037 Z"/><g transform="rotate(3.602590928416108,0,0)"/></g></g><g><g><rect fill="white" stroke="none" x="99.9798212233333" y="661.717721018137" width="237.77752722" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="102.6185848333333" y="677.550302678137" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">getNotificationRequestStatus(reqId)</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 79.1629083 684.587005638137 L 344.0903811073333 684.587005638137" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(358.57426136666663,684.587005638137) translate(-358.57426136666663,-684.587005638137)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 343.9144635333333 677.2571067214703 L 358.57426136666663 684.587005638137 L 343.9144635333333 691.9169045548038 Z"/></g></g><g><g><rect fill="white" stroke="none" x="203.59648801715653" y="710.974641738137" width="30.544193632353515" height="22.86928462"/></g><text fill="black" stroke="none" font-family="sans-serif" font-size="11pt" font-style="normal" font-weight="normal" text-decoration="normal" x="206.23525162715654" y="726.807223398137" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">IUN</text></g><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 358.57426136666663 733.8439263581371 L 93.64678855933333 733.8439263581371" stroke-miterlimit="10" stroke-width="1.4659797833333332" stroke-dasharray=""/><g transform="translate(79.1629083,733.8439263581371) translate(-79.1629083,-733.8439263581371)"><path fill="black" stroke="none" paint-order="stroke fill markers" d=" M 93.82270613333333 726.5140274414704 L 79.1629083 733.8439263581371 L 93.82270613333333 741.1738252748038 Z"/></g></g><g><g/><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 17.591757400000006 236.96097217799996 L 513.511282652462 236.96097217799996 L 513.511282652462 382.9725585979999 L 17.591757400000006 382.9725585979999 L 17.591757400000006 236.96097217799996 Z" stroke-miterlimit="10" stroke-width="2.5131082" stroke-dasharray=""/><path fill="white" stroke="black" paint-order="fill stroke markers" d=" M 17.591757400000006 236.96097217799996 L 17.591757400000006 258.07108105799995 L 77.54193861235352 258.07108105799995 L 88.09699305235353 247.51602661799996 L 88.09699305235353 236.96097217799996 L 17.591757400000006 236.96097217799996" stroke-miterlimit="10" stroke-width="2.5131082" stroke-dasharray=""/><text fill="black" stroke="none" font-family="sans-serif" font-size="8.8pt" font-style="normal" font-weight="bold" text-decoration="normal" x="35.183514800000005" y="251.03437809799993" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">loop</text><text fill="black" stroke="none" font-family="sans-serif" font-size="8.8pt" font-style="normal" font-weight="bold" text-decoration="normal" x="105.68875045235353" y="251.03437809799993" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">[upload]</text></g><g><g/><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 17.591757400000006 507.87403613799995 L 420.14541226666665 507.87403613799995 L 420.14541226666665 760.2315624581371 L 17.591757400000006 760.2315624581371 L 17.591757400000006 507.87403613799995 Z" stroke-miterlimit="10" stroke-width="2.5131082" stroke-dasharray=""/><path fill="white" stroke="black" paint-order="fill stroke markers" d=" M 17.591757400000006 507.87403613799995 L 17.591757400000006 528.9841450179999 L 66.47527200926514 528.9841450179999 L 77.03032644926515 518.429090578 L 77.03032644926515 507.87403613799995 L 17.591757400000006 507.87403613799995" stroke-miterlimit="10" stroke-width="2.5131082" stroke-dasharray=""/><text fill="black" stroke="none" font-family="sans-serif" font-size="8.8pt" font-style="normal" font-weight="bold" text-decoration="normal" x="35.183514800000005" y="521.947442058" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">alt</text><text fill="black" stroke="none" font-family="sans-serif" font-size="8.8pt" font-style="normal" font-weight="bold" text-decoration="normal" x="94.62208384926515" y="521.947442058" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">[IUN async]</text><g><path fill="none" stroke="black" paint-order="fill stroke markers" d=" M 17.591757400000006 614.219976038137 L 420.14541226666665 614.219976038137" stroke-miterlimit="10" stroke-width="2.5131082" stroke-dasharray="4.39793935"/></g><g/><text fill="black" stroke="none" font-family="sans-serif" font-size="8.8pt" font-style="normal" font-weight="bold" text-decoration="normal" x="94.62208384926515" y="628.293381958137" text-anchor="start" dominant-baseline="alphabetic" xml:space="preserve">[IUN sync]</text></g><g/></g><g/><g/><g/></g></svg>
+    
+    ### Ciclo di vita della notifica lato mittente
+    
+    #### 1. Caricamento allegati della notifica
+    
+    Prima di invocare la richiesta di notifica è necessario caricare gli allegati 
+    (documenti e bollettini di pagamento). <br/>
+    
+    ##### 1.a. Richiesta presigned Url
+    
+    Invocare l'operazione [presignedUploadRequest](#/NewNotification/presignedUploadRequest) 
+    con cui prenotare il caricamento. </br> 
+     
+    In risposta di ottengono le seguenti informazioni:<br/>
+    - httpMethod <br/>
+    - secret <br/>
+    - url <br/>
+    
+    ##### 1.b Upload allegati
+    
+    Per ogni allegato utilizzare un richiesta HTTP con metodo _httpMethod_ (POST o PUT) 
+    all'url indicato dal campo _url_. <br/>
+    
+    In tale richiesta vanno aggiunti i seguenti header: <br/>
+    - _content-type_: valorizzato come il campo "contentType" della richiesta di cui al punto (1.a) <br/>
+    - _x-amz-meta-secret_: valorizzato con il valore del campo "secret" della risposta di cui al punto (1.a) <br/>
+    - _trailer_: valorizzato con ```x-amz-checksum-sha256``` <br/>
+    - _x-amz-sdk-checksum-algorithm_: valorizzato con ```SHA256``` <br/>
+    - _x-amz-checksum-sha256_: valorizzato con lo sha256 del file inviato. (__N.B.__ questo è un trailer HTTP non un header).
+      Vedi [HTTP Trailer](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Trailer) <br/>
+
+    Dalla risposta va letto l'header _x-amz-version-id_ che verrà usato nell'invocazione 
+    successiva di richiesta creazione della notifica. Questo garantisce che eventuali utilizzi multipli (anche malevoli) del 
+    presignedUrl non vadano a sovrascrivere il file generando disservizi. 
+    
+    #### 2. Richiesta di invio della notifica
+    
+    Per effettuare una richiesta di invio notifica, invocare l'operazione 
+    [sendNewNotification](#/NewNotification/sendNewNotification) utilizzando i riferimenti dei file 
+    caricati ottenuti al punto (1.b).
+    
+    #### 3. Verifica accettazione richiesta di invio notifica
+    
+    Se il passo (2) avviene con successo si utilizza l'operazione 
+    [getNotificationRequestStatus](#/SenderRead/getNotificationRequestStatus)
+    per ottenere informazioni riguardo allo stato della "richiesta di invio di notifica". </br>
+    
+    Nel campo _notificationRequestStatus_ sarà indicato:</br>
+    - WAITING: se la validazione è ancora in corso.</br>
+    - ACCEPTED: se richiesta di notifica accettata, lo _IUN_ è valorizzato.</br>
+    - REFUSED: se richiesta di notifica rifiutata, è valorizzato il campo _errors_.</br>
+    
+    #### 4. Monitorare l'avanzamento di una notifica
+    
+    Se la "richiesta di invio di notifica" passa le validazioni viene trasformata in "notifica" e sarà 
+    identificata dalla IUN restituito dall'operazione 
+    [getNotificationRequestStatus](#/SenderRead/getNotificationRequestStatus).</br> 
+    
+    A tal punto si potranno utilizzare l'operazione _GET /delivery/notifications/sent/{iun}_ per 
+    ottenere i dettagli della notifica, la _timeline_ che dettaglia il perfezionamento della
+    notifica per il mittente e l'avanzamento delle comunicazioni nei confronti dei destinatari.    
+
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: 'https://da-definire/'
+servers:
+- url: https://api.pn.pagopa.it
+  description: Ambiente di produzione
+- url: https://api.uat.pn.pagopa.it
+  description: Ambiente di test
+- url: https://api.dev.pn.pagopa.it
+  description: Ambiente di sviluppo
+tags:
+  - name: NewNotification
+    description: >-
+      Invocazioni per precaricare allegati e inviare notifiche
+  - name: SenderReadB2B
+    description: >-
+      Invocazioni utilizzabili dai mittenti per verificare lo stato delle richieste 
+      di notifica inviate e delle notifiche accettate.
+
+paths:
+    ###########################################################################################
+    ###                          GESTIONE PRECARICAMENTO ALLEGATI                           ###
+    ###########################################################################################
+  "/delivery/attachments/preload":
+    post:
+      summary: Richiesta di pre-caricamento allegati
+      description: >-
+        Operazione che richiede a Piattaforma Notifica le informazioni e le autorizzazioni necessarie 
+        a precaricare uno o più file da allegare a una notifica. <br/>
+      tags:
+        - NewNotification
+      operationId: presignedUploadRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/PreLoadRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PreLoadResponse"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+
+    ###########################################################################################
+    ###                          CREAZIONE RICHIESTE DI NOTIFICA                           ###
+    ###########################################################################################
+
+  "/delivery/requests":
+    post:
+      summary: Richiesta invio notifica
+      description: >-
+        Operazione utilizzata dalla Pubblica Amministrazione per richiedere l'invio di una notifica.
+
+        La restituzione di uno stato HTTP 202 significa solo che la richiesta è sintatticamente
+        valida, non che la richiesta sia stata validata ed accettata. <br/>
+        Per conoscere lo stato di accettazione della richiesta di notifica bisogna utilizzare l'operazione
+        _getNotificationRequestStatus_ oppure utilizzare la modalità push prevista dai webhook. <br/>
+      tags:
+        - NewNotification
+      operationId: sendNewNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas-pn-notification-v1.yaml#/components/schemas/NewNotificationRequest"
+        required: true
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                 $ref: "#/components/schemas/NewNotificationResponse"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+    
+
+    ###########################################################################################
+    ###                        VERIFICA STATO RICHIESTE DI NOTIFICA                         ###
+    ###########################################################################################
+    get:
+      operationId: getNotificationRequestStatus
+      tags:
+        - SenderReadB2B
+      summary: Verifica accettazione richiesta notifica
+      description: >-
+        Questa operazione serve per verificare se la richiesta di notifica è stata accettata e ottenere
+        lo IUN associato a tale richiesta. <br/>
+        Bisogna specificare il parametro _requestId_ oppure la coppia costituita dai parametri 
+        _paProtocolNumber_ e _idempotenceToken_. <br/>
+      parameters:
+        - $ref: '#/components/parameters/notificationRequestId'
+        - $ref: '#/components/parameters/paProtocolNumber'
+        - $ref: '#/components/parameters/idempotenceToken'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                 $ref: "#/components/schemas/NewNotificationRequestStatusResponse"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+    
+    
+    ###########################################################################################
+    ###                             RICERCA NOTIFICHE ACCETTATE                             ###
+    ###########################################################################################
+  
+  "/delivery/notifications/sent/{iun}":
+    get:
+      summary: 'Mittente: lettura dettagli notifica'
+      description: >-
+        Questa operazione permette di leggere tutti i dettagli di una notifica accettata. <br/>
+      tags:
+        - SenderReadB2B
+      operationId: getSentNotification
+      parameters:
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/FullSentNotification"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+    
+    ###########################################################################################
+    ###                     DOWNLOAD DOCUMENTI E ALLEGATI PER PAGAMENTO                     ###
+    ###########################################################################################
+
+  "/delivery/notifications/sent/{iun}/attachments/documents/{docIdx}":
+    get:
+      summary: Download documento notificato
+      tags:
+        - SenderReadB2B
+      operationId: getSentNotificationDocument
+      parameters:
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'
+        - $ref: '#/components/parameters/pathDocumentIdx'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-notification-v1.yaml#/components/schemas/NotificationAttachmentDownloadMetadataResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        
+  "/delivery/notifications/sent/{iun}/attachments/payment/{recipientIdx}/{attachmentName}":
+    get:
+      summary: Download allegato per pagamento
+      tags:
+        - SenderReadB2B
+      operationId: getSentNotificationAttachment
+      parameters:
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'
+        - $ref: '#/components/parameters/pathRecipientIdx'
+        - $ref: '#/components/parameters/pathAttachmentName'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-notification-v1.yaml#/components/schemas/NotificationAttachmentDownloadMetadataResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+  
+  
+    ###########################################################################################
+    ###                          DOWNLOAD ATTI OPPONIBILI A TERZI                           ###
+    ###########################################################################################
+  '/delivery-push/{iun}/legal-facts/{legalFactType}/{legalFactId}':                 # ONLY EXTERNAL
+    get:                                                                            # ONLY EXTERNAL
+      summary: Download atto opponibile a terzi                                     # ONLY EXTERNAL
+      description: Permette di scaricare un atto opponibile a terzi                 # ONLY EXTERNAL
+      tags:                                                                         # ONLY EXTERNAL
+        - LegalFacts                                                                # ONLY EXTERNAL
+      operationId: getLegalFact                                                     # ONLY EXTERNAL
+      parameters:                                                                   # ONLY EXTERNAL
+        - $ref: './parameters-notification-search-v1.yaml#/components/parameters/pathIun'                                   # ONLY EXTERNAL
+        - $ref: '#/components/parameters/pathLegalFactType'                         # ONLY EXTERNAL
+        - $ref: '#/components/parameters/pathLegalFactId'                           # ONLY EXTERNAL
+      responses:                                                                    # ONLY EXTERNAL
+        '200':                                                                      # ONLY EXTERNAL
+          description: OK                                                           # ONLY EXTERNAL
+          content:                                                                  # ONLY EXTERNAL
+            application/json:                                                       # ONLY EXTERNAL
+              schema:                                                               # ONLY EXTERNAL
+                $ref: "#/components/schemas/LegalFactDownloadMetadataResponse"      # ONLY EXTERNAL
+        '400':                                                                      # ONLY EXTERNAL
+          description: Bad request                                                  # ONLY EXTERNAL
+          content:                                                                  # ONLY EXTERNAL
+            application/json:                                                       # ONLY EXTERNAL
+              schema:                                                               # ONLY EXTERNAL
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'     # ONLY EXTERNAL
+components:
+  
+  parameters:
+    ############################################################################################
+    ###                     PARAMETRI DI AUTENTICAZIONE E AUTORIZZAZIONE                     ###
+    ############################################################################################
+    cxTypeAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/cxTypeAuthFleet'
+    cxIdAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/cxIdAuthFleet'
+    cxGroupsAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/cxGroupsAuthFleet'
+    uidAuthFleet:
+      $ref: './remote-refs.yaml#/components/parameters/uidAuthFleet'
+
+    ############################################################################################
+    ###                       PARAMETRI RICERCA RICHIESTA DI NOTIFICA                        ###
+    ############################################################################################
+    notificationRequestId:
+      in: query
+      required: false
+      name: notificationRequestId
+      description: identificativo della richiesta di notifica
+      schema:
+        type: string
+    paProtocolNumber:
+      name: paProtocolNumber
+      in: query
+      required: false
+      description: >-
+        Numero di protocollo associato alla notifica, può essere riutilizzato per rettifiche.
+      schema:
+        type: string
+    idempotenceToken:
+      name: idempotenceToken
+      description: >-
+        token usato per disambiguare "richieste di notificazione" effetuate con lo stesso 
+        numero di protocollo. 
+      in: query
+      required: false
+      schema:
+        type: string
+    
+    
+    ############################################################################################
+    ###                             PARAMETRI DOWNLOAD DOCUMENTI                             ###
+    ############################################################################################
+    pathDocumentIdx:
+      name: docIdx
+      in: path
+      required: true
+      schema:
+        type: number
+    pathRecipientIdx:
+      name: recipientIdx
+      in: path
+      required: true
+      schema:
+        type: number
+    pathAttachmentName:
+      name: attachmentName
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "PAGOPA|F24_FLAT|F24_STANDARD"
+        #quella sottostante è quella corretta. Riscritta per problemi con tool usato
+        #oneOf:
+        #  - type: number
+        #  - type: string
+        #    enum:
+        #      - PAGOPA
+        #      - F24_FLAT
+        #      - F24_STANDARD
+    
+    
+    ############################################################################################
+    ###                      PARAMETRI DOWNLOAD ATTI OPPONIBILI A TERZI                      ###
+    ############################################################################################
+    pathLegalFactType:
+      $ref: './remote-refs.yaml#/components/parameters/pathLegalFactType'
+    pathLegalFactId:
+      $ref: './remote-refs.yaml#/components/parameters/pathLegalFactId'
+
+
+  schemas:
+    
+    ###########################################################################################
+    ###                             DTO PRECARICAMENTO ALLEGATI                             ###
+    ###########################################################################################
+    PreLoadRequest:
+      title: Richiesta di precaricamento di un File
+      type: object
+      properties:
+        preloadIdx:
+          title: Id della richiesta di precaricamento di un file
+          description: >-
+            Identificativo univoco all'interno della request HTTP, serve per correlare la risposta. 
+          type: string
+        contentType:
+          title: MIME type del file che verrà caricato
+          description: >-
+            Il MIME type dell'allegato che dovrà essere caricato. Attualmente è supportato solo
+              - application/pdf
+          type: string
+        sha256:
+          title: checksum sha256 del file che verrà caricato
+          description: >-
+            checksum sha256, codificato in base 64, del contenuto binario del file che verrà
+            caricato
+          type: string
+          
+    PreLoadResponse:
+      title: Informazioni per il caricamento file
+      description: >-
+        Per ogni richiesta che è stata fatta viene fornito un presigned URL e le 
+        informazioni per usarlo.
+      type: object
+      properties:
+        preloadIdx:
+          description: per correlazione con la richiesta
+          type: string
+        secret:
+          description: >-
+            Token aggiuntivo per far si che sia necessario intercettare anche gli 
+            header e non solo l'URL di upload del contenuto del documento.
+          example: AZ23RF12
+          type: string
+        httpMethod:
+          description: >-
+            Indica se per l'upload del contenuto file bisogna utilizzare il metodo PUT o POST
+          type: string
+          enum:
+            - POST
+            - PUT
+        url:
+          description: >-
+            URL a cui effettuare l'upload del contenuto del documento.
+          example: 'https://preloadpn.aws.amazon.......'
+          type: string
+        key:
+          description: >-
+            la chiave restituita sarà globalmente unica e andrà utilizzata nella richiesta 
+            di notifica.
+          example: '8F7E/9A3B/1234/AB87'
+          type: string
+    
+
+    ###########################################################################################
+    ###                              DTO RICHIESTE DI NOTIFICA                              ###
+    ###########################################################################################
+
+    NewNotificationResponse:
+      title: Identificativi della richiesta di notifica
+      description: >-
+        Contiene le informazioni per identificare una richiesta di invio notifica
+        che non è ancora stata accettata da Piattaforma notifiche.
+      type: object
+      required:
+        - notificationRequestId
+        - paProtocolNumber
+      properties:
+        notificationRequestId:
+          type: string
+          description: >-
+            identificativo univoco di una richiesta di invio notifica, non è lo IUN
+        paProtocolNumber:
+          type: string
+          description: Identificativo inviato dalla pubblica amministrazione
+        idempotenceToken:
+          description: >-
+            Ripetizione del token usato per disambiguare "richieste di notificazione" 
+            effetuate con lo stesso numero di protocollo (campo _paProtocolNumber_). 
+          type: string
+    
+    NewNotificationRequestStatusResponse:
+      allOf: 
+        - $ref: "./schemas-pn-notification-v1.yaml#/components/schemas/NewNotificationRequest"
+        - type: object
+          required:
+            - notificationRequestId
+            - notificationRequestStatus
+          properties:
+            notificationRequestId: 
+              description: >-
+                identificativo univoco di una richiesta di invio notifica, non è lo IUN
+              type: string
+            notificationRequestStatus:
+              description: >-
+                - __WAITING__: in attesa di essere valutata
+                - __ACCEPTED__: richiesta di notifica accettata, lo IUN è valorizzato
+                - __REFUSED__: richiesta di notifica rifiutata, è valorizzato il campo _errors_
+              type: string
+            retryAfter:
+              type: number
+              description: >-
+                Numero di secondi da attendere prima di effettuare una nuova richiesta per 
+                la stessa entità; valorizzato quando lo status è __WAITING__.
+            iun:
+              $ref: "./schemas-pn-notification-v1.yaml#/components/schemas/IUN"
+            errors:
+              description: >-
+                Elenco degli errori che hanno causato il rifiuto della richiesta di notifica
+              type: array
+              items:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/ProblemError'
+
+
+    ###########################################################################################
+    ###                              DTO NOTIFICA CON DETTAGLI                              ###
+    ###########################################################################################
+
+    FullSentNotification:
+      description: >-
+        Le informazioni riguardanti una notifica (richiesta di notifica accettata) e il 
+        processo di inoltro della notifica verso il cittadino.
+      allOf: 
+        - $ref: './schemas-pn-notification-v1.yaml#/components/schemas/SentNotification'
+        - type: object
+          required: 
+            - notificationStatus
+            - notificationStatusHistory
+            - timeline
+          properties:  
+            notificationStatus:
+              $ref: '#/components/schemas/NotificationStatus'
+            notificationStatusHistory:
+              $ref: '#/components/schemas/NotificationStatusHistory'
+            timeline:
+              description: >-
+                elenco dettagliato di tutto ciò che è accaduto durrante il processo di notifica
+              type: array
+              items:
+                $ref: '#/components/schemas/TimelineElement'
+    
+    TimelineElement:
+      $ref: './remote-refs.yaml#/components/schemas/TimelineElement'
+    NotificationStatus:
+      $ref: './remote-refs.yaml#/components/schemas/NotificationStatus'
+    NotificationStatusHistory:
+      $ref: './remote-refs.yaml#/components/schemas/NotificationStatusHistory'
+    LegalFactDownloadMetadataResponse:
+      $ref: './remote-refs.yaml#/components/schemas/LegalFactDownloadMetadataResponse'
+
+   
+  securitySchemes:        # ONLY EXTERNAL
+    ApiKeyAuth:           # ONLY EXTERNAL
+      type: apiKey        # ONLY EXTERNAL
+      in: header          # ONLY EXTERNAL
+      name: x-api-key     # ONLY EXTERNAL
+
+security:                 # ONLY EXTERNAL
+  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
+              
+
+
+  
