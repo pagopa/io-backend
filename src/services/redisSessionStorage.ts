@@ -592,7 +592,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
             pipe(
               TE.fromEither(
                 pipe(
-                  SessionToken.decode(sessionToken),
+                  sessionToken,
+                  SessionToken.decode,
                   E.mapLeft(_ => new Error("Error decoding token"))
                 )
               ),
