@@ -15,7 +15,7 @@ import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
 import { Either } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
@@ -295,7 +295,7 @@ export const extractUserFromJson = (from: string): Either<string, User> =>
       () => E.left<string, unknown>(`Invalid JSON for User [${from}]`),
       _ => E.right<string, unknown>(_)
     ),
-    E.chain(json =>
+    E.chain(
       flow(
         User.decode,
         E.mapLeft(

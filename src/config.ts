@@ -543,18 +543,14 @@ export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 // Register the urlTokenStrategy.
 export const URL_TOKEN_STRATEGY = urlTokenStrategy(PRE_SHARED_KEY);
 
-export const getClientProfileRedirectionUrl = (
-  token: string
-): UrlFromString => {
-  const url = clientProfileRedirectionUrl.replace("{token}", token);
-  return pipe(
-    url,
+export const getClientProfileRedirectionUrl = (token: string): UrlFromString =>
+  pipe(
+    clientProfileRedirectionUrl.replace("{token}", token),
     UrlFromString.decode,
     E.getOrElseW(() => {
       throw new Error("Invalid url");
     })
   );
-};
 
 export const ClientErrorRedirectionUrlParams = t.union([
   t.intersection([
@@ -584,20 +580,17 @@ export type ClientErrorRedirectionUrlParams = t.TypeOf<
 
 export const getClientErrorRedirectionUrl = (
   params: ClientErrorRedirectionUrlParams
-): UrlFromString => {
-  const errorParams = record
-    .collect(S.Ord)((key, value) => `${key}=${value}`)(params)
-    .join("&");
-
-  const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
-  return pipe(
-    url,
+): UrlFromString =>
+  pipe(
+    record
+      .collect(S.Ord)((key, value) => `${key}=${value}`)(params)
+      .join("&"),
+    errorParams => CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
     UrlFromString.decode,
     E.getOrElseW(() => {
       throw new Error("Invalid url");
     })
   );
-};
 
 // Needed to forward SPID requests for logging
 export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(

@@ -42,17 +42,12 @@ export default class SessionLockController {
     | IResponseSuccessJson<SuccessResponse>
   > =>
     pipe(
-      TE.of(void 0),
-      TE.chainW(_ =>
-        pipe(
-          req.params.fiscal_code,
-          FiscalCode.decode,
-          E.mapLeft(err =>
-            ResponseErrorValidation("Invalid fiscal code", readableReport(err))
-          ),
-          TE.fromEither
-        )
+      req.params.fiscal_code,
+      FiscalCode.decode,
+      E.mapLeft(err =>
+        ResponseErrorValidation("Invalid fiscal code", readableReport(err))
       ),
+      TE.fromEither,
       TE.chainW(fiscalCode =>
         pipe(
           AP.sequenceT(TE.ApplicativeSeq)(
@@ -103,18 +98,12 @@ export default class SessionLockController {
     | IResponseSuccessJson<SuccessResponse>
   > =>
     pipe(
-      TE.of(void 0),
-      // eslint-disable-next-line sonarjs/no-identical-functions
-      TE.chain(_ =>
-        pipe(
-          req.params.fiscal_code,
-          FiscalCode.decode,
-          E.mapLeft(err =>
-            ResponseErrorValidation("Invalid fiscal code", readableReport(err))
-          ),
-          TE.fromEither
-        )
+      req.params.fiscal_code,
+      FiscalCode.decode,
+      E.mapLeft(err =>
+        ResponseErrorValidation("Invalid fiscal code", readableReport(err))
       ),
+      TE.fromEither,
       TE.chainW(fiscalCode =>
         // unlock the account
         pipe(
