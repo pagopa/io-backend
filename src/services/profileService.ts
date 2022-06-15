@@ -107,7 +107,7 @@ export default class ProfileService {
             E.mapLeft(_ =>
               ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
             ),
-            E.map(_ => ResponseSuccessJson(_)),
+            E.map(ResponseSuccessJson),
             E.toUnion
           );
         }
