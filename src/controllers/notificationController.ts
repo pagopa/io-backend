@@ -56,8 +56,8 @@ export default class NotificationController {
         (data: Notification) =>
           pipe(
             TE.tryCatch(
-              async () =>
-                await this.sessionStorage.userHasActiveSessions(
+              () =>
+                this.sessionStorage.userHasActiveSessions(
                   data.message.fiscal_code
                 ),
               E.toError
