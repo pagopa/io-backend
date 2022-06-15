@@ -965,7 +965,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
                   ) &&
                   !(p.prefix === fimsTokenPrefix && p.value === user.fims_token)
               ),
-              R.collect(Ord)((_1, { prefix, value }) => `${prefix}${value}`)
+              R.collect((_1, { prefix, value }) => `${prefix}${value}`)
             )
           ).reduce((prev, tokens) => [...prev, ...tokens], [])
         ),
