@@ -878,7 +878,13 @@ export default class RedisSessionStorage extends RedisStorageUtils
         }
 
         this.loadSessionBySessionToken(value as SessionToken).then(
-          flow(E.mapLeft(error => resolve(E.left(error)))),
+          flow(
+            E.mapLeft(error => resolve(E.left(error))),
+            E.map(session => {
+              resolve(E.right(session));
+            }),
+            E.toUnion
+          ),
           error => {
             resolve(E.left(error));
           }
