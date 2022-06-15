@@ -6,7 +6,6 @@ import { isArray } from "util";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-// import { collect, StrMap } from "fp-ts/lib/StrMap";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
@@ -16,7 +15,6 @@ import { TaskEither } from "fp-ts/lib/TaskEither";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
-import { Ord } from "fp-ts/lib/string";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
@@ -878,13 +876,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
         }
 
         this.loadSessionBySessionToken(value as SessionToken).then(
-          flow(
-            E.mapLeft(error => resolve(E.left(error))),
-            E.map(session => {
-              resolve(E.right(session));
-            }),
-            E.toUnion
-          ),
+          flow(E.mapLeft(error => resolve(E.left(error)))),
           error => {
             resolve(E.left(error));
           }
