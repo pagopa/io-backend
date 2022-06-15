@@ -70,9 +70,8 @@ export default class ZendeskController {
           () => ResponseErrorInternal("Cannot retrieve profile")
         ),
         TE.chain(r =>
-          r.kind === "IResponseSuccessJson" ? TE.of(r) : TE.left(r)
+          r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
         ),
-        TE.map(r => r.value),
         TE.chainW(profile =>
           pipe(
             profile,

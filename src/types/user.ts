@@ -4,8 +4,8 @@
  */
 
 import * as express from "express";
-import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as t from "io-ts";
 import {
   errorsToReadableMessages,
@@ -14,7 +14,6 @@ import {
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
-import { Either } from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
@@ -171,7 +170,7 @@ export function isSpidUserIdentity(
 
 export function exactUserIdentityDecode(
   user: UserIdentity
-): Either<t.Errors, UserIdentity> {
+): E.Either<t.Errors, UserIdentity> {
   return isSpidUserIdentity(user)
     ? t.exact(SpidUserIdentity.type).decode(user)
     : t.exact(CieUserIdentity.type).decode(user);
@@ -216,7 +215,9 @@ function getAuthnContextFromResponse(xml: string): O.Option<string> {
 /**
  * Validates a SPID User extracted from a SAML response.
  */
-export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
+export function validateSpidUser(
+  rawValue: unknown
+): E.Either<string, SpidUser> {
   const validated = SpidObject.decode(rawValue);
   if (E.isLeft(validated)) {
     return E.left(`validateSpidUser: ${readableReport(validated.left)}`);
@@ -288,7 +289,7 @@ export const withUserFromRequest = async <T>(
 /**
  * Extracts a user from a json string.
  */
-export const extractUserFromJson = (from: string): Either<string, User> =>
+export const extractUserFromJson = (from: string): E.Either<string, User> =>
   pipe(
     O.tryCatch(() => JSON.parse(from)),
     O.fold(

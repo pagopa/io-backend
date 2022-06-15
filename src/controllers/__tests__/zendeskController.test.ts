@@ -1,6 +1,3 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";

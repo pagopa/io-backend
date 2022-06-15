@@ -1017,9 +1017,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private parseUser(value: string): Either<Error, User> {
     return pipe(
       E.parseJSON(value, E.toError),
-      E.chain(data =>
-        pipe(
-          User.decode(data),
+      E.chain(
+        flow(
+          User.decode,
           E.mapLeft(err => new Error(errorsToReadableMessages(err).join("/")))
         )
       )
