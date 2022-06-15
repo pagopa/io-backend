@@ -736,7 +736,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
             return resolve(E.left(new Error("Notify email value not found")));
           }
           const errorOrNoticeEmail = pipe(
-            EmailString.decode(value),
+            value,
+            EmailString.decode,
             E.mapLeft(
               validationErrors =>
                 new Error(errorsToReadableMessages(validationErrors).join("/"))
