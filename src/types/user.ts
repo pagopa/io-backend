@@ -296,8 +296,8 @@ export const extractUserFromJson = (from: string): Either<string, User> =>
       _ => E.right<string, unknown>(_)
     ),
     E.chain(json =>
-      pipe(
-        User.decode(json),
+      flow(
+        User.decode,
         E.mapLeft(
           err =>
             `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
