@@ -58,6 +58,7 @@
     "generate:proxy:zendesk-models": "rimraf generated/zendesk && gen-api-models --api-spec api_zendesk.yaml --out-dir generated/zendesk",
     "generate:proxy:api-pecserver": "rimraf generated/pecserver && gen-api-models --api-spec openapi/api-pecserver.yaml --out-dir generated/pecserver --request-types --response-decoders --client",
     "generate:proxy:third-party-service": "rimraf generated/third-party-service && gen-api-models --api-spec openapi/api-third-party.yaml --out-dir generated/third-party-service --request-types --response-decoders --client",
+    "generate:proxy:piattaforma-notifiche": "rimraf generated/piattaforma-notifiche && gen-api-models --api-spec openapi/pn/spec-output.yaml --out-dir generated/piattaforma-notifiche --request-types --response-decoders --client",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
@@ -79,7 +80,7 @@
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-spid-commons": "^7.0.0",
-    "@pagopa/ts-commons": "^10.0.0",
+    "@pagopa/ts-commons": "^10.4.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.7.4",
     "body-parser": "^1.18.3",
@@ -113,7 +114,7 @@
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^1.1.1",
-    "@pagopa/openapi-codegen-ts": "^10.0.6",
+    "@pagopa/openapi-codegen-ts": "^11.0.0",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
     "@types/express": "4.17.11",
@@ -163,7 +164,9 @@
     "typescript": "^4.3.5"
   },
   "jest": {
-    "setupFiles": ["<rootDir>/src/__mocks__/setupEnvVars.ts"],
+    "setupFiles": [
+      "<rootDir>/src/__mocks__/setupEnvVars.ts"
+    ],
     "testEnvironment": "node",
     "moduleFileExtensions": [
       "ts",
