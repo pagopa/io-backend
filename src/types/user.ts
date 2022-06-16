@@ -4,8 +4,8 @@
  */
 
 import * as express from "express";
-import { Either, isLeft, left, right } from "fp-ts/lib/Either";
-import { fromNullable, none, Option, some, tryCatch } from "fp-ts/lib/Option";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as t from "io-ts";
 import {
   errorsToReadableMessages,
@@ -14,6 +14,7 @@ import {
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
+import { flow, pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
@@ -169,7 +170,7 @@ export function isSpidUserIdentity(
 
 export function exactUserIdentityDecode(
   user: UserIdentity
-): Either<t.Errors, UserIdentity> {
+): E.Either<t.Errors, UserIdentity> {
   return isSpidUserIdentity(user)
     ? t.exact(SpidUserIdentity.type).decode(user)
     : t.exact(CieUserIdentity.type).decode(user);
@@ -192,31 +193,37 @@ const SpidObject = t.intersection([
  * ie. for <saml2:AuthnContextClassRef>https://www.spid.gov.it/SpidL2</saml2:AuthnContextClassRef>
  * returns "https://www.spid.gov.it/SpidL2"
  */
-function getAuthnContextFromResponse(xml: string): Option<string> {
-  return fromNullable(xml)
-    .chain(xmlStr => tryCatch(() => new DOMParser().parseFromString(xmlStr)))
-    .chain(xmlResponse =>
+function getAuthnContextFromResponse(xml: string): O.Option<string> {
+  return pipe(
+    O.fromNullable(xml),
+    O.chain(xmlStr =>
+      O.tryCatch(() => new DOMParser().parseFromString(xmlStr))
+    ),
+    O.chain(xmlResponse =>
       xmlResponse
-        ? some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
-        : none
-    )
-    .chain(responseAuthLevelEl =>
+        ? O.some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
+        : O.none
+    ),
+    O.chain(responseAuthLevelEl =>
       responseAuthLevelEl?.[0]?.textContent
-        ? some(responseAuthLevelEl[0].textContent.trim())
-        : none
-    );
+        ? O.some(responseAuthLevelEl[0].textContent.trim())
+        : O.none
+    )
+  );
 }
 
 /**
  * Validates a SPID User extracted from a SAML response.
  */
-export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
+export function validateSpidUser(
+  rawValue: unknown
+): E.Either<string, SpidUser> {
   const validated = SpidObject.decode(rawValue);
-  if (isLeft(validated)) {
-    return left(`validateSpidUser: ${readableReport(validated.value)}`);
+  if (E.isLeft(validated)) {
+    return E.left(`validateSpidUser: ${readableReport(validated.left)}`);
   }
 
-  const value = validated.value;
+  const value = validated.right;
 
   // Remove the international prefix from fiscal number.
   const FISCAL_NUMBER_INTERNATIONAL_PREFIX = "TINIT-";
@@ -233,9 +240,11 @@ export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
   // in the SAML assertion.
   // Actually the value returned by the test idp is invalid
   // @see https://github.com/italia/spid-testenv/issues/26
-  const authnContextClassRef = maybeAuthnContextClassRef
-    .filter(isSpidL)
-    .getOrElse(SpidLevelEnum["https://www.spid.gov.it/SpidL2"]);
+  const authnContextClassRef = pipe(
+    maybeAuthnContextClassRef,
+    O.filter(isSpidL),
+    O.getOrElse(() => SpidLevelEnum["https://www.spid.gov.it/SpidL2"])
+  );
 
   log.info(
     "Response from IDP (authnContextClassRef): %s",
@@ -261,12 +270,13 @@ export function validateSpidUser(rawValue: unknown): Either<string, SpidUser> {
     );
   }
 
-  const result = SpidUser.decode(valueWithDefaultSPIDLevel);
-
-  return result.mapLeft(
-    err =>
-      "Cannot validate SPID user object: " +
-      errorsToReadableMessages(err).join(" / ")
+  return pipe(
+    SpidUser.decode(valueWithDefaultSPIDLevel),
+    E.mapLeft(
+      err =>
+        "Cannot validate SPID user object: " +
+        errorsToReadableMessages(err).join(" / ")
+    )
   );
 }
 
@@ -279,16 +289,22 @@ export const withUserFromRequest = async <T>(
 /**
  * Extracts a user from a json string.
  */
-export const extractUserFromJson = (from: string): Either<string, User> =>
-  tryCatch(() => JSON.parse(from))
-    .fold(left<string, unknown>(`Invalid JSON for User [${from}]`), _ =>
-      right<string, unknown>(_)
-    )
-    .chain(json =>
-      User.decode(json).mapLeft(
-        err =>
-          `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
-            " / "
-          )}`
+export const extractUserFromJson = (from: string): E.Either<string, User> =>
+  pipe(
+    O.tryCatch(() => JSON.parse(from)),
+    O.fold(
+      () => E.left<string, unknown>(`Invalid JSON for User [${from}]`),
+      _ => E.right<string, unknown>(_)
+    ),
+    E.chain(
+      flow(
+        User.decode,
+        E.mapLeft(
+          err =>
+            `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
+              " / "
+            )}`
+        )
       )
-    );
+    )
+  );

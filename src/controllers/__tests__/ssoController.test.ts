@@ -9,7 +9,9 @@ import { IApiClientFactoryInterface } from "../../services/IApiClientFactory";
 import { ResponseErrorInternal, ResponseErrorTooManyRequests, ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { FIMSUser } from "../../../generated/fims/FIMSUser";
 import { DateFromString } from "@pagopa/ts-commons/lib/dates";
-import { ResponseErrorNotFound } from "italia-ts-commons/lib/responses";
+import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
+import * as E from "fp-ts/Either"
+import { pipe } from "fp-ts/lib/function";
 
 const myPortalUserResponse: MyPortalUser = {
   family_name: mockedUser.family_name,
@@ -26,9 +28,9 @@ const bpdUserResponse: BPDUser = {
 const fimsUserResponse: FIMSUser = {
   acr: mockedUser.spid_level,
   auth_time: mockedUser.created_at,
-  date_of_birth: DateFromString.decode(mockedUser.date_of_birth).getOrElseL(() => {
+  date_of_birth: pipe(mockedUser.date_of_birth, DateFromString.decode, E.getOrElseW(() => {
     fail("Invalid test initialization");
-  }),
+  })),
   email: mockedInitializedProfile.email,
   family_name: mockedUser.family_name,
   fiscal_code: mockedUser.fiscal_code,

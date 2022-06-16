@@ -3,15 +3,10 @@
  */
 
 import * as dotenv from "dotenv";
-import {
-  parseJSON,
-  right,
-  toError,
-  fromNullable as fromNullableE
-} from "fp-ts/lib/Either";
-import { fromNullable, isSome } from "fp-ts/lib/Option";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as t from "io-ts";
-import { record } from "fp-ts";
+import { toError } from "fp-ts/lib/Either";
 import { agent } from "@pagopa/ts-commons";
 
 import {
@@ -30,7 +25,7 @@ import {
   SamlConfig
 } from "@pagopa/io-spid-commons";
 
-import { rights } from "fp-ts/lib/Array";
+import * as A from "fp-ts/lib/Array";
 import {
   AbortableFetch,
   setFetchTimeout,
@@ -40,6 +35,9 @@ import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
+import { pipe } from "fp-ts/lib/function";
+import * as S from "fp-ts/lib/string";
+import { record } from "fp-ts";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -76,6 +74,13 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
+export const ENABLE_NOTICE_EMAIL_CACHE: boolean = pipe(
+  process.env.ENABLE_NOTICE_EMAIL_CACHE,
+  O.fromNullable,
+  O.map(_ => _.toLowerCase() === "true"),
+  O.getOrElseW(() => false)
+);
+
 // Default cache control max-age value is 1 hour
 const DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: string = "3600";
 
@@ -86,25 +91,30 @@ export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
   10
 );
 
-export const ENABLE_NOTICE_EMAIL_CACHE: boolean = fromNullable(
-  process.env.ENABLE_NOTICE_EMAIL_CACHE
-)
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
-
 // Private key used in SAML authentication to a SPID IDP.
 const samlKey = () =>
-  fromNullable(process.env.SAML_KEY).getOrElseL(() =>
-    readFile(process.env.SAML_KEY_PATH || "./certs/key.pem", "SAML private key")
+  pipe(
+    process.env.SAML_KEY,
+    O.fromNullable,
+    O.getOrElse(() =>
+      readFile(
+        process.env.SAML_KEY_PATH || "./certs/key.pem",
+        "SAML private key"
+      )
+    )
   );
 export const SAML_KEY = samlKey();
 
 // Public certificate used in SAML authentication to a SPID IDP.
 const samlCert = () =>
-  fromNullable(process.env.SAML_CERT).getOrElseL(() =>
-    readFile(
-      process.env.SAML_CERT_PATH || "./certs/cert.pem",
-      "SAML certificate"
+  pipe(
+    process.env.SAML_CERT,
+    O.fromNullable,
+    O.getOrElse(() =>
+      readFile(
+        process.env.SAML_CERT_PATH || "./certs/cert.pem",
+        "SAML certificate"
+      )
     )
   );
 
@@ -123,11 +133,12 @@ const SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX =
   DEFAULT_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX;
 // Default SAML Request cache is 10 minutes
 const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
-const SAML_REQUEST_EXPIRATION_PERIOD_MS = fromNullableE(
-  new Error("Missing Environment configuration")
-)(process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS)
-  .chain(_ => IntegerFromString.decode(_).mapLeft(toError))
-  .getOrElse(DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS);
+const SAML_REQUEST_EXPIRATION_PERIOD_MS = pipe(
+  process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS,
+  E.fromNullable(new Error("Missing Environment configuration")),
+  E.chain(_ => pipe(IntegerFromString.decode(_), E.mapLeft(toError))),
+  E.getOrElse(() => DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS)
+);
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
 const SAML_ACCEPTED_CLOCK_SKEW_MS = parseInt(
   process.env.SAML_ACCEPTED_CLOCK_SKEW_MS ||
@@ -141,19 +152,24 @@ const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 
-export const STARTUP_IDPS_METADATA:
-  | Record<string, string>
-  | undefined = fromNullable(process.env.STARTUP_IDPS_METADATA)
-  .map(_ =>
-    parseJSON(_, toError)
-      .chain<Record<string, string> | undefined>(_1 =>
-        STRINGS_RECORD.decode(_1).mapLeft(
-          err => new Error(errorsToReadableMessages(err).join(" / "))
+export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
+  process.env.STARTUP_IDPS_METADATA,
+  O.fromNullable,
+  O.map(_ =>
+    pipe(
+      E.parseJSON(_, E.toError),
+      E.chain(_1 =>
+        pipe(
+          _1,
+          STRINGS_RECORD.decode,
+          E.mapLeft(err => new Error(errorsToReadableMessages(err).join(" / ")))
         )
-      )
-      .getOrElse(undefined)
-  )
-  .getOrElse(undefined);
+      ),
+      E.getOrElseW(() => undefined)
+    )
+  ),
+  O.getOrElseW(() => undefined)
+);
 
 export const CLIENT_ERROR_REDIRECTION_URL =
   process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
@@ -161,27 +177,34 @@ export const CLIENT_ERROR_REDIRECTION_URL =
 export const CLIENT_REDIRECTION_URL =
   process.env.CLIENT_REDIRECTION_URL || "/login";
 
-const SPID_LEVEL_WHITELIST = fromNullable(process.env.SPID_LEVEL_WHITELIST)
-  .map(_ => _.split(","))
-  .foldL(
+const SPID_LEVEL_WHITELIST = pipe(
+  process.env.SPID_LEVEL_WHITELIST,
+  O.fromNullable,
+  O.map(_ => _.split(",")),
+  O.fold(
     // SPID_LEVEL_WHITELIST is unset
     () => {
       if (ENV === NodeEnvironmentEnum.DEVELOPMENT) {
         // default config for development, all the spid levels are allowed
-        return right<t.Errors, SpidLevelArray>(["SpidL1", "SpidL2", "SpidL3"]);
+        return E.right<t.Errors, SpidLevelArray>([
+          "SpidL1",
+          "SpidL2",
+          "SpidL3"
+        ]);
       }
       // default config for production, only L2 and L3 are allowed
-      return right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
+      return E.right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
     },
     _ => SpidLevelArray.decode(_)
-  )
-  .getOrElseL(err => {
+  ),
+  E.getOrElseW(err => {
     log.error(
       "Invalid value for SPID_LEVEL_WHITELIST env [%s]",
       readableReport(err)
     );
     return process.exit(1);
-  });
+  })
+);
 
 export const appConfig: IApplicationConfig = {
   assertionConsumerServicePath: "/assertionConsumerService",
@@ -194,12 +217,18 @@ export const appConfig: IApplicationConfig = {
   startupIdpsMetadata: STARTUP_IDPS_METADATA
 };
 
-const maybeSpidValidatorUrlOption = fromNullable(
-  process.env.SPID_VALIDATOR_URL
-).map(_ => ({ [_]: true }));
-const maybeSpidTestenvOption = fromNullable(SPID_TESTENV_URL).map(_ => ({
-  [_]: true
-}));
+const maybeSpidValidatorUrlOption = pipe(
+  process.env.SPID_VALIDATOR_URL,
+  O.fromNullable,
+  O.map(_ => ({ [_]: true }))
+);
+const maybeSpidTestenvOption = pipe(
+  SPID_TESTENV_URL,
+  O.fromNullable,
+  O.map(_ => ({
+    [_]: true
+  }))
+);
 
 // Set default idp metadata refresh time to 7 days
 export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 7;
@@ -228,8 +257,8 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   spidTestEnvUrl: SPID_TESTENV_URL,
   spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
   strictResponseValidation: {
-    ...(isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
-    ...(isSome(maybeSpidValidatorUrlOption)
+    ...(O.isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
+    ...(O.isSome(maybeSpidValidatorUrlOption)
       ? maybeSpidValidatorUrlOption.value
       : {})
   }
@@ -258,76 +287,88 @@ if (!clientProfileRedirectionUrl.includes("{token}")) {
 }
 
 // IP(s) or CIDR(s) allowed for notification
-export const ALLOW_NOTIFY_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for payment manager endpoint
-export const ALLOW_PAGOPA_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_PAGOPA_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for myportal endpoint
-export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for bpd endpoint
-export const ALLOW_BPD_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_BPD_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_BPD_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for zendesk endpoint
-export const ALLOW_ZENDESK_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_ZENDESK_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for handling sessions
-export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = decodeCIDRs(
-  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
+  process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
+  decodeCIDRs,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000 as Millisecond;
 
@@ -367,20 +408,27 @@ export const MessagesFeatureFlagType = t.keyof({
 });
 export type MessagesFeatureFlagType = t.TypeOf<typeof MessagesFeatureFlagType>;
 
-export const FF_MESSAGES_TYPE = MessagesFeatureFlagType.decode(
-  process.env.FF_MESSAGES_TYPE
-).getOrElse("none");
+export const FF_MESSAGES_TYPE = pipe(
+  process.env.FF_MESSAGES_TYPE,
+  MessagesFeatureFlagType.decode,
+  E.getOrElseW(() => "none" as const)
+);
 
-export const FF_MESSAGES_BETA_TESTER_LIST = CommaSeparatedListOf(NonEmptyString)
-  .decode(process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "")
-  .getOrElse([]);
+export const FF_MESSAGES_BETA_TESTER_LIST = pipe(
+  process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "",
+  CommaSeparatedListOf(NonEmptyString).decode,
+  E.getOrElseW(() => [])
+);
 
-export const FF_MESSAGES_CANARY_USERS_REGEX = NonEmptyString.decode(
-  process.env.FF_MESSAGES_CANARY_USERS_REGEX
-).getOrElse(
-  // XYZ will never be verified by an hashed fiscal code
-  // used as default
-  "XYZ" as NonEmptyString
+export const FF_MESSAGES_CANARY_USERS_REGEX = pipe(
+  process.env.FF_MESSAGES_CANARY_USERS_REGEX,
+  NonEmptyString.decode,
+  E.getOrElse(
+    () =>
+      // XYZ will never be verified by an hashed fiscal code
+      // used as default
+      "XYZ" as NonEmptyString
+  )
 );
 
 export const API_KEY = getRequiredENVVar("API_KEY");
@@ -495,14 +543,14 @@ export const PRE_SHARED_KEY = getRequiredENVVar("PRE_SHARED_KEY");
 // Register the urlTokenStrategy.
 export const URL_TOKEN_STRATEGY = urlTokenStrategy(PRE_SHARED_KEY);
 
-export const getClientProfileRedirectionUrl = (
-  token: string
-): UrlFromString => {
-  const url = clientProfileRedirectionUrl.replace("{token}", token);
-  return UrlFromString.decode(url).getOrElseL(() => {
-    throw new Error("Invalid url");
-  });
-};
+export const getClientProfileRedirectionUrl = (token: string): UrlFromString =>
+  pipe(
+    clientProfileRedirectionUrl.replace("{token}", token),
+    UrlFromString.decode,
+    E.getOrElseW(() => {
+      throw new Error("Invalid url");
+    })
+  );
 
 export const ClientErrorRedirectionUrlParams = t.union([
   t.intersection([
@@ -532,15 +580,17 @@ export type ClientErrorRedirectionUrlParams = t.TypeOf<
 
 export const getClientErrorRedirectionUrl = (
   params: ClientErrorRedirectionUrlParams
-): UrlFromString => {
-  const errorParams = record
-    .collect(params, (key, value) => `${key}=${value}`)
-    .join("&");
-  const url = CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`);
-  return UrlFromString.decode(url).getOrElseL(() => {
-    throw new Error("Invalid url");
-  });
-};
+): UrlFromString =>
+  pipe(
+    record
+      .collect(S.Ord)((key, value) => `${key}=${value}`)(params)
+      .join("&"),
+    errorParams => CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
+    UrlFromString.decode,
+    E.getOrElseW(() => {
+      throw new Error("Invalid url");
+    })
+  );
 
 // Needed to forward SPID requests for logging
 export const SPID_LOG_STORAGE_CONNECTION_STRING = getRequiredENVVar(
@@ -569,20 +619,23 @@ export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";
 export const NOTIFICATION_DEFAULT_TITLE = "Hai un nuovo messaggio su IO";
 
-export const BARCODE_ALGORITHM = NonEmptyString.decode(
-  process.env.BARCODE_ALGORITHM
-).getOrElse("code128" as NonEmptyString);
+export const BARCODE_ALGORITHM = pipe(
+  process.env.BARCODE_ALGORITHM,
+  NonEmptyString.decode,
+  E.getOrElse(() => "code128" as NonEmptyString)
+);
 
 // Application insights sampling percentage
 export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 
 // Password login params
-export const TEST_LOGIN_FISCAL_CODES = NonEmptyString.decode(
-  process.env.TEST_LOGIN_FISCAL_CODES
-)
-  .map(_ => _.split(","))
-  .map(_ => rights(_.map(FiscalCode.decode)))
-  .getOrElse([]);
+export const TEST_LOGIN_FISCAL_CODES = pipe(
+  process.env.TEST_LOGIN_FISCAL_CODES,
+  NonEmptyString.decode,
+  E.map(_ => _.split(",")),
+  E.map(_ => A.rights(_.map(FiscalCode.decode))),
+  E.getOrElseW(() => [])
+);
 
 export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
   process.env.TEST_LOGIN_PASSWORD
@@ -601,109 +654,141 @@ export const FF_USER_AGE_LIMIT_ENABLED =
   process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
 
 // Support Token
-export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = NonEmptyString.decode(
-  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
-export const JWT_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.JWT_SUPPORT_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
+  process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const JWT_SUPPORT_TOKEN_ISSUER = pipe(
+  process.env.JWT_SUPPORT_TOKEN_ISSUER,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.JWT_SUPPORT_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION) as Second;
+export const JWT_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
+  process.env.JWT_SUPPORT_TOKEN_EXPIRATION,
+  IntegerFromString.decode,
+  E.getOrElseW(() => DEFAULT_JWT_SUPPORT_TOKEN_EXPIRATION)
+) as Second;
+
 log.info(
   "JWT support token expiration set to %s seconds",
   JWT_SUPPORT_TOKEN_EXPIRATION
 );
 
 // Zendesk support Token
-export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = NonEmptyString.decode(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
-export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = pipe(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = pipe(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION = 604800 as Second;
-export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION) as Second;
+export const JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: Second = pipe(
+  process.env.JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
+  IntegerFromString.decode,
+  E.getOrElseW(() => DEFAULT_JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION)
+) as Second;
+
 log.info(
   "JWT Zendesk support token expiration set to %s seconds",
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION
 );
 
 // Mit  Voucher Token
-export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = NonEmptyString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
-export const JWT_MIT_VOUCHER_TOKEN_ISSUER = NonEmptyString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const JWT_MIT_VOUCHER_TOKEN_ISSUER = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
 
 const DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION = 600 as Second;
-export const JWT_MIT_VOUCHER_TOKEN_EXPIRATION: Second = IntegerFromString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_EXPIRATION
-).getOrElse(DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION) as Second;
+export const JWT_MIT_VOUCHER_TOKEN_EXPIRATION: Second = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_EXPIRATION,
+  IntegerFromString.decode,
+  E.getOrElseW(() => DEFAULT_JWT_MIT_VOUCHER_TOKEN_EXPIRATION)
+) as Second;
+
 log.info(
   "JWT Mit Voucher expiration set to %s seconds",
   JWT_MIT_VOUCHER_TOKEN_EXPIRATION
 );
 
-export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = NonEmptyString.decode(
-  process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE
-).getOrElseL(errs => {
-  log.error(
-    `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
-      errs
-    )}`
-  );
-  return process.exit(1);
-});
+export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
+  process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+
+export const TEST_CGN_FISCAL_CODES = pipe(
+  process.env.TEST_CGN_FISCAL_CODES || "",
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW(err => {
+    throw new Error(
+      `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
+    );
+  })
+);
 
 // PEC SERVER config
 export const PecServerConfig = t.interface({
@@ -720,31 +805,22 @@ export const PecServersConfig = t.interface({
 });
 export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
 
-export const PECSERVERS = ognlTypeFor<PecServersConfig>(
-  PecServersConfig,
-  "PECSERVERS"
-)
-  .decode(process.env)
-  .getOrElseL(errs => {
+export const PECSERVERS = pipe(
+  process.env,
+  ognlTypeFor<PecServersConfig>(PecServersConfig, "PECSERVERS").decode,
+  E.getOrElseW(errs => {
     log.error(
       `Missing or invalid PECSERVERS environment variable: ${readableReport(
         errs
       )}`
     );
     return process.exit(1);
-  });
+  })
+);
 //
 
-export const TEST_CGN_FISCAL_CODES = CommaSeparatedListOf(FiscalCode)
-  .decode(process.env.TEST_CGN_FISCAL_CODES || "")
-  .getOrElseL(err => {
-    throw new Error(
-      `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
-    );
-  });
-
 export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
-  process.env.THIRD_PARTY_CONFIG_LIST
+  process.env.THIRD_PARTY_CONFIG_LIST ?? ""
 );
 
 // -------------------------------
@@ -754,9 +830,11 @@ export const THIRD_PARTY_CONFIG_LIST = ThirdPartyConfigListFromString.decode(
 // Enable /notify and session/:fiscal_code/lock endpoint
 // only if code is deployed on appbackendli
 
-const IS_APPBACKENDLI = fromNullable(process.env.IS_APPBACKENDLI)
-  .map(_ => _.toLowerCase() === "true")
-  .getOrElse(false);
+const IS_APPBACKENDLI = pipe(
+  O.fromNullable(process.env.IS_APPBACKENDLI),
+  O.map(val => val.toLowerCase() === "true"),
+  O.getOrElse(() => false)
+);
 
 export const FF_ENABLE_NOTIFY_ENDPOINT = IS_APPBACKENDLI;
 export const FF_ENABLE_SESSION_LOCK_ENDPOINT = IS_APPBACKENDLI;

@@ -13,14 +13,14 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import { tryCatch } from "fp-ts/lib/TaskEither";
-import { toError } from "fp-ts/lib/Either";
 import {
   IResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import { identity } from "fp-ts/lib/function";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
@@ -121,21 +121,22 @@ export default class MessagesController {
     req: express.Request
   ): Promise<IGetLegalMessageResponse> =>
     withUserFromRequest(req, user =>
-      tryCatch(
-        () =>
-          // getLegalMessage is not yet implemented in new fn-app-messages
-          // just skip new implementation and take fn-app one
-          this.messageServiceSelector
-            .getOldMessageService()
-            .getLegalMessage(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code)
-            ),
-        e => ResponseErrorInternal(toError(e).message)
-      )
-        .fold<IGetLegalMessageResponse>(identity, identity)
-        .run()
+      pipe(
+        TE.tryCatch(
+          () =>
+            // getLegalMessage is not yet implemented in new fn-app-messages
+            // just skip new implementation and take fn-app one
+            this.messageServiceSelector
+              .getOldMessageService()
+              .getLegalMessage(
+                user,
+                req.params.id,
+                this.tokenService.getPecServerTokenHandler(user.fiscal_code)
+              ),
+          e => ResponseErrorInternal(E.toError(e).message)
+        ),
+        TE.toUnion
+      )()
     );
 
   /**
@@ -145,22 +146,23 @@ export default class MessagesController {
     req: express.Request
   ): Promise<IGetLegalMessageAttachmentResponse> =>
     withUserFromRequest(req, user =>
-      tryCatch(
-        () =>
-          // getLegalMessageAttachment is not yet implemented in new fn-app-messages
-          // just skip new implementation and take fn-app one
-          this.messageServiceSelector
-            .getOldMessageService()
-            .getLegalMessageAttachment(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code),
-              req.params.attachment_id
-            ),
-        e => ResponseErrorInternal(toError(e).message)
-      )
-        .fold<IGetLegalMessageAttachmentResponse>(identity, identity)
-        .run()
+      pipe(
+        TE.tryCatch(
+          () =>
+            // getLegalMessageAttachment is not yet implemented in new fn-app-messages
+            // just skip new implementation and take fn-app one
+            this.messageServiceSelector
+              .getOldMessageService()
+              .getLegalMessageAttachment(
+                user,
+                req.params.id,
+                this.tokenService.getPecServerTokenHandler(user.fiscal_code),
+                req.params.attachment_id
+              ),
+          e => ResponseErrorInternal(E.toError(e).message)
+        ),
+        TE.toUnion
+      )()
     );
 
   public readonly upsertMessageStatus = (

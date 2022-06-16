@@ -16,9 +16,10 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
-import { Either, fromPredicate } from "fp-ts/lib/Either";
+import * as E from "fp-ts/Either";
 import { DiscountBucketCode } from "generated/io-cgn-operator-search-api/DiscountBucketCode";
 import { Card } from "generated/cgn/Card";
+import { pipe } from "fp-ts/lib/function";
 import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import { OfflineMerchants } from "../../generated/cgn-operator-search/OfflineMerchants";
 import { OnlineMerchants } from "../../generated/cgn-operator-search/OnlineMerchants";
@@ -69,8 +70,8 @@ export default class CgnOperatorSearchController {
   > =>
     withUserFromRequest(req, async user => {
       const eligibleUserOrErrorResult = await this.eligibleUserOrError(user);
-      if (eligibleUserOrErrorResult.isLeft()) {
-        return eligibleUserOrErrorResult.value;
+      if (E.isLeft(eligibleUserOrErrorResult)) {
+        return eligibleUserOrErrorResult.left;
       }
 
       return withValidatedOrValidationError(
@@ -135,8 +136,8 @@ export default class CgnOperatorSearchController {
   > =>
     withUserFromRequest(req, async user => {
       const eligibleUserOrErrorResult = await this.eligibleUserOrError(user);
-      if (eligibleUserOrErrorResult.isLeft()) {
-        return eligibleUserOrErrorResult.value;
+      if (E.isLeft(eligibleUserOrErrorResult)) {
+        return eligibleUserOrErrorResult.left;
       }
 
       return withValidatedOrValidationError(
@@ -153,26 +154,25 @@ export default class CgnOperatorSearchController {
   private readonly eligibleUserOrError = async (
     user: User
   ): Promise<
-    Either<
+    E.Either<
       IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
       string
     >
   > => {
     const cgnStatusResponse = await this.cgnService.getCgnStatus(user);
 
-    return fromPredicate<
-      IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
-      IResponse<unknown>,
-      IResponseSuccessJson<Card>
-    >(this.isCgnStatusResponseSuccess, () =>
-      ResponseErrorInternal("Cannot retrieve cgn card status")
-    )(cgnStatusResponse)
-      .map(res => res.value.status)
-      .chain(
-        fromPredicate(
+    return pipe(
+      cgnStatusResponse,
+      E.fromPredicate(this.isCgnStatusResponseSuccess, () =>
+        ResponseErrorInternal("Cannot retrieve cgn card status")
+      ),
+      E.map(res => res.value.status),
+      E.chainW(
+        E.fromPredicate(
           status => status === "ACTIVATED",
           () => ResponseErrorForbiddenNotAuthorized
         )
-      );
+      )
+    );
   };
 }

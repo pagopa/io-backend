@@ -2,7 +2,7 @@
  * This file contains the ProfileWithEmail and ProfileWithoutEmail models and
  * some functions to validate and convert type to and from them.
  */
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -10,6 +10,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
+import { pipe } from "fp-ts/lib/function";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
@@ -34,7 +35,10 @@ export const toInitializedProfile = (
   family_name: user.family_name,
   fiscal_code: user.fiscal_code,
   has_profile: true,
-  is_email_enabled: fromNullable(profile.is_email_enabled).getOrElse(true),
+  is_email_enabled: pipe(
+    O.fromNullable(profile.is_email_enabled),
+    O.getOrElseW(() => true)
+  ),
   is_email_validated: profile.is_email_validated,
   is_inbox_enabled: profile.is_inbox_enabled,
   is_webhook_enabled: profile.is_webhook_enabled,

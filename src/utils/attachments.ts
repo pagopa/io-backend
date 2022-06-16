@@ -1,5 +1,8 @@
-import { array, flatten } from "fp-ts/lib/Array";
-import { task, Task } from "fp-ts/lib/Task";
+import * as A from "fp-ts/lib/Array";
+import { pipe } from "fp-ts/lib/function";
+import * as T from "fp-ts/lib/Task";
+import { Task } from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
 import { MessageAttachment } from "generated/backend/MessageAttachment";
 import { PrescriptionData } from "generated/backend/PrescriptionData";
 import { toBarcode } from "./barcode";
@@ -17,12 +20,14 @@ const MIME_TYPES = {
  * @see https://github.com/pagopa/io-functions-commons/blob/master/openapi/definitions.yaml#L91
  */
 const toBarcodeAttachments = (name: string, value: string) =>
-  toBarcode(value).fold(
-    () => [],
-    barcodes => [
+  pipe(
+    toBarcode(value),
+    TE.map(barcodes => [
       { content: barcodes.png, mime_type: MIME_TYPES.png, name },
       { content: barcodes.svg, mime_type: MIME_TYPES.svg, name }
-    ]
+    ]),
+    TE.mapLeft(() => []),
+    TE.toUnion
   );
 
 /**
@@ -33,14 +38,15 @@ const toBarcodeAttachments = (name: string, value: string) =>
 export function getPrescriptionAttachments(
   prescriptionData: PrescriptionData
 ): Task<ReadonlyArray<MessageAttachment>> {
-  return array
-    .sequence(task)([
+  return pipe(
+    A.sequence(T.ApplicativePar)([
       toBarcodeAttachments("iup", prescriptionData.iup),
       toBarcodeAttachments("nre", prescriptionData.nre),
       toBarcodeAttachments(
         "prescriber_fiscal_code",
         prescriptionData.prescriber_fiscal_code as string
       )
-    ])
-    .map(flatten);
+    ]),
+    T.map(A.flatten)
+  );
 }

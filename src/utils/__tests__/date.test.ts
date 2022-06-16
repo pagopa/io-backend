@@ -1,4 +1,5 @@
-import { isNone, isSome } from "fp-ts/lib/Option";
+import * as E from "fp-ts/Either"
+import * as O from "fp-ts/Option"
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
   formatDate,
@@ -35,8 +36,8 @@ describe("Check if a birthdate is for an adult user", () => {
 describe("User utility", () => {
   it("should extract the correct date of birth from fiscalCode", async () => {
     const extractedDateOfBirthOrError = toBirthDate(aFiscalCode);
-    expect(isSome(extractedDateOfBirthOrError)).toBeTruthy();
-    if (isSome(extractedDateOfBirthOrError)) {
+    expect(O.isSome(extractedDateOfBirthOrError)).toBeTruthy();
+    if (O.isSome(extractedDateOfBirthOrError)) {
       const birthDate = extractedDateOfBirthOrError.value;
       expect(birthDate.getFullYear()).toEqual(aDateOfBirth.getFullYear());
       expect(birthDate.getDay()).toEqual(aDateOfBirth.getDay());
@@ -46,7 +47,7 @@ describe("User utility", () => {
 
   it("should return none if fiscalCode is not recognized", async () => {
     const extractedDateOfBirthOrError = toBirthDate(aWrongFiscalCode);
-    expect(isNone(extractedDateOfBirthOrError)).toBeTruthy();
+    expect(O.isNone(extractedDateOfBirthOrError)).toBeTruthy();
   });
 });
 
@@ -67,11 +68,11 @@ describe("StrictUTCISODateFromString", () => {
       "2021-12-22T10:56:03+01:00"
     );
     console.log(JSON.stringify(parsed));
-    expect(parsed.isRight()).toBeTruthy();
+    expect(E.isRight(parsed)).toBeTruthy();
   });
 
   it("should not decode an invalid format", () => {
     const parsed = StrictUTCISODateFromString.decode("2021-12-22T10:56:03Z");
-    expect(parsed.isLeft()).toBeTruthy();
+    expect(E.isLeft(parsed)).toBeTruthy();
   });
 });

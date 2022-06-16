@@ -31,8 +31,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with poste id THEN the client returned is configured with poste info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, "1" as NonEmptyString)
-      .run();
+      .getClient(dummyBearerGenerator, "1" as NonEmptyString)();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
       "https://poste.dummy/",
@@ -44,8 +43,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with aruba id THEN the client returned is configured with aruba info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, "2" as NonEmptyString)
-      .run();
+      .getClient(dummyBearerGenerator, "2" as NonEmptyString)();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
       "https://aruba.dummy/",
@@ -57,8 +55,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with not existing id THEN the client returned is configured with poste info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, "3" as NonEmptyString)
-      .run();
+      .getClient(dummyBearerGenerator, "3" as NonEmptyString)();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
       "https://poste.dummy/",
@@ -70,8 +67,7 @@ describe("getClient", () => {
   it("GIVEN a pecservers configuration WHEN the client is requested with an undefined id THEN the client returned is configured with poste info", async () => {
     const mockPecServerClient = jest.spyOn(P, "pecServerClient");
     await new PecServerClientFactory(validPecConfigs)
-      .getClient(dummyBearerGenerator, undefined)
-      .run();
+      .getClient(dummyBearerGenerator, undefined)();
     expect(mockPecServerClient).toHaveBeenCalledTimes(1);
     expect(mockPecServerClient).toHaveBeenCalledWith(
       "https://poste.dummy/",

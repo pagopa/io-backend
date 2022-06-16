@@ -18,6 +18,10 @@ import {
 import { fromNullable } from "fp-ts/lib/Option";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import * as T from "fp-ts/Task";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
@@ -94,8 +98,9 @@ export default class NewMessagesService {
         public_message: params.public_message
       });
 
-      const resMessageContent = res.map(_ =>
-        _.status === 200 ? { ..._, value: _.value.message } : _
+      const resMessageContent = pipe(
+        res,
+        E.map(_ => (_.status === 200 ? { ..._, value: _.value.message } : _))
       );
 
       return withValidatedOrInternalError(resMessageContent, async response => {
@@ -105,18 +110,19 @@ export default class NewMessagesService {
             messageWithContent.content.prescription_data
           );
 
-          return maybePrescriptionData.isNone()
+          return O.isNone(maybePrescriptionData)
             ? ResponseSuccessJson(messageWithContent)
-            : getPrescriptionAttachments(maybePrescriptionData.value)
-                .map(attachments => ({
+            : pipe(
+                getPrescriptionAttachments(maybePrescriptionData.value),
+                T.map(attachments => ({
                   ...messageWithContent,
                   content: {
                     ...messageWithContent.content,
                     attachments
                   }
-                }))
-                .map(ResponseSuccessJson)
-                .run();
+                })),
+                T.map(ResponseSuccessJson)
+              )();
         }
 
         return response.status === 404

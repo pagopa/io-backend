@@ -1,6 +1,6 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: 1.0.0
+  version: 7.19.2
   title: Bonus vacanze API
 host: localhost
 basePath: /api/v1
@@ -9,79 +9,73 @@ schemes:
 security:
   - Bearer: []
 paths:
-  "/bonus/vacanze/eligibility":
+  /bonus/vacanze/eligibility:
     post:
       operationId: startBonusEligibilityCheck
       summary: Start bonus eligibility check (ISEE)
       responses:
-        "401":
+        '401':
           description: Bearer token null or expired.
-        "404":
+        '404':
           description: The feature has been dismissed
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "500":
+            $ref: '#/definitions/ProblemJson'
+        '500':
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson"
-
+            $ref: '#/definitions/ProblemJson'
     get:
       operationId: getBonusEligibilityCheck
       summary: Get eligibility (ISEE) check information for user's bonus
       responses:
-        "200":
+        '200':
           description: Eligibility (ISEE) check information for user's bonus
           schema:
-            $ref: "#/definitions/EligibilityCheck"
-        "202":
+            $ref: '#/definitions/EligibilityCheck'
+        '202':
           description: Processing request.
-        "401":
+        '401':
           description: Bearer token null or expired.
-        "404":
+        '404':
           description: Request not found.
-        "410":
+        '410':
           description: Request expired
-        "500":
+        '500':
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson"
-
-  ## BONUS ACTIVATIONS
-
-  "/bonus/vacanze/activations":
+            $ref: '#/definitions/ProblemJson'
+  /bonus/vacanze/activations:
     post:
       operationId: startBonusActivationProcedure
       summary: Start bonus activation request procedure
       responses:
-        "401":
+        '401':
           description: Bearer token null or expired.
-        "404":
+        '404':
           description: The feature has been dismissed
-        "500":
+        '500':
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson"
-
+            $ref: '#/definitions/ProblemJson'
     get:
       operationId: getAllBonusActivations
       summary: |
         Get all IDs of the bonus activations requested by
         the authenticated user or by any between his family member
       responses:
-        "200":
+        '200':
           description: |
             List of bonus activations ID belonging to the authenticated user
             or to any member of her family (former and actual)
           schema:
-            $ref: "#/definitions/PaginatedBonusActivationsCollection"
-        "401":
+            $ref: '#/definitions/PaginatedBonusActivationsCollection'
+        '401':
           description: Bearer token null or expired.
-        "500":
+        '500':
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson"
-
-  "/bonus/vacanze/activations/{bonus_id}":
+            $ref: '#/definitions/ProblemJson'
+  /bonus/vacanze/activations/{bonus_id}:
     get:
       operationId: getLatestBonusActivationById
       summary: |
@@ -94,65 +88,380 @@ paths:
           description: Bonus activation ID.
           type: string
       responses:
-        "200":
+        '200':
           description: Bonus activation details.
           schema:
-            $ref: "#/definitions/BonusActivationWithQrCode"
-        "202":
+            $ref: '#/definitions/BonusActivationWithQrCode'
+        '202':
           description: Processing request.
           schema:
-            $ref: "#/definitions/InstanceId"
-        "401":
+            $ref: '#/definitions/InstanceId'
+        '401':
           description: Bearer token null or expired.
-        "404":
+        '404':
           description: No bonus found.
-        "500":
+        '500':
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson"
-
+            $ref: '#/definitions/ProblemJson'
 definitions:
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/FiscalCode"
+    type: string
+    description: User's fiscal code.
+    format: FiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: SPNDNL80R13C555X
   InstanceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/InstanceId"
+    type: object
+    properties:
+      id:
+        type: string
+        minLength: 1
+        description: The identifier of the created request.
+    required:
+      - id
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/ProblemJson"
-  FamilyMember:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMember"
-  FamilyMembers:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMembers"
-  Dsu:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/Dsu"
-  EligibilityCheckSuccess:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccess"
-  EligibilityCheckSuccessEligible:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccessEligible"
-  EligibilityCheckSuccessIneligible:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccessIneligible"
-  EligibilityCheckSuccessConflict:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckSuccessConflict"
-  EligibilityCheckFailure:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheckFailure"
-  EligibilityCheck:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/EligibilityCheck"
-  BonusActivationStatus:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationStatus"
-  BonusCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusCode"
-  BonusActivation:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivation"
-  Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/Timestamp"
-  BonusActivationItem:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationItem"
-  BonusActivationCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationCollection"
-  PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.2.3/openapi/definitions.yaml#/PaginationResponse"
-  PaginatedBonusActivationsCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/PaginatedBonusActivationsCollection"
+    type: object
+    properties:
+      type:
+        type: string
+        format: uri
+        description: |-
+          An absolute URI that identifies the problem type. When dereferenced,
+          it SHOULD provide human-readable documentation for the problem type
+          (e.g., using HTML).
+        default: about:blank
+        example: https://example.com/problem/constraint-violation
+      title:
+        type: string
+        description: |-
+          A short, summary of the problem type. Written in english and readable
+          for engineers (usually not suited for non technical stakeholders and
+          not localized); example: Service Unavailable
+      status:
+        type: integer
+        format: int32
+        description: >-
+          The HTTP status code generated by the origin server for this
+          occurrence
 
+          of the problem.
+        minimum: 100
+        maximum: 600
+        exclusiveMaximum: true
+        example: 200
+      detail:
+        type: string
+        description: |-
+          A human readable explanation specific to this occurrence of the
+          problem.
+        example: There was an error processing the request
+      instance:
+        type: string
+        format: uri
+        description: >-
+          An absolute URI that identifies the specific occurrence of the
+          problem.
+
+          It may or may not yield further information if dereferenced.
+  FamilyMember:
+    type: object
+    properties:
+      fiscal_code:
+        type: string
+        description: User's fiscal code.
+        format: FiscalCode
+        x-import: '@pagopa/ts-commons/lib/strings'
+        example: SPNDNL80R13C555X
+      name:
+        type: string
+        minLength: 1
+      surname:
+        type: string
+        minLength: 1
+    required:
+      - fiscal_code
+      - name
+      - surname
+  FamilyMembers:
+    type: array
+    items:
+      $ref: '#/definitions/FamilyMember'
+  Dsu:
+    type: object
+    properties:
+      family_members:
+        $ref: '#/definitions/FamilyMembers'
+      max_amount:
+        type: integer
+      max_tax_benefit:
+        type: integer
+      request_id:
+        type: integer
+        description: IdRichiesta
+      isee_type:
+        type: string
+        description: TipoIndicatoreType
+      dsu_protocol_id:
+        type: string
+        minLength: 1
+        description: ProtocolloDSU
+      dsu_created_at:
+        type: string
+        format: date
+        description: DataPresentazioneDSU
+      has_discrepancies:
+        type: boolean
+        description: PresenzaDifformita
+    required:
+      - family_members
+      - max_amount
+      - max_tax_benefit
+      - request_id
+      - isee_type
+      - dsu_protocol_id
+      - dsu_created_at
+      - has_discrepancies
+  EligibilityCheckSuccess:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/EligibilityCheckSuccessEligible'
+      - $ref: '#/definitions/EligibilityCheckSuccessConflict'
+      - $ref: '#/definitions/EligibilityCheckSuccessIneligible'
+  EligibilityCheckSuccessEligible:
+    type: object
+    title: Eligibility check success
+    description: >
+      Eligibility check succeeded, we can proceed and send the eligibility
+      status.
+
+      Amounts are left undefined when status is INELIGIBLE
+    properties:
+      id:
+        type: string
+        minLength: 1
+      status:
+        type: string
+        x-extensible-enum:
+          - ELIGIBLE
+      valid_before:
+        type: string
+        format: UTCISODateFromString
+        description: A date-time field in ISO-8601 format and UTC timezone.
+        x-import: '@pagopa/ts-commons/lib/dates'
+        example: '2018-10-13T00:00:00.000Z'
+      dsu_request:
+        $ref: '#/definitions/Dsu'
+    required:
+      - id
+      - status
+      - valid_before
+      - dsu_request
+  EligibilityCheckSuccessIneligible:
+    type: object
+    title: Eligibility check success
+    description: >
+      Eligibility check succeeded, we can proceed and send the eligibility
+      status.
+
+      Amounts are left undefined when status is INELIGIBLE
+    properties:
+      id:
+        type: string
+        minLength: 1
+      status:
+        type: string
+        x-extensible-enum:
+          - INELIGIBLE
+    required:
+      - id
+      - status
+  EligibilityCheckSuccessConflict:
+    type: object
+    title: |
+      Eligibility check succeeded but there's already a bonus found
+      for this set of family members.
+    properties:
+      id:
+        type: string
+        minLength: 1
+      status:
+        type: string
+        x-extensible-enum:
+          - CONFLICT
+      dsu_request:
+        $ref: '#/definitions/Dsu'
+    required:
+      - id
+      - status
+      - dsu_request
+  EligibilityCheckFailure:
+    type: object
+    title: Eligibility check failure
+    description: Eligibility check failed because of some INPS internal error
+    properties:
+      id:
+        type: string
+        minLength: 1
+      error:
+        type: string
+        description: |
+          - INVALID_REQUEST     Request malformed
+          - INTERNAL_ERROR      Caller must retry after some timeout
+          - DATA_NOT_FOUND      ISEE data not found in INPS database
+          - DATABASE_OFFLINE    Caller must retry after some timeout
+        x-extensible-enum:
+          - INVALID_REQUEST
+          - INTERNAL_ERROR
+          - DATA_NOT_FOUND
+          - DATABASE_OFFLINE
+      error_description:
+        type: string
+      status:
+        type: string
+        x-extensible-enum:
+          - FAILURE
+    required:
+      - id
+      - error
+      - error_description
+      - status
+  EligibilityCheck:
+    title: Eligibility check
+    description: Eligibility check
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/EligibilityCheckSuccess'
+      - $ref: '#/definitions/EligibilityCheckFailure'
+  BonusActivationStatus:
+    type: string
+    description: >
+      Bonus activation status.
+
+      - PROCESSING  The bonus activation has started;
+                    this status is only needed when listing bonus id
+                    and does not appear in the bonus details
+                    since the request will return HTTP 202 in that case
+      - ACTIVE      The bonus has been successfully activated;
+                    the bonus activtion procedure can't be restarted anymore
+      - FAILED      The bonus activation procedure failed and can be restarted
+
+      - REDEEMED    The bonus is redeemed by the user or by any member of the
+      family;
+                    the bonus activtion procedure can't be restarted anymore
+    x-extensible-enum:
+      - PROCESSING
+      - ACTIVE
+      - FAILED
+      - REDEEMED
+  BonusCode:
+    description: The unique secret code that identifies a bonus
+    type: string
+    minLength: 12
+    maxLength: 12
+    pattern: ^[ACEFGHLMNPRUV3469]{12}$
+  BonusActivation:
+    type: object
+    title: Bonus activation
+    description: Bonus activation
+    properties:
+      id:
+        $ref: '#/definitions/BonusCode'
+      applicant_fiscal_code:
+        type: string
+        description: User's fiscal code.
+        format: FiscalCode
+        x-import: '@pagopa/ts-commons/lib/strings'
+        example: SPNDNL80R13C555X
+      status:
+        $ref: '#/definitions/BonusActivationStatus'
+      dsu_request:
+        $ref: '#/definitions/Dsu'
+      created_at:
+        type: string
+        format: UTCISODateFromString
+        description: A date-time field in ISO-8601 format and UTC timezone.
+        x-import: '@pagopa/ts-commons/lib/dates'
+        example: '2018-10-13T00:00:00.000Z'
+      redeemed_at:
+        type: string
+        format: UTCISODateFromString
+        description: A date-time field in ISO-8601 format and UTC timezone.
+        x-import: '@pagopa/ts-commons/lib/dates'
+        example: '2018-10-13T00:00:00.000Z'
+    required:
+      - id
+      - applicant_fiscal_code
+      - status
+      - dsu_request
+      - created_at
+  Timestamp:
+    type: string
+    format: UTCISODateFromString
+    description: A date-time field in ISO-8601 format and UTC timezone.
+    x-import: '@pagopa/ts-commons/lib/dates'
+    example: '2018-10-13T00:00:00.000Z'
+  BonusActivationItem:
+    type: object
+    properties:
+      id:
+        $ref: '#/definitions/BonusCode'
+      is_applicant:
+        type: boolean
+        description: |
+          True in case the authenticated user is the applicant for
+          the bonus activation identified by the id
+    required:
+      - id
+      - is_applicant
+  BonusActivationCollection:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/BonusActivationItem'
+    required:
+      - items
+  PaginationResponse:
+    type: object
+    description: Pagination response parameters.
+    properties:
+      page_size:
+        type: integer
+        minimum: 1
+        description: Number of items returned for each page.
+        example: 2
+      has_more_results:
+        type: boolean
+        description: This value indicates if there are more results.
+        example: true
+      prev:
+        type: string
+        description: Contains a value useful to get the previous page
+        example: first_id_of_the_page
+      next:
+        type: string
+        description: Contains a value useful to get the next page
+        example: last_id_of_the_page
+  PaginatedBonusActivationsCollection:
+    allOf:
+      - $ref: '#/definitions/BonusActivationCollection'
+      - type: object
+        description: Pagination response parameters.
+        properties:
+          page_size:
+            type: integer
+            minimum: 1
+            description: Number of items returned for each page.
+            example: 2
+          next:
+            type: string
+            description: |-
+              Contains an URL to GET the next results page in the
+              retrieved collection of items.
+            format: uri
+            example: https://example.com/?p=0XXX2
   QrCodeImage:
     type: object
     properties:
@@ -169,14 +478,13 @@ definitions:
       qr_code:
         type: array
         items:
-          $ref: "#/definitions/QrCodeImage"
+          $ref: '#/definitions/QrCodeImage'
     required:
       - qr_code
-
   BonusActivationWithQrCode:
     allOf:
-      - $ref: "#/definitions/BonusActivation"
-      - $ref: "#/definitions/QrCode"
+      - $ref: '#/definitions/BonusActivation'
+      - $ref: '#/definitions/QrCode'
 securityDefinitions:
   Bearer:
     type: apiKey

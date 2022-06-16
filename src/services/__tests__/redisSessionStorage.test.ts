@@ -5,11 +5,12 @@
 /* tslint:disable:no-null-keyword */
 /* tslint:disable:no-object-mutation */
 
-import { Either, isLeft, isRight, left, Left, right } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
+
 import * as lolex from "lolex";
 import { createMockRedis } from "mock-redis-client";
 
-import { none, some } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { RedisClient } from "redis";
@@ -141,7 +142,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      right(true),
+      E.right(true),
       "should set a new session with valid values"
     ],
     [
@@ -155,7 +156,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error")],
           "RedisSessionStorage.set"
@@ -174,7 +175,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("hset error")],
           "RedisSessionStorage.set"
@@ -193,7 +194,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("Error setting wallet token")],
           "RedisSessionStorage.set"
@@ -212,7 +213,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("Error setting session token")],
           "RedisSessionStorage.set"
@@ -231,7 +232,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [
             new Error("Error setting session token"),
@@ -253,7 +254,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hset error")],
           "RedisSessionStorage.set"
@@ -272,7 +273,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("Error setting session token"), new Error("hset error")],
           "RedisSessionStorage.set"
@@ -291,7 +292,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("Error setting wallet token")],
           "RedisSessionStorage.set"
@@ -310,7 +311,7 @@ describe("RedisSessionStorage#set", () => {
       "OK",
       undefined,
       "OK",
-      left(
+      E.left(
         multipleErrorsFormatter(
           [new Error("hmset error"), new Error("Error setting wallet token")],
           "RedisSessionStorage.set"
@@ -411,7 +412,9 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     jest
       .spyOn(RedisSessionStorage.prototype, "clearExpiredSetValues")
       .mockImplementation(() =>
-        Promise.resolve<ReadonlyArray<Either<Error, boolean>>>([right(true)])
+        Promise.resolve<ReadonlyArray<E.Either<Error, boolean>>>([
+          E.right(true)
+        ])
       );
   });
   afterAll(() => {
@@ -446,7 +449,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       ]);
     });
 
-    const response: Either<Error, boolean> = await sessionStorage[
+    const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
@@ -474,7 +477,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     expect(mockDel.mock.calls[0][5]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
     );
-    expect(response.isRight());
+    expect(E.isRight(response));
   });
 
   it("should delete only older session token for UserV4 and UserV3 payload", async () => {
@@ -516,7 +519,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       ]);
     });
 
-    const response: Either<Error, boolean> = await sessionStorage[
+    const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
@@ -555,7 +558,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     expect(mockDel.mock.calls[0][10]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
     );
-    expect(response.isRight());
+    expect(E.isRight(response));
   });
 
   it("should delete only older session token for UserV3 and UserV2 payload", async () => {
@@ -590,7 +593,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       ]);
     });
 
-    const response: Either<Error, boolean> = await sessionStorage[
+    const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
@@ -624,7 +627,7 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
     expect(mockDel.mock.calls[0][8]).toBe(
       `WALLET-${oldUserPayload2.wallet_token}`
     );
-    expect(response.isRight());
+    expect(E.isRight(response));
   });
 });
 
@@ -636,19 +639,18 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     const response = await sessionStorage.getBySessionToken(
       "inexistent token" as SessionToken
     );
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should fail getting a session with invalid value", async () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
-    const expectedDecodedError = User.decode(anInvalidUser) as Left<
-      ReadonlyArray<ValidationError>,
-      User
+    const expectedDecodedError = User.decode(anInvalidUser) as E.Left<
+      ReadonlyArray<ValidationError>
     >;
     const expectedError = new Error(
-      errorsToReadableMessages(expectedDecodedError.value).join("/")
+      errorsToReadableMessages(expectedDecodedError.left).join("/")
     );
     const response = await sessionStorage.getBySessionToken(
       aValidUser.session_token
@@ -658,7 +660,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet.mock.calls[0][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(left(expectedError));
+    expect(response).toEqual(E.left(expectedError));
   });
 
   it("should fail parse of user payload", async () => {
@@ -675,7 +677,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(
-      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
     );
   });
 
@@ -688,7 +690,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should get a session with valid values", async () => {
@@ -704,7 +706,7 @@ describe("RedisSessionStorage#getBySessionToken", () => {
     expect(mockGet.mock.calls[0][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(right(some(aValidUser)));
+    expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
 
@@ -716,7 +718,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
     const response = await sessionStorage.getByMyPortalToken(
       "inexistent token" as MyPortalToken
     );
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should fail getting a session with invalid value", async () => {
@@ -726,12 +728,11 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
-    const expectedDecodedError = User.decode(anInvalidUser) as Left<
-      ReadonlyArray<ValidationError>,
-      User
+    const expectedDecodedError = User.decode(anInvalidUser) as E.Left<
+      ReadonlyArray<ValidationError>
     >;
     const expectedError = new Error(
-      errorsToReadableMessages(expectedDecodedError.value).join("/")
+      errorsToReadableMessages(expectedDecodedError.left).join("/")
     );
     const response = await sessionStorage.getByMyPortalToken(
       aValidUser.myportal_token
@@ -744,7 +745,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(left(expectedError));
+    expect(response).toEqual(E.left(expectedError));
   });
 
   it("should fail parse of user payload", async () => {
@@ -767,7 +768,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(
-      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
     );
   });
 
@@ -780,7 +781,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should get a session with valid values", async () => {
@@ -802,7 +803,7 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(right(some(aValidUser)));
+    expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
 
@@ -814,7 +815,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
     const response = await sessionStorage.getByWalletToken(
       "inexistent token" as WalletToken
     );
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should fail getting a session with invalid value", async () => {
@@ -824,12 +825,11 @@ describe("RedisSessionStorage#getByWalletToken", () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
-    const expectedDecodedError = User.decode(anInvalidUser) as Left<
-      ReadonlyArray<ValidationError>,
-      User
+    const expectedDecodedError = User.decode(anInvalidUser) as E.Left<
+      ReadonlyArray<ValidationError>
     >;
     const expectedError = new Error(
-      errorsToReadableMessages(expectedDecodedError.value).join("/")
+      errorsToReadableMessages(expectedDecodedError.left).join("/")
     );
     const response = await sessionStorage.getByWalletToken(
       aValidUser.wallet_token
@@ -840,7 +840,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(left(expectedError));
+    expect(response).toEqual(E.left(expectedError));
   });
 
   it("should fail parse of user payload", async () => {
@@ -861,7 +861,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(
-      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
     );
   });
 
@@ -874,7 +874,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should get a session with valid values", async () => {
@@ -894,7 +894,7 @@ describe("RedisSessionStorage#getByWalletToken", () => {
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(right(some(aValidUser)));
+    expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
 
@@ -906,7 +906,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     const response = await sessionStorage.getByZendeskToken(
       "inexistent token" as ZendeskToken
     );
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should fail getting a session with invalid value", async () => {
@@ -916,23 +916,23 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     mockGet.mockImplementationOnce((_, callback) => {
       callback(undefined, JSON.stringify(anInvalidUser));
     });
-    const expectedDecodedError = User.decode(anInvalidUser) as Left<
-      ReadonlyArray<ValidationError>,
-      User
-    >;
-    const expectedError = new Error(
-      errorsToReadableMessages(expectedDecodedError.value).join("/")
-    );
-    const response = await sessionStorage.getByZendeskToken(
-      aValidUser.zendesk_token
-    );
+    const expectedDecodedError = User.decode(anInvalidUser);
+    expect(E.isLeft(expectedDecodedError)).toBeTruthy();
+    if(E.isLeft(expectedDecodedError)) {
+      const expectedError = new Error(
+        errorsToReadableMessages(expectedDecodedError.left).join("/")
+      );
+      const response = await sessionStorage.getByZendeskToken(
+        aValidUser.zendesk_token
+      );
 
-    expect(mockGet).toHaveBeenCalledTimes(2);
-    expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
-    expect(mockGet.mock.calls[1][0]).toBe(
-      `SESSION-${aValidUser.session_token}`
-    );
-    expect(response).toEqual(left(expectedError));
+      expect(mockGet).toHaveBeenCalledTimes(2);
+      expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+      expect(mockGet.mock.calls[1][0]).toBe(
+        `SESSION-${aValidUser.session_token}`
+      );
+      expect(response).toEqual(E.left(expectedError));
+      }
   });
 
   it("should fail parse of user payload", async () => {
@@ -953,7 +953,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(
-      left(new SyntaxError("Unexpected token I in JSON at position 0"))
+      E.left(new SyntaxError("Unexpected token I in JSON at position 0"))
     );
   });
 
@@ -966,7 +966,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(right(none));
+    expect(response).toEqual(E.right(O.none));
   });
 
   it("should get a session with valid values", async () => {
@@ -986,7 +986,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
-    expect(response).toEqual(right(some(aValidUser)));
+    expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
 
@@ -996,11 +996,11 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelError = new Error("del error");
 
   it.each([
-    [undefined, 7, right(true), "should delete al user tokens"],
+    [undefined, 7, E.right(true), "should delete al user tokens"],
     [
       expectedRedisDelError,
       undefined,
-      left(
+      E.left(
         new Error(
           `value [${expectedRedisDelError.message}] at RedisSessionStorage.del`
         )
@@ -1010,7 +1010,7 @@ describe("RedisSessionStorage#del", () => {
     [
       undefined,
       4,
-      left(
+      E.left(
         new Error(
           `value [${
             new Error(
@@ -1026,7 +1026,7 @@ describe("RedisSessionStorage#del", () => {
     async (
       tokenDelErr: Error,
       tokenDelResponse: number,
-      expected: Either<Error, boolean>
+      expected: E.Either<Error, boolean>
     ) => {
       const aValidUserWithExternalTokens = {
         ...aValidUser,
@@ -1056,7 +1056,7 @@ describe("RedisSessionStorage#del", () => {
       expect(mockDel.mock.calls[0][5]).toBe(
         `WALLET-${aValidUserWithExternalTokens.wallet_token}`
       );
-      if (isRight(expected)) {
+      if (E.isRight(expected)) {
         expect(mockSrem).toBeCalledWith(
           `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
           `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`,
@@ -1099,7 +1099,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockSadd.mock.calls[0][1]).toBe(expectedSessionInfoKey);
-    expect(response).toEqual(right({ sessions: [expectedSessionInfo] }));
+    expect(response).toEqual(E.right({ sessions: [expectedSessionInfo] }));
   });
 
   it("should fails if re-init session info and session info set don't complete", async () => {
@@ -1114,7 +1114,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
     });
     const response = await sessionStorage.listUserSessions(aValidUser);
     expect(mockSadd).not.toBeCalled();
-    expect(response).toEqual(left(sessionNotFoundError));
+    expect(response).toEqual(E.left(sessionNotFoundError));
   });
 
   it("should skip a session with invalid value", async () => {
@@ -1192,20 +1192,23 @@ describe("RedisSessionStorage#listUserSessions", () => {
       createdAt: new Date(),
       sessionToken: aValidUser.session_token
     });
-    mockMget.mockImplementationOnce((_, callback) => {
-      callback(undefined, [JSON.stringify(expectedSessionInfo.value)]);
-    });
+    expect(E.isRight(expectedSessionInfo)).toBeTruthy();
+    if (E.isRight(expectedSessionInfo)) {
+      mockMget.mockImplementationOnce((_, callback) => {
+        callback(undefined, [JSON.stringify(expectedSessionInfo.right)]);
+      });
 
-    const response = await sessionStorage.listUserSessions(aValidUser);
+      const response = await sessionStorage.listUserSessions(aValidUser);
 
-    expect(mockMget).toHaveBeenCalledTimes(1);
-    expect(mockMget.mock.calls[0][0]).toBe(
-      `SESSIONINFO-${aValidUser.session_token}`
-    );
-    const expectedSessionsList = SessionsList.decode({
-      sessions: [expectedSessionInfo.value]
-    });
-    expect(response).toEqual(expectedSessionsList);
+      expect(mockMget).toHaveBeenCalledTimes(1);
+      expect(mockMget.mock.calls[0][0]).toBe(
+        `SESSIONINFO-${aValidUser.session_token}`
+      );
+      const expectedSessionsList = SessionsList.decode({
+        sessions: [expectedSessionInfo.right]
+      });
+      expect(response).toEqual(expectedSessionsList);
+    }
   });
 });
 
@@ -1287,8 +1290,10 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
       aValidUser.fiscal_code
     );
-    expect(isRight(userHasActiveSessionsResult)).toBeTruthy();
-    expect(userHasActiveSessionsResult.value).toEqual(true);
+    expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
+    if (E.isRight(userHasActiveSessionsResult)) {
+      expect(userHasActiveSessionsResult.right).toEqual(true);
+    }
   });
 
   it("should return false if doens't exists an active user session", async () => {
@@ -1316,8 +1321,10 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
       aValidUser.fiscal_code
     );
-    expect(isRight(userHasActiveSessionsResult)).toBeTruthy();
-    expect(userHasActiveSessionsResult.value).toEqual(false);
+    expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
+    if (E.isRight(userHasActiveSessionsResult)) {
+      expect(userHasActiveSessionsResult.right).toEqual(false);
+    }
   });
 
   it("should return false if doens't exists any session info for the user", async () => {
@@ -1327,8 +1334,10 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
       aValidUser.fiscal_code
     );
-    expect(isRight(userHasActiveSessionsResult)).toBeTruthy();
-    expect(userHasActiveSessionsResult.value).toEqual(false);
+    expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
+    if (E.isRight(userHasActiveSessionsResult)) {
+      expect(userHasActiveSessionsResult.right).toEqual(false);
+    }
   });
 
   it("should return false if sessions info for a user are missing", async () => {
@@ -1344,8 +1353,10 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
       aValidUser.fiscal_code
     );
-    expect(isRight(userHasActiveSessionsResult)).toBeTruthy();
-    expect(userHasActiveSessionsResult.value).toEqual(false);
+    expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
+    if (E.isRight(userHasActiveSessionsResult)) {
+      expect(userHasActiveSessionsResult.right).toEqual(false);
+    }
   });
 
   it("should return a left value if a redis call fail", async () => {
@@ -1362,8 +1373,10 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
       aValidUser.fiscal_code
     );
-    expect(isRight(userHasActiveSessionsResult)).toBeFalsy();
-    expect(userHasActiveSessionsResult.value).toEqual(expectedRedisError);
+    expect(E.isRight(userHasActiveSessionsResult)).toBeFalsy();
+    if (E.isRight(userHasActiveSessionsResult)) {
+      expect(userHasActiveSessionsResult.right).toEqual(expectedRedisError);
+    }
   });
 
   it("should return left value if a redis error occurs searching session info", async () => {
@@ -1374,19 +1387,23 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     const userHasActiveSessionsResult = await sessionStorage.userHasActiveSessions(
       aValidUser.fiscal_code
     );
-    expect(isRight(userHasActiveSessionsResult)).toBeFalsy();
-    expect(userHasActiveSessionsResult.value).toEqual(expectedRedisError);
+    expect(E.isRight(userHasActiveSessionsResult)).toBeFalsy();
+    if (E.isRight(userHasActiveSessionsResult)) {
+      expect(userHasActiveSessionsResult.right).toEqual(expectedRedisError);
+    }
   });
 });
 
 describe("RedisSessionStorage#setBlockedUser", () => {
-  it("should return right(true) if the user is correctly locked", async () => {
+  it("should return E.right(true) if the user is correctly locked", async () => {
     mockSadd.mockImplementationOnce((_, __, callback) => callback(null));
 
     const result = await sessionStorage.setBlockedUser(aFiscalCode);
 
-    expect(result.isRight()).toBeTruthy();
-    expect(result.value).toBe(true);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(true);
+    }
   });
 
   it("should return left if the user is not correctly locked", async () => {
@@ -1395,13 +1412,15 @@ describe("RedisSessionStorage#setBlockedUser", () => {
 
     const result = await sessionStorage.setBlockedUser(aFiscalCode);
 
-    expect(result.isLeft()).toBeTruthy();
-    expect(result.value).toBe(aError);
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left).toBe(aError);
+    }
   });
 });
 
 describe("RedisSessionStorage#unsetBlockedUser", () => {
-  it("should return right(true) if the user is correctly unlocked", async () => {
+  it("should return E.right(true) if the user is correctly unlocked", async () => {
     const sremSuccess = 1;
     mockSrem.mockImplementation((_, __, callback) =>
       callback(null, sremSuccess)
@@ -1409,11 +1428,13 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
 
     const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
 
-    expect(result.isRight()).toBeTruthy();
-    expect(result.value).toBe(true);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(true);
+    }
   });
 
-  it("should return left(Error) if the user is not correctly unlocked", async () => {
+  it("should return E.left(Error) if the user is not correctly unlocked", async () => {
     const sremFailure = 0;
     mockSrem.mockImplementationOnce((_, __, callback) =>
       callback(null, sremFailure)
@@ -1421,8 +1442,10 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
 
     const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
 
-    expect(result.isLeft()).toBeTruthy();
-    expect(result.value instanceof Error).toBe(true);
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left instanceof Error).toBe(true);
+    }
   });
 
   it("should return left if for any unhandled failures", async () => {
@@ -1431,8 +1454,10 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
 
     const result = await sessionStorage.setBlockedUser(aFiscalCode);
 
-    expect(result.isLeft()).toBeTruthy();
-    expect(result.value).toBe(aError);
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left).toBe(aError);
+    }
   });
 });
 
@@ -1441,8 +1466,10 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
     mockSmembers.mockImplementationOnce((_, callback) => callback(null, []));
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
-    expect(result.isRight()).toBeTruthy();
-    expect(result.value).toBe(true);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(true);
+    }
   });
 
   it("should fail if there's an error retrieving user's sessions", async () => {
@@ -1450,8 +1477,10 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
     mockSmembers.mockImplementationOnce((_, callback) => callback(aError));
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
-    expect(result.isLeft()).toBeTruthy();
-    expect(result.value).toBe(aError);
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left).toBe(aError);
+    }
   });
 
   it("should fail if the stored user profile is not valid", async () => {
@@ -1462,8 +1491,10 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
-    expect(result.isLeft()).toBeTruthy();
-    expect(result.value instanceof Error).toBe(true);
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left instanceof Error).toBe(true);
+    }
   });
 
   it("should succeed if there's no user stored", async () => {
@@ -1471,15 +1502,19 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
-    expect(result.isRight()).toBeTruthy();
-    expect(result.value).toBe(true);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(true);
+    }
   });
 
   it("should succeed if everything is fine", async () => {
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
-    expect(result.isRight()).toBeTruthy();
-    expect(result.value).toBe(true);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(true);
+    }
   });
 });
 
@@ -1489,7 +1524,7 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
       callback(undefined, null);
     });
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
-    expect(isLeft(response)).toBeTruthy();
+    expect(E.isLeft(response)).toBeTruthy();
   });
 
   it("should fail if the value is not a valid email", async () => {
@@ -1497,7 +1532,7 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
       callback(undefined, "fake-wrong-value");
     });
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
-    expect(isLeft(response)).toBeTruthy();
+    expect(E.isLeft(response)).toBeTruthy();
   });
 
   it("should fail if redis get fail with an error", async () => {
@@ -1506,7 +1541,7 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
       callback(expectedError, undefined);
     });
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
-    expect(response).toEqual(left(expectedError));
+    expect(response).toEqual(E.left(expectedError));
   });
 
   it("should return an email if exists the notice key", async () => {
@@ -1514,7 +1549,7 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
       callback(undefined, anEmailAddress);
     });
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
-    expect(response).toEqual(right(anEmailAddress));
+    expect(response).toEqual(E.right(anEmailAddress));
   });
 });
 
@@ -1524,7 +1559,7 @@ describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
       callback(undefined, 1);
     });
     const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
-    expect(response).toEqual(right(true));
+    expect(response).toEqual(E.right(true));
   });
 
   it("should fail deleting a notice email", async () => {
@@ -1533,7 +1568,7 @@ describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
       callback(expectedError, undefined);
     });
     const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
-    expect(response).toEqual(left(expectedError));
+    expect(response).toEqual(E.left(expectedError));
   });
 });
 
@@ -1557,7 +1592,7 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
       expectedTtl,
       expect.any(Function)
     );
-    expect(response).toEqual(right(true));
+    expect(response).toEqual(E.right(true));
   });
 
   it("should return left if the notice email key was not created", async () => {
@@ -1580,6 +1615,6 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
       expectedTtl,
       expect.any(Function)
     );
-    expect(response).toEqual(left(expectedError));
+    expect(response).toEqual(E.left(expectedError));
   });
 });

@@ -1,4 +1,5 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { PecBearerGeneratorT } from "src/types/token";
@@ -32,15 +33,20 @@ export default class PecServerClientFactory
     bearerGenerator: PecBearerGeneratorT,
     maybeServiceId?: NonEmptyString
   ): TE.TaskEither<Error, ReturnType<IPecServerClient>> {
-    const pecServerConfig = O.fromNullable(maybeServiceId)
-      .chain(serviceId => findById(this.pecConfigs, serviceId))
-      .getOrElse(this.DEFAULT_PEC_CONFIG);
+    const pecServerConfig = pipe(
+      O.fromNullable(maybeServiceId),
+      O.chain(serviceId => findById(this.pecConfigs, serviceId)),
+      O.getOrElse(() => this.DEFAULT_PEC_CONFIG)
+    );
 
-    return bearerGenerator(pecServerConfig).map(token =>
-      pecServerClient(
-        pecServerConfig.url,
-        pecServerConfig.basePath,
-        getHttpsApiFetchWithBearer(token)
+    return pipe(
+      bearerGenerator(pecServerConfig),
+      TE.map(token =>
+        pecServerClient(
+          pecServerConfig.url,
+          pecServerConfig.basePath,
+          getHttpsApiFetchWithBearer(token)
+        )
       )
     );
   }

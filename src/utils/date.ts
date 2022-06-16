@@ -1,8 +1,10 @@
 import { PatternString } from "@pagopa/ts-commons/lib/strings";
 import { addYears, format, isAfter } from "date-fns";
+import { pipe } from "fp-ts/lib/function";
 import { Option, tryCatch } from "fp-ts/lib/Option";
 import { FiscalCode } from "generated/backend/FiscalCode";
 import * as t from "io-ts";
+import * as E from "fp-ts/Either";
 
 /**
  * Returns a comparator of two dates that returns true if
@@ -104,10 +106,13 @@ export const StrictUTCISODateFromString = new t.Type<Date, string>(
   (v, c) =>
     isDate(v)
       ? t.success(v)
-      : STRICT_UTC_ISO8601_FULL_REGEX.validate(v, c).chain(s => {
-          const d = new Date(s);
-          return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
-        }),
+      : pipe(
+          STRICT_UTC_ISO8601_FULL_REGEX.validate(v, c),
+          E.chain(s => {
+            const d = new Date(s);
+            return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
+          })
+        ),
   a => a.toISOString()
 );
 

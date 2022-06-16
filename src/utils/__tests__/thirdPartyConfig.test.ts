@@ -26,22 +26,12 @@ const aValidTestAndProdThirdPartyConfig = {
 };
 
 describe("ThirdPartyConfigListFromString", () => {
-  it("should decode an empty array from an undefined string", async () => {
-    const decoded = ThirdPartyConfigListFromString.decode(undefined);
-    expect(E.isRight(decoded)).toBeTruthy();
-
-    if (E.isRight(decoded)) {
-      const right = decoded.value;
-      expect(right).toEqual([]);
-    }
-  });
-
   it("should decode an empty array from an empty string", async () => {
     const decoded = ThirdPartyConfigListFromString.decode("");
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([]);
     }
   });
@@ -61,7 +51,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([aValidProdThirdPartyConfig]);
     }
   });
@@ -81,7 +71,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([aValidTestThirdPartyConfig]);
     }
   });
@@ -97,7 +87,7 @@ describe("ThirdPartyConfigListFromString", () => {
     expect(E.isRight(decoded)).toBeTruthy();
 
     if (E.isRight(decoded)) {
-      const right = decoded.value;
+      const right = decoded.right;
       expect(right).toEqual([aValidTestAndProdThirdPartyConfig]);
     }
   });

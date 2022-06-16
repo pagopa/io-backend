@@ -4,14 +4,8 @@
  */
 
 import * as express from "express";
-import { identity } from "fp-ts/lib/function";
-import {
-  fromLeft,
-  taskEither,
-  tryCatch,
-  fromPredicate,
-  fromEither
-} from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
 import { InitializedProfile } from "generated/backend/InitializedProfile";
 import {
   IResponseErrorInternal,
@@ -29,6 +23,7 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import ProfileService from "src/services/profileService";
 import * as t from "io-ts/lib";
+import { pipe } from "fp-ts/lib/function";
 import { ZendeskToken } from "../../generated/zendesk/ZendeskToken";
 import {
   JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
@@ -68,39 +63,38 @@ export default class ZendeskController {
     | IResponseErrorValidation
     | IResponseSuccessJson<ZendeskToken>
   > =>
-    withUserFromRequest(req, async user =>
-      tryCatch(
-        () => this.profileService.getProfile(user),
-        () => ResponseErrorInternal("Cannot retrieve profile")
-      )
-        .mapLeft<
-          | IResponseErrorInternal
-          | IResponseErrorTooManyRequests
-          | IResponseErrorNotFound
-        >(identity)
-        .chain<IResponseSuccessJson<InitializedProfile>>(r =>
-          r.kind === "IResponseSuccessJson" ? taskEither.of(r) : fromLeft(r)
-        )
-        .map(r => r.value)
-        .chain(profile =>
-          fromPredicate(isProfileWithValidEmailAddress, _ =>
-            ResponseErrorInternal("User does not have an email address")
-          )(profile)
-        )
-        .chain(profileWithValidEmailAddress =>
-          fromEither(
-            ValidZendeskProfile.decode(
-              profileWithValidEmailAddress
-            ).mapLeft(_ =>
-              ResponseErrorInternal(
-                "Cannot create a valid Zendesk user from this profile"
+    withUserFromRequest(req, user =>
+      pipe(
+        TE.tryCatch(
+          () => this.profileService.getProfile(user),
+          () => ResponseErrorInternal("Error retrieving user profile")
+        ),
+        TE.chain(r =>
+          r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
+        ),
+        TE.chainW(profile =>
+          pipe(
+            profile,
+            TE.fromPredicate(isProfileWithValidEmailAddress, () =>
+              ResponseErrorInternal("User does not have an email address")
+            )
+          )
+        ),
+        TE.chainW(profileWithValidEmailAddress =>
+          TE.fromEither(
+            pipe(
+              ValidZendeskProfile.decode(profileWithValidEmailAddress),
+              E.mapLeft(() =>
+                ResponseErrorInternal(
+                  "Cannot create a valid Zendesk user from this profile"
+                )
               )
             )
           )
-        )
-        .chain(validZendeskProfile =>
-          this.tokenService
-            .getJwtZendeskSupportToken(
+        ),
+        TE.chainW(validZendeskProfile =>
+          pipe(
+            this.tokenService.getJwtZendeskSupportToken(
               JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
               validZendeskProfile.name,
               validZendeskProfile.family_name,
@@ -108,20 +102,17 @@ export default class ZendeskController {
               validZendeskProfile.email,
               JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION,
               JWT_ZENDESK_SUPPORT_TOKEN_ISSUER
-            )
-            .mapLeft(e => ResponseErrorInternal(e.message))
-        )
-        .map(token =>
+            ),
+            TE.mapLeft(e => ResponseErrorInternal(e.message))
+          )
+        ),
+        TE.map(token =>
           ZendeskToken.encode({
             jwt: token
           })
-        )
-        .fold<
-          | IResponseErrorInternal
-          | IResponseErrorTooManyRequests
-          | IResponseErrorNotFound
-          | IResponseSuccessJson<ZendeskToken>
-        >(identity, ResponseSuccessJson)
-        .run()
+        ),
+        TE.map(ResponseSuccessJson),
+        TE.toUnion
+      )()
     );
 }

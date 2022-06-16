@@ -1,6 +1,9 @@
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { IVerifyOptions } from "passport-http-bearer";
+import * as E from "fp-ts/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
 import { User } from "../types/user";
 
 export type StrategyDoneFunction = (
@@ -20,10 +23,13 @@ export function fulfill(
   errorOrUser: Either<Error, Option<User>>,
   done: StrategyDoneFunction
 ): void {
-  errorOrUser.fold(
-    error => done(error),
-    // passport-http-custom-bearer uses the last options parameter
-    // we need to pass it as an empty string or we get an error
-    user => done(undefined, user.isNone() ? false : user.value, "")
+  pipe(
+    errorOrUser,
+    E.fold(
+      error => done(error),
+      // passport-http-custom-bearer uses the last options parameter
+      // we need to pass it as an empty string or we get an error
+      user => done(undefined, O.isNone(user) ? false : user.value, "")
+    )
   );
 }

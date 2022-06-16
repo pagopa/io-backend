@@ -11,6 +11,9 @@
   },
   "description": "IO app and web backend",
   "main": "index.js",
+  "engines": {
+    "node": "14.16.0"
+  },
   "scripts": {
     "watch": "tsc -w",
     "prebuild": "yarn generate:proxy-models",
@@ -22,8 +25,13 @@
     "prettify": "prettier --write \"./**/*.ts\"",
     "pretest": "./scripts/generate-test-certs.sh certs",
     "test": "jest -i",
-    "test:coverage": "dotenv -e .env.example -- jest -i --coverage",
+    "test:coverage": "jest -i --coverage",
     "start": "node src/server.js",
+    "openapi:bundle-notifications": "bundle-api-spec -i openapi/api_notifications.yaml.template -o api_notifications.yaml -V $npm_package_version",
+    "openapi:bundle-api_cgn": "bundle-api-spec -i openapi/api_cgn.yaml.template -o api_cgn.yaml -V $npm_package_version",
+    "openapi:bundle-api_bonus": "bundle-api-spec -i openapi/api_bonus.yaml.template -o api_bonus.yaml -V $npm_package_version",
+    "openapi:bundle-api_auth": "bundle-api-spec -i openapi/api_auth.yaml.template -o api_auth.yaml -V $npm_package_version",
+    "openapi:bundle-fn_bonus": "bundle-api-spec -i openapi/fn_bonus.yaml.template -o openapi/fn_bonus.yaml -V $npm_package_version",
     "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
     "generate:proxy:api-parameters": "gen-api-models --api-spec api_parameters.yaml --out-dir generated/parameters",
@@ -40,7 +48,7 @@
     "generate:proxy:bonus-models": "rimraf generated/bonus && gen-api-models --api-spec api_bonus.yaml --out-dir generated/bonus",
     "generate:proxy:cgn-models": "rimraf generated/cgn && gen-api-models --api-spec api_cgn.yaml --out-dir generated/cgn",
     "generate:proxy:cgn-operator-search-models": "rimraf generated/cgn-operator-search && gen-api-models --api-spec api_cgn_operator_search.yaml --out-dir generated/cgn-operator-search",
-    "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
+    "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec openapi/fn_bonus.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
     "generate:api:io-cgn": "rimraf generated/io-cgn-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml --no-strict --out-dir generated/io-cgn-api --request-types --response-decoders --client",
     "generate:api:io-cgn-operator-search": "rimraf generated/io-cgn-operator-search-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml --no-strict --out-dir generated/io-cgn-operator-search-api --request-types --response-decoders --client",
     "generate:api:pagopaproxy": "rimraf generated/pagopa-proxy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.1.1/api-spec/api-for-io.yaml --no-strict --out-dir generated/pagopa-proxy --request-types --response-decoders --client",
@@ -70,23 +78,25 @@
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
-    "@pagopa/io-spid-commons": "^6.2.0",
-    "@pagopa/ts-commons": "^9.4.0",
+    "@pagopa/io-spid-commons": "^7.0.0",
+    "@pagopa/ts-commons": "^10.0.0",
     "apicache": "^1.4.0",
-    "applicationinsights": "^1.7.4",
+    "applicationinsights": "^1.8.10",
     "body-parser": "^1.18.3",
     "bwip-js": "^2.0.6",
     "date-fns": "^1.30.1",
     "dotenv": "^6.0.0",
     "express": "^4.16.2",
     "express-enforces-ssl": "1.1.0",
-    "fp-ts": "~1.17.0",
+    "fp-ts": "^2.11.1",
     "helmet": "3.23.3",
     "http-graceful-shutdown": "^2.3.2",
-    "io-ts": "1.8.5",
-    "io-ts-types": "^0.4.7",
+    "io-ts": "^2.2.16",
+    "io-ts-types": "^0.5.16",
     "jsonwebtoken": "^8.5.1",
+    "monocle-ts": "^2.3.13",
     "morgan": "^1.9.1",
+    "newtype-ts": "^0.3.5",
     "node-fetch": "^2.6.1",
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",
@@ -125,7 +135,7 @@
     "@types/passport-strategy": "^0.2.35",
     "@types/qr-image": "^3.2.2",
     "@types/range_check": "^1.4.0",
-    "@types/redis": "^2.8.13",
+    "@types/redis": "^2.8.32",
     "@types/request-ip": "^0.0.34",
     "@types/superagent": "^3.8.4",
     "@types/supertest": "^2.0.6",
@@ -155,6 +165,9 @@
     "typescript": "^4.3.5"
   },
   "jest": {
+    "setupFiles": [
+      "<rootDir>/src/__mocks__/setupEnvVars.ts"
+    ],
     "testEnvironment": "node",
     "moduleFileExtensions": [
       "ts",
@@ -180,7 +193,6 @@
     ]
   },
   "resolutions": {
-    "fp-ts": "1.17.4",
     "handlebars": "~4.5.3",
     "@types/serve-static": "1.13.10",
     "@types/node": "14.14.45"
