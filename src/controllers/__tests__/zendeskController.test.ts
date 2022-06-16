@@ -13,8 +13,12 @@ import {
   ResponseErrorTooManyRequests,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { mockedInitializedProfile, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
-import * as TE from "fp-ts/TaskEither"
+import {
+  mockedInitializedProfile,
+  mockSessionToken,
+  mockWalletToken
+} from "../../__mocks__/user_mock";
+import * as TE from "fp-ts/TaskEither";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -70,9 +74,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
       Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
     );
 
-    mockGetZendeskSupportToken.mockReturnValue(
-      TE.of(aZendeskSupportToken)
-    );
+    mockGetZendeskSupportToken.mockReturnValue(TE.of(aZendeskSupportToken));
 
     req.user = mockedRequestUser;
 
@@ -239,8 +241,9 @@ describe("ZendeskController#getZendeskSupportToken", () => {
 
   it("should return a IResponseErrorInternal if getProfile promise gets rejected", async () => {
     const req = mockReq();
+    const expectedError = new Error("Error");
 
-    mockGetProfile.mockReturnValue(Promise.reject());
+    mockGetProfile.mockReturnValue(Promise.reject(expectedError));
 
     req.user = mockedRequestUser;
 
@@ -249,13 +252,11 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     const tokenService = new TokenService();
     const controller = new ZendeskController(profileService, tokenService);
 
-    const response = await controller.getZendeskSupportToken(req);
-
-    expect(response.kind).toEqual("IResponseErrorInternal");
-    if (response.kind === "IResponseErrorInternal") {
-      expect(response.detail).toEqual(
-        "Internal server error: Cannot retrieve profile"
-      );
+    try {
+      await controller.getZendeskSupportToken(req);
+      fail("Missing error");
+    } catch (err) {
+      return expect(err).toBe(expectedError);
     }
   });
 
