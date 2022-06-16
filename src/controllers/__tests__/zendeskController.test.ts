@@ -241,9 +241,8 @@ describe("ZendeskController#getZendeskSupportToken", () => {
 
   it("should return a IResponseErrorInternal if getProfile promise gets rejected", async () => {
     const req = mockReq();
-    const expectedError = new Error("Error");
 
-    mockGetProfile.mockReturnValue(Promise.reject(expectedError));
+    mockGetProfile.mockReturnValue(Promise.reject());
 
     req.user = mockedRequestUser;
 
@@ -252,11 +251,12 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     const tokenService = new TokenService();
     const controller = new ZendeskController(profileService, tokenService);
 
-    try {
-      await controller.getZendeskSupportToken(req);
-      fail("Missing error");
-    } catch (err) {
-      return expect(err).toBe(expectedError);
+    const response = await controller.getZendeskSupportToken(req);
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
+      expect(response.detail).toEqual(
+        "Internal server error: Error retrieving user profile"
+      );
     }
   });
 
