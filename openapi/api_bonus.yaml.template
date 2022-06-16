@@ -113,11 +113,11 @@ paths:
 
 definitions:
   FiscalCode:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/FiscalCode"
   InstanceId:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/InstanceId"
   ProblemJson:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/ProblemJson"
   FamilyMember:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/FamilyMember"
   FamilyMembers:
@@ -143,13 +143,13 @@ definitions:
   BonusActivation:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivation"
   Timestamp:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/Timestamp"
   BonusActivationItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationItem"
   BonusActivationCollection:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/BonusActivationCollection"
   PaginationResponse:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/PaginationResponse"
   PaginatedBonusActivationsCollection:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/PaginatedBonusActivationsCollection"
 

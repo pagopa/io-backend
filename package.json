@@ -115,7 +115,6 @@
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^1.1.1",
-    "@pagopa/io-functions-commons": "^25.4.0",
     "@pagopa/openapi-codegen-ts": "^10.0.6",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
