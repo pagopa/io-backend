@@ -23,8 +23,8 @@ import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withUserFromRequest } from "../types/user";
 
-import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
-import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
+import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
@@ -84,7 +84,7 @@ export default class MessagesController {
         }),
         params =>
           this.messageServiceSelector
-            .select(user.fiscal_code)
+            .getNewMessageService()
             .getMessagesByUser(user, params)
       )
     );
@@ -109,7 +109,7 @@ export default class MessagesController {
         }),
         params =>
           this.messageServiceSelector
-            .select(user.fiscal_code)
+            .getNewMessageService()
             .getMessage(user, params)
       )
     );
@@ -127,7 +127,7 @@ export default class MessagesController {
             // getLegalMessage is not yet implemented in new fn-app-messages
             // just skip new implementation and take fn-app one
             this.messageServiceSelector
-              .getOldMessageService()
+              .getNewMessageService()
               .getLegalMessage(
                 user,
                 req.params.id,
@@ -152,7 +152,7 @@ export default class MessagesController {
             // getLegalMessageAttachment is not yet implemented in new fn-app-messages
             // just skip new implementation and take fn-app one
             this.messageServiceSelector
-              .getOldMessageService()
+              .getNewMessageService()
               .getLegalMessageAttachment(
                 user,
                 req.params.id,

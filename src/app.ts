@@ -432,13 +432,11 @@ export function newApp({
           authMiddlewares.local
         );
         // Create the messages service.
-        const MESSAGES_SERVICE = new MessagesService(
-          API_CLIENT,
-          new PecServerClientFactory(PECSERVERS)
-        );
+        const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
-          APP_MESSAGES_API_CLIENT
+          APP_MESSAGES_API_CLIENT,
+          new PecServerClientFactory(PECSERVERS)
         );
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.

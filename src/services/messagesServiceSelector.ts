@@ -1,6 +1,5 @@
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { MessagesFeatureFlagType } from "../config";
-import { toFiscalCodeHash } from "../types/notification";
 import MessagesService from "./messagesService";
 import NewMessagesService from "./newMessagesService";
 
@@ -25,33 +24,34 @@ export type MessageServiceSelector = ReturnType<
 export const getMessagesServiceSelector = (
   oldMessagesService: MessagesService,
   newMessageService: NewMessagesService,
-  ffType: MessagesFeatureFlagType,
-  betaTesterUsers: ReadonlyArray<NonEmptyString>,
-  canaryTestUserRegex: NonEmptyString
+  _ffType: MessagesFeatureFlagType,
+  _betaTesterUsers: ReadonlyArray<NonEmptyString>,
+  _canaryTestUserRegex: NonEmptyString
+  // eslint-disable-next-line arrow-body-style
 ) => {
-  const isCanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
+  // const isCanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
   return {
     getNewMessageService: () => newMessageService,
-    getOldMessageService: () => oldMessagesService,
-    select: (fiscalCode: FiscalCode) => {
-      switch (ffType) {
-        case "none":
-          return oldMessagesService;
-        case "beta":
-          return betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
-            ? newMessageService
-            : oldMessagesService;
-        case "canary":
-          return isCanaryTestUser(toFiscalCodeHash(fiscalCode)) ||
-            betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
-            ? newMessageService
-            : oldMessagesService;
-        case "prod":
-          return newMessageService;
-        default:
-          // This will never happen
-          return oldMessagesService;
-      }
-    }
+    getOldMessageService: () => oldMessagesService
+    // select: (fiscalCode: FiscalCode) => {
+    //   switch (ffType) {
+    //     case "none":
+    //       return oldMessagesService;
+    //     case "beta":
+    //       return betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
+    //         ? newMessageService
+    //         : oldMessagesService;
+    //     case "canary":
+    //       return isCanaryTestUser(toFiscalCodeHash(fiscalCode)) ||
+    //         betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
+    //         ? newMessageService
+    //         : oldMessagesService;
+    //     case "prod":
+    //       return newMessageService;
+    //     default:
+    //       // This will never happen
+    //       return oldMessagesService;
+    //   }
+    // }
   };
 };
