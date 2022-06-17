@@ -70,7 +70,8 @@ import {
   FF_MESSAGES_BETA_TESTER_LIST,
   FF_MESSAGES_CANARY_USERS_REGEX,
   FF_ENABLE_NOTIFY_ENDPOINT,
-  FF_ENABLE_SESSION_LOCK_ENDPOINT
+  FF_ENABLE_SESSION_LOCK_ENDPOINT,
+  THIRD_PARTY_CONFIG_LIST
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -142,6 +143,7 @@ import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import { getMessagesServiceSelector } from "./services/messagesServiceSelector";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
+import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -436,10 +438,17 @@ export function newApp({
           API_CLIENT,
           new PecServerClientFactory(PECSERVERS)
         );
+
+        const thirdPartyClientFactory = getThirdPartyServiceClientFactory(
+          THIRD_PARTY_CONFIG_LIST
+        );
+
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
-          APP_MESSAGES_API_CLIENT
+          APP_MESSAGES_API_CLIENT,
+          thirdPartyClientFactory
         );
+
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(
