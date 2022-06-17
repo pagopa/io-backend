@@ -150,7 +150,7 @@ export default class NewMessagesService {
         }
 
         return response.status === 404
-          ? ResponseErrorNotFound("Not found", MESSAGE_NOT_FOUND)
+          ? ResponseErrorNotFound("Not found", "Message not found")
           : response.status === 429
           ? ResponseErrorTooManyRequests()
           : unhandledResponseStatus(response.status);

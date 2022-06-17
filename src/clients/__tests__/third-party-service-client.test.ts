@@ -5,6 +5,7 @@ import { getThirdPartyServiceClientFactory } from "../third-party-service-client
 import { ThirdPartyConfig } from "../../utils/thirdPartyConfig";
 
 import { aFiscalCode } from "../../__mocks__/user_mock";
+import { pipe } from "fp-ts/lib/function";
 
 const aValidDetailAuthentication = {
   type: "API_KEY",
@@ -13,22 +14,26 @@ const aValidDetailAuthentication = {
 };
 
 const aServiceId = "aServiceId" as ServiceId;
-const aValidTestAndProdThirdPartyConfig = ThirdPartyConfig.decode({
-  serviceId: aServiceId,
-  schemaKind: "PN",
-  jsonSchema: "aJsonSchema",
-  prodEnvironment: {
-    baseUrl: "aBaseUrl",
-    detailsAuthentication: aValidDetailAuthentication
+const aValidTestAndProdThirdPartyConfig = pipe(
+  {
+    serviceId: aServiceId,
+    schemaKind: "PN",
+    jsonSchema: "aJsonSchema",
+    prodEnvironment: {
+      baseUrl: "aBaseUrl",
+      detailsAuthentication: aValidDetailAuthentication
+    },
+    testEnvironment: {
+      testUsers: [aFiscalCode],
+      baseUrl: "anotherBaseUrl",
+      detailsAuthentication: aValidDetailAuthentication
+    }
   },
-  testEnvironment: {
-    testUsers: [aFiscalCode],
-    baseUrl: "anotherBaseUrl",
-    detailsAuthentication: aValidDetailAuthentication
-  }
-}).getOrElseL(() => {
-  throw Error("Error decoding ThirdPartyConfig");
-});
+  ThirdPartyConfig.decode,
+  E.getOrElseW(() => {
+    throw Error("Error decoding ThirdPartyConfig");
+  })
+);
 
 const aConfigList = [aValidTestAndProdThirdPartyConfig];
 
