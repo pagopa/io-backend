@@ -66,9 +66,6 @@ import {
   FF_USER_AGE_LIMIT_ENABLED,
   PECSERVERS,
   APP_MESSAGES_API_CLIENT,
-  FF_MESSAGES_TYPE,
-  FF_MESSAGES_BETA_TESTER_LIST,
-  FF_MESSAGES_CANARY_USERS_REGEX,
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_LOCK_ENDPOINT
 } from "./config";
@@ -140,7 +137,6 @@ import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
 import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
-import { getMessagesServiceSelector } from "./services/messagesServiceSelector";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 
 const defaultModule = {
@@ -814,15 +810,8 @@ function registerAPIRoutes(
     sessionStorage
   );
 
-  const messageServiceSelector = getMessagesServiceSelector(
-    messagesService,
-    appMessagesService,
-    FF_MESSAGES_TYPE,
-    FF_MESSAGES_BETA_TESTER_LIST,
-    FF_MESSAGES_CANARY_USERS_REGEX
-  );
   const messagesController: MessagesController = new MessagesController(
-    messageServiceSelector,
+    appMessagesService,
     tokenService
   );
 

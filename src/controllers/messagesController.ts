@@ -21,6 +21,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import NewMessagesService from "src/services/newMessagesService";
 import { withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
@@ -36,7 +37,6 @@ import {
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
-import { MessageServiceSelector } from "../services/messagesServiceSelector";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -55,7 +55,7 @@ type IGetLegalMessageAttachmentResponse =
 export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
-    private readonly messageServiceSelector: MessageServiceSelector,
+    private readonly messageService: NewMessagesService,
     private readonly tokenService: TokenService
   ) {}
 
@@ -82,10 +82,7 @@ export default class MessagesController {
           minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
         }),
-        params =>
-          this.messageServiceSelector
-            .getNewMessageService()
-            .getMessagesByUser(user, params)
+        params => this.messageService.getMessagesByUser(user, params)
       )
     );
 
@@ -107,10 +104,7 @@ export default class MessagesController {
           id: req.params.id,
           public_message: req.query.public_message
         }),
-        params =>
-          this.messageServiceSelector
-            .getNewMessageService()
-            .getMessage(user, params)
+        params => this.messageService.getMessage(user, params)
       )
     );
 
@@ -126,13 +120,11 @@ export default class MessagesController {
           () =>
             // getLegalMessage is not yet implemented in new fn-app-messages
             // just skip new implementation and take fn-app one
-            this.messageServiceSelector
-              .getNewMessageService()
-              .getLegalMessage(
-                user,
-                req.params.id,
-                this.tokenService.getPecServerTokenHandler(user.fiscal_code)
-              ),
+            this.messageService.getLegalMessage(
+              user,
+              req.params.id,
+              this.tokenService.getPecServerTokenHandler(user.fiscal_code)
+            ),
           e => ResponseErrorInternal(E.toError(e).message)
         ),
         TE.toUnion
@@ -151,14 +143,12 @@ export default class MessagesController {
           () =>
             // getLegalMessageAttachment is not yet implemented in new fn-app-messages
             // just skip new implementation and take fn-app one
-            this.messageServiceSelector
-              .getNewMessageService()
-              .getLegalMessageAttachment(
-                user,
-                req.params.id,
-                this.tokenService.getPecServerTokenHandler(user.fiscal_code),
-                req.params.attachment_id
-              ),
+            this.messageService.getLegalMessageAttachment(
+              user,
+              req.params.id,
+              this.tokenService.getPecServerTokenHandler(user.fiscal_code),
+              req.params.attachment_id
+            ),
           e => ResponseErrorInternal(E.toError(e).message)
         ),
         TE.toUnion
@@ -182,9 +172,11 @@ export default class MessagesController {
           withValidatedOrValidationError(
             MessageStatusChange.decode(req.body),
             change =>
-              this.messageServiceSelector
-                .getNewMessageService()
-                .upsertMessageStatus(user.fiscal_code, messageId, change)
+              this.messageService.upsertMessageStatus(
+                user.fiscal_code,
+                messageId,
+                change
+              )
           )
       )
     );

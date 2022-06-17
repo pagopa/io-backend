@@ -2,7 +2,6 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import ApiClient from "../../services/apiClientFactory";
 import NewMessagesService from "../../services/newMessagesService";
 import MessagesController from "../messagesController";
 import { mockedUser } from "../../__mocks__/user_mock";
@@ -10,9 +9,6 @@ import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
-import { getMessagesServiceSelector } from "../../services/messagesServiceSelector";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import MessagesService from "../../services/messagesService";
 
 const anId: string = "string-id";
 
@@ -108,19 +104,8 @@ describe("MessagesController#getMessagesByUser", () => {
 
     req.user = mockedUser;
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -164,19 +149,8 @@ describe("MessagesController#getMessagesByUser", () => {
       minimumId: minimumId
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -222,18 +196,8 @@ describe("MessagesController#getMessagesByUser", () => {
       minimumId: minimumId
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -260,17 +224,8 @@ describe("MessagesController#getMessagesByUser", () => {
 
     req.user = "";
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -298,17 +253,8 @@ describe("MessagesController#getMessage", () => {
     req.params = { id: anId };
     req.query = { public_message: "true" };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -335,17 +281,8 @@ describe("MessagesController#getMessage", () => {
     req.user = mockedUser;
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -372,18 +309,8 @@ describe("MessagesController#getMessage", () => {
     req.user = "";
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -410,18 +337,8 @@ describe("MessagesController#getLegalMessage", () => {
     req.user = mockedUser;
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -450,18 +367,8 @@ describe("MessagesController#getLegalMessage", () => {
     req.user = "";
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -483,18 +390,8 @@ describe("MessagesController#getLegalMessage", () => {
     req.user = mockedUser;
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -528,18 +425,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       attachment_id: "anAttachemntId"
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -572,18 +459,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       attachment_id: "anAttachemntId"
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -605,18 +482,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     req.user = mockedUser;
     req.params = { id: anId, attachment_id: "anAttachemntId" };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -658,19 +525,8 @@ describe("MessagesController#upsertMessageStatus", () => {
     req.params = { id: anId };
     req.body = aMessageStatusChange;
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(apiClient);
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -709,18 +565,8 @@ describe("MessagesController#upsertMessageStatus", () => {
       req.params = pathParams;
       req.body = body;
 
-      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-      const messageService = new MessagesService(apiClient);
-      const messageServiceSelector = getMessagesServiceSelector(
-        messageService,
-        newMessageService,
-        "none",
-        [],
-        "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-      );
-
       const controller = new MessagesController(
-        messageServiceSelector,
+        newMessageService,
         {} as TokenService
       );
 
