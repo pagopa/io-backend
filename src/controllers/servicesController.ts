@@ -20,10 +20,10 @@ import { ServiceId } from "../../generated/io-api/ServiceId";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
 
-import MessagesService from "../services/messagesService";
+import FunctionsAppService from "../services/functionAppService";
 
 export default class ServicesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(private readonly messagesService: FunctionsAppService) {}
 
   /**
    * Returns the service identified by the provided id

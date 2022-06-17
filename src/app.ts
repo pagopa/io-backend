@@ -96,7 +96,7 @@ import UserDataProcessingController from "./controllers/userDataProcessingContro
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
-import MessagesService from "./services/messagesService";
+import FunctionsAppService from "./services/functionAppService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
@@ -428,7 +428,7 @@ export function newApp({
           authMiddlewares.local
         );
         // Create the messages service.
-        const MESSAGES_SERVICE = new MessagesService(API_CLIENT);
+        const MESSAGES_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT,
@@ -794,7 +794,7 @@ function registerAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
-  messagesService: MessagesService,
+  messagesService: FunctionsAppService,
   appMessagesService: NewMessagesService,
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,

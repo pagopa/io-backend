@@ -31,7 +31,7 @@ import {
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
-export default class MessagesService {
+export default class FunctionsAppService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
 
   /**

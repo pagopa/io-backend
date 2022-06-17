@@ -9,7 +9,7 @@ import { ServiceId } from "../../../generated/io-api/ServiceId";
 import { APIClient } from "../../clients/api";
 import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
-import MessageService from "../messagesService";
+import FunctionsAppService from "../functionAppService";
 import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
 import { ServicePreference } from "../../../generated/io-api/ServicePreference";
@@ -76,11 +76,11 @@ jest
 
 const api = new ApiClientFactory("", "");
 
-describe("MessageService#getService", () => {
+describe("FunctionsAppService#getService", () => {
   it("returns a service from the API", async () => {
     mockGetService.mockImplementation(() => t.success(validApiServiceResponse));
 
-    const service = new MessageService(api);
+    const service = new FunctionsAppService(api);
 
     const res = await service.getService(aValidServiceID);
 
@@ -96,7 +96,7 @@ describe("MessageService#getService", () => {
   it("returns an error if the API returns an error", async () => {
     mockGetService.mockImplementation(() => t.success(problemJson));
 
-    const service = new MessageService(api);
+    const service = new FunctionsAppService(api);
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
       service_id: aValidServiceID
@@ -109,7 +109,7 @@ describe("MessageService#getService", () => {
       t.success(invalidApiServiceResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new FunctionsAppService(api);
 
     const res = await service.getService(aValidServiceID);
     expect(mockGetService).toHaveBeenCalledWith({
@@ -123,7 +123,7 @@ describe("MessageService#getService", () => {
       t.success(tooManyReqApiMessagesResponse)
     );
 
-    const service = new MessageService(api);
+    const service = new FunctionsAppService(api);
 
     const res = await service.getService(aValidServiceID);
 
@@ -131,7 +131,7 @@ describe("MessageService#getService", () => {
   });
 });
 
-describe("MessageService#getServicePreferences", () => {
+describe("FunctionsAppService#getServicePreferences", () => {
   const aServicePreferences = {
     is_email_enabled: true,
     is_inbox_enabled: true,
@@ -151,7 +151,7 @@ describe("MessageService#getServicePreferences", () => {
       });
     });
 
-    const service = new MessageService(api);
+    const service = new FunctionsAppService(api);
     const res = await service.getServicePreferences(
       mockedUser.fiscal_code,
       aValidServiceID as ServiceId
@@ -193,7 +193,7 @@ describe("MessageService#getServicePreferences", () => {
         });
       });
 
-      const service = new MessageService(api);
+      const service = new FunctionsAppService(api);
       const res = await service.getServicePreferences(
         mockedUser.fiscal_code,
         aValidServiceID as ServiceId
@@ -212,7 +212,7 @@ describe("MessageService#getServicePreferences", () => {
   );
 });
 
-describe("MessageService#upsertServicePreferences", () => {
+describe("FunctionsAppService#upsertServicePreferences", () => {
   const aServicePreferences: ServicePreference = {
     is_email_enabled: true,
     is_inbox_enabled: true,
@@ -232,7 +232,7 @@ describe("MessageService#upsertServicePreferences", () => {
       });
     });
 
-    const service = new MessageService(api);
+    const service = new FunctionsAppService(api);
     const res = await service.upsertServicePreferences(
       mockedUser.fiscal_code,
       aValidServiceID as ServiceId,
@@ -276,7 +276,7 @@ describe("MessageService#upsertServicePreferences", () => {
         });
       });
 
-      const service = new MessageService(api);
+      const service = new FunctionsAppService(api);
       const res = await service.upsertServicePreferences(
         mockedUser.fiscal_code,
         aValidServiceID as ServiceId,
