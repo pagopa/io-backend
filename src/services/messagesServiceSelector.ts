@@ -27,31 +27,7 @@ export const getMessagesServiceSelector = (
   _ffType: MessagesFeatureFlagType,
   _betaTesterUsers: ReadonlyArray<NonEmptyString>,
   _canaryTestUserRegex: NonEmptyString
-  // eslint-disable-next-line arrow-body-style
-) => {
-  // const isCanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
-  return {
-    getNewMessageService: () => newMessageService,
-    getOldMessageService: () => oldMessagesService
-    // select: (fiscalCode: FiscalCode) => {
-    //   switch (ffType) {
-    //     case "none":
-    //       return oldMessagesService;
-    //     case "beta":
-    //       return betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
-    //         ? newMessageService
-    //         : oldMessagesService;
-    //     case "canary":
-    //       return isCanaryTestUser(toFiscalCodeHash(fiscalCode)) ||
-    //         betaTesterUsers.includes(toFiscalCodeHash(fiscalCode))
-    //         ? newMessageService
-    //         : oldMessagesService;
-    //     case "prod":
-    //       return newMessageService;
-    //     default:
-    //       // This will never happen
-    //       return oldMessagesService;
-    //   }
-    // }
-  };
-};
+) => ({
+  getNewMessageService: () => newMessageService,
+  getOldMessageService: () => oldMessagesService
+});
