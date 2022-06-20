@@ -16,7 +16,11 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
+import * as E from "fp-ts/Either";
+
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { APIClient } from "src/clients/api";
+import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -30,6 +34,38 @@ import {
 } from "../utils/responses";
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
+
+type RightOf<T extends E.Either<unknown, unknown>> = T extends E.Right<infer R>
+  ? R
+  : never;
+
+const handleGetServicePreferencesResponse = (
+  response: RightOf<
+    PromiseType<ReturnType<ReturnType<APIClient>["getServicePreferences"]>>
+  >
+) => {
+  switch (response.status) {
+    case 200:
+      return ResponseSuccessJson(response.value);
+    case 400:
+      return ResponseErrorValidation("Bad Request", "Payload has bad format");
+    case 401:
+      return ResponseErrorUnexpectedAuthProblem();
+    case 404:
+      return ResponseErrorNotFound("Not Found", "User or Service not found");
+    case 409:
+      return ResponseErrorConflict(
+        response.value.detail ??
+          "The Profile is not in the correct preference mode"
+      );
+    case 429:
+      return ResponseErrorTooManyRequests();
+    default:
+      return ResponseErrorStatusNotDefinedInSpec(response);
+  }
+};
+
+// ----------------------
 
 export default class FunctionsAppService {
   constructor(private readonly apiClient: IApiClientFactoryInterface) {}
@@ -88,33 +124,10 @@ export default class FunctionsAppService {
         service_id: serviceId
       });
 
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 400:
-            return ResponseErrorValidation(
-              "Bad Request",
-              "Payload has bad format"
-            );
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 404:
-            return ResponseErrorNotFound(
-              "Not Found",
-              "User or Service not found"
-            );
-          case 409:
-            return ResponseErrorConflict(
-              response.value.detail ??
-                "The Profile is not in the correct preference mode"
-            );
-          case 429:
-            return ResponseErrorTooManyRequests();
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
+      return withValidatedOrInternalError(
+        validated,
+        handleGetServicePreferencesResponse
+      );
     });
 
   /**
@@ -141,34 +154,10 @@ export default class FunctionsAppService {
         service_id: serviceId
       });
 
-      // eslint-disable-next-line sonarjs/no-identical-functions
-      return withValidatedOrInternalError(validated, response => {
-        switch (response.status) {
-          case 200:
-            return ResponseSuccessJson(response.value);
-          case 400:
-            return ResponseErrorValidation(
-              "Bad Request",
-              "Payload has bad format"
-            );
-          case 401:
-            return ResponseErrorUnexpectedAuthProblem();
-          case 404:
-            return ResponseErrorNotFound(
-              "Not Found",
-              "User or Service not found"
-            );
-          case 409:
-            return ResponseErrorConflict(
-              response.value.detail ??
-                "The Profile is not in the correct preference mode"
-            );
-          case 429:
-            return ResponseErrorTooManyRequests();
-          default:
-            return ResponseErrorStatusNotDefinedInSpec(response);
-        }
-      });
+      return withValidatedOrInternalError(
+        validated,
+        handleGetServicePreferencesResponse
+      );
     });
 
   public readonly getVisibleServices = (): Promise<
