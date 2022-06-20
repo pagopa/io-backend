@@ -1,7 +1,4 @@
-import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/lib/Option";
 import { Option } from "fp-ts/lib/Option";
 import { IVerifyOptions } from "passport-http-bearer";
 import * as E from "fp-ts/Either";
