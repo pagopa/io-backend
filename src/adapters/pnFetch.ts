@@ -50,7 +50,7 @@ const retrieveNotificationDetails = (
         r => Error(`Failed to fetch PN ReceivedNotification: ${r.status}`)
       )
     ),
-    // eslint-disable no-unnecessary-type-assertion
+    // eslint-disable @typescript-eslint/no-unnecessary-type-assertion
     TE.map(response => response.value as FullReceivedNotification)
   );
 
@@ -79,7 +79,7 @@ const retrieveAttachmentsMetadata = (
     ),
     TE.map(
       response =>
-        // eslint-disable no-unnecessary-type-assertion
+        // eslint-disable @typescript-eslint/no-unnecessary-type-assertion
         response.value as NotificationAttachmentDownloadMetadataResponse
     ),
     TE.chainEitherK(metadata =>
