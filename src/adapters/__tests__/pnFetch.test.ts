@@ -1,5 +1,6 @@
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
+import * as T from "fp-ts/Task";
 import {
     createClient
 } from "../../../generated/third-party-service/client";
@@ -16,6 +17,8 @@ import {
 } from "../../../generated/piattaforma-notifiche/client";
 import { NotificationAttachmentDownloadMetadataResponse } from "../../../generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { pipe } from "fp-ts/lib/function";
+import { Response as NodeResponse } from "node-fetch";
+const util = require('util');
 
 const aTimelineId = "a-timeline-id";
 const aDate = new Date();
@@ -32,6 +35,7 @@ const aPnNotificationObject = {
 };
 const aPnNotification: FullReceivedNotification = pipe(aPnNotificationObject, FullReceivedNotification.decode, E.getOrElseW(() => { throw new Error("a pn notfication is not valid") }));
 const aPnNotificationDocument: NotificationAttachmentDownloadMetadataResponse = { contentLength: 100, contentType: "application/pdf", filename: "a-file-name", sha256: "a-digest", url: aPnAttachmentUrl };
+const documentBody = new util.TextEncoder().encode("a-document-body");
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
@@ -51,7 +55,7 @@ dummyPnAPIClient.mockImplementation(() => ({
     getSentNotificationDocument:dummyGetSentNotificationDocument
 } as unknown as PnClient));
 
-describe("pathParamsFromUrl", () => {
+describe("getThirdPartyMessageDetails", () => {
     beforeEach(() => jest.clearAllMocks());
 
     it("GIVEN a working PN endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints", async () => {
@@ -108,4 +112,41 @@ describe("pathParamsFromUrl", () => {
         expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
         expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
     });
+});
+
+describe("getThirdPartyMessageDetails", () => {
+    beforeEach(() => jest.clearAllMocks());
+
+    it("GIVEN a working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint", async () => {
+        const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) => T.of((new NodeResponse(documentBody, {
+            status: 200,
+            statusText: "OK"
+          }) as unknown) as Response)());
+        const aFetch = pnFetch((dummyFetch as any) as typeof fetch, aPnUrl, aPnKey)
+        const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
+        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: new URL(aPnNotificationDocument.url??"").pathname });
+        expect(E.isRight(result)).toBeTruthy();
+        expect(dummyFetch).toHaveBeenCalledTimes(1);
+        expect(dummyFetch).toHaveBeenCalledWith(`${aPnUrl}${new URL(aPnNotificationDocument.url??"").pathname}`);
+    });
+
+    it("GIVEN a not working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
+        const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) => T.of((new NodeResponse(documentBody, {
+            status: 400,
+            statusText: "KO"
+          }) as unknown) as Response)());
+        const aFetch = pnFetch((dummyFetch as any) as typeof fetch, aPnUrl, aPnKey)
+        const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
+        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: new URL(aPnNotificationDocument.url??"").pathname });
+        expect(E.isRight(result)).toBeTruthy();
+        if (E.isRight(result)) {
+            expect(result.right).toEqual(
+                expect.objectContaining({
+                    status: 500
+                }))
+        }
+        expect(dummyFetch).toHaveBeenCalledTimes(1);
+        expect(dummyFetch).toHaveBeenCalledWith(`${aPnUrl}${new URL(aPnNotificationDocument.url??"").pathname}`);
+    });
+
 });

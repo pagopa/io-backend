@@ -22,8 +22,13 @@ const getPath = (input: RequestInfo): string =>
   pipe(typeof input === "string" ? input : input.url, i => new URL(i).pathname);
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
-  RegExp("^[/]+messages/([^/]+)$"),
+  RegExp("^[/]+messages[/]+([^/]+)$"),
   ([id]) => `/messages/${id}`
+);
+
+export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
+  RegExp("^[/]+messages[/]+([^/]+)/(.+)$"),
+  ([id, url]) => `/messages/${id}/${url}`
 );
 
 const WithFiscalCode = t.interface({ fiscal_code: NonEmptyString });
@@ -96,6 +101,30 @@ const retrieveAttachmentsMetadata = (
     )
   );
 
+const checkHeaders = (headers?: HeadersInit) =>
+  pipe(
+    headers,
+    O.fromNullable,
+    E.fromOption(() => Error("Missing fiscal_code in headers")),
+    E.chain(flow(WithFiscalCode.decode, E.mapLeft(errorsToError))),
+    TE.fromEither
+  );
+
+const errorResponse = (error: Error) =>
+  pipe(
+    {
+      detail: error.message,
+      status: 500,
+      title: "Error fetching PN data"
+    },
+    ProblemJson.encode,
+    problem =>
+      (new NodeResponse(JSON.stringify(error), {
+        status: problem.status,
+        statusText: problem.title
+      }) as unknown) as Response // cast required: the same cast is used in clients code generation
+  );
+
 export const redirectMessages = (
   origFetch: typeof fetch,
   pnUrl: string,
@@ -105,10 +134,7 @@ export const redirectMessages = (
 ) => () =>
   pipe(
     init?.headers,
-    O.fromNullable,
-    E.fromOption(() => Error("Missing fiscal_code in headers")),
-    E.chain(flow(WithFiscalCode.decode, E.mapLeft(errorsToError))),
-    TE.fromEither,
+    checkHeaders,
     TE.chain(headers =>
       pipe(
         url,
@@ -150,13 +176,6 @@ export const redirectMessages = (
         )
       )
     ),
-    TE.mapLeft(error =>
-      ProblemJson.encode({
-        detail: error.message,
-        status: 500,
-        title: "Error fetching PN data"
-      })
-    ),
     TE.map(
       body =>
         (new NodeResponse(JSON.stringify(body), {
@@ -164,13 +183,34 @@ export const redirectMessages = (
           statusText: "OK"
         }) as unknown) as Response // cast required: the same cast is used in clients code generation
     ),
-    TE.mapLeft(
-      error =>
-        (new NodeResponse(JSON.stringify(error), {
-          status: error.status,
-          statusText: error.title
-        }) as unknown) as Response // cast required: the same cast is used in clients code generation
+    TE.mapLeft(errorResponse),
+    TE.toUnion
+  )();
+
+export const redirectAttachment = (
+  origFetch: typeof fetch,
+  pnUrl: string,
+  url: string
+) => () =>
+  pipe(
+    url,
+    ThirdPartyAttachmentUrl.decode,
+    E.mapLeft(errorsToError),
+    TE.fromEither,
+    TE.chainEitherK(
+      ([_path, _id, attachmentRelativeUrl]: ReadonlyArray<string>) =>
+        E.tryCatch(() => new URL(attachmentRelativeUrl, pnUrl), E.toError)
     ),
+    TE.chain(attachmentAbsoluteUrl =>
+      TE.tryCatch(() => origFetch(attachmentAbsoluteUrl.toString()), E.toError)
+    ),
+    TE.chain(
+      TE.fromPredicate(
+        r => r.status === 200,
+        r => Error(`Failed to fetch PN download attachment: ${r.status}`)
+      )
+    ),
+    TE.mapLeft(errorResponse),
     TE.toUnion
   )();
 
@@ -182,6 +222,8 @@ export const pnFetch = (
   pipe(input, getPath, url =>
     E.isRight(ThirdPartyMessagesUrl.decode(url))
       ? redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
+      : E.isRight(ThirdPartyAttachmentUrl.decode(url))
+      ? redirectAttachment(origFetch, pnUrl, url)
       : () => {
           throw Error(
             `Can not find a Piattaforma Notifiche implementation for ${url}`
