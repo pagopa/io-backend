@@ -101,7 +101,7 @@ export const ognlTypeFor = <T>(
   prefix: string
 ): t.Type<T, T, unknown> =>
   new t.Type<T, T, unknown>(
-    "KafkaProducerCompactConfigFromEnv",
+    "OGNL",
     (u: unknown): u is T => type.is(u),
     (input, context) =>
       pipe(
