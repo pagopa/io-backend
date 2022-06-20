@@ -2,19 +2,13 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
-import ApiClient from "../../services/apiClientFactory";
-import MessagesService from "../../services/messagesService";
 import NewMessagesService from "../../services/newMessagesService";
 import MessagesController from "../messagesController";
 import { mockedUser } from "../../__mocks__/user_mock";
-import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
-import { MessageStatusChange } from "../../../generated/io-api/MessageStatusChange";
-import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-api/MessageStatusReadingChange";
-import { toFiscalCodeHash } from "../../types/notification";
-import { getMessagesServiceSelector } from "../../services/messagesServiceSelector";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
+import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
 
 const anId: string = "string-id";
 
@@ -80,30 +74,16 @@ const internalErrorResponse = {
 const mockFnAppGetMessage = jest.fn();
 const mockFnAppGetMessagesByUser = jest.fn();
 const mockFnAppUpsertMessageStatus = jest.fn();
+const mockGetLegalMessage = jest.fn();
+const mockGetLegalMessageAttachment = jest.fn();
 
 const newMessageService = ({
   getMessage: mockFnAppGetMessage,
   getMessagesByUser: mockFnAppGetMessagesByUser,
-  upsertMessageStatus: mockFnAppUpsertMessageStatus
+  upsertMessageStatus: mockFnAppUpsertMessageStatus,
+  getLegalMessage: mockGetLegalMessage,
+  getLegalMessageAttachment: mockGetLegalMessageAttachment
 } as any) as NewMessagesService;
-
-const mockGetMessage = jest.fn();
-const mockGetMessagesByUser = jest.fn();
-const mockGetLegalMessage = jest.fn();
-const mockGetLegalMessageAttachment = jest.fn();
-const mockUpsertMessageStatus = jest.fn();
-
-jest.mock("../../services/messagesService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      getMessage: mockGetMessage,
-      getMessagesByUser: mockGetMessagesByUser,
-      getLegalMessage: mockGetLegalMessage,
-      getLegalMessageAttachment: mockGetLegalMessageAttachment,
-      upsertMessageStatus: mockUpsertMessageStatus
-    }))
-  };
-});
 
 const mockGetPecServerTokenHandler = jest.fn();
 const tokenServiceMock = {
@@ -118,34 +98,20 @@ describe("MessagesController#getMessagesByUser", () => {
   it("calls the getMessagesByUser on the messagesController with user only", async () => {
     const req = mockReq();
 
-    mockGetMessagesByUser.mockReturnValue(
+    mockFnAppGetMessagesByUser.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
     req.user = mockedUser;
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
 
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+    expect(mockFnAppGetMessagesByUser).toHaveBeenCalledWith(
       mockedUser,
       mockedDefaultParameters
     );
@@ -159,7 +125,7 @@ describe("MessagesController#getMessagesByUser", () => {
   it("calls the getMessagesByUser on the messagesController with user and partial pagination parameters", async () => {
     const req = mockReq();
 
-    mockGetMessagesByUser.mockReturnValue(
+    mockFnAppGetMessagesByUser.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
@@ -183,28 +149,14 @@ describe("MessagesController#getMessagesByUser", () => {
       minimumId: minimumId
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
 
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+    expect(mockFnAppGetMessagesByUser).toHaveBeenCalledWith(
       mockedUser,
       mockedParameters
     );
@@ -218,7 +170,7 @@ describe("MessagesController#getMessagesByUser", () => {
   it("calls the getMessagesByUser on the messagesController with user and all pagination parameters", async () => {
     const req = mockReq();
 
-    mockGetMessagesByUser.mockReturnValue(
+    mockFnAppGetMessagesByUser.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
@@ -244,27 +196,14 @@ describe("MessagesController#getMessagesByUser", () => {
       minimumId: minimumId
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
 
-    expect(mockGetMessagesByUser).toHaveBeenCalledWith(
+    expect(mockFnAppGetMessagesByUser).toHaveBeenCalledWith(
       mockedUser,
       mockedParameters
     );
@@ -279,33 +218,21 @@ describe("MessagesController#getMessagesByUser", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetMessagesByUser.mockReturnValue(
+    mockFnAppGetMessagesByUser.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessagesResponse))
     );
 
     req.user = "";
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
     response.apply(res);
 
-    expect(mockGetMessagesByUser).not.toBeCalled();
+    expect(mockFnAppGetMessagesByUser).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
@@ -318,7 +245,7 @@ describe("MessagesController#getMessage", () => {
   it("calls the getMessage on the messagesController with valid values", async () => {
     const req = mockReq();
 
-    mockGetMessage.mockReturnValue(
+    mockFnAppGetMessage.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
     );
 
@@ -326,26 +253,14 @@ describe("MessagesController#getMessage", () => {
     req.params = { id: anId };
     req.query = { public_message: "true" };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessage(req);
 
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
       id: anId,
       public_message: true
     });
@@ -359,33 +274,21 @@ describe("MessagesController#getMessage", () => {
   it("calls the getMessage on the messagesController with empty opional parameters", async () => {
     const req = mockReq();
 
-    mockGetMessage.mockReturnValue(
+    mockFnAppGetMessage.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
     );
 
     req.user = mockedUser;
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessage(req);
 
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
+    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
       id: anId
     });
     expect(response).toEqual({
@@ -399,35 +302,22 @@ describe("MessagesController#getMessage", () => {
     const req = mockReq();
     const res = mockRes();
 
-    mockGetMessage.mockReturnValue(
+    mockFnAppGetMessage.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
     );
 
     req.user = "";
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
     const response = await controller.getMessage(req);
     response.apply(res);
 
-    expect(mockGetMessage).not.toBeCalled();
+    expect(mockFnAppGetMessage).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });
@@ -447,21 +337,8 @@ describe("MessagesController#getLegalMessage", () => {
     req.user = mockedUser;
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -490,21 +367,8 @@ describe("MessagesController#getLegalMessage", () => {
     req.user = "";
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -526,21 +390,8 @@ describe("MessagesController#getLegalMessage", () => {
     req.user = mockedUser;
     req.params = { id: anId };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -574,21 +425,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       attachment_id: "anAttachemntId"
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -621,21 +459,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       attachment_id: "anAttachemntId"
     };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -657,21 +482,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     req.user = mockedUser;
     req.params = { id: anId, attachment_id: "anAttachemntId" };
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       tokenServiceMock as any
     );
 
@@ -713,22 +525,8 @@ describe("MessagesController#upsertMessageStatus", () => {
     req.params = { id: anId };
     req.body = aMessageStatusChange;
 
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "none",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
     const controller = new MessagesController(
-      messageServiceSelector,
+      newMessageService,
       {} as TokenService
     );
 
@@ -736,7 +534,6 @@ describe("MessagesController#upsertMessageStatus", () => {
 
     console.log(response);
 
-    expect(mockUpsertMessageStatus).not.toHaveBeenCalled();
     expect(mockFnAppUpsertMessageStatus).toHaveBeenCalledWith(
       mockedUser.fiscal_code,
       anId,
@@ -768,21 +565,8 @@ describe("MessagesController#upsertMessageStatus", () => {
       req.params = pathParams;
       req.body = body;
 
-      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-      const messageService = new MessagesService(
-        apiClient,
-        {} as IPecServerClientFactoryInterface
-      );
-      const messageServiceSelector = getMessagesServiceSelector(
-        messageService,
-        newMessageService,
-        "none",
-        [],
-        "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-      );
-
       const controller = new MessagesController(
-        messageServiceSelector,
+        newMessageService,
         {} as TokenService
       );
 
@@ -793,237 +577,4 @@ describe("MessagesController#upsertMessageStatus", () => {
       expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
     }
   );
-});
-
-describe("MessagesController#Feature Flags", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-  const messageService = new MessagesService(
-    apiClient,
-    {} as IPecServerClientFactoryInterface
-  );
-
-  it("it should switch to OLD function when FF is beta and user is NOT a beta tester", async () => {
-    const req = mockReq();
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    mockGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "beta",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
-    const controller = new MessagesController(
-      messageServiceSelector,
-      {} as TokenService
-    );
-
-    const response = await controller.getMessage(req);
-
-    expect(mockFnAppGetMessage).not.toHaveBeenCalled();
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
-      public_message: undefined
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
-  });
-
-  it("it should switch to NEW function when FF is beta and user is a beta tester", async () => {
-    const req = mockReq();
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    mockFnAppGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "beta",
-      [toFiscalCodeHash(mockedUser.fiscal_code)],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
-    const controller = new MessagesController(
-      messageServiceSelector,
-      {} as TokenService
-    );
-
-    const response = await controller.getMessage(req);
-
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
-      public_message: undefined
-    });
-    expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
-  });
-
-  it("it should switch to OLD function when FF is canary and user is NOT a canary user neither a beta tester", async () => {
-    const req = mockReq();
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    mockGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    // Hashed Fiscal Code is: d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52
-    // So we use a regex expecting "2" as last char
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "canary",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
-    const controller = new MessagesController(
-      messageServiceSelector,
-      {} as TokenService
-    );
-
-    const response = await controller.getMessage(req);
-
-    expect(mockFnAppGetMessage).not.toHaveBeenCalled();
-    expect(mockGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
-      public_message: undefined
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
-  });
-
-  it("it should switch to NEW function when FF is canary and user is NOT a canary user, but is a beta tester", async () => {
-    const req = mockReq();
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    mockFnAppGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    // Hashed Fiscal Code is: d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52
-    // So we use a regex expecting "2" as last char
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "canary",
-      [toFiscalCodeHash(mockedUser.fiscal_code)],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-
-    const controller = new MessagesController(
-      messageServiceSelector,
-      {} as TokenService
-    );
-
-    const response = await controller.getMessage(req);
-
-    expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
-      public_message: undefined
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
-  });
-
-  it("it should switch to NEW function when FF is canary and user is a canary tester", async () => {
-    const req = mockReq();
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    mockFnAppGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    // Hashed Fiscal Code is: d3f70202fd4d5bd995d6fe996337c1b77b0a4a631203048dafba121d2715ea52
-    // So we use a regex expecting "2" as last char
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "canary",
-      [toFiscalCodeHash(mockedUser.fiscal_code)],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}2)$" as NonEmptyString
-    );
-
-    const controller = new MessagesController(
-      messageServiceSelector,
-      {} as TokenService
-    );
-
-    const response = await controller.getMessage(req);
-
-    expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
-      public_message: undefined
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
-  });
-
-  it("it should switch to new function when FF is prod", async () => {
-    const req = mockReq();
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    mockFnAppGetMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    const messageServiceSelector = getMessagesServiceSelector(
-      messageService,
-      newMessageService,
-      "prod",
-      [],
-      "^([(0-9)|(a-f)|(A-F)]{63}0)|([(0-9)|(a-f)|(A-F)]{62}[(0-7)]{1}1)$" as NonEmptyString
-    );
-    const controller = new MessagesController(
-      messageServiceSelector,
-      {} as TokenService
-    );
-
-    const response = await controller.getMessage(req);
-
-    expect(mockGetMessage).not.toHaveBeenCalled();
-    expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
-      public_message: undefined
-    });
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
-    });
-  });
 });

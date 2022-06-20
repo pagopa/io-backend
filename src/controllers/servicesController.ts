@@ -20,10 +20,10 @@ import { ServiceId } from "../../generated/io-api/ServiceId";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
 
-import MessagesService from "../services/messagesService";
+import FunctionsAppService from "../services/functionAppService";
 
 export default class ServicesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(private readonly fnAppService: FunctionsAppService) {}
 
   /**
    * Returns the service identified by the provided id
@@ -37,7 +37,7 @@ export default class ServicesController {
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePublic>
-  > => this.messagesService.getService(req.params.id);
+  > => this.fnAppService.getService(req.params.id);
 
   /**
    * Returns the service preferences for the provided service id
@@ -56,10 +56,7 @@ export default class ServicesController {
       withValidatedOrValidationError(
         ServiceId.decode(req.params.id),
         serviceId =>
-          this.messagesService.getServicePreferences(
-            user.fiscal_code,
-            serviceId
-          )
+          this.fnAppService.getServicePreferences(user.fiscal_code, serviceId)
       )
     );
 
@@ -83,7 +80,7 @@ export default class ServicesController {
           withValidatedOrValidationError(
             ServicePreference.decode(req.body),
             pref =>
-              this.messagesService.upsertServicePreferences(
+              this.fnAppService.upsertServicePreferences(
                 user.fiscal_code,
                 serviceId,
                 pref
@@ -104,5 +101,5 @@ export default class ServicesController {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedServiceTupleCollection>
-  > => this.messagesService.getVisibleServices();
+  > => this.fnAppService.getVisibleServices();
 }

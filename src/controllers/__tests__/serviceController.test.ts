@@ -15,10 +15,9 @@ import { ServicePublic } from "../../../generated/backend/ServicePublic";
 import { NotificationChannelEnum } from "../../../generated/io-api/NotificationChannel";
 import mockReq from "../../__mocks__/request";
 import ApiClient from "../../services/apiClientFactory";
-import MessagesService from "../../services/messagesService";
+import FunctionsAppService from "../../services/functionAppService";
 import { mockedUser } from "../../__mocks__/user_mock";
 import ServicesController from "../servicesController";
-import { IPecServerClientFactoryInterface } from "../../services/IPecServerClientFactory";
 
 const aServiceId: string = "service-id";
 
@@ -33,7 +32,7 @@ const proxyService: ServicePublic = {
 };
 
 const mockGetService = jest.fn();
-jest.mock("../../services/messagesService", () => {
+jest.mock("../../services/functionAppService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getService: mockGetService
@@ -57,10 +56,7 @@ describe("serviceController#getService", () => {
     req.params = { id: aServiceId };
 
     const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const messageService = new MessagesService(
-      apiClient,
-      {} as IPecServerClientFactoryInterface
-    );
+    const messageService = new FunctionsAppService(apiClient);
     const controller = new ServicesController(messageService);
 
     const response = await controller.getService(req);
