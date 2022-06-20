@@ -428,7 +428,7 @@ export function newApp({
           authMiddlewares.local
         );
         // Create the messages service.
-        const MESSAGES_SERVICE = new FunctionsAppService(API_CLIENT);
+        const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT,
@@ -446,7 +446,7 @@ export function newApp({
           allowNotifyIPSourceRange,
           authMiddlewares.urlToken,
           PROFILE_SERVICE,
-          MESSAGES_SERVICE,
+          FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
           NOTIFICATION_SERVICE,
           SESSION_STORAGE,
@@ -794,7 +794,7 @@ function registerAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
-  messagesService: FunctionsAppService,
+  fnAppService: FunctionsAppService,
   appMessagesService: NewMessagesService,
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,
@@ -816,7 +816,7 @@ function registerAPIRoutes(
   );
 
   const servicesController: ServicesController = new ServicesController(
-    messagesService
+    fnAppService
   );
 
   const notificationController: NotificationController = new NotificationController(
