@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "7.43.2",
+  "version": "8.0.0",
   "min_app_version": {
     "ios": "1.38.0",
     "android": "1.38.0"
@@ -82,7 +82,7 @@
     "@pagopa/io-spid-commons": "^7.0.0",
     "@pagopa/ts-commons": "^10.4.0",
     "apicache": "^1.4.0",
-    "applicationinsights": "^1.7.4",
+    "applicationinsights": "^1.8.10",
     "body-parser": "^1.18.3",
     "bwip-js": "^2.0.6",
     "date-fns": "^1.30.1",
@@ -95,7 +95,9 @@
     "io-ts": "^2.2.16",
     "io-ts-types": "^0.5.16",
     "jsonwebtoken": "^8.5.1",
+    "monocle-ts": "^2.3.13",
     "morgan": "^1.9.1",
+    "newtype-ts": "^0.3.5",
     "node-fetch": "^2.6.1",
     "passport": "^0.4.0",
     "passport-auth-token": "^1.0.1",

@@ -12,7 +12,6 @@ import {
   PatternString
 } from "@pagopa/ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
-import { Option } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import { log } from "./logger";
 import { base64EncodeObject } from "./messages";
@@ -22,7 +21,9 @@ const SAML_NAMESPACE = {
   PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol"
 };
 
-export const getFiscalNumberFromPayload = (doc: Document): Option<FiscalCode> =>
+export const getFiscalNumberFromPayload = (
+  doc: Document
+): O.Option<FiscalCode> =>
   pipe(
     O.fromNullable(
       doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
@@ -38,7 +39,7 @@ export const getFiscalNumberFromPayload = (doc: Document): Option<FiscalCode> =>
 
 const getRequestIDFromPayload = (tagName: string, attrName: string) => (
   doc: Document
-): Option<string> =>
+): O.Option<string> =>
   pipe(
     O.fromNullable(
       doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)

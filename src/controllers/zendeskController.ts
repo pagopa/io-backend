@@ -63,16 +63,15 @@ export default class ZendeskController {
     | IResponseErrorValidation
     | IResponseSuccessJson<ZendeskToken>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, user =>
       pipe(
         TE.tryCatch(
           () => this.profileService.getProfile(user),
-          () => ResponseErrorInternal("Cannot retrieve profile")
+          () => ResponseErrorInternal("Error retrieving user profile")
         ),
         TE.chain(r =>
-          r.kind === "IResponseSuccessJson" ? TE.of(r) : TE.left(r)
+          r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
         ),
-        TE.map(r => r.value),
         TE.chainW(profile =>
           pipe(
             profile,

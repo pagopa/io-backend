@@ -2,9 +2,6 @@
  * Common response message type.
  */
 
-import { identity, pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/lib/Either";
-
 import * as t from "io-ts";
 
 export const SuccessResponse = t.interface({
@@ -44,45 +41,3 @@ export const CommaSeparatedListOf = (decoder: t.Mixed) =>
       ),
     String
   );
-
-/**
- * Parses a string into a deserialized json
- */
-export type JSONFromString = t.TypeOf<typeof jsonFromString>;
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const jsonFromString = new t.Type<object, string>(
-  "JSONFromString",
-  t.UnknownRecord.is,
-  (m, c) =>
-    pipe(
-      t.string.validate(m, c),
-      E.chain(s =>
-        pipe(
-          E.tryCatch(
-            () => t.success(JSON.parse(s)),
-            _ => t.failure(s, c, "Error parsing the string into a valid JSON")
-          ),
-          E.fold(identity, identity)
-        )
-      )
-    ),
-  String
-);
-
-export const fallback = <A, O, I>(type: t.Type<A, O, I>) => (
-  a: A,
-  name = `fallback(${type.name})`
-): t.Type<A, O, I> => {
-  const isFallbackValid = type.is(a);
-  return new t.Type<A, O, I>(
-    name,
-    type.is,
-    (i, context) => {
-      const validation = type.validate(i, context);
-      return E.isLeft(validation) && isFallbackValid
-        ? t.success(a)
-        : validation;
-    },
-    type.encode
-  );
-};

@@ -198,7 +198,6 @@ export default class MessagesService {
                   StrictUTCISODateFromString.decode(
                     legalMessageMetadata.cert_data.data.timestamp
                   ),
-                  x => x,
                   E.map(timestamp => ({
                     ...legalMessageMetadata,
                     cert_data: {

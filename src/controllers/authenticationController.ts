@@ -408,7 +408,7 @@ export default class AuthenticationController {
             _,
             exactUserIdentityDecode,
             E.mapLeft(_1 => ResponseErrorInternal("Exact decode failed.")),
-            E.map(_1 => ResponseSuccessJson<UserIdentity>(_1)),
+            E.map(ResponseSuccessJson),
             E.toUnion
           )
         ),

@@ -1,7 +1,6 @@
 import { DOMParser } from "xmldom";
 
 import * as O from "fp-ts/lib/Option";
-import { Option } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
 type SpidError = string;
@@ -14,7 +13,7 @@ type SpidError = string;
  */
 export default function getErrorCodeFromResponse(
   xml: string
-): Option<SpidError> {
+): O.Option<SpidError> {
   return pipe(
     O.tryCatch(() => new DOMParser().parseFromString(xml)),
     O.chain(xmlResponse =>

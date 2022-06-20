@@ -6,7 +6,6 @@ import { isArray } from "util";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-// import { collect, StrMap } from "fp-ts/lib/StrMap";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
@@ -16,7 +15,6 @@ import { TaskEither } from "fp-ts/lib/TaskEither";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
-import { Ord } from "fp-ts/lib/string";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
@@ -592,7 +590,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
             pipe(
               TE.fromEither(
                 pipe(
-                  SessionToken.decode(sessionToken),
+                  sessionToken,
+                  SessionToken.decode,
                   E.mapLeft(_ => new Error("Error decoding token"))
                 )
               ),
@@ -736,7 +735,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
             return resolve(E.left(new Error("Notify email value not found")));
           }
           const errorOrNoticeEmail = pipe(
-            EmailString.decode(value),
+            value,
+            EmailString.decode,
             E.mapLeft(
               validationErrors =>
                 new Error(errorsToReadableMessages(validationErrors).join("/"))
@@ -965,7 +965,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
                   ) &&
                   !(p.prefix === fimsTokenPrefix && p.value === user.fims_token)
               ),
-              R.collect(Ord)((_1, { prefix, value }) => `${prefix}${value}`)
+              R.collect((_1, { prefix, value }) => `${prefix}${value}`)
             )
           ).reduce((prev, tokens) => [...prev, ...tokens], [])
         ),
@@ -1023,9 +1023,9 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private parseUser(value: string): Either<Error, User> {
     return pipe(
       E.parseJSON(value, E.toError),
-      E.chain(data =>
-        pipe(
-          User.decode(data),
+      E.chain(
+        flow(
+          User.decode,
           E.mapLeft(err => new Error(errorsToReadableMessages(err).join("/")))
         )
       )

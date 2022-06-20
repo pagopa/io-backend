@@ -64,13 +64,13 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   ProblemJson:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/ProblemJson"
   SuccessResponse:
     $ref: "../api_backend.yaml#/definitions/SuccessResponse"
   EmailAddress:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/EmailAddress"
   FiscalCode:
-    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/FiscalCode"
   SpidUserIdentity:
     type: object
     title: SPID User Identity
