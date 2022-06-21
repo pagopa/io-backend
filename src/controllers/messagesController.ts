@@ -199,9 +199,7 @@ export default class MessagesController {
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
         messageId =>
-          this.messageServiceSelector
-            .getNewMessageService()
-            .getThirdPartyMessage(user.fiscal_code, messageId)
+          this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
       )
     );
 
