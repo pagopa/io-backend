@@ -10,7 +10,8 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { QueueClient } from "@azure/storage-queue";
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
@@ -57,8 +58,13 @@ export default class NotificationService {
       payload: {
         message: notificationSubject,
         message_id: notification.message.id,
-        title: fromNullable(notificationTitle).getOrElse(
-          `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
+        title: pipe(
+          notificationTitle,
+          O.fromNullable,
+          O.getOrElse(
+            () =>
+              `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
+          )
         )
       }
     };

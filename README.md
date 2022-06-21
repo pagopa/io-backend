@@ -203,10 +203,8 @@ Those are all Environment variables needed by the application:
 | FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
 | APP_MESSAGES_API_KEY                   | The key used to authenticate to the io-functions-app-messages API                 | string |
 | APP_MESSAGES_API_URL                   | The io-functions-app-messages URL                                                 | string |
-| FF_MESSAGES_TYPE                       | (Optional, default `none`) FF type for new messages implementations               | string |
-| FF_MESSAGES_BETA_TESTER_LIST           | (Optional, default empty) A list of hashed fiscal codes of beta testers           | string |
-| FF_MESSAGES_CANARY_USERS_REGEX         | (Optional, default `XYZ`) A regex for choosing canary users                       | string |
 | THIRD_PARTY_CONFIG_LIST                | (Optional, default empty) A list of ThirdParty Configuration                      | stringified JSON |
+| IS_APPBACKENDLI                        | (Optional, default false) Defines if code is deployed on appbackendli             | boolean |
 
 
 Notes:

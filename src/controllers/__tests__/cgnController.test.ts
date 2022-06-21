@@ -93,12 +93,10 @@ describe("CgnController#getCgnStatus", () => {
 
   it("should make the correct service method call", async () => {
     const req = { ...mockReq(), user: mockedUser };
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.getCgnStatus(req);
 
     expect(mockGetCgnStatus).toHaveBeenCalledWith(mockedUser);
@@ -110,7 +108,6 @@ describe("CgnController#getCgnStatus", () => {
     mockGetCgnStatus.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(aPendingCgn))
     );
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -150,7 +147,6 @@ describe("CgnController#getCgnStatus", () => {
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
       "GRBGPP87L04L741Z" as FiscalCode
     ]);
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -178,7 +174,6 @@ describe("CgnController#getEycaStatus", () => {
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.getEycaStatus(req);
 
     expect(mockGetEycaStatus).toHaveBeenCalledWith(mockedUser);
@@ -231,7 +226,6 @@ describe("CgnController#getEycaStatus", () => {
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
       "GRBGPP87L04L741Z" as FiscalCode
     ]);
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -259,7 +253,6 @@ describe("CgnController#startCgnActivation", () => {
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.startCgnActivation(req);
 
     expect(mockStartCgnActivation).toHaveBeenCalledWith(mockedUser);
@@ -311,7 +304,6 @@ describe("CgnController#startCgnActivation", () => {
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
       "GRBGPP87L04L741Z" as FiscalCode
     ]);
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -339,7 +331,6 @@ describe("CgnController#getCgnActivation", () => {
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.getCgnActivation(req);
 
     expect(mockGetCgnActivation).toHaveBeenCalledWith(mockedUser);
@@ -390,7 +381,6 @@ describe("CgnController#getCgnActivation", () => {
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
       "GRBGPP87L04L741Z" as FiscalCode
     ]);
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -418,7 +408,6 @@ describe("CgnController#getEycaActivation", () => {
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.getEycaActivation(req);
 
     expect(mockGetEycaActivation).toHaveBeenCalledWith(mockedUser);
@@ -470,7 +459,6 @@ describe("CgnController#getEycaActivation", () => {
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
       "GRBGPP87L04L741Z" as FiscalCode
     ]);
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -498,7 +486,6 @@ describe("CgnController#startEycaActivation", () => {
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.startEycaActivation(req);
 
     expect(mockStartEycaActivation).toHaveBeenCalledWith(mockedUser);
@@ -549,7 +536,6 @@ describe("CgnController#startEycaActivation", () => {
     allowedTestFiscalCodesMock.mockImplementationOnce(() => [
       "GRBGPP87L04L741Z" as FiscalCode
     ]);
-
     const controller = new CgnController(
       cgnService,
       allowedTestFiscalCodesMock()
@@ -657,7 +643,6 @@ describe("CgnController#generateOtp", () => {
       cgnService,
       allowedTestFiscalCodesMock()
     );
-
     await controller.generateOtp(req);
 
     expect(mockGenerateOtp).toHaveBeenCalledWith(mockedUser);

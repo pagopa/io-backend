@@ -3,11 +3,12 @@ import { PaymentFaultEnum } from "generated/pagopa-proxy/PaymentFault";
 import { PaymentFaultV2Enum } from "generated/pagopa-proxy/PaymentFaultV2";
 import { PaymentProblemJson } from "generated/pagopa-proxy/PaymentProblemJson";
 import * as t from "io-ts";
+import * as E from "fp-ts/lib/Either";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IWithinRangeIntegerTag,
   WithinRangeInteger
 } from "@pagopa/ts-commons/lib/numbers";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   IResponse,
@@ -18,7 +19,8 @@ import {
   ResponseErrorNotFound,
   ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { errorsToError } from "./errorsFormatter";
 
 /**
@@ -73,11 +75,11 @@ export const withValidatedOrInternalError = <T, U>(
   validated: t.Validation<T>,
   f: (p: T) => U
 ): U | IResponseErrorInternal =>
-  validated.isLeft()
+  E.isLeft(validated)
     ? ResponseErrorInternal(
-        errorsToReadableMessages(validated.value).join(" / ")
+        errorsToReadableMessages(validated.left).join(" / ")
       )
-    : f(validated.value);
+    : f(validated.right);
 
 /**
  * Calls the provided function with the valid response, or else returns an
@@ -87,12 +89,12 @@ export const withValidatedOrValidationError = <T, U>(
   response: t.Validation<T>,
   f: (p: T) => U
 ): U | IResponseErrorValidation =>
-  response.isLeft()
+  E.isLeft(response)
     ? ResponseErrorValidation(
         "Bad request",
-        errorsToReadableMessages(response.value).join(" / ")
+        errorsToReadableMessages(response.left).join(" / ")
       )
-    : f(response.value);
+    : f(response.right);
 
 /**
  * Interface for unauthorized error response.
@@ -184,9 +186,11 @@ export const ResponseSuccessOctet = (o: Buffer): IResponseSuccessOctet => ({
 export const wrapValidationWithInternalError: <A>(
   fa: t.Validation<A>
 ) => TE.TaskEither<IResponseErrorInternal, A> = fa =>
-  TE.fromEither(fa)
-    .mapLeft(errorsToError)
-    .mapLeft(e => ResponseErrorInternal(e.message));
+  pipe(
+    TE.fromEither(fa),
+    TE.mapLeft(errorsToError),
+    TE.mapLeft(e => ResponseErrorInternal(e.message))
+  );
 
 /**
  * Interface for NotImplemented error response.

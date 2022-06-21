@@ -54,7 +54,7 @@ describe("ognl", () => {
     const decoded = ognlTypeFor(dummyType, "PREFIX").decode(dummyEnv);
     expect(E.isRight(decoded)).toBeTruthy();
     if (E.isRight(decoded)) {
-      expect(decoded.getOrElse("")).toStrictEqual(dummyTypeDecoded);
+      expect(decoded.right).toStrictEqual(dummyTypeDecoded);
     }
   });
 });

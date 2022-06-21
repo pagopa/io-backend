@@ -1,7 +1,3 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -17,7 +13,12 @@ import {
   ResponseErrorTooManyRequests,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
-import { mockedInitializedProfile, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
+import {
+  mockedInitializedProfile,
+  mockSessionToken,
+  mockWalletToken
+} from "../../__mocks__/user_mock";
+import * as TE from "fp-ts/TaskEither";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -73,9 +74,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
       Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
     );
 
-    mockGetZendeskSupportToken.mockReturnValue(
-      taskEither.of(aZendeskSupportToken)
-    );
+    mockGetZendeskSupportToken.mockReturnValue(TE.of(aZendeskSupportToken));
 
     req.user = mockedRequestUser;
 
@@ -220,7 +219,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     );
 
     mockGetZendeskSupportToken.mockReturnValue(
-      fromLeft(new Error("ERROR while generating JWT support token"))
+      TE.left(new Error("ERROR while generating JWT support token"))
     );
 
     req.user = mockedRequestUser;
@@ -253,11 +252,10 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     const controller = new ZendeskController(profileService, tokenService);
 
     const response = await controller.getZendeskSupportToken(req);
-
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: Cannot retrieve profile"
+        "Internal server error: Error retrieving user profile"
       );
     }
   });

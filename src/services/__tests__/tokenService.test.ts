@@ -1,4 +1,4 @@
-import { isLeft, isRight } from "fp-ts/lib/Either";
+import * as E from "fp-ts/Either"
 import {
   EmailString,
   FiscalCode,
@@ -6,6 +6,7 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import TokenService from "../tokenService";
+import { pipe } from "fp-ts/lib/function";
 
 const aFirstname = "Mario" as NonEmptyString;
 const aLastname = "Rossi" as NonEmptyString;
@@ -59,24 +60,25 @@ describe("TokenService#getSupportToken", () => {
   it("should generate a new support token", async () => {
     // generate new token
     const tokenService = new TokenService();
-    const errorOrNewJwtToken = await tokenService
-      .getJwtSupportToken(aPrivateRsaKey, aFiscalCode, tokenTtl, aTokenIssuer)
-      .run();
-    expect(isRight(errorOrNewJwtToken)).toBeTruthy();
+    const errorOrNewJwtToken = await tokenService.getJwtSupportToken(
+      aPrivateRsaKey,
+      aFiscalCode,
+      tokenTtl,
+      aTokenIssuer
+    )();
+    expect(E.isRight(errorOrNewJwtToken)).toBeTruthy();
   });
 
   it("should return an error if an error occurs during token generation", async () => {
     // generate new token
     const tokenService = new TokenService();
-    const errorOrNewJwtToken = await tokenService
-      .getJwtSupportToken(
-        "aPrivateRsaKey" as NonEmptyString,
-        aFiscalCode,
-        tokenTtl,
-        aTokenIssuer
-      )
-      .run();
-    expect(isLeft(errorOrNewJwtToken)).toBeTruthy();
+    const errorOrNewJwtToken = await tokenService.getJwtSupportToken(
+      "aPrivateRsaKey" as NonEmptyString,
+      aFiscalCode,
+      tokenTtl,
+      aTokenIssuer
+    )();
+    expect(E.isLeft(errorOrNewJwtToken)).toBeTruthy();
   });
 });
 
@@ -84,33 +86,29 @@ describe("TokenService#getJwtMitVoucherToken", () => {
   it("should generate a token for mit voucher", async () => {
     // generate new token
     const tokenService = new TokenService();
-    const mitVoucherToken = await tokenService
-      .getJwtMitVoucherToken(
-        mitVoucher_privateKey_mock,
-        aFiscalCode,
-        600 as Second,
-        mitVoucher_tokenIssuer_mock,
-        mitVoucher_audience_mock
-      )
-      .run();
+    const mitVoucherToken = await tokenService.getJwtMitVoucherToken(
+      mitVoucher_privateKey_mock,
+      aFiscalCode,
+      600 as Second,
+      mitVoucher_tokenIssuer_mock,
+      mitVoucher_audience_mock
+    )();
 
-    expect(isRight(mitVoucherToken)).toBeTruthy();
+    expect(E.isRight(mitVoucherToken)).toBeTruthy();
   });
 
   it("should return an error if an error occurs during token generation", async () => {
     // generate new token
     const tokenService = new TokenService();
-    const mitVoucherToken = await tokenService
-      .getJwtMitVoucherToken(
-        "aPrivateEcFakeKey" as NonEmptyString,
-        aFiscalCode,
-        600 as Second,
-        mitVoucher_tokenIssuer_mock,
-        mitVoucher_audience_mock
-      )
-      .run();
+    const mitVoucherToken = await tokenService.getJwtMitVoucherToken(
+      "aPrivateEcFakeKey" as NonEmptyString,
+      aFiscalCode,
+      600 as Second,
+      mitVoucher_tokenIssuer_mock,
+      mitVoucher_audience_mock
+    )();
 
-    expect(isLeft(mitVoucherToken)).toBeTruthy();
+    expect(E.isLeft(mitVoucherToken)).toBeTruthy();
   });
 });
 
@@ -127,9 +125,8 @@ describe("TokenService#getZendeskSupportToken", () => {
         anEmailAddress,
         tokenTtl,
         aTokenIssuer
-      )
-      .run();
-    expect(isRight(errorOrNewJwtToken)).toBeTruthy();
+      )();
+    expect(E.isRight(errorOrNewJwtToken)).toBeTruthy();
   });
 
   it("should return an error if an error occurs during token generation", async () => {
@@ -144,9 +141,8 @@ describe("TokenService#getZendeskSupportToken", () => {
         anEmailAddress,
         tokenTtl,
         aTokenIssuer
-      )
-      .run();
-    expect(isLeft(errorOrNewJwtToken)).toBeTruthy();
+      )();
+    expect(E.isLeft(errorOrNewJwtToken)).toBeTruthy();
   });
 });
 
@@ -156,19 +152,17 @@ describe("TokenService#getPecServerTokenHandler", () => {
     const pecServerJwt = await tokenService
       .getPecServerTokenHandler(aFiscalCode)({
         secret: aPecServerSecretCode
-      } as any)
-      .run();
+      } as any)();
 
-    expect(pecServerJwt.isRight()).toBeTruthy();
-    expect(pecServerJwt.getOrElse("")).toBe(aPecServerJwt);
+    expect(E.isRight(pecServerJwt)).toBeTruthy();
+    expect(pipe(pecServerJwt, E.getOrElse(()=>""))).toBe(aPecServerJwt);
   });
 
   it("should return an error if an error occurs during token generation", async () => {
     const tokenService = new TokenService();
     const pecServerJwt = await tokenService
-      .getPecServerTokenHandler(aFiscalCode)({ secret: "" } as any)
-      .run();
+      .getPecServerTokenHandler(aFiscalCode)({ secret: "" } as any)();
 
-    expect(pecServerJwt.isLeft()).toBeTruthy();
+    expect(E.isLeft(pecServerJwt)).toBeTruthy();
   });
 });

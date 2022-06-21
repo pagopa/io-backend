@@ -6,9 +6,9 @@ import {
   ResponseSuccessAccepted,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import * as E from "fp-ts/lib/Either";
 import * as redis from "redis";
 import { mockedUser } from "../../__mocks__/user_mock";
-import { isRight, right } from "fp-ts/lib/Either";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { ExtendedProfile } from "../../../generated/backend/ExtendedProfile";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -104,7 +104,7 @@ jest.mock("../../services/profileService", () => {
 
 const mockDelPagoPaNoticeEmail = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve(right<Error, boolean>(true)));
+  .mockImplementation(_ => Promise.resolve(E.right(true)));
 
 jest.mock("../../services/redisSessionStorage", () => {
   return {
@@ -287,13 +287,14 @@ describe("ProfileController#upsertProfile", () => {
     const response = await controller.updateProfile(req);
 
     const errorOrProfile = Profile.decode(req.body);
-    expect(isRight(errorOrProfile)).toBeTruthy();
-
+    expect(E.isRight(errorOrProfile)).toBeTruthy();
     expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
-    expect(mockUpdateProfile).toHaveBeenCalledWith(
-      mockedUser,
-      errorOrProfile.value
-    );
+    if (E.isRight(errorOrProfile)) {
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        mockedUser,
+        errorOrProfile.right
+      );
+    }
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",

@@ -1,12 +1,9 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
 import {
   ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
-import { isRight } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
@@ -184,12 +181,13 @@ describe("UserDataProcessingController#upsertUserDataProcessing", () => {
     const errorOrUserDataProcessingChoice = UserDataProcessingChoiceRequest.decode(
       req.body
     );
-    expect(isRight(errorOrUserDataProcessingChoice)).toBeTruthy();
-
-    expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith(
-      mockedUser,
-      errorOrUserDataProcessingChoice.value
-    );
+    expect(E.isRight(errorOrUserDataProcessingChoice)).toBeTruthy();
+    if (E.isRight(errorOrUserDataProcessingChoice)) {
+      expect(mockUpsertUserDataProcessing).toHaveBeenCalledWith(
+        mockedUser,
+        errorOrUserDataProcessingChoice.right
+      );
+    }
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",

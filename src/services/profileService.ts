@@ -19,6 +19,8 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../generated/io-api/NewProfile";
 import { Profile as ProfileApi } from "../../generated/io-api/Profile";
@@ -99,11 +101,14 @@ export default class ProfileService {
       });
       return withValidatedOrInternalError(validated, response => {
         if (response.status === 200) {
-          return ExtendedProfileApi.decode(response.value).fold<
-            IResponseSuccessJson<ExtendedProfileApi> | IResponseErrorInternal
-          >(
-            _ => ResponseErrorInternal(errorsToReadableMessages(_).join(" / ")),
-            _ => ResponseSuccessJson(_)
+          return pipe(
+            response.value,
+            ExtendedProfileApi.decode,
+            E.mapLeft(_ =>
+              ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
+            ),
+            E.map(ResponseSuccessJson),
+            E.toUnion
           );
         }
         // The profile doesn't exists for the user

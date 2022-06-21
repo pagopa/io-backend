@@ -12,8 +12,9 @@ import NotificationService from "../../services/notificationService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import { User } from "../../types/user";
 import NotificationController from "../notificationController";
+
+import * as E from "fp-ts/lib/Either";
 import { mockedUser, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
-import { right } from "fp-ts/lib/Either";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
 
@@ -139,7 +140,7 @@ describe("NotificationController#notify", () => {
   it("should return success if data is correct", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -159,7 +160,7 @@ describe("NotificationController#notify", () => {
   it("should send generic notification if user has not active sessions", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(false)));
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(false)));
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -169,12 +170,14 @@ describe("NotificationController#notify", () => {
     const expectedNotificationOrError = Notification.decode(aValidNotification);
     const res = await controller.notify(req);
 
-    expect(expectedNotificationOrError.isRight()).toBeTruthy();
-    expect(mockNotify).toBeCalledWith(
-      expectedNotificationOrError.value,
-      NOTIFICATION_DEFAULT_SUBJECT,
-      NOTIFICATION_DEFAULT_TITLE
-    );
+    expect(E.isRight(expectedNotificationOrError)).toBeTruthy();
+    if (E.isRight(expectedNotificationOrError)) {
+      expect(mockNotify).toBeCalledWith(
+        expectedNotificationOrError.right,
+        NOTIFICATION_DEFAULT_SUBJECT,
+        NOTIFICATION_DEFAULT_TITLE
+      );
+    }
 
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -186,7 +189,7 @@ describe("NotificationController#notify", () => {
   it("should send generic notification if message content is not defined", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -198,12 +201,14 @@ describe("NotificationController#notify", () => {
     );
     const res = await controller.notify(req);
 
-    expect(expectedNotificationOrError.isRight()).toBeTruthy();
-    expect(mockNotify).toBeCalledWith(
-      expectedNotificationOrError.value,
-      NOTIFICATION_DEFAULT_SUBJECT,
-      NOTIFICATION_DEFAULT_TITLE
-    );
+    expect(E.isRight(expectedNotificationOrError)).toBeTruthy();
+    if (E.isRight(expectedNotificationOrError)) {
+      expect(mockNotify).toBeCalledWith(
+        expectedNotificationOrError.right,
+        NOTIFICATION_DEFAULT_SUBJECT,
+        NOTIFICATION_DEFAULT_TITLE
+      );
+    }
 
     expect(res).toEqual({
       apply: expect.any(Function),
@@ -250,7 +255,7 @@ describe("NotificationController#notify", () => {
   it("should return an error in case an exception is thrown notifying the user", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockImplementation(() => {
       throw new Error("error");
@@ -271,7 +276,7 @@ describe("NotificationController#notify", () => {
   it("should return an error in case notify call fails", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(right(true)));
+    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockReturnValue(Promise.reject());
 

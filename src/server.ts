@@ -4,8 +4,9 @@
 import * as http from "http";
 import * as https from "https";
 import * as appInsights from "applicationinsights";
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
+import { pipe } from "fp-ts/lib/function";
 import { newApp } from "./app";
 import {
   ALLOW_BPD_IP_SOURCE_RANGE,
@@ -79,16 +80,18 @@ const timer = TimeTracer();
  *
  * @see: utils/appinsights.js into the class AppInsightsClientBuilder
  */
-const maybeAppInsightsClient = fromNullable(
-  process.env.APPINSIGHTS_INSTRUMENTATIONKEY
-).map(k =>
-  initAppInsights(k, {
-    applicationVersion: getCurrentBackendVersion(),
-    disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
-    samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
-      ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
-      : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
-  })
+const maybeAppInsightsClient = pipe(
+  process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  O.fromNullable,
+  O.map(k =>
+    initAppInsights(k, {
+      applicationVersion: getCurrentBackendVersion(),
+      disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
+      samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
+        ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
+        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
+    })
+  )
 );
 
 newApp({
@@ -109,7 +112,7 @@ newApp({
   allowPagoPAIPSourceRange: ALLOW_PAGOPA_IP_SOURCE_RANGE,
   allowSessionHandleIPSourceRange: ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   allowZendeskIPSourceRange: ALLOW_ZENDESK_IP_SOURCE_RANGE,
-  appInsightsClient: maybeAppInsightsClient.toUndefined(),
+  appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
   env: ENV
 })
@@ -123,8 +126,11 @@ newApp({
       server = https.createServer(options, app).listen(443, () => {
         log.info("Listening on port 443");
         log.info(`Startup time: %sms`, startupTimeMs.toString());
-        maybeAppInsightsClient.map(_ =>
-          trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
+        pipe(
+          maybeAppInsightsClient,
+          O.map(_ =>
+            trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
+          )
         );
       });
     } else {
@@ -132,8 +138,11 @@ newApp({
       server = http.createServer(app).listen(SERVER_PORT, () => {
         log.info("Listening on port %d", SERVER_PORT);
         log.info(`Startup time: %sms`, startupTimeMs.toString());
-        maybeAppInsightsClient.map(_ =>
-          trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
+        pipe(
+          maybeAppInsightsClient,
+          O.map(_ =>
+            trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
+          )
         );
       });
     }
@@ -141,10 +150,13 @@ newApp({
       app.emit("server:stop");
 
       // If an AppInsights Client is initialized, flush all pending data and reset the configuration.
-      maybeAppInsightsClient.map(appInsightsClient => {
-        appInsightsClient.flush();
-        appInsights.dispose();
-      });
+      pipe(
+        maybeAppInsightsClient,
+        O.map(appInsightsClient => {
+          appInsightsClient.flush();
+          appInsights.dispose();
+        })
+      );
       log.info("HTTP server close.");
     });
 

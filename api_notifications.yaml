@@ -1,6 +1,6 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: 1.0.0
+  version: 7.19.2
   title: Proxy API
   description: Mobile and web proxy API gateway.
 host: localhost
@@ -10,90 +10,306 @@ schemes:
 security:
   - Token: []
 paths:
-  "/notify":
+  /notify:
     x-swagger-router-controller: NotificationController
     post:
       operationId: notify
       summary: Notify a user
-      description: |-
-        Post the notification to the user using a push notification.
+      description: Post the notification to the user using a push notification.
       parameters:
         - in: body
           name: body
           required: true
           schema:
-            $ref: "#/definitions/Notification"
+            $ref: '#/definitions/Notification'
           x-examples:
             application/json:
               message:
                 content:
-                    subject: message subject, aliquip sint nulla in estinut
-                    markdown: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et mollis felis.
-                      Vivamus orci nisl, commodo ut sodales ut, eleifend a libero. Donec dapibus, turpis in mattis tempor,
-                      risus nunc malesuada ex, non aliquet metus nunc a lacus. Aenean in arcu vitae nisl porta
-                      fermentum nec non nibh. Phasellus tortor tellus, semper in metus eget, eleifend
-                      laoreet nibh. Aenean feugiat lectus ut nisl eleifend gravida.
-                created_at: "2018-05-03T16:21:38.167Z"
-                fiscal_code: "TMMEXQ60A10Y526X"
-                id: "01CCKCY7QQ7WCHWTH8NB504386"
-                sender_service_id: "5a25abf4fcc89605c082f042c49a"
+                  subject: message subject, aliquip sint nulla in estinut
+                  markdown: >-
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Maecenas et mollis felis. Vivamus orci nisl, commodo ut
+                    sodales ut, eleifend a libero. Donec dapibus, turpis in
+                    mattis tempor, risus nunc malesuada ex, non aliquet metus
+                    nunc a lacus. Aenean in arcu vitae nisl porta fermentum nec
+                    non nibh. Phasellus tortor tellus, semper in metus eget,
+                    eleifend laoreet nibh. Aenean feugiat lectus ut nisl
+                    eleifend gravida.
+                created_at: '2018-05-03T16:21:38.167Z'
+                fiscal_code: TMMEXQ60A10Y526X
+                id: 01CCKCY7QQ7WCHWTH8NB504386
+                sender_service_id: 5a25abf4fcc89605c082f042c49a
               sender_metadata:
-                department_name: "Department name"
-                organization_name: "Organization name"
-                service_name: "Service name"
+                department_name: Department name
+                organization_name: Organization name
+                service_name: Service name
       responses:
-        "200":
+        '200':
           description: Success.
           schema:
-            $ref: "#/definitions/SuccessResponse"
+            $ref: '#/definitions/SuccessResponse'
           examples:
             application/json:
-              "message": "ok"
-        "400":
+              message: ok
+        '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/ProblemJson"
-        "401":
+            $ref: '#/definitions/ProblemJson'
+        '401':
           description: Token null or invalid.
-        "500":
-          description: There was an error in forwarding the notification to the Notification Hub.
+        '500':
+          description: >-
+            There was an error in forwarding the notification to the
+            Notification Hub.
           schema:
-            $ref: "#/definitions/ProblemJson"
+            $ref: '#/definitions/ProblemJson'
 definitions:
   CreatedMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/CreatedMessageWithContent"
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      content:
+        $ref: '#/definitions/MessageContent'
+      sender_service_id:
+        type: string
+        description: |-
+          The ID of the Service. Equals the subscriptionId of a registered
+          API user.
+        minLength: 1
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - content
+      - sender_service_id
   CreatedMessageWithoutContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/CreatedMessageWithoutContent"
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      sender_service_id:
+        type: string
+        description: |-
+          The ID of the Service. Equals the subscriptionId of a registered
+          API user.
+        minLength: 1
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - sender_service_id
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+    type: integer
+    default: 3600
+    minimum: 3600
+    maximum: 604800
+    description: |-
+      This parameter specifies for how long (in seconds) the system will
+      try to deliver the message to the channels configured by the user.
+    example: 3600
   SenderMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/SenderMetadata"
-  ServiceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/ServiceId"
+    title: Sender metadata
+    description: Metadata associated to a sender (service).
+    type: object
+    properties:
+      service_name:
+        $ref: '#/definitions/ServiceName'
+      organization_name:
+        $ref: '#/definitions/OrganizationName'
+      department_name:
+        $ref: '#/definitions/DepartmentName'
+    required:
+      - service_name
+      - organization_name
+      - department_name
   ServiceName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/ServiceName"
+    type: string
+    description: The name of the service. Will be added to the content of sent messages.
+    minLength: 1
   OrganizationName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/OrganizationName"
+    type: string
+    description: |-
+      The organization that runs the service. Will be added to the content
+      of sent messages to identify the sender.
+    minLength: 1
   DepartmentName:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/DepartmentName"
+    type: string
+    description: |-
+      The department inside the organization that runs the service. Will
+      be added to the content of sent messages.
+    minLength: 1
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/Timestamp"
+    type: string
+    format: UTCISODateFromString
+    description: A date-time field in ISO-8601 format and UTC timezone.
+    x-import: '@pagopa/ts-commons/lib/dates'
+    example: '2018-10-13T00:00:00.000Z'
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/FiscalCode"
+    type: string
+    description: User's fiscal code.
+    format: FiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: SPNDNL80R13C555X
   MessageContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/MessageContent"
+    type: object
+    properties:
+      subject:
+        $ref: '#/definitions/MessageSubject'
+      markdown:
+        $ref: '#/definitions/MessageBodyMarkdown'
+      payment_data:
+        $ref: '#/definitions/PaymentData'
+      prescription_data:
+        type: object
+        description: Metadata needed to process medical prescriptions.
+        properties:
+          nre:
+            description: >-
+              The field *Numero ricetta elettronica* identifies the medical
+              prescription at national level.
+            type: string
+            minLength: 15
+            maxLength: 15
+          iup:
+            description: >-
+              The field *Identificativo Unico di Prescrizione* identifies the
+              medical prescription at regional level.
+            type: string
+            minLength: 1
+            maxLength: 16
+          prescriber_fiscal_code:
+            type: string
+            description: Fiscal code of the Doctor that made the prescription.
+            format: FiscalCode
+            x-import: '@pagopa/ts-commons/lib/strings'
+            example: TCNZRO80R13C555Y
+        required:
+          - nre
+      eu_covid_cert:
+        type: object
+        description: Paylod with access token to retrieve a EU Covid Certificate
+        properties:
+          auth_code:
+            type: string
+        required:
+          - auth_code
+      due_date:
+        $ref: '#/definitions/Timestamp'
+    required:
+      - subject
+      - markdown
   MessageSubject:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/MessageSubject"
+    type: string
+    description: |-
+      The (optional) subject of the message - note that only some notification
+      channels support the display of a subject. When a subject is not provided,
+      one gets generated from the client attributes.
+    minLength: 10
+    maxLength: 120
+    example: Welcome new user !
   MessageBodyMarkdown:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/MessageBodyMarkdown"
+    type: string
+    description: |-
+      The full version of the message, in plain text or Markdown format. The
+      content of this field will be delivered to channels that don't have any
+      limit in terms of content size (e.g. email, etc...).
+    minLength: 80
+    maxLength: 10000
+    example: |-
+      # This is a markdown header
+
+      to show how easily markdown can be converted to **HTML**
+
+      Remember: this has to be a long text.
   PaymentNoticeNumber:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/PaymentNoticeNumber"
+    description: >-
+      The field ["Numero
+      Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
+      of pagoPa, needed to identify the payment. Format is `<aux digit
+      (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
+      specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
+      for more info on this field and the IUV.
+    type: string
+    pattern: ^[0123][0-9]{17}$
   PaymentAmount:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/PaymentAmount"
+    description: >-
+      Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
+      cents.
+    type: integer
+    minimum: 1
+    maximum: 9999999999
   PaymentData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/PaymentData"
+    type: object
+    description: Metadata needed to process pagoPA payments.
+    properties:
+      amount:
+        $ref: '#/definitions/PaymentAmount'
+      notice_number:
+        $ref: '#/definitions/PaymentNoticeNumber'
+      invalid_after_due_date:
+        type: boolean
+        default: false
+    required:
+      - amount
+      - notice_number
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.0/openapi/definitions.yaml#/ProblemJson"
+    type: object
+    properties:
+      type:
+        type: string
+        format: uri
+        description: |-
+          An absolute URI that identifies the problem type. When dereferenced,
+          it SHOULD provide human-readable documentation for the problem type
+          (e.g., using HTML).
+        default: about:blank
+        example: https://example.com/problem/constraint-violation
+      title:
+        type: string
+        description: |-
+          A short, summary of the problem type. Written in english and readable
+          for engineers (usually not suited for non technical stakeholders and
+          not localized); example: Service Unavailable
+      status:
+        type: integer
+        format: int32
+        description: >-
+          The HTTP status code generated by the origin server for this
+          occurrence
+
+          of the problem.
+        minimum: 100
+        maximum: 600
+        exclusiveMaximum: true
+        example: 200
+      detail:
+        type: string
+        description: |-
+          A human readable explanation specific to this occurrence of the
+          problem.
+        example: There was an error processing the request
+      instance:
+        type: string
+        format: uri
+        description: >-
+          An absolute URI that identifies the specific occurrence of the
+          problem.
+
+          It may or may not yield further information if dereferenced.
   NotificationMessage:
     x-one-of: true
     allOf:

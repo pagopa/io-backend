@@ -20,7 +20,8 @@ import {
   ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
 
-import { fromNullable } from "fp-ts/lib/Option";
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 import { EycaActivationDetail } from "../../generated/io-cgn-api/EycaActivationDetail";
 import { EycaCard } from "../../generated/io-cgn-api/EycaCard";
 import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
@@ -135,8 +136,10 @@ export default class CgnService {
           case 201:
             return ResponseSuccessRedirectToResource(
               response.value,
-              fromNullable(response.headers.Location).getOrElse(
-                "/api/v1/cgn/activation"
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/activation")
               ),
               response.value
             );
@@ -216,8 +219,10 @@ export default class CgnService {
           case 201:
             return ResponseSuccessRedirectToResource(
               response.value,
-              fromNullable(response.headers.Location).getOrElse(
-                "/api/v1/cgn/eyca/activation"
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/eyca/activation")
               ),
               response.value
             );
@@ -297,8 +302,10 @@ export default class CgnService {
           case 201:
             return ResponseSuccessRedirectToResource(
               response.value,
-              fromNullable(response.headers.Location).getOrElse(
-                "/api/v1/cgn/delete"
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => "/api/v1/cgn/delete")
               ),
               response.value
             );

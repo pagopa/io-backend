@@ -1,5 +1,3 @@
-/* tslint:disable:no-object-mutation */
-
 import { left, right } from "fp-ts/lib/Either";
 import * as redis from "redis";
 import { UserMetadata } from "../../../generated/backend/UserMetadata";

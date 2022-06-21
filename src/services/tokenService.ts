@@ -4,18 +4,19 @@
 
 import * as crypto from "crypto";
 import { promisify } from "util";
-import { toError } from "fp-ts/lib/Either";
-import { TaskEither, taskify } from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import {
-  EmailString,
   FiscalCode,
-  NonEmptyString
+  NonEmptyString,
+  EmailString
 } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
 import { ulid } from "ulid";
+import { TaskEither } from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { PecServerConfig } from "src/config";
-import * as TE from "fp-ts/lib/TaskEither";
 
 const asyncRandomBytes = promisify(crypto.randomBytes);
 
@@ -50,19 +51,22 @@ export default class TokenService {
     tokenTtl: Second,
     issuer: NonEmptyString
   ): TaskEither<Error, string> {
-    return taskify<Error, string>(cb =>
-      jwt.sign(
-        { fiscalCode },
-        privateKey,
-        {
-          algorithm: "RS256",
-          expiresIn: `${tokenTtl} seconds`,
-          issuer,
-          jwtid: ulid()
-        },
-        cb
-      )
-    )().mapLeft(toError);
+    return pipe(
+      TE.taskify<Error, string>(cb =>
+        jwt.sign(
+          { fiscalCode },
+          privateKey,
+          {
+            algorithm: "RS256",
+            expiresIn: `${tokenTtl} seconds`,
+            issuer,
+            jwtid: ulid()
+          },
+          cb
+        )
+      )(),
+      TE.mapLeft(E.toError)
+    );
   }
 
   /**
@@ -86,24 +90,27 @@ export default class TokenService {
     tokenTtl: Second,
     issuer: NonEmptyString
   ): TaskEither<Error, string> {
-    return taskify<Error, string>(cb =>
-      jwt.sign(
-        {
-          email: emailAddress,
-          external_id: fiscalCode,
-          iat: new Date().getTime() / 1000,
-          jti: ulid(),
-          name: `${name} ${familyName}`
-        },
-        secret,
-        {
-          algorithm: "HS256",
-          expiresIn: `${tokenTtl} seconds`,
-          issuer
-        },
-        cb
-      )
-    )().mapLeft(toError);
+    return pipe(
+      TE.taskify<Error, string>(cb =>
+        jwt.sign(
+          {
+            email: emailAddress,
+            external_id: fiscalCode,
+            iat: new Date().getTime() / 1000,
+            jti: ulid(),
+            name: `${name} ${familyName}`
+          },
+          secret,
+          {
+            algorithm: "HS256",
+            expiresIn: `${tokenTtl} seconds`,
+            issuer
+          },
+          cb
+        )
+      )(),
+      TE.mapLeft(E.toError)
+    );
   }
 
   /**
@@ -122,20 +129,23 @@ export default class TokenService {
     issuer: NonEmptyString,
     audience: NonEmptyString
   ): TaskEither<Error, string> {
-    return taskify<Error, string>(cb =>
-      jwt.sign(
-        {},
-        privateKey,
-        {
-          algorithm: "ES256",
-          audience,
-          expiresIn: `${tokenTtl} seconds`,
-          issuer,
-          subject: fiscalCode
-        },
-        cb
-      )
-    )().mapLeft(toError);
+    return pipe(
+      TE.taskify<Error, string>(cb =>
+        jwt.sign(
+          {},
+          privateKey,
+          {
+            algorithm: "ES256",
+            audience,
+            expiresIn: `${tokenTtl} seconds`,
+            issuer,
+            subject: fiscalCode
+          },
+          cb
+        )
+      )(),
+      TE.mapLeft(E.toError)
+    );
   }
 
   /**
@@ -147,17 +157,20 @@ export default class TokenService {
   public readonly getPecServerTokenHandler = (fiscalCode: FiscalCode) => (
     config: PecServerConfig
   ): TE.TaskEither<Error, string> =>
-    taskify<Error, string>(cb =>
-      jwt.sign(
-        {
-          account: fiscalCode
-        },
-        config.secret,
-        {
-          algorithm: "HS256",
-          noTimestamp: true
-        },
-        cb
-      )
-    )().mapLeft(toError);
+    pipe(
+      TE.taskify<Error, string>(cb =>
+        jwt.sign(
+          {
+            account: fiscalCode
+          },
+          config.secret,
+          {
+            algorithm: "HS256",
+            noTimestamp: true
+          },
+          cb
+        )
+      )(),
+      TE.mapLeft(E.toError)
+    );
 }

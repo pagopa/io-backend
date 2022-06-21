@@ -1,10 +1,3 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-duplicate-string */
-/* tslint:disable:no-let */
-/* tslint:disable:no-identical-functions */
-/* tslint:disable:no-big-function */
-/* tslint:disable:no-object-mutation */
-
 import { createMockRedis } from "mock-redis-client";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
@@ -21,6 +14,7 @@ import {
   mockFIMSToken
 } from "../../__mocks__/user_mock";
 import SessionController from "../sessionController";
+import * as E from "fp-ts/lib/Either";
 import { User } from "../../types/user";
 
 const aTokenDurationSecs = 3600;
@@ -167,6 +161,9 @@ describe("SessionController#listSessions", () => {
     const expectedResponse = SessionsList.decode({
       sessions: [expectedSessionInfo]
     });
-    expect(res.json).toHaveBeenCalledWith(expectedResponse.value);
+    expect(E.isRight(expectedResponse)).toBeTruthy();
+    if (E.isRight(expectedResponse)) {
+      expect(res.json).toHaveBeenCalledWith(expectedResponse.right);
+    }
   });
 });

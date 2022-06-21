@@ -1,7 +1,7 @@
 import * as t from "io-ts";
 import { tag } from "@pagopa/ts-commons/lib/types";
 import { PecServerConfig } from "src/config";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/TaskEither";
 
 interface ISessionTokenTag {
   readonly kind: "SessionToken";

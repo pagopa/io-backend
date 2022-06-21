@@ -13,18 +13,19 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import { tryCatch } from "fp-ts/lib/TaskEither";
-import { toError } from "fp-ts/lib/Either";
 import {
   IResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import { identity } from "fp-ts/lib/function";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import NewMessagesService from "src/services/newMessagesService";
 import { withUserFromRequest } from "../types/user";
 
-import { MessageStatusChange } from "../../generated/io-api/MessageStatusChange";
-import { MessageStatusAttributes } from "../../generated/io-api/MessageStatusAttributes";
+import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
+import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
@@ -36,7 +37,6 @@ import {
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
-import { MessageServiceSelector } from "../services/messagesServiceSelector";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -55,7 +55,7 @@ type IGetLegalMessageAttachmentResponse =
 export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
-    private readonly messageServiceSelector: MessageServiceSelector,
+    private readonly messageService: NewMessagesService,
     private readonly tokenService: TokenService
   ) {}
 
@@ -82,10 +82,7 @@ export default class MessagesController {
           minimumId: req.query.minimum_id
           /* eslint-enable sort-keys */
         }),
-        params =>
-          this.messageServiceSelector
-            .select(user.fiscal_code)
-            .getMessagesByUser(user, params)
+        params => this.messageService.getMessagesByUser(user, params)
       )
     );
 
@@ -107,10 +104,7 @@ export default class MessagesController {
           id: req.params.id,
           public_message: req.query.public_message
         }),
-        params =>
-          this.messageServiceSelector
-            .select(user.fiscal_code)
-            .getMessage(user, params)
+        params => this.messageService.getMessage(user, params)
       )
     );
 
@@ -121,21 +115,20 @@ export default class MessagesController {
     req: express.Request
   ): Promise<IGetLegalMessageResponse> =>
     withUserFromRequest(req, user =>
-      tryCatch(
-        () =>
-          // getLegalMessage is not yet implemented in new fn-app-messages
-          // just skip new implementation and take fn-app one
-          this.messageServiceSelector
-            .getOldMessageService()
-            .getLegalMessage(
+      pipe(
+        TE.tryCatch(
+          () =>
+            // getLegalMessage is not yet implemented in new fn-app-messages
+            // just skip new implementation and take fn-app one
+            this.messageService.getLegalMessage(
               user,
               req.params.id,
               this.tokenService.getPecServerTokenHandler(user.fiscal_code)
             ),
-        e => ResponseErrorInternal(toError(e).message)
-      )
-        .fold<IGetLegalMessageResponse>(identity, identity)
-        .run()
+          e => ResponseErrorInternal(E.toError(e).message)
+        ),
+        TE.toUnion
+      )()
     );
 
   /**
@@ -145,22 +138,21 @@ export default class MessagesController {
     req: express.Request
   ): Promise<IGetLegalMessageAttachmentResponse> =>
     withUserFromRequest(req, user =>
-      tryCatch(
-        () =>
-          // getLegalMessageAttachment is not yet implemented in new fn-app-messages
-          // just skip new implementation and take fn-app one
-          this.messageServiceSelector
-            .getOldMessageService()
-            .getLegalMessageAttachment(
+      pipe(
+        TE.tryCatch(
+          () =>
+            // getLegalMessageAttachment is not yet implemented in new fn-app-messages
+            // just skip new implementation and take fn-app one
+            this.messageService.getLegalMessageAttachment(
               user,
               req.params.id,
               this.tokenService.getPecServerTokenHandler(user.fiscal_code),
               req.params.attachment_id
             ),
-        e => ResponseErrorInternal(toError(e).message)
-      )
-        .fold<IGetLegalMessageAttachmentResponse>(identity, identity)
-        .run()
+          e => ResponseErrorInternal(E.toError(e).message)
+        ),
+        TE.toUnion
+      )()
     );
 
   public readonly upsertMessageStatus = (
@@ -180,9 +172,11 @@ export default class MessagesController {
           withValidatedOrValidationError(
             MessageStatusChange.decode(req.body),
             change =>
-              this.messageServiceSelector
-                .getNewMessageService()
-                .upsertMessageStatus(user.fiscal_code, messageId, change)
+              this.messageService.upsertMessageStatus(
+                user.fiscal_code,
+                messageId,
+                change
+              )
           )
       )
     );

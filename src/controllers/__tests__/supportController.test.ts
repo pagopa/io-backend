@@ -1,7 +1,4 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
-
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import mockReq from "../../__mocks__/request";
 import TokenService from "../../services/tokenService";
 import { mockedUser } from "../../__mocks__/user_mock";
@@ -27,7 +24,7 @@ describe("SupportController#getSupportToken", () => {
   it("should return a valid support token by calling TokenService with valid values", async () => {
     const req = mockReq();
 
-    mockGetSupportToken.mockReturnValue(taskEither.of(aSupportToken));
+    mockGetSupportToken.mockReturnValue(TE.of(aSupportToken));
 
     req.user = mockedUser;
 
@@ -46,7 +43,7 @@ describe("SupportController#getSupportToken", () => {
     const req = mockReq();
 
     mockGetSupportToken.mockReturnValue(
-      fromLeft(new Error("ERROR while generating JWT support token"))
+      TE.left(new Error("ERROR while generating JWT support token"))
     );
     req.user = mockedUser;
 

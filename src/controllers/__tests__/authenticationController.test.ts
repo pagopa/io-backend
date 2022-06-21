@@ -1,10 +1,4 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-duplicate-string */
-/* tslint:disable:no-let */
-/* tslint:disable:no-identical-functions */
-/* tslint:disable:no-big-function */
-/* tslint:disable:no-object-mutation */
-import { isRight, left, right } from "fp-ts/lib/Either";
+import * as E from "fp-ts/lib/Either";
 import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
@@ -205,8 +199,8 @@ describe("AuthenticationController#acs", () => {
       is_test_profile: false
     };
 
-    mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken)
@@ -241,8 +235,8 @@ describe("AuthenticationController#acs", () => {
   it("redirects to the correct url if userPayload is a valid User and a profile exists", async () => {
     const res = mockRes();
 
-    mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken)
@@ -276,8 +270,8 @@ describe("AuthenticationController#acs", () => {
       is_test_profile: false
     };
 
-    mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken)
@@ -314,8 +308,8 @@ describe("AuthenticationController#acs", () => {
   it("should fail if an error occours checking the profile", async () => {
     const res = mockRes();
 
-    mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken)
@@ -345,7 +339,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if userPayload is invalid", async () => {
     const res = mockRes();
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     const response = await controller.acs(invalidUserPayload);
     response.apply(res);
 
@@ -357,8 +351,8 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("should fail if the session can not be saved", async () => {
-    mockSet.mockReturnValue(Promise.resolve(right(false)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.right(false)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
@@ -373,7 +367,7 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("should return Unathorized if user is blocked", async () => {
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(true)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
@@ -385,7 +379,7 @@ describe("AuthenticationController#acs", () => {
 
   it("should fail if Redis Client returns an error while getting info on user blocked", async () => {
     mockIsBlockedUser.mockReturnValue(
-      Promise.resolve(left(new Error("Redis error")))
+      Promise.resolve(E.left(new Error("Redis error")))
     );
     const res = mockRes();
 
@@ -401,8 +395,8 @@ describe("AuthenticationController#acs", () => {
   });
 
   it("should fail if Redis client returns an error", async () => {
-    mockSet.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.left(new Error("Redis error"))));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     const res = mockRes();
 
     const response = await controller.acs(validUserPayload);
@@ -485,8 +479,8 @@ describe("AuthenticationController#acs", () => {
       is_test_profile: false
     };
 
-    mockSet.mockReturnValue(Promise.resolve(right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(right(false)));
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     mockGetNewToken
       .mockReturnValueOnce(mockSessionToken)
       .mockReturnValueOnce(mockWalletToken)
@@ -608,16 +602,18 @@ describe("AuthenticationController#getUserIdentity", () => {
     response.apply(res);
 
     expect(controller).toBeTruthy();
-    /* tslint:disable-next-line:no-useless-cast */
+
     const expectedValue = exactUserIdentityDecode(
       (mockedUser as unknown) as UserIdentity
     );
-    expect(isRight(expectedValue)).toBeTruthy();
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: expectedValue.value
-    });
+    expect(E.isRight(expectedValue)).toBeTruthy();
+    if (E.isRight(expectedValue)) {
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: expectedValue.right
+      });
+    }
   });
 
   it("should fail if the User object doesn't match UserIdentity decoder contraints", async () => {
@@ -629,7 +625,7 @@ describe("AuthenticationController#getUserIdentity", () => {
     const user = require("../../types/user").User;
     mockUserDecode = jest
       .spyOn(user, "decode")
-      .mockImplementation((_: unknown) => right(_));
+      .mockImplementation((_: unknown) => E.right(_));
 
     const response = await controller.getUserIdentity(req);
     response.apply(res);
@@ -671,7 +667,7 @@ describe("AuthenticationController#logout", () => {
     const req = mockReq();
     req.user = mockedUser;
 
-    mockDel.mockReturnValue(Promise.resolve(right(true)));
+    mockDel.mockReturnValue(Promise.resolve(E.right(true)));
 
     const response = await controller.logout(req);
     response.apply(res);
@@ -695,7 +691,7 @@ describe("AuthenticationController#logout", () => {
     };
     req.user = userWithExternalToken;
 
-    mockDel.mockReturnValue(Promise.resolve(right(true)));
+    mockDel.mockReturnValue(Promise.resolve(E.right(true)));
 
     const response = await controller.logout(req);
     response.apply(res);
@@ -727,7 +723,7 @@ describe("AuthenticationController#logout", () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
-    mockDel.mockReturnValue(Promise.resolve(right(false)));
+    mockDel.mockReturnValue(Promise.resolve(E.right(false)));
 
     const response = await controller.logout(req);
     response.apply(res);
@@ -744,7 +740,7 @@ describe("AuthenticationController#logout", () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
-    mockDel.mockReturnValue(Promise.resolve(left(new Error("Redis error"))));
+    mockDel.mockReturnValue(Promise.resolve(E.left(new Error("Redis error"))));
 
     const response = await controller.logout(req);
     response.apply(res);
