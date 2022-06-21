@@ -47,11 +47,7 @@ const handleGetServicePreferencesResponse = (
 ) => {
   switch (response.status) {
     case 200:
-      return ResponseSuccessJson({
-        ...response.value,
-        // TODO: Remove when the API specs of io-fn-app are upgraded
-        is_allowed_send_read_message_status: false
-      });
+      return ResponseSuccessJson(response.value);
     case 400:
       return ResponseErrorValidation("Bad Request", "Payload has bad format");
     case 401:
