@@ -66,9 +66,6 @@ import {
   FF_USER_AGE_LIMIT_ENABLED,
   PECSERVERS,
   APP_MESSAGES_API_CLIENT,
-  FF_MESSAGES_TYPE,
-  FF_MESSAGES_BETA_TESTER_LIST,
-  FF_MESSAGES_CANARY_USERS_REGEX,
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_LOCK_ENDPOINT,
   THIRD_PARTY_CONFIG_LIST
@@ -100,7 +97,7 @@ import UserDataProcessingController from "./controllers/userDataProcessingContro
 import BonusService from "./services/bonusService";
 import CgnService from "./services/cgnService";
 import CgnOperatorSearchService from "./services/cgnOperatorSearchService";
-import MessagesService from "./services/messagesService";
+import FunctionsAppService from "./services/functionAppService";
 import NotificationService from "./services/notificationService";
 import PagoPAProxyService from "./services/pagoPAProxyService";
 import ProfileService from "./services/profileService";
@@ -141,7 +138,6 @@ import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
 import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
-import { getMessagesServiceSelector } from "./services/messagesServiceSelector";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 
@@ -433,20 +429,18 @@ export function newApp({
           authMiddlewares.bearerSession,
           authMiddlewares.local
         );
-        // Create the messages service.
-        const MESSAGES_SERVICE = new MessagesService(
-          API_CLIENT,
-          new PecServerClientFactory(PECSERVERS)
-        );
 
         const thirdPartyClientFactory = getThirdPartyServiceClientFactory(
           THIRD_PARTY_CONFIG_LIST
         );
 
+        // Create the function app service.
+        const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT,
-          thirdPartyClientFactory
+          thirdPartyClientFactory,
+          new PecServerClientFactory(PECSERVERS)
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
@@ -461,7 +455,7 @@ export function newApp({
           allowNotifyIPSourceRange,
           authMiddlewares.urlToken,
           PROFILE_SERVICE,
-          MESSAGES_SERVICE,
+          FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
           NOTIFICATION_SERVICE,
           SESSION_STORAGE,
@@ -809,7 +803,7 @@ function registerAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   profileService: ProfileService,
-  messagesService: MessagesService,
+  fnAppService: FunctionsAppService,
   appMessagesService: NewMessagesService,
   notificationService: NotificationService,
   sessionStorage: RedisSessionStorage,
@@ -825,20 +819,13 @@ function registerAPIRoutes(
     sessionStorage
   );
 
-  const messageServiceSelector = getMessagesServiceSelector(
-    messagesService,
-    appMessagesService,
-    FF_MESSAGES_TYPE,
-    FF_MESSAGES_BETA_TESTER_LIST,
-    FF_MESSAGES_CANARY_USERS_REGEX
-  );
   const messagesController: MessagesController = new MessagesController(
-    messageServiceSelector,
+    appMessagesService,
     tokenService
   );
 
   const servicesController: ServicesController = new ServicesController(
-    messagesService
+    fnAppService
   );
 
   const notificationController: NotificationController = new NotificationController(

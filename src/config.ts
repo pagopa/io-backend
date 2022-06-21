@@ -398,39 +398,6 @@ export const getHttpsApiFetchWithBearer = (bearer: string) =>
     )
   );
 
-export const MessagesFeatureFlagType = t.keyof({
-  /* eslint-disable sort-keys */
-  none: null,
-  beta: null,
-  canary: null,
-  prod: null
-  /* eslint-enable sort-keys */
-});
-export type MessagesFeatureFlagType = t.TypeOf<typeof MessagesFeatureFlagType>;
-
-export const FF_MESSAGES_TYPE = pipe(
-  process.env.FF_MESSAGES_TYPE,
-  MessagesFeatureFlagType.decode,
-  E.getOrElseW(() => "none" as const)
-);
-
-export const FF_MESSAGES_BETA_TESTER_LIST = pipe(
-  process.env.FF_MESSAGES_BETA_TESTER_LIST ?? "",
-  CommaSeparatedListOf(NonEmptyString).decode,
-  E.getOrElseW(() => [])
-);
-
-export const FF_MESSAGES_CANARY_USERS_REGEX = pipe(
-  process.env.FF_MESSAGES_CANARY_USERS_REGEX,
-  NonEmptyString.decode,
-  E.getOrElse(
-    () =>
-      // XYZ will never be verified by an hashed fiscal code
-      // used as default
-      "XYZ" as NonEmptyString
-  )
-);
-
 export const API_KEY = getRequiredENVVar("API_KEY");
 export const API_URL = getRequiredENVVar("API_URL");
 export const API_BASE_PATH = getRequiredENVVar("API_BASE_PATH");
