@@ -21,6 +21,7 @@ import * as E from "fp-ts/Either";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { APIClient } from "src/clients/api";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
+import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -136,7 +137,7 @@ export default class FunctionsAppService {
   public readonly upsertServicePreferences = (
     fiscalCode: FiscalCode,
     serviceId: ServiceId,
-    servicePreferences: ServicePreference
+    servicePreferences: UpsertServicePreference
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound

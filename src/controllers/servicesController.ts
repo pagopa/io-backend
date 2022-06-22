@@ -19,6 +19,7 @@ import { PaginatedServiceTupleCollection } from "../../generated/backend/Paginat
 import { ServiceId } from "../../generated/io-api/ServiceId";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
+import { UpsertServicePreference } from "../../generated/backend/UpsertServicePreference";
 
 import FunctionsAppService from "../services/functionAppService";
 
@@ -78,7 +79,7 @@ export default class ServicesController {
         ServiceId.decode(req.params.id),
         serviceId =>
           withValidatedOrValidationError(
-            ServicePreference.decode(req.body),
+            UpsertServicePreference.decode(req.body),
             pref =>
               this.fnAppService.upsertServicePreferences(
                 user.fiscal_code,

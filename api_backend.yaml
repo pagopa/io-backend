@@ -67,7 +67,7 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/ServicePreference"
+            $ref: "#/definitions/UpsertServicePreference"
       responses:
         "200":
           description: Service Preference found.
@@ -75,6 +75,7 @@ paths:
             "$ref": "#/definitions/ServicePreference"
           examples:
             application/json:
+              can_access_message_read_status: true
               is_inbox_enabled: true
               is_email_enabled: false
               is_webhook_enabled: true
@@ -111,6 +112,7 @@ paths:
             "$ref": "#/definitions/ServicePreference"
           examples:
             application/json:
+              can_access_message_read_status: true
               is_inbox_enabled: true
               is_email_enabled: false
               is_webhook_enabled: true
@@ -1037,8 +1039,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/PreferredLanguages"
   Profile:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/Profile"
-  AppVersion:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/AppVersion"
   ExtendedProfile:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/ExtendedProfile"
   FiscalCode:
@@ -1147,8 +1147,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/ServicePreferencesSettings"
   ServicesPreferencesMode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/ServicesPreferencesMode"
+  BasicServicePreference:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/BasicServicePreference"
   ServicePreference:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/ServicePreference"
+  UpsertServicePreference:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/UpsertServicePreference"
   EnrichedMessage:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/EnrichedMessage"
   PublicMessage:
