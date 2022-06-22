@@ -1027,6 +1027,8 @@ definitions:
   # Definitions from the digital citizenship APIs
   AcceptedTosVersion:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/AcceptedTosVersion"
+  AppVersion:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/AppVersion"
   BlockedInboxOrChannels:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/BlockedInboxOrChannels"
   DepartmentName:
