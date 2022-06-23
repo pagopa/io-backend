@@ -24,18 +24,19 @@ const aTimelineId = "a-timeline-id";
 const aDate = new Date();
 const aPnUrl = "https://pn-url";
 const aPnKey = "a-pn-key";
-const aPnAttachmentUrl = `https://a.pn.attachment/attachments/an-attachments-id`;
+const aPnAttachmentUrl = `https://a.s3.pn.attachment/attachments/an-attachments-id`;
 const aPnNotificationId = "a-notification-id";
 const aDocIdx = "1";
 const aPnNotificationRecipient = { recipientType: RecipientTypeEnum.PF, taxId: "a-tax-id", denomination: "a-denomination" };
 const aPnDocument = { digests: { sha256: "a-digest" }, contentType: "application/pdf", ref: { key: "a-doc-key", versionToken: "1" }, docIdx: aDocIdx };
 const aPnNotificationObject = {
     paProtocolNumber: "a-protocol-number", subject: "a-subject", recipients: [aPnNotificationRecipient]
-    , documents: [aPnDocument], notificationFeePolicy: NotificationFeePolicyEnum.FLAT_RATE, physicalCommunicationType: PhysicalCommunicationTypeEnum.SIMPLE_REGISTERED_LETTER, iun: "a-iun", sentAt: aDate.toISOString(), notificationStatus: NotificationStatusEnum.ACCEPTED, notificationStatusHistory: [{ activeFrom: aDate.toISOString(), status: NotificationStatusEnum.ACCEPTED, relatedTimelineElements: [aTimelineId] }], timeline: [{ elementId: aTimelineId }]
+    , documents: [aPnDocument], notificationFeePolicy: NotificationFeePolicyEnum.FLAT_RATE, physicalCommunicationType: PhysicalCommunicationTypeEnum.SIMPLE_REGISTERED_LETTER, iun: aPnNotificationId, sentAt: aDate.toISOString(), notificationStatus: NotificationStatusEnum.ACCEPTED, notificationStatusHistory: [{ activeFrom: aDate.toISOString(), status: NotificationStatusEnum.ACCEPTED, relatedTimelineElements: [aTimelineId] }], timeline: [{ elementId: aTimelineId }]
 };
 const aPnNotification: FullReceivedNotification = pipe(aPnNotificationObject, FullReceivedNotification.decode, E.getOrElseW(() => { throw new Error("a pn notfication is not valid") }));
 const aPnNotificationDocument: NotificationAttachmentDownloadMetadataResponse = { contentLength: 100, contentType: "application/pdf", filename: "a-file-name", sha256: "a-digest", url: aPnAttachmentUrl };
 const documentBody = new util.TextEncoder().encode("a-document-body");
+const aThirdPartyAttachmentForPnRelativeUrl =  `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}`;
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
@@ -67,13 +68,13 @@ describe("getThirdPartyMessageDetails", () => {
             expect(result.right).toEqual(
                 expect.objectContaining({
                     status: 200,
-                    value: { details: aPnNotificationObject, attachments: [{ content_type: aPnNotificationDocument.contentType, id: `D${aPnNotification.documents[0].docIdx}`, name: aPnNotificationDocument.filename, url: new URL(aPnNotificationDocument.url??"").pathname }] }
+                    value: { details: aPnNotificationObject, attachments: [{ content_type: aPnNotification.documents[0].contentType, id: `D${aPnNotification.documents[0].docIdx}`, name: aPnNotification.documents[0].title, url: `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}` }] }
                 }))
         }
         expect(dummyGetReceivedNotification).toHaveBeenCalledTimes(1);
         expect(dummyGetReceivedNotification).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode});
-        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
-        expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
+        // expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
     });
 
     it("GIVEN a not working PN get message endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints returning an error", async () => {
@@ -93,28 +94,9 @@ describe("getThirdPartyMessageDetails", () => {
         expect(dummyGetReceivedNotification).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode});
         expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
     });
-
-    it("GIVEN a not working PN get document endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints returning an error", async () => {
-        dummyGetSentNotificationDocument.mockImplementationOnce(() => TE.of({status: 400, value: {}})());
-
-        const aFetch = pnFetch((nodeFetch as any) as typeof fetch, aPnUrl, aPnKey)
-        const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
-        const result = await client.getThirdPartyMessageDetails({ fiscal_code: aFiscalCode, id: aPnNotificationId });
-        expect(E.isRight(result)).toBeTruthy();
-        if (E.isRight(result)) {
-            expect(result.right).toEqual(
-                expect.objectContaining({
-                    status: 500
-                }))
-        }
-        expect(dummyGetReceivedNotification).toHaveBeenCalledTimes(1);
-        expect(dummyGetReceivedNotification).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode});
-        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
-        expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
-    });
 });
 
-describe("getThirdPartyMessageDetails", () => {
+describe("getThirdPartyAttachments", () => {
     beforeEach(() => jest.clearAllMocks());
 
     it("GIVEN a working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint", async () => {
@@ -124,10 +106,33 @@ describe("getThirdPartyMessageDetails", () => {
           }) as unknown) as Response)());
         const aFetch = pnFetch((dummyFetch as any) as typeof fetch, aPnUrl, aPnKey)
         const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
-        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: new URL(aPnNotificationDocument.url??"").pathname });
+        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: aThirdPartyAttachmentForPnRelativeUrl});
         expect(E.isRight(result)).toBeTruthy();
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
         expect(dummyFetch).toHaveBeenCalledTimes(1);
-        expect(dummyFetch).toHaveBeenCalledWith(`${aPnUrl}${new URL(aPnNotificationDocument.url??"").pathname}`);
+        expect(dummyFetch).toHaveBeenCalledWith(aPnAttachmentUrl);
+    });
+
+    it("GIVEN a working PN GetSentNotificationDocument endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
+        dummyGetSentNotificationDocument.mockImplementationOnce(() => TE.of({status: 400, value: {}})());
+        const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) => T.of((new NodeResponse(documentBody, {
+            status: 400,
+            statusText: "KO"
+          }) as unknown) as Response)());
+        const aFetch = pnFetch((dummyFetch as any) as typeof fetch, aPnUrl, aPnKey)
+        const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
+        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: aThirdPartyAttachmentForPnRelativeUrl });
+        expect(E.isRight(result)).toBeTruthy();
+        if (E.isRight(result)) {
+            expect(result.right).toEqual(
+                expect.objectContaining({
+                    status: 500
+                }))
+        }
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
+        expect(dummyFetch).toHaveBeenCalledTimes(0);
     });
 
     it("GIVEN a not working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
@@ -137,7 +142,7 @@ describe("getThirdPartyMessageDetails", () => {
           }) as unknown) as Response)());
         const aFetch = pnFetch((dummyFetch as any) as typeof fetch, aPnUrl, aPnKey)
         const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
-        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: new URL(aPnNotificationDocument.url??"").pathname });
+        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: aThirdPartyAttachmentForPnRelativeUrl });
         expect(E.isRight(result)).toBeTruthy();
         if (E.isRight(result)) {
             expect(result.right).toEqual(
@@ -145,8 +150,24 @@ describe("getThirdPartyMessageDetails", () => {
                     status: 500
                 }))
         }
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
         expect(dummyFetch).toHaveBeenCalledTimes(1);
-        expect(dummyFetch).toHaveBeenCalledWith(`${aPnUrl}${new URL(aPnNotificationDocument.url??"").pathname}`);
+        expect(dummyFetch).toHaveBeenCalledWith(aPnAttachmentUrl);
+    });
+
+    it("GIVEN not working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint returning an error", async () => {
+        const aFetch = pnFetch((nodeFetch as any) as typeof fetch, aPnUrl, aPnKey);
+        const client = createClient({ baseUrl: "https://localhost", fetchApi: aFetch });
+        const result = await client.getThirdPartyMessageAttachment({ fiscal_code: aFiscalCode, id: aPnNotificationId, attachment_url: "/not/pn/url" });
+        expect(E.isRight(result)).toBeTruthy();
+        if (E.isRight(result)) {
+            expect(result.right).toEqual(
+                expect.objectContaining({
+                    status: 500
+                }))
+        }
+        expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
     });
 
 });

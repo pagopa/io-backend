@@ -10,10 +10,11 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
 import { NotificationDocument } from "generated/piattaforma-notifiche/NotificationDocument";
+import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
+import { match } from "ts-pattern";
 import { FullReceivedNotification } from "../../generated/piattaforma-notifiche/FullReceivedNotification";
 import { ThirdPartyAttachment } from "../../generated/third-party-service/ThirdPartyAttachment";
 import { ThirdPartyMessageDetail } from "../../generated/third-party-service/ThirdPartyMessageDetail";
-import { NotificationAttachmentDownloadMetadataResponse } from "../../generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { PnAPIClient } from "../clients/pn-client";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
@@ -29,6 +30,14 @@ export const ThirdPartyMessagesUrl = pathParamsFromUrl(
 export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)/(.+)$"),
   ([id, url]) => `/messages/${id}/${url}`
+);
+
+export const PnDocumentUrl = pathParamsFromUrl(
+  RegExp(
+    "[/]+delivery[/]+notifications[/]+sent[/]+([^/]+)[/]+attachments[/]+documents[/]+([^/]+)$"
+  ),
+  ([iun, docIdx]) =>
+    `/delivery/notifications/sent/${iun}/attachments/documents/${docIdx}`
 );
 
 const WithFiscalCode = t.interface({ fiscal_code: NonEmptyString });
@@ -60,48 +69,24 @@ const retrieveNotificationDetails = (
   );
 
 const retrieveAttachmentsMetadata = (
-  origFetch: typeof fetch,
-  pnUrl: string,
-  pnApiKey: string,
-  headers: WithFiscalCode,
   [_, iun]: ReadonlyArray<string>,
-  { docIdx }: NotificationDocument
-) =>
+  { docIdx, contentType, title }: NotificationDocument
+): TE.TaskEither<Error, ThirdPartyAttachment> =>
   pipe(
-    () =>
-      PnAPIClient(pnUrl, origFetch).getSentNotificationDocument({
-        ApiKeyAuth: pnApiKey,
-        docIdx: Number(docIdx),
-        iun,
-        "x-pagopa-cx-taxid": headers.fiscal_code
-      }),
-    TE.mapLeft(errorsToError),
-    TE.chain(
-      TE.fromPredicate(
-        r => r.status === 200,
-        r => Error(`Failed to fetch PN SentNotificationDocument: ${r.status}`)
-      )
-    ),
-    TE.map(
-      response =>
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        response.value as NotificationAttachmentDownloadMetadataResponse
-    ),
-    TE.chainEitherK(metadata =>
-      pipe(
-        {
-          content_type: metadata.contentType,
-          id: `D${docIdx}`,
-          name: metadata.filename,
-          url: new URL(metadata.url ?? "").pathname
-        },
-        ThirdPartyAttachment.decode,
-        E.mapLeft(errorsToError)
-      )
-    )
+    {
+      content_type: contentType,
+      id: `D${docIdx}`,
+      name: title,
+      url: PnDocumentUrl.encode([iun, docIdx ?? ""])
+    },
+    ThirdPartyAttachment.decode,
+    E.mapLeft(errorsToError),
+    TE.fromEither
   );
 
-const checkHeaders = (headers?: HeadersInit) =>
+const checkHeaders = (
+  headers?: HeadersInit
+): TE.TaskEither<Error, WithFiscalCode> =>
   pipe(
     headers,
     O.fromNullable,
@@ -110,7 +95,7 @@ const checkHeaders = (headers?: HeadersInit) =>
     TE.fromEither
   );
 
-const errorResponse = (error: Error) =>
+const errorResponse = (error: Error): Response =>
   pipe(
     {
       detail: error.message,
@@ -131,7 +116,7 @@ export const redirectMessages = (
   pnApiKey: string,
   url: string,
   init?: RequestInit
-) => () =>
+) => (): Promise<Response> =>
   pipe(
     init?.headers,
     checkHeaders,
@@ -154,14 +139,7 @@ export const redirectMessages = (
               pipe(
                 receivedNotification.documents,
                 RA.map(document =>
-                  retrieveAttachmentsMetadata(
-                    origFetch,
-                    pnUrl,
-                    pnApiKey,
-                    headers,
-                    params,
-                    document
-                  )
+                  retrieveAttachmentsMetadata(params, document)
                 ),
                 TE.sequenceArray,
                 TE.map(attachments =>
@@ -187,27 +165,88 @@ export const redirectMessages = (
     TE.toUnion
   )();
 
+const getPnDocumentUrl = (
+  origFetch: typeof fetch,
+  pnUrl: string,
+  pnApiKey: string,
+  url: string,
+  headers: WithFiscalCode
+): TE.TaskEither<Error, NonEmptyString> =>
+  pipe(
+    url,
+    PnDocumentUrl.decode,
+    E.mapLeft(errorsToError),
+    TE.fromEither,
+    TE.chain(([_, iun, docIdx]) =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            PnAPIClient(pnUrl, origFetch).getSentNotificationDocument({
+              ApiKeyAuth: pnApiKey,
+              docIdx: Number(docIdx),
+              iun,
+              "x-pagopa-cx-taxid": headers.fiscal_code
+            }),
+          E.toError
+        ),
+        TE.chainEitherK(E.mapLeft(errorsToError)),
+        TE.chain(
+          TE.fromPredicate(
+            r => r.status === 200,
+            r =>
+              Error(`Failed to fetch PN SentNotificationDocument: ${r.status}`)
+          )
+        ),
+        TE.map(
+          response =>
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            (response.value as NotificationAttachmentDownloadMetadataResponse)
+              .url
+        ),
+        TE.chainEitherK(flow(NonEmptyString.decode, E.mapLeft(errorsToError)))
+      )
+    )
+  );
+
 export const redirectAttachment = (
   origFetch: typeof fetch,
   pnUrl: string,
-  url: string
-) => () =>
+  pnApiKey: string,
+  url: string,
+  init?: RequestInit
+) => (): Promise<Response> =>
   pipe(
-    url,
-    ThirdPartyAttachmentUrl.decode,
-    E.mapLeft(errorsToError),
-    TE.fromEither,
-    TE.chainEitherK(
-      ([_path, _id, attachmentRelativeUrl]: ReadonlyArray<string>) =>
-        E.tryCatch(() => new URL(attachmentRelativeUrl, pnUrl), E.toError)
-    ),
-    TE.chain(attachmentAbsoluteUrl =>
-      TE.tryCatch(() => origFetch(attachmentAbsoluteUrl.toString()), E.toError)
-    ),
-    TE.chain(
-      TE.fromPredicate(
-        r => r.status === 200,
-        r => Error(`Failed to fetch PN download attachment: ${r.status}`)
+    init?.headers,
+    checkHeaders,
+    TE.chain(headers =>
+      pipe(
+        url,
+        ThirdPartyAttachmentUrl.decode,
+        E.mapLeft(errorsToError),
+        TE.fromEither,
+        TE.chain(([_, _id, getAttachmentUrl]) =>
+          match(getAttachmentUrl)
+            .when(
+              au => E.isRight(PnDocumentUrl.decode(au)),
+              au => getPnDocumentUrl(origFetch, pnUrl, pnApiKey, au, headers)
+            )
+            .otherwise(au =>
+              TE.left(
+                new Error(
+                  `Can not find a Piattaforma Notifiche get attachment implementation for ${au}`
+                )
+              )
+            )
+        ),
+        TE.chain(attachmentBinaryUrl =>
+          TE.tryCatch(() => origFetch(attachmentBinaryUrl), E.toError)
+        ),
+        TE.chain(
+          TE.fromPredicate(
+            r => r.status === 200,
+            r => Error(`Failed to fetch PN download attachment: ${r.status}`)
+          )
+        )
       )
     ),
     TE.mapLeft(errorResponse),
@@ -219,14 +258,23 @@ export const pnFetch = (
   pnUrl: string,
   pnApiKey: string
 ): typeof fetch => (input: RequestInfo, init?: RequestInit) =>
-  pipe(input, getPath, url =>
-    E.isRight(ThirdPartyMessagesUrl.decode(url))
-      ? redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
-      : E.isRight(ThirdPartyAttachmentUrl.decode(url))
-      ? redirectAttachment(origFetch, pnUrl, url)
-      : () => {
-          throw Error(
+  match(getPath(input))
+    .when(
+      url => E.isRight(ThirdPartyMessagesUrl.decode(url)),
+      url => redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
+    )
+    .when(
+      url => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
+      url => redirectAttachment(origFetch, pnUrl, pnApiKey, url, init)
+    )
+    .otherwise(url =>
+      pipe(
+        TE.left(
+          new Error(
             `Can not find a Piattaforma Notifiche implementation for ${url}`
-          );
-        }
-  )();
+          )
+        ),
+        TE.mapLeft(errorResponse),
+        TE.toUnion
+      )
+    )();
