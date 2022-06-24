@@ -26,7 +26,6 @@ export const toInitializedProfile = (
   user: User
 ): InitializedProfile => ({
   accepted_tos_version: profile.accepted_tos_version,
-  last_app_version: profile.last_app_version,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
   date_of_birth:
     user.date_of_birth !== undefined
@@ -43,6 +42,7 @@ export const toInitializedProfile = (
   is_email_validated: profile.is_email_validated,
   is_inbox_enabled: profile.is_inbox_enabled,
   is_webhook_enabled: profile.is_webhook_enabled,
+  last_app_version: profile.last_app_version,
   name: user.name,
   preferred_languages: profile.preferred_languages,
   service_preferences_settings: profile.service_preferences_settings,
