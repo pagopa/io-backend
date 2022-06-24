@@ -416,7 +416,8 @@ export default class NewMessagesService {
       TE.chainW(
         // MessageWithThirdPartyData.is fails, we need to check the decode instead
         TE.fromPredicate(isMessageWithThirdPartyData, () =>
-          ResponseErrorInternal(
+          ResponseErrorValidation(
+            "Bad request",
             "The message retrieved is not a valid message with third-party data"
           )
         )

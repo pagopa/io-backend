@@ -1031,9 +1031,9 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
     expect(mockGetTPMessageFromExternalService).not.toHaveBeenCalled();
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal",
+      kind: "IResponseErrorValidation",
       detail:
-        "Internal server error: The message retrieved is not a valid message with third-party data"
+        "Bad request: The message retrieved is not a valid message with third-party data"
     });
   });
 
