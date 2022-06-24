@@ -19,7 +19,8 @@ import {
   aSpidEmailAddress,
   aValidName,
   aValidFamilyname
-} from "../../__mocks__/user_mock";import ApiClientFactory from "../apiClientFactory";
+} from "../../__mocks__/user_mock";
+import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
 
 const aValidAPIEmail = anEmailAddress;
@@ -48,6 +49,14 @@ const validApiProfileResponse = {
   status: 200,
   value: validApiProfile
 };
+
+const lastAppVersion = "0.0.1";
+
+const validApiProfileResponseWithLastAppVersion = {
+  status: 200,
+  value: { ...validApiProfile, last_app_version: lastAppVersion }
+};
+
 const proxyInitializedProfileResponse = {
   blocked_inbox_or_channels: undefined,
   email: aValidAPIEmail,
@@ -140,6 +149,27 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with last_app_version", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithLastAppVersion)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        last_app_version: lastAppVersion
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -203,6 +233,23 @@ describe("ProfileService#getApiProfile", () => {
       value: validApiProfileResponse.value
     });
   });
+
+  it("returns a user profile from the API with last_app_version", async () => {
+    mockGetProfile.mockImplementation(() => t.success(validApiProfileResponseWithLastAppVersion));
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {...validApiProfileResponse.value, last_app_version: lastAppVersion}
+    });
+  });
+
 
   it("returns an 429 HTTP error from getApiProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
