@@ -8,6 +8,7 @@ import {
 import { Profile } from "../../../generated/backend/Profile";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { AppVersion } from "../../../generated/io-api/AppVersion";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 import { APIClient } from "../../clients/api";
@@ -50,7 +51,7 @@ const validApiProfileResponse = {
   value: validApiProfile
 };
 
-const lastAppVersion = "0.0.1";
+const lastAppVersion = "0.0.1" as AppVersion;
 
 const validApiProfileResponseWithLastAppVersion = {
   status: 200,
@@ -235,7 +236,9 @@ describe("ProfileService#getApiProfile", () => {
   });
 
   it("returns a user profile from the API with last_app_version", async () => {
-    mockGetProfile.mockImplementation(() => t.success(validApiProfileResponseWithLastAppVersion));
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithLastAppVersion)
+    );
 
     const service = new ProfileService(api);
 
@@ -246,10 +249,12 @@ describe("ProfileService#getApiProfile", () => {
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: {...validApiProfileResponse.value, last_app_version: lastAppVersion}
+      value: {
+        ...validApiProfileResponse.value,
+        last_app_version: lastAppVersion
+      }
     });
   });
-
 
   it("returns an 429 HTTP error from getApiProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
@@ -316,6 +321,31 @@ describe("ProfileService#updateProfile", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: proxyInitializedProfileResponse
+    });
+  });
+
+  it("update an user profile to the API with new last_app_version", async () => {
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithLastAppVersion)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.updateProfile(mockedUser, {
+      ...updateProfileRequest,
+      last_app_version: lastAppVersion
+    });
+
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      body: { ...updateProfileRequest, last_app_version: lastAppVersion }
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        last_app_version: lastAppVersion
+      }
     });
   });
 
