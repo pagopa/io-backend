@@ -1171,6 +1171,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/MessageCategoryPayment"
   LegalMessageWithContent:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/LegalMessageWithContent"
+  MessageCategoryPN:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/MessageCategoryPN"
   LegalMessage:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/LegalMessage"
   
