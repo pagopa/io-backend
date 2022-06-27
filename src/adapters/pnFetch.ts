@@ -32,10 +32,10 @@ export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
   ([id, url]) => `/messages/${id}/${url}`
 );
 
+const basePnDocument = "[/]+delivery[/]+notifications[/]+sent[/]+([^/]+)";
+const attachmentPnDocument = "[/]+attachments[/]+documents[/]+([^/]+)$";
 export const PnDocumentUrl = pathParamsFromUrl(
-  RegExp(
-    "[/]+delivery[/]+notifications[/]+sent[/]+([^/]+)[/]+attachments[/]+documents[/]+([^/]+)$"
-  ),
+  RegExp(`${basePnDocument}${attachmentPnDocument}`),
   ([iun, docIdx]) =>
     `/delivery/notifications/sent/${iun}/attachments/documents/${docIdx}`
 );
