@@ -33,7 +33,7 @@ jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 
 const mockGetService = jest.fn();
-jest.mock("../services/messagesService", () => {
+jest.mock("../services/functionAppService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getService: mockGetService
