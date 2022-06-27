@@ -1,5 +1,3 @@
-/* tslint:disable:no-any */
-/* tslint:disable:no-object-mutation */
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   ResponseErrorNotFound,
@@ -28,6 +26,7 @@ import { profileMissingErrorResponse } from "../../types/profile";
 import ProfileController from "../profileController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { AppVersion } from "../../../generated/backend/AppVersion";
 
 const aTimestamp = 1518010929530;
 
@@ -56,7 +55,8 @@ const proxyUserResponse = {
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
-  version: 1 as NonNegativeInteger
+  version: 1 as NonNegativeInteger,
+  last_app_version: "0.0.1"
 };
 
 const apiUserProfileResponse = {
@@ -65,7 +65,8 @@ const apiUserProfileResponse = {
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
-  version: 42
+  version: 42,
+  last_app_version: "0.0.1"
 };
 
 // mock for upsert user (Extended Profile)
@@ -211,6 +212,33 @@ describe("ProfileController#getApiProfile", () => {
     jest.clearAllMocks();
   });
 
+  it("calls the getApiProfile on the ProfileService with valid values and return a profile without last_app_version", async () => {
+    const req = mockReq();
+
+    const {last_app_version, ...apiUserProfileResponseWithoutLastAppVersion} = apiUserProfileResponse;
+
+    mockGetApiProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(apiUserProfileResponseWithoutLastAppVersion))
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(
+      profileService,
+      redisSessionStorage
+    );
+    const response = await controller.getApiProfile(req);
+
+    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: apiUserProfileResponseWithoutLastAppVersion
+    });
+  });
+
   it("calls the getApiProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
 
@@ -267,7 +295,7 @@ describe("ProfileController#upsertProfile", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the upsertProfile on the ProfileService with valid values", async () => {
+  it("calls the upsertProfile on the ProfileService with valid values without last_app_version", async () => {
     const req = mockReq();
 
     mockUpdateProfile.mockReturnValue(
@@ -299,6 +327,52 @@ describe("ProfileController#upsertProfile", () => {
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: proxyUserResponse
+    });
+  });
+
+  it("calls the upsertProfile on the ProfileService with valid values with last_app_version", async () => {
+    const req = mockReq();
+
+    mockUpdateProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson({
+          ...proxyUserResponse,
+          last_app_version: "0.0.1" as AppVersion
+        })
+      )
+    );
+
+    req.user = mockedUser;
+    req.body = {
+      ...mockedUpsertProfile,
+      last_app_version: "0.0.1" as AppVersion
+    };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(
+      profileService,
+      redisSessionStorage
+    );
+
+    const response = await controller.updateProfile(req);
+
+    const errorOrProfile = Profile.decode(req.body);
+    expect(E.isRight(errorOrProfile)).toBeTruthy();
+    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
+    if (E.isRight(errorOrProfile)) {
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        mockedUser,
+        errorOrProfile.right
+      );
+    }
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyUserResponse,
+        last_app_version: "0.0.1" as AppVersion
+      }
     });
   });
 

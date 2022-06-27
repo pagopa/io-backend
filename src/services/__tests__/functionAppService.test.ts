@@ -12,8 +12,8 @@ import ApiClientFactory from "../apiClientFactory";
 import FunctionsAppService from "../functionAppService";
 import mockRes from "../../__mocks__/response";
 import { ProblemJson } from "../../../generated/io-api/ProblemJson";
-import { ServicePreference } from "../../../generated/io-api/ServicePreference";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { UpsertServicePreference } from "../../../generated/io-api/UpsertServicePreference";
 
 const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";
@@ -213,7 +213,7 @@ describe("FunctionsAppService#getServicePreferences", () => {
 });
 
 describe("FunctionsAppService#upsertServicePreferences", () => {
-  const aServicePreferences: ServicePreference = {
+  const aServicePreferences: UpsertServicePreference = {
     is_email_enabled: true,
     is_inbox_enabled: true,
     is_webhook_enabled: false,
