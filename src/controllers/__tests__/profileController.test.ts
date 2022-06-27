@@ -56,7 +56,7 @@ const proxyUserResponse = {
   spid_email: anEmailAddress,
   token: "123hexToken",
   version: 1 as NonNegativeInteger,
-  last_app_version: "UNKNOWN"
+  last_app_version: "0.0.1"
 };
 
 const apiUserProfileResponse = {
@@ -66,7 +66,7 @@ const apiUserProfileResponse = {
   is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
   version: 42,
-  last_app_version: "UNKNOWN"
+  last_app_version: "0.0.1"
 };
 
 // mock for upsert user (Extended Profile)
@@ -210,6 +210,33 @@ describe("ProfileController#getProfile", () => {
 describe("ProfileController#getApiProfile", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("calls the getApiProfile on the ProfileService with valid values and return a profile without last_app_version", async () => {
+    const req = mockReq();
+
+    const {last_app_version, ...apiUserProfileResponseWithoutLastAppVersion} = apiUserProfileResponse;
+
+    mockGetApiProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(apiUserProfileResponseWithoutLastAppVersion))
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(
+      profileService,
+      redisSessionStorage
+    );
+    const response = await controller.getApiProfile(req);
+
+    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: apiUserProfileResponseWithoutLastAppVersion
+    });
   });
 
   it("calls the getApiProfile on the ProfileService with valid values", async () => {
