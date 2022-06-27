@@ -6,7 +6,7 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
 import { NotificationDocument } from "generated/piattaforma-notifiche/NotificationDocument";
@@ -40,14 +40,14 @@ export const PnDocumentUrl = pathParamsFromUrl(
     `/delivery/notifications/sent/${iun}/attachments/documents/${docIdx}`
 );
 
-const WithFiscalCode = t.interface({ fiscal_code: NonEmptyString });
+const WithFiscalCode = t.interface({ fiscal_code: FiscalCode });
 type WithFiscalCode = t.TypeOf<typeof WithFiscalCode>;
 
 const retrieveNotificationDetails = (
   origFetch: typeof fetch,
   pnUrl: string,
   pnApiKey: string,
-  headers: WithFiscalCode,
+  fiscalCode: FiscalCode,
   [_, iun]: ReadonlyArray<string>
 ) =>
   pipe(
@@ -55,7 +55,7 @@ const retrieveNotificationDetails = (
       PnAPIClient(pnUrl, origFetch).getReceivedNotification({
         ApiKeyAuth: pnApiKey,
         iun,
-        "x-pagopa-cx-taxid": headers.fiscal_code
+        "x-pagopa-cx-taxid": fiscalCode
       }),
     TE.mapLeft(errorsToError),
     TE.chain(
@@ -75,7 +75,7 @@ const retrieveAttachmentsMetadata = (
   pipe(
     {
       content_type: contentType,
-      id: `D${docIdx}`,
+      id: docIdx,
       name: title,
       url: PnDocumentUrl.encode([iun, docIdx ?? ""])
     },
@@ -132,7 +132,7 @@ export const redirectMessages = (
               origFetch,
               pnUrl,
               pnApiKey,
-              headers,
+              headers.fiscal_code,
               params
             ),
             TE.chain(receivedNotification =>
@@ -170,7 +170,7 @@ const getPnDocumentUrl = (
   pnUrl: string,
   pnApiKey: string,
   url: string,
-  headers: WithFiscalCode
+  fiscalCode: FiscalCode
 ): TE.TaskEither<Error, NonEmptyString> =>
   pipe(
     url,
@@ -185,7 +185,7 @@ const getPnDocumentUrl = (
               ApiKeyAuth: pnApiKey,
               docIdx: Number(docIdx),
               iun,
-              "x-pagopa-cx-taxid": headers.fiscal_code
+              "x-pagopa-cx-taxid": fiscalCode
             }),
           E.toError
         ),
@@ -228,7 +228,14 @@ export const redirectAttachment = (
           match(getAttachmentUrl)
             .when(
               au => E.isRight(PnDocumentUrl.decode(au)),
-              au => getPnDocumentUrl(origFetch, pnUrl, pnApiKey, au, headers)
+              au =>
+                getPnDocumentUrl(
+                  origFetch,
+                  pnUrl,
+                  pnApiKey,
+                  au,
+                  headers.fiscal_code
+                )
             )
             .otherwise(au =>
               TE.left(
