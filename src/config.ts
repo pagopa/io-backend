@@ -807,3 +807,17 @@ const IS_APPBACKENDLI = pipe(
 
 export const FF_ENABLE_NOTIFY_ENDPOINT = IS_APPBACKENDLI;
 export const FF_ENABLE_SESSION_LOCK_ENDPOINT = IS_APPBACKENDLI;
+
+// PN Service Id
+export const PN_SERVICE_ID = pipe(
+  process.env.PN_SERVICE_ID,
+  NonEmptyString.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid PN_SERVICE_ID environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);

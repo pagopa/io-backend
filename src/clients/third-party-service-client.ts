@@ -15,6 +15,7 @@ import {
   Client,
   createClient
 } from "../../generated/third-party-service/client";
+import { pnFetch } from "../adapters/pnFetch";
 
 type Fetch = (
   input: RequestInfo | URL,
@@ -59,7 +60,7 @@ export const getThirdPartyServiceClient = (
   thirdPartyConfig: ThirdPartyConfig,
   fetchApi: Fetch = (nodeFetch as unknown) as Fetch
 ) => (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
-  const config = thirdPartyConfig.testEnvironment?.testUsers.includes(
+  const environment = thirdPartyConfig.testEnvironment?.testUsers.includes(
     fiscalCode
   )
     ? thirdPartyConfig.testEnvironment
@@ -70,12 +71,19 @@ export const getThirdPartyServiceClient = (
   const fetchApiWithRedirectAndAuthentication = pipe(
     fetchApi,
     withoutRedirect,
-    withApiKey(config.detailsAuthentication)
+    withApiKey(environment.detailsAuthentication),
+    fetch =>
+      pnFetch(
+        fetch,
+        thirdPartyConfig.serviceId,
+        environment.baseUrl,
+        environment.detailsAuthentication.key
+      )
   );
 
   return createClient<"fiscal_code">({
     basePath: "",
-    baseUrl: config.baseUrl,
+    baseUrl: environment.baseUrl,
     fetchApi: fetchApiWithRedirectAndAuthentication,
     withDefaults: op => params => op({ ...params, fiscal_code: fiscalCode })
   });
