@@ -8,6 +8,7 @@ import {
 import { Profile } from "../../../generated/backend/Profile";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { AppVersion } from "../../../generated/io-api/AppVersion";
 import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
 import { NewProfile } from "../../../generated/io-api/NewProfile";
 import { APIClient } from "../../clients/api";
@@ -19,7 +20,8 @@ import {
   aSpidEmailAddress,
   aValidName,
   aValidFamilyname
-} from "../../__mocks__/user_mock";import ApiClientFactory from "../apiClientFactory";
+} from "../../__mocks__/user_mock";
+import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
 
 const aValidAPIEmail = anEmailAddress;
@@ -48,6 +50,14 @@ const validApiProfileResponse = {
   status: 200,
   value: validApiProfile
 };
+
+const lastAppVersion = "0.0.1" as AppVersion;
+
+const validApiProfileResponseWithLastAppVersion = {
+  status: 200,
+  value: { ...validApiProfile, last_app_version: lastAppVersion }
+};
+
 const proxyInitializedProfileResponse = {
   blocked_inbox_or_channels: undefined,
   email: aValidAPIEmail,
@@ -140,6 +150,27 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with last_app_version", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithLastAppVersion)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        last_app_version: lastAppVersion
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -201,6 +232,27 @@ describe("ProfileService#getApiProfile", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: validApiProfileResponse.value
+    });
+  });
+
+  it("returns a user profile from the API with last_app_version", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithLastAppVersion)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...validApiProfileResponse.value,
+        last_app_version: lastAppVersion
+      }
     });
   });
 
@@ -269,6 +321,31 @@ describe("ProfileService#updateProfile", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: proxyInitializedProfileResponse
+    });
+  });
+
+  it("update an user profile to the API with new last_app_version", async () => {
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithLastAppVersion)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.updateProfile(mockedUser, {
+      ...updateProfileRequest,
+      last_app_version: lastAppVersion
+    });
+
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      body: { ...updateProfileRequest, last_app_version: lastAppVersion }
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        last_app_version: lastAppVersion
+      }
     });
   });
 
