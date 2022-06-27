@@ -68,7 +68,7 @@ describe("getThirdPartyMessageDetails", () => {
             expect(result.right).toEqual(
                 expect.objectContaining({
                     status: 200,
-                    value: { details: aPnNotificationObject, attachments: [{ content_type: aPnNotification.documents[0].contentType, id: `D${aPnNotification.documents[0].docIdx}`, name: aPnNotification.documents[0].title, url: `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}` }] }
+                    value: { details: aPnNotificationObject, attachments: [{ content_type: aPnNotification.documents[0].contentType, id: `${aPnNotification.documents[0].docIdx}`, name: aPnNotification.documents[0].title, url: `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}` }] }
                 }))
         }
         expect(dummyGetReceivedNotification).toHaveBeenCalledTimes(1);
