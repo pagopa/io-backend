@@ -18,7 +18,7 @@ import {
 import { NotificationAttachmentDownloadMetadataResponse } from "../../../generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { pipe } from "fp-ts/lib/function";
 import { Response as NodeResponse } from "node-fetch";
-const util = require('util');
+import * as util from "util";
 
 const aTimelineId = "a-timeline-id";
 const aDate = new Date();
