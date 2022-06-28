@@ -8,7 +8,8 @@ import { ServiceId } from "generated/io-api/ServiceId";
 import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
-  ApiKeyAuthenticationConfig
+  ApiKeyAuthenticationConfig,
+  EnvironmentConfig
 } from "src/utils/thirdPartyConfig";
 
 import {
@@ -21,13 +22,14 @@ type Fetch = (
   input: RequestInfo | URL,
   init?: RequestInit | undefined
 ) => Promise<Response>;
+
 export type ThirdPartyServiceClient = typeof getThirdPartyServiceClient;
 
 /**
  * Enrich a fetch api with header apiKey-value
  *
- * @param apiKey
- * @returns
+ * @param apiKey the api key couple name/value to be added to fetch
+ * @returns a fetch with api key name/value in header
  */
 const withApiKey = (apiKey: ApiKeyAuthenticationConfig) => (
   fetchApi: Fetch
@@ -43,11 +45,27 @@ const withApiKey = (apiKey: ApiKeyAuthenticationConfig) => (
 /**
  * Enrich a fetch api with manual redirect configuration
  *
- * @param apiKey
- * @returns
+ * @returns a fetch with manual redirect
  */
 const withoutRedirect = (fetchApi: Fetch): Fetch => async (input, init) =>
   fetchApi(input, { ...init, redirect: "manual" });
+
+/**
+ * Enrich a fetch api with pnFetch
+ *
+ * @param serviceId id of the TP service
+ * @param environment the enviroment to call (test/prod)
+ * @returns a fetch that redirects calls in case TP is PN service
+ */
+const withPNFetch = (serviceId: ServiceId, environment: EnvironmentConfig) => (
+  fetchApi: Fetch
+): Fetch =>
+  pnFetch(
+    fetchApi,
+    serviceId,
+    environment.baseUrl,
+    environment.detailsAuthentication.key
+  ) as Fetch;
 
 /**
  *
@@ -72,13 +90,7 @@ export const getThirdPartyServiceClient = (
     fetchApi,
     withoutRedirect,
     withApiKey(environment.detailsAuthentication),
-    fetch =>
-      pnFetch(
-        fetch,
-        thirdPartyConfig.serviceId,
-        environment.baseUrl,
-        environment.detailsAuthentication.key
-      )
+    withPNFetch(thirdPartyConfig.serviceId, environment)
   );
 
   return createClient<"fiscal_code">({
