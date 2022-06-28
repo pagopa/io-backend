@@ -231,43 +231,208 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/Timestamp"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.0/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/InstanceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.6.1/openapi/index.yaml#/definitions/InstanceId"
   CommonCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CommonCard"
+    type: object
+    properties:
+      activation_date:
+        $ref: "#/definitions/Timestamp"
+      expiration_date:
+        $ref: "#/definitions/Timestamp"
+    required:
+      - activation_date
+      - expiration_date
+    
   CardPending:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardPending"
+    type: object
+    properties:
+      status:
+        type: string
+        enum:
+          - PENDING
+    required:
+      - status
   CardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardActivated"
+    allOf:
+      - $ref: "#/definitions/CommonCard"
+      - type: object
+        properties:
+          status:
+            type: string
+            enum:
+              - ACTIVATED
+        required:
+          - status
   CardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardRevoked"
+    allOf:
+      - $ref: "#/definitions/CommonCard"
+      - type: object
+        properties:
+          status:
+            type: string
+            enum:
+              - REVOKED
+          revocation_date:
+            $ref: "#/definitions/Timestamp"
+          revocation_reason:
+            type: string
+            minLength: 1
+        required:
+          - status
+          - revocation_date
+          - revocation_reason
   CardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardExpired"
+    allOf:
+      - $ref: "#/definitions/CommonCard"
+      - type: object
+        properties:
+          status:
+            type: string
+            enum:
+              - EXPIRED
+        required:
+          - status
+  CardPendingDelete:
+    allOf:
+      - $ref: "#/definitions/CommonCard"
+      - type: object
+        properties:
+          status:
+            type: string
+            enum:
+              - PENDING_DELETE
+        required:
+          - status
   Card:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/Card"
-  CgnActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CgnActivationDetail"
-  EycaActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaActivationDetail"
-  EycaCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCard"
-  EycaCardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCardActivated"
-  EycaCardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCardExpired"
-  EycaCardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/EycaCardRevoked"
+    x-one-of: true
+    allOf:
+      - $ref: "#/definitions/CardPending"
+      - $ref: "#/definitions/CardPendingDelete"
+      - $ref: "#/definitions/CardActivated"
+      - $ref: "#/definitions/CardRevoked"
+      - $ref: "#/definitions/CardExpired"
+    x-example: 
+      status: ACTIVATED
+      activation_date: "2021-10-13T00:00:00.000Z"
+      expiration_date: "2030-10-13T00:00:00.000Z"
+
   CcdbNumber:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CcdbNumber"
-  Otp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/Otp"
+    type: string
+    description: The internal CCDB Card number
+    pattern: "^[A-Z][0-9]{3}-[A-Z][0-9]{3}-[A-Z][0-9]{3}-[A-Z][0-9]{3}$"
+    minLength: 1
+
+  EycaCardActivated:
+    allOf:
+      - $ref: "#/definitions/CardActivated"
+      - type: object
+        properties:
+          card_number:
+            $ref: "#/definitions/CcdbNumber"
+        required:
+          - card_number
+  EycaCardExpired:
+    allOf:
+      - $ref: "#/definitions/CardExpired"
+      - type: object
+        properties:
+          card_number:
+            $ref: "#/definitions/CcdbNumber"
+        required:
+          - card_number
+  EycaCardRevoked:
+    allOf:
+      - $ref: "#/definitions/CardRevoked"
+      - type: object
+        properties:
+          card_number:
+            $ref: "#/definitions/CcdbNumber"
+        required:
+          - card_number
+  EycaCardPendingDelete:
+    allOf:
+      - $ref: "#/definitions/CardPendingDelete"
+      - type: object
+        properties:
+          card_number:
+            $ref: "#/definitions/CcdbNumber"
+        required:
+          - card_number
+  EycaCard:
+    x-one-of: true
+    allOf:
+      - $ref: "#/definitions/CardPending"
+      - $ref: "#/definitions/EycaCardPendingDelete"
+      - $ref: "#/definitions/EycaCardActivated"
+      - $ref: "#/definitions/EycaCardRevoked"
+      - $ref: "#/definitions/EycaCardExpired"
+    x-example: 
+      status: ACTIVATED
+      activation_date: "2021-10-13T00:00:00.000Z"
+      expiration_date: "2030-10-13T00:00:00.000Z"
+
+  CgnActivationDetail:
+    type: object
+    properties:
+      instance_id:
+        $ref: "#/definitions/InstanceId"
+      status:
+        type: string
+        x-extensible-enum:
+          - PENDING
+          - RUNNING
+          - COMPLETED
+          - ERROR
+          - UNKNOWN
+      created_at:
+        $ref: "#/definitions/Timestamp"
+      last_updated_at:
+        $ref: "#/definitions/Timestamp"
+    required:
+      - instance_id
+      - status
+
+  EycaActivationDetail:
+    type: object
+    properties:
+      status:
+        type: string
+        x-extensible-enum:
+          - PENDING
+          - RUNNING
+          - COMPLETED
+          - ERROR
+          - UNKNOWN
+      created_at:
+        $ref: "#/definitions/Timestamp"
+      last_updated_at:
+        $ref: "#/definitions/Timestamp"
+    required:
+      - status
+
   OtpCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/OtpCode"
+    description: The unique otp code that can be use for discounts
+    type: string
+    pattern: "^[A-Z0-9]{9,13}$"
+  Otp:
+    type: object
+    properties:
+      code:
+        $ref: "#/definitions/OtpCode"
+      expires_at:
+        $ref: "#/definitions/Timestamp"
+      ttl:
+        type: number
+    required:
+      - code
+      - expires_at
+      - ttl
 
 securityDefinitions:
   Bearer:
