@@ -67,7 +67,8 @@ import {
   PECSERVERS,
   APP_MESSAGES_API_CLIENT,
   FF_ENABLE_NOTIFY_ENDPOINT,
-  FF_ENABLE_SESSION_LOCK_ENDPOINT
+  FF_ENABLE_SESSION_LOCK_ENDPOINT,
+  THIRD_PARTY_CONFIG_LIST
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -138,6 +139,7 @@ import MitVoucherController from "./controllers/mitVoucherController";
 import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
+import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -427,13 +429,20 @@ export function newApp({
           authMiddlewares.bearerSession,
           authMiddlewares.local
         );
-        // Create the messages service.
+
+        const thirdPartyClientFactory = getThirdPartyServiceClientFactory(
+          THIRD_PARTY_CONFIG_LIST
+        );
+
+        // Create the function app service.
         const FN_APP_SERVICE = new FunctionsAppService(API_CLIENT);
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT,
+          thirdPartyClientFactory,
           new PecServerClientFactory(PECSERVERS)
         );
+
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
         // Register the user metadata storage service.
         const USER_METADATA_STORAGE = new RedisUserMetadataStorage(

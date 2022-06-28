@@ -14,10 +14,12 @@ import { NotificationAttachmentDownloadMetadataResponse } from "generated/piatta
 import { match } from "ts-pattern";
 import { FullReceivedNotification } from "../../generated/piattaforma-notifiche/FullReceivedNotification";
 import { ThirdPartyAttachment } from "../../generated/third-party-service/ThirdPartyAttachment";
-import { ThirdPartyMessageDetail } from "../../generated/third-party-service/ThirdPartyMessageDetail";
+import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
 import { PnAPIClient } from "../clients/pn-client";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
+import { ServiceId } from "../../generated/backend/ServiceId";
+import { PN_SERVICE_ID } from "../config";
 
 const getPath = (input: RequestInfo): string =>
   pipe(typeof input === "string" ? input : input.url, i => new URL(i).pathname);
@@ -143,7 +145,7 @@ export const redirectMessages = (
                 ),
                 TE.sequenceArray,
                 TE.map(attachments =>
-                  ThirdPartyMessageDetail.encode({
+                  ThirdPartyMessage.encode({
                     attachments,
                     details: receivedNotification
                   })
@@ -262,26 +264,29 @@ export const redirectAttachment = (
 
 export const pnFetch = (
   origFetch: typeof fetch = fetch,
+  serviceId: ServiceId,
   pnUrl: string,
   pnApiKey: string
-): typeof fetch => (input: RequestInfo, init?: RequestInit) =>
-  match(getPath(input))
-    .when(
-      url => E.isRight(ThirdPartyMessagesUrl.decode(url)),
-      url => redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
-    )
-    .when(
-      url => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
-      url => redirectAttachment(origFetch, pnUrl, pnApiKey, url, init)
-    )
-    .otherwise(url =>
-      pipe(
-        TE.left(
-          new Error(
-            `Can not find a Piattaforma Notifiche implementation for ${url}`
+): typeof fetch => (input, init) =>
+  serviceId === PN_SERVICE_ID
+    ? match(getPath(input))
+        .when(
+          url => E.isRight(ThirdPartyMessagesUrl.decode(url)),
+          url => redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
+        )
+        .when(
+          url => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
+          url => redirectAttachment(origFetch, pnUrl, pnApiKey, url, init)
+        )
+        .otherwise(url =>
+          pipe(
+            TE.left(
+              new Error(
+                `Can not find a Piattaforma Notifiche implementation for ${url}`
+              )
+            ),
+            TE.mapLeft(errorResponse),
+            TE.toUnion
           )
-        ),
-        TE.mapLeft(errorResponse),
-        TE.toUnion
-      )
-    )();
+        )()
+    : origFetch(input, init);

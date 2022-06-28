@@ -15,17 +15,17 @@ import {
   ResponseErrorTooManyRequests,
   ResponseSuccessJson,
   ResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal
+  ResponseErrorInternal,
+  ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
 
-import { fromNullable } from "fp-ts/lib/Option";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
+import { pipe, flow } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
-import * as TE from "fp-ts/TaskEither";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 
 import { InternalMessageResponseWithContent } from "../../generated/io-messages-api/InternalMessageResponseWithContent";
@@ -36,6 +36,7 @@ import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-a
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 
+import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
 import { StrictUTCISODateFromString } from "../utils/date";
@@ -54,6 +55,22 @@ import {
 } from "../utils/responses";
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
+import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
+import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
+
+import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
+import { log } from "../utils/logger";
+
+const MessageWithThirdPartyData = t.intersection([
+  CreatedMessageWithContent,
+  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) })
+]);
+type MessageWithThirdPartyData = t.TypeOf<typeof MessageWithThirdPartyData>;
+
+const isMessageWithThirdPartyData = (
+  value: CreatedMessageWithContent
+): value is MessageWithThirdPartyData =>
+  E.isRight(MessageWithThirdPartyData.decode(value));
 
 import { LegalMessage } from "../../generated/pecserver/LegalMessage";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
@@ -76,6 +93,7 @@ type MessageWithLegalData = t.TypeOf<typeof MessageWithLegalData>;
 export default class NewMessagesService {
   constructor(
     private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>,
+    private readonly thirdPartyClientFactory: ThirdPartyServiceClientFactory,
     private readonly pecClient: IPecServerClientFactoryInterface
   ) {}
 
@@ -141,7 +159,7 @@ export default class NewMessagesService {
       return withValidatedOrInternalError(resMessageContent, async response => {
         if (response.status === 200) {
           const messageWithContent = response.value;
-          const maybePrescriptionData = fromNullable(
+          const maybePrescriptionData = O.fromNullable(
             messageWithContent.content.prescription_data
           );
 
@@ -215,6 +233,38 @@ export default class NewMessagesService {
       });
     });
 
+  // ------------------------------
+  // THIRD_PARTY MESSAGE
+  // ------------------------------
+
+  /**
+   * Retrieves a specific Third-Party message.
+   */
+  public readonly getThirdPartyMessage = async (
+    fiscalCode: FiscalCode,
+    messageId: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ThirdPartyMessageWithContent>
+  > =>
+    pipe(
+      this.getThirdPartyMessageFnApp(fiscalCode, messageId),
+      TE.chain(message =>
+        pipe(
+          this.getThirdPartyMessageFromThirdPartyService(message),
+          TE.map(thirdPartyMessage => ({
+            ...message,
+            third_party_message: thirdPartyMessage
+          }))
+        )
+      ),
+      TE.map(ResponseSuccessJson),
+      TE.toUnion
+    )();
   // ------------------------------------
   // Legal Messages
   // ------------------------------------
@@ -310,6 +360,70 @@ export default class NewMessagesService {
       TE.toUnion
     )();
 
+  // ------------------------------------
+
+  private readonly getThirdPartyMessageFnApp = (
+    fiscalCode: FiscalCode,
+    messageId: string
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests,
+    MessageWithThirdPartyData
+  > =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.apiClient.getMessage({
+            fiscal_code: fiscalCode,
+            id: messageId
+          }),
+        e => ResponseErrorInternal(E.toError(e).message)
+      ),
+      TE.chain(wrapValidationWithInternalError),
+
+      TE.chainW(
+        flow(
+          response =>
+            response.status === 200
+              ? E.of(response.value.message)
+              : E.left(response),
+          TE.fromEither,
+          TE.mapLeft(response => {
+            log.error(
+              `newMessagesServixce|getThirdPartyMessageFnApp|result:${
+                response.status
+              }(${response.value ?? "No details"})`
+            );
+            return response;
+          }),
+          TE.mapLeft(response => {
+            switch (response.status) {
+              case 401:
+                return ResponseErrorUnexpectedAuthProblem();
+              case 404:
+                return ResponseErrorNotFound("Not found", "Message not found");
+              case 429:
+                return ResponseErrorTooManyRequests();
+              default:
+                return ResponseErrorStatusNotDefinedInSpec(response);
+            }
+          })
+        )
+      ),
+      TE.chainW(
+        // MessageWithThirdPartyData.is fails, we need to check the decode instead
+        TE.fromPredicate(isMessageWithThirdPartyData, () =>
+          ResponseErrorValidation(
+            "Bad request",
+            "The message retrieved is not a valid message with third-party data"
+          )
+        )
+      )
+    );
+
   // ----------------------------------------------------
 
   private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
@@ -323,6 +437,7 @@ export default class NewMessagesService {
         e => ResponseErrorInternal(E.toError(e).message)
       ),
       TE.chain(wrapValidationWithInternalError),
+
       TE.chain(
         TE.fromPredicate(isGetMessageSuccess, e =>
           ResponseErrorInternal(
@@ -335,6 +450,83 @@ export default class NewMessagesService {
         TE.fromPredicate(MessageWithLegalData.is, () =>
           ResponseErrorInternal(
             "The message retrieved is not a valid message with legal data"
+          )
+        )
+      )
+    );
+
+  // Retrieve a ThirdParty message detail from related service, if exists
+  // return an error otherwise
+  private readonly getThirdPartyMessageFromThirdPartyService = (
+    message: MessageWithThirdPartyData
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests,
+    ThirdPartyMessage
+  > =>
+    pipe(
+      this.thirdPartyClientFactory(message.sender_service_id),
+      TE.fromEither,
+      TE.mapLeft(error => {
+        log.error(
+          "newMessagesService|getThirdPartyMessageFromThirdPartyService|%s",
+          error.message
+        );
+        return ResponseErrorInternal(error.message);
+      }),
+      TE.map(getClientByFiscalCode =>
+        getClientByFiscalCode(message.fiscal_code)
+      ),
+      TE.chainW(client =>
+        TE.tryCatch(
+          () =>
+            client.getThirdPartyMessageDetails({
+              id: message.content.third_party_data.id
+            }),
+          e => ResponseErrorInternal(E.toError(e).message)
+        )
+      ),
+      TE.chainW(wrapValidationWithInternalError),
+      TE.chainW(
+        flow(
+          response =>
+            response.status === 200 ? E.of(response.value) : E.left(response),
+          TE.fromEither,
+          TE.mapLeft(response => {
+            log.error(
+              `newMessagesServixce|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
+                response.status
+              }(${response.value ?? "No details"})`
+            );
+            return response;
+          }),
+          TE.mapLeft(
+            flow(response => {
+              switch (response.status) {
+                case 400:
+                  return ResponseErrorValidation("Bad Request", "");
+                case 401:
+                  return ResponseErrorUnexpectedAuthProblem();
+                case 403:
+                  return ResponseErrorForbiddenNotAuthorized;
+                case 404:
+                  return ResponseErrorNotFound(
+                    "Not found",
+                    "Message from Third Party service not found"
+                  );
+                case 429:
+                  return ResponseErrorTooManyRequests();
+                case 500:
+                  return ResponseErrorInternal(
+                    "Third Party Service failed with code 500"
+                  );
+                default:
+                  return ResponseErrorStatusNotDefinedInSpec(response);
+              }
+            })
           )
         )
       )
@@ -359,6 +551,7 @@ export default class NewMessagesService {
           e => ResponseErrorInternal(E.toError(e).message)
         )
       ),
+
       TE.chain(wrapValidationWithInternalError),
       TE.chain(
         TE.fromPredicate(isPecServerGetMessageSuccess, e =>

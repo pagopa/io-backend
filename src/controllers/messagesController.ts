@@ -29,6 +29,7 @@ import { MessageStatusAttributes } from "../../generated/io-messages-api/Message
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
+import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
@@ -186,9 +187,20 @@ export default class MessagesController {
    */
   public readonly getThirdPartyMessage = (
     req: express.Request
-  ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
-    withUserFromRequest(req, _user =>
-      Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessJson<ThirdPartyMessageWithContent>
+  > =>
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        NonEmptyString.decode(req.params.id),
+        messageId =>
+          this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
+      )
     );
 
   /**

@@ -74,6 +74,7 @@ const internalErrorResponse = {
 const mockFnAppGetMessage = jest.fn();
 const mockFnAppGetMessagesByUser = jest.fn();
 const mockFnAppUpsertMessageStatus = jest.fn();
+const mockGetThirdPartyMessage = jest.fn();
 const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
 
@@ -81,6 +82,7 @@ const newMessageService = ({
   getMessage: mockFnAppGetMessage,
   getMessagesByUser: mockFnAppGetMessagesByUser,
   upsertMessageStatus: mockFnAppUpsertMessageStatus,
+  getThirdPartyMessage: mockGetThirdPartyMessage,
   getLegalMessage: mockGetLegalMessage,
   getLegalMessageAttachment: mockGetLegalMessageAttachment
 } as any) as NewMessagesService;
