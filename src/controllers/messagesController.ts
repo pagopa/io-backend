@@ -53,6 +53,17 @@ type IGetLegalMessageAttachmentResponse =
   | IResponseErrorTooManyRequests
   | IResponseSuccessOctet;
 
+export const withGetThirdPartyAttachmentParams = async <T>(
+  req: express.Request,
+  f: (id: NonEmptyString, attachment_url: NonEmptyString) => Promise<T>
+) =>
+  withValidatedOrValidationError(NonEmptyString.decode(req.params.id), id =>
+    withValidatedOrValidationError(
+      NonEmptyString.decode(req.params.attachment_url),
+      attachment_url => f(id, attachment_url)
+    )
+  );
+
 export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
@@ -209,8 +220,17 @@ export default class MessagesController {
   public readonly getThirdPartyMessageAttachment = (
     req: express.Request
     // eslint-disable-next-line sonarjs/no-identical-functions
-  ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotImplemented
+  > =>
     withUserFromRequest(req, _user =>
-      Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+      withGetThirdPartyAttachmentParams(req, (_id, _attachment_url) =>
+        Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+      )
     );
 }

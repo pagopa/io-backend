@@ -22,7 +22,6 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 import { IPecServerClient } from "../../clients/pecserver";
 
-import { Client } from "../../../generated/third-party-service/client";
 import { ThirdPartyServiceClient } from "../../clients/third-party-service-client";
 import { CreatedMessageWithContent } from "../../../generated/io-messages-api/CreatedMessageWithContent";
 
@@ -217,7 +216,7 @@ const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
       return {
         getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
         getThirdPartyMessageAttachment: jest.fn()
-      } as Client<"fiscal_code">;
+      };
     }
   )
 );

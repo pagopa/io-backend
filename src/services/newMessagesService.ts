@@ -265,6 +265,36 @@ export default class NewMessagesService {
       TE.map(ResponseSuccessJson),
       TE.toUnion
     )();
+
+  /**
+   * Retrieves an attachment related to a message
+   */
+  public readonly getThirdPartyAttachment = async (
+    fiscalCode: FiscalCode,
+    messageId: NonEmptyString,
+    attachmentUrl: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessOctet<Buffer>
+  > =>
+    pipe(
+      this.getThirdPartyMessageFnApp(fiscalCode, messageId),
+      TE.chain(message =>
+        pipe(
+          this.getThirdPartyAttachmentFromThirdPartyService(
+            message,
+            attachmentUrl
+          )
+        )
+      ),
+      TE.map(ResponseSuccessOctet),
+      TE.toUnion
+    )();
+
   // ------------------------------------
   // Legal Messages
   // ------------------------------------
@@ -333,7 +363,7 @@ export default class NewMessagesService {
     | IResponseErrorInternal
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
-    | IResponseSuccessOctet
+    | IResponseSuccessOctet<Buffer>
   > =>
     pipe(
       this.getLegalMessageFromFnApp(user, messageId),
@@ -360,6 +390,8 @@ export default class NewMessagesService {
       TE.toUnion
     )();
 
+  // ------------------------------------
+  // Private Functions
   // ------------------------------------
 
   private readonly getThirdPartyMessageFnApp = (
@@ -424,37 +456,6 @@ export default class NewMessagesService {
       )
     );
 
-  // ----------------------------------------------------
-
-  private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
-    pipe(
-      TE.tryCatch(
-        () =>
-          this.apiClient.getMessage({
-            fiscal_code: user.fiscal_code,
-            id: messageId
-          }),
-        e => ResponseErrorInternal(E.toError(e).message)
-      ),
-      TE.chain(wrapValidationWithInternalError),
-
-      TE.chain(
-        TE.fromPredicate(isGetMessageSuccess, e =>
-          ResponseErrorInternal(
-            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
-          )
-        )
-      ),
-      TE.map(successResponse => successResponse.value.message),
-      TE.chain(
-        TE.fromPredicate(MessageWithLegalData.is, () =>
-          ResponseErrorInternal(
-            "The message retrieved is not a valid message with legal data"
-          )
-        )
-      )
-    );
-
   // Retrieve a ThirdParty message detail from related service, if exists
   // return an error otherwise
   private readonly getThirdPartyMessageFromThirdPartyService = (
@@ -497,11 +498,10 @@ export default class NewMessagesService {
           TE.fromEither,
           TE.mapLeft(response => {
             log.error(
-              `newMessagesService|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
+              `newMessagesServixce|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
                 response.status
-              } [title: ${response.value?.title ??
-                "No title"}, detail: ${response.value?.detail ??
-                "No details"}, type: ${response.value?.type ?? "No type"}])`
+              }(${`[${response.value?.title}, ${response.value?.detail}]` ??
+                "No details"})`
             );
             return response;
           }),
@@ -529,6 +529,119 @@ export default class NewMessagesService {
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
             })
+          )
+        )
+      )
+    );
+
+  // Retrieve a ThirdParty attachment from related service, if exists
+  // return an error otherwise
+  private readonly getThirdPartyAttachmentFromThirdPartyService = (
+    message: MessageWithThirdPartyData,
+    attachmentUrl: NonEmptyString
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests,
+    Buffer
+  > =>
+    pipe(
+      this.thirdPartyClientFactory(message.sender_service_id),
+      TE.fromEither,
+      TE.mapLeft(error => {
+        log.error(
+          "newMessagesService|getThirdPartyAttachmentFromThirdPartyService|%s",
+          error.message
+        );
+        return ResponseErrorInternal(error.message);
+      }),
+      TE.map(getClientByFiscalCode =>
+        getClientByFiscalCode(message.fiscal_code)
+      ),
+      TE.chainW(client =>
+        TE.tryCatch(
+          () =>
+            client.getThirdPartyMessageAttachment({
+              attachment_url: attachmentUrl,
+              id: message.content.third_party_data.id
+            }),
+          e => ResponseErrorInternal(E.toError(e).message)
+        )
+      ),
+      TE.chainW(wrapValidationWithInternalError),
+      TE.chainW(
+        flow(
+          response =>
+            response.status === 200 ? E.of(response.value) : E.left(response),
+          TE.fromEither,
+          TE.mapLeft(response => {
+            log.error(
+              `newMessagesService|getThirdPartyAttachmentFromThirdPartyService|invocation returned an error:${
+                response.status
+              } [title: ${response.value?.title ??
+                "No title"}, detail: ${response.value?.detail ??
+                "No details"}, type: ${response.value?.type ?? "No type"}])`
+            );
+            return response;
+          }),
+          TE.mapLeft(
+            // eslint-disable-next-line sonarjs/no-identical-functions
+            flow(response => {
+              switch (response.status) {
+                case 400:
+                  return ResponseErrorValidation("Bad Request", "");
+                case 401:
+                  return ResponseErrorUnexpectedAuthProblem();
+                case 403:
+                  return ResponseErrorForbiddenNotAuthorized;
+                case 404:
+                  return ResponseErrorNotFound(
+                    "Not found",
+                    "Message from Third Party service not found"
+                  );
+                case 429:
+                  return ResponseErrorTooManyRequests();
+                case 500:
+                  return ResponseErrorInternal(
+                    "Third Party Service failed with code 500"
+                  );
+                default:
+                  return ResponseErrorStatusNotDefinedInSpec(response);
+              }
+            })
+          )
+        )
+      )
+    );
+
+  // ----------------------------------------------------
+
+  private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.apiClient.getMessage({
+            fiscal_code: user.fiscal_code,
+            id: messageId
+          }),
+        e => ResponseErrorInternal(E.toError(e).message)
+      ),
+      TE.chain(wrapValidationWithInternalError),
+
+      TE.chain(
+        TE.fromPredicate(isGetMessageSuccess, e =>
+          ResponseErrorInternal(
+            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+          )
+        )
+      ),
+      TE.map(successResponse => successResponse.value.message),
+      TE.chain(
+        TE.fromPredicate(MessageWithLegalData.is, () =>
+          ResponseErrorInternal(
+            "The message retrieved is not a valid message with legal data"
           )
         )
       )
