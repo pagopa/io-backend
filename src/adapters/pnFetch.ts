@@ -97,7 +97,7 @@ const checkHeaders = (
     TE.fromEither
   );
 
-const errorResponse = (error: Error): Response =>
+export const errorResponse = (error: Error): Response =>
   pipe(
     {
       detail: error.message,
@@ -106,7 +106,7 @@ const errorResponse = (error: Error): Response =>
     },
     ProblemJson.encode,
     problem =>
-      (new NodeResponse(JSON.stringify(error), {
+      (new NodeResponse(JSON.stringify(problem), {
         status: problem.status,
         statusText: problem.title
       }) as unknown) as Response // cast required: the same cast is used in clients code generation

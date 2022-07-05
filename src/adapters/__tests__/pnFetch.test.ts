@@ -2,7 +2,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
 import { createClient } from "../../../generated/third-party-service/client";
-import { pnFetch } from "../pnFetch";
+import { errorResponse, pnFetch } from "../pnFetch";
 import nodeFetch from "node-fetch";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import * as pnclient from "../../../src/clients/pn-client";
@@ -47,6 +47,16 @@ dummyPnAPIClient.mockImplementation(
       getSentNotificationDocument: dummyGetSentNotificationDocument
     } as unknown) as PnClient)
 );
+
+const anErrorMessage = "ERROR TEST";
+
+describe("errorResponse", () => {
+  it("GIVEN a generic error WHEN errorResponse is called THEN a response containing the error message is returned", async () => {
+    const response = errorResponse(new Error(anErrorMessage));
+    expect(response.status).toEqual(500);
+    await expect(response.json()).resolves.toEqual({detail: anErrorMessage, status: 500, title: "Error fetching PN data"});
+  });
+});
 
 describe("getThirdPartyMessageDetails", () => {
   beforeEach(() => jest.clearAllMocks());
