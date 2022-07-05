@@ -14,7 +14,6 @@ info:
   title: 'Piattaforma Notifiche: API B2B per backend AppIO'
   version: v1.0
 host: api-io.pn.pagopa.it
-basePath: /
 schemes:
   - https
 paths:

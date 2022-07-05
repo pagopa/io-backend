@@ -160,7 +160,7 @@ describe("third-party-service-client", () => {
     );
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}//delivery/notifications/received/${aThirdPartyId}`,
+      `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}`,
       {
         headers: {
           "x-pagopa-cx-taxid": aProdFiscalCode,
