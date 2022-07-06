@@ -80,7 +80,7 @@
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-spid-commons": "^7.0.0",
-    "@pagopa/ts-commons": "^10.5.0",
+    "@pagopa/ts-commons": "^10.7.0",
     "apicache": "^1.4.0",
     "applicationinsights": "^1.8.10",
     "body-parser": "^1.18.3",
