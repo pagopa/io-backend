@@ -992,6 +992,8 @@ definitions:
       - PAYMENT
       - COMPLETELY_UNREACHABLE
       - REQUEST_REFUSED
+      - AAR_GENERATION
+      - NOT_HANDLED
     type: string
   TimelineElementDetails:
     description: The raw event payload that will be different based on the event.
