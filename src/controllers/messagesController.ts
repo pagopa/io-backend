@@ -33,8 +33,7 @@ import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdParty
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
-  IResponseErrorNotImplemented,
-  ResponseErrorNotImplemented
+  IResponseErrorNotImplemented
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
@@ -51,7 +50,7 @@ type IGetLegalMessageAttachmentResponse =
   | IResponseErrorValidation
   | IResponseErrorNotFound
   | IResponseErrorTooManyRequests
-  | IResponseSuccessOctet;
+  | IResponseSuccessOctet<Buffer>;
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
@@ -130,8 +129,6 @@ export default class MessagesController {
       pipe(
         TE.tryCatch(
           () =>
-            // getLegalMessage is not yet implemented in new fn-app-messages
-            // just skip new implementation and take fn-app one
             this.messageService.getLegalMessage(
               user,
               req.params.id,
@@ -153,8 +150,6 @@ export default class MessagesController {
       pipe(
         TE.tryCatch(
           () =>
-            // getLegalMessageAttachment is not yet implemented in new fn-app-messages
-            // just skip new implementation and take fn-app one
             this.messageService.getLegalMessageAttachment(
               user,
               req.params.id,
@@ -219,7 +214,6 @@ export default class MessagesController {
    */
   public readonly getThirdPartyMessageAttachment = (
     req: express.Request
-    // eslint-disable-next-line sonarjs/no-identical-functions
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -227,10 +221,15 @@ export default class MessagesController {
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
     | IResponseErrorNotImplemented
+    | IResponseSuccessOctet<Buffer>
   > =>
-    withUserFromRequest(req, _user =>
-      withGetThirdPartyAttachmentParams(req, (_id, _attachment_url) =>
-        Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+    withUserFromRequest(req, user =>
+      withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
+        this.messageService.getThirdPartyAttachment(
+          user.fiscal_code,
+          messageId,
+          attachmentUrl
+        )
       )
     );
 }
