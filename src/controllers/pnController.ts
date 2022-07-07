@@ -8,7 +8,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
-import { PNClientFactory, PNEnvironment } from "../services/pnService";
+import { PNClientFactory, PNEnvironment } from "../clients/pn-clients";
 import { withUserFromRequest } from "../types/user";
 import {
   IResponseNoContent,

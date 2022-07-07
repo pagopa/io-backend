@@ -53,7 +53,7 @@ import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
-import { PNClientFactory } from "./services/pnService";
+import { PNClientFactory } from "./clients/pn-clients";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
