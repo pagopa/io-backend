@@ -4,7 +4,7 @@ import { PNClientFactory } from "../../clients/pn-clients";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import { IoCourtesyDigitalAddressActivation } from "../../../generated/piattaforma-notifiche-courtesy/IoCourtesyDigitalAddressActivation";
-import { isRight } from "fp-ts/lib/Either";
+import { isLeft, isRight } from "fp-ts/lib/Either";
 
 const mockPnAddressBookIOClient = jest.spyOn(
   PNClients,
@@ -140,5 +140,44 @@ describe("pnService#upsertPnServiceActivation", () => {
       }),
       method: "put"
     });
+  });
+
+  it("should return an error if the response optained from PN is not valid", async () => {
+    mockNodeFetch.mockImplementationOnce(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        ({
+          ok: true,
+          status: 299,
+          json: async () => {
+            return;
+          }
+        } as Response)
+    );
+    const response = await upsertPnServiceActivation(
+      PNClients.PNEnvironment.PRODUCTION,
+      PNClientFactory(
+        mockProdUrl,
+        mockProdKey,
+        mockUATUrl,
+        mockUATKey,
+        mockNodeFetch
+      ),
+      aFiscalCode,
+      anActivationStatusPayload
+    );
+    expect(mockPnAddressBookIOClient).toBeCalledWith(
+      mockProdUrl.href,
+      mockProdKey,
+      mockNodeFetch
+    );
+    expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
+      body: JSON.stringify(anActivationStatusPayload),
+      headers: expect.objectContaining({
+        "x-api-key": mockProdKey,
+        "x-pagopa-cx-taxid": aFiscalCode
+      }),
+      method: "put"
+    });
+    expect(isLeft(response)).toBeTruthy();
   });
 });
