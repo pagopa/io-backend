@@ -1,4 +1,4 @@
-import { upsertPnServiceActivation } from "../pnService";
+import { upsertPnActivationService } from "../pnService";
 import * as PNClients from "../../clients/pn-clients";
 import { PNClientFactory } from "../../clients/pn-clients";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
@@ -31,19 +31,21 @@ const anActivationStatusPayload: IoCourtesyDigitalAddressActivation = {
 };
 
 describe("pnService#upsertPnServiceActivation", () => {
+  const service = upsertPnActivationService(
+    PNClientFactory(
+      mockProdUrl,
+      mockProdKey,
+      mockUATUrl,
+      mockUATKey,
+      mockNodeFetch
+    )
+  );
   beforeEach(() => {
     jest.clearAllMocks();
   });
   it("should call setCourtesyAddressIo with right PROD params", async () => {
-    const response = await upsertPnServiceActivation(
+    const response = await service(
       PNClients.PNEnvironment.PRODUCTION,
-      PNClientFactory(
-        mockProdUrl,
-        mockProdKey,
-        mockUATUrl,
-        mockUATKey,
-        mockNodeFetch
-      ),
       aFiscalCode,
       anActivationStatusPayload
     );
@@ -72,15 +74,8 @@ describe("pnService#upsertPnServiceActivation", () => {
   });
 
   it("should call setCourtesyAddressIo with right UAT params", async () => {
-    const response = await upsertPnServiceActivation(
+    const response = await service(
       PNClients.PNEnvironment.UAT,
-      PNClientFactory(
-        mockProdUrl,
-        mockProdKey,
-        mockUATUrl,
-        mockUATKey,
-        mockNodeFetch
-      ),
       aFiscalCode,
       anActivationStatusPayload
     );
@@ -114,15 +109,8 @@ describe("pnService#upsertPnServiceActivation", () => {
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         Promise.reject(expectedError)
     );
-    const responsePromise = upsertPnServiceActivation(
+    const responsePromise = service(
       PNClients.PNEnvironment.UAT,
-      PNClientFactory(
-        mockProdUrl,
-        mockProdKey,
-        mockUATUrl,
-        mockUATKey,
-        mockNodeFetch
-      ),
       aFiscalCode,
       anActivationStatusPayload
     );
@@ -153,15 +141,8 @@ describe("pnService#upsertPnServiceActivation", () => {
           }
         } as Response)
     );
-    const response = await upsertPnServiceActivation(
+    const response = await service(
       PNClients.PNEnvironment.PRODUCTION,
-      PNClientFactory(
-        mockProdUrl,
-        mockProdKey,
-        mockUATUrl,
-        mockUATKey,
-        mockNodeFetch
-      ),
       aFiscalCode,
       anActivationStatusPayload
     );

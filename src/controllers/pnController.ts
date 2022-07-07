@@ -8,46 +8,43 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import { pipe } from "fp-ts/lib/function";
-import { PNClientFactory, PNEnvironment } from "../clients/pn-clients";
+import { PNEnvironment } from "../clients/pn-clients";
 import { withUserFromRequest } from "../types/user";
 import {
   IResponseNoContent,
   ResponseNoContent,
-  withValidatedOrInternalError
+  withValidatedOrValidationError
 } from "../utils/responses";
 import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
+import { upsertPnActivationService } from "../services/pnService";
+
 /**
  * Upsert the Activation for `Avvisi di Cortesia` Piattaforma Notifiche
  * Special Service
  */
-export const upsertPNActivation = (
-  pnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+export const upsertPNActivationController = (
+  upsertPnActivation: ReturnType<typeof upsertPnActivationService>
 ) => (
   req: express.Request
 ): Promise<
   IResponseErrorValidation | IResponseErrorInternal | IResponseNoContent
 > =>
   withUserFromRequest(req, async user =>
-    withValidatedOrInternalError(PNActivation.decode(req.body), payload =>
+    withValidatedOrValidationError(PNActivation.decode(req.body), payload =>
       pipe(
         O.fromNullable(req.query.isTest),
         O.map(_ => _.toString().toLowerCase() === "true"),
         O.getOrElse(() => false),
         TE.of,
         TE.map(isTest =>
-          isTest
-            ? pnAddressBookIOClientSelector(PNEnvironment.UAT)
-            : pnAddressBookIOClientSelector(PNEnvironment.PRODUCTION)
+          isTest ? PNEnvironment.UAT : PNEnvironment.PRODUCTION
         ),
-        TE.chainW(_ =>
+        TE.chainW(pnEnvironment =>
           pipe(
             TE.tryCatch(
               () =>
-                _.setCourtesyAddressIo({
-                  body: {
-                    activationStatus: payload.activation_status
-                  },
-                  "x-pagopa-cx-taxid": user.fiscal_code
+                upsertPnActivation(pnEnvironment, user.fiscal_code, {
+                  activationStatus: payload.activation_status
                 }),
               () => ResponseErrorInternal("Error calling the PN service")
             ),

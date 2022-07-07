@@ -88,7 +88,7 @@ import checkIP from "./utils/middleware/checkIP";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
-import { upsertPNActivation } from "./controllers/pnController";
+import { upsertPNActivationController } from "./controllers/pnController";
 import {
   getUserForBPD,
   getUserForFIMS,
@@ -143,7 +143,7 @@ import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
-import { PNClientFactory } from "./services/pnService";
+import { upsertPnActivationService } from "./services/pnService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -562,11 +562,14 @@ export function newApp({
           PNAddressBookConfig.FF_PN_ACTIVATION_ENABLED === "1" &&
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
+          const upsertPnActivation = upsertPnActivationService(
+            PN_ADDRESS_BOOK_CLIENT_SELECTOR.value
+          );
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerPNRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
-            PN_ADDRESS_BOOK_CLIENT_SELECTOR.value,
+            upsertPnActivation,
             authMiddlewares.bearerSession
           );
         }
@@ -1340,14 +1343,14 @@ function registerAuthenticationRoutes(
 function registerPNRoutes(
   app: Express,
   pnBasePath: string,
-  pnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>,
+  upsertPnActivation: ReturnType<typeof upsertPnActivationService>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ) {
   app.post(
     `${pnBasePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(upsertPNActivation(pnAddressBookIOClientSelector))
+    toExpressHandler(upsertPNActivationController(upsertPnActivation))
   );
 }
 

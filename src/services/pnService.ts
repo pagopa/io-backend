@@ -2,9 +2,10 @@ import { IoCourtesyDigitalAddressActivation } from "../../generated/piattaforma-
 import { PNClientFactory, PNEnvironment } from "../clients/pn-clients";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 
-export const upsertPnServiceActivation = (
+export const upsertPnActivationService = (
+  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+) => (
   pnEnvironment: PNEnvironment,
-  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>,
   fiscalCode: FiscalCode,
   activationStatusPayload: IoCourtesyDigitalAddressActivation
 ) =>
