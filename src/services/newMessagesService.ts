@@ -427,7 +427,9 @@ export default class NewMessagesService {
             log.error(
               `newMessagesServixce|getThirdPartyMessageFnApp|result:${
                 response.status
-              }(${response.value ?? "No details"})`
+              }  [title: ${response.value?.title ??
+                "No title"}, detail: ${response.value?.detail ??
+                "No detail"}, type: ${response.value?.type ?? "No type"}]`
             );
             return response;
           }),
@@ -498,10 +500,11 @@ export default class NewMessagesService {
           TE.fromEither,
           TE.mapLeft(response => {
             log.error(
-              `newMessagesServixce|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
+              `newMessagesService|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
                 response.status
-              }(${`[${response.value?.title}, ${response.value?.detail}]` ??
-                "No details"})`
+              } [title: ${response.value?.title ??
+                "No title"}, detail: ${response.value?.detail ??
+                "No details"}, type: ${response.value?.type ?? "No type"}]`
             );
             return response;
           }),
