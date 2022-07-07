@@ -15,7 +15,7 @@ import { match } from "ts-pattern";
 import { FullReceivedNotification } from "../../generated/piattaforma-notifiche/FullReceivedNotification";
 import { ThirdPartyAttachment } from "../../generated/third-party-service/ThirdPartyAttachment";
 import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
-import { PnAPIClient } from "../clients/pn-client";
+import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
 import { ServiceId } from "../../generated/backend/ServiceId";

@@ -1,0 +1,54 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Piattaforma Notifiche
+host: localhost
+basePath: /api/v1/pn
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/activation":
+    post:
+      operationId: upsertPNActivation
+      summary: Upsert Piattaforma Notifiche Activation
+      description: |
+        Upsert the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/PNActivation'
+          x-examples:
+            application/json:
+              activation_status: true
+      responses:
+        "204":
+          description: Request created.
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+definitions:
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+  PNActivation:
+    type: object
+    properties:
+      activation_status:
+        type: boolean
+    required:
+      - activation_status
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

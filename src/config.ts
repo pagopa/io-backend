@@ -53,6 +53,7 @@ import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
+import { PNClientFactory } from "./services/pnService";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -460,6 +461,64 @@ export const EUCOVIDCERT_API_CLIENT = EUCovidCertAPIClient(
   EUCOVIDCERT_API_KEY,
   EUCOVIDCERT_API_URL,
   httpOrHttpsApiFetch
+);
+
+/**
+ * Piattaforma Notifiche configuration environments variables.
+ * Missing or invalid variables kill the backend process.
+ *
+ * `FF_PN_ACTIVATION_ENABLED` feature flag enable the mounting
+ * of activation endpoints.
+ */
+
+const IEnabledPnAddressBookConfig = t.interface({
+  FF_PN_ACTIVATION_ENABLED: t.literal("1"),
+  PN_ACTIVATION_BASE_PATH: t.string,
+  PN_API_KEY: NonEmptyString,
+  PN_API_KEY_UAT: NonEmptyString,
+  PN_API_URL: UrlFromString,
+  PN_API_URL_UAT: UrlFromString
+});
+type IEnabledPnAddressBookConfig = t.TypeOf<typeof IEnabledPnAddressBookConfig>;
+
+const IPNAddressBookConfig = t.union([
+  IEnabledPnAddressBookConfig,
+  t.partial({
+    FF_PN_ACTIVATION_ENABLED: t.literal("0")
+  })
+]);
+type IPNAddressBookConfig = t.TypeOf<typeof IPNAddressBookConfig>;
+
+export const PNAddressBookConfig = pipe(
+  process.env,
+  IPNAddressBookConfig.decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid PN Address book configuration envs: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+
+export const PN_ADDRESS_BOOK_CLIENT_SELECTOR: O.Option<ReturnType<
+  typeof PNClientFactory
+>> = pipe(
+  PNAddressBookConfig,
+  E.fromPredicate(IEnabledPnAddressBookConfig.is, () => O.none),
+  E.map(_ =>
+    O.some(
+      PNClientFactory(
+        _.PN_API_URL,
+        _.PN_API_KEY,
+        _.PN_API_URL_UAT,
+        _.PN_API_KEY_UAT,
+        httpOrHttpsApiFetch
+      )
+    )
+  ),
+  E.toUnion
 );
 
 export const MIT_VOUCHER_API_BASE_PATH = getRequiredENVVar(
