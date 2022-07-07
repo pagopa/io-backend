@@ -1,15 +1,13 @@
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
-  ResponseErrorInternal,
-  ResponseErrorValidation
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/function";
 import { PNClientFactory, PNEnvironment } from "../services/pnService";
 import { withUserFromRequest } from "../types/user";
 import {
@@ -23,7 +21,7 @@ import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy
  * Special Service
  */
 export const upsertPNActivation = (
-  _pnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+  pnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
 ) => (
   req: express.Request
 ): Promise<
@@ -35,18 +33,11 @@ export const upsertPNActivation = (
         O.fromNullable(req.query.isTest),
         O.map(_ => _.toString().toLowerCase() === "true"),
         O.getOrElse(() => false),
-        t.boolean.decode,
-        E.mapLeft(_ =>
-          ResponseErrorValidation(
-            "Bad Request",
-            "Invalid isTest query params value"
-          )
-        ),
-        TE.fromEither,
+        TE.of,
         TE.map(isTest =>
           isTest
-            ? _pnAddressBookIOClientSelector(PNEnvironment.UAT)
-            : _pnAddressBookIOClientSelector(PNEnvironment.PRODUCTION)
+            ? pnAddressBookIOClientSelector(PNEnvironment.UAT)
+            : pnAddressBookIOClientSelector(PNEnvironment.PRODUCTION)
         ),
         TE.chainW(_ =>
           pipe(
@@ -60,12 +51,9 @@ export const upsertPNActivation = (
                 }),
               () => ResponseErrorInternal("Error calling the PN service")
             ),
-            TE.chainW(
-              flow(
-                TE.fromEither,
-                TE.mapLeft(() =>
-                  ResponseErrorInternal("Unexpected PN service response")
-                )
+            TE.chainEitherKW(
+              E.mapLeft(() =>
+                ResponseErrorInternal("Unexpected PN service response")
               )
             )
           )

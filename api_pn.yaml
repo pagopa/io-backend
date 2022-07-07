@@ -24,6 +24,11 @@ paths:
           x-examples:
             application/json:
               activation_status: true
+        - in: query
+          name: isTest
+          required: false
+          schema:
+            type: boolean
       responses:
         "204":
           description: Request created.
