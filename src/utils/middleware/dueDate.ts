@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { log } from "../logger";
 
@@ -19,11 +18,7 @@ export function dueDateMiddleware(
       log.warn(
         `An ${req.method.toUpperCase()} ${
           req.path
-        } request has landed at ${UTCISODateFromString.encode(
-          now
-        )} although it was supposed to expire at ${UTCISODateFromString.encode(
-          dueDate
-        )}.`
+        } request has landed at ${now.toISOString()} although it was supposed to expire at ${dueDate.toISOString()}.`
       );
       ResponseErrorNotFound(
         "Expired resource",

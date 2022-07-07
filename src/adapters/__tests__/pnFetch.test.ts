@@ -22,6 +22,7 @@ import {
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody
 } from "../../__mocks__/pn";
+import {  notificationDetailResponseExample, notificationDetailResponseExampleAsObject } from "../../__mocks__/pn-response";
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
@@ -103,6 +104,38 @@ describe("getThirdPartyMessageDetails", () => {
     });
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
     // expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({ApiKeyAuth: aPnKey, iun: aPnNotificationId, "x-pagopa-cx-taxid": aFiscalCode, docIdx: Number(aDocIdx)});
+  });
+
+  it("GIVEN a PN endpoint returning a real response WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints", async () => {
+    dummyGetReceivedNotification.mockImplementation(() =>
+      TE.of({
+        status: 200,
+        value: notificationDetailResponseExample,
+        headers: {}
+      })()
+    );
+    const aFetch = pnFetch(
+      (nodeFetch as any) as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey
+    );
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch
+    });
+    const result = await client.getThirdPartyMessageDetails({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId
+    });
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(expect.objectContaining({
+        status: 200,
+        value: expect.objectContaining({details: expect.objectContaining({abstract: notificationDetailResponseExampleAsObject.abstract})})
+      }))
+    }
+ 
   });
 
   it("GIVEN a not working PN get message endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints returning an error", async () => {
