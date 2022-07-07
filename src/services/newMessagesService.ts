@@ -458,6 +458,35 @@ export default class NewMessagesService {
       )
     );
 
+  private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.apiClient.getMessage({
+            fiscal_code: user.fiscal_code,
+            id: messageId
+          }),
+        e => ResponseErrorInternal(E.toError(e).message)
+      ),
+      TE.chain(wrapValidationWithInternalError),
+
+      TE.chain(
+        TE.fromPredicate(isGetMessageSuccess, e =>
+          ResponseErrorInternal(
+            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
+          )
+        )
+      ),
+      TE.map(successResponse => successResponse.value.message),
+      TE.chain(
+        TE.fromPredicate(MessageWithLegalData.is, () =>
+          ResponseErrorInternal(
+            "The message retrieved is not a valid message with legal data"
+          )
+        )
+      )
+    );
+
   // Retrieve a ThirdParty message detail from related service, if exists
   // return an error otherwise
   private readonly getThirdPartyMessageFromThirdPartyService = (
@@ -614,37 +643,6 @@ export default class NewMessagesService {
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
             })
-          )
-        )
-      )
-    );
-
-  // ----------------------------------------------------
-
-  private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
-    pipe(
-      TE.tryCatch(
-        () =>
-          this.apiClient.getMessage({
-            fiscal_code: user.fiscal_code,
-            id: messageId
-          }),
-        e => ResponseErrorInternal(E.toError(e).message)
-      ),
-      TE.chain(wrapValidationWithInternalError),
-
-      TE.chain(
-        TE.fromPredicate(isGetMessageSuccess, e =>
-          ResponseErrorInternal(
-            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
-          )
-        )
-      ),
-      TE.map(successResponse => successResponse.value.message),
-      TE.chain(
-        TE.fromPredicate(MessageWithLegalData.is, () =>
-          ResponseErrorInternal(
-            "The message retrieved is not a valid message with legal data"
           )
         )
       )
