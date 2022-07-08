@@ -425,7 +425,7 @@ export default class NewMessagesService {
           TE.fromEither,
           TE.mapLeft(response => {
             log.error(
-              `newMessagesServixce|getThirdPartyMessageFnApp|result:${
+              `newMessagesService|getThirdPartyMessageFnApp|result:${
                 response.status
               }  [title: ${response.value?.title ??
                 "No title"}, detail: ${response.value?.detail ??
