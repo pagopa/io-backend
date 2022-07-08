@@ -205,6 +205,13 @@ Those are all Environment variables needed by the application:
 | APP_MESSAGES_API_URL                   | The io-functions-app-messages URL                                                 | string |
 | THIRD_PARTY_CONFIG_LIST                | (Optional, default empty) A list of ThirdParty Configuration                      | stringified JSON |
 | IS_APPBACKENDLI                        | (Optional, default false) Defines if code is deployed on appbackendli             | boolean |
+| FF_PN_ACTIVATION_ENABLED               | (Optional) Enable the integration with PN for Service Activation (1 enabled)      | int     |
+| PN_ACTIVATION_BASE_PATH                | (Required if FF_PN_ACTIVATION_ENABLED = 1) base path for activation endpoint      | string  |
+| PN_API_KEY                             | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for production environment  | string  |
+| PN_API_KEY_UAT                         | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for UAT environment         | string  |
+| PN_API_URL                             | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for production         | string  |
+| PN_API_URL_UAT                         | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for UAT environment    | string  |
+
 
 
 Notes:
