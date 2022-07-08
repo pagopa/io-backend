@@ -1,7 +1,4 @@
-import {
-  upsertPnActivationService,
-  getPnActivationService
-} from "../pnService";
+import { PnService } from "../pnService";
 import * as PNClients from "../../clients/pn-clients";
 import { PNClientFactory } from "../../clients/pn-clients";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
@@ -25,7 +22,7 @@ const anActivationStatusPayload: IoCourtesyDigitalAddressActivation = {
 };
 
 describe("pnService#upsertPnServiceActivation", () => {
-  const service = upsertPnActivationService(
+  const service = PnService(
     PNClientFactory(
       mockProdUrl,
       mockProdKey,
@@ -48,7 +45,7 @@ describe("pnService#upsertPnServiceActivation", () => {
     );
   });
   it("should call setCourtesyAddressIo with right PROD params", async () => {
-    const response = await service(
+    const response = await service.upsertPnActivation(
       PNClients.PNEnvironment.PRODUCTION,
       aFiscalCode,
       anActivationStatusPayload
@@ -78,7 +75,7 @@ describe("pnService#upsertPnServiceActivation", () => {
   });
 
   it("should call setCourtesyAddressIo with right UAT params", async () => {
-    const response = await service(
+    const response = await service.upsertPnActivation(
       PNClients.PNEnvironment.UAT,
       aFiscalCode,
       anActivationStatusPayload
@@ -113,7 +110,7 @@ describe("pnService#upsertPnServiceActivation", () => {
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         Promise.reject(expectedError)
     );
-    const responsePromise = service(
+    const responsePromise = service.upsertPnActivation(
       PNClients.PNEnvironment.UAT,
       aFiscalCode,
       anActivationStatusPayload
@@ -145,7 +142,7 @@ describe("pnService#upsertPnServiceActivation", () => {
           }
         } as Response)
     );
-    const response = await service(
+    const response = await service.upsertPnActivation(
       PNClients.PNEnvironment.PRODUCTION,
       aFiscalCode,
       anActivationStatusPayload
@@ -168,7 +165,7 @@ describe("pnService#upsertPnServiceActivation", () => {
 });
 
 describe("pnService#getPnServiceActivation", () => {
-  const service = getPnActivationService(
+  const service = PnService(
     PNClientFactory(
       mockProdUrl,
       mockProdKey,
@@ -191,7 +188,7 @@ describe("pnService#getPnServiceActivation", () => {
     );
   });
   it("should call getPnServiceActivation with right PROD params", async () => {
-    const response = await service(
+    const response = await service.getPnActivation(
       PNClients.PNEnvironment.PRODUCTION,
       aFiscalCode
     );
@@ -219,7 +216,10 @@ describe("pnService#getPnServiceActivation", () => {
   });
 
   it("should call getPnServiceActivation with right UAT params", async () => {
-    const response = await service(PNClients.PNEnvironment.UAT, aFiscalCode);
+    const response = await service.getPnActivation(
+      PNClients.PNEnvironment.UAT,
+      aFiscalCode
+    );
     expect(mockPnAddressBookIOClient).toBeCalledWith(
       mockUATUrl.href,
       mockUATKey,
@@ -249,7 +249,10 @@ describe("pnService#getPnServiceActivation", () => {
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         Promise.reject(expectedError)
     );
-    const responsePromise = service(PNClients.PNEnvironment.UAT, aFiscalCode);
+    const responsePromise = service.getPnActivation(
+      PNClients.PNEnvironment.UAT,
+      aFiscalCode
+    );
     await expect(responsePromise).rejects.toThrowError(expectedError);
     expect(mockPnAddressBookIOClient).toBeCalledWith(
       mockUATUrl.href,
@@ -276,7 +279,7 @@ describe("pnService#getPnServiceActivation", () => {
           }
         } as Response)
     );
-    const response = await service(
+    const response = await service.getPnActivation(
       PNClients.PNEnvironment.PRODUCTION,
       aFiscalCode
     );

@@ -146,10 +146,7 @@ import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
-import {
-  getPnActivationService,
-  upsertPnActivationService
-} from "./services/pnService";
+import { PnService } from "./services/pnService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -568,19 +565,12 @@ export function newApp({
           PNAddressBookConfig.FF_PN_ACTIVATION_ENABLED === "1" &&
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
-          const upsertPnActivation = upsertPnActivationService(
-            PN_ADDRESS_BOOK_CLIENT_SELECTOR.value
-          );
-
-          const getPnActivation = getPnActivationService(
-            PN_ADDRESS_BOOK_CLIENT_SELECTOR.value
-          );
+          const pnService = PnService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerPNRoutes(
             app,
             PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
-            upsertPnActivation,
-            getPnActivation,
+            pnService,
             authMiddlewares.bearerSession
           );
         }
@@ -1354,21 +1344,20 @@ function registerAuthenticationRoutes(
 function registerPNRoutes(
   app: Express,
   pnBasePath: string,
-  upsertPnActivation: ReturnType<typeof upsertPnActivationService>,
-  getPnActivation: ReturnType<typeof getPnActivationService>,
+  pnService: ReturnType<typeof PnService>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ) {
   app.get(
     `${pnBasePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(getPNActivationController(getPnActivation))
+    toExpressHandler(getPNActivationController(pnService.getPnActivation))
   );
 
   app.post(
     `${pnBasePath}/activation`,
     bearerSessionTokenAuth,
-    toExpressHandler(upsertPNActivationController(upsertPnActivation))
+    toExpressHandler(upsertPNActivationController(pnService.upsertPnActivation))
   );
 }
 
