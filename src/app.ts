@@ -146,7 +146,7 @@ import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
-import { PnService } from "./services/pnService";
+import { PNService } from "./services/pnService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -565,7 +565,7 @@ export function newApp({
           PNAddressBookConfig.FF_PN_ACTIVATION_ENABLED === "1" &&
           O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
         ) {
-          const pnService = PnService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
+          const pnService = PNService(PN_ADDRESS_BOOK_CLIENT_SELECTOR.value);
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerPNRoutes(
             app,
@@ -1344,7 +1344,7 @@ function registerAuthenticationRoutes(
 function registerPNRoutes(
   app: Express,
   pnBasePath: string,
-  pnService: ReturnType<typeof PnService>,
+  pnService: ReturnType<typeof PNService>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ) {

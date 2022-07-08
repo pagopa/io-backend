@@ -21,7 +21,7 @@ const getPnActivationService = (
     "x-pagopa-cx-taxid": fiscalCode
   });
 
-export const PnService = (
+export const PNService = (
   PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
 ) => ({
   getPnActivation: getPnActivationService(PnAddressBookIOClientSelector),

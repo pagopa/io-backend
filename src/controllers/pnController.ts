@@ -18,14 +18,14 @@ import {
   withValidatedOrValidationError
 } from "../utils/responses";
 import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
-import { PnService } from "../services/pnService";
+import { PNService } from "../services/pnService";
 
 /**
  * Upsert the Activation for `Avvisi di Cortesia` Piattaforma Notifiche
  * Special Service
  */
 export const upsertPNActivationController = (
-  upsertPnActivation: ReturnType<typeof PnService>["upsertPnActivation"]
+  upsertPnActivation: ReturnType<typeof PNService>["upsertPnActivation"]
 ) => (
   req: express.Request
 ): Promise<
@@ -75,7 +75,7 @@ export const upsertPNActivationController = (
   );
 
 export const getPNActivationController = (
-  getPnActivation: ReturnType<typeof PnService>["getPnActivation"]
+  getPnActivation: ReturnType<typeof PNService>["getPnActivation"]
 ) => (
   req: express.Request
 ): Promise<
