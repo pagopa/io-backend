@@ -22,9 +22,9 @@ import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 import { IPecServerClient } from "../../clients/pecserver";
 
-import { Client } from "../../../generated/third-party-service/client";
 import { ThirdPartyServiceClient } from "../../clients/third-party-service-client";
 import { CreatedMessageWithContent } from "../../../generated/io-messages-api/CreatedMessageWithContent";
+import { base64File } from "../../__mocks__/pn";
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
@@ -211,13 +211,15 @@ mockGetTPMessageFromExternalService.mockImplementation(async _messageId =>
     value: aThirdPartyMessageDetail
   })
 );
+const mockGetTPAttachment = jest.fn();
+
 const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
   E.right<Error, ReturnType<ThirdPartyServiceClient>>(
     (_fiscalCode: FiscalCode) => {
       return {
         getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
-        getThirdPartyMessageAttachment: jest.fn()
-      } as Client<"fiscal_code">;
+        getThirdPartyMessageAttachment: mockGetTPAttachment
+      };
     }
   )
 );
@@ -959,7 +961,7 @@ describe("MessageService#getThirdPartyMessage", () => {
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
-  it("should return an Not Fount if the getMessage API returns Not Found", async () => {
+  it("should return an Not Found if the getMessage API returns Not Found", async () => {
     mockGetMessage.mockImplementation(async () =>
       t.success({ status: 404, message: "Message Not Found" })
     );
@@ -1226,6 +1228,296 @@ describe("MessageService#getThirdPartyMessage", () => {
     });
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound"
+    });
+  });
+});
+
+describe("MessageService#getThirdPartyAttachment", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const anAttachmentUrl = "/an/url/with/attachmentId" as NonEmptyString;
+
+  var buffer = Buffer.from(base64File);
+
+  mockGetTPAttachment.mockImplementation(async (_id, _attachmentUrl) => {
+    return t.success({
+      status: 200,
+      headers: {},
+      value: buffer
+    });
+  });
+
+  it("should return an attachment from the API", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+      attachment_url: anAttachmentUrl
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessOctet",
+      value: buffer
+    });
+  });
+
+  it("should return an error if the getMessage API returns an error", async () => {
+    mockGetMessage.mockImplementation(async () => t.success(problemJson));
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).not.toHaveBeenCalled();
+
+    expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("should return a Not Found error if the getMessage API returns Not Found", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success({ status: 404, message: "Message Not Found" })
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).not.toHaveBeenCalled();
+
+    expect(res.kind).toEqual("IResponseErrorNotFound");
+  });
+
+  it("should return an error if getMessage validation fails", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      CreatedMessageWithContent.decode({})
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).not.toHaveBeenCalled();
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if message does not contains a valid ThirdPartyData content", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiMessageResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).not.toHaveBeenCalled();
+    expect(res).toMatchObject({
+      kind: "IResponseErrorValidation",
+      detail:
+        "Bad request: The message retrieved is not a valid message with third-party data"
+    });
+  });
+
+  it("should return an error if service configuration cannot be found", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    mockGetThirdPartyMessageClientFactory.mockImplementationOnce(serviceId =>
+      E.left(Error(`Service ${serviceId} not found`))
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).not.toHaveBeenCalled();
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+      detail: `Internal server error: Service ${aServiceId} not found`
+    });
+  });
+
+  it("should return an error if ThirParty service client throws an error", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    const anError = "Error calling Third Party client";
+    mockGetTPAttachment.mockImplementationOnce(async () => {
+      throw Error(anError);
+    });
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+      attachment_url: anAttachmentUrl
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+      detail: `Internal server error: ${anError}`
+    });
+  });
+
+  it("should return an error if ThirParty service client returns a problemJson response", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    mockGetTPAttachment.mockImplementationOnce(async () =>
+      t.success(problemJson)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+      attachment_url: anAttachmentUrl
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return Not Found if ThirParty service client returns an 404", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    mockGetTPAttachment.mockImplementationOnce(async () =>
+      t.success({ status: 404 })
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+      attachment_url: anAttachmentUrl
     });
     expect(res).toMatchObject({
       kind: "IResponseErrorNotFound"

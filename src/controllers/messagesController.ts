@@ -33,8 +33,7 @@ import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdParty
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
-  IResponseErrorNotImplemented,
-  ResponseErrorNotImplemented
+  IResponseErrorNotImplemented
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
@@ -51,7 +50,18 @@ type IGetLegalMessageAttachmentResponse =
   | IResponseErrorValidation
   | IResponseErrorNotFound
   | IResponseErrorTooManyRequests
-  | IResponseSuccessOctet;
+  | IResponseSuccessOctet<Buffer>;
+
+export const withGetThirdPartyAttachmentParams = async <T>(
+  req: express.Request,
+  f: (id: NonEmptyString, attachment_url: NonEmptyString) => Promise<T>
+) =>
+  withValidatedOrValidationError(NonEmptyString.decode(req.params.id), id =>
+    withValidatedOrValidationError(
+      NonEmptyString.decode(req.params.attachment_url),
+      attachment_url => f(id, attachment_url)
+    )
+  );
 
 export default class MessagesController {
   // eslint-disable-next-line max-params
@@ -119,8 +129,6 @@ export default class MessagesController {
       pipe(
         TE.tryCatch(
           () =>
-            // getLegalMessage is not yet implemented in new fn-app-messages
-            // just skip new implementation and take fn-app one
             this.messageService.getLegalMessage(
               user,
               req.params.id,
@@ -142,8 +150,6 @@ export default class MessagesController {
       pipe(
         TE.tryCatch(
           () =>
-            // getLegalMessageAttachment is not yet implemented in new fn-app-messages
-            // just skip new implementation and take fn-app one
             this.messageService.getLegalMessageAttachment(
               user,
               req.params.id,
@@ -208,9 +214,22 @@ export default class MessagesController {
    */
   public readonly getThirdPartyMessageAttachment = (
     req: express.Request
-    // eslint-disable-next-line sonarjs/no-identical-functions
-  ): Promise<IResponseErrorValidation | IResponseErrorNotImplemented> =>
-    withUserFromRequest(req, _user =>
-      Promise.resolve(ResponseErrorNotImplemented("Not implemented yet"))
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotImplemented
+    | IResponseSuccessOctet<Buffer>
+  > =>
+    withUserFromRequest(req, user =>
+      withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
+        this.messageService.getThirdPartyAttachment(
+          user.fiscal_code,
+          messageId,
+          attachmentUrl
+        )
+      )
     );
 }

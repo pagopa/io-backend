@@ -9,6 +9,7 @@ import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
+import { base64File } from "../../__mocks__/pn";
 
 const anId: string = "string-id";
 
@@ -75,6 +76,7 @@ const mockFnAppGetMessage = jest.fn();
 const mockFnAppGetMessagesByUser = jest.fn();
 const mockFnAppUpsertMessageStatus = jest.fn();
 const mockGetThirdPartyMessage = jest.fn();
+const mockGetThirdPartyAttachment = jest.fn();
 const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
 
@@ -83,6 +85,7 @@ const newMessageService = ({
   getMessagesByUser: mockFnAppGetMessagesByUser,
   upsertMessageStatus: mockFnAppUpsertMessageStatus,
   getThirdPartyMessage: mockGetThirdPartyMessage,
+  getThirdPartyAttachment: mockGetThirdPartyAttachment,
   getLegalMessage: mockGetLegalMessage,
   getLegalMessageAttachment: mockGetLegalMessageAttachment
 } as any) as NewMessagesService;
@@ -320,6 +323,74 @@ describe("MessagesController#getMessage", () => {
     response.apply(res);
 
     expect(mockFnAppGetMessage).not.toBeCalled();
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("MessagesController#getThirdPartyAttachment", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const anAttachmentUrl = "an/Attachment/url";
+
+  const buffer = Buffer.from(base64File);
+
+  it("should call the getThirdPartyAttachment on the messagesController with valid values", async () => {
+    const req = mockReq();
+
+    mockGetThirdPartyAttachment.mockReturnValue(
+      Promise.resolve(ResponseSuccessOctet(buffer))
+    );
+
+    req.user = mockedUser;
+    req.params = {
+      id: anId,
+      attachment_url: anAttachmentUrl
+    };
+
+    const controller = new MessagesController(
+      newMessageService,
+      tokenServiceMock as any
+    );
+
+    const response = await controller.getThirdPartyMessageAttachment(req);
+
+    expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      req.params.id,
+      req.params.attachment_url
+    );
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessOctet",
+      value: buffer
+    });
+  });
+
+  it("should not call the getThirdPartyAttachment on the messagesController with empty user", async () => {
+    const req = mockReq();
+    const res = mockRes();
+
+    mockGetThirdPartyAttachment.mockReturnValue(
+      Promise.resolve(ResponseSuccessOctet(buffer))
+    );
+
+    req.user = "";
+    req.params = {
+      id: anId,
+      attachment_url: anAttachmentUrl
+    };
+
+    const controller = new MessagesController(
+      newMessageService,
+      tokenServiceMock as any
+    );
+
+    const response = await controller.getThirdPartyMessageAttachment(req);
+    response.apply(res);
+
+    expect(mockGetThirdPartyAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
   });
 });

@@ -163,9 +163,9 @@ export const ResponsePaymentError = (
 /**
  * Interface for a successful response returning a octet stream object.
  */
-export interface IResponseSuccessOctet
+export interface IResponseSuccessOctet<T>
   extends IResponse<"IResponseSuccessOctet"> {
-  readonly value: unknown;
+  readonly value: T;
 }
 
 /**
@@ -173,7 +173,9 @@ export interface IResponseSuccessOctet
  *
  * @param o The object to return to the client
  */
-export const ResponseSuccessOctet = (o: Buffer): IResponseSuccessOctet => ({
+export const ResponseSuccessOctet = (
+  o: Buffer
+): IResponseSuccessOctet<typeof o> => ({
   apply: res =>
     res
       .status(HttpStatusCodeEnum.HTTP_STATUS_200)

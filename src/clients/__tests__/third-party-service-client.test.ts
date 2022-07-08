@@ -12,7 +12,8 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
   aPnNotification,
   aPnNotificationObject,
-  aPNServiceId
+  aPNServiceId,
+  base64File
 } from "../../__mocks__/pn";
 
 const aValidDetailAuthentication = {
@@ -64,7 +65,8 @@ describe("getThirdPartyServiceClientFactory", () => {
   });
 });
 
-const mockNodeFetch = jest.fn(
+const mockNodeFetch = jest.fn();
+mockNodeFetch.mockImplementation(
   async (_input: RequestInfo | URL, _init?: RequestInit) =>
     ({
       ok: true,
@@ -78,6 +80,10 @@ const mockNodeFetch = jest.fn(
 const aThirdPartyId = "aThirdPartyId";
 
 describe("third-party-service-client", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should add ApiKey header to Third Party service call with API_KEY configuration when user is a TEST user", async () => {
     const client = getThirdPartyServiceClient(
       aValidTestAndProdThirdPartyConfig,
@@ -165,6 +171,54 @@ describe("third-party-service-client", () => {
         headers: {
           "x-pagopa-cx-taxid": aProdFiscalCode,
           "x-api-key": "aKey",
+          [expectedConfig.detailsAuthentication.header_key_name]:
+            expectedConfig.detailsAuthentication.key
+        },
+        method: "get",
+        redirect: "manual"
+      }
+    );
+  });
+
+  it("should call custom decoder when getThirdPartyMessageAttachment is called", async () => {
+    var buffer = Buffer.from(base64File);
+    var arrayBuffer = new Uint8Array(buffer).buffer;
+
+    mockNodeFetch.mockImplementationOnce(
+      async (_input: RequestInfo | URL, _init?: RequestInit) => {
+        return {
+          ok: true,
+          status: 200,
+          arrayBuffer: async () => arrayBuffer
+        } as Response;
+      }
+    );
+
+    const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
+
+    const client = getThirdPartyServiceClient(
+      { ...aValidTestAndProdThirdPartyConfig, serviceId: aServiceId },
+      mockNodeFetch
+    )(aProdFiscalCode);
+
+    const res = await client.getThirdPartyMessageAttachment({
+      id: aThirdPartyId,
+      attachment_url: "an/url"
+    });
+    const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
+
+    expect(res).toMatchObject(
+      E.right({
+        status: 200,
+        value: buffer
+      })
+    );
+
+    expect(mockNodeFetch).toHaveBeenCalledWith(
+      `${expectedConfig.baseUrl}/messages/${aThirdPartyId}/an/url`,
+      {
+        headers: {
+          fiscal_code: aProdFiscalCode,
           [expectedConfig.detailsAuthentication.header_key_name]:
             expectedConfig.detailsAuthentication.key
         },

@@ -3,20 +3,40 @@ import { pipe } from "fp-ts/lib/function";
 
 import nodeFetch from "node-fetch";
 
-import { FiscalCode } from "generated/io-api/FiscalCode";
-import { ServiceId } from "generated/io-api/ServiceId";
+import {
+  bufferArrayResponseDecoder,
+  composeResponseDecoders,
+  createFetchRequestForApi,
+  MapResponseType,
+  ReplaceRequestParams,
+  RequestParams,
+  RequestResponseTypes,
+  ResponseDecoder,
+  TypeofApiCall
+} from "@pagopa/ts-commons/lib/requests";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+
 import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
   ApiKeyAuthenticationConfig,
   EnvironmentConfig
-} from "src/utils/thirdPartyConfig";
+} from "../../src/utils/thirdPartyConfig";
 
+import { FiscalCode } from "../../generated/io-api/FiscalCode";
+import { ServiceId } from "../../generated/io-api/ServiceId";
 import {
   Client,
   createClient
 } from "../../generated/third-party-service/client";
+import {
+  getThirdPartyMessageAttachmentDecoder,
+  GetThirdPartyMessageAttachmentT
+} from "../../generated/third-party-service/requestTypes";
+
 import { pnFetch } from "../adapters/pnFetch";
+
+// ---
 
 type Fetch = (
   input: RequestInfo | URL,
@@ -67,6 +87,19 @@ const withPNFetch = (serviceId: ServiceId, environment: EnvironmentConfig) => (
     environment.detailsAuthentication.key
   ) as Fetch;
 
+// ------------------
+
+type GetThirdPartyMessageAttachmentCustomResponseDecoders = ResponseDecoder<
+  RequestResponseTypes<
+    MapResponseType<GetThirdPartyMessageAttachmentT, 200, Buffer>
+  >
+>;
+
+type GetThirdPartyMessageAttachmentCustomT = ReplaceRequestParams<
+  MapResponseType<GetThirdPartyMessageAttachmentT, 200, Buffer>,
+  Omit<RequestParams<GetThirdPartyMessageAttachmentT>, "fiscal_code">
+>;
+
 /**
  *
  * @param thirdPartyConfig
@@ -76,8 +109,17 @@ const withPNFetch = (serviceId: ServiceId, environment: EnvironmentConfig) => (
  */
 export const getThirdPartyServiceClient = (
   thirdPartyConfig: ThirdPartyConfig,
-  fetchApi: Fetch = (nodeFetch as unknown) as Fetch
-) => (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
+  fetchApi: Fetch
+) => (
+  fiscalCode: FiscalCode
+): {
+  readonly getThirdPartyMessageDetails: Client<
+    "fiscal_code"
+  >["getThirdPartyMessageDetails"];
+  readonly getThirdPartyMessageAttachment: TypeofApiCall<
+    GetThirdPartyMessageAttachmentCustomT
+  >;
+} => {
   const environment = thirdPartyConfig.testEnvironment?.testUsers.includes(
     fiscalCode
   )
@@ -93,12 +135,46 @@ export const getThirdPartyServiceClient = (
     withPNFetch(thirdPartyConfig.serviceId, environment)
   );
 
-  return createClient<"fiscal_code">({
+  const options = {
     basePath: "",
     baseUrl: environment.baseUrl,
-    fetchApi: fetchApiWithRedirectAndAuthentication,
-    withDefaults: op => params => op({ ...params, fiscal_code: fiscalCode })
+    fetchApi: fetchApiWithRedirectAndAuthentication
+  };
+
+  const binaryArrayDecoder: GetThirdPartyMessageAttachmentCustomResponseDecoders = composeResponseDecoders(
+    bufferArrayResponseDecoder(200),
+    getThirdPartyMessageAttachmentDecoder()
+  ) as GetThirdPartyMessageAttachmentCustomResponseDecoders;
+
+  const getThirdPartyMessageAttachmentCustomT: GetThirdPartyMessageAttachmentCustomT = {
+    headers: () => ({
+      fiscal_code: fiscalCode
+    }),
+    method: "get",
+    query: () => withoutUndefinedValues({}),
+    response_decoder: binaryArrayDecoder,
+    url: ({ ["id"]: id, ["attachment_url"]: attachmentUrl }) =>
+      `${options.basePath}/messages/${id}/${attachmentUrl}`
+  };
+
+  const getThirdPartyMessageAttachmentCustom: TypeofApiCall<GetThirdPartyMessageAttachmentCustomT> = createFetchRequestForApi(
+    getThirdPartyMessageAttachmentCustomT,
+    options
+  );
+
+  const baseClient = createClient<"fiscal_code">({
+    ...options,
+    withDefaults: op => params =>
+      op({
+        ...params,
+        fiscal_code: fiscalCode
+      })
   });
+
+  return {
+    getThirdPartyMessageAttachment: getThirdPartyMessageAttachmentCustom,
+    getThirdPartyMessageDetails: baseClient.getThirdPartyMessageDetails
+  };
 };
 
 export type ThirdPartyServiceClientFactory = ReturnType<
