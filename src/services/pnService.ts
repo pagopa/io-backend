@@ -13,3 +13,10 @@ export const upsertPnActivationService = (
     body: activationStatusPayload,
     "x-pagopa-cx-taxid": fiscalCode
   });
+
+export const getPnActivationService = (
+  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+) => (pnEnvironment: PNEnvironment, fiscalCode: FiscalCode) =>
+  PnAddressBookIOClientSelector(pnEnvironment).getCourtesyAddressIo({
+    "x-pagopa-cx-taxid": fiscalCode
+  });

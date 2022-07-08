@@ -1,4 +1,7 @@
-import { upsertPnActivationService } from "../pnService";
+import {
+  upsertPnActivationService,
+  getPnActivationService
+} from "../pnService";
 import * as PNClients from "../../clients/pn-clients";
 import { PNClientFactory } from "../../clients/pn-clients";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
@@ -15,16 +18,7 @@ const mockUATUrl = { href: "https://example.com/uat" } as ValidUrl;
 const mockProdKey = "test-prod-key";
 const mockUATKey = "test-uat-key";
 
-const mockNodeFetch = jest.fn(
-  async (_input: RequestInfo | URL, _init?: RequestInit) =>
-    ({
-      ok: true,
-      status: 204,
-      json: async () => {
-        return;
-      }
-    } as Response)
-);
+const mockNodeFetch = jest.fn();
 
 const anActivationStatusPayload: IoCourtesyDigitalAddressActivation = {
   activationStatus: true
@@ -39,6 +33,16 @@ describe("pnService#upsertPnServiceActivation", () => {
       mockUATKey,
       mockNodeFetch
     )
+  );
+  mockNodeFetch.mockImplementation(
+    async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      ({
+        ok: true,
+        status: 204,
+        json: async () => {
+          return;
+        }
+      } as Response)
   );
   beforeEach(() => {
     jest.clearAllMocks();
@@ -130,7 +134,7 @@ describe("pnService#upsertPnServiceActivation", () => {
     });
   });
 
-  it("should return an error if the response optained from PN is not valid", async () => {
+  it("should return an error if the setCourtesyAddressIo response from PN is not valid", async () => {
     mockNodeFetch.mockImplementationOnce(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         ({
@@ -158,6 +162,135 @@ describe("pnService#upsertPnServiceActivation", () => {
         "x-pagopa-cx-taxid": aFiscalCode
       }),
       method: "put"
+    });
+    expect(isLeft(response)).toBeTruthy();
+  });
+});
+
+describe("pnService#getPnServiceActivation", () => {
+  const service = getPnActivationService(
+    PNClientFactory(
+      mockProdUrl,
+      mockProdKey,
+      mockUATUrl,
+      mockUATKey,
+      mockNodeFetch
+    )
+  );
+  mockNodeFetch.mockImplementation(
+    async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      ({
+        ok: true,
+        status: 200,
+        json: async () => {
+          return anActivationStatusPayload;
+        }
+      } as Response)
+  );
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it("should call getPnServiceActivation with right PROD params", async () => {
+    const response = await service(
+      PNClients.PNEnvironment.PRODUCTION,
+      aFiscalCode
+    );
+    expect(mockPnAddressBookIOClient).toBeCalledWith(
+      mockProdUrl.href,
+      mockProdKey,
+      mockNodeFetch
+    );
+    expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
+      headers: expect.objectContaining({
+        "x-api-key": mockProdKey,
+        "x-pagopa-cx-taxid": aFiscalCode
+      }),
+      method: "get"
+    });
+    expect(isRight(response)).toBeTruthy();
+    if (isRight(response)) {
+      expect(response.right).toEqual(
+        expect.objectContaining({
+          status: 200,
+          value: anActivationStatusPayload
+        })
+      );
+    }
+  });
+
+  it("should call getPnServiceActivation with right UAT params", async () => {
+    const response = await service(PNClients.PNEnvironment.UAT, aFiscalCode);
+    expect(mockPnAddressBookIOClient).toBeCalledWith(
+      mockUATUrl.href,
+      mockUATKey,
+      mockNodeFetch
+    );
+    expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
+      headers: expect.objectContaining({
+        "x-api-key": mockUATKey,
+        "x-pagopa-cx-taxid": aFiscalCode
+      }),
+      method: "get"
+    });
+    expect(isRight(response)).toBeTruthy();
+    if (isRight(response)) {
+      expect(response.right).toEqual(
+        expect.objectContaining({
+          status: 200,
+          value: anActivationStatusPayload
+        })
+      );
+    }
+  });
+
+  it("should return an error if getCourtesyAddressIo fails", async () => {
+    const expectedError = new Error("error");
+    mockNodeFetch.mockImplementationOnce(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        Promise.reject(expectedError)
+    );
+    const responsePromise = service(PNClients.PNEnvironment.UAT, aFiscalCode);
+    await expect(responsePromise).rejects.toThrowError(expectedError);
+    expect(mockPnAddressBookIOClient).toBeCalledWith(
+      mockUATUrl.href,
+      mockUATKey,
+      mockNodeFetch
+    );
+    expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
+      headers: expect.objectContaining({
+        "x-api-key": mockUATKey,
+        "x-pagopa-cx-taxid": aFiscalCode
+      }),
+      method: "get"
+    });
+  });
+
+  it("should return an error if the getCourtesyAddressIo response from PN is not valid", async () => {
+    mockNodeFetch.mockImplementationOnce(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        ({
+          ok: true,
+          status: 299,
+          json: async () => {
+            return anActivationStatusPayload;
+          }
+        } as Response)
+    );
+    const response = await service(
+      PNClients.PNEnvironment.PRODUCTION,
+      aFiscalCode
+    );
+    expect(mockPnAddressBookIOClient).toBeCalledWith(
+      mockProdUrl.href,
+      mockProdKey,
+      mockNodeFetch
+    );
+    expect(mockNodeFetch).toBeCalledWith(expect.any(String), {
+      headers: expect.objectContaining({
+        "x-api-key": mockProdKey,
+        "x-pagopa-cx-taxid": aFiscalCode
+      }),
+      method: "get"
     });
     expect(isLeft(response)).toBeTruthy();
   });
