@@ -619,7 +619,6 @@ export default class NewMessagesService {
             return response;
           }),
           TE.mapLeft(
-            // eslint-disable-next-line sonarjs/no-identical-functions
             flow(response => {
               switch (response.status) {
                 case 400:
@@ -631,7 +630,7 @@ export default class NewMessagesService {
                 case 404:
                   return ResponseErrorNotFound(
                     "Not found",
-                    "Message from Third Party service not found"
+                    "Attachment from Third Party service not found"
                   );
                 case 429:
                   return ResponseErrorTooManyRequests();
