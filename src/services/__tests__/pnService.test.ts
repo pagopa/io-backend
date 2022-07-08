@@ -34,18 +34,18 @@ describe("pnService#upsertPnServiceActivation", () => {
       mockNodeFetch
     )
   );
-  mockNodeFetch.mockImplementation(
-    async (_input: RequestInfo | URL, _init?: RequestInit) =>
-      ({
-        ok: true,
-        status: 204,
-        json: async () => {
-          return;
-        }
-      } as Response)
-  );
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNodeFetch.mockImplementation(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        ({
+          ok: true,
+          status: 204,
+          json: async () => {
+            return;
+          }
+        } as Response)
+    );
   });
   it("should call setCourtesyAddressIo with right PROD params", async () => {
     const response = await service(
@@ -177,18 +177,18 @@ describe("pnService#getPnServiceActivation", () => {
       mockNodeFetch
     )
   );
-  mockNodeFetch.mockImplementation(
-    async (_input: RequestInfo | URL, _init?: RequestInit) =>
-      ({
-        ok: true,
-        status: 200,
-        json: async () => {
-          return anActivationStatusPayload;
-        }
-      } as Response)
-  );
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNodeFetch.mockImplementation(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        ({
+          ok: true,
+          status: 200,
+          json: async () => {
+            return anActivationStatusPayload;
+          }
+        } as Response)
+    );
   });
   it("should call getPnServiceActivation with right PROD params", async () => {
     const response = await service(
