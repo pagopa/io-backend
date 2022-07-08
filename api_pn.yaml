@@ -27,8 +27,7 @@ paths:
         - in: query
           name: isTest
           required: false
-          schema:
-            type: boolean
+          type: boolean
       responses:
         "204":
           description: Request created.
