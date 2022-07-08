@@ -970,7 +970,7 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/third-party-messages/:id/attachments/:attachment_url`,
+    `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessageAttachment,
