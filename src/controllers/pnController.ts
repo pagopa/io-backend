@@ -1,7 +1,9 @@
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
-  ResponseErrorInternal
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
@@ -16,7 +18,10 @@ import {
   withValidatedOrValidationError
 } from "../utils/responses";
 import { PNActivation } from "../../generated/api_piattaforma-notifiche-courtesy/PNActivation";
-import { upsertPnActivationService } from "../services/pnService";
+import {
+  upsertPnActivationService,
+  getPnActivationService
+} from "../services/pnService";
 
 /**
  * Upsert the Activation for `Avvisi di Cortesia` Piattaforma Notifiche
@@ -70,4 +75,55 @@ export const upsertPNActivationController = (
         TE.toUnion
       )()
     )
+  );
+
+export const getPNActivationController = (
+  getPnActivation: ReturnType<typeof getPnActivationService>
+) => (
+  req: express.Request
+): Promise<
+  | IResponseErrorValidation
+  | IResponseErrorInternal
+  | IResponseSuccessJson<PNActivation>
+> =>
+  withUserFromRequest(req, async user =>
+    pipe(
+      O.fromNullable(req.query.isTest),
+      O.map(_ => _.toString().toLowerCase() === "true"),
+      O.getOrElse(() => false),
+      TE.of,
+      TE.map(isTest => (isTest ? PNEnvironment.UAT : PNEnvironment.PRODUCTION)),
+      TE.chainW(pnEnvironment =>
+        pipe(
+          TE.tryCatch(
+            () => getPnActivation(pnEnvironment, user.fiscal_code),
+            () => ResponseErrorInternal("Error calling the PN service")
+          ),
+          TE.chainEitherKW(
+            E.mapLeft(() =>
+              ResponseErrorInternal("Unexpected PN service response")
+            )
+          )
+        )
+      ),
+      TE.map(_ => {
+        switch (_.status) {
+          case 200:
+            return ResponseSuccessJson({
+              activation_status: _.value.activationStatus
+            });
+          case 404:
+            // When the activation is missing on PN
+            // false default value was returned.
+            return ResponseSuccessJson({
+              activation_status: false
+            });
+          case 400:
+            return ResponseErrorInternal("PN service response is bad request");
+          default:
+            return ResponseErrorInternal("Unexpected response status code");
+        }
+      }),
+      TE.toUnion
+    )()
   );
