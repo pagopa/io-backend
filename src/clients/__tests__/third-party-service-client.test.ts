@@ -136,7 +136,7 @@ describe("third-party-service-client", () => {
     );
   });
 
-  it("should handle fetch for PN service with adapter data", async () => {
+  it("should handle fetch for PN service with adapter data (get detail)", async () => {
     const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
 
     const client = getThirdPartyServiceClient(
@@ -219,6 +219,35 @@ describe("third-party-service-client", () => {
       {
         headers: {
           fiscal_code: aProdFiscalCode,
+          [expectedConfig.detailsAuthentication.header_key_name]:
+            expectedConfig.detailsAuthentication.key
+        },
+        method: "get",
+        redirect: "manual"
+      }
+    );
+  });
+
+  it("should handle fetch for PN service with adapter data (get attachment)", async () => {
+    const aProdFiscalCode = "GRBRPP87L04L741X" as FiscalCode;
+
+    const client = getThirdPartyServiceClient(
+      { ...aValidTestAndProdThirdPartyConfig, serviceId: aPNServiceId },
+      mockNodeFetch
+    )(aProdFiscalCode);
+
+    await client.getThirdPartyMessageAttachment({
+      id: aThirdPartyId,
+      attachment_url: `delivery/notifications/sent/${aThirdPartyId}/attachments/documents/0`
+    });
+    const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
+
+    expect(mockNodeFetch).toHaveBeenCalledWith(
+      `${expectedConfig.baseUrl}/delivery/notifications/sent/${aThirdPartyId}/attachments/documents/0`,
+      {
+        headers: {
+          "x-pagopa-cx-taxid": aProdFiscalCode,
+          "x-api-key": "aKey",
           [expectedConfig.detailsAuthentication.header_key_name]:
             expectedConfig.detailsAuthentication.key
         },
