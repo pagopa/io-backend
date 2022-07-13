@@ -19,8 +19,14 @@ import {
   OrderingEnum
 } from "../../../generated/cgn-operator-search/OfflineMerchantSearchRequest";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { CardActivated } from "../../../generated/io-cgn-api/CardActivated";
-import { CardExpired } from "../../../generated/io-cgn-api/CardExpired";
+import {
+  CardActivated,
+  StatusEnum as ActivatedStatusEnum
+} from "../../../generated/io-cgn-api/CardActivated";
+import {
+  CardExpired,
+  StatusEnum as ExpiredStatusEnum
+} from "../../../generated/io-cgn-api/CardExpired";
 import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";
 
 const anAPIKey = "";
@@ -47,7 +53,7 @@ const mockGetCgnStatus = jest.fn().mockReturnValue(
   ResponseSuccessJson<CardActivated>({
     activation_date: new Date(),
     expiration_date: new Date(),
-    status: "ACTIVATED"
+    status: ActivatedStatusEnum.ACTIVATED
   })
 );
 const mockGetEycaStatus = jest.fn();
@@ -194,7 +200,7 @@ describe("CgnOperatorController#getPublishedProductCategories", () => {
       user: mockedUser
     };
 
-    req.query.count_new_discounts = "a_not_boolean_value"; 
+    req.query.count_new_discounts = "a_not_boolean_value";
 
     await controller.getPublishedProductCategories(req);
 
@@ -268,7 +274,7 @@ describe("CgnOperatorController#getMerchant", () => {
       ResponseSuccessJson<CardExpired>({
         activation_date: new Date(),
         expiration_date: new Date(),
-        status: "EXPIRED"
+        status: ExpiredStatusEnum.EXPIRED
       })
     );
 
@@ -480,7 +486,7 @@ describe("CgnOperatorController#getDiscountBucketCode", () => {
       ResponseSuccessJson<CardExpired>({
         activation_date: new Date(),
         expiration_date: new Date(),
-        status: "EXPIRED"
+        status: ExpiredStatusEnum.EXPIRED
       })
     );
 

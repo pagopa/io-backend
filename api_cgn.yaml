@@ -242,6 +242,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CommonCard"
   CardPending:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardPending"
+  CardPendingDelete:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardPendingDelete"
   CardActivated:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml#/definitions/CardActivated"
   CardRevoked:
