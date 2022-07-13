@@ -507,13 +507,13 @@ export const PN_ADDRESS_BOOK_CLIENT_SELECTOR: O.Option<ReturnType<
 >> = pipe(
   PNAddressBookConfig,
   E.fromPredicate(IEnabledPnAddressBookConfig.is, () => O.none),
-  E.map(_ =>
+  E.map(pnConfig =>
     O.some(
       PNClientFactory(
-        _.PN_API_URL,
-        _.PN_API_KEY,
-        _.PN_API_URL_UAT,
-        _.PN_API_KEY_UAT,
+        pnConfig.PN_API_URL,
+        pnConfig.PN_API_KEY,
+        pnConfig.PN_API_URL_UAT,
+        pnConfig.PN_API_KEY_UAT,
         httpOrHttpsApiFetch
       )
     )
