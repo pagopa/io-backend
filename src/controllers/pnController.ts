@@ -103,11 +103,11 @@ export const getPNActivationController = (
           )
         )
       ),
-      TE.map(_ => {
-        switch (_.status) {
+      TE.map(pnActivationResponse => {
+        switch (pnActivationResponse.status) {
           case 200:
             return ResponseSuccessJson({
-              activation_status: _.value.activationStatus
+              activation_status: pnActivationResponse.value.activationStatus
             });
           case 404:
             // When the activation is missing on PN
