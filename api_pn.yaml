@@ -10,6 +10,27 @@ security:
   - Bearer: []
 paths:
   "/activation":
+    get:
+      operationId: getPNActivation
+      summary: Get Piattaforma Notifiche Activation
+      description: |
+        Get the Piattaforma Notifiche activation for Special Service "Avvisi di Cortesia"
+      parameters:
+        - in: query
+          name: isTest
+          required: false
+          type: boolean
+      responses:
+        "200":
+          description: Request created.
+          schema:
+            $ref: "#/definitions/PNActivation"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
     post:
       operationId: upsertPNActivation
       summary: Upsert Piattaforma Notifiche Activation

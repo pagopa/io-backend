@@ -2,7 +2,7 @@ import { IoCourtesyDigitalAddressActivation } from "../../generated/piattaforma-
 import { PNClientFactory, PNEnvironment } from "../clients/pn-clients";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 
-export const upsertPnActivationService = (
+const upsertPnActivationService = (
   PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
 ) => (
   pnEnvironment: PNEnvironment,
@@ -13,3 +13,17 @@ export const upsertPnActivationService = (
     body: activationStatusPayload,
     "x-pagopa-cx-taxid": fiscalCode
   });
+
+const getPnActivationService = (
+  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+) => (pnEnvironment: PNEnvironment, fiscalCode: FiscalCode) =>
+  PnAddressBookIOClientSelector(pnEnvironment).getCourtesyAddressIo({
+    "x-pagopa-cx-taxid": fiscalCode
+  });
+
+export const PNService = (
+  PnAddressBookIOClientSelector: ReturnType<typeof PNClientFactory>
+) => ({
+  getPnActivation: getPnActivationService(PnAddressBookIOClientSelector),
+  upsertPnActivation: upsertPnActivationService(PnAddressBookIOClientSelector)
+});
