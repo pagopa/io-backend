@@ -68,7 +68,9 @@ import {
   APP_MESSAGES_API_CLIENT,
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_LOCK_ENDPOINT,
-  THIRD_PARTY_CONFIG_LIST
+  THIRD_PARTY_CONFIG_LIST,
+  PN_ADDRESS_BOOK_CLIENT_SELECTOR,
+  PNAddressBookConfig
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -86,6 +88,7 @@ import checkIP from "./utils/middleware/checkIP";
 import BonusController from "./controllers/bonusController";
 import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
+import { upsertPNActivationController } from "./controllers/pnController";
 import {
   getUserForBPD,
   getUserForFIMS,
@@ -140,6 +143,7 @@ import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
+import { upsertPnActivationService } from "./services/pnService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -553,6 +557,22 @@ export function newApp({
           PROFILE_SERVICE,
           authMiddlewares.bearerFIMS
         );
+
+        if (
+          PNAddressBookConfig.FF_PN_ACTIVATION_ENABLED === "1" &&
+          O.isSome(PN_ADDRESS_BOOK_CLIENT_SELECTOR)
+        ) {
+          const upsertPnActivation = upsertPnActivationService(
+            PN_ADDRESS_BOOK_CLIENT_SELECTOR.value
+          );
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerPNRoutes(
+            app,
+            PNAddressBookConfig.PN_ACTIVATION_BASE_PATH,
+            upsertPnActivation,
+            authMiddlewares.bearerSession
+          );
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerZendeskRoutes(
@@ -1317,6 +1337,20 @@ function registerAuthenticationRoutes(
     `${authBasePath}/user-identity`,
     bearerSessionTokenAuth,
     toExpressHandler(acsController.getUserIdentity, acsController)
+  );
+}
+
+function registerPNRoutes(
+  app: Express,
+  pnBasePath: string,
+  upsertPnActivation: ReturnType<typeof upsertPnActivationService>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+) {
+  app.post(
+    `${pnBasePath}/activation`,
+    bearerSessionTokenAuth,
+    toExpressHandler(upsertPNActivationController(upsertPnActivation))
   );
 }
 

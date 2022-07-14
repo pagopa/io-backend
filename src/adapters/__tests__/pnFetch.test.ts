@@ -5,7 +5,7 @@ import { createClient } from "../../../generated/third-party-service/client";
 import { errorResponse, pnFetch } from "../pnFetch";
 import nodeFetch from "node-fetch";
 import { aFiscalCode } from "../../__mocks__/user_mock";
-import * as pnclient from "../../../src/clients/pn-client";
+import * as pnclient from "../../../src/clients/pn-clients";
 import { Client as PnClient } from "../../../generated/piattaforma-notifiche/client";
 import { Response as NodeResponse } from "node-fetch";
 
@@ -22,7 +22,10 @@ import {
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody
 } from "../../__mocks__/pn";
-import {  notificationDetailResponseExample, notificationDetailResponseExampleAsObject } from "../../__mocks__/pn-response";
+import {
+  notificationDetailResponseExample,
+  notificationDetailResponseExampleAsObject
+} from "../../__mocks__/pn-response";
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
@@ -55,7 +58,11 @@ describe("errorResponse", () => {
   it("GIVEN a generic error WHEN errorResponse is called THEN a response containing the error message is returned", async () => {
     const response = errorResponse(new Error(anErrorMessage));
     expect(response.status).toEqual(500);
-    await expect(response.json()).resolves.toEqual({detail: anErrorMessage, status: 500, title: "Error fetching PN data"});
+    await expect(response.json()).resolves.toEqual({
+      detail: anErrorMessage,
+      status: 500,
+      title: "Error fetching PN data"
+    });
   });
 });
 
@@ -130,12 +137,17 @@ describe("getThirdPartyMessageDetails", () => {
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
-      expect(result.right).toEqual(expect.objectContaining({
-        status: 200,
-        value: expect.objectContaining({details: expect.objectContaining({abstract: notificationDetailResponseExampleAsObject.abstract})})
-      }))
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          status: 200,
+          value: expect.objectContaining({
+            details: expect.objectContaining({
+              abstract: notificationDetailResponseExampleAsObject.abstract
+            })
+          })
+        })
+      );
     }
- 
   });
 
   it("GIVEN a not working PN get message endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints returning an error", async () => {
