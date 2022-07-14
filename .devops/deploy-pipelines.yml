@@ -36,41 +36,6 @@ parameters:
         appname: io-p-app-appbackendli
         rg: io-p-rg-linux
 
-
-  - name: 'OPENAPI_SPEC_PATHS'
-    type: object
-    default:
-      api_auth: 
-        openapi_spec_path: 'api_auth.yaml'
-        package_name: '@pagopa/io-backend-auth-sdk'
-      api_backend: 
-        openapi_spec_path: 'api_backend.yaml'
-        package_name: '@pagopa/io-backend-sdk'
-      api_bonus: 
-        openapi_spec_path: 'api_bonus.yaml'
-        package_name: '@pagopa/io-backend-bonus-sdk'
-      api_bpd: 
-        openapi_spec_path: 'api_bpd.yaml'
-        package_name: '@pagopa/io-backend-bpd-sdk'
-      api_cgn: 
-        openapi_spec_path: 'api_cgn.yaml'
-        package_name: '@pagopa/io-backend-cgn-sdk'
-      api_myportal: 
-        openapi_spec_path: 'api_myportal.yaml'
-        package_name: '@pagopa/io-backend-myportal-sdk'
-      api_notifications: 
-        openapi_spec_path: 'api_notifications.yaml'
-        package_name: '@pagopa/io-backend-notifications-sdk'
-      api_pagopa: 
-        openapi_spec_path: 'api_pagopa.yaml'
-        package_name: '@pagopa/io-backend-pagopa-sdk'
-      api_public: 
-        openapi_spec_path: 'api_public.yaml'
-        package_name: '@pagopa/io-backend-public-sdk'
-      api_session: 
-        openapi_spec_path: 'api_session.yaml'
-        package_name: '@pagopa/io-backend-session-sdk'
-
 # Only manual activations are intended
 trigger: none
 pr: none
