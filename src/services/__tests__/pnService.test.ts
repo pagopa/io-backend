@@ -1,4 +1,4 @@
-import { PnService } from "../pnService";
+import { PNService } from "../pnService";
 import * as PNClients from "../../clients/pn-clients";
 import { PNClientFactory } from "../../clients/pn-clients";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
@@ -22,7 +22,7 @@ const anActivationStatusPayload: IoCourtesyDigitalAddressActivation = {
 };
 
 describe("pnService#upsertPnServiceActivation", () => {
-  const service = PnService(
+  const service = PNService(
     PNClientFactory(
       mockProdUrl,
       mockProdKey,
@@ -165,7 +165,7 @@ describe("pnService#upsertPnServiceActivation", () => {
 });
 
 describe("pnService#getPnServiceActivation", () => {
-  const service = PnService(
+  const service = PNService(
     PNClientFactory(
       mockProdUrl,
       mockProdKey,
