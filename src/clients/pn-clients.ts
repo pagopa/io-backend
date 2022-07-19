@@ -1,6 +1,6 @@
 import nodeFetch from "node-fetch";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
-import { stripTrailingSlashIfPresent } from "src/utils/url";
+import { stripTrailingSlashIfPresent } from "../utils/url";
 import {
   Client,
   createClient
