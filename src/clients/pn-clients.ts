@@ -8,6 +8,7 @@ import {
   Client as AddressBookClient,
   createClient as createAddressBookClient
 } from "../../generated/piattaforma-notifiche-courtesy/client";
+import { stripTrailingSlashIfPresent } from "src/utils/url";
 
 export function PnAPIClient(
   baseUrl: string,
@@ -66,9 +67,17 @@ export const PNClientFactory = (
 ) => (pnEnvironment: PNEnvironment) => {
   switch (pnEnvironment) {
     case PNEnvironment.PRODUCTION:
-      return PnAddressBookIOClient(pnApiUrlProd.href, pnApiKeyProd, fetchApi);
+      return PnAddressBookIOClient(
+        stripTrailingSlashIfPresent(pnApiUrlProd),
+        pnApiKeyProd,
+        fetchApi
+      );
     case PNEnvironment.UAT:
-      return PnAddressBookIOClient(pnApiUrlUAT.href, pnApiKeyUAT, fetchApi);
+      return PnAddressBookIOClient(
+        stripTrailingSlashIfPresent(pnApiUrlUAT),
+        pnApiKeyUAT,
+        fetchApi
+      );
     default:
       throw new Error("Unimplemented PN Environment");
   }
