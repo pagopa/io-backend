@@ -1,5 +1,6 @@
 import nodeFetch from "node-fetch";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
+import { stripTrailingSlashIfPresent } from "src/utils/url";
 import {
   Client,
   createClient
@@ -8,7 +9,6 @@ import {
   Client as AddressBookClient,
   createClient as createAddressBookClient
 } from "../../generated/piattaforma-notifiche-courtesy/client";
-import { stripTrailingSlashIfPresent } from "src/utils/url";
 
 export function PnAPIClient(
   baseUrl: string,
