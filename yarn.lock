@@ -338,20 +338,20 @@
     eslint-plugin-sonarjs "^0.5.0"
     prettier "^2.1.2"
 
-"@pagopa/io-spid-commons@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-7.0.0.tgz#2e85b8e4078eb35b52270efc4da527fd848da7fe"
-  integrity sha512-3/Win6vKsEmIuc981COj3odk9SxSTbTpweDAwC58lOwZCqTQRVx2t0p61wFXBmyjMV8vBHTg7AQeyZL1u+7XsA==
+"@pagopa/io-spid-commons@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-8.0.0.tgz#2b1edcb001c2abbb4e19ece9a48048bf138ff9af"
+  integrity sha512-KxwbXcd/mZ85Po3wgfPn0UpM8eUGji2IVDwgH/7G/mkDhw1HbwS7fm5lUtrMIhU0W9UvOejrtc+L0OmjAAW9CQ==
   dependencies:
     "@pagopa/ts-commons" "^10.0.0"
-    "@types/redis" "^2.8.14"
+    "@types/redis" "^2.8.32"
     date-fns "^1.30.1"
     fp-ts "^2.11.1"
     io-ts "^2.2.16"
     io-ts-types "^0.5.16"
     node-fetch "^2.2.0"
-    node-forge "^0.10.0"
-    passport "^0.4.1"
+    node-forge "^1.0.0"
+    passport "^0.6.0"
     passport-saml "1.3.5"
     redis "^2.8.0"
     winston "^3.0.0"
@@ -679,7 +679,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/redis@^2.8.14", "@types/redis@^2.8.32":
+"@types/redis@^2.8.32":
   version "2.8.32"
   resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.32.tgz#1d3430219afbee10f8cfa389dad2571a05ecfb11"
   integrity sha512-7jkMKxcGq9p242exlbsVzuJb57KqHRhNl4dHoQu2Y5v9bCAbtIXXH0R3HleSQW4CTOqpHIYUW3t6tpUj4BVQ+w==
@@ -5379,6 +5379,11 @@ node-forge@^0.10.0:
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.10.0.tgz#32dea2afb3e9926f02ee5ce8794902691a676bf3"
   integrity sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==
 
+node-forge@^1.0.0:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
+  integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
+
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
@@ -5933,13 +5938,14 @@ passport-strategy@*, passport-strategy@1.x.x, passport-strategy@^1.0.0:
   resolved "https://registry.yarnpkg.com/passport-strategy/-/passport-strategy-1.0.0.tgz#b5539aa8fc225a3d1ad179476ddf236b440f52e4"
   integrity sha1-tVOaqPwiWj0a0XlHbd8ja0QPUuQ=
 
-passport@^0.4.0, passport@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/passport/-/passport-0.4.1.tgz#941446a21cb92fc688d97a0861c38ce9f738f270"
-  integrity sha512-IxXgZZs8d7uFSt3eqNjM9NQ3g3uQCW5avD8mRNoXV99Yig50vjuaez6dQK2qC0kVWPRTujxY0dWgGfT09adjYg==
+passport@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/passport/-/passport-0.6.0.tgz#e869579fab465b5c0b291e841e6cc95c005fac9d"
+  integrity sha512-0fe+p3ZnrWRW74fe8+SvCyf4a3Pb2/h7gFkQ8yTJpAO50gDzlfjZUZTO1k5Eg9kUct22OxHLqDZoKUWRHOh9ug==
   dependencies:
     passport-strategy "1.x.x"
     pause "0.0.1"
+    utils-merge "^1.0.1"
 
 path-dirname@^1.0.0:
   version "1.0.2"
@@ -7721,7 +7727,7 @@ util.promisify@^1.0.0:
     has-symbols "^1.0.1"
     object.getownpropertydescriptors "^2.1.0"
 
-utils-merge@1.0.1:
+utils-merge@1.0.1, utils-merge@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
