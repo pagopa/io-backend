@@ -1,5 +1,6 @@
 import nodeFetch from "node-fetch";
 import { ValidUrl } from "@pagopa/ts-commons/lib/url";
+import { stripTrailingSlashIfPresent } from "../utils/url";
 import {
   Client,
   createClient
@@ -66,9 +67,17 @@ export const PNClientFactory = (
 ) => (pnEnvironment: PNEnvironment) => {
   switch (pnEnvironment) {
     case PNEnvironment.PRODUCTION:
-      return PnAddressBookIOClient(pnApiUrlProd.href, pnApiKeyProd, fetchApi);
+      return PnAddressBookIOClient(
+        stripTrailingSlashIfPresent(pnApiUrlProd),
+        pnApiKeyProd,
+        fetchApi
+      );
     case PNEnvironment.UAT:
-      return PnAddressBookIOClient(pnApiUrlUAT.href, pnApiKeyUAT, fetchApi);
+      return PnAddressBookIOClient(
+        stripTrailingSlashIfPresent(pnApiUrlUAT),
+        pnApiKeyUAT,
+        fetchApi
+      );
     default:
       throw new Error("Unimplemented PN Environment");
   }
