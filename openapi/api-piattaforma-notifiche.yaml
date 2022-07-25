@@ -614,6 +614,7 @@ definitions:
       - PAID
       - UNREACHABLE
       - REFUSED
+      - CANCELLED
     type: string
   NotificationStatusHistory:
     description: elenco degli avanzamenti effettuati dal processo di notifica
