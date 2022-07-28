@@ -532,8 +532,7 @@ definitions:
         $ref: '#/definitions/NotificationPaymentAttachment'
     required:
       - creditorTaxId
-      - noticeNumber
-      - pagoPaForm
+      - noticeCode
     title: Informazioni per effettuare il pagamento
     type: object
   NotificationPhysicalAddress:
