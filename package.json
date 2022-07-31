@@ -100,7 +100,7 @@
     "monocle-ts": "^2.3.13",
     "morgan": "^1.9.1",
     "newtype-ts": "^0.3.5",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.2.10",
     "passport": "^0.6.0",
     "passport-auth-token": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
