@@ -10,6 +10,7 @@ import { ISessionStorage } from "../services/ISessionStorage";
 import { ZendeskToken } from "../types/token";
 import { User } from "../types/user";
 import { fulfill, StrategyDoneFunction } from "../utils/strategies";
+import { SESSION_TOKEN_LENGTH_BYTES } from "../controllers/authenticationController";
 
 const bearerZendeskTokenStrategy = (
   sessionStorage: ISessionStorage
@@ -23,7 +24,12 @@ const bearerZendeskTokenStrategy = (
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
     (_: express.Request, token: string, done: StrategyDoneFunction) => {
-      sessionStorage.getByZendeskToken(token as ZendeskToken).then(
+      const zendeskToken =
+        token.length > SESSION_TOKEN_LENGTH_BYTES
+          ? token.substring(0, SESSION_TOKEN_LENGTH_BYTES)
+          : token;
+          
+      sessionStorage.getByZendeskToken(zendeskToken as ZendeskToken).then(
         (errorOrUser: Either<Error, Option<User>>) => {
           try {
             fulfill(errorOrUser, done);

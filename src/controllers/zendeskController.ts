@@ -6,7 +6,6 @@
 import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
-import { InitializedProfile } from "generated/backend/InitializedProfile";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -32,12 +31,7 @@ import {
 } from "../../src/config";
 import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
-
-// define a predicate to validate a profile by email confirmation
-const isProfileWithValidEmailAddress = (
-  userProfile: InitializedProfile
-): userProfile is InitializedProfile =>
-  !!(userProfile.email && userProfile.is_email_validated);
+import { profileWithValidatedEmailAddressOrError } from "src/utils/profile";
 
 // define a ValidZendeskProfile as a subset of InitializedProfile model
 const ValidZendeskProfile = t.interface({
@@ -65,21 +59,7 @@ export default class ZendeskController {
   > =>
     withUserFromRequest(req, user =>
       pipe(
-        TE.tryCatch(
-          () => this.profileService.getProfile(user),
-          () => ResponseErrorInternal("Error retrieving user profile")
-        ),
-        TE.chain(r =>
-          r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
-        ),
-        TE.chainW(profile =>
-          pipe(
-            profile,
-            TE.fromPredicate(isProfileWithValidEmailAddress, () =>
-              ResponseErrorInternal("User does not have an email address")
-            )
-          )
-        ),
+        profileWithValidatedEmailAddressOrError(this.profileService, user),
         TE.chainW(profileWithValidEmailAddress =>
           TE.fromEither(
             pipe(
