@@ -34,7 +34,7 @@ import {
 
 import { log } from "../utils/logger";
 import ProfileService from "../services/profileService";
-import { profileWithValidatedEmailAddressOrError } from "../utils/profile";
+import { profileWithValidNameAndEmailAddressOrError } from "../utils/profile";
 import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 export default class SessionController {
@@ -52,7 +52,7 @@ export default class SessionController {
   > =>
     withUserFromRequest(req, async user => {
       const zendeskSuffix = await pipe(
-        profileWithValidatedEmailAddressOrError(this.profileService, user),
+        profileWithValidNameAndEmailAddressOrError(this.profileService, user),
         TE.bimap(
           _ => crypto.randomBytes(4).toString("hex"),
           p =>

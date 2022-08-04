@@ -117,12 +117,12 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid email address"
+        "Internal server error: User does not have a valid name or email address"
       );
     }
   });
 
-  it("should return an IResponseErrorInternal if user does not have a valid email address", async () => {
+  it("should return an IResponseErrorInternal if User does not have a valid name or email address", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -146,7 +146,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid email address"
+        "Internal server error: User does not have a valid name or email address"
       );
     }
   });
@@ -176,7 +176,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid email address"
+        "Internal server error: User does not have a valid name or email address"
       );
     }
   });
@@ -206,7 +206,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid email address"
+        "Internal server error: User does not have a valid name or email address"
       );
     }
   });

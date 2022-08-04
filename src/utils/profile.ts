@@ -46,7 +46,7 @@ type ProfileWithValidNameAndEmailAddress = t.TypeOf<
  * @param user
  * @returns
  */
-export const profileWithValidatedEmailAddressOrError = (
+export const profileWithValidNameAndEmailAddressOrError = (
   profileService: ProfileService,
   user: User
 ) =>
@@ -63,7 +63,7 @@ export const profileWithValidatedEmailAddressOrError = (
         profile,
         ProfileWithValidNameAndEmailAddress.decode,
         E.mapLeft(_ =>
-          ResponseErrorInternal("User does not have a valid email address")
+          ResponseErrorInternal("User does not have a valid name or email address")
         ),
         TE.fromEither
       )

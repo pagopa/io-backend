@@ -31,7 +31,7 @@ import {
 } from "../../src/config";
 import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
-import { profileWithValidatedEmailAddressOrError } from "../utils/profile";
+import { profileWithValidNameAndEmailAddressOrError } from "../utils/profile";
 
 // define a ValidZendeskProfile as a subset of InitializedProfile model
 const ValidZendeskProfile = t.interface({
@@ -59,7 +59,7 @@ export default class ZendeskController {
   > =>
     withUserFromRequest(req, user =>
       pipe(
-        profileWithValidatedEmailAddressOrError(this.profileService, user),
+        profileWithValidNameAndEmailAddressOrError(this.profileService, user),
         TE.chainW(profileWithValidEmailAddress =>
           TE.fromEither(
             pipe(
