@@ -31,7 +31,7 @@ import {
 } from "../../src/config";
 import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
-import { profileWithValidatedEmailAddressOrError } from "src/utils/profile";
+import { profileWithValidatedEmailAddressOrError } from "../utils/profile";
 
 // define a ValidZendeskProfile as a subset of InitializedProfile model
 const ValidZendeskProfile = t.interface({

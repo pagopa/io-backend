@@ -12,13 +12,13 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import TokenService from "src/services/tokenService";
+import TokenService from "../services/tokenService";
 import {
   BPDToken,
   FIMSToken,
   MyPortalToken,
   ZendeskToken
-} from "src/types/token";
+} from "../types/token";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { PublicSession } from "../../generated/backend/PublicSession";
 import RedisSessionStorage from "../services/redisSessionStorage";
@@ -32,7 +32,7 @@ import {
 
 import { log } from "../utils/logger";
 import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
-import ProfileService from "src/services/profileService";
+import ProfileService from "../services/profileService";
 import * as TE from "fp-ts/lib/TaskEither";
 import { profileWithValidatedEmailAddressOrError } from "../utils/profile";
 import * as crypto from "crypto";
@@ -54,7 +54,7 @@ export default class SessionController {
       const zendeskSuffix = await pipe(
         profileWithValidatedEmailAddressOrError(this.profileService, user),
         TE.bimap(
-          _ => crypto.randomBytes(8).toString("hex"),
+          _ => crypto.randomBytes(4).toString("hex"),
           p =>
             crypto
               .createHash("sha256")

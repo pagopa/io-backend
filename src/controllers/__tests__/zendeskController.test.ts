@@ -117,7 +117,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have an email address"
+        "Internal server error: User does not have a valid email address"
       );
     }
   });
@@ -146,7 +146,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have an email address"
+        "Internal server error: User does not have a valid email address"
       );
     }
   });
@@ -176,7 +176,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have an email address"
+        "Internal server error: User does not have a valid email address"
       );
     }
   });
@@ -206,7 +206,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: Cannot create a valid Zendesk user from this profile"
+        "Internal server error: User does not have a valid email address"
       );
     }
   });
