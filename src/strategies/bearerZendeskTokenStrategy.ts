@@ -28,7 +28,7 @@ const bearerZendeskTokenStrategy = (
         token.length > SESSION_TOKEN_LENGTH_BYTES
           ? token.substring(0, SESSION_TOKEN_LENGTH_BYTES)
           : token;
-          
+
       sessionStorage.getByZendeskToken(zendeskToken as ZendeskToken).then(
         (errorOrUser: Either<Error, Option<User>>) => {
           try {

@@ -2,6 +2,7 @@
  * This controller returns data about the current user session
  */
 
+import * as crypto from "crypto";
 import * as express from "express";
 import {
   IResponseErrorInternal,
@@ -12,6 +13,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import TokenService from "../services/tokenService";
 import {
   BPDToken,
@@ -31,11 +33,9 @@ import {
 } from "../types/user";
 
 import { log } from "../utils/logger";
-import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 import ProfileService from "../services/profileService";
-import * as TE from "fp-ts/lib/TaskEither";
 import { profileWithValidatedEmailAddressOrError } from "../utils/profile";
-import * as crypto from "crypto";
+import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 export default class SessionController {
   constructor(
