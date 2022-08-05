@@ -1,8 +1,11 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { ResponseErrorInternal } from "@pagopa/ts-commons/lib/responses";
-import { pipe } from "fp-ts/lib/function";
+import {
+  IResponseSuccessJson,
+  ResponseErrorInternal
+} from "@pagopa/ts-commons/lib/responses";
+import { identity, pipe } from "fp-ts/lib/function";
 import { User } from "../../src/types/user";
 import ProfileService from "../../src/services/profileService";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
@@ -49,12 +52,16 @@ export const profileWithEmailValidatedOrError = (
       () => profileService.getProfile(user),
       () => ResponseErrorInternal("Error retrieving user profile")
     ),
-    TE.chain(r =>
-      r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
+    TE.chain(
+      TE.fromPredicate(
+        (r): r is IResponseSuccessJson<InitializedProfile> =>
+          r.kind === "IResponseSuccessJson",
+        identity
+      )
     ),
     TE.chainW(profile =>
       pipe(
-        profile,
+        profile.value,
         ProfileWithEmailValidated.decode,
         E.mapLeft(_ =>
           ResponseErrorInternal("Profile has not a validated email address")
