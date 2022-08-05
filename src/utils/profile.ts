@@ -9,35 +9,29 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { EmailAddress } from "../../generated/io-api/EmailAddress";
 
 // define a type that represents a Profile with a non optional email address
-const ProfileWithEmailAddress = t.intersection([
+const ProfileWithEmail = t.intersection([
   t.interface({
     email: EmailAddress
   }),
   InitializedProfile
 ]);
 
-type ProfileWithEmailAddress = t.TypeOf<typeof ProfileWithEmailAddress>;
+type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
 
 // define a branded type that ensure we have the email in the profile and
 // that it is not undefined
-interface IProfileWithValidNameAndEmailAddressTag {
+interface IProfileWithEmailValidatedTag {
   readonly HasValidEmailAddress: unique symbol;
 }
 
-const ProfileWithValidNameAndEmailAddress = t.brand(
-  ProfileWithEmailAddress,
-  (
-    p
-  ): p is t.Branded<
-    ProfileWithEmailAddress,
-    IProfileWithValidNameAndEmailAddressTag
-  > => !!(p.email && p.is_email_validated),
+const ProfileWithEmailValidated = t.brand(
+  ProfileWithEmail,
+  (p): p is t.Branded<ProfileWithEmail, IProfileWithEmailValidatedTag> =>
+    !!(p.email && p.is_email_validated),
   "HasValidEmailAddress"
 );
 
-type ProfileWithValidNameAndEmailAddress = t.TypeOf<
-  typeof ProfileWithValidNameAndEmailAddress
->;
+type ProfileWithEmailValidated = t.TypeOf<typeof ProfileWithEmailValidated>;
 
 /**
  * Gets a profile with a valid email
@@ -46,7 +40,7 @@ type ProfileWithValidNameAndEmailAddress = t.TypeOf<
  * @param user
  * @returns
  */
-export const profileWithValidNameAndEmailAddressOrError = (
+export const profileWithEmailValidatedOrError = (
   profileService: ProfileService,
   user: User
 ) =>
@@ -61,9 +55,9 @@ export const profileWithValidNameAndEmailAddressOrError = (
     TE.chainW(profile =>
       pipe(
         profile,
-        ProfileWithValidNameAndEmailAddress.decode,
+        ProfileWithEmailValidated.decode,
         E.mapLeft(_ =>
-          ResponseErrorInternal("User does not have a valid name or email address")
+          ResponseErrorInternal("Profile has not a validated email address")
         ),
         TE.fromEither
       )

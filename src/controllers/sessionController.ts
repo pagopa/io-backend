@@ -34,7 +34,7 @@ import {
 
 import { log } from "../utils/logger";
 import ProfileService from "../services/profileService";
-import { profileWithValidNameAndEmailAddressOrError } from "../utils/profile";
+import { profileWithEmailValidatedOrError } from "../utils/profile";
 import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 export default class SessionController {
@@ -52,7 +52,7 @@ export default class SessionController {
   > =>
     withUserFromRequest(req, async user => {
       const zendeskSuffix = await pipe(
-        profileWithValidNameAndEmailAddressOrError(this.profileService, user),
+        profileWithEmailValidatedOrError(this.profileService, user),
         TE.bimap(
           _ => crypto.randomBytes(4).toString("hex"),
           p =>
@@ -73,7 +73,7 @@ export default class SessionController {
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
-          zendeskToken: user.zendesk_token + zendeskSuffix
+          zendeskToken: `${user.zendesk_token}${zendeskSuffix}`
         });
       }
 
@@ -116,7 +116,7 @@ export default class SessionController {
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,
-            zendeskToken: updatedUser.zendesk_token + zendeskSuffix
+            zendeskToken: `${updatedUser.zendesk_token}${zendeskSuffix}`
           })
         ),
         E.toUnion

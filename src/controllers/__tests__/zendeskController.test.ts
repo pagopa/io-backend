@@ -117,12 +117,12 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid name or email address"
+        "Internal server error: Profile has not a validated email address"
       );
     }
   });
 
-  it("should return an IResponseErrorInternal if User does not have a valid name or email address", async () => {
+  it("should return an IResponseErrorInternal if Profile has not a validated email address", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -146,7 +146,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid name or email address"
+        "Internal server error: Profile has not a validated email address"
       );
     }
   });
@@ -176,37 +176,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid name or email address"
-      );
-    }
-  });
-
-  it("should return an IResponseErrorInternal if user has an empty name", async () => {
-    const req = mockReq();
-
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          ...mockedInitializedProfile,
-          name: undefined,
-          family_name: undefined
-        })
-      )
-    );
-
-    req.user = mockedRequestUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const tokenService = new TokenService();
-    const controller = new ZendeskController(profileService, tokenService);
-
-    const response = await controller.getZendeskSupportToken(req);
-
-    expect(response.kind).toEqual("IResponseErrorInternal");
-    if (response.kind === "IResponseErrorInternal") {
-      expect(response.detail).toEqual(
-        "Internal server error: User does not have a valid name or email address"
+        "Internal server error: Profile has not a validated email address"
       );
     }
   });
