@@ -2,6 +2,10 @@ import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import {
+  IResponseErrorInternal,
+  IResponseErrorNotFound,
+  IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
@@ -56,7 +60,12 @@ export const profileWithEmailValidatedOrError = (
       TE.fromPredicate(
         (r): r is IResponseSuccessJson<InitializedProfile> =>
           r.kind === "IResponseSuccessJson",
-        _ => ResponseErrorInternal("Error retrieving user profile")
+        e =>
+          e as
+            | IResponseErrorInternal
+            | IResponseErrorTooManyRequests
+            | IResponseErrorNotFound
+            | IResponseErrorValidation
       )
     ),
     TE.chainW(profile =>
