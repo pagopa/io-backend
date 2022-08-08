@@ -5,7 +5,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import { identity, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { User } from "../../src/types/user";
 import ProfileService from "../../src/services/profileService";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
