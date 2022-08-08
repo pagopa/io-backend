@@ -56,7 +56,7 @@ export const profileWithEmailValidatedOrError = (
       TE.fromPredicate(
         (r): r is IResponseSuccessJson<InitializedProfile> =>
           r.kind === "IResponseSuccessJson",
-        identity
+        _ => ResponseErrorInternal("Error retrieving user profile")
       )
     ),
     TE.chainW(profile =>
