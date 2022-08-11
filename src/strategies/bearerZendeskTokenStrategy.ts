@@ -24,9 +24,10 @@ const bearerZendeskTokenStrategy = (
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,
     (_: express.Request, token: string, done: StrategyDoneFunction) => {
+      // tokens are hex string 2 chars = 1 byte
       const zendeskToken =
-        token.length > SESSION_TOKEN_LENGTH_BYTES
-          ? token.substring(0, SESSION_TOKEN_LENGTH_BYTES)
+        token.length > SESSION_TOKEN_LENGTH_BYTES * 2
+          ? token.substring(0, SESSION_TOKEN_LENGTH_BYTES * 2)
           : token;
 
       sessionStorage.getByZendeskToken(zendeskToken as ZendeskToken).then(

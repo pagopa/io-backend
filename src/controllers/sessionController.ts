@@ -54,7 +54,9 @@ export default class SessionController {
       const zendeskSuffix = await pipe(
         profileWithEmailValidatedOrError(this.profileService, user),
         TE.bimap(
+          // we generate 4 bytes and convert them to hex string for a length of 8 chars
           _ => crypto.randomBytes(4).toString("hex"),
+          // or we take 8 chars from the hash hex string
           p =>
             crypto
               .createHash("sha256")
