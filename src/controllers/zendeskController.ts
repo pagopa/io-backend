@@ -60,6 +60,9 @@ export default class ZendeskController {
     withUserFromRequest(req, user =>
       pipe(
         profileWithEmailValidatedOrError(this.profileService, user),
+        TE.mapLeft(e =>
+          ResponseErrorInternal(`Error retrieving a user profile with validated email address | ${e.message}`)
+        ),
         TE.chainW(profileWithValidEmailAddress =>
           TE.fromEither(
             pipe(
