@@ -8,8 +8,6 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -52,8 +50,6 @@ export default class ZendeskController {
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
-    | IResponseErrorNotFound
     | IResponseErrorValidation
     | IResponseSuccessJson<ZendeskToken>
   > =>
