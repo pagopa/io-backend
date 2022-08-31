@@ -8,6 +8,35 @@ basePath: /api/v1
 schemes:
   - https
 paths:
+  "/sessions/{fiscalcode}":
+    get:
+      operationId: getSession
+      summary: Get available user info from session
+      description: |-
+        Use this operaion if you want to known the state of user session
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/UserSession"
+          examples:
+            application/json:
+              "message": "ok"
+        "400":
+          description: Bad request
+        "401":
+          description: Token null or invalid.
+        "404":
+          description: User not found.
+        "429":
+          description: Throttling.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
   "/sessions/{fiscalcode}/lock":
     post:
       operationId: lockUserSession
@@ -85,6 +114,13 @@ definitions:
     properties:
       message:
         type: string
+  UserSession:
+    type: object
+    properties:
+      active:
+        type: boolean
+    required:
+      - active
 responses: {}
 consumes:
   - application/json

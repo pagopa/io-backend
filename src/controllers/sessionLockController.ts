@@ -20,12 +20,49 @@ import { SuccessResponse } from "src/types/commons";
 import { pipe } from "fp-ts/lib/function";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
+import { UserSession } from "../../generated/session/UserSession";
 
 export default class SessionLockController {
   constructor(
     private readonly sessionStorage: RedisSessionStorage,
     private readonly metadataStorage: RedisUserMetadataStorage
   ) {}
+
+  /**
+   * Get a user session info
+   *
+   * @param req expects fiscal_code as a path param
+   *
+   * @returns a promise with the encoded User Session response
+   */
+  public readonly getUserSession = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<UserSession>
+  > =>
+    pipe(
+      req.params.fiscal_code,
+      FiscalCode.decode,
+      E.mapLeft(err =>
+        ResponseErrorValidation("Invalid Fiscal Code", readableReport(err))
+      ),
+      TE.fromEither,
+      TE.chainW(fiscalCode =>
+        pipe(
+          TE.tryCatch(
+            () => this.sessionStorage.userHasActiveSessions(fiscalCode),
+            E.toError
+          ),
+          TE.chain(TE.fromEither),
+          TE.mapLeft(e => ResponseErrorInternal(`${e.message} [${e}]`))
+        )
+      ),
+      TE.map(active => UserSession.encode({ active })),
+      TE.map(ResponseSuccessJson),
+      TE.toUnion
+    )();
 
   /**
    * Lock a user account and clear all its session data

@@ -1110,6 +1110,15 @@ function registerSessionAPIRoutes(
       userMetadataStorage
     );
 
+    app.get(
+      `${basePath}/sessions/:fiscal_code`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.getUserSession,
+        sessionLockController
+      )
+    );
+
     app.post(
       `${basePath}/sessions/:fiscal_code/lock`,
       urlTokenAuth,
