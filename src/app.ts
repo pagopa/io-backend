@@ -67,7 +67,7 @@ import {
   PECSERVERS,
   APP_MESSAGES_API_CLIENT,
   FF_ENABLE_NOTIFY_ENDPOINT,
-  FF_ENABLE_SESSION_LOCK_ENDPOINT,
+  FF_ENABLE_SESSION_ENDPOINTS,
   THIRD_PARTY_CONFIG_LIST,
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PNAddressBookConfig
@@ -1104,7 +1104,7 @@ function registerSessionAPIRoutes(
   sessionStorage: RedisSessionStorage,
   userMetadataStorage: RedisUserMetadataStorage
 ): void {
-  if (FF_ENABLE_SESSION_LOCK_ENDPOINT) {
+  if (FF_ENABLE_SESSION_ENDPOINTS) {
     const sessionLockController: SessionLockController = new SessionLockController(
       sessionStorage,
       userMetadataStorage
