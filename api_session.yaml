@@ -13,7 +13,7 @@ paths:
       operationId: getSession
       summary: Get available user info from session
       description: |-
-        Use this operaion if you want to known the state of user session
+        Use this operation if you want to known the state of user session
       parameters:
         - $ref: "#/parameters/FiscalCode"
         - $ref: "#/parameters/Token"
@@ -24,7 +24,7 @@ paths:
             $ref: "#/definitions/UserSession"
           examples:
             application/json:
-              "message": "ok"
+              "active": "true"
         "400":
           description: Bad request
         "401":
