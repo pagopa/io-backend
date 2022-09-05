@@ -24,7 +24,7 @@ paths:
             $ref: "#/definitions/UserSession"
           examples:
             application/json:
-              "active": "true"
+              "active": true
         "400":
           description: Bad request
         "401":
