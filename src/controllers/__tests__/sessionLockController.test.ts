@@ -103,7 +103,7 @@ describe("SessionLockController#lockUserSession", () => {
       mockRedisUserMetadataStorage
     );
 
-    const response = await controller.getUserSession(req);
+    const response = await controller.lockUserSession(req);
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(400);
