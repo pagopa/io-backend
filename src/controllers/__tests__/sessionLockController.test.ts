@@ -60,7 +60,7 @@ describe("SessionLockController#getUserSession", () => {
     const res = mockRes();
 
     mockUserHasActiveSessions.mockImplementationOnce(async () =>
-      E.left("any error")
+      E.left(new Error("any error"))
     );
 
     const controller = new SessionLockController(
