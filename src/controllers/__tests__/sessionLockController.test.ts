@@ -55,7 +55,7 @@ describe("SessionLockController#getUserSession", () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it("should fail on get error", async () => {
+  it("should fail if userHasActiveSessions returns an error", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
