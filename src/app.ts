@@ -860,7 +860,8 @@ function registerAPIRoutes(
 
   const sessionController: SessionController = new SessionController(
     sessionStorage,
-    tokenService
+    tokenService,
+    profileService
   );
 
   const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(

@@ -6,11 +6,8 @@
 import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
-import { InitializedProfile } from "generated/backend/InitializedProfile";
 import {
   IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -32,12 +29,7 @@ import {
 } from "../../src/config";
 import TokenService from "../../src/services/tokenService";
 import { withUserFromRequest } from "../types/user";
-
-// define a predicate to validate a profile by email confirmation
-const isProfileWithValidEmailAddress = (
-  userProfile: InitializedProfile
-): userProfile is InitializedProfile =>
-  !!(userProfile.email && userProfile.is_email_validated);
+import { profileWithEmailValidatedOrError } from "../utils/profile";
 
 // define a ValidZendeskProfile as a subset of InitializedProfile model
 const ValidZendeskProfile = t.interface({
@@ -58,26 +50,15 @@ export default class ZendeskController {
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
-    | IResponseErrorTooManyRequests
-    | IResponseErrorNotFound
     | IResponseErrorValidation
     | IResponseSuccessJson<ZendeskToken>
   > =>
     withUserFromRequest(req, user =>
       pipe(
-        TE.tryCatch(
-          () => this.profileService.getProfile(user),
-          () => ResponseErrorInternal("Error retrieving user profile")
-        ),
-        TE.chain(r =>
-          r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
-        ),
-        TE.chainW(profile =>
-          pipe(
-            profile,
-            TE.fromPredicate(isProfileWithValidEmailAddress, () =>
-              ResponseErrorInternal("User does not have an email address")
-            )
+        profileWithEmailValidatedOrError(this.profileService, user),
+        TE.mapLeft(e =>
+          ResponseErrorInternal(
+            `Error retrieving a user profile with validated email address | ${e.message}`
           )
         ),
         TE.chainW(profileWithValidEmailAddress =>

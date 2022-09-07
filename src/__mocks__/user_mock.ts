@@ -31,12 +31,12 @@ export const mockSessionToken =
 export const mockWalletToken =
   "5ba5b99a982da1aa5eb4fd8643124474fa17ee3016c13c617ab79d2e7c8624bb80105c0c0cae9864e035a0d31a715043" as WalletToken;
 export const mockMyPortalToken =
-  "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d" as MyPortalToken;
-export const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416" as BPDToken;
+  "c4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700dc4d6bc16ef30211fb3fa8855efecac21be04a7d032f8700d" as MyPortalToken;
+export const mockBPDToken = "4123ee213b64955212ea59e3beeaad1e5fdb3a36d22104164123ee213b64955212ea59e3beeaad1e5fdb3a36d2210416" as BPDToken;
 export const mockZendeskToken =
-  "aaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210abc" as ZendeskToken;
+  "aaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210abcaaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210abc" as ZendeskToken;
 export const mockFIMSToken =
-  "aaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210bcd" as FIMSToken;
+  "aaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210bcdaaaa12213b64955212ea59e3beeaad1e5fdb3a36d2210bcd" as FIMSToken;
 
 // mock for a valid User
 export const mockedUser: User = {

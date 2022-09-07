@@ -2,6 +2,7 @@
  * This controller returns data about the current user session
  */
 
+import * as crypto from "crypto";
 import * as express from "express";
 import {
   IResponseErrorInternal,
@@ -12,13 +13,14 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import TokenService from "src/services/tokenService";
+import * as TE from "fp-ts/lib/TaskEither";
+import TokenService from "../services/tokenService";
 import {
   BPDToken,
   FIMSToken,
   MyPortalToken,
   ZendeskToken
-} from "src/types/token";
+} from "../types/token";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { PublicSession } from "../../generated/backend/PublicSession";
 import RedisSessionStorage from "../services/redisSessionStorage";
@@ -31,12 +33,15 @@ import {
 } from "../types/user";
 
 import { log } from "../utils/logger";
+import ProfileService from "../services/profileService";
+import { profileWithEmailValidatedOrError } from "../utils/profile";
 import { SESSION_TOKEN_LENGTH_BYTES } from "./authenticationController";
 
 export default class SessionController {
   constructor(
     private readonly sessionStorage: RedisSessionStorage,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly profileService: ProfileService
   ) {}
   public readonly getSessionState = (
     req: express.Request
@@ -46,6 +51,22 @@ export default class SessionController {
     | IResponseSuccessJson<PublicSession>
   > =>
     withUserFromRequest(req, async user => {
+      const zendeskSuffix = await pipe(
+        profileWithEmailValidatedOrError(this.profileService, user),
+        TE.bimap(
+          // we generate 4 bytes and convert them to hex string for a length of 8 chars
+          _ => crypto.randomBytes(4).toString("hex"),
+          // or we take 8 chars from the hash hex string
+          p =>
+            crypto
+              .createHash("sha256")
+              .update(p.email)
+              .digest("hex")
+              .substring(0, 8)
+        ),
+        TE.toUnion
+      )();
+
       if (UserV5.is(user)) {
         // All required tokens are present on the current session, no update is required
         return ResponseSuccessJson({
@@ -54,7 +75,7 @@ export default class SessionController {
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
-          zendeskToken: user.zendesk_token
+          zendeskToken: `${user.zendesk_token}${zendeskSuffix}`
         });
       }
 
@@ -97,7 +118,7 @@ export default class SessionController {
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,
-            zendeskToken: updatedUser.zendesk_token
+            zendeskToken: `${updatedUser.zendesk_token}${zendeskSuffix}`
           })
         ),
         E.toUnion

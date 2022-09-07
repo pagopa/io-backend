@@ -117,12 +117,12 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have an email address"
+        "Internal server error: Error retrieving a user profile with validated email address | Profile has not a validated email address"
       );
     }
   });
 
-  it("should return an IResponseErrorInternal if user does not have a valid email address", async () => {
+  it("should return an IResponseErrorInternal if Profile has not a validated email address", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -146,7 +146,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have an email address"
+        "Internal server error: Error retrieving a user profile with validated email address | Profile has not a validated email address"
       );
     }
   });
@@ -176,37 +176,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: User does not have an email address"
-      );
-    }
-  });
-
-  it("should return an IResponseErrorInternal if user has an empty name", async () => {
-    const req = mockReq();
-
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          ...mockedInitializedProfile,
-          name: undefined,
-          family_name: undefined
-        })
-      )
-    );
-
-    req.user = mockedRequestUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const tokenService = new TokenService();
-    const controller = new ZendeskController(profileService, tokenService);
-
-    const response = await controller.getZendeskSupportToken(req);
-
-    expect(response.kind).toEqual("IResponseErrorInternal");
-    if (response.kind === "IResponseErrorInternal") {
-      expect(response.detail).toEqual(
-        "Internal server error: Cannot create a valid Zendesk user from this profile"
+        "Internal server error: Error retrieving a user profile with validated email address | Profile has not a validated email address"
       );
     }
   });
@@ -255,7 +225,7 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Internal server error: Error retrieving user profile"
+        "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile"
       );
     }
   });
@@ -279,11 +249,11 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     // getUserDataProcessing is not called
     expect(response.kind).toEqual("IResponseErrorInternal");
     if (response.kind === "IResponseErrorInternal") {
-      expect(response.detail).toEqual("Internal server error: Any Error");
+      expect(response.detail).toEqual("Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile | Internal server error: Any Error");
     }
   });
 
-  it("should return a IResponseErrorTooManyRequests if getProfile promise gets resolved with a IResponseErrorTooManyRequests", async () => {
+  it("should return a IResponseErrorInternal if getProfile promise gets resolved with a IResponseErrorTooManyRequests", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -300,15 +270,15 @@ describe("ZendeskController#getZendeskSupportToken", () => {
     const response = await controller.getZendeskSupportToken(req);
 
     // getUserDataProcessing is not called
-    expect(response.kind).toEqual("IResponseErrorTooManyRequests");
-    if (response.kind === "IResponseErrorTooManyRequests") {
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
       expect(response.detail).toEqual(
-        "Too many requests: Rate limit triggered"
+        "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile | Too many requests: Rate limit triggered"
       );
     }
   });
 
-  it("should return a IResponseErrorNotFound if getProfile promise gets resolved with a IResponseErrorNotFound", async () => {
+  it("should return a IResponseErrorInternal if getProfile promise gets resolved with a IResponseErrorNotFound", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -326,9 +296,9 @@ describe("ZendeskController#getZendeskSupportToken", () => {
 
     const response = await controller.getZendeskSupportToken(req);
 
-    expect(response.kind).toEqual("IResponseErrorNotFound");
-    if (response.kind === "IResponseErrorNotFound") {
-      expect(response.detail).toEqual("User not found: Cannot find user");
+    expect(response.kind).toEqual("IResponseErrorInternal");
+    if (response.kind === "IResponseErrorInternal") {
+      expect(response.detail).toEqual("Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile | User not found: Cannot find user");
     }
   });
 
