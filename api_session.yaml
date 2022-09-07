@@ -21,7 +21,7 @@ paths:
         "200":
           description: Success.
           schema:
-            $ref: "#/definitions/UserSession"
+            $ref: "#/definitions/UserSessionInfo"
           examples:
             application/json:
               "active": true
@@ -114,7 +114,7 @@ definitions:
     properties:
       message:
         type: string
-  UserSession:
+  UserSessionInfo:
     type: object
     properties:
       active:

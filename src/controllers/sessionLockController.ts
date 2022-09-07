@@ -20,7 +20,7 @@ import { SuccessResponse } from "src/types/commons";
 import { pipe } from "fp-ts/lib/function";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
-import { UserSession } from "../../generated/session/UserSession";
+import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
 
 export default class SessionLockController {
   constructor(
@@ -40,7 +40,7 @@ export default class SessionLockController {
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
-    | IResponseSuccessJson<UserSession>
+    | IResponseSuccessJson<UserSessionInfo>
   > =>
     pipe(
       req.params.fiscal_code,
@@ -59,7 +59,7 @@ export default class SessionLockController {
           TE.mapLeft(e => ResponseErrorInternal(`${e.message} [${e}]`))
         )
       ),
-      TE.map(active => UserSession.encode({ active })),
+      TE.map(active => UserSessionInfo.encode({ active })),
       TE.map(ResponseSuccessJson),
       TE.toUnion
     )();
