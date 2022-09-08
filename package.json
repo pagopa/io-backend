@@ -2,8 +2,8 @@
   "name": "@pagopa/io-backend",
   "version": "8.10.2",
   "min_app_version": {
-    "ios": "1.38.0",
-    "android": "1.38.0"
+    "ios": "2.3.0",
+    "android": "2.3.0"
   },
   "min_app_version_pagopa": {
     "ios": "0.0.0",
