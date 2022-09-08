@@ -24,16 +24,74 @@ const mockSetBlockedUser = jest
 const mockUnsetBlockedUser = jest
   .fn()
   .mockImplementation(async () => E.right(true));
+const mockUserHasActiveSessions = jest
+  .fn()
+  .mockImplementation(async () => E.right(true));
 const mockRedisSessionStorage = ({
   delUserAllSessions: mockDelUserAllSessions,
   setBlockedUser: mockSetBlockedUser,
-  unsetBlockedUser: mockUnsetBlockedUser
+  unsetBlockedUser: mockUnsetBlockedUser,
+  userHasActiveSessions: mockUserHasActiveSessions
 } as unknown) as RedisSessionStorage;
 
 const mockDel = jest.fn().mockImplementation(async () => E.right(true));
 const mockRedisUserMetadataStorage = ({
   del: mockDel
 } as unknown) as RedisUserMetadataStorage;
+
+describe("SessionLockController#getUserSession", () => {
+  it("should fail on invalid fiscal code", async () => {
+    const req = mockReq({ params: { fiscal_code: "invalid" } });
+    const res = mockRes();
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage
+    );
+
+    const response = await controller.getUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("should fail if userHasActiveSessions returns an error", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockUserHasActiveSessions.mockImplementationOnce(async () =>
+      E.left(new Error("any error"))
+    );
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage
+    );
+
+    const response = await controller.getUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should succeed on correct request", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage
+    );
+
+    const response = await controller.getUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      active: true
+    });
+  });
+});
 
 describe("SessionLockController#lockUserSession", () => {
   it("should fail on invalid fiscal code", async () => {
