@@ -41,6 +41,7 @@ export const toInitializedProfile = (
   ),
   is_email_validated: profile.is_email_validated,
   is_inbox_enabled: profile.is_inbox_enabled,
+  is_reminder_enabled: profile.is_reminder_enabled,
   is_webhook_enabled: profile.is_webhook_enabled,
   last_app_version: profile.last_app_version,
   name: user.name,

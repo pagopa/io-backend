@@ -58,6 +58,11 @@ const validApiProfileResponseWithLastAppVersion = {
   value: { ...validApiProfile, last_app_version: lastAppVersion }
 };
 
+const validApiProfileResponseWithIsReminderEnabled = {
+  status: 200,
+  value: { ...validApiProfile, is_reminder_enabled: false }
+};
+
 const proxyInitializedProfileResponse = {
   blocked_inbox_or_channels: undefined,
   email: aValidAPIEmail,
@@ -171,6 +176,27 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with is_reminder_enabled", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithIsReminderEnabled)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        is_reminder_enabled: true
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -256,6 +282,27 @@ describe("ProfileService#getApiProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with is_reminder_enabled", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithIsReminderEnabled)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...validApiProfileResponse.value,
+        is_reminder_enabled: true
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getApiProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -307,7 +354,7 @@ describe("ProfileService#updateProfile", () => {
 
   it("update an user profile to the API", async () => {
     mockUpdateProfile.mockImplementation(() =>
-      t.success(validApiProfileResponse)
+      t.success(validApiProfileResponseWithIsReminderEnabled)
     );
 
     const service = new ProfileService(api);
@@ -316,11 +363,11 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: updateProfileRequest
+      body: { ...updateProfileRequest, is_reminder_enabled: false }
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: proxyInitializedProfileResponse
+      value: { ...proxyInitializedProfileResponse, is_reminder_enabled: false }
     });
   });
 
@@ -338,7 +385,11 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: { ...updateProfileRequest, last_app_version: lastAppVersion }
+      body: {
+        ...updateProfileRequest,
+        is_reminder_enabled: false,
+        last_app_version: lastAppVersion
+      }
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",

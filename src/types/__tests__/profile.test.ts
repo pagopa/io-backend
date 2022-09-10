@@ -26,6 +26,7 @@ import {
 import { mockedUser } from "../../__mocks__/user_mock";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
+import { IsReminderEnabled } from "../../../generated/backend/IsReminderEnabled";
 
 const aTosVersion = 1 as AcceptedTosVersion;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
@@ -36,6 +37,7 @@ const anIsWebhookEnabled = true as IsWebhookEnabled;
 const anIsInboxEnabled = true as IsInboxEnabled;
 const anIsEmailEnabled = true as IsEmailEnabled;
 const anIsEmailValidated = true as IsEmailValidated;
+const anIsReminderEnabled = true as IsReminderEnabled;
 const aServicePreferencesSettings: ServicePreferencesSettings = {
   mode: ServicesPreferencesModeEnum.LEGACY
 };
@@ -47,6 +49,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   is_email_enabled: anIsEmailEnabled,
   is_email_validated: anIsEmailValidated,
   is_inbox_enabled: anIsInboxEnabled,
+  is_reminder_enabled: anIsReminderEnabled,
   is_test_profile: false,
   is_webhook_enabled: anIsWebhookEnabled,
   preferred_languages: aPreferredLanguages,
