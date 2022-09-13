@@ -360,10 +360,10 @@
     xmldom "^0.6.0"
     yargs "^15.3.0"
 
-"@pagopa/openapi-codegen-ts@^11.3.0":
-  version "11.3.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-11.3.0.tgz#9ba6763c24743570a4097964f157e31e39f933ff"
-  integrity sha512-hCHGE4rRg472oTrwe8C7KWNNduYSwgYymk0pfIF1KLYAlN8YGzmr67yHhFh4UIYh3C8RfiduyJ/I1K7qKitgOw==
+"@pagopa/openapi-codegen-ts@^12.0.0":
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-12.0.0.tgz#816ae1ef02acb60072365052bf70d8b960a3d9f6"
+  integrity sha512-geg6IwU+UHZqFa8DSUFClxIriVCoGFKQf4hOoprXG8oKL1DS0DkJaOODByuJJqvbx9uHSVbGQqaty2lLB6HqSw==
   dependencies:
     "@pagopa/ts-commons" "^10.3.0"
     fs-extra "^6.0.0"
