@@ -7,7 +7,7 @@ Procedura per importare le specifiche di PN:
 3. sovrascrivere il file opeanpi/api-piattaforma-notifiche.yaml con il contenuto file output.yaml generato dal comando precedente
 4. fixare l'api
     /delivery-push/{iun}/legal-facts/{legalFactType}/{legalFactId}:
-    sostiendo la $ref del paramentro legalFactType con la sua definizione completa
+    sostituendo la $ref del parametro legalFactType con la sua definizione completa
     Questo è necessario poichè il codegen attualmente non supporta il $ref nei parametri delle API
 5. fixare la definizione di ProblemError aggiungendo "type: object" mancante
 6. rimuovere lo / iniziale da tutti i paths
