@@ -192,7 +192,7 @@ describe("ProfileService#getProfile", () => {
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
-        is_reminder_enabled: true
+        is_reminder_enabled: false
       }
     });
   });
@@ -298,7 +298,7 @@ describe("ProfileService#getApiProfile", () => {
       kind: "IResponseSuccessJson",
       value: {
         ...validApiProfileResponse.value,
-        is_reminder_enabled: true
+        is_reminder_enabled: false
       }
     });
   });
