@@ -191,6 +191,6 @@ export const notificationDetailResponseExample = pipe(
     notificationDetailResponseExampleAsObject,
     FullReceivedNotification.decode,
     E.getOrElseW(e => {
-    return new Error("a pn notfication is not valid: "+ errorsToReadableMessages(e).join("|"));
+    throw new Error("a pn notfication is not valid: "+ errorsToReadableMessages(e).join("|"));
     })
   );
