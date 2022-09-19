@@ -58,9 +58,14 @@ const validApiProfileResponseWithLastAppVersion = {
   value: { ...validApiProfile, last_app_version: lastAppVersion }
 };
 
-const validApiProfileResponseWithIsReminderEnabled = {
+const validApiProfileResponseWithReminderStatus = {
   status: 200,
-  value: { ...validApiProfile, is_reminder_enabled: false }
+  value: { ...validApiProfile, reminder_status: "DISABLED" }
+};
+
+const validApiProfileResponseWithDefaultReminderStatus = {
+  status: 200,
+  value: { ...validApiProfile, reminder_status: "UNSET" }
 };
 
 const proxyInitializedProfileResponse = {
@@ -176,9 +181,9 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
-  it("returns a user profile from the API with is_reminder_enabled", async () => {
+  it("returns a user profile from the API with reminder_status", async () => {
     mockGetProfile.mockImplementation(() =>
-      t.success(validApiProfileResponseWithIsReminderEnabled)
+      t.success(validApiProfileResponseWithReminderStatus)
     );
 
     const service = new ProfileService(api);
@@ -192,7 +197,7 @@ describe("ProfileService#getProfile", () => {
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
-        is_reminder_enabled: false
+        reminder_status: "DISABLED"
       }
     });
   });
@@ -282,9 +287,9 @@ describe("ProfileService#getApiProfile", () => {
     });
   });
 
-  it("returns a user profile from the API with is_reminder_enabled", async () => {
+  it("returns a user profile from the API with reminder_status", async () => {
     mockGetProfile.mockImplementation(() =>
-      t.success(validApiProfileResponseWithIsReminderEnabled)
+      t.success(validApiProfileResponseWithReminderStatus)
     );
 
     const service = new ProfileService(api);
@@ -298,7 +303,7 @@ describe("ProfileService#getApiProfile", () => {
       kind: "IResponseSuccessJson",
       value: {
         ...validApiProfileResponse.value,
-        is_reminder_enabled: false
+        reminder_status: "DISABLED"
       }
     });
   });
@@ -354,7 +359,7 @@ describe("ProfileService#updateProfile", () => {
 
   it("update an user profile to the API", async () => {
     mockUpdateProfile.mockImplementation(() =>
-      t.success(validApiProfileResponseWithIsReminderEnabled)
+      t.success(validApiProfileResponseWithDefaultReminderStatus)
     );
 
     const service = new ProfileService(api);
@@ -363,11 +368,11 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: { ...updateProfileRequest, is_reminder_enabled: false }
+      body: { ...updateProfileRequest, reminder_status: "UNSET" }
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: { ...proxyInitializedProfileResponse, is_reminder_enabled: false }
+      value: { ...proxyInitializedProfileResponse, reminder_status: "UNSET" }
     });
   });
 
@@ -387,7 +392,7 @@ describe("ProfileService#updateProfile", () => {
       fiscal_code: mockedUser.fiscal_code,
       body: {
         ...updateProfileRequest,
-        is_reminder_enabled: false,
+        reminder_status: "UNSET",
         last_app_version: lastAppVersion
       }
     });
