@@ -77,7 +77,7 @@ const retrieveAttachmentsMetadata = (
   pipe(
     {
       content_type: contentType,
-      id: docIdx,
+      id: `${iun}${docIdx}`,
       name: title,
       url: PnDocumentUrl.encode([iun, docIdx ?? ""])
     },

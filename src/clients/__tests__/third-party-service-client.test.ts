@@ -157,7 +157,7 @@ describe("third-party-service-client", () => {
           attachments: [
             {
               content_type: aPnNotification.documents[0].contentType,
-              id: `${aPnNotification.documents[0].docIdx}`,
+              id: `${aThirdPartyId}${aPnNotification.documents[0].docIdx}`,
               url: `/delivery/notifications/sent/${aThirdPartyId}/attachments/documents/${aPnNotification.documents[0].docIdx}`
             }
           ]
