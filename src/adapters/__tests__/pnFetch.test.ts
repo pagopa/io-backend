@@ -94,7 +94,7 @@ describe("getThirdPartyMessageDetails", () => {
             attachments: [
               {
                 content_type: aPnNotification.documents[0].contentType,
-                id: `${aPnNotification.documents[0].docIdx}`,
+                id: `${aPnNotificationId}${aPnNotification.documents[0].docIdx}`,
                 name: aPnNotification.documents[0].title,
                 url: `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}`
               }
