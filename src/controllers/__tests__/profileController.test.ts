@@ -63,7 +63,6 @@ const apiUserProfileResponse = {
   is_email_validated: true,
   is_inbox_enabled: true,
   is_webhook_enabled: true,
-  reminder_status: "UNSET",
   preferred_languages: ["it_IT"],
   version: 42,
   last_app_version: "0.0.1"
@@ -247,14 +246,9 @@ describe("ProfileController#getApiProfile", () => {
   it("calls the getApiProfile on the ProfileService with valid values and return a profile without reminder_status", async () => {
     const req = mockReq();
 
-    const {
-      reminder_status,
-      ...apiUserProfileResponseWithoutReminderStatus
-    } = apiUserProfileResponse;
-
     mockGetApiProfile.mockReturnValue(
       Promise.resolve(
-        ResponseSuccessJson(apiUserProfileResponseWithoutReminderStatus)
+        ResponseSuccessJson(apiUserProfileResponse)
       )
     );
 
@@ -272,7 +266,7 @@ describe("ProfileController#getApiProfile", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: apiUserProfileResponseWithoutReminderStatus
+      value: apiUserProfileResponse
     });
   });
 
