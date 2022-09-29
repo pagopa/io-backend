@@ -6,6 +6,7 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
+import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 import { AppVersion } from "../../../generated/io-api/AppVersion";
@@ -61,11 +62,6 @@ const validApiProfileResponseWithLastAppVersion = {
 const validApiProfileResponseWithReminderStatus = {
   status: 200,
   value: { ...validApiProfile, reminder_status: "DISABLED" }
-};
-
-const validApiProfileResponseWithDefaultReminderStatus = {
-  status: 200,
-  value: { ...validApiProfile, reminder_status: "UNSET" }
 };
 
 const proxyInitializedProfileResponse = {
@@ -358,9 +354,7 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("update an user profile to the API", async () => {
-    mockUpdateProfile.mockImplementation(() =>
-      t.success(validApiProfileResponseWithDefaultReminderStatus)
-    );
+    mockUpdateProfile.mockImplementation(() => t.success(validApiProfileResponse));
 
     const service = new ProfileService(api);
 
@@ -368,11 +362,12 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: { ...updateProfileRequest, reminder_status: "UNSET" }
+      body: { ...updateProfileRequest }
     });
+
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: { ...proxyInitializedProfileResponse, reminder_status: "UNSET" }
+      value: { ...proxyInitializedProfileResponse }
     });
   });
 
@@ -392,7 +387,6 @@ describe("ProfileService#updateProfile", () => {
       fiscal_code: mockedUser.fiscal_code,
       body: {
         ...updateProfileRequest,
-        reminder_status: "UNSET",
         last_app_version: lastAppVersion
       }
     });
@@ -401,6 +395,34 @@ describe("ProfileService#updateProfile", () => {
       value: {
         ...proxyInitializedProfileResponse,
         last_app_version: lastAppVersion
+      }
+    });
+  });
+
+  it("update an user profile to the API with reminder status", async () => {
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithReminderStatus)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.updateProfile(mockedUser, {
+      ...updateProfileRequest,
+      reminder_status: ReminderStatusEnum.DISABLED
+    });
+
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      body: {
+        ...updateProfileRequest,
+        reminder_status: ReminderStatusEnum.DISABLED
+      }
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        reminder_status: ReminderStatusEnum.DISABLED
       }
     });
   });
