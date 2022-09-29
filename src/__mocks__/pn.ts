@@ -6,10 +6,11 @@ import {
   NotificationFeePolicyEnum,
   PhysicalCommunicationTypeEnum
 } from "../../generated/piattaforma-notifiche/NewNotificationRequest";
-import { NotificationStatusEnum } from "../../generated/piattaforma-notifiche/NotificationStatus";
 import { NotificationAttachmentDownloadMetadataResponse } from "../../generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { pipe } from "fp-ts/lib/function";
 import { ServiceId } from "../../generated/io-messages-api/ServiceId";
+
+const STATUS_ACCEPTED = "ACCEPTED";
 
 export const aPNServiceId = "aPNServiceId" as ServiceId;
 
@@ -41,11 +42,11 @@ export const aPnNotificationObject = {
     PhysicalCommunicationTypeEnum.SIMPLE_REGISTERED_LETTER,
   iun: aPnNotificationId,
   sentAt: aDate.toISOString(),
-  notificationStatus: NotificationStatusEnum.ACCEPTED,
+  notificationStatus: STATUS_ACCEPTED,
   notificationStatusHistory: [
     {
       activeFrom: aDate.toISOString(),
-      status: NotificationStatusEnum.ACCEPTED,
+      status: STATUS_ACCEPTED,
       relatedTimelineElements: [aTimelineId]
     }
   ],
