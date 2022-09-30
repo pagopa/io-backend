@@ -1145,12 +1145,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/UserDataProcessingChoiceRequest"
   UserDataProcessing:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/UserDataProcessing"
-  MessageStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/MessageStatusValue"
-  RejectedMessageStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/RejectedMessageStatusValue"
-  NotRejectedMessageStatusValue:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/NotRejectedMessageStatusValue"
   MessageResponseWithContent:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/MessageResponseWithContent"
   ServicePreferencesSettings:
@@ -1203,6 +1197,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/Attachment"
   LegalData:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/LegalData"
+  MessageStatusValue:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/MessageStatusValue"
+  RejectedMessageStatusValue:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/RejectedMessageStatusValue"
+  NotRejectedMessageStatusValue:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/NotRejectedMessageStatusValue"
   MessageStatusAttributes:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.9.1/openapi/definitions.yaml#/MessageStatusAttributes"
   MessageStatusReadingChange:
