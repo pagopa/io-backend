@@ -27,6 +27,7 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 import { ReminderStatus } from "../../../generated/backend/ReminderStatus";
+import { AppVersion } from "../../../generated/backend/AppVersion";
 
 const aTosVersion = 1 as AcceptedTosVersion;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
@@ -51,6 +52,7 @@ const mockedExtendedProfile: ExtendedProfileApi = {
   is_inbox_enabled: anIsInboxEnabled,
   is_test_profile: false,
   is_webhook_enabled: anIsWebhookEnabled,
+  last_app_version: "1.0.0" as AppVersion,
   preferred_languages: aPreferredLanguages,
   reminder_status: aReminderStatus,
   service_preferences_settings: aServicePreferencesSettings,
@@ -94,8 +96,14 @@ describe("profile type", () => {
     );
     expect(userData.name).toBe(mockedUser.name);
     expect(userData.spid_email).toBe(mockedUser.spid_email);
+    expect(userData.last_app_version).toBe(
+      mockedExtendedProfile.last_app_version
+    );
     expect(userData.preferred_languages).toBe(
       mockedExtendedProfile.preferred_languages
+    );
+    expect(userData.reminder_status).toBe(
+      mockedExtendedProfile.reminder_status
     );
     expect(userData.version).toBe(mockedExtendedProfile.version);
   });

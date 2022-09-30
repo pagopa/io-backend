@@ -362,12 +362,12 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: { ...updateProfileRequest }
+      body: updateProfileRequest
     });
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: { ...proxyInitializedProfileResponse }
+      value: proxyInitializedProfileResponse
     });
   });
 
