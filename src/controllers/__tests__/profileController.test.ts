@@ -56,7 +56,6 @@ const proxyUserResponse = {
   spid_email: anEmailAddress,
   token: "123hexToken",
   version: 1 as NonNegativeInteger,
-  last_app_version: "0.0.1"
 };
 
 const apiUserProfileResponse = {
@@ -215,10 +214,15 @@ describe("ProfileController#getApiProfile", () => {
   it("calls the getApiProfile on the ProfileService with valid values and return a profile without last_app_version", async () => {
     const req = mockReq();
 
-    const {last_app_version, ...apiUserProfileResponseWithoutLastAppVersion} = apiUserProfileResponse;
+    const {
+      last_app_version,
+      ...apiUserProfileResponseWithoutLastAppVersion
+    } = apiUserProfileResponse;
 
     mockGetApiProfile.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(apiUserProfileResponseWithoutLastAppVersion))
+      Promise.resolve(
+        ResponseSuccessJson(apiUserProfileResponseWithoutLastAppVersion)
+      )
     );
 
     req.user = mockedUser;
@@ -236,6 +240,33 @@ describe("ProfileController#getApiProfile", () => {
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: apiUserProfileResponseWithoutLastAppVersion
+    });
+  });
+
+  it("calls the getApiProfile on the ProfileService with valid values and return a profile without reminder_status", async () => {
+    const req = mockReq();
+
+    mockGetApiProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson(apiUserProfileResponse)
+      )
+    );
+
+    req.user = mockedUser;
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(
+      profileService,
+      redisSessionStorage
+    );
+    const response = await controller.getApiProfile(req);
+
+    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: apiUserProfileResponse
     });
   });
 
@@ -295,7 +326,7 @@ describe("ProfileController#upsertProfile", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the upsertProfile on the ProfileService with valid values without last_app_version", async () => {
+  it("calls the upsertProfile on the ProfileService with valid values without last_app_version and reminder_status", async () => {
     const req = mockReq();
 
     mockUpdateProfile.mockReturnValue(
@@ -372,6 +403,52 @@ describe("ProfileController#upsertProfile", () => {
       value: {
         ...proxyUserResponse,
         last_app_version: "0.0.1" as AppVersion
+      }
+    });
+  });
+
+  it("calls the upsertProfile on the ProfileService with valid values with reminder_status", async () => {
+    const req = mockReq();
+
+    mockUpdateProfile.mockReturnValue(
+      Promise.resolve(
+        ResponseSuccessJson({
+          ...proxyUserResponse,
+          reminder_status: "ENABLED"
+        })
+      )
+    );
+
+    req.user = mockedUser;
+    req.body = {
+      ...mockedUpsertProfile,
+      reminder_status: "ENABLED"
+    };
+
+    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+    const profileService = new ProfileService(apiClient);
+    const controller = new ProfileController(
+      profileService,
+      redisSessionStorage
+    );
+
+    const response = await controller.updateProfile(req);
+
+    const errorOrProfile = Profile.decode(req.body);
+    expect(E.isRight(errorOrProfile)).toBeTruthy();
+    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
+    if (E.isRight(errorOrProfile)) {
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        mockedUser,
+        errorOrProfile.right
+      );
+    }
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyUserResponse,
+        reminder_status: "ENABLED"
       }
     });
   });

@@ -45,6 +45,7 @@ export const toInitializedProfile = (
   last_app_version: profile.last_app_version,
   name: user.name,
   preferred_languages: profile.preferred_languages,
+  reminder_status: profile.reminder_status,
   service_preferences_settings: profile.service_preferences_settings,
   spid_email: user.spid_email,
   version: profile.version

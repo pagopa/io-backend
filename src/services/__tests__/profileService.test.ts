@@ -6,6 +6,7 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
+import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 import { AppVersion } from "../../../generated/io-api/AppVersion";
@@ -56,6 +57,11 @@ const lastAppVersion = "0.0.1" as AppVersion;
 const validApiProfileResponseWithLastAppVersion = {
   status: 200,
   value: { ...validApiProfile, last_app_version: lastAppVersion }
+};
+
+const validApiProfileResponseWithReminderStatus = {
+  status: 200,
+  value: { ...validApiProfile, reminder_status: "DISABLED" }
 };
 
 const proxyInitializedProfileResponse = {
@@ -171,6 +177,27 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with reminder_status", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithReminderStatus)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        reminder_status: "DISABLED"
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -256,6 +283,27 @@ describe("ProfileService#getApiProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with reminder_status", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithReminderStatus)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...validApiProfileResponse.value,
+        reminder_status: "DISABLED"
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getApiProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -306,9 +354,7 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("update an user profile to the API", async () => {
-    mockUpdateProfile.mockImplementation(() =>
-      t.success(validApiProfileResponse)
-    );
+    mockUpdateProfile.mockImplementation(() => t.success(validApiProfileResponse));
 
     const service = new ProfileService(api);
 
@@ -318,6 +364,7 @@ describe("ProfileService#updateProfile", () => {
       fiscal_code: mockedUser.fiscal_code,
       body: updateProfileRequest
     });
+
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: proxyInitializedProfileResponse
@@ -338,13 +385,44 @@ describe("ProfileService#updateProfile", () => {
 
     expect(mockUpdateProfile).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
-      body: { ...updateProfileRequest, last_app_version: lastAppVersion }
+      body: {
+        ...updateProfileRequest,
+        last_app_version: lastAppVersion
+      }
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: {
         ...proxyInitializedProfileResponse,
         last_app_version: lastAppVersion
+      }
+    });
+  });
+
+  it("update an user profile to the API with reminder status", async () => {
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithReminderStatus)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.updateProfile(mockedUser, {
+      ...updateProfileRequest,
+      reminder_status: ReminderStatusEnum.DISABLED
+    });
+
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      body: {
+        ...updateProfileRequest,
+        reminder_status: ReminderStatusEnum.DISABLED
+      }
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        reminder_status: ReminderStatusEnum.DISABLED
       }
     });
   });
