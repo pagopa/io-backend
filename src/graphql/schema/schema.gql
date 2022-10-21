@@ -1,0 +1,17 @@
+scalar FiscalCode
+
+type User {
+  id: FiscalCode!
+  name: String
+  messages: [Message]
+}
+
+type Message {
+  id: ID!
+  text: String
+  userId: FiscalCode!
+}
+
+type Query {
+  user(id: FiscalCode!): User
+}

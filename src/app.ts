@@ -1,8 +1,10 @@
+/* eslint-disable sort-keys */
 /* eslint-disable max-lines-per-function */
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
 
+import { readFileSync } from "fs";
 import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -26,6 +28,7 @@ import * as E from "fp-ts/lib/Either";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { ApolloServer } from "apollo-server-express";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -147,6 +150,7 @@ import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 import { PNService } from "./services/pnService";
+import { resolvers } from "./graphql/resolvers/resolvers";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -353,6 +357,22 @@ export function newApp({
   return pipe(
     TE.tryCatch(
       async () => {
+        const apolloServer = new ApolloServer({
+          typeDefs: readFileSync("src/graphql/schema/schema.gql", "utf8"),
+          resolvers,
+          csrfPrevention: true,
+          cache: "bounded",
+          plugins: []
+        });
+        await apolloServer.start();
+
+        // Specify the path where we'd like to mount our server
+        app.use(
+          "/graphql",
+          authMiddlewares.bearerSession,
+          apolloServer.getMiddleware({ path: "/" })
+        );
+
         // Ceate the Token Service
         const TOKEN_SERVICE = new TokenService();
 

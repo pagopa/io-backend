@@ -10,7 +10,8 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*"

@@ -25,7 +25,7 @@
       "name": "Docker: Attach to Node",
       "preLaunchTask": "tsc-watch",
       "protocol": "auto",
-      "port": 5859,
+      "port": 5861,
       "restart": true,
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/usr/src/app",
