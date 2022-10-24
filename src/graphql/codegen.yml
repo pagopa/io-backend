@@ -1,0 +1,13 @@
+schema:
+  - ./src/graphql/schema/schema.gql
+generates:
+  ./generated/graphql/types.ts:
+    plugins:
+      - typescript
+      - typescript-resolvers
+      - add:
+            content: "import { FiscalCode } from \"@pagopa/ts-commons/lib/strings\";"
+    config:
+      scalars:
+        FiscalCode: FiscalCode
+
