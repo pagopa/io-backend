@@ -28,7 +28,7 @@ import * as E from "fp-ts/lib/Either";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, AuthenticationError } from "apollo-server-express";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -150,7 +150,7 @@ import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 import { PNService } from "./services/pnService";
-import { resolvers } from "./graphql/resolvers/resolvers";
+import { ContextWithUser, resolvers } from "./graphql/resolvers/resolvers";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -192,7 +192,7 @@ export interface IAppFactoryParameters {
   readonly ZendeskBasePath: string;
 }
 
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
 export function newApp({
   env,
   allowNotifyIPSourceRange,
@@ -357,22 +357,6 @@ export function newApp({
   return pipe(
     TE.tryCatch(
       async () => {
-        const apolloServer = new ApolloServer({
-          typeDefs: readFileSync("src/graphql/schema/schema.gql", "utf8"),
-          resolvers,
-          csrfPrevention: true,
-          cache: "bounded",
-          plugins: []
-        });
-        await apolloServer.start();
-
-        // Specify the path where we'd like to mount our server
-        app.use(
-          "/graphql",
-          authMiddlewares.bearerSession,
-          apolloServer.getMiddleware({ path: "/" })
-        );
-
         // Ceate the Token Service
         const TOKEN_SERVICE = new TokenService();
 
@@ -604,6 +588,39 @@ export function newApp({
           TOKEN_SERVICE,
           authMiddlewares.bearerZendesk
         );
+
+        const apolloServer = new ApolloServer({
+          typeDefs: readFileSync("src/graphql/schema/schema.gql", "utf8"),
+          resolvers,
+          csrfPrevention: true,
+          cache: "bounded",
+          plugins: [],
+          context: async ({ req }): Promise<ContextWithUser> => {
+            // Try to retrieve a user with the token
+            const user = User.decode(req.user);
+
+            if (E.isLeft(user)) {
+              throw new AuthenticationError("User must be logged in");
+            } else {
+              // Add the user to the context
+              return {
+                user: user.right,
+                messageService: APP_MESSAGES_SERVICE,
+                fnAppMessageService: FN_APP_SERVICE
+              };
+            }
+          }
+        });
+
+        await apolloServer.start();
+
+        // Specify the path where we'd like to mount our server
+        app.use(
+          "/graphql",
+          authMiddlewares.bearerSession,
+          apolloServer.getMiddleware({ path: "/" })
+        );
+
         return { acsController, app };
       },
       err => new Error(`Error on app routes setup: [${err}]`)

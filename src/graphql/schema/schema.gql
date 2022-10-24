@@ -1,17 +1,60 @@
 scalar FiscalCode
 
+
+enum ServiceMetadataCategoryEnum{
+  STANDARD,
+  SPECIAL
+}
+
+
 type User {
   id: FiscalCode!
   name: String
   messages: [Message]
 }
 
-type Message {
-  id: ID!
-  text: String
-  userId: FiscalCode!
+type MessageContent {
+  subject: String!
+  content: String!
 }
 
+type Message {
+  id: ID!
+  content: MessageContent!
+  service: Service! 
+}
+
+
+interface CommonServiceMetadata {
+  category: ServiceMetadataCategoryEnum
+  description: String
+  web_url:  String
+  app_ios:  String
+}
+
+type StandardServiceMetadata implements CommonServiceMetadata {
+  description: String
+  web_url:  String
+  app_ios:  String
+
+}
+
+type SpecialServiceMetadata implements CommonServiceMetadata {
+  description: String
+  web_url:  String
+  app_ios:  String
+  custom_special_flow: String!
+}
+
+union ServiceMetadata = StandardServiceMetadata | SpecialServiceMetadata
+
+
+type Service {
+  service_id: ID!
+  service_metadata: ServiceMetadata!
+}
+
+
 type Query {
-  user(id: FiscalCode!): User
+  myMessages: [Message]
 }

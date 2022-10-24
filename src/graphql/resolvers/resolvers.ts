@@ -3,11 +3,34 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sort-keys */
-import { GraphQLScalarType } from "graphql";
+import { GraphQLError, GraphQLScalarType } from "graphql";
 import { UserInputError } from "apollo-server-express";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
+
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/TaskEither";
+import * as T from "fp-ts/Task";
+
+import {
+  Maybe,
+  Message,
+  Resolvers,
+  Service,
+  ServiceMetadataCategoryEnum
+} from "generated/graphql/types";
+import { User } from "src/types/user";
+import NewMessagesService from "src/services/newMessagesService";
+import FunctionsAppService from "src/services/functionAppService";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+
+export interface ContextWithUser {
+  readonly user: User;
+  readonly messageService: NewMessagesService;
+  readonly fnAppMessageService: FunctionsAppService;
+}
+
+// export interface ContextFunctionParams {}
 
 const fiscalCodeScalar = new GraphQLScalarType<FiscalCode>({
   name: "FiscalCode",
@@ -41,68 +64,76 @@ const fiscalCodeScalar = new GraphQLScalarType<FiscalCode>({
   }
 });
 
-const users = [
-  {
-    id: "AAABBB00C00D000E",
-    name: "John Doe"
-  },
-  {
-    id: "AAABBB01C00D000E",
-    name: "Jane Doe"
-  }
-];
-
-const messages = [
-  {
-    id: "1",
-    text: "Hello World 1",
-    userId: "AAABBB00C00D000E"
-  },
-  {
-    id: "2",
-    text: "Hello World 2",
-    userId: "AAABBB00C00D000E"
-  },
-  {
-    id: "3",
-    text: "Hello World 3",
-    userId: "AAABBB00C00D000E"
-  },
-  {
-    id: "4",
-    text: "Hello World 1",
-    userId: "AAABBB01C00D000E"
-  },
-  {
-    id: "5",
-    text: "Hello World 2",
-    userId: "AAABBB01C00D000E"
-  }
-];
-
 // Provide resolver functions for your schema fields
-export const resolvers = {
+export const resolvers: Resolvers<ContextWithUser> = {
   FiscalCode: fiscalCodeScalar,
-  Query: {
-    // @ts-ignore
-    user: (parent, args, context, info) => {
-      // @ts-ignore
-      console.log(
-        JSON.stringify(
-          // @ts-ignore
-          info.fieldNodes[0].selectionSet.selections.map(x => x.name.value)
-        )
-      );
-      const fiscalCode = args.id;
-      return users.filter(x => x.id === fiscalCode)[0];
+
+  ServiceMetadata: {
+    __resolveType: (obj, _context, _info) => {
+      console.log("Nella __resolveType");
+      return obj.category === ServiceMetadataCategoryEnum.Standard
+        ? "StandardServiceMetadata"
+        : "SpecialServiceMetadata";
     }
   },
-  User: {
-    // @ts-ignore
-    messages: parent => {
-      const userId = parent.id;
-      console.log(userId);
-      return messages.filter(message => message.userId === userId);
+
+  Service: {
+    service_metadata: parent => parent.service_metadata
+  },
+
+  Message: {
+    service: (parent, _args, context, _info) => {
+      // eslint-disable-next-line sonarjs/prefer-immediate-return
+      const p = pipe(
+        TE.tryCatch(
+          () =>
+            context.fnAppMessageService.getService(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (parent as any).sender_service_id
+            ),
+          _ => "Error query services service"
+        ),
+        TE.chain(r =>
+          r.kind === "IResponseSuccessJson"
+            ? TE.of(r.value)
+            : TE.left(`Error from message service: ${r.detail}`)
+        ),
+        T.map(_ => {
+          if (E.isLeft(_)) {
+            throw new GraphQLError(_.left);
+          }
+          return _.right as Service;
+        })
+      )();
+
+      return p;
+    }
+  },
+
+  Query: {
+    myMessages: (_parent, _args, context, _info) => {
+      // eslint-disable-next-line sonarjs/prefer-immediate-return
+      const p = pipe(
+        TE.tryCatch(
+          () =>
+            context.messageService.getMessagesByUser(context.user, {
+              pageSize: 5 as NonNegativeInteger
+            }),
+          _ => "Error query message service"
+        ),
+        TE.chain(r =>
+          r.kind === "IResponseSuccessJson"
+            ? TE.of(r.value.items)
+            : TE.left(`Error from message service: ${r.detail}`)
+        ),
+        TE.getOrElseW(_ => {
+          throw new GraphQLError(_);
+        }),
+        // eslint-disable-next-line functional/prefer-readonly-type
+        T.map(_ => _ as Maybe<Array<Maybe<Message>>>)
+      )();
+
+      return p;
     }
   }
 };
