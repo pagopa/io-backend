@@ -6,6 +6,7 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Profile } from "../../../generated/backend/Profile";
+import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
@@ -62,6 +63,14 @@ const validApiProfileResponseWithLastAppVersion = {
 const validApiProfileResponseWithReminderStatus = {
   status: 200,
   value: { ...validApiProfile, reminder_status: "DISABLED" }
+};
+
+const validApiProfileResponseWithPushNotificationsContentType = {
+  status: 200,
+  value: {
+    ...validApiProfile,
+    push_notifications_content_type: PushNotificationsContentTypeEnum.ANONYMOUS
+  }
 };
 
 const proxyInitializedProfileResponse = {
@@ -198,6 +207,28 @@ describe("ProfileService#getProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with push_notifications_content_type", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithPushNotificationsContentType)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        push_notifications_content_type:
+          PushNotificationsContentTypeEnum.ANONYMOUS
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -304,6 +335,28 @@ describe("ProfileService#getApiProfile", () => {
     });
   });
 
+  it("returns a user profile from the API with push_notifications_content_type", async () => {
+    mockGetProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithPushNotificationsContentType)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.getApiProfile(mockedUser);
+
+    expect(mockGetProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...validApiProfileResponse.value,
+        push_notifications_content_type:
+          PushNotificationsContentTypeEnum.ANONYMOUS
+      }
+    });
+  });
+
   it("returns an 429 HTTP error from getApiProfile upstream API", async () => {
     mockGetProfile.mockImplementation(() =>
       t.success(tooManyReqApiMessagesResponse)
@@ -354,7 +407,9 @@ describe("ProfileService#updateProfile", () => {
   });
 
   it("update an user profile to the API", async () => {
-    mockUpdateProfile.mockImplementation(() => t.success(validApiProfileResponse));
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponse)
+    );
 
     const service = new ProfileService(api);
 
@@ -423,6 +478,37 @@ describe("ProfileService#updateProfile", () => {
       value: {
         ...proxyInitializedProfileResponse,
         reminder_status: ReminderStatusEnum.DISABLED
+      }
+    });
+  });
+
+  it("update an user profile to the API with push notifications content type", async () => {
+    mockUpdateProfile.mockImplementation(() =>
+      t.success(validApiProfileResponseWithPushNotificationsContentType)
+    );
+
+    const service = new ProfileService(api);
+
+    const res = await service.updateProfile(mockedUser, {
+      ...updateProfileRequest,
+      push_notifications_content_type:
+        PushNotificationsContentTypeEnum.ANONYMOUS
+    });
+
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      body: {
+        ...updateProfileRequest,
+        push_notifications_content_type:
+          PushNotificationsContentTypeEnum.ANONYMOUS
+      }
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: {
+        ...proxyInitializedProfileResponse,
+        push_notifications_content_type:
+          PushNotificationsContentTypeEnum.ANONYMOUS
       }
     });
   });

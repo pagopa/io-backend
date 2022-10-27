@@ -27,6 +27,8 @@ import ProfileController from "../profileController";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 import { AppVersion } from "../../../generated/backend/AppVersion";
+import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
+import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 
 const aTimestamp = 1518010929530;
 
@@ -55,7 +57,7 @@ const proxyUserResponse = {
   preferredLanguages: aPreferredLanguages,
   spid_email: anEmailAddress,
   token: "123hexToken",
-  version: 1 as NonNegativeInteger,
+  version: 1 as NonNegativeInteger
 };
 
 const apiUserProfileResponse = {
@@ -64,8 +66,7 @@ const apiUserProfileResponse = {
   is_inbox_enabled: true,
   is_webhook_enabled: true,
   preferred_languages: ["it_IT"],
-  version: 42,
-  last_app_version: "0.0.1"
+  version: 42
 };
 
 // mock for upsert user (Extended Profile)
@@ -127,7 +128,7 @@ describe("ProfileController#getProfile", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getProfile on the ProfileService with valid values", async () => {
+  it("calls the getProfile on the ProfileService with valid values and return a profile without new features related properties", async () => {
     const req = mockReq();
 
     mockGetProfile.mockReturnValue(
@@ -152,6 +153,50 @@ describe("ProfileController#getProfile", () => {
       value: proxyUserResponse
     });
   });
+
+  it.each`
+    feature                                   | additionalProperty                   | value
+    ${"app version tracking"}                 | ${"last_app_version"}                | ${"0.0.1" as AppVersion}
+    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.ANONYMOUS}
+    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.FULL}
+    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.DISABLED}
+    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.ENABLED}
+  `(
+    "calls the getProfile on the ProfileService with valid values and return a profile with $additionalProperty=$value property relative to $feature feature",
+    async ({ additionalProperty, value }) => {
+      const req = mockReq();
+
+      mockGetProfile.mockReturnValue(
+        Promise.resolve(
+          ResponseSuccessJson({
+            ...proxyUserResponse,
+            [additionalProperty]: value
+          })
+        )
+      );
+
+      req.user = mockedUser;
+
+      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+      const profileService = new ProfileService(apiClient);
+      const controller = new ProfileController(
+        profileService,
+        redisSessionStorage
+      );
+
+      const response = await controller.getProfile(req);
+
+      expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: {
+          ...proxyUserResponse,
+          [additionalProperty]: value
+        }
+      });
+    }
+  );
 
   it("calls the getProfile on the ProfileService with empty user", async () => {
     const req = mockReq();
@@ -211,45 +256,11 @@ describe("ProfileController#getApiProfile", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the getApiProfile on the ProfileService with valid values and return a profile without last_app_version", async () => {
-    const req = mockReq();
-
-    const {
-      last_app_version,
-      ...apiUserProfileResponseWithoutLastAppVersion
-    } = apiUserProfileResponse;
-
-    mockGetApiProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson(apiUserProfileResponseWithoutLastAppVersion)
-      )
-    );
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-    const response = await controller.getApiProfile(req);
-
-    expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: apiUserProfileResponseWithoutLastAppVersion
-    });
-  });
-
-  it("calls the getApiProfile on the ProfileService with valid values and return a profile without reminder_status", async () => {
+  it("calls the getApiProfile on the ProfileService with valid values and return a profile without new features related properties", async () => {
     const req = mockReq();
 
     mockGetApiProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson(apiUserProfileResponse)
-      )
+      Promise.resolve(ResponseSuccessJson(apiUserProfileResponse))
     );
 
     req.user = mockedUser;
@@ -269,6 +280,49 @@ describe("ProfileController#getApiProfile", () => {
       value: apiUserProfileResponse
     });
   });
+
+  it.each`
+    feature                                   | additionalProperty                   | value
+    ${"app version tracking"}                 | ${"last_app_version"}                | ${"0.0.1" as AppVersion}
+    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.ANONYMOUS}
+    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.FULL}
+    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.DISABLED}
+    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.ENABLED}
+  `(
+    "calls the getApiProfile on the ProfileService with valid values and return a profile with $additionalProperty=$value property relative to $feature feature",
+    async ({ additionalProperty, value }) => {
+      const req = mockReq();
+
+      mockGetApiProfile.mockReturnValue(
+        Promise.resolve(
+          ResponseSuccessJson({
+            ...apiUserProfileResponse,
+            [additionalProperty]: value
+          })
+        )
+      );
+
+      req.user = mockedUser;
+
+      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+      const profileService = new ProfileService(apiClient);
+      const controller = new ProfileController(
+        profileService,
+        redisSessionStorage
+      );
+      const response = await controller.getApiProfile(req);
+
+      expect(mockGetApiProfile).toHaveBeenCalledWith(mockedUser);
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: {
+          ...apiUserProfileResponse,
+          [additionalProperty]: value
+        }
+      });
+    }
+  );
 
   it("calls the getApiProfile on the ProfileService with valid values", async () => {
     const req = mockReq();
@@ -326,7 +380,7 @@ describe("ProfileController#upsertProfile", () => {
     jest.clearAllMocks();
   });
 
-  it("calls the upsertProfile on the ProfileService with valid values without last_app_version and reminder_status", async () => {
+  it("should call the upsertProfile on the ProfileService with valid values without new features related properties", async () => {
     const req = mockReq();
 
     mockUpdateProfile.mockReturnValue(
@@ -361,97 +415,61 @@ describe("ProfileController#upsertProfile", () => {
     });
   });
 
-  it("calls the upsertProfile on the ProfileService with valid values with last_app_version", async () => {
-    const req = mockReq();
+  it.each`
+    feature                                   | additionalProperty                   | value
+    ${"app version tracking"}                 | ${"last_app_version"}                | ${"0.0.1" as AppVersion}
+    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.ANONYMOUS}
+    ${"descriptive push notification opt-in"} | ${"push_notifications_content_type"} | ${PushNotificationsContentTypeEnum.FULL}
+    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.DISABLED}
+    ${"reminder opt-in"}                      | ${"reminder_status"}                 | ${ReminderStatusEnum.ENABLED}
+  `(
+    "calls the upsertProfile on the ProfileService with valid values and $additionalProperty=$value relative to $feature feature",
+    async ({ additionalProperty, value }) => {
+      const req = mockReq();
 
-    mockUpdateProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          ...proxyUserResponse,
-          last_app_version: "0.0.1" as AppVersion
-        })
-      )
-    );
-
-    req.user = mockedUser;
-    req.body = {
-      ...mockedUpsertProfile,
-      last_app_version: "0.0.1" as AppVersion
-    };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.updateProfile(req);
-
-    const errorOrProfile = Profile.decode(req.body);
-    expect(E.isRight(errorOrProfile)).toBeTruthy();
-    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
-    if (E.isRight(errorOrProfile)) {
-      expect(mockUpdateProfile).toHaveBeenCalledWith(
-        mockedUser,
-        errorOrProfile.right
+      mockUpdateProfile.mockReturnValue(
+        Promise.resolve(
+          ResponseSuccessJson({
+            ...proxyUserResponse,
+            [additionalProperty]: value
+          })
+        )
       );
-    }
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: {
-        ...proxyUserResponse,
-        last_app_version: "0.0.1" as AppVersion
-      }
-    });
-  });
 
-  it("calls the upsertProfile on the ProfileService with valid values with reminder_status", async () => {
-    const req = mockReq();
+      req.user = mockedUser;
+      req.body = {
+        ...mockedUpsertProfile,
+        [additionalProperty]: value
+      };
 
-    mockUpdateProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          ...proxyUserResponse,
-          reminder_status: "ENABLED"
-        })
-      )
-    );
-
-    req.user = mockedUser;
-    req.body = {
-      ...mockedUpsertProfile,
-      reminder_status: "ENABLED"
-    };
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.updateProfile(req);
-
-    const errorOrProfile = Profile.decode(req.body);
-    expect(E.isRight(errorOrProfile)).toBeTruthy();
-    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
-    if (E.isRight(errorOrProfile)) {
-      expect(mockUpdateProfile).toHaveBeenCalledWith(
-        mockedUser,
-        errorOrProfile.right
+      const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
+      const profileService = new ProfileService(apiClient);
+      const controller = new ProfileController(
+        profileService,
+        redisSessionStorage
       );
-    }
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: {
-        ...proxyUserResponse,
-        reminder_status: "ENABLED"
+
+      const response = await controller.updateProfile(req);
+
+      const errorOrProfile = Profile.decode(req.body);
+      expect(E.isRight(errorOrProfile)).toBeTruthy();
+      expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
+      if (E.isRight(errorOrProfile)) {
+        expect(mockUpdateProfile).toHaveBeenCalledWith(
+          mockedUser,
+          errorOrProfile.right
+        );
       }
-    });
-  });
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: {
+          ...proxyUserResponse,
+          [additionalProperty]: value
+        }
+      });
+    }
+  );
 
   it("calls the upsertProfile on the ProfileService with empty user and valid upsert user", async () => {
     const req = mockReq();
