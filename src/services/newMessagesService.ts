@@ -1,9 +1,7 @@
 /**
  * This service retrieves messages from the API system using an API client.
  */
-
 import * as t from "io-ts";
-
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -18,7 +16,6 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
-
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe, flow } from "fp-ts/lib/function";
@@ -27,7 +24,6 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
-
 import { InternalMessageResponseWithContent } from "../../generated/io-messages-api/InternalMessageResponseWithContent";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
 import { LegalData } from "../../generated/io-messages-api/LegalData";
@@ -35,7 +31,6 @@ import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWit
 import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
-
 import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
@@ -57,9 +52,11 @@ import { MessageStatusChange } from "../../generated/io-messages-api/MessageStat
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
 import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
 import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
-
 import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
+import { LegalMessage } from "../../generated/pecserver/LegalMessage";
+import { getIsFileTypeForTypes } from "../utils/file-type";
+import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
 const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
@@ -71,9 +68,6 @@ const isMessageWithThirdPartyData = (
   value: CreatedMessageWithContent
 ): value is MessageWithThirdPartyData =>
   E.isRight(MessageWithThirdPartyData.decode(value));
-
-import { LegalMessage } from "../../generated/pecserver/LegalMessage";
-import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
 const isGetMessageSuccess = (
   res: IResponseType<number, unknown, never>
@@ -289,6 +283,12 @@ export default class NewMessagesService {
             message,
             attachmentUrl
           )
+        )
+      ),
+      TE.filterOrElseW(getIsFileTypeForTypes(["pdf"]), () =>
+        ResponseErrorValidation(
+          "File Format Validation Error",
+          "The requested file is not a valid PDF"
         )
       ),
       TE.map(ResponseSuccessOctet),

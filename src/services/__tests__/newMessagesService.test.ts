@@ -25,6 +25,7 @@ import { IPecServerClient } from "../../clients/pecserver";
 import { ThirdPartyServiceClient } from "../../clients/third-party-service-client";
 import { CreatedMessageWithContent } from "../../../generated/io-messages-api/CreatedMessageWithContent";
 import { base64File } from "../../__mocks__/pn";
+import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
@@ -1242,7 +1243,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
 
   const anAttachmentUrl = "/an/url/with/attachmentId" as NonEmptyString;
 
-  var buffer = Buffer.from(base64File);
+  var buffer = Buffer.from(base64File, "base64");
 
   mockGetTPAttachment.mockImplementation(async (_id, _attachmentUrl) => {
     return t.success({
@@ -1304,6 +1305,44 @@ describe("MessageService#getThirdPartyAttachment", () => {
     expect(mockGetTPAttachment).not.toHaveBeenCalled();
 
     expect(res.kind).toEqual("IResponseErrorInternal");
+  });
+
+  it("should return a Validation error if the attachment is not a PDF", async () => {
+    mockGetTPAttachment.mockImplementation(async (_id, _attachmentUrl) => {
+      return t.success({
+        status: 200,
+        headers: {},
+        value: Buffer.from(NON_VALID_PDF, "base64")
+      });
+    });
+
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyAttachment(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData,
+      anAttachmentUrl
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPAttachment).toHaveBeenCalledWith({
+      id: aValidThirdPartyMessageUniqueId,
+      attachment_url: anAttachmentUrl
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorValidation"
+    });
   });
 
   it("should return a Not Found error if the getMessage API returns Not Found", async () => {
