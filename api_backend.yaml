@@ -1026,7 +1026,7 @@ paths:
 definitions:
   # Definitions from the digital citizenship APIs
   AcceptedTosVersion:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/e0d12ae28c6416710e4e67905d9ef48523160e9e/openapi/definitions.yaml#/AcceptedTosVersion"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.1.0/openapi/definitions.yaml#/AcceptedTosVersion"
   AppVersion:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/e0d12ae28c6416710e4e67905d9ef48523160e9e/openapi/definitions.yaml#/AppVersion"
   BlockedInboxOrChannels:
