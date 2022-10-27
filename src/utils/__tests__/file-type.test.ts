@@ -48,4 +48,13 @@ describe("getIsFileTypeForTypes", () => {
     // THEN
     expect(valid).toBeFalsy();
   });
+
+  it("GIVEN a buffer containig a PDF with a not valid magic number WHEN the buffer is verified for pdf or any THEN the validator return true", async () => {
+    // GIVEN
+    const buffer = Buffer.from(NON_VALID_PDF, "base64");
+    // WHEN
+    const valid = getIsFileTypeForTypes(["pdf", "any"])(buffer);
+    // THEN
+    expect(valid).toBeTruthy();
+  });
 });
