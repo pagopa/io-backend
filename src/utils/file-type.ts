@@ -1,8 +1,7 @@
-import { pipe, identity } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as RS from "fp-ts/ReadonlySet";
 import { match } from "ts-pattern";
 import * as EQ from "fp-ts/Eq";
-import * as B from "fp-ts/boolean";
 
 export type FileType = "pdf" | "any";
 
@@ -44,6 +43,5 @@ export const getIsFileTypeForTypes = (types: ReadonlySet<FileType>) => (
   pipe(
     types,
     RS.map(eqFunction)(typeToCheck),
-    RS.map(B.Eq)(is => is(data)),
-    RS.some(identity)
+    RS.some(is => is(data))
   );
