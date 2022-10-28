@@ -72,9 +72,12 @@ export const resolvers: Resolvers<ContextWithUser> = {
   //   }
   // },
 
-  // Service: {
-  //   service_metadata: parent => parent.service_metadata
-  // },
+  Service: {
+    service_metadata: parent => ({
+      ...parent.service_metadata,
+      __typename: "StandardServiceMetadata"
+    })
+  },
 
   Message: {
     service: (parent, _args, context, _info) => {
