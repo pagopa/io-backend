@@ -590,7 +590,7 @@ export function newApp({
         );
 
         const apolloServer = new ApolloServer({
-          typeDefs: readFileSync("src/graphql/schema/schema.gql", "utf8"),
+          typeDefs: readFileSync("src/graphql/schema/schema.graphql", "utf8"),
           resolvers,
           csrfPrevention: true,
           cache: "bounded",
