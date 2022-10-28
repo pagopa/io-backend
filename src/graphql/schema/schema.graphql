@@ -26,7 +26,6 @@ type Message {
 
 
 interface CommonServiceMetadata {
-  category: ServiceMetadataCategoryEnum
   description: String
   web_url:  String
   app_ios:  String
@@ -36,7 +35,6 @@ type StandardServiceMetadata implements CommonServiceMetadata {
   description: String
   web_url:  String
   app_ios:  String
-
 }
 
 type SpecialServiceMetadata implements CommonServiceMetadata {
