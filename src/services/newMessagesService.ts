@@ -55,8 +55,10 @@ import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
 import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
 import { LegalMessage } from "../../generated/pecserver/LegalMessage";
-import { getIsFileTypeForTypes } from "../utils/file-type";
+import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
+
+const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
 const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
@@ -285,7 +287,7 @@ export default class NewMessagesService {
           )
         )
       ),
-      TE.filterOrElseW(getIsFileTypeForTypes(["pdf"]), () =>
+      TE.filterOrElseW(getIsFileTypeForTypes(ALLOWED_TYPES), () =>
         ResponseErrorValidation(
           "File Format Validation Error",
           "The requested file is not a valid PDF"

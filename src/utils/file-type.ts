@@ -1,6 +1,8 @@
 import { pipe, identity } from "fp-ts/lib/function";
-import * as RA from "fp-ts/ReadonlyArray";
+import * as RS from "fp-ts/ReadonlySet";
 import { match } from "ts-pattern";
+import * as EQ from "fp-ts/Eq";
+import * as B from "fp-ts/boolean";
 
 export type FileType = "pdf" | "any";
 
@@ -23,12 +25,25 @@ export const typeToCheck = (type: FileType) =>
     .with("any", () => isAny)
     .exhaustive();
 
-export const getIsFileTypeForTypes = (types: ReadonlyArray<FileType>) => (
+/**
+ * Compare two functions: will return true if the functions have the same body
+ */
+export const eqFunction: EQ.Eq<ReturnType<typeof typeToCheck>> = EQ.fromEquals(
+  (f1, f2) => f1.toString() === f2.toString()
+);
+
+/**
+ * Get a function to verify if the input buffer contains any of the file type listed in the input set.
+ *
+ * @param types a set of allowed type
+ * @returns a function to verify a buffer
+ */
+export const getIsFileTypeForTypes = (types: ReadonlySet<FileType>) => (
   data: Buffer
 ) =>
   pipe(
     types,
-    RA.map(typeToCheck),
-    RA.map(is => is(data)),
-    RA.some(identity)
+    RS.map(eqFunction)(typeToCheck),
+    RS.map(B.Eq)(is => is(data)),
+    RS.some(identity)
   );
