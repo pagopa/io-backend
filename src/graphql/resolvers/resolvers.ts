@@ -12,13 +12,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 
-import {
-  Maybe,
-  Message,
-  Resolvers,
-  Service,
-  ServiceMetadataCategoryEnum
-} from "generated/graphql/types";
+import { Maybe, Message, Resolvers, Service } from "generated/graphql/types";
 import { User } from "src/types/user";
 import NewMessagesService from "src/services/newMessagesService";
 import FunctionsAppService from "src/services/functionAppService";
@@ -68,18 +62,19 @@ const fiscalCodeScalar = new GraphQLScalarType<FiscalCode>({
 export const resolvers: Resolvers<ContextWithUser> = {
   FiscalCode: fiscalCodeScalar,
 
-  ServiceMetadata: {
-    __resolveType: (obj, _context, _info) => {
-      console.log("Nella __resolveType");
-      return obj.category === ServiceMetadataCategoryEnum.Standard
-        ? "StandardServiceMetadata"
-        : "SpecialServiceMetadata";
-    }
-  },
+  // TODO
+  // ServiceMetadata: {
+  //   __resolveType: (obj, _context, _info) => {
+  //     console.log("Nella __resolveType");
+  //     return obj.category === ServiceMetadataCategoryEnum.Standard
+  //       ? "StandardServiceMetadata"
+  //       : "SpecialServiceMetadata";
+  //   }
+  // },
 
-  Service: {
-    service_metadata: parent => parent.service_metadata
-  },
+  // Service: {
+  //   service_metadata: parent => parent.service_metadata
+  // },
 
   Message: {
     service: (parent, _args, context, _info) => {
