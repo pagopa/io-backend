@@ -69,7 +69,7 @@
     "predeploy": "npm-run-all build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
     "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md",
-    "expose": "lt --local-host backend.localhost --port 8000 --local_https true --subdomain pagopagraphql"
+    "expose": "lt --port 8000 --subdomain pagopagraphql --local-https --allow-invalid-cert"
   },
   "repository": {
     "type": "git",
