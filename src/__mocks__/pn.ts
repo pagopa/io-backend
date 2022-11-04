@@ -10,6 +10,7 @@ import { NotificationAttachmentDownloadMetadataResponse } from "../../generated/
 import { pipe } from "fp-ts/lib/function";
 import { ServiceId } from "../../generated/io-messages-api/ServiceId";
 import { VALID_PDF } from "../utils/__mocks__/pdf_files";
+import { aFiscalCode } from "./user_mock";
 
 const STATUS_ACCEPTED = "ACCEPTED";
 
@@ -20,11 +21,11 @@ export const aDate = new Date();
 export const aPnUrl = "https://pn-url";
 export const aPnKey = "a-pn-key";
 export const aPnAttachmentUrl = `https://a.s3.pn.attachment/attachments/an-attachments-id`;
-export const aPnNotificationId = "a-notification-id";
+export const aPnNotificationId = "AAAA-BBBB-CCCC-000000-D-1";
 export const aDocIdx = "1";
 export const aPnNotificationRecipient = {
   recipientType: RecipientTypeEnum.PF,
-  taxId: "a-tax-id",
+  taxId: aFiscalCode,
   denomination: "a-denomination"
 };
 export const aPnDocument = {
@@ -36,6 +37,8 @@ export const aPnDocument = {
 export const aPnNotificationObject = {
   paProtocolNumber: "a-protocol-number",
   subject: "a-subject",
+  senderDenomination: "1",
+  senderTaxId: "77777777777",
   recipients: [aPnNotificationRecipient],
   documents: [aPnDocument],
   notificationFeePolicy: NotificationFeePolicyEnum.FLAT_RATE,
@@ -56,7 +59,7 @@ export const aPnNotificationObject = {
 export const aPnNotification: FullReceivedNotification = pipe(
   aPnNotificationObject,
   FullReceivedNotification.decode,
-  E.getOrElseW(() => {
+  E.getOrElseW(_e => {
     throw new Error("a pn notfication is not valid");
   })
 );

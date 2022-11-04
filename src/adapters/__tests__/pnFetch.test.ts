@@ -90,7 +90,7 @@ describe("getThirdPartyMessageDetails", () => {
         expect.objectContaining({
           status: 200,
           value: {
-            details: aPnNotificationObject,
+            details: { ...aPnNotificationObject, taxonomyCode: "010101101P" },
             attachments: [
               {
                 content_type: aPnNotification.documents[0].contentType,
