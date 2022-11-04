@@ -68,7 +68,8 @@
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "predeploy": "npm-run-all build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
-    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
+    "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md",
+    "expose": "lt --local-host backend.localhost --port 8000 --local_https true --subdomain pagopagraphql"
   },
   "repository": {
     "type": "git",

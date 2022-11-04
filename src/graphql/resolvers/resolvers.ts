@@ -65,7 +65,6 @@ export const resolvers: Resolvers<ContextWithUser> = {
   // TODO
   // ServiceMetadata: {
   //   __resolveType: (obj, _context, _info) => {
-  //     console.log("Nella __resolveType");
   //     return obj.category === ServiceMetadataCategoryEnum.Standard
   //       ? "StandardServiceMetadata"
   //       : "SpecialServiceMetadata";
