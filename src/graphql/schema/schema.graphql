@@ -21,7 +21,7 @@ type MessageContent {
 type Message {
   id: ID!
   content: MessageContent!
-  service: Service! 
+  service: Service
 }
 
 
