@@ -1,6 +1,5 @@
 scalar FiscalCode
 
-
 enum ServiceMetadataCategoryEnum{
   STANDARD,
   SPECIAL
@@ -23,7 +22,6 @@ type Message {
   content: MessageContent!
   service: Service
 }
-
 
 interface CommonServiceMetadata {
   description: String @constraint(maxLength: 25)

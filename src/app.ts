@@ -151,6 +151,11 @@ import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 import { PNService } from "./services/pnService";
 import { ContextWithUser, resolvers } from "./graphql/resolvers/resolvers";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import {
+  constraintDirective,
+  constraintDirectiveTypeDefs
+} from "graphql-constraint-directive";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -589,8 +594,16 @@ export function newApp({
           authMiddlewares.bearerZendesk
         );
 
+        let schema = makeExecutableSchema({
+          typeDefs: [
+            constraintDirectiveTypeDefs,
+            readFileSync("src/graphql/schema/schema.graphql", "utf8")
+          ]
+        });
+        schema = constraintDirective()(schema);
+
         const apolloServer = new ApolloServer({
-          typeDefs: readFileSync("src/graphql/schema/schema.graphql", "utf8"),
+          schema,
           resolvers,
           csrfPrevention: true,
           cache: "bounded",
