@@ -26,19 +26,19 @@ type Message {
 
 
 interface CommonServiceMetadata {
-  description: String
+  description: String @constraint(maxLength: 25)
   web_url:  String
   app_ios:  String
 }
 
 type StandardServiceMetadata implements CommonServiceMetadata {
-  description: String
+  description: String @constraint(maxLength: 25)
   web_url:  String
   app_ios:  String
 }
 
 type SpecialServiceMetadata implements CommonServiceMetadata {
-  description: String
+  description: String @constraint(maxLength: 25)
   web_url:  String
   app_ios:  String
   custom_special_flow: String!

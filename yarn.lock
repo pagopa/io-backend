@@ -1059,7 +1059,7 @@
     tslib "^2.4.0"
     value-or-promise "1.0.11"
 
-"@graphql-tools/schema@^8.0.0":
+"@graphql-tools/schema@^8.0.0", "@graphql-tools/schema@^8.3.2":
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/@graphql-tools/schema/-/schema-8.5.1.tgz#c2f2ff1448380919a330312399c9471db2580b58"
   integrity sha512-0Esilsh0P/qYcB5DKQpiKeQs/jevzIadNTaT0jeWklPMwNbT7yMX4EqZany7mbeRRlSRwMzNzL5olyFdffHBZg==
@@ -1100,6 +1100,13 @@
   version "8.9.0"
   resolved "https://registry.yarnpkg.com/@graphql-tools/utils/-/utils-8.9.0.tgz#c6aa5f651c9c99e1aca55510af21b56ec296cdb7"
   integrity sha512-pjJIWH0XOVnYGXCqej8g/u/tsfV4LvLlj0eATKQu5zwnxd/TiTHq7Cg313qUPTFFHZ3PP5wJ15chYVtLDwaymg==
+  dependencies:
+    tslib "^2.4.0"
+
+"@graphql-tools/utils@^8.6.2":
+  version "8.13.1"
+  resolved "https://registry.yarnpkg.com/@graphql-tools/utils/-/utils-8.13.1.tgz#b247607e400365c2cd87ff54654d4ad25a7ac491"
+  integrity sha512-qIh9yYpdUFmctVqovwMdheVNJqFh+DQNWIhX87FJStfXYnmweBUDATok9fWPleKeFwxnW8IapKmY8m8toJEkAw==
   dependencies:
     tslib "^2.4.0"
 
@@ -5297,6 +5304,15 @@ graphql-config@4.3.6:
     string-env-interpolation "1.0.1"
     ts-node "^10.8.1"
     tslib "^2.4.0"
+
+graphql-constraint-directive@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/graphql-constraint-directive/-/graphql-constraint-directive-4.1.2.tgz#00a8f73ca219f67565e170959e57b23226e44d8b"
+  integrity sha512-0YC+1G9nDZvZ0u2m4LR6oZyJybUpRwHMyNfkU4vISYpVOpGYTFghsny+lW6i8wvq16NEZaGiXMg7VMke550i9A==
+  dependencies:
+    "@graphql-tools/schema" "^8.3.2"
+    "@graphql-tools/utils" "^8.6.2"
+    validator "^13.6.0"
 
 graphql-request@^5.0.0:
   version "5.0.0"
@@ -10421,7 +10437,7 @@ validator@^11.0.0:
   resolved "https://registry.yarnpkg.com/validator/-/validator-11.1.0.tgz#ac18cac42e0aa5902b603d7a5d9b7827e2346ac4"
   integrity sha512-qiQ5ktdO7CD6C/5/mYV4jku/7qnqzjrxb3C/Q5wR3vGGinHTgJZN/TdFT3ZX4vXhX2R1PXx42fB1cn5W+uJ4lg==
 
-validator@^13.7.0:
+validator@^13.6.0, validator@^13.7.0:
   version "13.7.0"
   resolved "https://registry.yarnpkg.com/validator/-/validator-13.7.0.tgz#4f9658ba13ba8f3d82ee881d3516489ea85c0857"
   integrity sha512-nYXQLCBkpJ8X6ltALua9dRrZDHVYxjJ1wgskNt1lH9fzGjs3tgojGSCBjmEPwkWS1y29+DrizMTW19Pr9uB2nw==

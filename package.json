@@ -97,6 +97,7 @@
     "express-enforces-ssl": "1.1.0",
     "fp-ts": "^2.11.1",
     "graphql": "^16.6.0",
+    "graphql-constraint-directive": "^4.1.2",
     "helmet": "3.23.3",
     "http-graceful-shutdown": "^2.3.2",
     "io-ts": "^2.2.16",
