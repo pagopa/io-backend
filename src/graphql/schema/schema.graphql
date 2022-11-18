@@ -1,6 +1,5 @@
 scalar FiscalCode
 
-
 enum ServiceMetadataCategoryEnum{
   STANDARD,
   SPECIAL
