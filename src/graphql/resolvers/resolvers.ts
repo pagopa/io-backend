@@ -120,7 +120,7 @@ export const resolvers: Resolvers<ContextWithUser> = {
         ),
         TE.chain(r =>
           r.kind === "IResponseSuccessJson"
-            ? TE.of(r.value.items)
+            ? TE.of(r.value.items.map(i => ({ ...i, fiscal_code: "000" })))
             : TE.left(`Error from message service: ${r.detail}`)
         ),
         TE.getOrElseW(_ => {

@@ -22,6 +22,7 @@ type Message {
   id: ID!
   content: MessageContent!
   service: Service
+  fiscalCode: FiscalCode!
 }
 
 
