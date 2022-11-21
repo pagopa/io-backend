@@ -61,10 +61,7 @@ export default class NotificationService {
         title: pipe(
           notificationTitle,
           O.fromNullable,
-          O.getOrElse(
-            () =>
-              `${notification.sender_metadata.service_name} - ${notification.sender_metadata.organization_name}`
-          )
+          O.getOrElse(() => `${notification.sender_metadata.organization_name}`)
         )
       }
     };
