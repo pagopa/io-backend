@@ -54,5 +54,5 @@ type Service {
 
 
 type Query {
-  myMessages: [Message]
+  messages(pageSize: Int, maximumId: ID, minimumId: ID, getArchivedMessages: Boolean, enrichResultData: Boolean): [Message]
 }

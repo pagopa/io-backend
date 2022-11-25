@@ -5,7 +5,7 @@
 /* eslint-disable sort-keys */
 import { GraphQLError, GraphQLScalarType } from "graphql";
 import { UserInputError } from "apollo-server-express";
-import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 
 import * as E from "fp-ts/lib/Either";
@@ -108,13 +108,17 @@ export const resolvers: Resolvers<ContextWithUser> = {
   },
 
   Query: {
-    myMessages: (_parent, _args, context, _info) => {
+    messages: (_parent, _args, context, _info) => {
       // eslint-disable-next-line sonarjs/prefer-immediate-return
       const p = pipe(
         TE.tryCatch(
           () =>
             context.messageService.getMessagesByUser(context.user, {
-              pageSize: 5 as NonNegativeInteger
+              pageSize: _args.pageSize as NonNegativeInteger,
+              maximumId: _args.maximumId ? _args.maximumId as NonEmptyString: undefined,
+              minimumId: _args.minimumId ? _args.minimumId as NonEmptyString: undefined,
+              getArchivedMessages: _args.getArchivedMessages ? _args.getArchivedMessages as boolean: false,
+              enrichResultData: _args.enrichResultData ? _args.enrichResultData as boolean: false
             }),
           _ => "Error query message service"
         ),
