@@ -12,7 +12,13 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 
-import { Maybe, Message, Resolvers, Service } from "generated/graphql/types";
+import {
+  Maybe,
+  Message,
+  MessageContent,
+  Resolvers,
+  Service
+} from "generated/graphql/types";
 import { User } from "src/types/user";
 import NewMessagesService from "src/services/newMessagesService";
 import FunctionsAppService from "src/services/functionAppService";
@@ -79,6 +85,36 @@ export const resolvers: Resolvers<ContextWithUser> = {
   },
 
   Message: {
+    content: (parent, _args, context, _info) => {
+      // eslint-disable-next-line sonarjs/prefer-immediate-return
+      const p = pipe(
+        TE.tryCatch(
+          () =>
+            context.messageService.getMessage(
+              context.user,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              { id: (parent as any).id }
+            ),
+          _ => "Error query services service"
+        ),
+        TE.chain(r =>
+          r.kind === "IResponseSuccessJson"
+            ? TE.of({
+                content: r.value.content.markdown,
+                subject: r.value.content.subject
+              })
+            : TE.left(`Error from message service: ${r.detail}`)
+        ),
+        T.map(_ => {
+          if (E.isLeft(_)) {
+            throw new GraphQLError(_.left);
+          }
+          return _.right as MessageContent;
+        })
+      )();
+
+      return p;
+    },
     service: (parent, _args, context, _info) => {
       // eslint-disable-next-line sonarjs/prefer-immediate-return
       const p = pipe(
@@ -115,16 +151,25 @@ export const resolvers: Resolvers<ContextWithUser> = {
           () =>
             context.messageService.getMessagesByUser(context.user, {
               pageSize: _args.pageSize as NonNegativeInteger,
-              maximumId: _args.maximumId ? _args.maximumId as NonEmptyString: undefined,
-              minimumId: _args.minimumId ? _args.minimumId as NonEmptyString: undefined,
-              getArchivedMessages: _args.getArchivedMessages ? _args.getArchivedMessages as boolean: false,
-              enrichResultData: _args.enrichResultData ? _args.enrichResultData as boolean: false
+              maximumId: _args.maximumId
+                ? (_args.maximumId as NonEmptyString)
+                : undefined,
+              minimumId: _args.minimumId
+                ? (_args.minimumId as NonEmptyString)
+                : undefined,
+              getArchivedMessages: false,
+              enrichResultData: false
             }),
           _ => "Error query message service"
         ),
         TE.chain(r =>
           r.kind === "IResponseSuccessJson"
-            ? TE.of(r.value.items.map(i => ({ ...i, fiscal_code: "000" })))
+            ? TE.of(
+                r.value.items.map(i => ({
+                  id: i.id,
+                  sender_service_id: i.sender_service_id
+                }))
+              )
             : TE.left(`Error from message service: ${r.detail}`)
         ),
         TE.getOrElseW(_ => {
