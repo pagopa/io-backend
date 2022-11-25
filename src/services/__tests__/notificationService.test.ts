@@ -20,6 +20,8 @@ import { NotifyMessage } from "../../../generated/messages/NotifyMessage";
 import { toFiscalCodeHash } from "../../types/notification";
 import { base64EncodeObject } from "../../utils/messages";
 import NotificationService from "../notificationService";
+import { fail } from "assert";
+import { pipe } from "fp-ts/lib/function";
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const aFiscalCodeHash =
@@ -166,6 +168,82 @@ describe("NotificationService#notify", () => {
       Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
     );
     expect(E.isRight(NotifyMessage.decode(decodedMessage))).toBeTruthy();
+  });
+
+  it("should write organization name in title, if notificationTitle parameter is empty", async () => {
+    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    const service = new NotificationService("", "");
+
+    const res = await service.notify(aValidNotification, aNotificationSubject);
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+    expect(mockSendMessage).toBeCalled();
+    const decodedMessage = JSON.parse(
+      Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
+    );
+
+    pipe(
+      decodedMessage,
+      NotifyMessage.decode,
+      E.map(m =>
+        expect(m).toEqual({
+          installationId: toFiscalCodeHash(
+            aValidNotification.message.fiscal_code
+          ),
+          kind: "Notify",
+          payload: {
+            message: aValidNotification.message.content.subject,
+            message_id: aValidNotification.message.id,
+            title: aValidNotification.sender_metadata.organization_name
+          }
+        })
+      ),
+      E.mapLeft(_ => fail("Cannot decode NotifyMessage"))
+    );
+  });
+
+  it("should write notificationTitle in title, if notificationTitle not empty", async () => {
+    mockSendMessage.mockImplementation(_ => Promise.resolve());
+    const service = new NotificationService("", "");
+
+    const res = await service.notify(
+      aValidNotification,
+      aNotificationSubject,
+      "a custom title"
+    );
+
+    expect(res).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+    expect(mockSendMessage).toBeCalled();
+    const decodedMessage = JSON.parse(
+      Buffer.from(mockSendMessage.mock.calls[0][0], "base64").toString("ascii")
+    );
+
+    pipe(
+      decodedMessage,
+      NotifyMessage.decode,
+      E.map(m =>
+        expect(m).toEqual({
+          installationId: toFiscalCodeHash(
+            aValidNotification.message.fiscal_code
+          ),
+          kind: "Notify",
+          payload: {
+            message: aValidNotification.message.content.subject,
+            message_id: aValidNotification.message.id,
+            title: "a custom title"
+          }
+        })
+      ),
+      E.mapLeft(_ => fail("Cannot decode NotifyMessage"))
+    );
   });
 
   it("should fail if the Queue Storage fails on notify", async () => {
