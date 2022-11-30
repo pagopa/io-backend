@@ -1,5 +1,5 @@
 /**
- * This controller handles the CGN requests from the
+ * This controller handles the IO_SIGN requests from the
  * app by forwarding the call to the API system.
  */
 
