@@ -85,6 +85,7 @@ describe("GET /services/:id", () => {
       MitVoucherBasePath: "/api/v1/mitvoucher/auth",
       CGNAPIBasePath: "/api/v1/cgn",
       CGNOperatorSearchAPIBasePath: "/api/v1/cgn-operator-search",
+      IoSignAPIBasePath: "/api/v1/sign",
       MyPortalBasePath: "/myportal/api/v1",
       PagoPABasePath: "/pagopa/api/v1",
       ZendeskBasePath: "/api/backend/zendesk/v1",
