@@ -70,7 +70,9 @@ import {
   FF_ENABLE_SESSION_ENDPOINTS,
   THIRD_PARTY_CONFIG_LIST,
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
-  PNAddressBookConfig
+  PNAddressBookConfig,
+  FF_IO_SIGN_ENABLED,
+  IO_SIGN_API_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -147,6 +149,8 @@ import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
 import { PNService } from "./services/pnService";
+import IoSignService from "./services/ioSignService";
+import IoSignController from "./controllers/ioSignController";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -183,12 +187,13 @@ export interface IAppFactoryParameters {
   readonly FIMSBasePath: string;
   readonly CGNAPIBasePath: string;
   readonly CGNOperatorSearchAPIBasePath: string;
+  readonly IoSignAPIBasePath: string;
   readonly EUCovidCertBasePath: string;
   readonly MitVoucherBasePath: string;
   readonly ZendeskBasePath: string;
 }
 
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
 export function newApp({
   env,
   allowNotifyIPSourceRange,
@@ -206,6 +211,7 @@ export function newApp({
   BPDBasePath,
   FIMSBasePath,
   CGNAPIBasePath,
+  IoSignAPIBasePath,
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   MitVoucherBasePath,
@@ -365,6 +371,9 @@ export function newApp({
         // Create the cgn service
         const CGN_SERVICE = new CgnService(CGN_API_CLIENT);
 
+        // Create the io sign
+        const IO_SIGN_SERVICE = new IoSignService(IO_SIGN_API_CLIENT);
+
         // Create the cgn operator search service
         const CGN_OPERATOR_SEARCH_SERVICE = new CgnOperatorSearchService(
           CGN_OPERATOR_SEARCH_API_CLIENT
@@ -505,6 +514,17 @@ export function newApp({
             CGNOperatorSearchAPIBasePath,
             CGN_SERVICE,
             CGN_OPERATOR_SEARCH_SERVICE,
+            authMiddlewares.bearerSession
+          );
+        }
+
+        if (FF_IO_SIGN_ENABLED) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerIoSignAPIRoutes(
+            app,
+            IoSignAPIBasePath,
+            IO_SIGN_SERVICE,
+            PROFILE_SERVICE,
             authMiddlewares.bearerSession
           );
         }
@@ -1198,6 +1218,26 @@ function registerCgnAPIRoutes(
     `${basePath}/otp`,
     bearerSessionTokenAuth,
     toExpressHandler(cgnController.generateOtp, cgnController)
+  );
+}
+
+function registerIoSignAPIRoutes(
+  app: Express,
+  basePath: string,
+  ioSignService: IoSignService,
+  profileService: ProfileService,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  const ioSignController: IoSignController = new IoSignController(
+    ioSignService,
+    profileService
+  );
+
+  app.post(
+    `${basePath}/qtsp/clauses/filled_document`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioSignController.createFilledDocument, ioSignController)
   );
 }
 

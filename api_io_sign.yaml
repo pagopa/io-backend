@@ -1,0 +1,73 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: IO Sign - Backend API
+host: localhost
+basePath: /api/v1/sign
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/qtsp/clauses/filled_document":
+    post:
+      operationId: createFilledDocument
+      summary: Create a filled document for QTSP.
+      description: |
+        The caller of this API is expected to poll on it since the endpoint
+        will return 404 until the ToS document gets processed.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateFilledDocument'
+      responses:
+        "201":
+          description: Filled document created
+          schema:
+            $ref: "#/definitions/FilledDocumentDetailView"
+        "400":
+          description: Validation error.
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Resource not found.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+
+definitions:
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/Timestamp"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/FiscalCode"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+
+  CreateFilledDocument:
+    type: object
+    properties:
+      document_url:
+        type: string
+        format: url
+        minLength: 1
+    required:
+      - document_url
+
+  FilledDocumentDetailView:
+    type: object
+    properties:
+      filled_document_url:
+        type: string
+        format: url
+    required:
+      - filled_document_url
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
