@@ -28,11 +28,12 @@ import {
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
+
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
 
   /**
-   * Get the current io-sign Status related to the user.
+   * Get the Signer id related to the user.
    */
   public readonly getSignerByFiscalCode = (
     user: User

@@ -21,6 +21,7 @@ import {
 import IoSignService from "src/services/ioSignService";
 import { pipe } from "fp-ts/lib/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 
 import { FilledDocumentDetailView } from "../../generated/io-sign-api/FilledDocumentDetailView";
@@ -32,7 +33,7 @@ import ProfileService from "../services/profileService";
 
 import { profileWithEmailValidatedOrError } from "../utils/profile";
 
-export const retriveSignerId = (ioSignService: IoSignService, user: User) =>
+export const retrieveSignerId = (ioSignService: IoSignService, user: User) =>
   pipe(
     TE.tryCatch(
       () => ioSignService.getSignerByFiscalCode(user),
@@ -49,7 +50,14 @@ export const retriveSignerId = (ioSignService: IoSignService, user: User) =>
       pipe(
         response.value,
         SignerDetailView.decode,
-        E.mapLeft(_ => new Error("Signer id is not valid")),
+        E.mapLeft(
+          errs =>
+            new Error(
+              `Signer id is not valid: ${errorsToReadableMessages(errs).join(
+                " / "
+              )}`
+            )
+        ),
         TE.fromEither
       )
     )
@@ -73,10 +81,10 @@ export default class IoSignController {
       pipe(
         req.body,
         CreateFilledDocument.decode,
-        E.mapLeft(() =>
+        E.mapLeft(errs =>
           ResponseErrorValidation(
-            "Payload not valid",
-            "The body of the request is invalid!"
+            "Bad request",
+            errorsToReadableMessages(errs).join(" / ")
           )
         ),
         TE.fromEither,
@@ -84,10 +92,10 @@ export default class IoSignController {
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
-                retriveSignerId(this.ioSignService, user),
+                retrieveSignerId(this.ioSignService, user),
                 TE.mapLeft(e =>
                   ResponseErrorInternal(
-                    `Error retrieving signer id for this users | ${e.message}`
+                    `Error retrieving the signer id for this users | ${e.message}`
                   )
                 )
               ),
