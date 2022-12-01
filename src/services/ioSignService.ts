@@ -55,7 +55,7 @@ export default class IoSignService {
           case 400:
             return ResponseErrorValidation(
               "Invalid request",
-              "An error occurred while validating the request body"
+              `An error occurred while validating the request body | ${response.value}`
             );
           case 403:
             return ResponseErrorNotFound403(
@@ -101,7 +101,7 @@ export default class IoSignService {
           case 400:
             return ResponseErrorValidation(
               "Invalid request",
-              "An error occurred while validating the request body"
+              `An error occurred while validating the request body | ${response.value}`
             );
           case 404:
             return ResponseErrorNotFound(
