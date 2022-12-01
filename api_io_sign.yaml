@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   version: 1.0.0
   title: IO Sign - Backend API
-host: localhost
+host: api-app.io.pagopa.it
 basePath: /api/v1/sign
 schemes:
   - https
