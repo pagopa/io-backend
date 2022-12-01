@@ -35,30 +35,12 @@ import { profileWithEmailValidatedOrError } from "../utils/profile";
 
 export const retrieveSignerId = (ioSignService: IoSignService, user: User) =>
   pipe(
-    TE.tryCatch(
-      () => ioSignService.getSignerByFiscalCode(user),
-      () => new Error("Error retrieving signer id")
-    ),
+    TE.tryCatch(() => ioSignService.getSignerByFiscalCode(user), E.toError),
     TE.chain(
       TE.fromPredicate(
         (r): r is IResponseSuccessJson<SignerDetailView> =>
           r.kind === "IResponseSuccessJson",
         e => new Error(`Error retrieving signer id | ${e.detail}`)
-      )
-    ),
-    TE.chainW(response =>
-      pipe(
-        response.value,
-        SignerDetailView.decode,
-        E.mapLeft(
-          errs =>
-            new Error(
-              `Signer id is not valid: ${errorsToReadableMessages(errs).join(
-                " / "
-              )}`
-            )
-        ),
-        TE.fromEither
       )
     )
   );
@@ -115,7 +97,7 @@ export default class IoSignController {
                 userProfile.email,
                 user.family_name as NonEmptyString,
                 user.name as NonEmptyString,
-                signerId.id
+                signerId.value.id
               )
             )
           )
