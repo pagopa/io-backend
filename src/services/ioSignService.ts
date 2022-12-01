@@ -1,5 +1,5 @@
 /**
- * This service interactsnwith the Bonus API
+ * This service interacts with the IO Sign API
  */
 
 import {
