@@ -7,7 +7,7 @@ import IoSignService from "../ioSignService";
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetInfo = jest.fn();
-const mockGetQtspClauses = jest.fn();
+const mockGetQtspClausesMetadata = jest.fn();
 
 const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
@@ -35,7 +35,7 @@ mockGetSignerByFiscalCode.mockImplementation(() =>
   })
 );
 
-mockGetQtspClauses.mockImplementation(() =>
+mockGetQtspClausesMetadata.mockImplementation(() =>
   t.success({
     status: 200,
     value: {
@@ -60,7 +60,7 @@ const api = {
   createFilledDocument: mockCreateFilledDocument,
   getSignerByFiscalCode: mockGetSignerByFiscalCode,
   getInfo: mockGetInfo,
-  getQtspClausesMetadata: mockGetQtspClauses
+  getQtspClausesMetadata: mockGetQtspClausesMetadata
 } as ReturnType<IoSignAPIClient>;
 
 describe("IoSignService#getSignerByFiscalCode", () => {
@@ -313,7 +313,7 @@ describe("IoSignService#getQtspClausesMetadata", () => {
 
     await service.getQtspClausesMetadata();
 
-    expect(mockGetQtspClauses).toHaveBeenCalledWith({});
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({});
   });
 
   it("should handle a success response", async () => {
@@ -328,7 +328,7 @@ describe("IoSignService#getQtspClausesMetadata", () => {
 
   it("should handle an internal error response", async () => {
     const aGenericProblem = {};
-    mockGetQtspClauses.mockImplementationOnce(() =>
+    mockGetQtspClausesMetadata.mockImplementationOnce(() =>
       t.success({ status: 500, value: aGenericProblem })
     );
     const service = new IoSignService(api);
@@ -340,7 +340,9 @@ describe("IoSignService#getQtspClausesMetadata", () => {
   });
 
   it("should return an error for unhandled response status code", async () => {
-    mockGetQtspClauses.mockImplementationOnce(() => t.success({ status: 123 }));
+    mockGetQtspClausesMetadata.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
     const service = new IoSignService(api);
     const res = await service.getQtspClausesMetadata();
 
@@ -350,7 +352,7 @@ describe("IoSignService#getQtspClausesMetadata", () => {
   });
 
   it("should return an error if the api call thows", async () => {
-    mockGetQtspClauses.mockImplementationOnce(() => {
+    mockGetQtspClausesMetadata.mockImplementationOnce(() => {
       throw new Error();
     });
     const service = new IoSignService(api);
