@@ -21,6 +21,8 @@ import { FilledDocumentDetailView } from "generated/io-sign-api/FilledDocumentDe
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Id } from "generated/io-sign-api/Id";
 import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClausesMetadataDetailView";
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/Either";
 import { User } from "../types/user";
 import {
   ResponseErrorStatusNotDefinedInSpec,
@@ -29,7 +31,6 @@ import {
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
-
 const resourcesNotFound = "Resources not found";
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
@@ -112,7 +113,12 @@ export default class IoSignService {
             );
           case 500:
             return ResponseErrorInternal(
-              readableProblem((response.value as unknown) as ProblemJson)
+              pipe(
+                response.value,
+                ProblemJson.decode,
+                E.map(readableProblem),
+                E.getOrElse(() => "Internal server error!")
+              )
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
@@ -134,7 +140,12 @@ export default class IoSignService {
             return ResponseSuccessJson(response.value);
           case 500:
             return ResponseErrorInternal(
-              readableProblem((response.value as unknown) as ProblemJson)
+              pipe(
+                response.value,
+                ProblemJson.decode,
+                E.map(readableProblem),
+                E.getOrElse(() => "Internal server error!")
+              )
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
