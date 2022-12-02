@@ -9,6 +9,22 @@ schemes:
 security:
   - Bearer: []
 paths:
+  "/qtsp/clauses":
+    post:
+      operationId: getQtspCluasesMetadata
+      summary: Get the qtsp clauses
+      responses:
+        "200":
+          description: QTSP clauses
+          schema:
+            $ref: "#/definitions/QtspClausesMetadataDetailView"
+        "401":
+          description: Bearer token null or expired.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
   "/qtsp/clauses/filled_document":
     post:
       operationId: createFilledDocument
@@ -65,6 +81,42 @@ definitions:
         format: url
     required:
       - filled_document_url
+
+  QtspClause:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+      required:
+        - text
+
+  QtspClausesMetadataDetailView:
+    type: object
+    properties:
+      clauses:
+        type: array
+        items:
+          $ref: "#/definitions/QtspClause"
+        minItems: 1
+        uniqueItems: true
+      document_url:
+        type: string
+        format: url
+      privacy_url:
+        type: string
+        format: url
+      privacy_text:
+        type: string
+        minLength: 1
+      terms_and_conditions_url:
+        type: string
+        format: url
+      nonce:
+        type: string
+        format: base64
+        minLength: 1
+
 
 securityDefinitions:
   Bearer:
