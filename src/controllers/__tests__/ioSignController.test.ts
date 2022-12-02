@@ -29,12 +29,14 @@ const badRequestErrorResponse = {
 
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
+const mockGetQtspClausesMetadata = jest.fn();
 
 jest.mock("../../services/ioSignService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       createFilledDocument: mockCreateFilledDocument,
-      getSignerByFiscalCode: mockGetSignerByFiscalCode
+      getSignerByFiscalCode: mockGetSignerByFiscalCode,
+      getQtspClausesMetadata: mockGetQtspClausesMetadata
     }))
   };
 });
@@ -48,6 +50,22 @@ jest.mock("../../services/profileService", () => {
     }))
   };
 });
+
+const qtspClausesMetadata = {
+  clauses: [
+    {
+      text: "(1) Io sottoscritto/a dichiaro quanto...."
+    },
+    {
+      text: "(2) Io sottoscritto/a accetto..."
+    }
+  ],
+  document_url: "https://mock.com/modulo.pdf",
+  privacy_url: "https://mock.com/privacy.pdf",
+  terms_and_conditions_url: "https://mock.com/tos.pdf",
+  privacy_text: "[PLACE HOLDER]",
+  nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe=="
+};
 
 const client = IoSignAPIClient(API_KEY, API_URL, API_BASE_PATH);
 const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
@@ -139,5 +157,32 @@ describe("IoSignController#createFilledDocument", () => {
     expect(mockCreateFilledDocument).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("IoSignController#getQtspClausesMetadata", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const controller = new IoSignController(ioSignService, profileService);
+    await controller.getQtspClausesMetadata();
+
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith();
+  });
+
+  it("should call getQtspClausesMetadata method on the IoSignService with valid values", async () => {
+    mockGetQtspClausesMetadata.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(qtspClausesMetadata))
+    );
+    const controller = new IoSignController(ioSignService, profileService);
+    const response = await controller.getQtspClausesMetadata();
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: qtspClausesMetadata
+    });
   });
 });

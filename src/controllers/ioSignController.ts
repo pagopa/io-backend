@@ -22,6 +22,7 @@ import IoSignService from "src/services/ioSignService";
 import { pipe } from "fp-ts/lib/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClausesMetadataDetailView";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 
 import { FilledDocumentDetailView } from "../../generated/io-sign-api/FilledDocumentDetailView";
@@ -105,4 +106,8 @@ export default class IoSignController {
         TE.toUnion
       )()
     );
+
+  public readonly getQtspClausesMetadata = (): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<QtspClausesMetadataDetailView>
+  > => this.ioSignService.getQtspClausesMetadata();
 }

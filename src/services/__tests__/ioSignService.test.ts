@@ -7,6 +7,7 @@ import IoSignService from "../ioSignService";
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetInfo = jest.fn();
+const mockGetQtspClauses = jest.fn();
 
 const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
@@ -34,10 +35,32 @@ mockGetSignerByFiscalCode.mockImplementation(() =>
   })
 );
 
+mockGetQtspClauses.mockImplementation(() =>
+  t.success({
+    status: 200,
+    value: {
+      clauses: [
+        {
+          text: "(1) Io sottoscritto/a dichiaro quanto...."
+        },
+        {
+          text: "(2) Io sottoscritto/a accetto..."
+        }
+      ],
+      document_url: "https://mock.com/modulo.pdf",
+      privacy_url: "https://mock.com/privacy.pdf",
+      terms_and_conditions_url: "https://mock.com/tos.pdf",
+      privacy_text: "[PLACE HOLDER]",
+      nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe=="
+    }
+  })
+);
+
 const api = {
   createFilledDocument: mockCreateFilledDocument,
   getSignerByFiscalCode: mockGetSignerByFiscalCode,
-  getInfo: mockGetInfo
+  getInfo: mockGetInfo,
+  getQtspClausesMetadata: mockGetQtspClauses
 } as ReturnType<IoSignAPIClient>;
 
 describe("IoSignService#getSignerByFiscalCode", () => {
@@ -273,6 +296,65 @@ describe("IoSignService#createFilledDocument", () => {
       mockedUser.name as NonEmptyString,
       fakeSignerId
     );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("IoSignService#getQtspClausesMetadata", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new IoSignService(api);
+
+    await service.getQtspClausesMetadata();
+
+    expect(mockGetQtspClauses).toHaveBeenCalledWith({});
+  });
+
+  it("should handle a success response", async () => {
+    const service = new IoSignService(api);
+
+    const res = await service.getQtspClausesMetadata();
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+    mockGetQtspClauses.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+    const service = new IoSignService(api);
+    const res = await service.getQtspClausesMetadata();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetQtspClauses.mockImplementationOnce(() => t.success({ status: 123 }));
+    const service = new IoSignService(api);
+    const res = await service.getQtspClausesMetadata();
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetQtspClauses.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new IoSignService(api);
+    const res = await service.getQtspClausesMetadata();
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
