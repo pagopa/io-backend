@@ -19,6 +19,11 @@ type MessageContent {
 
 type Message {
   id: ID!
+  fiscal_code: FiscalCode!
+  created_at: String!
+  category: String!    
+  is_read: Boolean
+  is_archived: Boolean
   content: MessageContent
   service: Service
 }
@@ -48,7 +53,11 @@ union ServiceMetadata = StandardServiceMetadata | SpecialServiceMetadata
 
 type Service {
   service_id: ID!
-  service_metadata: ServiceMetadata!
+  service_metadata: ServiceMetadata
+  service_name: String!
+  organization_name: String!
+  department_name: String
+  organization_fiscal_code: String
 }
 
 

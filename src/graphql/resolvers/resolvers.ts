@@ -164,12 +164,7 @@ export const resolvers: Resolvers<ContextWithUser> = {
         ),
         TE.chain(r =>
           r.kind === "IResponseSuccessJson"
-            ? TE.of(
-                r.value.items.map(i => ({
-                  id: i.id,
-                  sender_service_id: i.sender_service_id
-                }))
-              )
+            ? TE.of(r.value.items)
             : TE.left(`Error from message service: ${r.detail}`)
         ),
         TE.getOrElseW(_ => {
