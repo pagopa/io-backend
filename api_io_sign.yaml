@@ -11,7 +11,7 @@ security:
 paths:
   "/qtsp/clauses":
     post:
-      operationId: getQtspCluasesMetadata
+      operationId: getQtspClausesMetadata
       summary: Get the qtsp clauses
       responses:
         "200":
