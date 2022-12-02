@@ -113,6 +113,7 @@ export default class IoSignService {
             );
           case 500:
             return ResponseErrorInternal(
+              // TODO: The response generated in case of Error is undefined and not a ProblemJson. [SFEQS-1199]
               pipe(
                 response.value,
                 ProblemJson.decode,
@@ -140,6 +141,7 @@ export default class IoSignService {
             return ResponseSuccessJson(response.value);
           case 500:
             return ResponseErrorInternal(
+              // TODO: The response generated in case of Error is undefined and not a ProblemJson. [SFEQS-1199]
               pipe(
                 response.value,
                 ProblemJson.decode,
