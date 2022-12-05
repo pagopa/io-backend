@@ -142,7 +142,8 @@ export default class IoSignService {
             return ResponseSuccessJson(response.value);
           case 500:
             return ResponseErrorInternal(
-              // TODO: The response generated in case of Error is undefined and not a ProblemJson. [SFEQS-1199]
+              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section. 
+              // Now, it generates incorrect output whenever the http status is 500. [SFEQS-1199]
               pipe(
                 response.value,
                 ProblemJson.decode,
