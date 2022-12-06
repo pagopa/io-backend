@@ -308,18 +308,12 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     jest.clearAllMocks();
   });
 
-  it("should make the correct api call", async () => {
-    const service = new IoSignService(api);
-
-    await service.getQtspClausesMetadata();
-
-    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({});
-  });
-
-  it("should handle a success response", async () => {
+  it("should make the correct api call and handle a success response", async () => {
     const service = new IoSignService(api);
 
     const res = await service.getQtspClausesMetadata();
+
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({});
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
