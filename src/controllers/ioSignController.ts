@@ -20,7 +20,7 @@ import {
 
 import IoSignService from "src/services/ioSignService";
 import { pipe } from "fp-ts/lib/function";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 
@@ -28,15 +28,18 @@ import { FilledDocumentDetailView } from "../../generated/io-sign-api/FilledDocu
 
 import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
 
-import { User, withUserFromRequest } from "../types/user";
+import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
 
 import { profileWithEmailValidatedOrError } from "../utils/profile";
 
-export const retrieveSignerId = (ioSignService: IoSignService, user: User) =>
+export const retrieveSignerId = (
+  ioSignService: IoSignService,
+  fiscalCode: FiscalCode
+) =>
   pipe(
     TE.tryCatch(
-      () => ioSignService.getSignerByFiscalCode(user.fiscal_code),
+      () => ioSignService.getSignerByFiscalCode(fiscalCode),
       E.toError
     ),
     TE.chain(
@@ -80,7 +83,7 @@ export default class IoSignController {
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
-                retrieveSignerId(this.ioSignService, user),
+                retrieveSignerId(this.ioSignService, user.fiscal_code),
                 TE.mapLeft(e =>
                   ResponseErrorInternal(
                     `Error retrieving the signer id for this users | ${e.message}`
