@@ -46,9 +46,13 @@ export const retrieveSignerId = (
         (r): r is IResponseSuccessJson<SignerDetailView> =>
           r.kind === "IResponseSuccessJson",
         e =>
-          new Error(
-            `Your profile is not enabled to use this service | ${e.detail}`
-          )
+          e.kind === "IResponseErrorNotFound"
+            ? new Error(
+                `Your profile is not enabled to use this service. | ${e.detail}`
+              )
+            : new Error(
+                `An error occurred while retrieving the signer id. | ${e.detail}`
+              )
       )
     )
   );
