@@ -18,9 +18,13 @@ import {
 import { IoSignAPIClient } from "src/clients/io-sign";
 import { SignerDetailView } from "generated/io-sign-api/SignerDetailView";
 import { FilledDocumentDetailView } from "generated/io-sign-api/FilledDocumentDetailView";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "@pagopa/ts-commons/lib/strings";
 import { Id } from "generated/io-sign-api/Id";
-import { User } from "../types/user";
+
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -36,7 +40,7 @@ export default class IoSignService {
    * Get the Signer id related to the user.
    */
   public readonly getSignerByFiscalCode = (
-    user: User
+    fiscalCode: FiscalCode
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -46,7 +50,7 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignerByFiscalCode({
-        body: { fiscal_code: user.fiscal_code }
+        body: { fiscal_code: fiscalCode }
       });
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {

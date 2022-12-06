@@ -1,4 +1,7 @@
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import {
+  ResponseErrorInternal,
+  ResponseSuccessJson
+} from "@pagopa/ts-commons/lib/responses";
 
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -139,5 +142,55 @@ describe("IoSignController#createFilledDocument", () => {
     expect(mockCreateFilledDocument).not.toBeCalled();
     // http output is correct
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should return an error if the signer is not found", async () => {
+    mockGetSignerByFiscalCode.mockReturnValue(
+      Promise.reject(ResponseErrorInternal("Signer not found"))
+    );
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
+    );
+
+    const req = {
+      ...mockReq({
+        body: { document_url: documentToFill }
+      }),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    const response = await controller.createFilledDocument(req);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        kind: "IResponseErrorInternal"
+      })
+    );
+  });
+
+  it("should return an error if the profile is not found", async () => {
+    mockGetSignerByFiscalCode.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(signerDetailMock))
+    );
+    mockGetProfile.mockReturnValue(
+      Promise.reject(ResponseErrorInternal("Profile not found"))
+    );
+
+    const req = {
+      ...mockReq({
+        body: { document_url: documentToFill }
+      }),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    const response = await controller.createFilledDocument(req);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        kind: "IResponseErrorInternal"
+      })
+    );
   });
 });

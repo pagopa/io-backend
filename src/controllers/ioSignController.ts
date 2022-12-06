@@ -35,12 +35,18 @@ import { profileWithEmailValidatedOrError } from "../utils/profile";
 
 export const retrieveSignerId = (ioSignService: IoSignService, user: User) =>
   pipe(
-    TE.tryCatch(() => ioSignService.getSignerByFiscalCode(user), E.toError),
+    TE.tryCatch(
+      () => ioSignService.getSignerByFiscalCode(user.fiscal_code),
+      E.toError
+    ),
     TE.chain(
       TE.fromPredicate(
         (r): r is IResponseSuccessJson<SignerDetailView> =>
           r.kind === "IResponseSuccessJson",
-        e => new Error(`Error retrieving signer id | ${e.detail}`)
+        e =>
+          new Error(
+            `Your profile is not enabled to use this service | ${e.detail}`
+          )
       )
     )
   );

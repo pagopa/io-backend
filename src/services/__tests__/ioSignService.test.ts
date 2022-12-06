@@ -7,6 +7,7 @@ import IoSignService from "../ioSignService";
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetInfo = jest.fn();
+const mockGetQtspClausesMetadata = jest.fn();
 
 const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
@@ -37,7 +38,8 @@ mockGetSignerByFiscalCode.mockImplementation(() =>
 const api = {
   createFilledDocument: mockCreateFilledDocument,
   getSignerByFiscalCode: mockGetSignerByFiscalCode,
-  getInfo: mockGetInfo
+  getInfo: mockGetInfo,
+  getQtspClausesMetadata: mockGetQtspClausesMetadata
 } as ReturnType<IoSignAPIClient>;
 
 describe("IoSignService#getSignerByFiscalCode", () => {
@@ -48,7 +50,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
   it("should make the correct api call", async () => {
     const service = new IoSignService(api);
 
-    await service.getSignerByFiscalCode(mockedUser);
+    await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(mockGetSignerByFiscalCode).toHaveBeenCalledWith({
       body: {
@@ -60,7 +62,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
   it("should handle a success response", async () => {
     const service = new IoSignService(api);
 
-    const res = await service.getSignerByFiscalCode(mockedUser);
+    const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
@@ -74,7 +76,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
 
     const service = new IoSignService(api);
 
-    const res = await service.getSignerByFiscalCode(mockedUser);
+    const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorValidation"
@@ -88,7 +90,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
 
     const service = new IoSignService(api);
 
-    const res = await service.getSignerByFiscalCode(mockedUser);
+    const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorNotFound"
@@ -103,7 +105,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
 
     const service = new IoSignService(api);
 
-    const res = await service.getSignerByFiscalCode(mockedUser);
+    const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -116,7 +118,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     );
     const service = new IoSignService(api);
 
-    const res = await service.getSignerByFiscalCode(mockedUser);
+    const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -129,7 +131,7 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     });
     const service = new IoSignService(api);
 
-    const res = await service.getSignerByFiscalCode(mockedUser);
+    const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
