@@ -3,7 +3,6 @@
  */
 
 import {
-  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -45,7 +44,6 @@ export default class IoSignService {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<SignerDetailView>
   > =>
     withCatchAsInternalError(async () => {
@@ -85,7 +83,6 @@ export default class IoSignService {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<FilledDocumentDetailView>
   > =>
     withCatchAsInternalError(async () => {

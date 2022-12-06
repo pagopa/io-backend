@@ -9,7 +9,6 @@ import * as E from "fp-ts/Either";
 import { sequenceS } from "fp-ts/lib/Apply";
 
 import {
-  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -59,13 +58,16 @@ export default class IoSignController {
     private readonly profileService: ProfileService
   ) {}
 
+  /**
+   * Given the url of a PDF document with empty fields,
+   * fill in the PDF form and return the url of the filled document.
+   */
   public readonly createFilledDocument = (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<FilledDocumentDetailView>
   > =>
     withUserFromRequest(req, async user =>
