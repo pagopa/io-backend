@@ -3,7 +3,6 @@
  */
 
 import {
-  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -18,12 +17,17 @@ import {
 import { IoSignAPIClient } from "src/clients/io-sign";
 import { SignerDetailView } from "generated/io-sign-api/SignerDetailView";
 import { FilledDocumentDetailView } from "generated/io-sign-api/FilledDocumentDetailView";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "@pagopa/ts-commons/lib/strings";
 import { Id } from "generated/io-sign-api/Id";
+
 import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClausesMetadataDetailView";
 import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
-import { User } from "../types/user";
+
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -39,17 +43,16 @@ export default class IoSignService {
    * Get the Signer id related to the user.
    */
   public readonly getSignerByFiscalCode = (
-    user: User
+    fiscalCode: FiscalCode
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<SignerDetailView>
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.getSignerByFiscalCode({
-        body: { fiscal_code: user.fiscal_code }
+        body: { fiscal_code: fiscalCode }
       });
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
@@ -84,7 +87,6 @@ export default class IoSignService {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<FilledDocumentDetailView>
   > =>
     withCatchAsInternalError(async () => {
@@ -113,8 +115,8 @@ export default class IoSignService {
             );
           case 500:
             return ResponseErrorInternal(
-              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section. 
-              // Now, it generates incorrect output whenever the http status is 500. 
+              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section.
+              // Now, it generates incorrect output whenever the http status is 500.
               pipe(
                 response.value,
                 ProblemJson.decode,
@@ -142,7 +144,7 @@ export default class IoSignService {
             return ResponseSuccessJson(response.value);
           case 500:
             return ResponseErrorInternal(
-              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section. 
+              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section.
               // Now, it generates incorrect output whenever the http status is 500. [SFEQS-1199]
               pipe(
                 response.value,
