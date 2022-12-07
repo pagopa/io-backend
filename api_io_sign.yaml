@@ -20,6 +20,10 @@ paths:
             $ref: "#/definitions/QtspClausesMetadataDetailView"
         "401":
           description: Bearer token null or expired.
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
         "500":
           description: Service unavailable.
           schema:
