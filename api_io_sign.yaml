@@ -49,6 +49,10 @@ paths:
           description: Bearer token null or expired.
         "404":
           description: Resource not found.
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
         "500":
           description: Service unavailable.
           schema:
