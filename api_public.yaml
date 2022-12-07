@@ -57,7 +57,7 @@ paths:
       operationId: login
       summary: Login SPID/CIE
       description: Login with SPID or CIE for IO APP
-      parameters: 
+      parameters:
         - $ref: "#/parameters/EntityId"
         - $ref: "#/parameters/AuthLevel"
         - $ref: "#/parameters/JwkPubKeyToken"
@@ -80,6 +80,24 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "503":
           description: Service unavailable
+  "/assertionConsumerService":
+    post:
+      operationId: acs
+      summary: ACS step of Login SPID/CIE
+      description: Login with SPID or CIE for IO APP
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/SAMLResponse"
+      responses:
+        "200":
+          description: Access token
+        "301":
+          description: Redirect to home page
+          headers:
+            Location:
+              type: string
 
 definitions:
   FiscalCode:
@@ -130,6 +148,10 @@ definitions:
         minLength: 1
     required:
       - token
+  SAMLResponse:
+    type: string
+    description: A string representation of a signed SPID/CIE response
+    minLength: 1
 consumes:
   - application/json
 produces:

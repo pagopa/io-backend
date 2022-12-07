@@ -42,7 +42,7 @@ dist
 local.*
 
 # Exclude .npmrc file
-.npmrc 
+.npmrc
 
 # Exclude Codetour plugin folder
 .tours
