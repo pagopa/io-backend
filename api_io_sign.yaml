@@ -10,7 +10,7 @@ security:
   - Bearer: []
 paths:
   "/qtsp/clauses":
-    post:
+    get:
       operationId: getQtspClausesMetadata
       summary: Get the qtsp clauses
       responses:
