@@ -12,12 +12,7 @@ terraform {
     }
   }
 
-  backend "azurerm" {
-    resource_group_name  = "terraform-state-rg"
-    storage_account_name = "tfappcommon"
-    container_name       = "terraform-state"
-    key                  = "github-pagopa-authorization.tfstate"
-  }
+  backend "azurerm" {}
 }
 
 provider "azurerm" {
