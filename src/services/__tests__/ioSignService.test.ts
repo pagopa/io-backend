@@ -143,7 +143,8 @@ describe("IoSignService#getSignerByFiscalCode", () => {
     const res = await service.getSignerByFiscalCode(mockedUser.fiscal_code);
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
+      detail: "Internal server error: unhandled API response status [123]"
     });
   });
 
@@ -280,7 +281,8 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
+      detail: "Internal server error: unhandled API response status [123]"
     });
   });
 

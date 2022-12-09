@@ -30,7 +30,7 @@ import {
 import { Id } from "generated/io-sign-api/Id";
 
 import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClausesMetadataDetailView";
-import { pipe } from "fp-ts/lib/function";
+
 import * as E from "fp-ts/Either";
 
 import {
