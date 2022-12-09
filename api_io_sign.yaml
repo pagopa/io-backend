@@ -34,8 +34,7 @@ paths:
       operationId: createFilledDocument
       summary: Create a filled document for QTSP.
       description: |
-        The caller of this API is expected to poll on it since the endpoint
-        will return 404 until the ToS document gets processed.
+        This endpoint returns a url that the client should poll until the resource has been created.
       parameters:
         - in: body
           name: documentToFill
@@ -47,6 +46,12 @@ paths:
           description: Filled document created
           schema:
             $ref: "#/definitions/FilledDocumentDetailView"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the created document.
         "400":
           description: Validation error.
         "401":

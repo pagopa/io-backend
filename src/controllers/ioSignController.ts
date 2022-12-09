@@ -13,6 +13,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  IResponseSuccessRedirectToResource,
   ResponseErrorInternal,
   ResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
@@ -73,7 +74,10 @@ export default class IoSignController {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseSuccessJson<FilledDocumentDetailView>
+    | IResponseSuccessRedirectToResource<
+        FilledDocumentDetailView,
+        FilledDocumentDetailView
+      >
   > =>
     withUserFromRequest(req, async user =>
       pipe(

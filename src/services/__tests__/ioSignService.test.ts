@@ -20,6 +20,7 @@ mockGetInfo.mockImplementation(() =>
 mockCreateFilledDocument.mockImplementation(() =>
   t.success({
     status: 201,
+    headers: { Location: "http://mockdocument.com/doc.pdf" },
     value: {
       filled_document_url: "http://mockdocument.com/doc.pdf"
     }
@@ -187,7 +188,7 @@ describe("IoSignService#createFilledDocument", () => {
     });
   });
 
-  it("should handle a success response", async () => {
+  it("should handle a success redirect to resource response", async () => {
     const service = new IoSignService(api);
 
     const res = await service.createFilledDocument(
@@ -199,7 +200,7 @@ describe("IoSignService#createFilledDocument", () => {
     );
 
     expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
+      kind: "IResponseSuccessRedirectToResource"
     });
   });
 
