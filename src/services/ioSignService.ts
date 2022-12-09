@@ -40,6 +40,7 @@ import {
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
+import { SignatureRequestDetailView } from "generated/io-sign-api/SignatureRequestDetailView";
 const resourcesNotFound = "Resources not found";
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
@@ -78,6 +79,36 @@ export default class IoSignService {
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  public readonly getSignatureRequest = (
+    id: Id,
+    signerId: Id
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestDetailView>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioSignApiClient.getSignatureRequestById({
+        id,
+        "x-iosign-signer-id": signerId
+      });
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              resourcesNotFound,
+              "The signature request could not be found."
+            );
+          case 403:
+            return ResponseErrorNotFound403(
+              "The user associated with this profile could not be found."
+            );
         }
       });
     });

@@ -33,6 +33,8 @@ import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
 
 import { profileWithEmailValidatedOrError } from "../utils/profile";
+import { SignatureRequestDetailView } from "generated/io-sign-api/SignatureRequestDetailView";
+import { Id } from "generated/io-sign-api/Id";
 
 export const retrieveSignerId = (
   ioSignService: IoSignService,
@@ -97,7 +99,7 @@ export default class IoSignController {
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
                 TE.mapLeft(e =>
                   ResponseErrorInternal(
-                    `Error retrieving the signer id for this users | ${e.message}`
+                    `Error retrieving the signer id for this user | ${e.message}`
                   )
                 )
               ),
@@ -129,4 +131,40 @@ export default class IoSignController {
   public readonly getQtspClausesMetadata = (): Promise<
     IResponseErrorInternal | IResponseSuccessJson<QtspClausesMetadataDetailView>
   > => this.ioSignService.getQtspClausesMetadata();
+
+  public readonly getSignatureRequest = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseErrorValidation
+    | IResponseSuccessJson<SignatureRequestDetailView>
+  > =>
+    withUserFromRequest(req, async user =>
+      pipe(
+        sequenceS(TE.ApplyPar)({
+          signerId: pipe(
+            retrieveSignerId(this.ioSignService, user.fiscal_code),
+            TE.mapLeft(e =>
+              ResponseErrorInternal(
+                `Error retrieving the signer id for this user | ${e.message}`
+              )
+            ),
+            TE.map(response => response.value.id)
+          ),
+          signatureRequestId: pipe(
+            req.params.id,
+            Id.decode,
+            TE.fromEither,
+            TE.mapLeft(_ =>
+              ResponseErrorInternal(`Error validating the signature request id`)
+            )
+          )
+        }),
+        TE.map(({ signerId, signatureRequestId: id }) =>
+          this.ioSignService.getSignatureRequest(id, signerId)
+        ),
+        TE.toUnion
+      )()
+    );
 }
