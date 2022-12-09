@@ -7,12 +7,17 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessJson,
+  IResponseSuccessRedirectToResource,
   ProblemJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
+  ResponseSuccessRedirectToResource
 } from "@pagopa/ts-commons/lib/responses";
+
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 
 import { IoSignAPIClient } from "src/clients/io-sign";
 import { SignerDetailView } from "generated/io-sign-api/SignerDetailView";
@@ -83,7 +88,10 @@ export default class IoSignService {
     | IResponseErrorInternal
     | IResponseErrorValidation
     | IResponseErrorNotFound
-    | IResponseSuccessJson<FilledDocumentDetailView>
+    | IResponseSuccessRedirectToResource<
+        FilledDocumentDetailView,
+        FilledDocumentDetailView
+      >
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.createFilledDocument({
@@ -98,7 +106,15 @@ export default class IoSignService {
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 201:
-            return ResponseSuccessJson(response.value);
+            return ResponseSuccessRedirectToResource(
+              response.value,
+              pipe(
+                response.headers.Location,
+                O.fromNullable,
+                O.getOrElse(() => response.value.filled_document_url)
+              ),
+              response.value
+            );
           case 400:
             return ResponseErrorValidation(
               "Invalid request",

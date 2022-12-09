@@ -26,6 +26,12 @@ paths:
           description: Filled document created
           schema:
             $ref: "#/definitions/FilledDocumentDetailView"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the created document.
         "400":
           description: Validation error.
         "401":
