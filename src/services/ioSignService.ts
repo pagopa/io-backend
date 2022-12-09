@@ -29,6 +29,10 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { Id } from "generated/io-sign-api/Id";
 
+import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClausesMetadataDetailView";
+
+import * as E from "fp-ts/Either";
+
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -36,7 +40,7 @@ import {
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
-
+const resourcesNotFound = "Resources not found";
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
 
@@ -122,12 +126,48 @@ export default class IoSignService {
             );
           case 404:
             return ResponseErrorNotFound(
-              "Resources not found",
+              resourcesNotFound,
               "The user associated with this profile could not be found."
             );
           case 500:
             return ResponseErrorInternal(
-              readableProblem((response.value as unknown) as ProblemJson)
+              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section.
+              // Now, it generates incorrect output whenever the http status is 500.
+              pipe(
+                response.value,
+                ProblemJson.decode,
+                E.map(readableProblem),
+                E.getOrElse(() => "Internal server error!")
+              )
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get the QTSP clauses
+   */
+  public readonly getQtspClausesMetadata = (): Promise<
+    IResponseErrorInternal | IResponseSuccessJson<QtspClausesMetadataDetailView>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioSignApiClient.getQtspClausesMetadata({});
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 500:
+            return ResponseErrorInternal(
+              // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section.
+              // Now, it generates incorrect output whenever the http status is 500. [SFEQS-1199]
+              pipe(
+                response.value,
+                ProblemJson.decode,
+                E.map(readableProblem),
+                E.getOrElse(() => "Internal server error!")
+              )
             );
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);

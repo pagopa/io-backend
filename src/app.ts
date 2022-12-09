@@ -1239,6 +1239,12 @@ function registerIoSignAPIRoutes(
     bearerSessionTokenAuth,
     toExpressHandler(ioSignController.createFilledDocument, ioSignController)
   );
+
+  app.get(
+    `${basePath}/qtsp/clauses`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioSignController.getQtspClausesMetadata, ioSignController)
+  );
 }
 
 function registerCgnOperatorSearchAPIRoutes(
