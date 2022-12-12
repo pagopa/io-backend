@@ -33,6 +33,7 @@ import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClauses
 
 import * as E from "fp-ts/Either";
 
+import { SignatureRequestDetailView } from "generated/io-sign-api/SignatureRequestDetailView";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -40,8 +41,9 @@ import {
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
-import { SignatureRequestDetailView } from "generated/io-sign-api/SignatureRequestDetailView";
 const resourcesNotFound = "Resources not found";
+const userNotFound =
+  "The user associated with this profile could not be found.";
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
 
@@ -70,9 +72,7 @@ export default class IoSignService {
               `An error occurred while validating the request body | ${response.value}`
             );
           case 403:
-            return ResponseErrorNotFound403(
-              "The user associated with this profile could not be found."
-            );
+            return ResponseErrorNotFound403(userNotFound);
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
@@ -106,9 +106,9 @@ export default class IoSignService {
               "The signature request could not be found."
             );
           case 403:
-            return ResponseErrorNotFound403(
-              "The user associated with this profile could not be found."
-            );
+            return ResponseErrorNotFound403(userNotFound);
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
         }
       });
     });
@@ -156,10 +156,7 @@ export default class IoSignService {
               `An error occurred while validating the request body | ${response.value}`
             );
           case 404:
-            return ResponseErrorNotFound(
-              resourcesNotFound,
-              "The user associated with this profile could not be found."
-            );
+            return ResponseErrorNotFound(resourcesNotFound, userNotFound);
           case 500:
             return ResponseErrorInternal(
               // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section.

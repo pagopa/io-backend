@@ -23,6 +23,8 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { QtspClausesMetadataDetailView } from "generated/io-sign/QtspClausesMetadataDetailView";
+import { SignatureRequestDetailView } from "generated/io-sign-api/SignatureRequestDetailView";
+import { Id } from "generated/io-sign-api/Id";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
@@ -33,8 +35,6 @@ import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
 
 import { profileWithEmailValidatedOrError } from "../utils/profile";
-import { SignatureRequestDetailView } from "generated/io-sign-api/SignatureRequestDetailView";
-import { Id } from "generated/io-sign-api/Id";
 
 export const retrieveSignerId = (
   ioSignService: IoSignService,
@@ -60,6 +60,12 @@ export const retrieveSignerId = (
       )
     )
   );
+
+const toErrorRetrievingTheSignerId = (e: Error) =>
+  ResponseErrorInternal(
+    `Error retrieving the signer id for this user | ${e.message}`
+  );
+
 export default class IoSignController {
   constructor(
     private readonly ioSignService: IoSignService,
@@ -97,11 +103,7 @@ export default class IoSignController {
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(e =>
-                  ResponseErrorInternal(
-                    `Error retrieving the signer id for this user | ${e.message}`
-                  )
-                )
+                TE.mapLeft(toErrorRetrievingTheSignerId)
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
@@ -143,15 +145,6 @@ export default class IoSignController {
     withUserFromRequest(req, async user =>
       pipe(
         sequenceS(TE.ApplyPar)({
-          signerId: pipe(
-            retrieveSignerId(this.ioSignService, user.fiscal_code),
-            TE.mapLeft(e =>
-              ResponseErrorInternal(
-                `Error retrieving the signer id for this user | ${e.message}`
-              )
-            ),
-            TE.map(response => response.value.id)
-          ),
           signatureRequestId: pipe(
             req.params.id,
             Id.decode,
@@ -159,6 +152,11 @@ export default class IoSignController {
             TE.mapLeft(_ =>
               ResponseErrorInternal(`Error validating the signature request id`)
             )
+          ),
+          signerId: pipe(
+            retrieveSignerId(this.ioSignService, user.fiscal_code),
+            TE.mapLeft(toErrorRetrievingTheSignerId),
+            TE.map(response => response.value.id)
           )
         }),
         TE.map(({ signerId, signatureRequestId: id }) =>
