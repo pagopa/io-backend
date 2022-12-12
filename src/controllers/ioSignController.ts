@@ -22,17 +22,29 @@ import IoSignService from "src/services/ioSignService";
 import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { QtspClausesMetadataDetailView } from "generated/io-sign/QtspClausesMetadataDetailView";
+import { Errors } from "io-ts";
+import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
+import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
-
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
+import { DocumentToSign as DocumentToSignApiModel } from "../../generated/io-sign-api/DocumentToSign";
 
 import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
+import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
 
 import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
 
 import { profileWithEmailValidatedOrError } from "../utils/profile";
+
+const responseErrorValidation = (errs: Errors) =>
+  ResponseErrorValidation(
+    "Bad request",
+    errorsToReadableMessages(errs).join(" / ")
+  );
+
+const responseErrorInternal = (reason: string) => (e: Error) =>
+  ResponseErrorInternal(`${reason} | ${e.message}`);
 
 export const retrieveSignerId = (
   ioSignService: IoSignService,
@@ -83,29 +95,24 @@ export default class IoSignController {
       pipe(
         req.body,
         CreateFilledDocument.decode,
-        E.mapLeft(errs =>
-          ResponseErrorValidation(
-            "Bad request",
-            errorsToReadableMessages(errs).join(" / ")
-          )
-        ),
+        E.mapLeft(responseErrorValidation),
         TE.fromEither,
         TE.chainW(body =>
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(e =>
-                  ResponseErrorInternal(
-                    `Error retrieving the signer id for this users | ${e.message}`
+                TE.mapLeft(
+                  responseErrorInternal(
+                    "Error retrieving the signer id for this users"
                   )
                 )
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
-                TE.mapLeft(e =>
-                  ResponseErrorInternal(
-                    `Error retrieving a user profile with validated email address | ${e.message}`
+                TE.mapLeft(
+                  responseErrorInternal(
+                    "Error retrieving a user profile with validated email address"
                   )
                 )
               )
@@ -117,6 +124,61 @@ export default class IoSignController {
                 userProfile.email,
                 user.family_name as NonEmptyString,
                 user.name as NonEmptyString,
+                signerId.value.id
+              )
+            )
+          )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Create a Signature from a Signature Request
+   */
+  public readonly createSignature = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureDetailView>
+  > =>
+    withUserFromRequest(req, async user =>
+      pipe(
+        req.body,
+        CreateSignatureBody.decode,
+        E.mapLeft(responseErrorValidation),
+        TE.fromEither,
+        TE.chainW(body =>
+          pipe(
+            sequenceS(TE.ApplySeq)({
+              signerId: pipe(
+                retrieveSignerId(this.ioSignService, user.fiscal_code),
+                TE.mapLeft(
+                  responseErrorInternal(
+                    "Error retrieving the signer id for this users"
+                  )
+                )
+              ),
+              userProfile: pipe(
+                profileWithEmailValidatedOrError(this.profileService, user),
+                TE.mapLeft(
+                  responseErrorInternal(
+                    "Error retrieving a user profile with validated email address"
+                  )
+                )
+              )
+            }),
+            TE.map(({ userProfile, signerId }) =>
+              this.ioSignService.createSignature(
+                body.signature_request_id,
+                userProfile.email,
+                // this cast is necessary because swagger 2.0 does not support `oneOf`
+                (body.documents_to_sign as unknown) as ReadonlyArray<
+                  DocumentToSignApiModel
+                >,
+                body.qtsp_clauses,
                 signerId.value.id
               )
             )
