@@ -18,6 +18,12 @@ import {
 } from "../../__mocks__/user_mock";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { NonEmptyString } from "io-ts-types";
+import {
+  SignatureRequestDetailView,
+  StatusEnum
+} from "../../../generated/io-sign-api/SignatureRequestDetailView";
+
+import { Id } from "../../../generated/io-sign-api/Id";
 
 const API_KEY = "";
 const API_URL = "";
@@ -33,13 +39,15 @@ const badRequestErrorResponse = {
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetQtspClausesMetadata = jest.fn();
+const mockGetSignatureRequest = jest.fn();
 
 jest.mock("../../services/ioSignService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       createFilledDocument: mockCreateFilledDocument,
       getSignerByFiscalCode: mockGetSignerByFiscalCode,
-      getQtspClausesMetadata: mockGetQtspClausesMetadata
+      getQtspClausesMetadata: mockGetQtspClausesMetadata,
+      getSignatureRequest: mockGetSignatureRequest
     }))
   };
 });
@@ -68,6 +76,28 @@ const qtspClausesMetadata = {
   terms_and_conditions_url: "https://mock.com/tos.pdf",
   privacy_text: "[PLACE HOLDER]",
   nonce: "acSPlAeZY9TM0gdzJcl9+Cp3NxlUTPyk/+B9CqHsufWQmib+QHpe=="
+};
+
+const signatureRequest: SignatureRequestDetailView = {
+  id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
+  status: StatusEnum.WAIT_FOR_SIGNATURE,
+  signer_id: "37862aff-3436-4487-862b-fd9e7d2a114e" as Id,
+  dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
+  documents: [
+    {
+      id: "01GKVMRN42JXW34AN6MRJ6843E" as Id,
+      created_at: new Date(),
+      updated_at: new Date(),
+      url: "https://my-document.url/document.pdf",
+      metadata: {
+        title: "My document title",
+        signature_fields: []
+      }
+    }
+  ],
+  created_at: new Date(),
+  updated_at: new Date(),
+  expires_at: new Date()
 };
 
 const client = IoSignAPIClient(API_KEY, API_URL, API_BASE_PATH);
@@ -236,6 +266,48 @@ describe("IoSignController#getQtspClausesMetadata", () => {
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: qtspClausesMetadata
+    });
+  });
+
+  describe("IoSignController#getSignatureRequest", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should make the correct service method call", async () => {
+      const controller = new IoSignController(ioSignService, profileService);
+      const req = {
+        ...mockReq({
+          params: {
+            id: signatureRequest.id
+          }
+        }),
+        user: mockedUser
+      };
+      await controller.getSignatureRequest(req);
+      expect(mockGetSignatureRequest).toHaveBeenCalledWith();
+    });
+
+    it("should call getSignatureRequest method on the IoSignService with valid values", async () => {
+      mockGetSignatureRequest.mockReturnValue(
+        Promise.resolve(ResponseSuccessJson(signatureRequest))
+      );
+      const controller = new IoSignController(ioSignService, profileService);
+      const req = {
+        ...mockReq({
+          params: {
+            id: signatureRequest.id
+          }
+        }),
+        user: mockedUser
+      };
+      const response = await controller.getSignatureRequest(req);
+
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        kind: "IResponseSuccessJson",
+        value: signatureRequest
+      });
     });
   });
 });
