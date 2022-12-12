@@ -211,6 +211,11 @@ Those are all Environment variables needed by the application:
 | PN_API_KEY_UAT                         | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for UAT environment         | string  |
 | PN_API_URL                             | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for production         | string  |
 | PN_API_URL_UAT                         | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for UAT environment    | string  |
+| FF_IO_SIGN_ENABLED                     | When is `true` (namely `1`) enables IO SIGN API to be registered into backend app | boolean |
+| IO_SIGN_API_BASE_PATH                  | The root path for the backend io-sign api endpoints                               | string  |
+| IO_SIGN_API_KEY                        | The key used to authenticate to the io-func-sign-user API                         | string  |
+| IO_SIGN_API_URL                        | The io-func-sign-user  URL                                                        | string  |
+
 
 
 

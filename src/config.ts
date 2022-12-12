@@ -54,6 +54,7 @@ import { ognlTypeFor } from "./utils/ognl";
 import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 import { PNClientFactory } from "./clients/pn-clients";
+import { IoSignAPIClient } from "./clients/io-sign";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -426,6 +427,16 @@ export const BONUS_API_CLIENT = BonusAPIClient(
   httpOrHttpsApiFetch
 );
 
+export const IO_SIGN_API_KEY = getRequiredENVVar("IO_SIGN_API_KEY");
+export const IO_SIGN_API_URL = getRequiredENVVar("IO_SIGN_API_URL");
+export const IO_SIGN_API_BASE_PATH = getRequiredENVVar("IO_SIGN_API_BASE_PATH");
+export const IO_SIGN_API_CLIENT = IoSignAPIClient(
+  IO_SIGN_API_KEY,
+  IO_SIGN_API_URL,
+  IO_SIGN_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+
 export const CGN_API_KEY = getRequiredENVVar("CGN_API_KEY");
 export const CGN_API_URL = getRequiredENVVar("CGN_API_URL");
 export const CGN_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
@@ -670,6 +681,7 @@ export const TEST_LOGIN_PASSWORD = NonEmptyString.decode(
 // Feature flags
 export const FF_BONUS_ENABLED = process.env.FF_BONUS_ENABLED === "1";
 export const FF_CGN_ENABLED = process.env.FF_CGN_ENABLED === "1";
+export const FF_IO_SIGN_ENABLED = process.env.FF_IO_SIGN_ENABLED === "1";
 export const FF_EUCOVIDCERT_ENABLED =
   process.env.FF_EUCOVIDCERT_ENABLED === "1";
 

@@ -1,0 +1,145 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: IO Sign - Backend API
+host: api-app.io.pagopa.it
+basePath: /api/v1/sign
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/qtsp/clauses":
+    get:
+      operationId: getQtspClausesMetadata
+      summary: Get the qtsp clauses
+      responses:
+        "200":
+          description: QTSP clauses
+          schema:
+            $ref: "#/definitions/QtspClausesMetadataDetailView"
+        "401":
+          description: Bearer token null or expired.
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/qtsp/clauses/filled_document":
+    post:
+      operationId: createFilledDocument
+      summary: Create a filled document for QTSP.
+      description: |
+        This endpoint returns a url that the client should poll until the resource has been created.
+      parameters:
+        - in: body
+          name: documentToFill
+          required: true
+          schema:
+            $ref: '#/definitions/CreateFilledDocument'
+      responses:
+        "201":
+          description: Filled document created
+          schema:
+            $ref: "#/definitions/FilledDocumentDetailView"
+          headers:
+            Location:
+              type: string
+              description: |-
+                Location (URL) of created request resource.
+                A GET request to this URL returns the created document.
+        "400":
+          description: Validation error.
+        "401":
+          description: Bearer token null or expired.
+        "404":
+          description: Resource not found.
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+
+definitions:
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/Timestamp"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/FiscalCode"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+
+  CreateFilledDocument:
+    type: object
+    properties:
+      document_url:
+        type: string
+        format: url
+        minLength: 1
+    required:
+      - document_url
+
+  FilledDocumentDetailView:
+    type: object
+    properties:
+      filled_document_url:
+        type: string
+        format: url
+    required:
+      - filled_document_url
+
+  QtspClause:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+      required:
+        - text
+
+  QtspClausesMetadataDetailView:
+    type: object
+    properties:
+      clauses:
+        type: array
+        items:
+          $ref: "#/definitions/QtspClause"
+        minItems: 1
+        uniqueItems: true
+      document_url:
+        type: string
+        format: url
+      privacy_url:
+        type: string
+        format: url
+      privacy_text:
+        type: string
+        minLength: 1
+      terms_and_conditions_url:
+        type: string
+        format: url
+      nonce:
+        type: string
+        format: base64
+        minLength: 1
+    required:
+      - clauses
+      - document_url
+      - privacy_url
+      - privacy_text
+      - terms_and_conditions_url
+      - nonce
+
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

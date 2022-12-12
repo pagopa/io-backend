@@ -68,6 +68,7 @@ const aCgnOperatorSearchAPIBasePath = "/api/v1/cgn-operator-search";
 const aEuCovidCertAPIBasePath = "/api/v1/eucovidcert";
 const aMitVoucherBasePath = "/api/v1/mitvoucher/auth";
 const aZendeskBasePath = "/api/backend/zendesk/v1";
+const aIoSignAPIBasePath = "/api/v1/sign";
 
 describe("Success app start", () => {
   // tslint:disable:no-let
@@ -81,6 +82,7 @@ describe("Success app start", () => {
       CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
       EUCovidCertBasePath: aEuCovidCertAPIBasePath,
       FIMSBasePath: aFIMSBasePath,
+      IoSignAPIBasePath: aIoSignAPIBasePath,
       MitVoucherBasePath: aMitVoucherBasePath,
       MyPortalBasePath: aMyPortalBasePath,
       PagoPABasePath: aPagoPABasePath,
@@ -185,6 +187,7 @@ describe("Failure app start", () => {
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         FIMSBasePath: aFIMSBasePath,
+        IoSignAPIBasePath: aIoSignAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
@@ -218,6 +221,7 @@ describe("Failure app start", () => {
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         FIMSBasePath: aFIMSBasePath,
+        IoSignAPIBasePath: aIoSignAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
@@ -251,6 +255,7 @@ describe("Failure app start", () => {
         CGNOperatorSearchAPIBasePath: aCgnOperatorSearchAPIBasePath,
         EUCovidCertBasePath: aEuCovidCertAPIBasePath,
         FIMSBasePath: aFIMSBasePath,
+        IoSignAPIBasePath: aIoSignAPIBasePath,
         MitVoucherBasePath: aMitVoucherBasePath,
         MyPortalBasePath: aMyPortalBasePath,
         PagoPABasePath: aPagoPABasePath,
