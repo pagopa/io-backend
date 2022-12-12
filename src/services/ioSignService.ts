@@ -36,6 +36,7 @@ import * as E from "fp-ts/Either";
 import { DocumentToSign } from "generated/io-sign-api/DocumentToSign";
 import { QtspClauses } from "generated/io-sign/QtspClauses";
 import { SignatureDetailView } from "generated/io-sign/SignatureDetailView";
+import { SignatureRequestDetailView } from "generated/io-sign/SignatureRequestDetailView";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -178,6 +179,9 @@ export default class IoSignService {
       });
     });
 
+  /**
+   * Create a Signature from a Signature Request
+   */
   public readonly createSignature = (
     signature_request_id: Id,
     email: EmailString,
@@ -225,6 +229,39 @@ export default class IoSignService {
                 E.getOrElse(() => internalServerError)
               )
             );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get a Signature Request from id
+   */
+  public readonly getSignatureRequest = (
+    signatureRequestId: Id,
+    signerId: Id
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestDetailView>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioSignApiClient.getSignatureRequestById({
+        id: signatureRequestId,
+        "x-iosign-signer-id": signerId
+      });
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              resourcesNotFound,
+              "Signature request not found"
+            );
+          case 403:
+            return ResponseErrorNotFound403(userNotFound);
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }

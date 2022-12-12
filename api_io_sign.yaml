@@ -91,6 +91,10 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
         "403":
+          description: Forbidden.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "404":
           description: Resource not found.
           schema:
             $ref: "#/definitions/ProblemJson"
@@ -103,6 +107,42 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
+  "/signature-requests/{id}":
+    post:
+      operationId: getSignatureRequestById
+      summary: Get a Signature Request from id
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: Signature request Id
+          format: ulid
+          required: true
+      responses:
+        "200":
+          description: The Signature Request detail
+          schema:
+            $ref: "#/definitions/SignatureRequestDetailView"
+        "401":
+          description: Bearer token null or expired.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "403":
+          description: Resource not found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "404":
+          description: Resource not found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 definitions:
   Timestamp:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/Timestamp"
@@ -302,6 +342,79 @@ definitions:
       - signature_request_id
       - qtsp_signature_request_id
       - status
+
+  DocumentMetadata:
+      type: object
+      properties:
+        title:
+          type: string
+        signature_fields:
+          type: array
+          items:
+            $ref: "#/definitions/SignatureField"
+      required:
+        - title
+        - signature_fields
+
+  DocumentDetailView:
+      type: object
+      properties:
+        id:
+          $ref: "#/definitions/Id"
+        metadata:
+          $ref: "#/definitions/DocumentMetadata"
+        url:
+          type: string
+          format: uri
+        created_at:
+          $ref: "#/definitions/Timestamp"
+        updated_at:
+          $ref: "#/definitions/Timestamp"
+      required:
+        - id
+        - metadata
+        - url
+        - created_at
+        - updated_at
+
+  SignatureRequestDetailView:
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/Id"
+      status:
+        type: string
+        x-extensible-enum:
+          - WAIT_FOR_SIGNATURE
+          - WAIT_FOR_QTSP
+          - SIGNED
+          - REJECTED
+      dossier_id:
+        $ref: "#/definitions/Id"
+      signer_id:
+        $ref: "#/definitions/Id"
+      expires_at:
+        $ref: "#/definitions/Timestamp"
+      documents:
+        type: array
+        items:
+          $ref: "#/definitions/DocumentDetailView"
+      created_at:
+        $ref: "#/definitions/Timestamp"
+      updated_at:
+        $ref: "#/definitions/Timestamp"
+      qr_code_url:
+        type: string
+        format: uri
+    required:
+      - id
+      - status
+      - dossier_id
+      - signer_id
+      - expires_at
+      - documents
+      - created_at
+      - updated_at
 
 securityDefinitions:
   Bearer:
