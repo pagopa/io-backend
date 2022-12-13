@@ -29,7 +29,6 @@ import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView
 import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
-import { DocumentToSign as DocumentToSignApiModel } from "../../generated/io-sign-api/DocumentToSign";
 
 import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
 import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
@@ -177,10 +176,7 @@ export default class IoSignController {
               this.ioSignService.createSignature(
                 body.signature_request_id,
                 userProfile.email,
-                // this cast is necessary because swagger 2.0 does not support `oneOf`
-                (body.documents_to_sign as unknown) as ReadonlyArray<
-                  DocumentToSignApiModel
-                >,
+                body.documents_to_sign,
                 body.qtsp_clauses,
                 signerId.value.id
               )

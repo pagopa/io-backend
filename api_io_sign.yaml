@@ -229,7 +229,16 @@ definitions:
       - title
       - type
 
-  SignatureFieldAttrs:
+  ExistingSignatureFieldAttrs:
+      type: object
+      properties:
+        unique_name:
+          type: string
+          minLength: 1
+      required:
+        - unique_name
+
+  SignatureFieldToBeCreatedAttrs:
     type: object
     properties:
       bottom_left:
@@ -251,9 +260,16 @@ definitions:
       page:
         type: number
         minimum: 0
-      unique_name:
-        type: string
-        minLength: 1
+    required:
+      - bottom_left
+      - page
+      - top_right
+
+  SignatureFieldAttrs:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/ExistingSignatureFieldAttrs'
+      - $ref: '#/definitions/SignatureFieldToBeCreatedAttrs'
 
   SignatureField:
     type: object

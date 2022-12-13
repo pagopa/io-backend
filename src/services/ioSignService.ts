@@ -33,7 +33,7 @@ import { QtspClausesMetadataDetailView } from "generated/io-sign/QtspClausesMeta
 
 import * as E from "fp-ts/Either";
 
-import { DocumentToSign } from "generated/io-sign-api/DocumentToSign";
+import { DocumentToSign } from "generated/io-sign/DocumentToSign";
 import { QtspClauses } from "generated/io-sign/QtspClauses";
 import { SignatureDetailView } from "generated/io-sign/SignatureDetailView";
 import { SignatureRequestDetailView } from "generated/io-sign/SignatureRequestDetailView";
