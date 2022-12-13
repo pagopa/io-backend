@@ -16,13 +16,21 @@ import {
   mockedInitializedProfile,
   mockedUser
 } from "../../__mocks__/user_mock";
-import { EmailString } from "@pagopa/ts-commons/lib/strings";
-import { NonEmptyString } from "io-ts-types";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
 import {
   SignatureRequestDetailView,
   StatusEnum as SignatureRequestStatusEnum
 } from "../../../generated/io-sign/SignatureRequestDetailView";
 import { Id } from "../../../generated/io-sign/Id";
+import { QtspClauses } from "../../../generated/io-sign/QtspClauses";
+import { DocumentToSign } from "../../../generated/io-sign/DocumentToSign";
+import { TypeEnum as ClauseTypeEnum } from "../../../generated/io-sign-api/Clause";
+import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
+import {
+  SignatureDetailView,
+  StatusEnum as SignatureStatusEnum
+} from "../../../generated/io-sign/SignatureDetailView";
 
 const API_KEY = "";
 const API_URL = "";
@@ -100,6 +108,47 @@ const signatureRequest: SignatureRequestDetailView = {
   updated_at: new Date(),
   expires_at: new Date()
 };
+
+const signature: SignatureDetailView = {
+  id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
+  signature_request_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
+  qtsp_signature_request_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
+  status: SignatureStatusEnum.CREATED
+};
+
+const qtspAcceptedClauses: QtspClauses = {
+  accepted_clauses: [{ text: "fake caluses...." as NonEmptyString }],
+  filled_document_url: "https://my-document.url/document.pdf" as NonEmptyString,
+  nonce: "000000000==" as NonEmptyString
+};
+
+const documentsToSign: ReadonlyArray<DocumentToSign> = [
+  {
+    document_id: "01GKVMRN408NXRT3R5HN3ADBJJ" as NonEmptyString,
+    signature_fields: [
+      {
+        clause: {
+          title: "Firma document",
+          type: ClauseTypeEnum.REQUIRED
+        },
+        attrs: {
+          unique_name: "field1" as NonEmptyString
+        }
+      },
+      {
+        clause: {
+          title: "Firma document",
+          type: ClauseTypeEnum.REQUIRED
+        },
+        attrs: {
+          bottom_left: { x: 10, y: 10 },
+          top_right: { x: 100, y: 20 },
+          page: 1 as NonNegativeNumber
+        }
+      }
+    ]
+  }
+];
 
 const client = IoSignAPIClient(API_KEY, API_URL, API_BASE_PATH);
 const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
@@ -313,5 +362,150 @@ describe("IoSignController#getSignatureRequest", () => {
       kind: "IResponseSuccessJson",
       value: signatureRequest
     });
+  });
+});
+
+describe("IoSignController#createSignature", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    mockGetSignerByFiscalCode.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(signerDetailMock))
+    );
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
+    );
+
+    const req = {
+      ...mockReq({
+        body: {
+          signature_request_id: signature.signature_request_id,
+          documents_to_sign: documentsToSign,
+          qtsp_clauses: qtspAcceptedClauses
+        }
+      }),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    await controller.createSignature(req);
+
+    expect(mockCreateSignature).toHaveBeenCalledWith(
+      signature.signature_request_id,
+      mockedInitializedProfile.email as EmailString,
+      documentsToSign,
+      qtspAcceptedClauses,
+      signerDetailMock.id
+    );
+  });
+
+  it("should call createSignature method on the IoSignService with valid values", async () => {
+    const req = {
+      ...mockReq({
+        body: {
+          signature_request_id: signature.signature_request_id,
+          documents_to_sign: documentsToSign,
+          qtsp_clauses: qtspAcceptedClauses
+        }
+      }),
+      user: mockedUser
+    };
+
+    mockCreateSignature.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(filledDocumentMock))
+    );
+
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
+    );
+
+    const controller = new IoSignController(ioSignService, profileService);
+
+    const response = await controller.createSignature(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: filledDocumentMock
+    });
+  });
+
+  it("should not call createSignature method on the IoSignService with empty body", async () => {
+    const req = {
+      ...mockReq(),
+      user: mockedUser
+    };
+
+    const res = mockRes();
+
+    const controller = new IoSignController(ioSignService, profileService);
+    const response = await controller.createSignature(req);
+
+    response.apply(res);
+
+    // service method is not called
+    expect(mockCreateSignature).not.toBeCalled();
+    // http output is correct
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should return an error if the signer is not found", async () => {
+    mockGetSignerByFiscalCode.mockReturnValue(
+      Promise.reject(ResponseErrorInternal("Signer not found"))
+    );
+    mockGetProfile.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
+    );
+
+    const req = {
+      ...mockReq({
+        body: {
+          signature_request_id: signature.signature_request_id,
+          documents_to_sign: documentsToSign,
+          qtsp_clauses: qtspAcceptedClauses
+        }
+      }),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    const response = await controller.createSignature(req);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        kind: "IResponseErrorInternal"
+      })
+    );
+  });
+
+  it("should return an error if the profile is not found", async () => {
+    mockGetSignerByFiscalCode.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(signerDetailMock))
+    );
+    mockGetProfile.mockReturnValue(
+      Promise.reject(ResponseErrorInternal("Profile not found"))
+    );
+
+    const req = {
+      ...mockReq({
+        body: {
+          signature_request_id: signature.signature_request_id,
+          documents_to_sign: documentsToSign,
+          qtsp_clauses: qtspAcceptedClauses
+        }
+      }),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    const response = await controller.createSignature(req);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        kind: "IResponseErrorInternal"
+      })
+    );
   });
 });
