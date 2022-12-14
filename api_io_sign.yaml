@@ -118,6 +118,7 @@ paths:
           description: Signature request Id
           format: ulid
           required: true
+          minLength: 1
       responses:
         "200":
           description: The Signature Request detail
