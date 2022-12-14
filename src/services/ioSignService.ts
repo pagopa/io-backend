@@ -21,18 +21,22 @@ import { pipe } from "fp-ts/lib/function";
 
 import { IoSignAPIClient } from "src/clients/io-sign";
 import { SignerDetailView } from "generated/io-sign-api/SignerDetailView";
-import { FilledDocumentDetailView } from "generated/io-sign-api/FilledDocumentDetailView";
+import { FilledDocumentDetailView } from "generated/io-sign/FilledDocumentDetailView";
 import {
   EmailString,
   FiscalCode,
   NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
-import { Id } from "generated/io-sign-api/Id";
+import { Id } from "generated/io-sign/Id";
 
-import { QtspClausesMetadataDetailView } from "generated/io-sign-api/QtspClausesMetadataDetailView";
+import { QtspClausesMetadataDetailView } from "generated/io-sign/QtspClausesMetadataDetailView";
 
 import * as E from "fp-ts/Either";
 
+import { DocumentToSign } from "generated/io-sign/DocumentToSign";
+import { QtspClauses } from "generated/io-sign/QtspClauses";
+import { SignatureDetailView } from "generated/io-sign/SignatureDetailView";
+import { SignatureRequestDetailView } from "generated/io-sign/SignatureRequestDetailView";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
@@ -40,7 +44,12 @@ import {
 } from "../utils/responses";
 import { readableProblem } from "../../src/utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
+
+const internalServerError = "Internal server error";
+const invalidRequest = "Invalid request";
 const resourcesNotFound = "Resources not found";
+const userNotFound =
+  "The user associated with this profile could not be found.";
 export default class IoSignService {
   constructor(private readonly ioSignApiClient: ReturnType<IoSignAPIClient>) {}
 
@@ -65,13 +74,11 @@ export default class IoSignService {
             return ResponseSuccessJson(response.value);
           case 400:
             return ResponseErrorValidation(
-              "Invalid request",
+              invalidRequest,
               `An error occurred while validating the request body | ${response.value}`
             );
           case 403:
-            return ResponseErrorNotFound403(
-              "The user associated with this profile could not be found."
-            );
+            return ResponseErrorNotFound403(userNotFound);
           case 500:
             return ResponseErrorInternal(
               `Internal server error | ${response.value}`
@@ -121,14 +128,11 @@ export default class IoSignService {
             );
           case 400:
             return ResponseErrorValidation(
-              "Invalid request",
+              invalidRequest,
               `An error occurred while validating the request body | ${response.value}`
             );
           case 404:
-            return ResponseErrorNotFound(
-              resourcesNotFound,
-              "The user associated with this profile could not be found."
-            );
+            return ResponseErrorNotFound(resourcesNotFound, userNotFound);
           case 500:
             return ResponseErrorInternal(
               // TODO [SFEQS-1199]: When the code for openapi-codegen-ts is fixed, refactor this section.
@@ -137,7 +141,7 @@ export default class IoSignService {
                 response.value,
                 ProblemJson.decode,
                 E.map(readableProblem),
-                E.getOrElse(() => "Internal server error!")
+                E.getOrElse(() => internalServerError)
               )
             );
           default:
@@ -166,9 +170,98 @@ export default class IoSignService {
                 response.value,
                 ProblemJson.decode,
                 E.map(readableProblem),
-                E.getOrElse(() => "Internal server error!")
+                E.getOrElse(() => internalServerError)
               )
             );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Create a Signature from a Signature Request
+   */
+  public readonly createSignature = (
+    signature_request_id: Id,
+    email: EmailString,
+    documents_to_sign: ReadonlyArray<DocumentToSign>,
+    qtsp_clauses: QtspClauses,
+    signerId: Id
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureDetailView>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioSignApiClient.createSignature({
+        body: {
+          documents_to_sign,
+          email,
+          qtsp_clauses,
+          signature_request_id
+        },
+        "x-iosign-signer-id": signerId
+      });
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 400:
+            return ResponseErrorValidation(
+              invalidRequest,
+              `An error occurred while validating the request body | ${response.value}`
+            );
+          case 404:
+            return ResponseErrorNotFound(
+              resourcesNotFound,
+              "Signature request not found"
+            );
+          case 403:
+            return ResponseErrorNotFound403(userNotFound);
+          case 500:
+            return ResponseErrorInternal(
+              pipe(
+                response.value,
+                ProblemJson.decode,
+                E.map(readableProblem),
+                E.getOrElse(() => internalServerError)
+              )
+            );
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get a Signature Request from id
+   */
+  public readonly getSignatureRequest = (
+    signatureRequestId: Id,
+    signerId: Id
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestDetailView>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioSignApiClient.getSignatureRequestById({
+        id: signatureRequestId,
+        "x-iosign-signer-id": signerId
+      });
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
+          case 404:
+            return ResponseErrorNotFound(
+              resourcesNotFound,
+              "Signature request not found"
+            );
+          case 403:
+            return ResponseErrorNotFound403(userNotFound);
           default:
             return ResponseErrorStatusNotDefinedInSpec(response);
         }

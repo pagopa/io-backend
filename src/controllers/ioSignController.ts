@@ -22,17 +22,34 @@ import IoSignService from "src/services/ioSignService";
 import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { QtspClausesMetadataDetailView } from "generated/io-sign/QtspClausesMetadataDetailView";
+import { Errors } from "io-ts";
+import { Id } from "../../generated/io-sign/Id";
+import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
+import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
+import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
-
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 
 import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
+import { CreateSignatureBody } from "../../generated/io-sign/CreateSignatureBody";
 
 import { withUserFromRequest } from "../types/user";
 import ProfileService from "../services/profileService";
 
 import { profileWithEmailValidatedOrError } from "../utils/profile";
+
+const responseErrorValidation = (errs: Errors) =>
+  ResponseErrorValidation(
+    "Bad request",
+    errorsToReadableMessages(errs).join(" / ")
+  );
+
+const responseErrorInternal = (reason: string) => (e: Error) =>
+  ResponseErrorInternal(`${reason} | ${e.message}`);
+
+const toErrorRetrievingTheSignerId = ResponseErrorInternal(
+  `Error retrieving the signer id for this user`
+);
 
 export const retrieveSignerId = (
   ioSignService: IoSignService,
@@ -83,29 +100,20 @@ export default class IoSignController {
       pipe(
         req.body,
         CreateFilledDocument.decode,
-        E.mapLeft(errs =>
-          ResponseErrorValidation(
-            "Bad request",
-            errorsToReadableMessages(errs).join(" / ")
-          )
-        ),
+        E.mapLeft(responseErrorValidation),
         TE.fromEither,
         TE.chainW(body =>
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(e =>
-                  ResponseErrorInternal(
-                    `Error retrieving the signer id for this users | ${e.message}`
-                  )
-                )
+                TE.mapLeft(() => toErrorRetrievingTheSignerId)
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
-                TE.mapLeft(e =>
-                  ResponseErrorInternal(
-                    `Error retrieving a user profile with validated email address | ${e.message}`
+                TE.mapLeft(
+                  responseErrorInternal(
+                    "Error retrieving a user profile with validated email address"
                   )
                 )
               )
@@ -121,6 +129,89 @@ export default class IoSignController {
               )
             )
           )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Create a Signature from a Signature Request
+   */
+  public readonly createSignature = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureDetailView>
+  > =>
+    withUserFromRequest(req, async user =>
+      pipe(
+        req.body,
+        CreateSignatureBody.decode,
+        E.mapLeft(responseErrorValidation),
+        TE.fromEither,
+        TE.chainW(body =>
+          pipe(
+            sequenceS(TE.ApplySeq)({
+              signerId: pipe(
+                retrieveSignerId(this.ioSignService, user.fiscal_code),
+                TE.mapLeft(() => toErrorRetrievingTheSignerId)
+              ),
+              userProfile: pipe(
+                profileWithEmailValidatedOrError(this.profileService, user),
+                TE.mapLeft(
+                  responseErrorInternal(
+                    "Error retrieving a user profile with validated email address"
+                  )
+                )
+              )
+            }),
+            TE.map(({ userProfile, signerId }) =>
+              this.ioSignService.createSignature(
+                body.signature_request_id,
+                userProfile.email,
+                body.documents_to_sign,
+                body.qtsp_clauses,
+                signerId.value.id
+              )
+            )
+          )
+        ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Get a Signature Request from id
+   */
+  public readonly getSignatureRequest = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestDetailView>
+  > =>
+    withUserFromRequest(req, async user =>
+      pipe(
+        sequenceS(TE.ApplyPar)({
+          signatureRequestId: pipe(
+            req.params.id,
+            Id.decode,
+            TE.fromEither,
+            TE.mapLeft(_ =>
+              ResponseErrorInternal(`Error validating the signature request id`)
+            )
+          ),
+          signerId: pipe(
+            retrieveSignerId(this.ioSignService, user.fiscal_code),
+            TE.mapLeft(() => toErrorRetrievingTheSignerId),
+            TE.map(response => response.value.id)
+          )
+        }),
+        TE.map(({ signerId, signatureRequestId: id }) =>
+          this.ioSignService.getSignatureRequest(id, signerId)
         ),
         TE.toUnion
       )()

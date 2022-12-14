@@ -67,14 +67,90 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
 
+  "/signatures":
+    post:
+      operationId: createSignature
+      summary: Create a Signature from SignatureRequest
+      parameters:
+        - in: body
+          name: signatureToCreate
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSignatureBody'
+      responses:
+        "200":
+          description: Signature created
+          schema:
+            $ref: "#/definitions/SignatureDetailView"
+        "400":
+          description: Validation error.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Bearer token null or expired.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "403":
+          description: Forbidden.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "404":
+          description: Resource not found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/signature-requests/{id}":
+    get:
+      operationId: getSignatureRequestById
+      summary: Get a Signature Request from id
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: Signature request Id
+          format: ulid
+          required: true
+          minLength: 1
+      responses:
+        "200":
+          description: The Signature Request detail
+          schema:
+            $ref: "#/definitions/SignatureRequestDetailView"
+        "401":
+          description: Bearer token null or expired.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "403":
+          description: Resource not found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "404":
+          description: Resource not found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
 definitions:
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/Timestamp"
-  FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/Timestamp"
+
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/ProblemJson"
 
   CreateFilledDocument:
     type: object
@@ -137,6 +213,226 @@ definitions:
       - terms_and_conditions_url
       - nonce
 
+  Id:
+    type: string
+    description: Entity Id
+    minLength: 1
+    example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+
+  Clause:
+    type: object
+    properties:
+      title:
+        type: string
+      type:
+        type: string
+        enum: ["REQUIRED", "UNFAIR", "OPTIONAL"]
+    required:
+      - title
+      - type
+
+  ExistingSignatureFieldAttrs:
+      type: object
+      properties:
+        unique_name:
+          type: string
+          minLength: 1
+      required:
+        - unique_name
+
+  SignatureFieldToBeCreatedAttrs:
+    type: object
+    properties:
+      bottom_left:
+        type: object
+        properties:
+          x: { type: number }
+          y: { type: number }
+        required:
+          - x
+          - y
+      top_right:
+        type: object
+        properties:
+          x: { type: number }
+          y: { type: number }
+        required:
+          - x
+          - y
+      page:
+        type: number
+        minimum: 0
+    required:
+      - bottom_left
+      - page
+      - top_right
+
+  SignatureFieldAttrs:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/ExistingSignatureFieldAttrs'
+      - $ref: '#/definitions/SignatureFieldToBeCreatedAttrs'
+
+  SignatureField:
+    type: object
+    properties:
+      attrs:
+        $ref: "#/definitions/SignatureFieldAttrs"
+      clause:
+        $ref: "#/definitions/Clause"
+    required:
+      - attrs
+      - clause
+
+  DocumentToSign:
+    type: object
+    properties:
+      document_id:
+        type: string
+        format: ulid
+        minLength: 1
+      signature_fields:
+        type: array
+        items:
+          $ref: "#/definitions/SignatureField"
+    required:
+      - document_id
+      - signature_fields
+
+  QtspClauses:
+    type: object
+    properties:
+      accepted_clauses:
+        type: array
+        items:
+          $ref: "#/definitions/QtspClause"
+        minItems: 1
+        uniqueItems: true
+      filled_document_url:
+        type: string
+        format: url
+        minLength: 1
+      nonce:
+        type: string
+        format: base64
+        minLength: 1
+    required:
+      - accepted_clauses
+      - filled_document_url
+      - nonce
+
+  CreateSignatureBody:
+    type: object
+    properties:
+      signature_request_id:
+        $ref: "#/definitions/Id"
+      documents_to_sign:
+        type: array
+        items:
+          $ref: "#/definitions/DocumentToSign"
+        minItems: 1
+        uniqueItems: true
+      qtsp_clauses:
+        $ref: "#/definitions/QtspClauses"
+    required:
+      - signature_request_id
+      - documents_to_sign
+      - qtsp_clauses
+
+  SignatureDetailView:
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/Id"
+      signature_request_id:
+        $ref: "#/definitions/Id"
+      qtsp_signature_request_id:
+        $ref: "#/definitions/Id"
+      status:
+        type: string
+        enum: ["CREATED", "READY", "WAITING", "COMPLETED", "FAILED"]
+      created_at:
+        $ref: "#/definitions/Timestamp"
+      updated_at:
+        $ref: "#/definitions/Timestamp"
+    required:
+      - id
+      - signature_request_id
+      - qtsp_signature_request_id
+      - status
+
+  DocumentMetadata:
+      type: object
+      properties:
+        title:
+          type: string
+        signature_fields:
+          type: array
+          items:
+            $ref: "#/definitions/SignatureField"
+      required:
+        - title
+        - signature_fields
+
+  DocumentDetailView:
+      type: object
+      properties:
+        id:
+          $ref: "#/definitions/Id"
+        metadata:
+          $ref: "#/definitions/DocumentMetadata"
+        url:
+          type: string
+          format: uri
+        created_at:
+          $ref: "#/definitions/Timestamp"
+        updated_at:
+          $ref: "#/definitions/Timestamp"
+      required:
+        - id
+        - metadata
+        - url
+        - created_at
+        - updated_at
+
+  SignatureRequestDetailView:
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/Id"
+      status:
+        type: string
+        x-extensible-enum:
+          - WAIT_FOR_SIGNATURE
+          - WAIT_FOR_QTSP
+          - SIGNED
+          - REJECTED
+      dossier_id:
+        $ref: "#/definitions/Id"
+      signer_id:
+        $ref: "#/definitions/Id"
+      expires_at:
+        $ref: "#/definitions/Timestamp"
+      documents:
+        type: array
+        items:
+          $ref: "#/definitions/DocumentDetailView"
+      created_at:
+        $ref: "#/definitions/Timestamp"
+      updated_at:
+        $ref: "#/definitions/Timestamp"
+      qr_code_url:
+        type: string
+        format: uri
+    required:
+      - id
+      - status
+      - dossier_id
+      - signer_id
+      - expires_at
+      - documents
+      - created_at
+      - updated_at
 
 securityDefinitions:
   Bearer:
