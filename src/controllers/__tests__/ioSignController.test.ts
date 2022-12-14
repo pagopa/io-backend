@@ -262,7 +262,9 @@ describe("IoSignController#createFilledDocument", () => {
 
     expect(response).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorInternal"
+        kind: "IResponseErrorInternal",
+        detail:
+          "Internal server error: Error retrieving the signer id for this user"
       })
     );
   });
@@ -287,7 +289,9 @@ describe("IoSignController#createFilledDocument", () => {
 
     expect(response).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorInternal"
+        kind: "IResponseErrorInternal",
+        detail:
+          "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile"
       })
     );
   });
@@ -475,7 +479,9 @@ describe("IoSignController#createSignature", () => {
 
     expect(response).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorInternal"
+        kind: "IResponseErrorInternal",
+        detail:
+          "Internal server error: Error retrieving the signer id for this user"
       })
     );
   });
@@ -504,7 +510,9 @@ describe("IoSignController#createSignature", () => {
 
     expect(response).toEqual(
       expect.objectContaining({
-        kind: "IResponseErrorInternal"
+        kind: "IResponseErrorInternal",
+        detail:
+          "Internal server error: Error retrieving a user profile with validated email address | Error retrieving user profile"
       })
     );
   });

@@ -47,10 +47,9 @@ const responseErrorValidation = (errs: Errors) =>
 const responseErrorInternal = (reason: string) => (e: Error) =>
   ResponseErrorInternal(`${reason} | ${e.message}`);
 
-const toErrorRetrievingTheSignerId = (e: Error) =>
-  ResponseErrorInternal(
-    `Error retrieving the signer id for this user | ${e.message}`
-  );
+const toErrorRetrievingTheSignerId = ResponseErrorInternal(
+  `Error retrieving the signer id for this user`
+);
 
 export const retrieveSignerId = (
   ioSignService: IoSignService,
@@ -108,7 +107,7 @@ export default class IoSignController {
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(toErrorRetrievingTheSignerId)
+                TE.mapLeft(() => toErrorRetrievingTheSignerId)
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
@@ -157,11 +156,7 @@ export default class IoSignController {
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
                 retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(
-                  responseErrorInternal(
-                    "Error retrieving the signer id for this users"
-                  )
-                )
+                TE.mapLeft(() => toErrorRetrievingTheSignerId)
               ),
               userProfile: pipe(
                 profileWithEmailValidatedOrError(this.profileService, user),
@@ -211,7 +206,7 @@ export default class IoSignController {
           ),
           signerId: pipe(
             retrieveSignerId(this.ioSignService, user.fiscal_code),
-            TE.mapLeft(toErrorRetrievingTheSignerId),
+            TE.mapLeft(() => toErrorRetrievingTheSignerId),
             TE.map(response => response.value.id)
           )
         }),

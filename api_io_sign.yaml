@@ -147,10 +147,10 @@ paths:
 
 definitions:
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/Timestamp"
 
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.3.0/openapi/definitions.yaml#/ProblemJson"
 
   CreateFilledDocument:
     type: object
