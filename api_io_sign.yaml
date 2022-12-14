@@ -108,7 +108,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
 
   "/signature-requests/{id}":
-    post:
+    get:
       operationId: getSignatureRequestById
       summary: Get a Signature Request from id
       parameters:
