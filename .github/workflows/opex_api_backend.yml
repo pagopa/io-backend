@@ -15,6 +15,7 @@ on:
   workflow_dispatch:
 
 env:
+  TEMPLATE_DIR: azure-dashboard
   CLIENT_ID: 10ab3c51-f734-4782-abe9-3e998a1a2e84
   TENANT_ID: 7788edaf-0346-4068-9d79-c868aed15b3d
   SUBSCRIPTION_ID: ec285037-c673-4f58-b594-d7c480da4e8b
@@ -68,19 +69,19 @@ jobs:
       # this action create a folder named /azure-dashboard
       - uses: pagopa/opex-dashboard-action@main
         with:
-          template: azure-dashboard
-          config: .opex/${{ env.API_NAME }}/config_${{ matrix.environment }}.yaml
+          template: ${{ env.TEMPLATE_DIR }}
+          config: .opex/${{ env.API_NAME }}/${{ matrix.environment }}/config.yaml
 
       # we need to set env variables in the folder /azure-dashboard
       - name: Copy Environments
         run: |
-          cp -R .opex/${API_NAME}/env ./azure-dashboard
+          cp -R .opex/${API_NAME}/env ./${TEMPLATE_DIR}
 
       # now is possible to launch the command: terraform apply
       - name: Terraform Apply
         shell: bash
         run: |
-          cd ./azure-dashboard
+          cd ./${TEMPLATE_DIR}
           export ARM_CLIENT_ID="${CLIENT_ID}"
           export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
           export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
