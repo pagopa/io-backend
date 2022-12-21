@@ -9,7 +9,7 @@ on:
     paths:
       - '.github/workflows/opex_api_backend.yml'
       - '.opex/api_backend/*'
-      # - 'azure-dashboard/api_backend/*'
+      - 'azure-dashboard/*'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
