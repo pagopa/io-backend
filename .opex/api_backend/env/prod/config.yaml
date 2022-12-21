@@ -10,3 +10,7 @@ overrides:
   hosts:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
+  endpoints:
+    /api/v1/payment-requests/{rptId}:
+      response_time_threshold: 7
+      availability_threshold: 0.25
