@@ -1,4 +1,4 @@
-name: Create Dashboard
+name: Opex Dashboard api_backend
 
 # Controls when the workflow will run
 on:
@@ -69,7 +69,7 @@ jobs:
       - uses: pagopa/opex-dashboard-action@main
         with:
           template: azure-dashboard
-          config: .opex/${API_NAME}/config_${{ matrix.environment }}.yaml
+          config: .opex/${{ env.API_NAME }}/config_${{ matrix.environment }}.yaml
 
       # we need to set env variables in the folder /azure-dashboard
       - name: Copy Environments
