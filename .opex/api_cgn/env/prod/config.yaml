@@ -7,7 +7,6 @@ action_groups:
   - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/SlackPagoPA
   - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/EmailPagoPA
 overrides:
-  basePath: ""
   hosts:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
