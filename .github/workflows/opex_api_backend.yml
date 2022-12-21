@@ -1,0 +1,89 @@
+name: Create Dashboard
+
+# Controls when the workflow will run
+on:
+  push:
+    branches:
+      # - master
+      - opex-demo
+    paths:
+      - '.github/workflows/opex_api_backend.yml'
+      - '.opex/api_backend/*'
+      # - 'azure-dashboard/api_backend/*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  CLIENT_ID: 10ab3c51-f734-4782-abe9-3e998a1a2e84
+  TENANT_ID: 7788edaf-0346-4068-9d79-c868aed15b3d
+  SUBSCRIPTION_ID: ec285037-c673-4f58-b594-d7c480da4e8b
+  API_NAME: api_backend
+
+permissions:
+  id-token: write
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        environment: [prod]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        id: checkout
+        # from https://github.com/actions/checkout/commits/main
+        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Read terraform version
+        id: read-version
+        shell: bash
+        run: |
+          echo "TERRAFORM_VERSION=`cat .terraform-version`" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        # from https://github.com/hashicorp/setup-terraform/commits/main
+        uses: hashicorp/setup-terraform@8feba2b913ea459066180f9cb177f58a881cf146
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Login
+        id: login
+        # from https://github.com/Azure/login/commits/master
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+        with:
+          client-id: ${{ env.CLIENT_ID }}
+          tenant-id: ${{ env.TENANT_ID }}
+          subscription-id: ${{ env.SUBSCRIPTION_ID }}
+
+      # this action create a folder named /azure-dashboard
+      - uses: pagopa/opex-dashboard-action@main
+        with:
+          template: azure-dashboard
+          config: ./opex/${API_NAME}/config_${{ matrix.environment }}.yaml
+
+      # we need to set env variables in the folder /azure-dashboard
+      - name: Copy Environments
+        run: |
+          cp -R ./.opex/${API_NAME}/env ./azure-dashboard
+
+      # now is possible to launch the command: terraform apply
+      - name: Terraform Apply
+        shell: bash
+        run: |
+          cd ./azure-dashboard
+          export ARM_CLIENT_ID="${CLIENT_ID}"
+          export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+          export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
+          export ARM_USE_OIDC=true
+
+          bash ./terraform.sh apply ${{ matrix.environment }} -auto-approve
