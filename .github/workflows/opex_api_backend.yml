@@ -7,11 +7,9 @@ on:
       # - master
       - opex-demo
     paths:
+      - 'api_backend.yaml'
       - '.github/workflows/opex_api_backend.yml'
       - '.opex/api_backend/**'
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
 
 env:
   TEMPLATE_DIR: azure-dashboard
