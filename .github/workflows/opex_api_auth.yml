@@ -4,8 +4,7 @@ name: Opex Dashboard api_auth
 on:
   push:
     branches:
-      # - master
-      - opex-demo
+      - master
     paths:
       - 'api_auth.yaml'
       - '.github/workflows/opex_api_auth.yml'
