@@ -1,4 +1,4 @@
-oa3_spec: myfolder/api_backend.yaml
+oa3_spec: api_backend.yaml
 name: Opexd_test
 location: West Europe
 timespan: 5m
