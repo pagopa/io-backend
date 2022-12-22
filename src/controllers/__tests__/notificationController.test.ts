@@ -14,7 +14,11 @@ import { User } from "../../types/user";
 import NotificationController from "../notificationController";
 
 import * as E from "fp-ts/lib/Either";
-import { mockedUser, mockSessionToken, mockWalletToken } from "../../__mocks__/user_mock";
+import {
+  mockedUser,
+  mockSessionToken,
+  mockWalletToken
+} from "../../__mocks__/user_mock";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
 
@@ -113,6 +117,7 @@ const redisSessionStorage = new RedisSessionStorage(
 const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = jest.fn());
 
 const notificationService = new NotificationService("", "");
+const notificationServiceFactory = (_fc: FiscalCode) => notificationService;
 
 // tslint:disable-next-line: no-any
 const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpdateInstallation = jest.fn());
@@ -124,7 +129,7 @@ const NOTIFICATION_DEFAULT_SUBJECT = "default subject";
 const NOTIFICATION_DEFAULT_TITLE = "default title";
 
 const controller = new NotificationController(
-  notificationService,
+  notificationServiceFactory,
   redisSessionStorage,
   {
     notificationDefaultSubject: "default subject",
