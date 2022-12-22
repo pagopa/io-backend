@@ -46,6 +46,8 @@ import {
   NOTIFICATION_DEFAULT_TITLE,
   NOTIFICATIONS_QUEUE_NAME,
   NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+  PUSH_NOTIFICATIONS_QUEUE_NAME,
+  PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
   PAGOPA_CLIENT,
   samlConfig,
   serviceProviderConfig,
@@ -151,6 +153,8 @@ import { getThirdPartyServiceClientFactory } from "./clients/third-party-service
 import { PNService } from "./services/pnService";
 import IoSignService from "./services/ioSignService";
 import IoSignController from "./controllers/ioSignController";
+import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
+import { FeatureFlagEnum } from "./utils/featureFlag";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -390,7 +394,7 @@ export function newApp({
         );
 
         // Create the Notification Service
-        const NOTIFICATION_SERVICE = pipe(
+        const OLD_NOTIFICATION_SERVICE = pipe(
           E.tryCatch(
             () =>
               new NotificationService(
@@ -403,6 +407,32 @@ export function newApp({
           E.getOrElseW(err => {
             throw err;
           })
+        );
+
+        // Create the Notification Service
+        const PUSH_NOTIFICATION_SERVICE = pipe(
+          E.tryCatch(
+            () =>
+              new NotificationService(
+                PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
+                PUSH_NOTIFICATIONS_QUEUE_NAME
+              ),
+            err =>
+              new Error(
+                `Error initializing Push Notification Service: [${err}]`
+              )
+          ),
+          E.getOrElseW(err => {
+            throw err;
+          })
+        );
+
+        const notificationServiceFactory = getNotificationServiceFactory(
+          OLD_NOTIFICATION_SERVICE,
+          PUSH_NOTIFICATION_SERVICE,
+          // TODO
+          [],
+          FeatureFlagEnum.NONE
         );
 
         // Create the UsersLoginLogService
@@ -427,7 +457,7 @@ export function newApp({
           getClientProfileRedirectionUrl,
           getClientErrorRedirectionUrl,
           PROFILE_SERVICE,
-          NOTIFICATION_SERVICE,
+          notificationServiceFactory,
           USERS_LOGIN_LOG_SERVICE,
           TEST_LOGIN_FISCAL_CODES,
           FF_USER_AGE_LIMIT_ENABLED,
@@ -473,7 +503,7 @@ export function newApp({
           PROFILE_SERVICE,
           FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
-          NOTIFICATION_SERVICE,
+          OLD_NOTIFICATION_SERVICE,
           SESSION_STORAGE,
           PAGOPA_PROXY_SERVICE,
           USER_METADATA_STORAGE,

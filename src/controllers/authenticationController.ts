@@ -28,6 +28,7 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
+import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
@@ -38,7 +39,6 @@ import {
   clientProfileRedirectionUrl
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
-import NotificationService from "../services/notificationService";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
 import {
@@ -82,7 +82,7 @@ export default class AuthenticationController {
       params: ClientErrorRedirectionUrlParams
     ) => UrlFromString,
     private readonly profileService: ProfileService,
-    private readonly notificationService: NotificationService,
+    private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
@@ -274,7 +274,7 @@ export default class AuthenticationController {
     }
 
     // async fire & forget
-    this.notificationService
+    this.notificationServiceFactory(user.fiscal_code)
       .deleteInstallation(user.fiscal_code)
       .then(deleteInstallationResponse => {
         if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {

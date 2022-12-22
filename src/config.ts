@@ -651,6 +651,14 @@ export const NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
   "NOTIFICATIONS_QUEUE_NAME"
 );
 
+// Needed to forward push notifications actions events
+export const PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING = getRequiredENVVar(
+  "PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING"
+);
+export const PUSH_NOTIFICATIONS_QUEUE_NAME = getRequiredENVVar(
+  "PUSH_NOTIFICATIONS_QUEUE_NAME"
+);
+
 // Push notifications
 export const NOTIFICATION_DEFAULT_SUBJECT =
   "Entra nell'app per leggere il contenuto";
