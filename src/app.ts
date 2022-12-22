@@ -153,7 +153,10 @@ import { getThirdPartyServiceClientFactory } from "./clients/third-party-service
 import { PNService } from "./services/pnService";
 import IoSignService from "./services/ioSignService";
 import IoSignController from "./controllers/ioSignController";
-import { getNotificationServiceFactory } from "./services/notificationServiceFactory";
+import {
+  getNotificationServiceFactory,
+  NotificationServiceFactory
+} from "./services/notificationServiceFactory";
 import { FeatureFlagEnum } from "./utils/featureFlag";
 
 const defaultModule = {
@@ -503,7 +506,7 @@ export function newApp({
           PROFILE_SERVICE,
           FN_APP_SERVICE,
           APP_MESSAGES_SERVICE,
-          OLD_NOTIFICATION_SERVICE,
+          notificationServiceFactory,
           SESSION_STORAGE,
           PAGOPA_PROXY_SERVICE,
           USER_METADATA_STORAGE,
@@ -876,7 +879,7 @@ function registerAPIRoutes(
   profileService: ProfileService,
   fnAppService: FunctionsAppService,
   appMessagesService: NewMessagesService,
-  notificationService: NotificationService,
+  notificationServiceFactory: NotificationServiceFactory,
   sessionStorage: RedisSessionStorage,
   pagoPaProxyService: PagoPAProxyService,
   userMetadataStorage: RedisUserMetadataStorage,
@@ -900,7 +903,7 @@ function registerAPIRoutes(
   );
 
   const notificationController: NotificationController = new NotificationController(
-    notificationService,
+    notificationServiceFactory,
     sessionStorage,
     {
       notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
