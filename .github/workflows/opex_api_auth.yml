@@ -42,7 +42,7 @@ jobs:
           fetch-depth: 0
 
       # this action create a folder named /azure-dashboard
-      - uses: pagopa/pex-dashboard-azure-action@v1.0.1
+      - uses: pagopa/opex-dashboard-azure-action@v1.0.1
         with:
           environment: ${{ matrix.environment }}
           api-name: ${{ env.API_NAME }}
