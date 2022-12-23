@@ -45,6 +45,7 @@ import AuthenticationController, {
 import { addDays, addMonths, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
 import * as appInsights from "applicationinsights";
+import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -163,6 +164,8 @@ beforeAll(async () => {
   const api = new ApiClientFactory("", "");
   const profileService = new ProfileService(api);
   const notificationService = new NotificationService("", "");
+  const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
+    notificationService;
   const usersLoginLogService = new UsersLoginLogService("", "");
 
   controller = new AuthenticationController(
@@ -171,7 +174,7 @@ beforeAll(async () => {
     getClientProfileRedirectionUrl,
     getClientErrorRedirectionUrl,
     profileService,
-    notificationService,
+    notificationServiceFactory,
     usersLoginLogService,
     [],
     true,

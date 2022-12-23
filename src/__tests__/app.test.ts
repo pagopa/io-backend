@@ -270,7 +270,7 @@ describe("Failure app start", () => {
         env: NodeEnvironmentEnum.PRODUCTION
       });
     } catch (err) {
-      expect(mockNotificationService).toBeCalledTimes(1);
+      expect(mockNotificationService).toBeCalledTimes(2);
     }
   });
 });

@@ -14,13 +14,13 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Millisecond } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
+import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 import { Installation } from "../../generated/backend/Installation";
 import { InstallationID } from "../../generated/backend/InstallationID";
 
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
 
-import NotificationService from "../services/notificationService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import { withUserFromRequest } from "../types/user";
 import { log } from "../utils/logger";
@@ -38,7 +38,7 @@ export interface INotificationControllerOptions {
 
 export default class NotificationController {
   constructor(
-    private readonly notificationService: NotificationService,
+    private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly sessionStorage: RedisSessionStorage,
     private readonly opts: INotificationControllerOptions
   ) {}
@@ -67,14 +67,15 @@ export default class NotificationController {
               userHasActiveSessions && "content" in data.message
                 ? // send the full message only if the user has an
                   // active session and the message content is defined
-                  await this.notificationService.notify(
-                    data,
-                    data.message.content.subject
-                  )
+                  await this.notificationServiceFactory(
+                    data.message.fiscal_code
+                  ).notify(data, data.message.content.subject)
                 : // send a generic message
                   // if the user does not have an active session
                   // or the message content is not defined
-                  await this.notificationService.notify(
+                  await this.notificationServiceFactory(
+                    data.message.fiscal_code
+                  ).notify(
                     data,
                     this.opts.notificationDefaultSubject,
                     this.opts.notificationDefaultTitle
@@ -103,10 +104,9 @@ export default class NotificationController {
             // Anyway, to quickly mitigate the disservice to our users, we apply this temporary workaround
             delay(10000 as Millisecond)
               .then(() =>
-                this.notificationService.createOrUpdateInstallation(
-                  user.fiscal_code,
-                  installation
-                )
+                this.notificationServiceFactory(
+                  user.fiscal_code
+                ).createOrUpdateInstallation(user.fiscal_code, installation)
               )
               .catch(err => {
                 log.error(
