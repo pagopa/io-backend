@@ -74,7 +74,9 @@ import {
   PN_ADDRESS_BOOK_CLIENT_SELECTOR,
   PNAddressBookConfig,
   FF_IO_SIGN_ENABLED,
-  IO_SIGN_API_CLIENT
+  IO_SIGN_API_CLIENT,
+  FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+  FF_ROUTING_PUSH_NOTIF
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -157,7 +159,6 @@ import {
   getNotificationServiceFactory,
   NotificationServiceFactory
 } from "./services/notificationServiceFactory";
-import { FeatureFlagEnum } from "./utils/featureFlag";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -433,9 +434,8 @@ export function newApp({
         const notificationServiceFactory = getNotificationServiceFactory(
           OLD_NOTIFICATION_SERVICE,
           PUSH_NOTIFICATION_SERVICE,
-          // TODO
-          [],
-          FeatureFlagEnum.NONE
+          FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+          FF_ROUTING_PUSH_NOTIF
         );
 
         // Create the UsersLoginLogService

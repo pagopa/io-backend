@@ -45,7 +45,7 @@ import { getRequiredENVVar, readFile } from "./utils/container";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import ApiClientFactory from "./services/apiClientFactory";
 import { BonusAPIClient } from "./clients/bonus";
-import { CommaSeparatedListOf, STRINGS_RECORD } from "./types/commons";
+import { STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
@@ -55,6 +55,8 @@ import { AppMessagesAPIClient } from "./clients/app-messages.client";
 import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 import { PNClientFactory } from "./clients/pn-clients";
 import { IoSignAPIClient } from "./clients/io-sign";
+import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
+import { CommaSeparatedListOf } from "./utils/comma-separated-list";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -899,4 +901,28 @@ export const PN_SERVICE_ID = pipe(
     );
     return process.exit(1);
   })
+);
+
+export const FF_ROUTING_PUSH_NOTIF = pipe(
+  process.env.FF_ROUTING_PUSH_NOTIF,
+  FeatureFlag.decode,
+  E.getOrElse(_ => FeatureFlagEnum.NONE)
+);
+
+export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
+  process.env.FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+  CommaSeparatedListOf(NonEmptyString).decode,
+  E.getOrElseW(errs => {
+    log.error(
+      `Missing or invalid FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST environment variable: ${readableReport(
+        errs
+      )}`
+    );
+    return process.exit(1);
+  })
+);
+export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
+  process.env.FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+  NonEmptyString.decode,
+  E.getOrElse(_ => "")
 );
