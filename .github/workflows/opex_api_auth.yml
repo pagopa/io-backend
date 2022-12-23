@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - master
-      - opex-demo
     paths:
       - 'api_auth.yaml'
       - '.github/workflows/opex_api_auth.yml'
@@ -51,4 +50,4 @@ jobs:
           tenant-id: ${{ env.TENANT_ID }}
           subscription-id: ${{ env.SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
-          docker-version: sha256:490f804e0114dbbf5df491e8b201e4705848e93dee313f376a0412536088af52
+          docker-version: sha256:d9465f04e469c8f65bb1fb21cb9688508c64fda75495f552e858fb5a9580be90
