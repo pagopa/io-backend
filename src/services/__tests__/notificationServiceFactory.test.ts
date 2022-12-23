@@ -28,32 +28,32 @@ describe("notificationServiceFactory#getNotificationService returning old Servic
     jest.clearAllMocks();
   });
 
-  it("should return new notification service if ff is BETA and user is a beta tester", async () => {
+  it("should return new notification service if ff is BETA and user is not a beta tester", async () => {
     const getService = getNotificationServiceFactory(
       oldNotificationService,
       newNotificationService,
-      [aFiscalCode],
+      [],
       FeatureFlagEnum.BETA
     );
 
     const result = getService(aFiscalCode);
 
-    expect(result).toEqual(newNotificationService);
-    expect(result).not.toEqual(oldNotificationService);
+    expect(result).not.toEqual(newNotificationService);
+    expect(result).toEqual(oldNotificationService);
   });
 
-  it("should return new notification service if ff is CANARY and user is a beta tester", async () => {
+  it("should return new notification service if ff is CANARY and user is not a beta tester", async () => {
     const getService = getNotificationServiceFactory(
       oldNotificationService,
       newNotificationService,
-      [aFiscalCode],
+      [],
       FeatureFlagEnum.CANARY
     );
 
     const result = getService(aFiscalCode);
 
-    expect(result).toEqual(newNotificationService);
-    expect(result).not.toEqual(oldNotificationService);
+    expect(result).not.toEqual(newNotificationService);
+    expect(result).toEqual(oldNotificationService);
   });
 });
 
