@@ -41,8 +41,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      # this action create a folder named /azure-dashboard
-      - uses: pagopa/opex-dashboard-azure-action@test
+      # from https://github.com/pagopa/opex-dashboard-azure-action/
+      - uses: pagopa/opex-dashboard-azure-action@v1.0.2
         with:
           environment: ${{ matrix.environment }}
           api-name: ${{ env.API_NAME }}

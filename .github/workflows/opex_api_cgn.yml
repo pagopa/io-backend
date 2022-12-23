@@ -5,13 +5,13 @@ on:
   push:
     branches:
       - master
+      - opex-demo
     paths:
       - 'api_cgn.yaml'
       - '.github/workflows/opex_api_cgn.yml'
       - '.opex/api_cgn/**'
 
 env:
-  TEMPLATE_DIR: azure-dashboard
   CLIENT_ID: 10ab3c51-f734-4782-abe9-3e998a1a2e84
   TENANT_ID: 7788edaf-0346-4068-9d79-c868aed15b3d
   SUBSCRIPTION_ID: ec285037-c673-4f58-b594-d7c480da4e8b
@@ -41,46 +41,14 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Read terraform version
-        id: read-version
-        shell: bash
-        run: |
-          echo "TERRAFORM_VERSION=`cat .terraform-version`" >> $GITHUB_ENV
-
-      - name: Setup Terraform
-        # from https://github.com/hashicorp/setup-terraform/commits/main
-        uses: hashicorp/setup-terraform@8feba2b913ea459066180f9cb177f58a881cf146
+      # from https://github.com/pagopa/opex-dashboard-azure-action/
+      - uses: pagopa/opex-dashboard-azure-action@v1.0.2
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: Login
-        id: login
-        # from https://github.com/Azure/login/commits/master
-        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
-        with:
+          environment: ${{ matrix.environment }}
+          api-name: ${{ env.API_NAME }}
+          config: .opex/${{ env.API_NAME }}/env/${{ matrix.environment }}/config.yaml
           client-id: ${{ env.CLIENT_ID }}
           tenant-id: ${{ env.TENANT_ID }}
           subscription-id: ${{ env.SUBSCRIPTION_ID }}
-
-      # this action create a folder named /azure-dashboard
-      - uses: pagopa/opex-dashboard-action@main
-        with:
-          template: ${{ env.TEMPLATE_DIR }}
-          config: .opex/${{ env.API_NAME }}/env/${{ matrix.environment }}/config.yaml
-
-      # we need to set env variables in the folder /azure-dashboard
-      - name: Copy Environments
-        run: |
-          cp -R .opex/${API_NAME}/env ./${TEMPLATE_DIR}
-
-      # now is possible to launch the command: terraform apply
-      - name: Terraform Apply
-        shell: bash
-        run: |
-          cd ./${TEMPLATE_DIR}
-          export ARM_CLIENT_ID="${CLIENT_ID}"
-          export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
-          export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
-          export ARM_USE_OIDC=true
-
-          bash ./terraform.sh apply ${{ matrix.environment }} -auto-approve
+          # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
+          docker-version: sha256:490f804e0114dbbf5df491e8b201e4705848e93dee313f376a0412536088af52
