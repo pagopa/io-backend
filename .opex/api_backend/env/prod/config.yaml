@@ -14,3 +14,6 @@ overrides:
     /api/v1/payment-requests/{rptId}:
       response_time_threshold: 7
       availability_threshold: 0.25
+    /api/v1/payment-activations:
+      response_time_threshold: 4
+      availability_threshold: 0.95
