@@ -79,6 +79,7 @@
   "dependencies": {
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
+    "@pagopa/io-functions-commons": "^26.3.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
     "@pagopa/io-spid-commons": "^8.1.0",
     "@pagopa/ts-commons": "^10.7.0",
