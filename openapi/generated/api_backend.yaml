@@ -1,0 +1,2845 @@
+swagger: '2.0'
+info:
+  version: 9.4.0
+  title: Proxy API
+  description: Mobile and web proxy API gateway.
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  /services/{service_id}:
+    x-swagger-router-controller: ServicesController
+    parameters:
+      - name: service_id
+        in: path
+        type: string
+        required: true
+        description: The ID of an existing Service.
+    get:
+      operationId: getService
+      summary: Get Service
+      description: A previously created service with the provided service ID is returned.
+      responses:
+        '200':
+          description: Service found.
+          schema:
+            $ref: '#/definitions/ServicePublic'
+          examples:
+            application/json:
+              department_name: IO
+              organization_fiscal_code: '00000000000'
+              organization_name: IO
+              service_id: 5a563817fcc896087002ea46c49a
+              service_name: App IO
+              version: 1
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: No service found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the service.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+      parameters: []
+  /services/{service_id}/preferences:
+    post:
+      operationId: upsertServicePreferences
+      summary: UpsertServicePreferences
+      parameters:
+        - name: service_id
+          in: path
+          type: string
+          required: true
+          description: The ID of an existing Service.
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/UpsertServicePreference'
+      responses:
+        '200':
+          description: Service Preference found.
+          schema:
+            $ref: '#/definitions/ServicePreference'
+          examples:
+            application/json:
+              can_access_message_read_status: true
+              is_inbox_enabled: true
+              is_email_enabled: false
+              is_webhook_enabled: true
+              settings_version: 1
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Unauthorized
+        '404':
+          description: No service found for the provided ID.
+        '409':
+          description: >-
+            Conflict. Either the provided preference setting version is not
+            consistent with the current version stored in the Profile
+
+            or the Profile is not in the correct preference mode.
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal Server Error
+    get:
+      operationId: getServicePreferences
+      summary: GetServicePreferences
+      parameters:
+        - name: service_id
+          in: path
+          type: string
+          required: true
+          description: The ID of an existing Service.
+      responses:
+        '200':
+          description: Service Preference found.
+          schema:
+            $ref: '#/definitions/ServicePreference'
+          examples:
+            application/json:
+              can_access_message_read_status: true
+              is_inbox_enabled: true
+              is_email_enabled: false
+              is_webhook_enabled: true
+              settings_version: 1
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Unauthorized
+        '404':
+          description: No service found for the provided ID.
+        '409':
+          description: Conflict. The Profile is not in the correct preference mode.
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal Server Error
+  /services:
+    x-swagger-router-controller: ServicesController
+    get:
+      operationId: getVisibleServices
+      summary: Get all visible services
+      description: Returns the description of all visible services.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/PaginatedServiceTupleCollection'
+          examples:
+            application/json:
+              items:
+                - service_id: AzureDeployc49a
+                  version: 1
+                - service_id: 5a25abf4fcc89605c082f042c49a
+                  version: 0
+              page_size: 1
+        '401':
+          description: Bearer token null or expired.
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the services.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+      parameters:
+        - $ref: '#/parameters/PaginationRequest'
+  /messages:
+    x-swagger-router-controller: MessagesController
+    parameters:
+      - $ref: '#/parameters/PageSize'
+      - $ref: '#/parameters/EnrichResultData'
+      - $ref: '#/parameters/GetArchivedMessages'
+      - $ref: '#/parameters/MaximumId'
+      - $ref: '#/parameters/MinimumId'
+    get:
+      operationId: getUserMessages
+      summary: Get user's messages
+      description: >-
+        Returns the messages for the user identified by the provided fiscal
+        code.
+
+        Messages will be returned in inverse acceptance order (from last to
+        first).
+
+        The "next" field, when present, contains an URL pointing to the next
+        page of results.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/PaginatedPublicMessagesCollection'
+          examples:
+            application/json:
+              items:
+                - created_at: '2018-05-21T07:36:41.209Z'
+                  fiscal_code: LSSLCU79B24L219P
+                  id: 01CE0T1Z18T3NT9ECK5NJ09YR3
+                  sender_service_id: 5a563817fcc896087002ea46c49a
+                  time_to_live: 3600
+                - created_at: '2018-05-21T07:41:01.361Z'
+                  fiscal_code: LSSLCU79B24L219P
+                  id: 01CE0T9X1HT595GEF8FH9NRSW7
+                  sender_service_id: 5a563817fcc896087002ea46c49a
+                  time_to_live: 3600
+              next: 01CE0T9X1HT595GEF8FH9NRSW7
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: No message found.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the messages.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /messages/{id}:
+    x-swagger-router-controller: MessagesController
+    parameters:
+      - name: id
+        in: path
+        type: string
+        required: true
+        description: The ID of the message.
+      - $ref: '#/parameters/PublicMessage'
+    get:
+      operationId: getUserMessage
+      summary: Get message
+      description: Returns the message with the provided message ID.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/CreatedMessageWithContentAndAttachments'
+          examples:
+            application/json: |
+              content: {
+                markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                subject: "my subject ............",
+                attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}]
+              },
+              created_at: "2018-06-06T12:22:24.523Z",
+              fiscal_code: "LSSLCU79B24L219P",
+              id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+              sender_service_id: "5a25abf4fcc89605c082f042c49a",
+              time_to_live: 3600
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /messages/{id}/message-status:
+    x-swagger-router-controller: MessagesController
+    put:
+      operationId: upsertMessageStatusAttributes
+      summary: UpsertMessageStatusAttributes
+      description: Updates the status of a message with attributes
+      parameters:
+        - name: id
+          in: path
+          type: string
+          required: true
+          description: The ID of the message.
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/MessageStatusChange'
+          required: true
+          x-examples:
+            application/json: |
+              change_type: "bulk",
+              is_archived: true,
+              is_read: true
+      responses:
+        '200':
+          description: Success.
+          schema:
+            $ref: '#/definitions/MessageStatusAttributes'
+          examples:
+            application/json:
+              is_read: true,
+              is_archived: false
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Operation forbidden.
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in upserting message's status attributes.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /legal-messages/{id}:
+    x-swagger-router-controller: MessagesController
+    parameters:
+      - name: id
+        in: path
+        type: string
+        required: true
+        description: The ID of the message.
+    get:
+      operationId: getUserLegalMessage
+      summary: Get legal message
+      description: Returns the legal message with the provided message ID.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/LegalMessageWithContent'
+          examples:
+            application/json: |
+              content: {
+                markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                subject: "my subject ............",
+                attachments: [{name:"attachment", content:"aBase64Encoding", mime_type: "image/png"}]
+              },
+              created_at: "2018-06-06T12:22:24.523Z",
+              fiscal_code: "LSSLCU79B24L219P",
+              id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+              sender_service_id: "5a25abf4fcc89605c082f042c49a",
+              time_to_live: 3600
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /legal-messages/{id}/attachments/{attachment_id}:
+    x-swagger-router-controller: MessagesController
+    get:
+      operationId: getLegalMessageAttachment
+      summary: Retrieve an attachment of a legal message
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          type: string
+          required: true
+          description: The ID of the message.
+        - in: path
+          name: attachment_id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            format: binary
+            type: string
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+  /third-party-messages/{id}:
+    x-swagger-router-controller: MessagesController
+    get:
+      operationId: getThirdPartyMessage
+      summary: Retrieve Third Party message
+      description: Returns the Third Party message with the provided message ID.
+      parameters:
+        - name: id
+          in: path
+          type: string
+          minLength: 1
+          required: true
+          description: ID of the IO message.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/ThirdPartyMessageWithContent'
+          examples:
+            text/json: |
+              content: {
+                markdown: "hey hey !! <a style=\"color: red\" href=\"http://example.com\"> some content here ..... this is a link with a style applied, some other content</a>",
+                subject: "my subject ............",
+                third_party_data: [{id: "aThirdPartyMessageId"}]
+              },
+              third_party_message: { 
+                attachments: [], 
+                custom_property: "a custom property" 
+              },
+              created_at: "2018-06-06T12:22:24.523Z",
+              fiscal_code: "LSSLCU79B24L219P",
+              id: "01CFAGRMGB9XCA8B2CQ4QA7K76",
+              sender_service_id: "5a25abf4fcc89605c082f042c49a",
+              time_to_live: 3600
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Forbidden
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '410':
+          description: Third Party Service no longer available
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the message.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '501':
+          description: Not Implemented
+        '504':
+          description: Gateway Timeout
+  /third-party-messages/{id}/attachments/{attachment_url}:
+    x-swagger-router-controller: MessagesController
+    get:
+      operationId: getThirdPartyMessageAttachment
+      summary: Retrieve an attachment of a Thrid Party message
+      produces:
+        - application/octet-stream
+      parameters:
+        - name: id
+          in: path
+          type: string
+          minLength: 1
+          required: true
+          description: ID of the IO message.
+        - in: path
+          name: attachment_url
+          type: string
+          minLength: 1
+          required: true
+      responses:
+        '200':
+          description: Success
+          schema:
+            format: binary
+            type: string
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No message found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '410':
+          description: Third Party Service no longer available
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+        '501':
+          description: Not Implemented
+        '504':
+          description: Gateway Timeout
+  /profile:
+    x-swagger-router-controller: ProfileController
+    get:
+      operationId: getUserProfile
+      summary: Get user's profile
+      description: Returns the profile for the user identified by the provided fiscal code.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/InitializedProfile'
+          examples:
+            application/json:
+              email: email@example.com
+              family_name: Rossi
+              fiscal_code: TMMEXQ60A10Y526X
+              has_profile: true
+              is_email_set: true
+              is_inbox_enabled: true
+              is_webhook_enabled: true
+              name: Mario
+              spid_email: preferred@example.com
+              service_preferences_settings:
+                - mode: LEGACY
+              version: 1
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the user profile.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+    post:
+      operationId: updateProfile
+      summary: Update the User's profile
+      description: Update the profile for the user identified by the provided fiscal code.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/Profile'
+          required: true
+          x-examples:
+            application/json:
+              email: foobar@example.com
+              preferred_languages:
+                - it_IT
+              is_inbox_enabled: true
+              is_webhook_enabled: false
+              version: 1
+      responses:
+        '200':
+          description: Profile updated.
+          schema:
+            $ref: '#/definitions/InitializedProfile'
+          examples:
+            application/json:
+              email: email@example.com
+              family_name: Rossi
+              fiscal_code: TMMEXQ60A10Y526X
+              has_profile: true
+              is_email_set: true
+              is_inbox_enabled: true
+              is_webhook_enabled: true
+              name: Mario
+              spid_email: preferred@example.com
+              version: 0
+        '400':
+          description: Invalid payload.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: User not found
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '409':
+          description: Conflict.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: Profile cannot be updated.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /api-profile:
+    x-swagger-router-controller: ProfileController
+    get:
+      operationId: getApiUserProfile
+      summary: Get user's profile stored into the API
+      description: Returns the profile for the user identified by the provided fiscal code.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/ExtendedProfile'
+          examples:
+            application/json:
+              email: email@example.com
+              preferred_languages:
+                - it_IT
+              is_inbox_enabled: true
+              accepted_tos_version: 1
+              is_webhook_enabled: true
+              is_email_enabled: true
+              version: 1
+              sender_allowed: true
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: Profile not found
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error in retrieving the user profile.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /email-validation-process:
+    x-swagger-router-controller: ProfileController
+    post:
+      operationId: startEmailValidationProcess
+      summary: Start the Email Validation Process
+      description: |-
+        Start the email validation process that create the validation token
+        and send the validation email
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: Profile not found
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: There was an error starting email validation process
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /user-metadata:
+    x-swagger-router-controller: userMetadataController
+    get:
+      operationId: getUserMetadata
+      summary: Get user's metadata
+      description: Returns metadata for the current authenticated user.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/UserMetadata'
+        '204':
+          description: No Content.
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: There was an error in retrieving the user metadata.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+    post:
+      operationId: upsertUserMetadata
+      summary: Set User's metadata
+      description: Create or update metadata for the current authenticated user.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/UserMetadata'
+          required: true
+      responses:
+        '200':
+          description: User Metadata updated.
+          schema:
+            $ref: '#/definitions/UserMetadata'
+        '400':
+          description: Invalid payload.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '409':
+          description: Conflict.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: Profile cannot be updated.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /installations/{installationID}:
+    x-swagger-router-controller: NotificationController
+    parameters:
+      - name: installationID
+        in: path
+        required: true
+        description: The ID of the message.
+        type: string
+    put:
+      operationId: createOrUpdateInstallation
+      summary: Create or update an Installation
+      description: Create or update an Installation to the Azure Notification hub.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/Installation'
+          required: true
+          x-examples:
+            application/json:
+              platform: gcm
+              pushChannel: >-
+                fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p
+      responses:
+        '200':
+          description: Success.
+          schema:
+            $ref: '#/definitions/SuccessResponse'
+          examples:
+            application/json:
+              message: ok
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: >-
+            There was an error in registering the device to the Notification
+            Hub.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /session:
+    x-swagger-router-controller: AuthenticationController
+    get:
+      operationId: getSessionState
+      summary: Get the user current session
+      description: Return the session state for the current authenticated user.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/PublicSession'
+          examples:
+            application/json:
+              spidLevel: https://www.spid.gov.it/SpidL2
+              walletToken: >-
+                c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /sessions:
+    x-swagger-router-controller: AuthenticationController
+    get:
+      operationId: listUserSessions
+      summary: List sessions of a User
+      description: Return all the active sessions for an authenticated User.
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/SessionsList'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: Unavailable service
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /token/support:
+    x-swagger-router-controller: SupportController
+    get:
+      operationId: getSupportToken
+      summary: Get a JWT Support Token
+      description: Return a JWT Support Token for the authenticated user.
+      responses:
+        '200':
+          description: Created.
+          schema:
+            $ref: '#/definitions/SupportToken'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: Unavailable service
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /payment-requests/{rptId}:
+    x-swagger-router-controller: PagoPAProxyController
+    parameters:
+      - name: rptId
+        in: path
+        required: true
+        description: Unique identifier for payments.
+        type: string
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
+    get:
+      operationId: getPaymentInfo
+      summary: Get Payment Info
+      description: Retrieve information about a payment
+      responses:
+        '200':
+          description: Payment information retrieved
+          schema:
+            $ref: '#/definitions/PaymentRequestsGetResponse'
+          examples:
+            application/json:
+              importoSingoloVersamento: 200,
+              codiceContestoPagamento: ABC123
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: PagoPA services are not available or request is rejected
+          schema:
+            $ref: '#/definitions/PaymentProblemJson'
+        '504':
+          description: gateway timeout.
+  /payment-activations:
+    x-swagger-router-controller: PagoPAProxyController
+    parameters:
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
+    post:
+      operationId: activatePayment
+      summary: Activate Payment
+      description: Require a lock (activation) for a payment
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/PaymentActivationsPostRequest'
+          required: true
+          x-examples:
+            application/json:
+              rptId: '12345678901012123456789012345'
+              importoSingoloVersamento: 200
+              codiceContestoPagamento: ABC123
+      responses:
+        '200':
+          description: Payment activation process started
+          schema:
+            $ref: '#/definitions/PaymentActivationsPostResponse'
+          examples:
+            application/json:
+              importoSingoloVersamento: 200
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '500':
+          description: PagoPA services are not available or request is rejected
+          schema:
+            $ref: '#/definitions/PaymentProblemJson'
+        '504':
+          description: gateway timeout.
+  /payment-activations/{codiceContestoPagamento}:
+    x-swagger-router-controller: PagoPAProxyController
+    parameters:
+      - name: codiceContestoPagamento
+        in: path
+        required: true
+        description: Transaction Id used to identify the communication flow.
+        type: string
+      - name: test
+        in: query
+        description: Use test environment of PagoPAClient
+        type: boolean
+        required: false
+    get:
+      operationId: getActivationStatus
+      summary: Get Activation status
+      description: Check the activation status to retrieve the paymentId
+      responses:
+        '200':
+          description: Payment information
+          schema:
+            $ref: '#/definitions/PaymentActivationsGetResponse'
+          examples:
+            application/json:
+              idPagamento: '123455'
+        '400':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: Activation status not found
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '500':
+          description: Unavailable service
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '504':
+          description: gateway timeout.
+  /user-data-processing:
+    x-swagger-router-controller: UserDataProcessingController
+    post:
+      operationId: upsertUserDataProcessing
+      summary: Set User's data processing choices
+      description: >-
+        Let the authenticated user express his will to retrieve or delete his
+        stored data.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/UserDataProcessingChoiceRequest'
+          required: true
+      responses:
+        '200':
+          description: User Data processing created / updated.
+          schema:
+            $ref: '#/definitions/UserDataProcessing'
+        '400':
+          description: Invalid payload.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Bearer token null or expired.
+        '409':
+          description: Conflict.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too may requests
+        '500':
+          description: User Data processing choice cannot be taken in charge.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /user-data-processing/{choice}:
+    x-swagger-router-controller: UserDataProcessingController
+    get:
+      operationId: getUserDataProcessing
+      summary: Get User's data processing
+      description: >-
+        Get the user's request to delete or download his stored data by
+        providing a kind of choice.
+      parameters:
+        - $ref: '#/parameters/UserDataProcessingChoiceParam'
+      responses:
+        '200':
+          description: User data processing retrieved
+          schema:
+            $ref: '#/definitions/UserDataProcessing'
+        '401':
+          description: Bearer token null or expired.
+        '404':
+          description: Not found.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+    delete:
+      operationId: abortUserDataProcessing
+      summary: Abort User's revious data processing request
+      description: Ask for a request to abort, if present
+      tags:
+        - restricted
+      parameters:
+        - $ref: '#/parameters/UserDataProcessingChoiceParam'
+      responses:
+        '202':
+          description: The abort request has been recorded
+        '400':
+          description: Invalid request.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too many requests
+        '500':
+          description: Server Error
+          schema:
+            $ref: '#/definitions/ProblemJson'
+definitions:
+  AcceptedTosVersion:
+    type: number
+    minimum: 1
+    description: Version of latest terms of service accepted by the user.
+  AppVersion:
+    type: string
+    pattern: ^((0|[1-9]\\d*)\\.){2}(0|[1-9]\\d*)(\\.(0|[1-9]\\d*)){0,1}$
+    description: A string field in Semantic Versioning format
+    example: 1.10.11
+  BlockedInboxOrChannels:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        type: string
+        description: |-
+          All notification channels plus the message inbox.
+          These represent all the possible channels a user could block.
+        x-extensible-enum:
+          - EMAIL
+          - INBOX
+          - WEBHOOK
+        example: INBOX
+    description: |-
+      All the notification channels blocked by the user.
+      Each channel is related to a specific service (sender).
+  DepartmentName:
+    type: string
+    description: |-
+      The department inside the organization that runs the service. Will
+      be added to the content of sent messages.
+    minLength: 1
+  EmailAddress:
+    type: string
+    format: email
+    example: foobar@example.com
+  PreferredLanguage:
+    type: string
+    x-extensible-enum:
+      - it_IT
+      - en_GB
+      - es_ES
+      - de_DE
+      - fr_FR
+    example: it_IT
+  PreferredLanguages:
+    type: array
+    items:
+      $ref: '#/definitions/PreferredLanguage'
+    description: >-
+      Indicates the User's preferred written or spoken languages in order
+
+      of preference. Generally used for selecting a localized User interface.
+      Valid
+
+      values are concatenation of the ISO 639-1 two letter language code, an
+      underscore,
+
+      and the ISO 3166-1 2 letter country code; e.g., 'en_US' specifies the
+      language
+
+      English and country US.
+  Profile:
+    type: object
+    description: |-
+      Describes the citizen's profile.
+      Used for profile update.
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      service_preferences_settings:
+        $ref: '#/definitions/ServicePreferencesSettings'
+      blocked_inbox_or_channels:
+        $ref: '#/definitions/BlockedInboxOrChannels'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: '#/definitions/IsInboxEnabled'
+      accepted_tos_version:
+        $ref: '#/definitions/AcceptedTosVersion'
+      is_webhook_enabled:
+        $ref: '#/definitions/IsWebhookEnabled'
+      is_email_enabled:
+        $ref: '#/definitions/IsEmailEnabled'
+      reminder_status:
+        $ref: '#/definitions/ReminderStatus'
+      last_app_version:
+        $ref: '#/definitions/AppVersion'
+      push_notifications_content_type:
+        $ref: '#/definitions/PushNotificationsContentType'
+      version:
+        type: integer
+    required:
+      - version
+  ExtendedProfile:
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      email:
+        $ref: '#/definitions/EmailAddress'
+      service_preferences_settings:
+        $ref: '#/definitions/ServicePreferencesSettings'
+      blocked_inbox_or_channels:
+        $ref: '#/definitions/BlockedInboxOrChannels'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: '#/definitions/IsInboxEnabled'
+      accepted_tos_version:
+        $ref: '#/definitions/AcceptedTosVersion'
+      is_webhook_enabled:
+        $ref: '#/definitions/IsWebhookEnabled'
+      is_email_enabled:
+        $ref: '#/definitions/IsEmailEnabled'
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
+      reminder_status:
+        $ref: '#/definitions/ReminderStatus'
+      is_test_profile:
+        $ref: '#/definitions/IsTestProfile'
+      last_app_version:
+        $ref: '#/definitions/AppVersion'
+      push_notifications_content_type:
+        $ref: '#/definitions/PushNotificationsContentType'
+      version:
+        type: integer
+    required:
+      - is_email_enabled
+      - is_email_validated
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - service_preferences_settings
+      - version
+  FiscalCode:
+    type: string
+    description: User's fiscal code.
+    format: FiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: SPNDNL80R13C555X
+  IsEmailEnabled:
+    type: boolean
+    description: >-
+      True if the recipient of a message wants to forward the notifications to
+      his email address.
+  IsInboxEnabled:
+    type: boolean
+    description: |-
+      True if the recipient of a message wants to store its content for
+      later retrieval.
+  IsEmailValidated:
+    type: boolean
+    description: True if the user email has been validated.
+  ReminderStatus:
+    type: string
+    x-extensible-enum:
+      - ENABLED
+      - DISABLED
+    example: ENABLED
+    description: Api definition of reminder opt-in status
+  PushNotificationsContentType:
+    type: string
+    x-extensible-enum:
+      - FULL
+      - ANONYMOUS
+    example: FULL
+    description: >-
+      This parameter specifies how a specific user wants to visualize push
+      notifications.
+
+      FULL leads to descriptive push notifications while ANONYMOUS leads to
+      silent ones.
+  IsTestProfile:
+    type: boolean
+    description: True if the user's profile is only for test purpose.
+    default: false
+  IsWebhookEnabled:
+    type: boolean
+    description: >-
+      True if the recipient of a message wants to forward the notifications to
+      the default webhook.
+  LimitedProfile:
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      sender_allowed:
+        type: boolean
+        description: |-
+          True in case the service that made the request can send
+          messages to the user identified by this profile (false otherwise).
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+    required:
+      - sender_allowed
+  MessageBodyMarkdown:
+    type: string
+    description: |-
+      The full version of the message, in plain text or Markdown format. The
+      content of this field will be delivered to channels that don't have any
+      limit in terms of content size (e.g. email, etc...).
+    minLength: 80
+    maxLength: 10000
+    example: |-
+      # This is a markdown header
+
+      to show how easily markdown can be converted to **HTML**
+
+      Remember: this has to be a long text.
+  MessageContent:
+    allOf:
+      - $ref: '#/definitions/MessageContentBase'
+      - type: object
+        properties:
+          payment_data:
+            $ref: '#/definitions/PaymentData'
+          prescription_data:
+            $ref: '#/definitions/PrescriptionData'
+          legal_data:
+            $ref: '#/definitions/LegalData'
+          eu_covid_cert:
+            $ref: '#/definitions/EUCovidCert'
+          third_party_data:
+            $ref: '#/definitions/ThirdPartyData'
+          due_date:
+            $ref: '#/definitions/Timestamp'
+  MessageResponseNotificationStatus:
+    type: object
+    properties:
+      email:
+        $ref: '#/definitions/NotificationChannelStatusValue'
+      webhook:
+        $ref: '#/definitions/NotificationChannelStatusValue'
+  NotificationChannelStatusValue:
+    type: string
+    description: >-
+      The status of a notification (one for each channel).
+
+      "SENT": the notification was succesfully sent to the channel (ie. email or
+      push notification)
+
+      "THROTTLED": a temporary failure caused a retry during the notification
+      processing;
+        the notification associated with this channel will be delayed for a maximum of 7 days or until the message expires
+      "EXPIRED": the message expired before the notification could be sent;
+        this means that the maximum message time to live was reached; no notification will be sent to this channel
+      "FAILED": a permanent failure caused the process to exit with an error, no
+      notification will be sent to this channel
+    x-extensible-enum:
+      - SENT
+      - THROTTLED
+      - EXPIRED
+      - FAILED
+    example: SENT
+  NotificationChannel:
+    type: string
+    description: All notification channels.
+    x-extensible-enum:
+      - EMAIL
+      - WEBHOOK
+    example: EMAIL
+  MessageSubject:
+    type: string
+    description: |-
+      The (optional) subject of the message - note that only some notification
+      channels support the display of a subject. When a subject is not provided,
+      one gets generated from the client attributes.
+    minLength: 10
+    maxLength: 120
+    example: Welcome new user !
+  MessageContentBase:
+    type: object
+    properties:
+      subject:
+        $ref: '#/definitions/MessageSubject'
+      markdown:
+        $ref: '#/definitions/MessageBodyMarkdown'
+    required:
+      - subject
+      - markdown
+  EUCovidCert:
+    type: object
+    description: Paylod with access token to retrieve a EU Covid Certificate
+    properties:
+      auth_code:
+        type: string
+    required:
+      - auth_code
+  OrganizationFiscalCode:
+    type: string
+    description: Organization fiscal code.
+    format: OrganizationFiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: '12345678901'
+  NewMessageContent:
+    allOf:
+      - $ref: '#/definitions/MessageContentBase'
+      - type: object
+        properties:
+          payment_data:
+            $ref: '#/definitions/PaymentDataWithRequiredPayee'
+          due_date:
+            $ref: '#/definitions/Timestamp'
+          prescription_data:
+            $ref: '#/definitions/PrescriptionData'
+          eu_covid_cert:
+            $ref: '#/definitions/EUCovidCert'
+          third_party_data:
+            $ref: '#/definitions/ThirdPartyData'
+          legal_data:
+            $ref: '#/definitions/LegalData'
+  Payee:
+    type: object
+    description: Metadata needed to explicit payment's payee.
+    properties:
+      fiscal_code:
+        $ref: '#/definitions/OrganizationFiscalCode'
+    required:
+      - fiscal_code
+  PaymentDataBase:
+    type: object
+    description: Metadata needed to process pagoPA payments.
+    properties:
+      amount:
+        $ref: '#/definitions/PaymentAmount'
+      notice_number:
+        $ref: '#/definitions/PaymentNoticeNumber'
+      invalid_after_due_date:
+        type: boolean
+        default: false
+    required:
+      - amount
+      - notice_number
+  PaymentDataWithRequiredPayee:
+    allOf:
+      - $ref: '#/definitions/PaymentDataBase'
+      - type: object
+        properties:
+          payee:
+            $ref: '#/definitions/Payee'
+        required:
+          - payee
+  OrganizationName:
+    type: string
+    description: |-
+      The organization that runs the service. Will be added to the content
+      of sent messages to identify the sender.
+    minLength: 1
+  PaginationResponse:
+    type: object
+    description: Pagination response parameters.
+    properties:
+      prev:
+        type: string
+        description: Contains a value useful to get the previous page
+        example: first_id_of_the_page
+      next:
+        type: string
+        description: Contains a value useful to get the next page
+        example: last_id_of_the_page
+  PrescriptionData:
+    type: object
+    description: Metadata needed to process medical prescriptions.
+    properties:
+      nre:
+        description: >-
+          The field *Numero ricetta elettronica* identifies the medical
+          prescription at national level.
+        type: string
+        minLength: 15
+        maxLength: 15
+      iup:
+        description: >-
+          The field *Identificativo Unico di Prescrizione* identifies the
+          medical prescription at regional level.
+        type: string
+        minLength: 1
+        maxLength: 16
+      prescriber_fiscal_code:
+        type: string
+        description: Fiscal code of the Doctor that made the prescription.
+        format: FiscalCode
+        x-import: '@pagopa/ts-commons/lib/strings'
+        example: TCNZRO80R13C555Y
+    required:
+      - nre
+  ProblemJson:
+    type: object
+    properties:
+      type:
+        type: string
+        format: uri
+        description: |-
+          An absolute URI that identifies the problem type. When dereferenced,
+          it SHOULD provide human-readable documentation for the problem type
+          (e.g., using HTML).
+        default: about:blank
+        example: https://example.com/problem/constraint-violation
+      title:
+        type: string
+        description: |-
+          A short, summary of the problem type. Written in english and readable
+          for engineers (usually not suited for non technical stakeholders and
+          not localized); example: Service Unavailable
+      status:
+        type: integer
+        format: int32
+        description: >-
+          The HTTP status code generated by the origin server for this
+          occurrence
+
+          of the problem.
+        minimum: 100
+        maximum: 600
+        exclusiveMaximum: true
+        example: 200
+      detail:
+        type: string
+        description: |-
+          A human readable explanation specific to this occurrence of the
+          problem.
+        example: There was an error processing the request
+      instance:
+        type: string
+        format: uri
+        description: >-
+          An absolute URI that identifies the specific occurrence of the
+          problem.
+
+          It may or may not yield further information if dereferenced.
+  ServiceId:
+    type: string
+    description: |-
+      The ID of the Service. Equals the subscriptionId of a registered
+      API user.
+    minLength: 1
+  ServiceName:
+    type: string
+    description: The name of the service. Will be added to the content of sent messages.
+    minLength: 1
+  ServicePublic:
+    title: Service (public)
+    description: A Service associated to an user's subscription.
+    type: object
+    properties:
+      service_id:
+        $ref: '#/definitions/ServiceId'
+      service_name:
+        $ref: '#/definitions/ServiceName'
+      organization_name:
+        $ref: '#/definitions/OrganizationName'
+      department_name:
+        $ref: '#/definitions/DepartmentName'
+      organization_fiscal_code:
+        $ref: '#/definitions/OrganizationFiscalCode'
+      available_notification_channels:
+        description: All the notification channels available for a service.
+        type: array
+        items:
+          $ref: '#/definitions/NotificationChannel'
+      version:
+        type: integer
+      service_metadata:
+        $ref: '#/definitions/ServiceMetadata'
+    required:
+      - service_id
+      - service_name
+      - organization_name
+      - department_name
+      - organization_fiscal_code
+      - version
+  ServiceMetadata:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/StandardServiceMetadata'
+      - $ref: '#/definitions/SpecialServiceMetadata'
+      - $ref: '#/definitions/CommonServiceMetadata'
+  CommonServiceMetadata:
+    type: object
+    description: A set of metadata properties related to this service.
+    properties:
+      description:
+        type: string
+        minLength: 1
+      web_url:
+        type: string
+        minLength: 1
+      app_ios:
+        type: string
+        minLength: 1
+      app_android:
+        type: string
+        minLength: 1
+      tos_url:
+        type: string
+        minLength: 1
+      privacy_url:
+        type: string
+        minLength: 1
+      address:
+        type: string
+        minLength: 1
+      phone:
+        type: string
+        minLength: 1
+      email:
+        type: string
+        minLength: 1
+      pec:
+        type: string
+        minLength: 1
+      cta:
+        type: string
+        minLength: 1
+      token_name:
+        type: string
+        minLength: 1
+      support_url:
+        type: string
+        minLength: 1
+      scope:
+        $ref: '#/definitions/ServiceScope'
+    required:
+      - scope
+  StandardServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/StandardServiceCategory'
+        required:
+          - category
+  SpecialServiceMetadata:
+    allOf:
+      - $ref: '#/definitions/CommonServiceMetadata'
+      - type: object
+        properties:
+          category:
+            $ref: '#/definitions/SpecialServiceCategory'
+          custom_special_flow:
+            type: string
+            minLength: 1
+        required:
+          - category
+  ServiceTuple:
+    description: Service identifier and version used to return list of services.
+    type: object
+    properties:
+      service_id:
+        $ref: '#/definitions/ServiceId'
+      scope:
+        $ref: '#/definitions/ServiceScope'
+      version:
+        type: integer
+    required:
+      - service_id
+      - version
+  ServiceScope:
+    type: string
+    x-extensible-enum:
+      - NATIONAL
+      - LOCAL
+  ServiceCategory:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/SpecialServiceCategory'
+      - $ref: '#/definitions/StandardServiceCategory'
+  SpecialServiceCategory:
+    type: string
+    x-extensible-enum:
+      - SPECIAL
+  StandardServiceCategory:
+    type: string
+    x-extensible-enum:
+      - STANDARD
+  PaginatedServiceTupleCollection:
+    description: A paginated collection of services tuples
+    allOf:
+      - description: A collection of services tuples (service and version)
+        type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/definitions/ServiceTuple'
+        required:
+          - items
+      - $ref: '#/definitions/PaginationResponse'
+  Timestamp:
+    type: string
+    format: UTCISODateFromString
+    description: A date-time field in ISO-8601 format and UTC timezone.
+    x-import: '@pagopa/ts-commons/lib/dates'
+    example: '2018-10-13T00:00:00.000Z'
+  PaymentNoticeNumber:
+    description: >-
+      The field ["Numero
+      Avviso"](https://pagopa-specifichepagamenti.readthedocs.io/it/latest/_docs/Capitolo7.html#il-numero-avviso-e-larchivio-dei-pagamenti-in-attesa)
+      of pagoPa, needed to identify the payment. Format is `<aux digit
+      (1n)>[<application code> (2n)]<codice IUV (15|17n)>`. See [pagoPa
+      specs](https://www.agid.gov.it/sites/default/files/repository_files/specifiche_attuative_pagamenti_1_3_1_0.pdf)
+      for more info on this field and the IUV.
+    type: string
+    pattern: ^[0123][0-9]{17}$
+  PaymentAmount:
+    description: >-
+      Amount of payment in euro cent. PagoPA accepts up to 9999999999 euro
+      cents.
+    type: integer
+    minimum: 1
+    maximum: 9999999999
+  PaymentData:
+    allOf:
+      - $ref: '#/definitions/PaymentDataBase'
+      - type: object
+        properties:
+          payee:
+            $ref: '#/definitions/Payee'
+  TimeToLiveSeconds:
+    type: integer
+    default: 3600
+    minimum: 3600
+    maximum: 604800
+    description: |-
+      This parameter specifies for how long (in seconds) the system will
+      try to deliver the message to the channels configured by the user.
+    example: 3600
+  CreatedMessageWithContent:
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      content:
+        $ref: '#/definitions/NewMessageContent'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - content
+      - sender_service_id
+  CreatedMessageWithoutContent:
+    type: object
+    properties:
+      id:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      time_to_live:
+        $ref: '#/definitions/TimeToLiveSeconds'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      sender_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - id
+      - fiscal_code
+      - created_at
+      - sender_service_id
+  CreatedMessageWithoutContentCollection:
+    description: A collection of messages
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/CreatedMessageWithoutContent'
+    required:
+      - items
+  PaginatedCreatedMessageWithoutContentCollection:
+    description: A paginated collection of messages
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithoutContentCollection'
+      - $ref: '#/definitions/PaginationResponse'
+  UserDataProcessingStatus:
+    type: string
+    description: The status of a user data processing request
+    enum:
+      - PENDING
+      - WIP
+      - CLOSED
+      - FAILED
+      - ABORTED
+    example: PENDING
+  UserDataProcessingChoice:
+    type: string
+    description: User's choice to delete or download his own data.
+    enum:
+      - DOWNLOAD
+      - DELETE
+    example: DOWNLOAD
+  UserDataProcessingChoiceRequest:
+    type: object
+    description: A request wrapper for User data processing choice
+    properties:
+      choice:
+        $ref: '#/definitions/UserDataProcessingChoice'
+    required:
+      - choice
+  UserDataProcessing:
+    type: object
+    description: A representation of a single user data processing request
+    properties:
+      choice:
+        $ref: '#/definitions/UserDataProcessingChoice'
+      status:
+        $ref: '#/definitions/UserDataProcessingStatus'
+      created_at:
+        $ref: '#/definitions/Timestamp'
+      updated_at:
+        $ref: '#/definitions/Timestamp'
+      version:
+        type: integer
+    required:
+      - choice
+      - status
+      - version
+  MessageResponseWithContent:
+    type: object
+    properties:
+      message:
+        $ref: '#/definitions/CreatedMessageWithContent'
+      notification:
+        $ref: '#/definitions/MessageResponseNotificationStatus'
+      status:
+        $ref: '#/definitions/MessageStatusValue'
+    required:
+      - message
+  ServicePreferencesSettings:
+    description: |-
+      Describes the citizen's profile, mostly interesting for preferences
+      attributes.
+    type: object
+    properties:
+      mode:
+        $ref: '#/definitions/ServicesPreferencesMode'
+    required:
+      - mode
+  ServicesPreferencesMode:
+    type: string
+    enum:
+      - LEGACY
+      - AUTO
+      - MANUAL
+  BasicServicePreference:
+    description: >-
+      Define a set of required preferences of a Citizen for a given Service.
+
+      It's needed by Citizens to express how they want Services to get in touch
+      with them.
+    type: object
+    properties:
+      is_email_enabled:
+        type: boolean
+      is_inbox_enabled:
+        type: boolean
+      is_webhook_enabled:
+        type: boolean
+      settings_version:
+        type: integer
+        minimum: 0
+    required:
+      - is_email_enabled
+      - is_inbox_enabled
+      - is_webhook_enabled
+      - settings_version
+  ServicePreference:
+    description: |-
+      Return the set of preferences of a Citizen for a given Service.
+      It's needed by Citizens to read previoulsy expressed preferences.
+    allOf:
+      - $ref: '#/definitions/BasicServicePreference'
+      - type: object
+        properties:
+          can_access_message_read_status:
+            type: boolean
+        required:
+          - can_access_message_read_status
+  UpsertServicePreference:
+    description: >-
+      Define a set of preferences of a Citizen for a given Service.
+
+      Extends the BasicServicePreference with new optional preferences for
+      backward compatibility.
+    allOf:
+      - $ref: '#/definitions/BasicServicePreference'
+      - type: object
+        properties:
+          can_access_message_read_status:
+            type: boolean
+  EnrichedMessage:
+    allOf:
+      - type: object
+        properties:
+          id:
+            type: string
+          fiscal_code:
+            $ref: '#/definitions/FiscalCode'
+          time_to_live:
+            $ref: '#/definitions/TimeToLiveSeconds'
+          created_at:
+            $ref: '#/definitions/Timestamp'
+          sender_service_id:
+            $ref: '#/definitions/ServiceId'
+          service_name:
+            type: string
+          organization_name:
+            type: string
+          message_title:
+            type: string
+          category:
+            $ref: '#/definitions/MessageCategory'
+          has_attachments:
+            type: boolean
+            default: false
+        required:
+          - id
+          - fiscal_code
+          - created_at
+          - sender_service_id
+          - service_name
+          - organization_name
+          - message_title
+      - $ref: '#/definitions/MessageStatusAttributes'
+  PublicMessage:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/EnrichedMessage'
+      - $ref: '#/definitions/CreatedMessageWithoutContent'
+  PublicMessagesCollection:
+    description: A collection of messages
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/PublicMessage'
+    required:
+      - items
+  PaginatedPublicMessagesCollection:
+    description: A paginated collection of messages
+    allOf:
+      - $ref: '#/definitions/PublicMessagesCollection'
+      - $ref: '#/definitions/PaginationResponse'
+  MessageCategory:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/MessageCategoryPayment'
+      - $ref: '#/definitions/MessageCategoryBase'
+      - $ref: '#/definitions/MessageCategoryPN'
+  MessageCategoryBase:
+    type: object
+    properties:
+      tag:
+        type: string
+        enum:
+          - LEGAL_MESSAGE
+          - EU_COVID_CERT
+          - GENERIC
+    required:
+      - tag
+  MessageCategoryPayment:
+    type: object
+    properties:
+      tag:
+        type: string
+        enum:
+          - PAYMENT
+      rptId:
+        type: string
+    required:
+      - tag
+      - rptId
+  LegalMessageWithContent:
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithContent'
+      - type: object
+        properties:
+          legal_message:
+            $ref: '#/definitions/LegalMessage'
+        required:
+          - legal_message
+  MessageCategoryPN:
+    allOf:
+      - $ref: '#/definitions/ThirdPartyData'
+      - type: object
+        properties:
+          tag:
+            type: string
+            enum:
+              - PN
+        required:
+          - tag
+  LegalMessage:
+    type: object
+    properties:
+      eml:
+        $ref: '#/definitions/LegalMessageEml'
+      cert_data:
+        $ref: '#/definitions/LegalMessageCertData'
+    required:
+      - eml
+      - cert_data
+  ThirdPartyData:
+    type: object
+    description: >-
+      Payload containing all information needed to retrieve and visualize third
+      party message details
+    properties:
+      id:
+        type: string
+        description: >-
+          Unique id for retrieving third party enriched information about the
+          message
+        minLength: 1
+      original_sender:
+        type: string
+        description: Either a ServiceId or a simple string representing the sender name
+        minLength: 1
+      original_receipt_date:
+        $ref: '#/definitions/Timestamp'
+      has_attachments:
+        type: boolean
+        default: false
+      summary:
+        type: string
+        minLength: 1
+    required:
+      - id
+  ThirdPartyMessageWithContent:
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithContent'
+      - type: object
+        properties:
+          third_party_message:
+            $ref: '#/definitions/ThirdPartyMessage'
+        required:
+          - third_party_message
+  ThirdPartyMessage:
+    type: object
+    properties:
+      attachments:
+        type: array
+        items:
+          $ref: '#/definitions/ThirdPartyAttachment'
+      details:
+        type: object
+        additionalProperties: true
+  ThirdPartyAttachment:
+    type: object
+    properties:
+      id:
+        type: string
+        minLength: 1
+      content_type:
+        type: string
+        minLength: 1
+      name:
+        type: string
+        minLength: 1
+      url:
+        type: string
+        minLength: 1
+    required:
+      - id
+      - url
+  LegalMessageEml:
+    type: object
+    properties:
+      subject:
+        type: string
+      plain_text_content:
+        type: string
+      html_content:
+        type: string
+      attachments:
+        type: array
+        items:
+          $ref: '#/definitions/Attachment'
+    required:
+      - subject
+      - plain_text_content
+      - html_content
+      - attachments
+  LegalMessageCertData:
+    type: object
+    properties:
+      header:
+        $ref: '#/definitions/CertDataHeader'
+      data:
+        $ref: '#/definitions/CertData'
+    required:
+      - header
+      - data
+  CertData:
+    type: object
+    properties:
+      sender_provider:
+        type: string
+        minLength: 1
+      timestamp:
+        type: string
+        format: date-time
+      envelope_id:
+        type: string
+        minLength: 1
+      msg_id:
+        type: string
+        minLength: 1
+      receipt_type:
+        type: string
+    required:
+      - sender_provider
+      - timestamp
+      - envelope_id
+      - msg_id
+      - receipt_type
+  CertDataHeader:
+    type: object
+    properties:
+      sender:
+        type: string
+        minLength: 1
+      recipients:
+        type: string
+        minLength: 1
+      replies:
+        type: string
+        minLength: 1
+      object:
+        type: string
+        minLength: 1
+    required:
+      - sender
+      - recipients
+  Attachment:
+    type: object
+    properties:
+      id:
+        type: string
+      content_type:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+    required:
+      - id
+      - content_type
+      - name
+  LegalData:
+    type: object
+    properties:
+      sender_mail_from:
+        type: string
+        minLength: 1
+      has_attachment:
+        type: boolean
+        default: false
+      message_unique_id:
+        type: string
+        minLength: 1
+      original_message_url:
+        type: string
+        minLength: 1
+      pec_server_service_id:
+        $ref: '#/definitions/ServiceId'
+    required:
+      - sender_mail_from
+      - has_attachment
+      - message_unique_id
+  MessageStatusValue:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/RejectedMessageStatusValue'
+      - $ref: '#/definitions/NotRejectedMessageStatusValue'
+    description: >-
+      The processing status of a message.
+
+      "ACCEPTED": the message has been accepted and will be processed for
+      delivery;
+        we'll try to store its content in the user's inbox and notify him on his preferred channels
+      "THROTTLED": a temporary failure caused a retry during the message
+      processing;
+        any notification associated with this message will be delayed for a maximum of 7 days
+      "FAILED": a permanent failure caused the process to exit with an error, no
+      notification will be sent for this message
+
+      "PROCESSED": the message was succesfully processed and is now stored in
+      the user's inbox;
+        we'll try to send a notification for each of the selected channels
+      "REJECTED": either the recipient does not exist, or the sender has been
+      blocked
+  RejectedMessageStatusValue:
+    type: string
+    x-extensible-enum:
+      - REJECTED
+  NotRejectedMessageStatusValue:
+    type: string
+    x-extensible-enum:
+      - ACCEPTED
+      - THROTTLED
+      - FAILED
+      - PROCESSED
+  MessageStatusAttributes:
+    type: object
+    properties:
+      is_read:
+        type: boolean
+        default: false
+      is_archived:
+        type: boolean
+        default: false
+    required:
+      - is_read
+      - is_archived
+  MessageStatusReadingChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - reading
+      is_read:
+        type: boolean
+        enum:
+          - true
+    required:
+      - change_type
+      - is_read
+  MessageStatusArchivingChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - archiving
+      is_archived:
+        type: boolean
+    required:
+      - change_type
+      - is_archived
+  MessageStatusBulkChange:
+    type: object
+    properties:
+      change_type:
+        type: string
+        enum:
+          - bulk
+      is_archived:
+        type: boolean
+      is_read:
+        type: boolean
+        enum:
+          - true
+    required:
+      - change_type
+      - is_archived
+  MessageStatusChange:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/MessageStatusReadingChange'
+      - $ref: '#/definitions/MessageStatusArchivingChange'
+      - $ref: '#/definitions/MessageStatusBulkChange'
+  CreatedMessageWithContentResponse:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithContent'
+      - $ref: '#/definitions/CreatedMessageWithContentAndEnrichedData'
+  CreatedMessageWithContentAndEnrichedData:
+    allOf:
+      - $ref: '#/definitions/CreatedMessageWithContent'
+      - $ref: '#/definitions/EnrichedMessage'
+  PaymentProblemJson:
+    description: >-
+      A ProblemJson-like type specific for the GetPayment and ActivatePayment
+      operations
+    type: object
+    properties:
+      type:
+        type: string
+        format: uri
+        description: |-
+          An absolute URI that identifies the problem type. When dereferenced,
+          it SHOULD provide human-readable documentation for the problem type
+          (e.g., using HTML).
+        default: about:blank
+        example: https://example.com/problem/constraint-violation
+      title:
+        type: string
+        description: |-
+          A short, summary of the problem type. Written in english and readable
+          for engineers (usually not suited for non technical stakeholders and
+          not localized); example: Service Unavailable
+      status:
+        type: integer
+        format: int32
+        minimum: 100
+        maximum: 600
+        exclusiveMaximum: true
+      detail:
+        description: >-
+          Fault codes for the PagoPA Verifica and Attiva operations ( Deprecated
+          )
+        type: string
+        x-extensible-enum:
+          - PAYMENT_DUPLICATED
+          - INVALID_AMOUNT
+          - PAYMENT_ONGOING
+          - PAYMENT_EXPIRED
+          - PAYMENT_UNAVAILABLE
+          - PAYMENT_UNKNOWN
+          - DOMAIN_UNKNOWN
+          - PPT_MULTI_BENEFICIARIO
+          - GENERIC_ERROR
+      detail_v2:
+        description: Fault codes for the PagoPA/Controparte Verifica and Attiva operations
+        type: string
+        x-extensible-enum:
+          - PPT_SYSTEM_ERROR
+          - PPT_AUTORIZZAZIONE
+          - PPT_AUTENTICAZIONE
+          - PPT_SINTASSI_XSD
+          - PPT_SINTASSI_EXTRAXSD
+          - PPT_SEMANTICA
+          - PPT_RPT_DUPLICATA
+          - PPT_RPT_SCONOSCIUTA
+          - PPT_RT_SCONOSCIUTA
+          - PPT_RT_NONDISPONIBILE
+          - PPT_SUPERAMENTOSOGLIA
+          - PPT_SEGREGAZIONE
+          - PPT_TIPOFIRMA_SCONOSCIUTO
+          - PPT_ERRORE_FORMATO_BUSTA_FIRMATA
+          - PPT_FIRMA_INDISPONIBILE
+          - PPT_ID_CARRELLO_DUPLICATO
+          - PPT_OPER_NON_STORNABILE
+          - PPT_OPER_NON_REVOCABILE
+          - PPT_WISP_TIMEOUT_RECUPERO_SCELTA
+          - PPT_WISP_SESSIONE_SCONOSCIUTA
+          - PPT_CANALE_ERRORE
+          - PPT_CODIFICA_PSP_SCONOSCIUTA
+          - PPT_PSP_SCONOSCIUTO
+          - PPT_PSP_DISABILITATO
+          - PPT_TIPO_VERSAMENTO_SCONOSCIUTO
+          - PPT_INTERMEDIARIO_PSP_SCONOSCIUTO
+          - PPT_INTERMEDIARIO_PSP_DISABILITATO
+          - PPT_CANALE_IRRAGGIUNGIBILE
+          - PPT_CANALE_SERVIZIO_NONATTIVO
+          - PPT_CANALE_TIMEOUT
+          - PPT_CANALE_NONRISOLVIBILE
+          - PPT_CANALE_INDISPONIBILE
+          - PPT_CANALE_SCONOSCIUTO
+          - PPT_CANALE_DISABILITATO
+          - PPT_CANALE_ERR_PARAM_PAG_IMM
+          - PPT_CANALE_ERRORE_RESPONSE
+          - PPT_RT_DUPLICATA
+          - PPT_ISCRIZIONE_NON_PRESENTE
+          - PPT_ULTERIORE_ISCRIZIONE
+          - PPT_PDD_IRRAGGIUNGIBILE
+          - PPT_ERRORE_EMESSO_DA_PAA
+          - PPT_DOMINIO_SCONOSCIUTO
+          - PPT_DOMINIO_DISABILITATO
+          - PPT_INTERMEDIARIO_PA_SCONOSCIUTO
+          - PPT_INTERMEDIARIO_PA_DISABILITATO
+          - PPT_STAZIONE_INT_PA_IRRAGGIUNGIBILE
+          - PPT_STAZIONE_INT_PA_SERVIZIO_NONATTIVO
+          - PPT_STAZIONE_INT_PA_ERRORE_RESPONSE
+          - PPT_STAZIONE_INT_PA_TIMEOUT
+          - PPT_STAZIONE_INT_PA_NONRISOLVIBILE
+          - PPT_STAZIONE_INT_PA_INDISPONIBILE
+          - PPT_STAZIONE_INT_PA_SCONOSCIUTA
+          - PPT_STAZIONE_INT_PA_DISABILITATA
+          - PPT_ID_FLUSSO_SCONOSCIUTO
+          - PAA_ID_DOMINIO_ERRATO
+          - PAA_ID_INTERMEDIARIO_ERRATO
+          - PAA_STAZIONE_INT_ERRATA
+          - PAA_RPT_SCONOSCIUTA
+          - PAA_RT_DUPLICATA
+          - PAA_TIPOFIRMA_SCONOSCIUTO
+          - PAA_ERRORE_FORMATO_BUSTA_FIRMATA
+          - PAA_FIRMA_INDISPONIBILE
+          - PAA_FIRMA_ERRATA
+          - PAA_PAGAMENTO_SCONOSCIUTO
+          - PAA_PAGAMENTO_DUPLICATO
+          - PAA_PAGAMENTO_IN_CORSO
+          - PAA_PAGAMENTO_ANNULLATO
+          - PAA_PAGAMENTO_SCADUTO
+          - PAA_SINTASSI_XSD
+          - PAA_SINTASSI_EXTRAXSD
+          - PAA_SEMANTICA
+          - PAA_ATTIVA_RPT_IMPORTO_NON_VALIDO
+          - PAA_SYSTEM_ERROR
+          - CANALE_SINTASSI_XSD
+          - CANALE_SINTASSI_EXTRAXSD
+          - CANALE_SEMANTICA
+          - CANALE_RPT_DUPLICATA
+          - CANALE_RPT_SCONOSCIUTA
+          - CANALE_RPT_RIFIUTATA
+          - CANALE_RT_SCONOSCIUTA
+          - CANALE_RT_NON_DISPONIBILE
+          - CANALE_INDISPONIBILE
+          - CANALE_RICHIEDENTE_ERRATO
+          - CANALE_SYSTEM_ERROR
+          - PPT_LOCAL_ERROR_PROTOCOLLO
+          - PPT_LOCAL_ERROR_EXTRAXSD
+          - PPT_LOCAL_ERROR_FSM
+          - PPT_RT_SEGNO_DISCORDE
+          - CANALE_FIRMA_SCONOSCIUTA
+          - CANALE_BUSTA_ERRATA
+          - CANALE_NEGA_CONTABILIZZAZIONE
+          - CANALE_CARRELLO_DUPLICATO_KO
+          - CANALE_CARRELLO_DUPLICATO_UNKNOWN
+          - CANALE_CARRELLO_DUPLICATO_OK
+          - OGGETTO_DISABILITATO
+          - PPT_IBAN_NON_CENSITO
+          - PPT_RT_IN_GESTIONE
+          - CANALE_CONVENZIONE_NON_VALIDA
+          - PAA_CONVENZIONE_NON_VALIDA
+          - PPT_IMPORTO_ERRATO
+          - PPT_TOKEN_SCONOSCIUTO
+          - PPT_TOKEN_SCADUTO
+          - PPT_POSIZIONE_SCONOSCIUTA
+          - PPT_DATI_POSIZIONE_GIA_CONOSCIUTI
+          - PPT_ESITO_GIA_ACQUISITO
+          - PPT_PAGAMENTO_IN_CORSO
+          - PPT_PAGAMENTO_DUPLICATO
+          - PPT_MULTI_BENEFICIARIO
+          - PPT_ERRORE
+          - GENERIC_ERROR
+      instance:
+        type: string
+        format: uri
+        description: >-
+          An absolute URI that identifies the specific occurrence of the
+          problem.
+
+          It may or may not yield further information if dereferenced.
+    required:
+      - detail
+      - detail_v2
+  CodiceContestoPagamento:
+    description: Transaction Id used to identify the communication flow
+    type: string
+    minLength: 32
+    maxLength: 32
+  EnteBeneficiario:
+    description: Beneficiary institution related to a payment
+    type: object
+    properties:
+      identificativoUnivocoBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 35
+      denominazioneBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 70
+      codiceUnitOperBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 35
+      denomUnitOperBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 70
+      indirizzoBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 70
+      civicoBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 16
+      capBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 16
+      localitaBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 35
+      provinciaBeneficiario:
+        type: string
+        minLength: 1
+        maxLength: 35
+      nazioneBeneficiario:
+        type: string
+        pattern: '[A-Z]{2}'
+    required:
+      - identificativoUnivocoBeneficiario
+      - denominazioneBeneficiario
+  Iban:
+    type: string
+    pattern: '[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}'
+  ImportoEuroCents:
+    description: Amount for payments, in eurocents
+    type: integer
+    minimum: 0
+    maximum: 99999999
+  PaymentActivationsGetResponse:
+    type: object
+    description: >-
+      Define the response to send to App to provide the payment activation
+      status related to a codiceContestoPagamento
+    properties:
+      idPagamento:
+        type: string
+        minLength: 1
+        maxLength: 36
+    required:
+      - idPagamento
+  PaymentActivationsPostRequest:
+    type: object
+    description: Define the request received from CD App to require a payment activation
+    properties:
+      rptId:
+        $ref: '#/definitions/RptId'
+      importoSingoloVersamento:
+        $ref: '#/definitions/ImportoEuroCents'
+      codiceContestoPagamento:
+        $ref: '#/definitions/CodiceContestoPagamento'
+    required:
+      - rptId
+      - importoSingoloVersamento
+      - codiceContestoPagamento
+  PaymentActivationsPostResponse:
+    type: object
+    description: Define the response to send to CD App containing activation information
+    properties:
+      importoSingoloVersamento:
+        $ref: '#/definitions/ImportoEuroCents'
+      ibanAccredito:
+        $ref: '#/definitions/Iban'
+      causaleVersamento:
+        type: string
+        minLength: 1
+        maxLength: 140
+      enteBeneficiario:
+        $ref: '#/definitions/EnteBeneficiario'
+      spezzoniCausaleVersamento:
+        $ref: '#/definitions/SpezzoniCausaleVersamento'
+    required:
+      - importoSingoloVersamento
+  PaymentRequestsGetResponse:
+    type: object
+    title: PaymentRequestsGetResponse
+    description: Define the response to send to CD App containing payment information
+    properties:
+      importoSingoloVersamento:
+        $ref: '#/definitions/ImportoEuroCents'
+      codiceContestoPagamento:
+        $ref: '#/definitions/CodiceContestoPagamento'
+      ibanAccredito:
+        $ref: '#/definitions/Iban'
+      causaleVersamento:
+        type: string
+        minLength: 1
+        maxLength: 140
+      enteBeneficiario:
+        $ref: '#/definitions/EnteBeneficiario'
+      spezzoniCausaleVersamento:
+        $ref: '#/definitions/SpezzoniCausaleVersamento'
+    required:
+      - importoSingoloVersamento
+      - codiceContestoPagamento
+  RptId:
+    type: string
+  SpezzoneStrutturatoCausaleVersamento:
+    description: Amount related to a single element of a payment installments
+    type: object
+    properties:
+      causaleSpezzone:
+        type: string
+        minLength: 1
+        maxLength: 25
+      importoSpezzone:
+        $ref: '#/definitions/ImportoEuroCents'
+  SpezzoniCausaleVersamento:
+    description: Payment installments (optional)
+    type: array
+    items:
+      $ref: '#/definitions/SpezzoniCausaleVersamentoItem'
+  SpezzoniCausaleVersamentoItem:
+    description: Single element of a payment installments
+    type: object
+    properties:
+      spezzoneCausaleVersamento:
+        type: string
+        minLength: 1
+        maxLength: 35
+      spezzoneStrutturatoCausaleVersamento:
+        $ref: '#/definitions/SpezzoneStrutturatoCausaleVersamento'
+  MessageContentWithAttachments:
+    allOf:
+      - type: object
+        properties:
+          attachments:
+            type: array
+            items:
+              $ref: '#/definitions/MessageAttachment'
+      - $ref: '#/definitions/NewMessageContent'
+  MessageAttachment:
+    type: object
+    title: MessageAttachment
+    description: Describes a message's attachment
+    properties:
+      name:
+        type: string
+      content:
+        type: string
+      mime_type:
+        type: string
+    required:
+      - name
+      - content
+      - mime_type
+  CreatedMessageWithContentAndAttachments:
+    allOf:
+      - type: object
+        properties:
+          content:
+            $ref: '#/definitions/MessageContentWithAttachments'
+        required:
+          - content
+      - $ref: '#/definitions/CreatedMessageWithContentResponse'
+  Installation:
+    type: object
+    title: Installation
+    description: Describes an app installation.
+    properties:
+      platform:
+        $ref: '#/definitions/Platform'
+      pushChannel:
+        $ref: '#/definitions/PushChannel'
+    required:
+      - platform
+      - pushChannel
+  InitializedProfile:
+    type: object
+    title: Initialized profile
+    description: Describes the user's profile after it has been stored in the Profile API.
+    properties:
+      accepted_tos_version:
+        $ref: '#/definitions/AcceptedTosVersion'
+      email:
+        $ref: '#/definitions/EmailAddress'
+      blocked_inbox_or_channels:
+        $ref: '#/definitions/BlockedInboxOrChannels'
+      preferred_languages:
+        $ref: '#/definitions/PreferredLanguages'
+      is_inbox_enabled:
+        $ref: '#/definitions/IsInboxEnabled'
+      is_email_validated:
+        $ref: '#/definitions/IsEmailValidated'
+      is_email_enabled:
+        $ref: '#/definitions/IsEmailEnabled'
+      reminder_status:
+        $ref: '#/definitions/ReminderStatus'
+      push_notifications_content_type:
+        $ref: '#/definitions/PushNotificationsContentType'
+      is_webhook_enabled:
+        $ref: '#/definitions/IsWebhookEnabled'
+      family_name:
+        type: string
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+      has_profile:
+        $ref: '#/definitions/HasProfile'
+      last_app_version:
+        $ref: '#/definitions/AppVersion'
+      name:
+        type: string
+      spid_email:
+        $ref: '#/definitions/EmailAddress'
+      date_of_birth:
+        type: string
+        format: date
+      service_preferences_settings:
+        $ref: '#/definitions/ServicePreferencesSettings'
+      version:
+        $ref: '#/definitions/Version'
+    required:
+      - family_name
+      - fiscal_code
+      - has_profile
+      - is_inbox_enabled
+      - is_email_enabled
+      - is_webhook_enabled
+      - name
+      - service_preferences_settings
+      - version
+  UserMetadata:
+    type: object
+    title: User Metadata information
+    properties:
+      version:
+        type: number
+      metadata:
+        type: string
+    required:
+      - version
+      - metadata
+  PublicSession:
+    type: object
+    title: User session data
+    description: Describe the current session of an authenticated user.
+    properties:
+      spidLevel:
+        $ref: '#/definitions/SpidLevel'
+      walletToken:
+        type: string
+      myPortalToken:
+        type: string
+      bpdToken:
+        type: string
+      zendeskToken:
+        type: string
+      fimsToken:
+        type: string
+    required:
+      - spidLevel
+      - walletToken
+      - myPortalToken
+      - bpdToken
+      - zendeskToken
+      - fimsToken
+  SessionInfo:
+    type: object
+    title: Session info of a user
+    description: Decribe a session of an authenticated user.
+    properties:
+      createdAt:
+        $ref: '#/definitions/Timestamp'
+      sessionToken:
+        type: string
+    required:
+      - createdAt
+      - sessionToken
+  SessionsList:
+    description: Contains all active sessions for an authenticated user.
+    type: object
+    properties:
+      sessions:
+        type: array
+        items:
+          $ref: '#/definitions/SessionInfo'
+    required:
+      - sessions
+  InstallationID:
+    type: string
+    description: >-
+      The sixteen octets of an Installation ID are represented as 32 hexadecimal
+      (base 16) digits, displayed in five groups
+
+      separated by hyphens, in the form 8-4-4-4-12 for a total of 36 characters
+      (32 alphanumeric characters and four
+
+      hyphens).
+
+      See https://en.wikipedia.org/wiki/Universally_unique_identifier
+    minLength: 1
+  HasProfile:
+    type: boolean
+    default: false
+    description: True if the user has a remote profile.
+  IsEmailSet:
+    type: boolean
+    default: false
+    description: True if the user has presonalized the email.
+  Version:
+    type: integer
+    description: The entity version.
+  Platform:
+    type: string
+    description: The platform type where the installation happened.
+    x-extensible-enum:
+      - apns
+      - gcm
+  PushChannel:
+    type: string
+    description: >-
+      The Push Notification Service handle for this Installation.
+
+      See
+      https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-registration-management
+  SpidLevel:
+    type: string
+    description: A SPID level.
+    x-extensible-enum:
+      - https://www.spid.gov.it/SpidL1
+      - https://www.spid.gov.it/SpidL2
+      - https://www.spid.gov.it/SpidL3
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
+  LimitedFederatedUser:
+    title: Federated user
+    description: User data needed by federated applications.
+    type: object
+    properties:
+      fiscal_code:
+        $ref: '#/definitions/FiscalCode'
+    required:
+      - fiscal_code
+  FederatedUser:
+    title: Federated user
+    description: User data needed by federated applications.
+    allOf:
+      - type: object
+        properties:
+          name:
+            type: string
+          family_name:
+            type: string
+        required:
+          - name
+          - family_name
+      - $ref: '#/definitions/LimitedFederatedUser'
+  SupportToken:
+    title: Support token
+    description: A Support Token response
+    type: object
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: number
+    required:
+      - access_token
+      - expires_in
+responses: {}
+parameters:
+  PublicMessage:
+    name: public_message
+    in: query
+    type: boolean
+    description: Discriminate when to return public message shape. Default to false.
+  EnrichResultData:
+    name: enrich_result_data
+    type: boolean
+    in: query
+    required: false
+    description: Indicates whether result data should be enriched or not.
+  GetArchivedMessages:
+    name: archived
+    type: boolean
+    in: query
+    required: false
+    description: >-
+      Indicates whether retrieve archived/not archived messages. Default is
+      false
+  PageSize:
+    name: page_size
+    type: integer
+    in: query
+    minimum: 1
+    maximum: 100
+    required: false
+    description: How many items a page should include.
+  MaximumId:
+    name: maximum_id
+    type: string
+    in: query
+    required: false
+    description: The maximum id to get messages until to.
+  MinimumId:
+    name: minimum_id
+    type: string
+    in: query
+    required: false
+    description: The minimum id to get messages from.
+  PaginationRequest:
+    type: string
+    name: cursor
+    in: query
+    minimum: 1
+    description: An opaque identifier that points to the next item in the collection.
+  UserDataProcessingChoiceParam:
+    name: choice
+    in: path
+    type: string
+    enum:
+      - DOWNLOAD
+      - DELETE
+    description: A representation of a user data processing choice
+    required: true
+    x-example: DOWNLOAD
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
