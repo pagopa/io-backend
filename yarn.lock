@@ -347,6 +347,15 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
+"@pagopa/io-functions-eucovidcerts-sdk@x":
+  version "1.26.2"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-eucovidcerts-sdk/-/io-functions-eucovidcerts-sdk-1.26.2.tgz#4181da044215169a51a651b7a2d406d664f362ad"
+  integrity sha512-g0JXRcrsAlBph4rdBdjO88WSl6ez7KUG184bkvbv1AkVMr5qLYQqF3Oq+jqpGnAICPNklVZG8EN/Zpa0FIFy1Q==
+  dependencies:
+    "@pagopa/ts-commons" "^10.0.0"
+    fp-ts "^2.10.5"
+    io-ts "^2.2.16"
+
 "@pagopa/io-spid-commons@^8.1.0":
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-8.1.0.tgz#525cacc12b630b521c9651ca6382e3677c5d6cdd"

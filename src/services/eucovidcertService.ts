@@ -11,10 +11,10 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
+import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
+import { PreferredLanguages } from "@pagopa/io-functions-eucovidcerts-sdk/PreferredLanguages";
 import { readableProblem } from "../utils/errorsFormatter";
 import { EUCovidCertAPIClient } from "../clients/eucovidcert.client";
-import { Certificate } from "../../generated/eucovidcert-api/Certificate";
-import { PreferredLanguages } from "../../generated/eucovidcert-api/PreferredLanguages";
 
 import {
   ResponseErrorStatusNotDefinedInSpec,
