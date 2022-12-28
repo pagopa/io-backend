@@ -22,6 +22,7 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { APIClient } from "src/clients/api";
 import { PromiseType } from "@pagopa/ts-commons/lib/types";
 import { UpsertServicePreference } from "generated/backend/UpsertServicePreference";
+import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
@@ -33,7 +34,6 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { ServiceId } from "../../generated/io-api/ServiceId";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 type RightOf<T extends E.Either<unknown, unknown>> = T extends E.Right<infer R>

@@ -4,16 +4,16 @@ import * as e from "express";
 import * as t from "io-ts";
 import { OrganizationFiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { ServiceId } from "../../../generated/io-api/ServiceId";
+import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 
 import { APIClient } from "../../clients/api";
 import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import FunctionsAppService from "../functionAppService";
 import mockRes from "../../__mocks__/response";
-import { ProblemJson } from "../../../generated/io-api/ProblemJson";
+import { ProblemJson } from "@pagopa/io-functions-app-sdk/ProblemJson";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { UpsertServicePreference } from "../../../generated/io-api/UpsertServicePreference";
+import { UpsertServicePreference } from "@pagopa/io-functions-app-sdk/UpsertServicePreference";
 
 const aValidDepartmentName = "Department name";
 const aValidOrganizationName = "Organization name";

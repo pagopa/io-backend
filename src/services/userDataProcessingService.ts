@@ -20,9 +20,9 @@ import {
 import { pipe } from "fp-ts/lib/function";
 
 import * as O from "fp-ts/lib/Option";
-import { UserDataProcessing } from "generated/io-api/UserDataProcessing";
-import { UserDataProcessingChoice } from "generated/io-api/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "generated/io-api/UserDataProcessingChoiceRequest";
+import { UserDataProcessing } from "@pagopa/io-functions-app-sdk/UserDataProcessing";
+import { UserDataProcessingChoice } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import { User } from "../types/user";
 import {
   unhandledResponseStatus,

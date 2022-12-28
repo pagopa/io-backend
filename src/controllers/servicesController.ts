@@ -12,11 +12,11 @@ import {
   IResponseSuccessJson,
   IResponseErrorConflict
 } from "@pagopa/ts-commons/lib/responses";
+import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { withUserFromRequest } from "../../src/types/user";
 import { withValidatedOrValidationError } from "../../src/utils/responses";
 
 import { PaginatedServiceTupleCollection } from "../../generated/backend/PaginatedServiceTupleCollection";
-import { ServiceId } from "../../generated/io-api/ServiceId";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
 import { ServicePreference } from "../../generated/backend/ServicePreference";
 import { UpsertServicePreference } from "../../generated/backend/UpsertServicePreference";

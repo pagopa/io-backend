@@ -3,15 +3,14 @@ import { pipe } from "fp-ts/lib/function";
 
 import nodeFetch from "node-fetch";
 
+import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
+import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
   ApiKeyAuthenticationConfig,
   EnvironmentConfig
 } from "../../src/utils/thirdPartyConfig";
-
-import { FiscalCode } from "../../generated/io-api/FiscalCode";
-import { ServiceId } from "../../generated/io-api/ServiceId";
 import {
   Client,
   createClient

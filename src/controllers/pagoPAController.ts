@@ -19,7 +19,7 @@ import {
 import { ISessionStorage } from "src/services/ISessionStorage";
 import { pipe } from "fp-ts/lib/function";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
-import { EmailAddress } from "../../generated/io-api/EmailAddress";
+import { EmailAddress } from "@pagopa/io-functions-app-sdk/EmailAddress";
 import { PagoPAUser } from "../../generated/pagopa/PagoPAUser";
 import ProfileService from "../services/profileService";
 import { withUserFromRequest } from "../types/user";

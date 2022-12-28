@@ -13,7 +13,7 @@ import {
   PreferredLanguageEnum
 } from "../../../generated/backend/PreferredLanguage";
 import { Version } from "../../../generated/backend/Version";
-import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
+import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 import { AcceptedTosVersion } from "../../../generated/backend/AcceptedTosVersion";
 import { IsEmailEnabled } from "../../../generated/backend/IsEmailEnabled";

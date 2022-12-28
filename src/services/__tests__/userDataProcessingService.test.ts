@@ -4,8 +4,8 @@ import * as t from "io-ts";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
-} from "../../../generated/io-api/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "../../../generated/io-api/UserDataProcessingChoiceRequest";
+} from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import { mockedUser } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import UserDataProcessingService from "../userDataProcessingService";

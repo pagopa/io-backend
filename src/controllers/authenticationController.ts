@@ -21,7 +21,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
-import { NewProfile } from "generated/io-api/NewProfile";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
