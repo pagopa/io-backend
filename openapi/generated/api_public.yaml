@@ -57,7 +57,7 @@ definitions:
     type: string
     description: User's fiscal code.
     format: FiscalCode
-    x-import: italia-ts-commons/lib/strings
+    x-import: '@pagopa/ts-commons/lib/strings'
     example: SPNDNL80R13C555X
   ProblemJson:
     type: object

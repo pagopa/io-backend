@@ -190,13 +190,13 @@ securityDefinitions:
 definitions:
 
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginationResponse"
   DetailResponse:
     type: object
     properties:

@@ -33,7 +33,7 @@ paths:
   
 definitions:
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   SuccessResponse:
     $ref: "api_backend.template.yaml#/definitions/SuccessResponse"
   MitVoucherToken:

@@ -107,9 +107,9 @@ parameters:
     description: ID of the Third Party message.
 definitions:
   ThirdPartyMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/ThirdPartyMessage"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ThirdPartyMessage"
   ThirdPartyAttachment:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/ThirdPartyAttachment"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ThirdPartyAttachment"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.5.1/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   

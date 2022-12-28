@@ -106,9 +106,9 @@ parameters:
     description: The API key used to access this webhooks.
 definitions:
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.3/openapi/definitions.yaml#/FiscalCode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.3/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   SuccessResponse:
     type: object
     properties:
