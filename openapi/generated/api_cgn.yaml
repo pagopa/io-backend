@@ -1,0 +1,443 @@
+swagger: '2.0'
+info:
+  version: 9.4.0
+  title: Carta Giovani Nazionale API
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  /cgn/status:
+    get:
+      operationId: getCgnStatus
+      summary: Get the CGN status details
+      description: |
+        Get the CGN status details 
+        by the provided fiscal code
+      responses:
+        '200':
+          description: CGN status details.
+          schema:
+            $ref: '#/definitions/Card'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Forbidden.
+        '404':
+          description: No CGN found.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /cgn/activation:
+    post:
+      operationId: startCgnActivation
+      summary: Start a CGN activation procedure
+      description: |
+        Start a new CGN activation procedure
+        for the logged user calculating if the user is
+        eligible to get a CGN.
+      responses:
+        '201':
+          description: Request created.
+          schema:
+            $ref: '#/definitions/InstanceId'
+          headers:
+            Location:
+              type: string
+              description: >-
+                Location (URL) of created request resource.
+
+                A GET request to this URL returns the request status and
+                details.
+        '202':
+          description: Processing request.
+          schema:
+            $ref: '#/definitions/InstanceId'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: >
+            Cannot activate a new CGN because the user is ineligible to get the
+            CGN.
+        '409':
+          description: >
+            Cannot activate the user's cgn because another updateCgn request was
+            found
+
+            for this user or it is already active.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+    get:
+      operationId: getCgnActivation
+      summary: |
+        Get CGN activation process status
+      description: |
+        Get informations about a CGN activation process
+      responses:
+        '200':
+          description: Cgn activation details.
+          schema:
+            $ref: '#/definitions/CgnActivationDetail'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Forbidden.
+        '404':
+          description: No CGN activation process found.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /cgn/eyca/activation:
+    post:
+      operationId: startEycaActivation
+      summary: Start an EYCA activation procedure
+      description: |
+        Start a new EYCA activation procedure
+        for the logged user calculating if the user is
+        eligible to enable EYCA on his CGN card.
+      responses:
+        '201':
+          description: Request created.
+          schema:
+            $ref: '#/definitions/InstanceId'
+          headers:
+            Location:
+              type: string
+              description: >-
+                Location (URL) of created request resource.
+
+                A GET request to this URL returns the request status and
+                details.
+        '202':
+          description: Processing request.
+          schema:
+            $ref: '#/definitions/InstanceId'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: >
+            Cannot activate EYCA Card because the user is ineligible to enable
+            EYCA.
+        '409':
+          description: >
+            Cannot activate EYCA Card because another EYCA Card activation
+            request was found
+
+            for this user or it is already active.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+    get:
+      operationId: getEycaActivation
+      summary: |
+        Get EYCA activation process' status
+      description: |
+        Get informations about an EYCA activation process
+      responses:
+        '200':
+          description: Eyca Card activation details.
+          schema:
+            $ref: '#/definitions/EycaActivationDetail'
+        '401':
+          description: Wrong or missing function key.
+        '403':
+          description: Forbidden.
+        '404':
+          description: No EYCA Card activation process found.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /cgn/eyca/status:
+    get:
+      operationId: getEycaStatus
+      summary: Get the Eyca Card status details
+      description: |
+        Get the Eyca Card status details
+      responses:
+        '200':
+          description: Eyca Card status details.
+          schema:
+            $ref: '#/definitions/EycaCard'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Forbidden.
+        '404':
+          description: No Eyca Card found.
+        '409':
+          description: Conflict.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+  /cgn/otp:
+    post:
+      operationId: generateOtp
+      summary: |
+        Generate a new Otp related to a CGN
+      description: |
+        Generate a new Otp used to discount an online purchase
+        through a valid CGN
+      responses:
+        '200':
+          description: Otp generated.
+          schema:
+            $ref: '#/definitions/Otp'
+        '401':
+          description: Bearer token null or expired.
+        '403':
+          description: Forbidden.
+        '500':
+          description: Service unavailable.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+definitions:
+  Timestamp:
+    type: string
+    format: UTCISODateFromString
+    description: A date-time field in ISO-8601 format and UTC timezone.
+    x-import: '@pagopa/ts-commons/lib/dates'
+    example: '2018-10-13T00:00:00.000Z'
+  FiscalCode:
+    type: string
+    description: User's fiscal code.
+    format: FiscalCode
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: SPNDNL80R13C555X
+  ProblemJson:
+    type: object
+    properties:
+      type:
+        type: string
+        format: uri
+        description: |-
+          An absolute URI that identifies the problem type. When dereferenced,
+          it SHOULD provide human-readable documentation for the problem type
+          (e.g., using HTML).
+        default: about:blank
+        example: https://example.com/problem/constraint-violation
+      title:
+        type: string
+        description: |-
+          A short, summary of the problem type. Written in english and readable
+          for engineers (usually not suited for non technical stakeholders and
+          not localized); example: Service Unavailable
+      status:
+        type: integer
+        format: int32
+        description: >-
+          The HTTP status code generated by the origin server for this
+          occurrence
+
+          of the problem.
+        minimum: 100
+        maximum: 600
+        exclusiveMaximum: true
+        example: 200
+      detail:
+        type: string
+        description: |-
+          A human readable explanation specific to this occurrence of the
+          problem.
+        example: There was an error processing the request
+      instance:
+        type: string
+        format: uri
+        description: >-
+          An absolute URI that identifies the specific occurrence of the
+          problem.
+
+          It may or may not yield further information if dereferenced.
+  InstanceId:
+    type: object
+    properties:
+      id:
+        type: string
+        minLength: 1
+        description: The identifier of the created request.
+    required:
+      - id
+  CommonCard:
+    type: object
+    properties:
+      activation_date:
+        $ref: '#/definitions/Otp/properties/expires_at'
+      expiration_date:
+        $ref: '#/definitions/Otp/properties/expires_at'
+    required:
+      - activation_date
+      - expiration_date
+  CardPending:
+    type: object
+    properties:
+      status:
+        type: string
+        x-extensible-enum:
+          - PENDING
+    required:
+      - status
+  CardActivated:
+    allOf:
+      - $ref: '#/definitions/CommonCard'
+      - type: object
+        properties:
+          status:
+            type: string
+            x-extensible-enum:
+              - ACTIVATED
+        required:
+          - status
+  CardRevoked:
+    allOf:
+      - $ref: '#/definitions/CommonCard'
+      - type: object
+        properties:
+          status:
+            type: string
+            x-extensible-enum:
+              - REVOKED
+          revocation_date:
+            $ref: '#/definitions/Otp/properties/expires_at'
+          revocation_reason:
+            type: string
+            minLength: 1
+        required:
+          - status
+          - revocation_date
+          - revocation_reason
+  CardExpired:
+    allOf:
+      - $ref: '#/definitions/CommonCard'
+      - type: object
+        properties:
+          status:
+            type: string
+            x-extensible-enum:
+              - EXPIRED
+        required:
+          - status
+  Card:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/CardPending'
+      - $ref: '#/definitions/CardActivated'
+      - $ref: '#/definitions/CardRevoked'
+      - $ref: '#/definitions/CardExpired'
+    x-example:
+      status: ACTIVATED
+      activation_date: '2021-10-13T00:00:00.000Z'
+      expiration_date: '2030-10-13T00:00:00.000Z'
+  CgnActivationDetail:
+    type: object
+    properties:
+      instance_id:
+        $ref: '#/definitions/InstanceId'
+      status:
+        type: string
+        x-extensible-enum:
+          - PENDING
+          - RUNNING
+          - COMPLETED
+          - ERROR
+          - UNKNOWN
+      created_at:
+        $ref: '#/definitions/Otp/properties/expires_at'
+      last_updated_at:
+        $ref: '#/definitions/Otp/properties/expires_at'
+    required:
+      - instance_id
+      - status
+  EycaActivationDetail:
+    type: object
+    properties:
+      status:
+        type: string
+        x-extensible-enum:
+          - PENDING
+          - RUNNING
+          - COMPLETED
+          - ERROR
+          - UNKNOWN
+      created_at:
+        $ref: '#/definitions/Otp/properties/expires_at'
+      last_updated_at:
+        $ref: '#/definitions/Otp/properties/expires_at'
+    required:
+      - status
+  EycaCard:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/CardPending'
+      - $ref: '#/definitions/EycaCardActivated'
+      - $ref: '#/definitions/EycaCardRevoked'
+      - $ref: '#/definitions/EycaCardExpired'
+    x-example:
+      status: ACTIVATED
+      activation_date: '2021-10-13T00:00:00.000Z'
+      expiration_date: '2030-10-13T00:00:00.000Z'
+  EycaCardActivated:
+    allOf:
+      - $ref: '#/definitions/CardActivated'
+      - type: object
+        properties:
+          card_number:
+            $ref: '#/definitions/CcdbNumber'
+        required:
+          - card_number
+  EycaCardExpired:
+    allOf:
+      - $ref: '#/definitions/CardExpired'
+      - type: object
+        properties:
+          card_number:
+            $ref: '#/definitions/CcdbNumber'
+        required:
+          - card_number
+  EycaCardRevoked:
+    allOf:
+      - $ref: '#/definitions/CardRevoked'
+      - type: object
+        properties:
+          card_number:
+            $ref: '#/definitions/CcdbNumber'
+        required:
+          - card_number
+  CcdbNumber:
+    type: string
+    description: The internal CCDB Card number
+    pattern: ^[A-Z][0-9]{3}-[A-Z][0-9]{3}-[A-Z][0-9]{3}-[A-Z][0-9]{3}$
+    minLength: 1
+  Otp:
+    type: object
+    properties:
+      code:
+        $ref: '#/definitions/OtpCode'
+      expires_at:
+        type: string
+        format: UTCISODateFromString
+        description: A date-time field in ISO-8601 format and UTC timezone.
+        x-import: '@pagopa/ts-commons/lib/dates'
+        example: '2018-10-13T00:00:00.000Z'
+      ttl:
+        type: number
+    required:
+      - code
+      - expires_at
+      - ttl
+  OtpCode:
+    description: The unique otp code that can be use for discounts
+    type: string
+    pattern: ^[A-Z0-9]{9,13}$
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
