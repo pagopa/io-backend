@@ -22,11 +22,11 @@ import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   CardActivated,
   StatusEnum as ActivatedStatusEnum
-} from "../../../generated/io-cgn-api/CardActivated";
+} from "@pagopa/io-functions-cgn-sdk/CardActivated";
 import {
   CardExpired,
   StatusEnum as ExpiredStatusEnum
-} from "../../../generated/io-cgn-api/CardExpired";
+} from "@pagopa/io-functions-cgn-sdk/CardExpired";
 import { DiscountBucketCode } from "../../../generated/io-cgn-operator-search-api/DiscountBucketCode";
 
 const anAPIKey = "";
