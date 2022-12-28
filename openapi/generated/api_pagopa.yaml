@@ -103,7 +103,7 @@ definitions:
     type: string
     description: User's fiscal code.
     format: FiscalCode
-    x-import: italia-ts-commons/lib/strings
+    x-import: '@pagopa/ts-commons/lib/strings'
     example: SPNDNL80R13C555X
   FederatedUser:
     title: Federated user
@@ -123,11 +123,7 @@ definitions:
         type: object
         properties:
           fiscal_code:
-            type: string
-            description: User's fiscal code.
-            format: FiscalCode
-            x-import: '@pagopa/ts-commons/lib/strings'
-            example: SPNDNL80R13C555X
+            $ref: '#/definitions/FiscalCode'
         required:
           - fiscal_code
   PagoPAUser:

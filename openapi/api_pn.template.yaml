@@ -64,7 +64,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   PNActivation:
     type: object
     properties:

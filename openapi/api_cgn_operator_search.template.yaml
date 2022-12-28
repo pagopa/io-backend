@@ -136,7 +136,7 @@ parameters:
 
 definitions:
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.0.1/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   Merchant:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/Merchant"
   DiscountCodeType:

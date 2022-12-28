@@ -68,7 +68,7 @@ definitions:
   PreferredLanguages:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-eucovidcerts/v1.22.0/openapi/index.yaml#/definitions/PreferredLanguages"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v20.5.3/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
  
 consumes:
   - application/json
