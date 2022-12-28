@@ -328,6 +328,16 @@ definitions:
     x-one-of: true
     allOf:
       - $ref: '#/definitions/CardPending'
+      - allOf:
+          - $ref: '#/definitions/CommonCard'
+          - type: object
+            properties:
+              status:
+                type: string
+                x-extensible-enum:
+                  - PENDING_DELETE
+            required:
+              - status
       - $ref: '#/definitions/CardActivated'
       - $ref: '#/definitions/CardRevoked'
       - $ref: '#/definitions/CardExpired'
@@ -376,6 +386,14 @@ definitions:
     x-one-of: true
     allOf:
       - $ref: '#/definitions/CardPending'
+      - allOf:
+          - $ref: '#/definitions/Card/allOf/1'
+          - type: object
+            properties:
+              card_number:
+                $ref: '#/definitions/CcdbNumber'
+            required:
+              - card_number
       - $ref: '#/definitions/EycaCardActivated'
       - $ref: '#/definitions/EycaCardRevoked'
       - $ref: '#/definitions/EycaCardExpired'

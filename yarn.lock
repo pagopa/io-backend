@@ -409,6 +409,15 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
+"@pagopa/io-functions-cgn-sdk@x":
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-cgn-sdk/-/io-functions-cgn-sdk-2.6.3.tgz#17117ddf0190aca903e4f8cc80f0b79dde60be50"
+  integrity sha512-U7cv8MhNOw0O10/whRLZhh4F8HkWoh0BWAJ1O7mpVS4NhAaEGKnYzro/6/24CBBI3xbDpxtFvdS0A+ZerQmx7g==
+  dependencies:
+    "@pagopa/ts-commons" "^10.0.0"
+    fp-ts "^2.10.5"
+    io-ts "^2.2.16"
+
 "@pagopa/io-functions-commons@^26.3.0":
   version "26.3.0"
   resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-26.3.0.tgz#6ac816adb0778bbec8a237f4bfa90a6ecbb3a9f4"
