@@ -1,0 +1,49 @@
+swagger: '2.0'
+info:
+  version: 9.4.0
+  title: Zendesk API
+  description: User authentication for zendesk
+host: localhost
+basePath: /api/backend/zendesk/v1/
+schemes:
+  - https
+paths:
+  /jwt:
+    x-swagger-router-controller: ZendeskController
+    post:
+      operationId: getJwtForZendesk
+      summary: Get jwt with user's data for zendesk
+      description: Returns jwt with user's data for zendesk backend.
+      parameters:
+        - in: formData
+          name: user_token
+          type: string
+      responses:
+        '200':
+          description: Found.
+          schema:
+            $ref: '#/definitions/ZendeskToken'
+          examples:
+            application/json:
+              jwt: a.jwt.token
+              expires_in: 1200
+        '401':
+          description: Token null or expired.
+        '500':
+          description: There was an error in retrieving the user data.
+definitions:
+  ZendeskToken:
+    title: Zendesk support token
+    description: A Support Token response to authenticate to Zendesk
+    type: object
+    properties:
+      jwt:
+        type: string
+    required:
+      - jwt
+responses: {}
+parameters: {}
+consumes:
+  - application/x-www-form-urlencoded
+produces:
+  - application/json
