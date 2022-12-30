@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "9.7.0",
+  "version": "9.7.3",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
@@ -63,9 +63,8 @@
     "predeploy": "npm-run-all build dist:modules",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
     "version": "npm-run-all bump:*",
-    "bump:openapi": "openapi:bundle && git add openapi/generated/*",
+    "bump:openapi": "npm-run-all openapi:bundle && git add openapi/generated/*",
     "bump:changelog": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"
- 
   },
   "repository": {
     "type": "git",

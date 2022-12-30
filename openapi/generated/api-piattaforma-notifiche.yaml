@@ -13,7 +13,7 @@ info:
   license:
     name: Licenza di PN
     url: https://da-definire/
-  version: 9.7.0
+  version: 9.7.3
   x-api-id: api-external-b2b-appio
   x-summary: 'Piattaforma Notifiche: API B2B per backend AppIO'
 servers:
