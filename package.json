@@ -44,7 +44,7 @@
     "generate:proxy:cgn-models": "rimraf generated/cgn && gen-api-models --api-spec api_cgn.yaml --out-dir generated/cgn",
     "generate:proxy:io-sign-models": "rimraf generated/io-sign && gen-api-models --api-spec api_io_sign.yaml --out-dir generated/io-sign",
     "generate:proxy:cgn-operator-search-models": "rimraf generated/cgn-operator-search && gen-api-models --api-spec api_cgn_operator_search.yaml --out-dir generated/cgn-operator-search",
-    "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec openapi/generated/fn_bonus.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
+    "generate:api:io-bonus": "rimraf generated/io-bonus-api && gen-api-models --api-spec openapi/consumed/fn_bonus.yaml --no-strict --out-dir generated/io-bonus-api --request-types --response-decoders --client",
     "generate:api:io-sign": "rimraf generated/io-sign-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-sign/6d2adf18cf6bc08a6f2b8f5d3e3a690536c68fa9/apps/io-func-sign-user/openapi.yaml --no-strict --out-dir generated/io-sign-api --request-types --response-decoders --client",
     "generate:api:io-cgn": "rimraf generated/io-cgn-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-cgn/v2.0.0/openapi/index.yaml --no-strict --out-dir generated/io-cgn-api --request-types --response-decoders --client",
     "generate:api:io-cgn-operator-search": "rimraf generated/io-cgn-operator-search-api && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml --no-strict --out-dir generated/io-cgn-operator-search-api --request-types --response-decoders --client",
