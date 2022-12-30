@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
+    "outDir": "dist",
     "strict": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
@@ -16,8 +17,10 @@
     "./src/**/*"
   ],
   "exclude": [
+    "Dangerfile.ts",
     "node_modules",
     "src/**/__tests__/*",
-    "src/**/__mocks__/*"
+    "src/**/__mocks__/*",
+    "docker/**"
   ]
 }
