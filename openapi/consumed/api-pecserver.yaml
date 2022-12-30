@@ -1,13 +1,13 @@
 swagger: '2.0'
 info:
   title: Poste Italiane - PEC to IO circuit
-  version: '1'
+  version: 9.7.0
 host: iopec.postecert.poste.it
 basePath: /v1
 schemes:
   - https
 paths:
-  '/messages/{id}':
+  /messages/{id}:
     get:
       operationId: getMessage
       produces:
@@ -35,7 +35,7 @@ paths:
       security:
         - bearerAuth: []
       summary: Retrieve a legal message
-  '/messages/{id}/attachments/{attachment_id}':
+  /messages/{id}/attachments/{attachment_id}:
     get:
       operationId: getMessageAttachment
       produces:
@@ -67,7 +67,7 @@ paths:
       security:
         - bearerAuth: []
       summary: Retrieve an attachment of a legal message
-  '/messages/{id}/{format}':
+  /messages/{id}/{format}:
     get:
       operationId: getMessagePart
       produces:
@@ -199,5 +199,4 @@ definitions:
       - html_content
       - attachments
     type: object
-
 x-components: {}
