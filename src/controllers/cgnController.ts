@@ -16,15 +16,15 @@ import {
   ResponseErrorForbiddenNotAuthorized
 } from "@pagopa/ts-commons/lib/responses";
 
-import { EycaActivationDetail } from "generated/io-cgn-api/EycaActivationDetail";
-import { EycaCard } from "generated/io-cgn-api/EycaCard";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Otp } from "generated/cgn/Otp";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
 import { Card } from "../../generated/cgn/Card";
 import CgnService from "../../src/services/cgnService";
 import { InstanceId } from "../../generated/cgn/InstanceId";
 import { User, withUserFromRequest } from "../types/user";
-import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
 
 export const withAllowedUser = async <T>(
   user: User,

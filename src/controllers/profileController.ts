@@ -15,9 +15,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
 
+import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
-import { ExtendedProfile as ExtendedProfileApi } from "../../generated/io-api/ExtendedProfile";
 
 import ProfileService from "../services/profileService";
 import { profileMissingErrorResponse } from "../types/profile";

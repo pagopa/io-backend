@@ -3,7 +3,7 @@ import { mockedUser } from "../../__mocks__/user_mock";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
 import EUCovidCertController from "../eucovidcertController";
 import EUCovidCertService from "../../services/eucovidcertService";
-import { StatusEnum as RevokedStatusEnum } from "../../../generated/eucovidcert-api/RevokedCertificate";
+import { StatusEnum as RevokedStatusEnum } from "@pagopa/io-functions-eucovidcerts-sdk/RevokedCertificate";
 import * as e from "express";
 import {
   ResponseErrorInternal,
@@ -24,7 +24,7 @@ const aMockedAuthCode = "000";
 
 const aRevokedCertificate: RevokedCertificate = {
   uvci: "000",
-  header_info:{
+  header_info: {
     logo_id: "aLogoId",
     title: "a Title",
     subtitle: "a Subtitle"

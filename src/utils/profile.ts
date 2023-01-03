@@ -3,10 +3,10 @@ import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
+import { EmailAddress } from "@pagopa/io-functions-app-sdk/EmailAddress";
 import { User } from "../../src/types/user";
 import ProfileService from "../../src/services/profileService";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-import { EmailAddress } from "../../generated/io-api/EmailAddress";
 
 // define a type that represents a Profile with a non optional email address
 const ProfileWithEmail = t.intersection([

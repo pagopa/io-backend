@@ -12,7 +12,7 @@ import { DepartmentName } from "../../../generated/backend/DepartmentName";
 import { OrganizationName } from "../../../generated/backend/OrganizationName";
 import { ServiceName } from "../../../generated/backend/ServiceName";
 import { ServicePublic } from "../../../generated/backend/ServicePublic";
-import { NotificationChannelEnum } from "../../../generated/io-api/NotificationChannel";
+import { NotificationChannelEnum } from "@pagopa/io-functions-app-sdk/NotificationChannel";
 import mockReq from "../../__mocks__/request";
 import ApiClient from "../../services/apiClientFactory";
 import FunctionsAppService from "../../services/functionAppService";

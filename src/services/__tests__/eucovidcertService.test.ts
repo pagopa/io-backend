@@ -3,7 +3,7 @@ import * as t from "io-ts";
 import EUCovidCertService from "../eucovidcertService";
 import { EUCovidCertAPIClient } from "../../clients/eucovidcert.client";
 import { mockedUser } from "../../__mocks__/user_mock";
-import { StatusEnum as RevokedStatusEnum } from "../../../generated/eucovidcert-api/RevokedCertificate";
+import { StatusEnum as RevokedStatusEnum } from "@pagopa/io-functions-eucovidcerts-sdk/RevokedCertificate";
 import { RevokedCertificate } from "../../../generated/eucovidcert/RevokedCertificate";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import mockRes from "../../__mocks__/response";

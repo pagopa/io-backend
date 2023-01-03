@@ -5,7 +5,7 @@ import CgnService from "../cgnService";
 import {
   CardPending,
   StatusEnum
-} from "../../../generated/io-cgn-api/CardPending";
+} from "@pagopa/io-functions-cgn-sdk/CardPending";
 import { Otp } from "../../../generated/cgn/Otp";
 import { OtpCode } from "../../../generated/cgn/OtpCode";
 

@@ -2,7 +2,7 @@ import * as E from "fp-ts/lib/Either";
 import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 import * as lolex from "lolex";
 import * as redis from "redis";
-import { NewProfile } from "../../../generated/io-api/NewProfile";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 import {
   ResponseErrorInternal,
   ResponseErrorNotFound,

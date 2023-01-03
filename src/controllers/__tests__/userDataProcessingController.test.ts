@@ -7,8 +7,8 @@ import * as E from "fp-ts/lib/Either";
 import {
   UserDataProcessingChoice,
   UserDataProcessingChoiceEnum
-} from "../../../generated/io-api/UserDataProcessingChoice";
-import { UserDataProcessingChoiceRequest } from "../../../generated/io-api/UserDataProcessingChoiceRequest";
+} from "@pagopa/io-functions-app-sdk/UserDataProcessingChoice";
+import { UserDataProcessingChoiceRequest } from "@pagopa/io-functions-app-sdk/UserDataProcessingChoiceRequest";
 import UserDataProcessingService from "../../../src/services/userDataProcessingService";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -34,7 +34,6 @@ const aUserDataProcessingResponse = {
     version: 0
   }
 };
-
 
 const userDataProcessingMissingErrorResponse = ResponseErrorNotFound(
   "Not Found",

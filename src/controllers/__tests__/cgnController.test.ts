@@ -13,12 +13,12 @@ import CgnService from "../../services/cgnService";
 import {
   CardPending,
   StatusEnum
-} from "../../../generated/io-cgn-api/CardPending";
+} from "@pagopa/io-functions-cgn-sdk/CardPending";
 import {
   CgnActivationDetail,
   StatusEnum as ActivationStatusEnum
-} from "../../../generated/io-cgn-api/CgnActivationDetail";
-import { EycaActivationDetail } from "../../../generated/io-cgn-api/EycaActivationDetail";
+} from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
 import { Otp } from "../../../generated/cgn/Otp";
 import { OtpCode } from "../../../generated/cgn/OtpCode";
 

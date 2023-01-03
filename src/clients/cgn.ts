@@ -1,5 +1,5 @@
 import nodeFetch from "node-fetch";
-import { Client, createClient } from "../../generated/io-cgn-api/client";
+import { Client, createClient } from "@pagopa/io-functions-cgn-sdk/client";
 
 export function CgnAPIClient(
   token: string,
