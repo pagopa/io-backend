@@ -54,19 +54,19 @@ definitions:
     required:
       - auth_code
   Certificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/Certificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/Certificate"
   ValidCertificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/ValidCertificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/ValidCertificate"
   RevokedCertificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/RevokedCertificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/RevokedCertificate"
   ExpiredCertificate:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/ExpiredCertificate"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/ExpiredCertificate"
   HeaderInfo:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/HeaderInfo"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/HeaderInfo"
   QRCode:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/QRCode"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/QRCode"
   PreferredLanguages:
-    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts/openapi/index.yaml#/definitions/PreferredLanguages"
+    $ref: "../node_modules/@pagopa/io-functions-eucovidcerts-sdk/openapi.yaml#/definitions/PreferredLanguages"
   ProblemJson:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
  
