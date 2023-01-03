@@ -1,5 +1,5 @@
 import nodeFetch from "node-fetch";
-import { Client, createClient } from "../../generated/io-api/client";
+import { Client, createClient } from "@pagopa/io-functions-app-sdk/client";
 
 export function APIClient(
   baseUrl: string,

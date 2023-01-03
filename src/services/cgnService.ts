@@ -22,13 +22,13 @@ import {
 
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import { EycaActivationDetail } from "../../generated/io-cgn-api/EycaActivationDetail";
-import { EycaCard } from "../../generated/io-cgn-api/EycaCard";
-import { InstanceId } from "../../generated/io-cgn-api/InstanceId";
-import { CgnActivationDetail } from "../../generated/io-cgn-api/CgnActivationDetail";
+import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
+import { EycaCard } from "@pagopa/io-functions-cgn-sdk/EycaCard";
+import { InstanceId } from "@pagopa/io-functions-cgn-sdk/InstanceId";
+import { CgnActivationDetail } from "@pagopa/io-functions-cgn-sdk/CgnActivationDetail";
+import { Card } from "@pagopa/io-functions-cgn-sdk/Card";
+import { Otp } from "@pagopa/io-functions-cgn-sdk/Otp";
 import { CgnAPIClient } from "../../src/clients/cgn";
-import { Card } from "../../generated/io-cgn-api/Card";
-import { Otp } from "../../generated/io-cgn-api/Otp";
 import { User } from "../types/user";
 import {
   ResponseErrorStatusNotDefinedInSpec,

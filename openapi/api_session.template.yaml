@@ -1,0 +1,128 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Session API
+  description: Collection of enpoints to interact with user session.
+host: localhost
+basePath: /api/v1
+schemes:
+  - https
+paths:
+  "/sessions/{fiscalcode}":
+    get:
+      operationId: getSession
+      summary: Get available user info from session
+      description: |-
+        Use this operation if you want to known the state of user session
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/UserSessionInfo"
+          examples:
+            application/json:
+              "active": true
+        "400":
+          description: Bad request
+        "401":
+          description: Token null or invalid.
+        "404":
+          description: User not found.
+        "429":
+          description: Throttling.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+  "/sessions/{fiscalcode}/lock":
+    post:
+      operationId: lockUserSession
+      summary: Lock a user session and delete session data
+      description: |-
+        Use this operation if you want to block a user to log in. The operation succeed if the user is already blocked
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+          examples:
+            application/json:
+              "message": "ok"
+        "400":
+          description: Bad request
+        "401":
+          description: Token null or invalid.
+        "404":
+          description: User not found.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+    delete:
+      operationId: unlockUserSession
+      summary: Remove a lock to a user session
+      description: |-
+        Use this operation if you want to unblock a user and re-allow to login. The operation succeed if the user wasn't blocked
+      parameters:
+        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/Token"
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+          examples:
+            application/json:
+              "message": "ok"
+        "400":
+          description: Bad request
+        "401":
+          description: Token null or invalid.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+parameters:
+  FiscalCode:
+    name: fiscalcode
+    in: path
+    type: string
+    maxLength: 16
+    minLength: 16
+    required: true
+    description: The fiscal code of the user, all upper case.
+    x-example: SPNDNL80R13C555X
+  Token:
+    name: token
+    in: query
+    type: string
+    required: true
+    description: The API key used to access this webhooks.
+definitions:
+  FiscalCode:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
+  ProblemJson:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
+  UserSessionInfo:
+    type: object
+    properties:
+      active:
+        type: boolean
+    required:
+      - active
+responses: {}
+consumes:
+  - application/json
+produces:
+  - application/json

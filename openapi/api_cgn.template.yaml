@@ -195,43 +195,43 @@ paths:
             $ref: "#/definitions/ProblemJson"
 definitions:
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Timestamp"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v25.4.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
   InstanceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/InstanceId"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/InstanceId"
   CommonCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CommonCard"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CommonCard"
   CardPending:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CardPending"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardPending"
   CardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CardActivated"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardActivated"
   CardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CardRevoked"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardRevoked"
   CardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CardExpired"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CardExpired"
   Card:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/Card"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/Card"
   CgnActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CgnActivationDetail"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CgnActivationDetail"
   EycaActivationDetail:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/EycaActivationDetail"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaActivationDetail"
   EycaCard:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/EycaCard"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCard"
   EycaCardActivated:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/EycaCardActivated"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCardActivated"
   EycaCardExpired:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/EycaCardExpired"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCardExpired"
   EycaCardRevoked:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/EycaCardRevoked"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/EycaCardRevoked"
   CcdbNumber:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/CcdbNumber"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/CcdbNumber"
   Otp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/Otp"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/Otp"
   OtpCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn/IP_383_upgrade_to_fp_ts_2/openapi/index.yaml#/definitions/OtpCode"
+    $ref: "../node_modules/@pagopa/io-functions-cgn-sdk/openapi.yaml#/definitions/OtpCode"
 
 securityDefinitions:
   Bearer:

@@ -46,13 +46,20 @@ stages:
             yarn lint
           displayName: 'Lint'
 
+        # OpenAPI spec is a versione file, still is created with a generation process from a template
+        # We need to check it either is out-of-sync with the template or it has been manually edited
+        - script: |
+            yarn openapi:bundle
+          displayName: 'Bundle OpenAPI'
+        - script: |
+            [[ -z $(git status --porcelain) ]] && exit 0 || exit 1
+          displayName: 'Check OpenAPI spec is up-to-date'
+
       - job: validate_api_specification     
         steps:
         - script: |
-            # By convention, we expose api specifications using files
-            #  in form api_<api-name>.yaml in the root of this project
             valid=1
-            for apispec in $(ls api_*.yaml); do
+            for apispec in $(ls openapi/generated/*.yaml); do
               echo "validating $apispec"
               npx oval validate -p $apispec
               result=$?

@@ -1,0 +1,86 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: FIMS API
+  description: Federated Identity Management System API for user authentication.
+host: localhost
+basePath: /fims/api/v1
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/user":
+    x-swagger-router-controller: SSOController
+    get:
+      operationId: getUserForFIMS
+      summary: Get user's data
+      description: Returns the user data needed by FIMS backend.
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/FIMSUser"
+          examples:
+            application/json:
+              name: "Name"
+              family_name: "Surname"
+              fiscal_code: "AAABBB01C02D123Z"
+              auth_time: 1648474413
+              acr: "https://www.spid.gov.it/SpidL2"
+              email: "email@test.com"
+              date_of_birth: "2002-01-01"
+        "400":
+          description: Validation error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Token null or expired.
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "429":
+          description: Too may requests
+        "500":
+          description: There was an error in retrieving the user data.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+definitions:
+  FederatedUser:
+    $ref: "api_backend.template.yaml#/definitions/FederatedUser"
+  FIMSUser:
+    allOf:
+      - type: object
+        properties:
+          date_of_birth:
+            type: string
+            format: date
+          email:
+            $ref: "api_backend.template.yaml#/definitions/EmailAddress"
+          auth_time:
+            type: number
+          acr:
+            $ref: "#/definitions/SpidLevel"
+        required:
+          - date_of_birth
+          - auth_time
+          - acr
+      - $ref: "#/definitions/FederatedUser"
+  ProblemJson:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+  FiscalCode:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
+  SpidLevel:
+    $ref: "api_backend.template.yaml#/definitions/SpidLevel"
+responses: {}
+parameters: {}
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

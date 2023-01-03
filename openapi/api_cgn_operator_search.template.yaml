@@ -1,0 +1,180 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Carta Giovani Nazionale Operator Search API
+host: localhost
+basePath: /api/v1/cgn/operator-search
+schemes:
+  - https
+security:
+  - Bearer: []
+paths:
+  "/published-product-categories":
+    get:
+      operationId: getPublishedProductCategories
+      summary: List of published product categories
+      description: |
+        List of categories that have at least a published discount
+      parameters:
+        - $ref: '#/parameters/CountNewDiscounts'
+      responses:
+        "200":
+          description: List of categories that have at least a published discount
+          schema:
+            $ref: "#/definitions/PublishedProductCategoriesResult"
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson" 
+
+  "/online-merchants":
+    post:
+      operationId: getOnlineMerchants
+      summary: List of online merchants
+      description: |
+        List of online merchants alphabetically ordered
+      parameters:
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/OnlineMerchantSearchRequest'
+      responses:
+        "200":
+          description: List of online merchants for the given query parameters
+          schema:
+            $ref: "#/definitions/OnlineMerchants"
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson" 
+
+  "/offline-merchants":
+    post:
+      operationId: getOfflineMerchants
+      summary: List of merchants with a physical address
+      description: |
+        List of merchants with physical address, ordered by distance from the user by default
+      parameters:
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/OfflineMerchantSearchRequest'
+      responses:
+        "200":
+          description: List of physical merchants for the given query parameters
+          schema:
+            $ref: "#/definitions/OfflineMerchants"
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/merchants/{merchantId}":
+    parameters:
+      - name: merchantId
+        in: path
+        type: string
+        minLength: 1
+        required: true
+        description: Merchant Identifier
+    get:
+      operationId: getMerchant
+      summary: Retrieve merchant details
+      description: |
+        Retrieve merchant details together with published discounts
+      responses:
+        "200":
+          description: Found
+          schema:
+            $ref: "#/definitions/Merchant"
+        "404":
+          description: Operator Not Found
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+  "/discount-bucket-code/{discountId}":
+    parameters:
+      - name: discountId
+        in: path
+        type: string
+        minLength: 1
+        required: true
+        description: Discount Identifier
+    get:
+      operationId: getDiscountBucketCode
+      summary: Retrieve a discount bucket code
+      description: |
+        Retrieve a discount bucket code and burns it
+      responses:
+        "200":
+          description: Found
+          schema:
+            $ref: "#/definitions/DiscountBucketCode"
+        "404":
+          description: Bucket code Not Found
+        '401':
+          description: Bearer token null or expired
+        '403':
+          description: Access data provided are invalid or CGN not valid
+        '410':
+          description: Endpoint no longer available
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
+parameters:
+  CountNewDiscounts:
+    type: boolean
+    name: count_new_discounts
+    in: query
+    description: Indicates whether categories should be enriched with new discounts count.
+
+definitions:
+  ProblemJson:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
+  Merchant:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/Merchant"
+  DiscountCodeType:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/DiscountCodeType"
+  OfflineMerchants:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/OfflineMerchants"
+  OfflineMerchant:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/OfflineMerchant"
+  OfflineMerchantSearchRequest:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/OfflineMerchantSearchRequest"
+  OnlineMerchants:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/OnlineMerchants"
+  OnlineMerchant:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/OnlineMerchant"
+  OnlineMerchantSearchRequest:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/OnlineMerchantSearchRequest"
+  Discount:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/Discount"
+  ProductCategory:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/ProductCategory"
+  Address:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/Address"
+  Coordinates:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/Coordinates"
+  BoundingBox:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/BoundingBox"
+  DiscountBucketCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/DiscountBucketCode"
+  PublishedProductCategories:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/PublishedProductCategories"
+  PublishedProductCategoriesWithNewDiscountsCount:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/PublishedProductCategoriesWithNewDiscountsCount"
+  PublishedProductCategoriesResult:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/PublishedProductCategoriesResult"
+  ProductCategoryWithNewDiscountsCount:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-cgn-operator-search/v2.6.2/openapi/index.yaml#/definitions/ProductCategoryWithNewDiscountsCount"
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header

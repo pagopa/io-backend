@@ -11,9 +11,8 @@ import {
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
+import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
-
-import { ExtendedProfile } from "../../generated/io-api/ExtendedProfile";
 
 import { formatDate } from "../utils/date";
 import { User } from "./user";

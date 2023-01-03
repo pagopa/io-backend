@@ -10,9 +10,9 @@ import { PushNotificationsContentTypeEnum } from "../../../generated/backend/Pus
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { ServicePreferencesSettings } from "../../../generated/backend/ServicePreferencesSettings";
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
-import { AppVersion } from "../../../generated/io-api/AppVersion";
-import { ExtendedProfile as ExtendedProfileApi } from "../../../generated/io-api/ExtendedProfile";
-import { NewProfile } from "../../../generated/io-api/NewProfile";
+import { AppVersion } from "@pagopa/io-functions-app-sdk/AppVersion";
+import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
+import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 import { APIClient } from "../../clients/api";
 import { toInitializedProfile } from "../../types/profile";
 import {
