@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 9.7.1
+  version: 9.7.2
   title: Session API
   description: Collection of enpoints to interact with user session.
 host: localhost
