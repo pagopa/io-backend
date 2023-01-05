@@ -31,7 +31,14 @@ import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
 import RedisSessionStorage, {
   sessionNotFoundError
 } from "../redisSessionStorage";
-import { mockBPDToken, mockFIMSToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
+import {
+  mockBPDToken,
+  mockFIMSToken,
+  mockMyPortalToken,
+  mockSessionToken,
+  mockWalletToken,
+  mockZendeskToken
+} from "../../__mocks__/user_mock";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -322,17 +329,18 @@ describe("RedisSessionStorage#set", () => {
   ])(
     "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
     async (
-      sessionSetErr: Error,
-      sessionSetSuccess: string,
-      walletSetErr: Error,
-      walletSetSuccess: string,
-      myPortalSetError: Error,
-      myPortalSetSuccess: string,
-      bpdSetError: Error,
-      bpdSetSuccess: string,
-      zendeskSetError: Error,
-      zendeskSetSuccess: string,
-      expected: Error
+      sessionSetErr,
+      sessionSetSuccess,
+      walletSetErr,
+      walletSetSuccess,
+      myPortalSetError,
+      myPortalSetSuccess,
+      bpdSetError,
+      bpdSetSuccess,
+      zendeskSetError,
+      zendeskSetSuccess,
+      expected,
+      _
       // tslint:disable-next-line: parameters-max-number
     ) => {
       mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
@@ -394,7 +402,9 @@ describe("RedisSessionStorage#set", () => {
       expect(mockSet.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
       expect(mockSet.mock.calls[3][1]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[4][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+      expect(mockSet.mock.calls[4][0]).toBe(
+        `ZENDESK-${aValidUser.zendesk_token}`
+      );
       expect(mockSet.mock.calls[4][1]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[6][0]).toBe(
@@ -918,7 +928,7 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     });
     const expectedDecodedError = User.decode(anInvalidUser);
     expect(E.isLeft(expectedDecodedError)).toBeTruthy();
-    if(E.isLeft(expectedDecodedError)) {
+    if (E.isLeft(expectedDecodedError)) {
       const expectedError = new Error(
         errorsToReadableMessages(expectedDecodedError.left).join("/")
       );
@@ -927,12 +937,14 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
       );
 
       expect(mockGet).toHaveBeenCalledTimes(2);
-      expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+      expect(mockGet.mock.calls[0][0]).toBe(
+        `ZENDESK-${aValidUser.zendesk_token}`
+      );
       expect(mockGet.mock.calls[1][0]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
       expect(response).toEqual(E.left(expectedError));
-      }
+    }
   });
 
   it("should fail parse of user payload", async () => {
@@ -948,7 +960,9 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(2);
-    expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+    expect(mockGet.mock.calls[0][0]).toBe(
+      `ZENDESK-${aValidUser.zendesk_token}`
+    );
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
@@ -982,14 +996,15 @@ describe("RedisSessionStorage#getByZendeskToken", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(2);
-    expect(mockGet.mock.calls[0][0]).toBe(`ZENDESK-${aValidUser.zendesk_token}`);
+    expect(mockGet.mock.calls[0][0]).toBe(
+      `ZENDESK-${aValidUser.zendesk_token}`
+    );
     expect(mockGet.mock.calls[1][0]).toBe(
       `SESSION-${aValidUser.session_token}`
     );
     expect(response).toEqual(E.right(O.some(aValidUser)));
   });
 });
-
 
 // tslint:disable-next-line: no-big-function
 describe("RedisSessionStorage#del", () => {
@@ -1021,53 +1036,46 @@ describe("RedisSessionStorage#del", () => {
       ),
       "should fail if Redis client returns an error deleting the session and false deleting the mapping"
     ]
-  ])(
-    "%s, %s, %s, %s",
-    async (
-      tokenDelErr: Error,
-      tokenDelResponse: number,
-      expected: E.Either<Error, boolean>
-    ) => {
-      const aValidUserWithExternalTokens = {
-        ...aValidUser,
-        bpd_token: mockBPDToken,
-        myportal_token: mockMyPortalToken
-      };
-      const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
-      mockDel.mockImplementationOnce(callCallback(tokenDelErr, tokenDelResponse));
-      mockSrem.mockImplementationOnce((_, __, callback) => callback(null, 1));
+  ])("%s, %s, %s, %s", async (tokenDelErr, tokenDelResponse, expected, _) => {
+    const aValidUserWithExternalTokens = {
+      ...aValidUser,
+      bpd_token: mockBPDToken,
+      myportal_token: mockMyPortalToken
+    };
+    const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
+    mockDel.mockImplementationOnce(callCallback(tokenDelErr, tokenDelResponse));
+    mockSrem.mockImplementationOnce((_, __, callback) => callback(null, 1));
 
-      const response = await sessionStorage.del(aValidUserWithExternalTokens);
+    const response = await sessionStorage.del(aValidUserWithExternalTokens);
 
-      expect(mockDel).toHaveBeenCalledTimes(1);
-      expect(mockDel.mock.calls[0][0]).toBe(
-        `BPD-${aValidUserWithExternalTokens.bpd_token}`
+    expect(mockDel).toHaveBeenCalledTimes(1);
+    expect(mockDel.mock.calls[0][0]).toBe(
+      `BPD-${aValidUserWithExternalTokens.bpd_token}`
+    );
+    expect(mockDel.mock.calls[0][1]).toBe(
+      `FIMS-${aValidUserWithExternalTokens.fims_token}`
+    );
+    expect(mockDel.mock.calls[0][2]).toBe(
+      `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
+    );
+    expect(mockDel.mock.calls[0][3]).toBe(expectedSessionInfoKey);
+    expect(mockDel.mock.calls[0][4]).toBe(
+      `SESSION-${aValidUserWithExternalTokens.session_token}`
+    );
+    expect(mockDel.mock.calls[0][5]).toBe(
+      `WALLET-${aValidUserWithExternalTokens.wallet_token}`
+    );
+    if (E.isRight(expected)) {
+      expect(mockSrem).toBeCalledWith(
+        `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
+        `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`,
+        expect.any(Function)
       );
-      expect(mockDel.mock.calls[0][1]).toBe(
-        `FIMS-${aValidUserWithExternalTokens.fims_token}`
-      );
-      expect(mockDel.mock.calls[0][2]).toBe(
-        `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
-      );
-      expect(mockDel.mock.calls[0][3]).toBe(expectedSessionInfoKey);
-      expect(mockDel.mock.calls[0][4]).toBe(
-        `SESSION-${aValidUserWithExternalTokens.session_token}`
-      );
-      expect(mockDel.mock.calls[0][5]).toBe(
-        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
-      );
-      if (E.isRight(expected)) {
-        expect(mockSrem).toBeCalledWith(
-          `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
-          `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`,
-          expect.any(Function)
-        );
-      } else {
-        expect(mockSrem).not.toBeCalled();
-      }
-      expect(response).toEqual(expected);
+    } else {
+      expect(mockSrem).not.toBeCalled();
     }
-  );
+    expect(response).toEqual(expected);
+  });
 });
 
 describe("RedisSessionStorage#listUserSessions", () => {

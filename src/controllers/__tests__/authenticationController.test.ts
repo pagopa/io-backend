@@ -533,7 +533,7 @@ describe("AuthenticationController#acs", () => {
 describe("AuthenticationController#acsTest", () => {
   let acsSpyOn: jest.SpyInstance<
     ReturnType<AuthenticationController["acs"]>,
-    ArgsType<AuthenticationController["acs"]>
+    jest.ArgsType<AuthenticationController["acs"]>
   >;
   const res = mockRes();
   beforeEach(() => {
@@ -584,7 +584,7 @@ describe("AuthenticationController#acsTest", () => {
 });
 
 describe("AuthenticationController#getUserIdentity", () => {
-  let mockUserDecode: jest.Mock | undefined;
+  let mockUserDecode: jest.SpyInstance | undefined;
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
