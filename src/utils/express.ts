@@ -53,7 +53,7 @@ export function toExpressMiddleware<T, P>(
         flow(
           O.fromNullable,
           O.map(TE.left),
-          O.getOrElse(() => TE.right(next()))
+          O.getOrElseW(() => TE.right(next()))
         )
       ),
       TE.mapLeft(response => {
