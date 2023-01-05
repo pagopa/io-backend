@@ -52,6 +52,34 @@ paths:
           description: Unavailable service
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/login":
+    get:
+      operationId: login
+      summary: Login SPID/CIE
+      description: Login with SPID or CIE for IO APP
+      parameters: 
+        - $ref: "#/parameters/EntityId"
+        - $ref: "#/parameters/AuthLevel"
+        - $ref: "#/parameters/JwkPubKeyToken"
+        - $ref: "#/parameters/JwkPubKeyHashAlgorithm"
+      responses:
+        "302":
+          description: Redirect to IDP
+          headers:
+            Location:
+              type: string
+              description: Redirect endpoint with SAML AuthNRequest query parameters
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "503":
+          description: Service unavailable
+
 definitions:
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/FiscalCode"
@@ -105,3 +133,23 @@ consumes:
   - application/json
 produces:
   - application/json
+
+parameters:
+  EntityId:
+    name: entityID
+    in: query
+    type: string
+    description: An ID that refers to a specific IDP
+    required: true
+  AuthLevel:
+    name: authLevel
+    in: query
+    type: string
+    enum: [SpidL2, SpidL3]
+    description: SPID AuthLevel
+    required: true
+    x-example: SpidL2
+  JwkPubKeyToken:
+    $ref: "./api_lollipop.yaml#/parameters/JwkPubKeyToken"
+  JwkPubKeyHashAlgorithm:
+    $ref: "./api_lollipop.yaml#/parameters/JwkPubKeyHashAlgorithm"

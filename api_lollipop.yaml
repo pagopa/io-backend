@@ -1,0 +1,26 @@
+swagger: "2.0"
+info:
+  title: "IO LolliPop parameters"
+  version: "0.1"
+paths:
+  "/dummy":
+    get:
+      responses:
+        "200":
+          description: "ok"
+parameters:
+  JwkPubKeyToken:
+    in: header
+    name: x-pagopa-lollipop-pub-key
+    type: string
+    description: represents a Base64url encode of a JWK Public Key
+    format: JwkPublicKeyFromToken
+    x-import: '@pagopa/ts-commons/lib/jwk'
+    example: "eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IjRmMzB6dUdNcm9kRXl3cEoxelZKbWFRLVYtZlM4OVZBTW8yZnN6dWxOTmsiLCJ5IjoibG5NdmExengxaFJncVY5enVEU3dkV0dyUlhTREl4UXQ1YVJVeG1EVW44NCJ9"
+  JwkPubKeyHashAlgorithm:
+    in: header
+    name: x-pagopa-lollipop-pub-key-hash-algo
+    type: string
+    enum: [sha256, sha384. sha512]
+    description: Represents the selected hashing algorithm for jwk thumbprint
+    example: "sha256"

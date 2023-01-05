@@ -215,7 +215,7 @@ Those are all Environment variables needed by the application:
 | IO_SIGN_API_BASE_PATH                  | The root path for the backend io-sign api endpoints                               | string  |
 | IO_SIGN_API_KEY                        | The key used to authenticate to the io-func-sign-user API                         | string  |
 | IO_SIGN_API_URL                        | The io-func-sign-user  URL                                                        | string  |
-
+| LOLLIPOP_ALLOWED_USER_AGENTS           | List of allowed user agents for Lollipop Login flow                               | string  |
 
 
 

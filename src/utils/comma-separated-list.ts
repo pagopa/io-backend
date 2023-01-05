@@ -26,3 +26,22 @@ export const CommaSeparatedListOf = (decoder: t.Mixed) =>
       ),
     String
   );
+
+export const ArbitrarySeparatedListOf = (separator: string, decoder: t.Mixed) =>
+  new t.Type<ReadonlyArray<t.TypeOf<typeof decoder>>, string, unknown>(
+    `ArbitrarySeparatedListOf<${decoder.name}>`,
+    (value: unknown): value is ReadonlyArray<t.TypeOf<typeof decoder>> =>
+      Array.isArray(value) && value.every(e => decoder.is(e)),
+    input =>
+      t.readonlyArray(decoder).decode(
+        typeof input === "string"
+          ? input
+              .split(separator)
+              .map(e => e.trim())
+              .filter(Boolean)
+          : !input
+          ? [] // fallback to empty array in case of empty input
+          : input // it should not happen, but in case we let the decoder fail
+      ),
+    String
+  );
