@@ -850,10 +850,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-9.0.0.tgz#a7a8b31f633ef961afd54edc966c0e7dcf169021"
-  integrity sha512-j6cgJCZ0w1wLORHV7kvKb98QcCrsnDmU8g130wc3Nzapiiem2P0HOQybtc1tfgXD1UBZxYAD0x2V+riKa1hIug==
+"@pagopa/io-spid-commons@^9.1.0":
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-9.1.0.tgz#48eb49c3e7af29ebf856dd07874ca91852625f18"
+  integrity sha512-wRQ5mCIZYpFuBf5remyEXW8vEwERBktwKh1g7zRg1Ky1//zXgBcSL5BUkNBZpAWyECzOh+TgXgQ8OrBZXiZerA==
   dependencies:
     "@pagopa/ts-commons" "^10.11.1"
     "@types/redis" "^2.8.32"
