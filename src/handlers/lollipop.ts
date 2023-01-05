@@ -4,11 +4,11 @@ import * as express from "express";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
-import { withValidatedOrValidationError } from "src/utils/responses";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation
 } from "@pagopa/ts-commons/lib/responses";
+import { withValidatedOrValidationError } from "../utils/responses";
 
 /**
  * 1. Read pubkey header
