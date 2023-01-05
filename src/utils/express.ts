@@ -36,7 +36,8 @@ export function toExpressHandler<T, P>(
 /**
  * Convenience method that transforms a function (handler),
  * which takes an express.Request as input and returns an IResponse,
- * into an express middleware.
+ * into an express middleware. If handler returns undefined
+ * the next middleware is called
  */
 export function toExpressMiddleware<T, P>(
   handler: (req: express.Request) => Promise<IResponse<T> | undefined>,
