@@ -39,6 +39,7 @@ import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
 import * as S from "fp-ts/lib/string";
 import { record } from "fp-ts";
+import { SemverFromFromUserAgentString } from "@pagopa/ts-commons/lib/http-user-agent";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -251,7 +252,7 @@ log.info(
 
 export const LOLLIPOP_ALLOWED_USER_AGENTS = pipe(
   process.env.LOLLIPOP_ALLOWED_USER_AGENTS,
-  ArbitrarySeparatedListOf("|", NonEmptyString).decode,
+  ArbitrarySeparatedListOf("|", SemverFromFromUserAgentString).decode,
   E.getOrElseW(err => {
     throw new Error(
       `Unexpected LOLLIPOP_ALLOWED_USER_AGENTS value: ${readableReport(err)}`
