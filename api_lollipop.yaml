@@ -21,7 +21,7 @@ parameters:
     in: header
     name: x-pagopa-lollipop-pub-key-hash-algo
     type: string
-    enum: [sha256, sha384. sha512]
+    enum: [sha256, sha384, sha512]
     description: Represents the selected hashing algorithm for jwk thumbprint
     example: "sha256"
   UserAgent:

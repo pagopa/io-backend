@@ -264,9 +264,7 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   lollipopProviderConfig: pipe(
     LOLLIPOP_ALLOWED_USER_AGENTS,
     O.fromPredicate(RA.isNonEmpty),
-    O.map(allowedUserAgents => ({
-      allowedUserAgents
-    })),
+    O.bindTo("allowedUserAgents"),
     O.toUndefined
   ),
   organization: {
