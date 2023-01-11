@@ -31,6 +31,6 @@ export const lollipopLoginHandler = () => async (
       O.getOrElseW(() => E.right(void 0))
     ),
     _ =>
-      // TODO:
+      // TODO: Not yet implemented
       void 0
   );
