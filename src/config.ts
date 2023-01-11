@@ -922,7 +922,7 @@ export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
   })
 );
 export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
-  process.env.FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+  process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
   E.getOrElse(_ => "XYZ" as NonEmptyString)
 );
