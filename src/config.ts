@@ -59,9 +59,9 @@ import { PNClientFactory } from "./clients/pn-clients";
 import { IoSignAPIClient } from "./clients/io-sign";
 import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
 import {
-  ArbitrarySeparatedListOf,
-  CommaSeparatedListOf
-} from "./utils/comma-separated-list";
+  CommaSeparatedListOf,
+  PipeSeparatedListOf
+} from "./utils/separated-list";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -252,7 +252,7 @@ log.info(
 
 export const LOLLIPOP_ALLOWED_USER_AGENTS = pipe(
   process.env.LOLLIPOP_ALLOWED_USER_AGENTS,
-  ArbitrarySeparatedListOf("|", SemverFromFromUserAgentString).decode,
+  PipeSeparatedListOf(SemverFromFromUserAgentString).decode,
   E.getOrElseW(err => {
     throw new Error(
       `Unexpected LOLLIPOP_ALLOWED_USER_AGENTS value: ${readableReport(err)}`
