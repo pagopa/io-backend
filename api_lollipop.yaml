@@ -24,3 +24,9 @@ parameters:
     enum: [sha256, sha384. sha512]
     description: Represents the selected hashing algorithm for jwk thumbprint
     example: "sha256"
+  UserAgent:
+    in: header
+    name: User-Agent
+    type: string
+    description: The User Agent that could be the browser value or a specific Lollipop autorized User Agent validated with the type `@pagopa/ts-commons/SemverUserAgentFromString`
+    example: IO-App/2.23
