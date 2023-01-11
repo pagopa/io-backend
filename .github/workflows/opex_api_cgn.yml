@@ -4,7 +4,7 @@ name: Opex Dashboard api_cgn
 on:
   push:
     branches:
-      - opex-demo
+      - master
     paths:
       - 'api_cgn.yaml'
       - '.github/workflows/opex_api_cgn.yml'

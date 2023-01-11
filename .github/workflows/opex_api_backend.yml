@@ -4,7 +4,7 @@ name: Opex Dashboard api_backend
 on:
   push:
     branches:
-      - opex-demo
+      - master
     paths:
       - 'api_backend.yaml'
       - '.github/workflows/opex_api_backend.yml'
