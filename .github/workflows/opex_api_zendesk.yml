@@ -1,6 +1,6 @@
 name: Opex Dashboard api_zendesk
 
-### Controls when the workflow will run
+# Controls when the workflow will run
 on:
   push:
     branches:
