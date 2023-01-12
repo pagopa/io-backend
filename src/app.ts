@@ -131,7 +131,11 @@ import {
   trackStartupTime
 } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
-import { constantExpressHandler, toExpressHandler } from "./utils/express";
+import {
+  constantExpressHandler,
+  toExpressHandler,
+  toExpressMiddleware
+} from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
@@ -159,6 +163,7 @@ import {
   getNotificationServiceFactory,
   NotificationServiceFactory
 } from "./services/notificationServiceFactory";
+import { lollipopLoginHandler } from "./handlers/lollipop";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -668,6 +673,7 @@ export function newApp({
               },
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
+              lollipopMiddleware: toExpressMiddleware(lollipopLoginHandler()),
               redisClient: REDIS_CLIENT,
               samlConfig,
               serviceProviderConfig

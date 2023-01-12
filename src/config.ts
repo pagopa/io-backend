@@ -4,6 +4,7 @@
 
 import * as dotenv from "dotenv";
 import * as E from "fp-ts/Either";
+import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
 import * as t from "io-ts";
 import { toError } from "fp-ts/lib/Either";
@@ -38,6 +39,7 @@ import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
 import { pipe } from "fp-ts/lib/function";
 import * as S from "fp-ts/lib/string";
 import { record } from "fp-ts";
+import { SemverFromFromUserAgentString } from "@pagopa/ts-commons/lib/http-user-agent";
 import { CgnAPIClient } from "./clients/cgn";
 import { log } from "./utils/logger";
 import urlTokenStrategy from "./strategies/urlTokenStrategy";
@@ -56,7 +58,10 @@ import { ThirdPartyConfigListFromString } from "./utils/thirdPartyConfig";
 import { PNClientFactory } from "./clients/pn-clients";
 import { IoSignAPIClient } from "./clients/io-sign";
 import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
-import { CommaSeparatedListOf } from "./utils/comma-separated-list";
+import {
+  CommaSeparatedListOf,
+  PipeSeparatedListOf
+} from "./utils/separated-list";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -245,8 +250,23 @@ log.info(
   IDP_METADATA_REFRESH_INTERVAL_SECONDS
 );
 
+export const LOLLIPOP_ALLOWED_USER_AGENTS = pipe(
+  process.env.LOLLIPOP_ALLOWED_USER_AGENTS,
+  PipeSeparatedListOf(SemverFromFromUserAgentString).decode,
+  E.getOrElseW(err => {
+    throw new Error(
+      `Unexpected LOLLIPOP_ALLOWED_USER_AGENTS value: ${readableReport(err)}`
+    );
+  })
+);
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
+  lollipopProviderConfig: pipe(
+    LOLLIPOP_ALLOWED_USER_AGENTS,
+    O.fromPredicate(RA.isNonEmpty),
+    O.bindTo("allowedUserAgents"),
+    O.toUndefined
+  ),
   organization: {
     URL: "https://io.italia.it",
     displayName: "IO - l'app dei servizi pubblici BETA",

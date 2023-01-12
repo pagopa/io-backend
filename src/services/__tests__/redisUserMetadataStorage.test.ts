@@ -1,6 +1,6 @@
 // tslint:disable no-object-mutation
 
-import { Either, left, right } from "fp-ts/lib/Either";
+import { left, right } from "fp-ts/lib/Either";
 import { createMockRedis } from "mock-redis-client";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
@@ -81,24 +81,15 @@ describe("RedisUserMetadataStorage#get", () => {
       left(redisClientError),
       "should fail if user metadata don't exists"
     ]
-  ])(
-    "%s, %s, %s, %s",
-    async (
-      mockGetError: Error,
-      mockGetResponse: string | undefined,
-      expected: Either<Error, UserMetadata>
-    ) => {
-      mockGet.mockImplementation((_, callback) => {
-        callback(mockGetError, mockGetResponse);
-      });
+  ])("%s, %s, %s, %s", async (mockGetError, mockGetResponse, expected, _) => {
+    mockGet.mockImplementation((_, callback) => {
+      callback(mockGetError, mockGetResponse);
+    });
 
-      const response = await userMetadataStorage.get(aValidUser);
-      expect(mockGet.mock.calls[0][0]).toBe(
-        `USERMETA-${aValidUser.fiscal_code}`
-      );
-      expect(response).toEqual(expected);
-    }
-  );
+    const response = await userMetadataStorage.get(aValidUser);
+    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(response).toEqual(expected);
+  });
 });
 
 describe("RedisUserMetadataStorage#get", () => {
