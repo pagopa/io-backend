@@ -1,0 +1,53 @@
+name: Opex Dashboard api_mit_voucher
+
+### Controls when the workflow will run
+on:
+  push:
+    branches:
+      - opex-demo
+    paths:
+      - 'api_mit_voucher.yaml'
+      - '.github/workflows/opex_api_mit_voucher.yml'
+      - '.opex/api_mit_voucher/**'
+
+env:
+  CLIENT_ID: 10ab3c51-f734-4782-abe9-3e998a1a2e84
+  TENANT_ID: 7788edaf-0346-4068-9d79-c868aed15b3d
+  SUBSCRIPTION_ID: ec285037-c673-4f58-b594-d7c480da4e8b
+  API_NAME: api_mit_voucher
+
+permissions:
+  id-token: write
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        environment: [prod]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        id: checkout
+        # from https://github.com/actions/checkout/commits/main
+        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      # from https://github.com/pagopa/opex-dashboard-azure-action/
+      - uses: pagopa/opex-dashboard-azure-action@v1.0.3
+        with:
+          environment: ${{ matrix.environment }}
+          api-name: ${{ env.API_NAME }}
+          config: .opex/${{ env.API_NAME }}/env/${{ matrix.environment }}/config.yaml
+          client-id: ${{ env.CLIENT_ID }}
+          tenant-id: ${{ env.TENANT_ID }}
+          subscription-id: ${{ env.SUBSCRIPTION_ID }}
+          # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
+          docker-version: sha256:d9465f04e469c8f65bb1fb21cb9688508c64fda75495f552e858fb5a9580be90
