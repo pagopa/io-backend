@@ -111,7 +111,7 @@
     "passport-strategy": "^1.0.0",
     "qr-image": "^3.2.0",
     "range_check": "^1.4.0",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "redis-clustr": "^1.6.0",
     "ts-pattern": "^4.0.3",
     "ulid": "^2.2.2",
