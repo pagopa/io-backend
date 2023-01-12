@@ -1,0 +1,12 @@
+oa3_spec: api_notifications.yaml
+name: opex_iobackend_api_notifications
+location: West Europe
+timespan: 5m
+data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
+action_groups:
+  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/SlackPagoPA
+  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/EmailPagoP
+overrides:
+  hosts:
+    - app-backend.io.italia.it
+    - api-app.io.pagopa.it
