@@ -2,16 +2,27 @@ name: Opex Dashboard api_mit_voucher
 
 # Controls when the workflow will run
 on:
+  workflow_dispatch:
   push:
     branches:
-      - opex-demo
+      - master
+    paths:
+      - 'api_mit_voucher.yaml'
+      - '.github/workflows/opex_api_mit_voucher.yml'
+      - '.opex/api_mit_voucher/**'
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
     paths:
       - 'api_mit_voucher.yaml'
       - '.github/workflows/opex_api_mit_voucher.yml'
       - '.opex/api_mit_voucher/**'
 
 env:
-  CLIENT_ID: 10ab3c51-f734-4782-abe9-3e998a1a2e84
+  CLIENT_ID: 712582b4-1e38-4329-bfd2-5cd186e82529
   TENANT_ID: 7788edaf-0346-4068-9d79-c868aed15b3d
   SUBSCRIPTION_ID: ec285037-c673-4f58-b594-d7c480da4e8b
   API_NAME: api_mit_voucher

@@ -12,6 +12,6 @@ resource "azurerm_role_assignment" "master_terraform_storage_account_tfstate_app
 
 resource "azurerm_role_assignment" "master_terraform_resource_group_dashboards" {
   scope                = data.azurerm_resource_group.dashboards.id
-  role_definition_name = "Contributor"
+  role_definition_name = "Monitoring Contributor"
   principal_id         = azuread_service_principal.master.object_id
 }

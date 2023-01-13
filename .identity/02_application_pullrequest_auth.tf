@@ -12,6 +12,6 @@ resource "azurerm_role_assignment" "pullrequest_terraform_storage_account_tfstat
 
 resource "azurerm_role_assignment" "pullrequest_terraform_resource_group_dashboards" {
   scope                = data.azurerm_resource_group.dashboards.id
-  role_definition_name = "Reader"
+  role_definition_name = "Monitoring Contributor"
   principal_id         = azuread_service_principal.pullrequest.object_id
 }
