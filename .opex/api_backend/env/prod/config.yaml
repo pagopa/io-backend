@@ -1,5 +1,5 @@
 oa3_spec: api_backend.yaml
-name: opex_api_backend
+name: opex_iobackend_api_backend
 location: West Europe
 timespan: 5m
 data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
