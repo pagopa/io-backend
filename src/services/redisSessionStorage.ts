@@ -14,8 +14,10 @@ import * as redis from "redis";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, pipe, identity } from "fp-ts/lib/function";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
+import * as t from "io-ts";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
@@ -26,13 +28,20 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken,
+  ZendeskToken
 } from "../types/token";
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
+
+const NullableBackendAssertionRef = t.union([
+  t.null,
+  t.undefined,
+  BackendAssertionRef
+]);
+type NullableBackendAssertionRef = t.TypeOf<typeof NullableBackendAssertionRef>;
 
 const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
@@ -56,157 +65,126 @@ export const keyPrefixes = [
   sessionInfoKeyPrefix,
   noticeEmailPrefix,
   blockedUserSetKey,
-  lollipopFingerprintPrefix,
+  lollipopFingerprintPrefix
 ];
 export const sessionNotFoundError = new Error("Session not found");
 
-export default class RedisSessionStorage
-  extends RedisStorageUtils
-  implements ISessionStorage
-{
-  private readonly mgetTask: (
-    ...args: ReadonlyArray<string>
-  ) => TaskEither<Error, ReadonlyArray<string>>;
-  private readonly sismemberTask: (
-    ...args: ReadonlyArray<string>
-  ) => TaskEither<Error, number>;
-  private readonly ttlTask: (key: string) => TaskEither<Error, number>;
+export default class RedisSessionStorage extends RedisStorageUtils
+  implements ISessionStorage {
   constructor(
-    private readonly redisClient: redis.RedisClient,
+    private readonly redisClient:
+      | redis.RedisClientType
+      | redis.RedisClusterType,
     private readonly tokenDurationSecs: number,
     private readonly defaultDurationAssertionRefSec: Second
   ) {
     super();
-    this.mgetTask = TE.taskify(this.redisClient.mget.bind(this.redisClient));
-    this.sismemberTask = TE.taskify(
-      this.redisClient.sismember.bind(this.redisClient)
-    );
-    this.ttlTask = TE.taskify(this.redisClient.ttl.bind(this.redisClient));
   }
 
   /**
    * {@inheritDoc}
    */
+  // eslint-disable-next-line max-lines-per-function
   public async set(
     user: UserV5,
     expireSec: number = this.tokenDurationSecs
   ): Promise<Either<Error, boolean>> {
-    const setSessionToken = new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${sessionKeyPrefix}${user.session_token}`,
-        JSON.stringify(user),
-        "EX",
-        expireSec,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting session token")
-            )
-          )
-      );
-    });
+    const setSessionTokenV2 = pipe(
+      TE.tryCatch(
+        () =>
+          // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
+          // @see https://redis.io/commands/set
+          this.redisClient.setEx(
+            `${sessionKeyPrefix}${user.session_token}`,
+            expireSec,
+            JSON.stringify(user)
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting session token"))
+    );
 
-    const setWalletToken = new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${walletKeyPrefix}${user.wallet_token}`,
-        user.session_token,
-        "EX",
-        expireSec,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting wallet token")
-            )
-          )
-      );
-    });
+    const setWalletTokenV2 = pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${walletKeyPrefix}${user.wallet_token}`,
+            expireSec,
+            user.session_token
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting wallet token"))
+    );
 
-    const setMyPortalToken = new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${myPortalTokenPrefix}${user.myportal_token}`,
-        user.session_token,
-        "EX",
-        expireSec,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting MyPortal token")
-            )
-          )
-      );
-    });
+    const setMyPortalTokenV2 = pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${myPortalTokenPrefix}${user.myportal_token}`,
+            expireSec,
+            user.session_token
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting MyPortal token"))
+    );
 
-    const setBPDToken = new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${bpdTokenPrefix}${user.bpd_token}`,
-        user.session_token,
-        "EX",
-        expireSec,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting BPD token")
-            )
-          )
-      );
-    });
+    const setBPDTokenV2 = pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${bpdTokenPrefix}${user.bpd_token}`,
+            expireSec,
+            user.session_token
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting BPD token"))
+    );
 
-    const setZendeskToken = new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${zendeskTokenPrefix}${user.zendesk_token}`,
-        user.session_token,
-        "EX",
-        expireSec,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting Zendesk token")
-            )
-          )
-      );
-    });
+    const setZendeskTokenV2 = pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${zendeskTokenPrefix}${user.zendesk_token}`,
+            expireSec,
+            user.session_token
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting Zendesk token"))
+    );
 
-    const setFIMSToken = new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${fimsTokenPrefix}${user.fims_token}`,
-        user.session_token,
-        "EX",
-        expireSec,
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting FIMS token")
-            )
-          )
-      );
-    });
+    const setFIMSTokenV2 = pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${fimsTokenPrefix}${user.fims_token}`,
+            expireSec,
+            user.session_token
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting FIMS token"))
+    );
 
     // If is a session update, the session info key doesn't must be updated.
     // eslint-disable-next-line functional/no-let
-    let saveSessionInfoPromise: Promise<Either<Error, boolean>> =
-      Promise.resolve(E.right(true));
+    let saveSessionInfoPromise: Promise<Either<
+      Error,
+      boolean
+    >> = Promise.resolve(E.right(true));
     if (expireSec === this.tokenDurationSecs) {
       const sessionInfo: SessionInfo = {
         createdAt: new Date(),
-        sessionToken: user.session_token,
+        sessionToken: user.session_token
       };
       saveSessionInfoPromise = this.saveSessionInfo(
         sessionInfo,
@@ -217,20 +195,20 @@ export default class RedisSessionStorage
     const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
 
     const setPromisesResult = await Promise.all([
-      setSessionToken,
-      setWalletToken,
-      setMyPortalToken,
-      setBPDToken,
-      setZendeskToken,
-      setFIMSToken,
+      setSessionTokenV2(),
+      setWalletTokenV2(),
+      setMyPortalTokenV2(),
+      setBPDTokenV2(),
+      setZendeskTokenV2(),
+      setFIMSTokenV2(),
       saveSessionInfoPromise,
-      removeOtherUserSessionsPromise,
+      removeOtherUserSessionsPromise
     ]);
     const isSetFailed = setPromisesResult.some(E.isLeft);
     if (isSetFailed) {
       return E.left<Error, boolean>(
         multipleErrorsFormatter(
-          setPromisesResult.filter(E.isLeft).map((_) => _.left),
+          setPromisesResult.filter(E.isLeft).map(result => result.left),
           "RedisSessionStorage.set"
         )
       );
@@ -378,27 +356,20 @@ export default class RedisSessionStorage
       (_, { prefix, value }) => `${prefix}${value}`
     )(this.getUserTokens(user));
 
-    const deleteTokensPromise = await new Promise<Either<Error, true>>(
-      (resolve) => {
-        // Remove the specified key. A key is ignored if it does not exist.
-        // @see https://redis.io/commands/del
-        this.redisClient.del(...tokens, (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.integerReply(err, response, tokens.length),
-              new Error(
-                "Unexpected response from redis client deleting user tokens."
-              )
-            )
-          )
-        );
-      }
-    );
+    const deleteTokensPromiseV2 = await pipe(
+      // TODO: Check types for tokens array on del command
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      TE.tryCatch(() => this.redisClient.del(...(tokens as any)), E.toError),
+      this.integerReplyAsync(tokens.length),
+      this.falsyResponseToErrorAsync(
+        new Error("Unexpected response from redis client deleting user tokens.")
+      )
+    )();
 
-    if (E.isLeft(deleteTokensPromise)) {
+    if (E.isLeft(deleteTokensPromiseV2)) {
       return E.left(
         new Error(
-          `value [${deleteTokensPromise.left.message}] at RedisSessionStorage.del`
+          `value [${deleteTokensPromiseV2.left.message}] at RedisSessionStorage.del`
         )
       );
     }
@@ -406,14 +377,18 @@ export default class RedisSessionStorage
     // Remove SESSIONINFO reference from USERSESSIONS Set
     // this operation is executed in background and doesn't compromise
     // the logout process.
-    this.redisClient.srem(
-      `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
-      `${sessionInfoKeyPrefix}${user.session_token}`,
-      (err, _) => {
-        if (err) {
-          log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
-        }
-      }
+    pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.sRem(
+            `${userSessionsSetKeyPrefix}${user.fiscal_code}`,
+            `${sessionInfoKeyPrefix}${user.session_token}`
+          ),
+        E.toError
+      ),
+      TE.mapLeft(_ => {
+        log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
+      })
     );
     return E.right(true);
   }
@@ -432,7 +407,7 @@ export default class RedisSessionStorage
     } else if (E.isLeft(sessionKeys)) {
       const sessionInfo: SessionInfo = {
         createdAt: new Date(),
-        sessionToken: user.session_token,
+        sessionToken: user.session_token
       };
       const refreshUserSessionInfo = await this.saveSessionInfo(
         sessionInfo,
@@ -447,13 +422,18 @@ export default class RedisSessionStorage
       );
     }
     return pipe(
-      this.mgetTask(
+      this.mGet([
         ...pipe(
           sessionKeys,
           E.getOrElseW(() => initializedSessionKeys)
         )
-      ),
-      TE.map((_) => this.parseUserSessionList(_))
+      ]),
+      TE.map(keys =>
+        // TODO: Check if is safe remove null values returned by mGet
+        this.parseUserSessionList(
+          keys.filter(key => key !== null) as ReadonlyArray<string>
+        )
+      )
     )();
   }
 
@@ -466,36 +446,45 @@ export default class RedisSessionStorage
     fiscalCode: string
   ): Promise<ReadonlyArray<Either<Error, boolean>>> {
     const userSessionSetKey = `${userSessionsSetKeyPrefix}${fiscalCode}`;
-    const keys = await new Promise<ReadonlyArray<string>>((resolve) => {
-      this.redisClient.smembers(userSessionSetKey, (err, response) => {
-        if (err) {
-          log.error("Error reading set members: %s", err);
-          return resolve([]);
-        }
-        resolve(response);
-      });
-    });
+    const keysV2 = await pipe(
+      TE.tryCatch(
+        () => this.redisClient.sMembers(userSessionSetKey),
+        E.toError
+      ),
+      TE.mapLeft(err => {
+        log.error("Error reading set members: %s", err);
+        // eslint-disable-next-line functional/prefer-readonly-type
+        return [] as string[];
+      }),
+      TE.toUnion
+    )();
+
     const activeKeys = await Promise.all(
-      keys.map(
-        (_) =>
-          new Promise<Either<string, string>>((resolve) => {
-            this.redisClient.exists(_, (err, response) => {
-              if (err || !response) {
-                return resolve(E.left(_));
-              }
-              return resolve(E.right(_));
-            });
-          })
+      keysV2.map(key =>
+        pipe(
+          TE.tryCatch(() => this.redisClient.exists(key), E.toError),
+          TE.chainW(TE.fromPredicate(response => !!response, identity)),
+          TE.bimap(
+            () => key,
+            () => key
+          )
+        )()
       )
     );
+
     return await Promise.all(
-      activeKeys.filter(E.isLeft).map(
-        (_) =>
-          new Promise<Either<Error, boolean>>((resolve) => {
-            this.redisClient.srem(userSessionSetKey, _.left, (err, response) =>
-              resolve(this.integerReply(err, response))
-            );
-          })
+      pipe(
+        activeKeys
+          .filter(E.isLeft)
+          .map(key => this.redisClient.sRem(userSessionSetKey, key.left)),
+        keysRemPromises =>
+          keysRemPromises.map(promise =>
+            pipe(
+              TE.tryCatch(() => promise, E.toError),
+              this.integerReplyAsync(),
+              task => task()
+            )
+          )
       )
     );
   }
@@ -510,9 +499,12 @@ export default class RedisSessionStorage
         : E.left(sessionKeys.left);
     }
     const errorOrSessionTokens = await pipe(
-      this.mgetTask(...sessionKeys.right),
-      TE.map((_) =>
-        this.parseUserSessionList(_).sessions.map((__) => __.sessionToken)
+      this.mGet([...sessionKeys.right]),
+      TE.map(keys =>
+        this.parseUserSessionList(
+          // TODO: Check if is safe skip null values from mGet
+          keys.filter<string>((key): key is string => key !== null)
+        ).sessions.map(session => session.sessionToken)
       )
     )();
 
@@ -523,8 +515,8 @@ export default class RedisSessionStorage
     }
 
     return pipe(
-      this.mgetTask(...errorOrSessionTokens.right),
-      TE.map((_) => _.length > 0)
+      this.mGet(errorOrSessionTokens.right),
+      TE.map(_ => _.length > 0)
     )();
   }
 
@@ -536,12 +528,13 @@ export default class RedisSessionStorage
    * @returns a promise with either an error or true
    */
   public setBlockedUser(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
-    return new Promise<Either<Error, true>>((resolve) => {
-      log.info(`Adding ${fiscalCode} to ${blockedUserSetKey} set`);
-      this.redisClient.sadd(blockedUserSetKey, fiscalCode, (err) =>
-        resolve(err ? E.left(err) : E.right(true))
-      );
-    });
+    return pipe(
+      TE.tryCatch(() => {
+        log.info(`Adding ${fiscalCode} to ${blockedUserSetKey} set`);
+        return this.redisClient.sAdd(blockedUserSetKey, fiscalCode);
+      }, E.toError),
+      TE.map<number, true>(_ => true)
+    )();
   }
 
   /**
@@ -554,19 +547,18 @@ export default class RedisSessionStorage
   public unsetBlockedUser(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
-    return new Promise<Either<Error, boolean>>((resolve) => {
-      log.info(`Removing ${fiscalCode} from ${blockedUserSetKey} set`);
-      this.redisClient.srem(blockedUserSetKey, fiscalCode, (err, response) =>
-        resolve(
-          this.falsyResponseToError(
-            this.integerReply(err, response, 1),
-            new Error(
-              "Unexpected response from redis client deleting blockedUserKey"
-            )
-          )
+    return pipe(
+      TE.tryCatch(() => {
+        log.info(`Removing ${fiscalCode} from ${blockedUserSetKey} set`);
+        return this.redisClient.sRem(blockedUserSetKey, fiscalCode);
+      }, E.toError),
+      this.integerReplyAsync(1),
+      this.falsyResponseToErrorAsync(
+        new Error(
+          "Unexpected response from redis client deleting blockedUserKey"
         )
-      );
-    });
+      )
+    )();
   }
 
   /**
@@ -580,10 +572,13 @@ export default class RedisSessionStorage
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
     return pipe(
-      this.sismemberTask(blockedUserSetKey, fiscalCode),
+      TE.tryCatch(
+        () => this.sIsMember(blockedUserSetKey, fiscalCode),
+        E.toError
+      ),
       TE.bimap(
-        (err) => new Error(`Error accessing blocked users collection: ${err}`),
-        (result) => result === 1
+        err => new Error(`Error accessing blocked users collection: ${err}`),
+        identity
       )
     )();
   }
@@ -603,13 +598,13 @@ export default class RedisSessionStorage
     ): TaskEither<Error, boolean> =>
       pipe(
         A.sequence(TE.ApplicativePar)<Error, boolean>(
-          sessionTokens.map((sessionToken) =>
+          sessionTokens.map(sessionToken =>
             pipe(
               TE.fromEither(
                 pipe(
                   sessionToken,
                   SessionToken.decode,
-                  E.mapLeft((_) => new Error("Error decoding token"))
+                  E.mapLeft(_ => new Error("Error decoding token"))
                 )
               ),
               TE.chain((token: SessionToken) =>
@@ -628,16 +623,16 @@ export default class RedisSessionStorage
       TE.fromEither(errorOrSessions),
       TE.fold(
         // as we're deleting stuff, a NotFound error can be considered as a success
-        (_) => (_ === sessionNotFoundError ? TE.of(true) : TE.left(_)),
-        (sessionInfoKeys) =>
+        _ => (_ === sessionNotFoundError ? TE.of(true) : TE.left(_)),
+        sessionInfoKeys =>
           delEverySession(
             sessionInfoKeys.map(
-              (sessionInfoKey) =>
+              sessionInfoKey =>
                 sessionInfoKey.replace(sessionInfoKeyPrefix, "") as SessionToken
             )
           )
       ),
-      TE.chain((_) =>
+      TE.chain(_ =>
         pipe(
           TE.tryCatch(() => this.delSessionsSet(fiscalCode), E.toError),
           TE.chain(TE.fromEither)
@@ -701,36 +696,33 @@ export default class RedisSessionStorage
       throw new Error(`Unexpected session TTL value [${sessionTtl}]`);
     }
 
-    return new Promise<Either<Error, boolean>>((resolve) => {
-      this.redisClient.set(
-        `${noticeEmailPrefix}${user.session_token}`,
-        NoticeEmail,
-        "EX",
-        sessionTtl,
-        // eslint-disable-next-line sonarjs/no-identical-functions
-        (err, response) =>
-          resolve(
-            this.falsyResponseToError(
-              this.singleStringReply(err, response),
-              new Error("Error setting session token")
-            )
-          )
-      );
-    });
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${noticeEmailPrefix}${user.session_token}`,
+            sessionTtl,
+            NoticeEmail
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting session token"))
+    )();
   }
 
   /**
    * Delete notify email cache related to an user
    */
   public async delPagoPaNoticeEmail(user: User): Promise<Either<Error, true>> {
-    return new Promise<Either<Error, true>>((resolve) => {
-      log.info(
-        `Deleting cashed notify email ${noticeEmailPrefix}${user.fiscal_code}`
-      );
-      this.redisClient.del(`${noticeEmailPrefix}${user.session_token}`, (err) =>
-        resolve(err ? E.left(err) : E.right(true))
-      );
-    });
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.del(`${noticeEmailPrefix}${user.session_token}`),
+        E.toError
+      ),
+      // TODO: Check if the method return 0 on missing delete
+      TE.map<number, true>(_ => true)
+    )();
   }
 
   /**
@@ -739,109 +731,110 @@ export default class RedisSessionStorage
   public async getPagoPaNoticeEmail(
     user: User
   ): Promise<Either<Error, EmailString>> {
-    return new Promise<Either<Error, EmailString>>((resolve) => {
-      this.redisClient.get(
-        `${noticeEmailPrefix}${user.session_token}`,
-        (err, value) => {
-          if (err) {
-            // Client returns an error.
-            return resolve(E.left(err));
-          }
-
-          if (value === null) {
-            return resolve(E.left(new Error("Notify email value not found")));
-          }
-          const errorOrNoticeEmail = pipe(
-            value,
-            EmailString.decode,
-            E.mapLeft(
-              (validationErrors) =>
-                new Error(errorsToReadableMessages(validationErrors).join("/"))
-            )
-          );
-          return resolve(errorOrNoticeEmail);
-        }
-      );
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public async getLollipopAssertionRefForUser(fiscalCode: FiscalCode) {
-    return new Promise<Either<Error, O.Option<BackendAssertionRef>>>(
-      (resolve) => {
-        this.redisClient.get(
-          `${lollipopFingerprintPrefix}${fiscalCode}`,
-          (err, value) => {
-            if (err) {
-              // Client returns an error.
-              return resolve(E.left(err));
-            }
-
-            if (value === null) {
-              return resolve(E.right(O.none));
-            }
-            const errorOrLollipopFingerprint = pipe(
-              value,
-              BackendAssertionRef.decode,
-              E.mapLeft(
-                (validationErrors) =>
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.get(`${noticeEmailPrefix}${user.session_token}`),
+        E.toError
+      ),
+      TE.chain(maybeEmail =>
+        pipe(
+          O.fromNullable(maybeEmail),
+          TE.fromOption(() => new Error("Notify email value not found")),
+          TE.chain(
+            flow(
+              EmailString.decode,
+              TE.fromEither,
+              TE.mapLeft(
+                validationErrors =>
                   new Error(
                     errorsToReadableMessages(validationErrors).join("/")
                   )
-              ),
-              E.map(O.some)
-            );
-            return resolve(errorOrLollipopFingerprint);
-          }
-        );
-      }
+              )
+            )
+          )
+        )
+      )
+    )();
+  }
+
+  // eslint-disable-next-line functional/prefer-readonly-type
+  private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
+    return TE.tryCatch(
+      () => this.redisClient.mGet.bind(this.redisClient)(keys),
+      E.toError
     );
+  }
+
+  private sIsMember(key: string, member: string) {
+    return this.redisClient.sIsMember.bind(this.redisClient)(key, member);
+  }
+
+  private ttl(key: string) {
+    return this.redisClient.ttl.bind(this.redisClient)(key);
   }
 
   /**
    * {@inheritDoc}
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public async getLollipopAssertionRefForUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, O.Option<BackendAssertionRef>>> {
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.get(`${lollipopFingerprintPrefix}${fiscalCode}`),
+        E.toError
+      ),
+      TE.chain(
+        flow(
+          NullableBackendAssertionRef.decode,
+          E.map(O.fromNullable),
+          E.mapLeft(
+            validationErrors =>
+              new Error(errorsToReadableMessages(validationErrors).join("/"))
+          ),
+          TE.fromEither
+        )
+      )
+    )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public async setLollipopAssertionRefForUser(
     user: UserV5,
     assertionRef: BackendAssertionRef,
     expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
   ) {
-    return new Promise<Either<Error, boolean>>((resolve) => {
-      this.redisClient.set(
-        `${lollipopFingerprintPrefix}${user.fiscal_code}`,
-        assertionRef,
-        "EX",
-        expireAssertionRefSec,
-        (err, value) => {
-          if (err) {
-            // Client returns an error.
-            return resolve(E.left(err));
-          }
-
-          const saveSessionInfoResult = this.falsyResponseToError(
-            this.singleStringReply(err, value),
-            new Error("Error setting user key")
-          );
-          resolve(saveSessionInfoResult);
-        }
-      );
-    });
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${lollipopFingerprintPrefix}${user.fiscal_code}`,
+            expireAssertionRefSec,
+            assertionRef
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
+    )();
   }
 
   /**
    * {@inheritDoc}
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public async delLollipopAssertionRefForUser(fiscalCode: FiscalCode) {
-    return new Promise<Either<Error, boolean>>((resolve) => {
-      this.redisClient.del(
-        `${lollipopFingerprintPrefix}${fiscalCode}`,
-        (err, value) => {
-          resolve(this.integerReply(err, value));
-        }
-      );
-    });
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.del(`${lollipopFingerprintPrefix}${fiscalCode}`),
+        E.toError
+      ),
+      this.integerReplyAsync()
+    )();
   }
 
   /**
@@ -855,7 +848,10 @@ export default class RedisSessionStorage
     // Returns the key ttl in seconds
     // -2 if the key doesn't exist or -1 if the key has no expire
     // @see https://redis.io/commands/ttl
-    return this.ttlTask(`${sessionKeyPrefix}${token}`)();
+    return TE.tryCatch(
+      () => this.ttl(`${sessionKeyPrefix}${token}`),
+      E.toError
+    )();
   }
 
   /**
@@ -869,7 +865,7 @@ export default class RedisSessionStorage
     try {
       const user: User = pipe(
         await this.loadSessionBySessionToken(token),
-        E.getOrElseW((err) => {
+        E.getOrElseW(err => {
           throw err;
         })
       );
@@ -883,14 +879,16 @@ export default class RedisSessionStorage
   }
 
   private delSessionsSet(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
-    return new Promise<Either<Error, true>>((resolve) => {
-      log.info(
-        `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
-      );
-      this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`, (err) =>
-        resolve(err ? E.left(err) : E.right(true))
-      );
-    });
+    return pipe(
+      TE.tryCatch(() => {
+        log.info(
+          `Deleting sessions set ${userSessionsSetKeyPrefix}${fiscalCode}`
+        );
+        return this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`);
+      }, E.toError),
+      // TODO: Check if the method return 0 on missing delete
+      TE.map<number, true>(_ => true)
+    )();
   }
 
   /*
@@ -903,34 +901,37 @@ export default class RedisSessionStorage
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
     const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionInfo.sessionToken}`;
-    return new Promise<Either<Error, boolean>>((resolve) => {
-      this.redisClient.set(
-        sessionInfoKey,
-        JSON.stringify(sessionInfo),
-        "EX",
-        this.tokenDurationSecs,
-        (err, response) => {
-          const saveSessionInfoResult = this.falsyResponseToError(
-            this.singleStringReply(err, response),
-            new Error("Error setting user token info")
-          );
-          if (E.isLeft(saveSessionInfoResult)) {
-            return resolve(saveSessionInfoResult);
-          }
-          this.redisClient.sadd(
-            `${userSessionsSetKeyPrefix}${fiscalCode}`,
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
             sessionInfoKey,
-            (infoSetUpdateErr, infoSetUpdateRes) =>
-              resolve(
-                this.falsyResponseToError(
-                  this.integerReply(infoSetUpdateErr, infoSetUpdateRes),
-                  new Error("Error updating user tokens info set")
-                )
-              )
-          );
-        }
-      );
-    });
+            this.tokenDurationSecs,
+            JSON.stringify(sessionInfo)
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(
+        new Error("Error setting user token info")
+      ),
+      TE.chain(_ =>
+        pipe(
+          TE.tryCatch(
+            () =>
+              this.redisClient.sAdd(
+                `${userSessionsSetKeyPrefix}${fiscalCode}`,
+                sessionInfoKey
+              ),
+            E.toError
+          ),
+          this.integerReplyAsync(),
+          this.falsyResponseToErrorAsync(
+            new Error("Error updating user tokens info set")
+          )
+        )
+      )
+    )();
   }
 
   /**
@@ -939,20 +940,20 @@ export default class RedisSessionStorage
   private async loadSessionBySessionToken(
     token: SessionToken
   ): Promise<Either<Error, User>> {
-    return new Promise((resolve) => {
-      this.redisClient.get(`${sessionKeyPrefix}${token}`, (err, value) => {
-        if (err) {
-          // Client returns an error.
-          return resolve(E.left(err));
-        }
-
-        if (value === null) {
-          return resolve(E.left(sessionNotFoundError));
-        }
-        const errorOrDeserializedUser = this.parseUser(value);
-        return resolve(errorOrDeserializedUser);
-      });
-    });
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.get(`${sessionKeyPrefix}${token}`),
+        E.toError
+      ),
+      TE.chain(
+        flow(
+          O.fromNullable,
+          E.fromOption(() => sessionNotFoundError),
+          E.chain(this.parseUser),
+          TE.fromEither
+        )
+      )
+    )();
   }
 
   /**
@@ -962,31 +963,24 @@ export default class RedisSessionStorage
     prefix: string,
     token: WalletToken | MyPortalToken | BPDToken | ZendeskToken | FIMSToken
   ): Promise<Either<Error, User>> {
-    return new Promise((resolve) => {
-      this.redisClient.get(`${prefix}${token}`, (err, value) => {
-        if (err) {
-          // Client returns an error.
-          return resolve(E.left(err));
-        }
-
-        if (value === null) {
-          return resolve(E.left(sessionNotFoundError));
-        }
-
-        this.loadSessionBySessionToken(value as SessionToken).then(
-          flow(
-            E.mapLeft((error) => resolve(E.left(error))),
-            E.map((session) => {
-              resolve(E.right(session));
-            }),
-            E.toUnion
+    return pipe(
+      TE.tryCatch(() => this.redisClient.get(`${prefix}${token}`), E.toError),
+      TE.chain(
+        flow(
+          O.fromNullable,
+          TE.fromOption(() => sessionNotFoundError)
+        )
+      ),
+      TE.chain(value =>
+        pipe(
+          TE.tryCatch(
+            () => this.loadSessionBySessionToken(value as SessionToken),
+            E.toError
           ),
-          (error) => {
-            resolve(E.left(error));
-          }
-        );
-      });
-    });
+          TE.chain(TE.fromEither)
+        )
+      )
+    )();
   }
 
   /**
@@ -1000,32 +994,31 @@ export default class RedisSessionStorage
     );
     if (E.isRight(errorOrSessionInfoKeys)) {
       const oldSessionInfoKeys = errorOrSessionInfoKeys.right.filter(
-        (_) =>
+        _ =>
           _.startsWith(sessionInfoKeyPrefix) &&
           _ !== `${sessionInfoKeyPrefix}${user.session_token}`
       );
       // Generate old session keys list from session info keys list
       // transforming pattern SESSIONINFO-token into pattern SESSION-token with token as the same value
       const oldSessionKeys = oldSessionInfoKeys.map(
-        (_) => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`
+        _ => `${sessionKeyPrefix}${_.split(sessionInfoKeyPrefix)[1]}`
       );
 
       // Retrieve all user data related to session tokens.
       // All the tokens are stored inside user payload.
-      const errorOrSerializedUser = await new Promise<
-        Either<Error, ReadonlyArray<string>>
-      >((resolve) => {
-        this.redisClient.mget(...oldSessionKeys, (err, response) =>
-          resolve(this.arrayStringReply(err, response))
-        );
-      });
+      const errorOrSerializedUserV2 = await pipe(
+        TE.tryCatch(() => this.redisClient.mGet(oldSessionInfoKeys), E.toError),
+        // TODO: Some value can be null
+        this.arrayStringReplyAsync
+      );
+
       // Deserialize all available user payloads and skip invalid one
       const errorOrDeserializedUsers = pipe(
-        errorOrSerializedUser,
-        E.map((_) =>
+        errorOrSerializedUserV2,
+        E.map(_ =>
           _.map(this.parseUser)
             .filter(E.isRight)
-            .map((deserializedUser) => deserializedUser.right)
+            .map(deserializedUser => deserializedUser.right)
         )
       );
 
@@ -1033,13 +1026,13 @@ export default class RedisSessionStorage
       // If the value is invalid or must be skipped, it will be mapped with none
       const externalTokens = pipe(
         errorOrDeserializedUsers,
-        E.mapLeft((_) => []),
-        E.map((_) =>
-          _.map((deserializedUser) =>
+        E.mapLeft(_ => []),
+        E.map(_ =>
+          _.map(deserializedUser =>
             pipe(
               this.getUserTokens(deserializedUser),
               R.filter(
-                (p) =>
+                p =>
                   !(
                     p.prefix === sessionInfoKeyPrefix ||
                     p.prefix === sessionKeyPrefix
@@ -1070,23 +1063,23 @@ export default class RedisSessionStorage
 
       // Delete all active tokens that are different
       // from the new one generated and provided inside user object.
-      const deleteOldKeysResponse = await new Promise<Either<Error, boolean>>(
-        (resolve) => {
-          const keys: ReadonlyArray<string> = [
-            ...oldSessionInfoKeys,
-            ...oldSessionKeys,
-            ...externalTokens,
-          ];
-          if (keys.length === 0) {
-            return resolve(E.right(true));
-          }
-          this.redisClient.del(...keys, (err, response) =>
-            resolve(this.integerReply(err, response))
-          );
-        }
-      );
+      const deleteOldKeysResponseV2 = await pipe(
+        TE.of([...oldSessionInfoKeys, ...oldSessionKeys, ...externalTokens]),
+        TE.chain(
+          TE.fromPredicate(
+            keys => keys.length === 0,
+            () => true
+          )
+        ),
+        TE.foldW(TE.right, keys =>
+          pipe(
+            TE.tryCatch(() => this.redisClient.del(keys), E.toError),
+            this.integerReplyAsync()
+          )
+        )
+      )();
       await this.clearExpiredSetValues(user.fiscal_code);
-      return deleteOldKeysResponse;
+      return deleteOldKeysResponseV2;
     }
     return errorOrSessionInfoKeys.left === sessionNotFoundError
       ? E.right(true)
@@ -1096,24 +1089,28 @@ export default class RedisSessionStorage
   private readSessionInfoKeys(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, ReadonlyArray<string>>> {
-    return new Promise<Either<Error, ReadonlyArray<string>>>((resolve) => {
-      this.redisClient.smembers(
-        `${userSessionsSetKeyPrefix}${fiscalCode}`,
-        (err, response) => resolve(this.arrayStringReply(err, response))
-      );
-    });
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.sMembers(`${userSessionsSetKeyPrefix}${fiscalCode}`),
+        E.toError
+      ),
+      this.arrayStringReplyAsync
+    );
   }
 
-  private arrayStringReply(
-    err: Error | null,
-    replay: ReadonlyArray<string> | undefined
-  ): Either<Error, ReadonlyArray<string>> {
-    if (err) {
-      return E.left(err);
-    } else if (!isArray(replay) || replay.length === 0) {
-      return E.left(sessionNotFoundError);
-    }
-    return E.right(replay);
+  private arrayStringReplyAsync(
+    command: TE.TaskEither<Error, ReadonlyArray<string | null>>
+  ): Promise<Either<Error, NonEmptyArray<string>>> {
+    return pipe(
+      command,
+      TE.chain(
+        TE.fromPredicate(
+          (res): res is NonEmptyArray<string> => isArray(res) && res.length > 0,
+          () => sessionNotFoundError
+        )
+      )
+    )();
   }
 
   private parseUser(value: string): Either<Error, User> {
@@ -1122,7 +1119,7 @@ export default class RedisSessionStorage
       E.chain(
         flow(
           User.decode,
-          E.mapLeft((err) => new Error(errorsToReadableMessages(err).join("/")))
+          E.mapLeft(err => new Error(errorsToReadableMessages(err).join("/")))
         )
       )
     );
@@ -1135,21 +1132,21 @@ export default class RedisSessionStorage
       (prev: SessionsList, _) =>
         pipe(
           E.parseJSON(_, E.toError),
-          E.chain((data) =>
+          E.chain(data =>
             pipe(
               SessionInfo.decode(data),
               E.mapLeft(
-                (err) => new Error(errorsToReadableMessages(err).join("/"))
+                err => new Error(errorsToReadableMessages(err).join("/"))
               )
             )
           ),
           E.fold(
-            (err) => {
+            err => {
               log.warn("Unable to decode the session info: %s. Skipped.", err);
               return prev;
             },
-            (sessionInfo) => ({
-              sessions: [...prev.sessions, sessionInfo],
+            sessionInfo => ({
+              sessions: [...prev.sessions, sessionInfo]
             })
           )
         ),
@@ -1163,36 +1160,36 @@ export default class RedisSessionStorage
     const requiredTokens = {
       session_info: {
         prefix: sessionInfoKeyPrefix,
-        value: user.session_token,
+        value: user.session_token
       },
       session_token: {
         prefix: sessionKeyPrefix,
-        value: user.session_token,
+        value: user.session_token
       },
       wallet_token: {
         prefix: walletKeyPrefix,
-        value: user.wallet_token,
-      },
+        value: user.wallet_token
+      }
     };
     if (UserV5.is(user)) {
       return {
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         fims_token: {
           prefix: fimsTokenPrefix,
-          value: user.fims_token,
+          value: user.fims_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
+          value: user.myportal_token
         },
         zendesk_token: {
           prefix: zendeskTokenPrefix,
-          value: user.zendesk_token,
-        },
+          value: user.zendesk_token
+        }
       };
     }
     if (UserV4.is(user)) {
@@ -1200,16 +1197,16 @@ export default class RedisSessionStorage
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
+          value: user.myportal_token
         },
         zendesk_token: {
           prefix: zendeskTokenPrefix,
-          value: user.zendesk_token,
-        },
+          value: user.zendesk_token
+        }
       };
     }
     if (UserV3.is(user)) {
@@ -1217,12 +1214,12 @@ export default class RedisSessionStorage
         ...requiredTokens,
         bpd_token: {
           prefix: bpdTokenPrefix,
-          value: user.bpd_token,
+          value: user.bpd_token
         },
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
-        },
+          value: user.myportal_token
+        }
       };
     }
     if (UserV2.is(user)) {
@@ -1230,13 +1227,13 @@ export default class RedisSessionStorage
         ...requiredTokens,
         myportal_token: {
           prefix: myPortalTokenPrefix,
-          value: user.myportal_token,
-        },
+          value: user.myportal_token
+        }
       };
     }
     if (UserV1.is(user)) {
       return {
-        ...requiredTokens,
+        ...requiredTokens
       };
     }
     return assertUnreachable(user);

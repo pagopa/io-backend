@@ -1,8 +1,12 @@
 import * as redis from "redis";
 import * as E from "fp-ts/lib/Either";
-import { ReadableReporter } from "@pagopa/ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Either } from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
+import { parse } from "fp-ts/lib/Json";
+import { flow, pipe } from "fp-ts/lib/function";
 import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { User } from "../types/user";
 import { log } from "../utils/logger";
@@ -16,11 +20,12 @@ export const invalidVersionNumberError = new Error("Invalid version number");
 /**
  * Service that manages user metadata stored into Redis database.
  */
-export default class RedisUserMetadataStorage
-  extends RedisStorageUtils
-  implements IUserMetadataStorage
-{
-  constructor(private readonly redisClient: redis.RedisClient) {
+
+export default class RedisUserMetadataStorage extends RedisStorageUtils
+  implements IUserMetadataStorage {
+  constructor(
+    private readonly redisClient: redis.RedisClientType | redis.RedisClusterType
+  ) {
     super();
   }
 
@@ -49,15 +54,17 @@ export default class RedisUserMetadataStorage
     ) {
       return E.left(getUserMetadataResult.left);
     }
-    return await new Promise<Either<Error, boolean>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.set(
-        `${userMetadataPrefix}${user.fiscal_code}`,
-        JSON.stringify(payload),
-        (err, response) => resolve(this.singleStringReply(err, response))
-      );
-    });
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.set(
+            `${userMetadataPrefix}${user.fiscal_code}`,
+            JSON.stringify(payload)
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync
+    )();
   }
 
   /**
@@ -73,59 +80,49 @@ export default class RedisUserMetadataStorage
    * {@inheritDoc}
    */
   public del(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
-    return new Promise<Either<Error, true>>((resolve) => {
-      log.info(`Deleting metadata for ${fiscalCode}`);
-      this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`, (err) => {
-        if (err) {
-          resolve(E.left(err));
-        } else {
-          resolve(E.right(true));
-        }
-      });
-    });
+    return pipe(
+      TE.tryCatch(() => {
+        log.info(`Deleting metadata for ${fiscalCode}`);
+        return this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`);
+      }, E.toError),
+      TE.map<number, true>(() => true)
+    )();
   }
 
   private loadUserMetadataByFiscalCode(
     fiscalCode: string
   ): Promise<Either<Error, UserMetadata>> {
-    return new Promise<Either<Error, UserMetadata>>((resolve) => {
-      // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
-      // @see https://redis.io/commands/set
-      this.redisClient.get(
-        `${userMetadataPrefix}${fiscalCode}`,
-        (err, response) => {
-          if (err || response === null) {
-            resolve(E.left(err || metadataNotFoundError));
-          } else {
-            // Try-catch is needed because parse() may throw an exception.
-            try {
-              const metadataPayload = JSON.parse(response);
-              const errorOrDeserializedUserMetadata =
-                UserMetadata.decode(metadataPayload);
-
-              if (E.isLeft(errorOrDeserializedUserMetadata)) {
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.get(`${userMetadataPrefix}${fiscalCode}`),
+        () => metadataNotFoundError
+      ),
+      TE.chain(
+        flow(
+          O.fromNullable,
+          TE.fromOption(() => metadataNotFoundError)
+        )
+      ),
+      TE.chain(
+        flow(
+          parse,
+          E.mapLeft(() => new Error("Unable to parse the user metadata json")),
+          TE.fromEither,
+          TE.chain(
+            flow(
+              UserMetadata.decode,
+              TE.fromEither,
+              TE.mapLeft(err => {
                 log.error(
                   "Unable to decode the user metadata: %s",
-                  ReadableReporter.report(errorOrDeserializedUserMetadata)
+                  errorsToReadableMessages(err).join("|")
                 );
-                return resolve(
-                  E.left<Error, UserMetadata>(
-                    new Error("Unable to decode the user metadata")
-                  )
-                );
-              }
-              const userMetadata = errorOrDeserializedUserMetadata.right;
-              return resolve(E.right<Error, UserMetadata>(userMetadata));
-            } catch (_) {
-              return resolve(
-                E.left<Error, UserMetadata>(
-                  new Error("Unable to parse the user metadata json")
-                )
-              );
-            }
-          }
-        }
-      );
-    });
+                return new Error("Unable to decode the user metadata");
+              })
+            )
+          )
+        )
+      )
+    )();
   }
 }

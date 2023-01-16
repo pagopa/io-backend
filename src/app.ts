@@ -221,7 +221,7 @@ export interface IAppFactoryParameters {
 }
 
 // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
-export function newApp({
+export async function newApp({
   env,
   allowNotifyIPSourceRange,
   allowPagoPAIPSourceRange,
