@@ -76,7 +76,8 @@ import {
   FF_IO_SIGN_ENABLED,
   IO_SIGN_API_CLIENT,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
-  FF_ROUTING_PUSH_NOTIF
+  FF_ROUTING_PUSH_NOTIF,
+  FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -440,6 +441,7 @@ export function newApp({
           OLD_NOTIFICATION_SERVICE,
           PUSH_NOTIFICATION_SERVICE,
           FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
+          FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
           FF_ROUTING_PUSH_NOTIF
         );
 
