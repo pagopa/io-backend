@@ -46,7 +46,7 @@ describe("notificationServiceFactory#getNotificationService returning old Servic
     expect(result).toEqual(oldNotificationService);
   });
 
-  it("should return old notification service if ff is CANARY and user is not a beta tester neither he bolongs to canary set", async () => {
+  it("should return old notification service if ff is CANARY and user is not a beta tester neither he belongs to canary set", async () => {
     const getService = getNotificationServiceFactory(
       oldNotificationService,
       newNotificationService,
