@@ -104,7 +104,7 @@ stages:
           displayName: 'Generate test certificates'        
 
         - script: |
-            yarn test:coverage
+            yarn test:coverage --silent
           displayName: 'Unit tests exec'
 
         - bash: |
