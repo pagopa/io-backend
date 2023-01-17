@@ -971,10 +971,8 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^12.0.0":
-  version "12.0.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-12.0.0.tgz#984194d7b5ca80ff83f00194e986c183fc190c04"
-  integrity sha512-xF0tmXzlDI3cem/GcXaInGR28StiB1JpuDaw5nlJPkI/WpOwAKT9GWt9VUTJAfttw7u/YoH7AfFGc0AuE96xwg==
+"@pagopa/io-spid-commons@../io-spid-commons":
+  version "10.0.0"
   dependencies:
     "@pagopa/ts-commons" "^12.0.0"
     "@types/redis" "^2.8.32"
@@ -1171,12 +1169,12 @@
   dependencies:
     "@types/node" "*"
 
-"@types/apicache@^1.2.0":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@types/apicache/-/apicache-1.2.2.tgz#b820659b1d95e66ec0e71dcd0317e9d30f0c154b"
-  integrity sha512-+rjhMdbx7m7pKnNiQCSiKE21mGmMzsfCU871h5BCj4guhAj423j61Dq0Yrr9CnLiDwUhSKtkXWudr9SQE0/IoA==
+"@types/apicache@^1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@types/apicache/-/apicache-1.6.1.tgz#b5875b54af6b53be1ac64b2bbc14fe7abfb984f0"
+  integrity sha512-vNUh8lponMjIOPGVp04xf9avb5lJTR6qSW3IS3ROmugMFLvNXwI3nPC1JnnoA6zyEC7HHqW0LGfuLSue32C9dQ==
   dependencies:
-    "@types/redis" "*"
+    "@types/redis" "^2.8.0"
 
 "@types/babel__core@^7.1.14":
   version "7.20.0"
@@ -1501,14 +1499,7 @@
   resolved "https://registry.yarnpkg.com/@types/range_check/-/range_check-1.4.0.tgz#040135701c22d1e4cbbefb4de2304c4d17f65638"
   integrity sha512-Nz2HM497oh6XfVfnFssNv4+R2mQwXtzYIHwIAP9s9pxL4Rd0v6dea2ATAaTksvbUNtofvpfWGrF5bFhx1gp8gg==
 
-"@types/redis@*":
-  version "2.8.16"
-  resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.16.tgz#62dd5176d53c5f133f99661000f548a75b9761e2"
-  integrity sha512-7iJzu9OvKPuKiZxlIVG7P3UM7C3XX4FxXk9f24MkAvucze93Zp4XzoERmDaKQnaZP0Qv1pMAq25lAvUPCKXCHQ==
-  dependencies:
-    "@types/node" "*"
-
-"@types/redis@^2.8.32":
+"@types/redis@^2.8.0", "@types/redis@^2.8.32":
   version "2.8.32"
   resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.32.tgz#1d3430219afbee10f8cfa389dad2571a05ecfb11"
   integrity sha512-7jkMKxcGq9p242exlbsVzuJb57KqHRhNl4dHoQu2Y5v9bCAbtIXXH0R3HleSQW4CTOqpHIYUW3t6tpUj4BVQ+w==
@@ -1845,6 +1836,7 @@ ansi-styles@^5.0.0:
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-5.2.0.tgz#07449690ad45777d1924ac2abb2fc8895dba836b"
   integrity sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==
 
+<<<<<<< HEAD
 anymatch@^3.0.3, anymatch@~3.1.2:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/anymatch/-/anymatch-3.1.3.tgz#790c58b19ba1720a84205b57c618d5ad8524973e"
@@ -1853,6 +1845,8 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
+=======
+>>>>>>> a0e9df3 ([#IOCIT-232] Remove unused type and upgrade apicache)
 apicache@^1.6.3:
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/apicache/-/apicache-1.6.3.tgz#4441aa40f2a48c9dd6f11c73be937d563405355b"
