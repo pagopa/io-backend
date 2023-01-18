@@ -751,9 +751,8 @@ describe("RedisSessionStorage#getByMyPortalToken", () => {
 
 describe("RedisSessionStorage#getByWalletToken", () => {
   it("should fail getting a session for an inexistent token", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, null);
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
+
     const response = await sessionStorage.getByWalletToken(
       "inexistent token" as WalletToken
     );
@@ -761,12 +760,12 @@ describe("RedisSessionStorage#getByWalletToken", () => {
   });
 
   it("should fail getting a session with invalid value", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, mockSessionToken);
-    });
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, JSON.stringify(anInvalidUser));
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(mockSessionToken));
+
+    mockGet.mockImplementationOnce(_ =>
+      Promise.resolve(JSON.stringify(anInvalidUser))
+    );
+
     const expectedDecodedError = User.decode(anInvalidUser) as E.Left<
       ReadonlyArray<ValidationError>
     >;
@@ -786,12 +785,8 @@ describe("RedisSessionStorage#getByWalletToken", () => {
   });
 
   it("should fail parse of user payload", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, mockSessionToken);
-    });
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, "Invalid JSON");
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(mockSessionToken));
+    mockGet.mockImplementationOnce(_ => Promise.resolve("Invalid JSON"));
 
     const response = await sessionStorage.getByWalletToken(
       aValidUser.wallet_token
@@ -808,9 +803,8 @@ describe("RedisSessionStorage#getByWalletToken", () => {
   });
 
   it("should return error if the session is expired", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, null);
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
+
     const response = await sessionStorage.getByWalletToken(
       aValidUser.wallet_token
     );
@@ -820,12 +814,11 @@ describe("RedisSessionStorage#getByWalletToken", () => {
   });
 
   it("should get a session with valid values", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, mockSessionToken);
-    });
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, JSON.stringify(aValidUser));
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(mockSessionToken));
+
+    mockGet.mockImplementationOnce(_ =>
+      Promise.resolve(JSON.stringify(aValidUser))
+    );
 
     const response = await sessionStorage.getByWalletToken(
       aValidUser.wallet_token
