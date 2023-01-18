@@ -7,6 +7,7 @@ import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as R from "fp-ts/lib/Record";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
@@ -177,10 +178,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     // If is a session update, the session info key doesn't must be updated.
     // eslint-disable-next-line functional/no-let
-    let saveSessionInfoPromise: Promise<Either<
-      Error,
-      boolean
-    >> = Promise.resolve(E.right(true));
+    let saveSessionInfoPromise: TE.TaskEither<Error, boolean> = TE.right(true);
     if (expireSec === this.tokenDurationSecs) {
       const sessionInfo: SessionInfo = {
         createdAt: new Date(),
@@ -194,16 +192,22 @@ export default class RedisSessionStorage extends RedisStorageUtils
 
     const removeOtherUserSessionsPromise = this.removeOtherUserSessions(user);
 
-    const setPromisesResult = await Promise.all([
-      setSessionTokenV2(),
-      setWalletTokenV2(),
-      setMyPortalTokenV2(),
-      setBPDTokenV2(),
-      setZendeskTokenV2(),
-      setFIMSTokenV2(),
-      saveSessionInfoPromise,
-      removeOtherUserSessionsPromise
-    ]);
+    const setPromisesResult = await pipe(
+      A.sequence(T.taskSeq)([
+        setSessionTokenV2,
+        setWalletTokenV2,
+        setMyPortalTokenV2,
+        setBPDTokenV2,
+        setZendeskTokenV2,
+        setFIMSTokenV2,
+        saveSessionInfoPromise,
+        pipe(
+          TE.tryCatch(() => removeOtherUserSessionsPromise, E.toError),
+          TE.mapLeft(e => E.left<Error, boolean>(e)),
+          TE.toUnion
+        )
+      ])
+    )();
     const isSetFailed = setPromisesResult.some(E.isLeft);
     if (isSetFailed) {
       return E.left<Error, boolean>(
@@ -412,7 +416,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       const refreshUserSessionInfo = await this.saveSessionInfo(
         sessionInfo,
         user.fiscal_code
-      );
+      )();
       if (E.isLeft(refreshUserSessionInfo)) {
         return E.left(sessionNotFoundError);
       }
@@ -899,7 +903,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private saveSessionInfo(
     sessionInfo: SessionInfo,
     fiscalCode: FiscalCode
-  ): Promise<Either<Error, boolean>> {
+  ): TE.TaskEither<Error, boolean> {
     const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionInfo.sessionToken}`;
     return pipe(
       TE.tryCatch(
@@ -931,7 +935,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
           )
         )
       )
-    )();
+    );
   }
 
   /**
@@ -986,6 +990,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * Remove other user sessions and wallet tokens
    */
+  //TODO: refactor this to return taskeither
   private async removeOtherUserSessions(
     user: UserV5
   ): Promise<Either<Error, boolean>> {
@@ -1064,18 +1069,15 @@ export default class RedisSessionStorage extends RedisStorageUtils
       // Delete all active tokens that are different
       // from the new one generated and provided inside user object.
       const deleteOldKeysResponseV2 = await pipe(
-        TE.of([...oldSessionInfoKeys, ...oldSessionKeys, ...externalTokens]),
-        TE.chain(
-          TE.fromPredicate(
-            keys => keys.length === 0,
-            () => true
-          )
-        ),
-        TE.foldW(TE.right, keys =>
-          pipe(
-            TE.tryCatch(() => this.redisClient.del(keys), E.toError),
-            this.integerReplyAsync()
-          )
+        [...oldSessionInfoKeys, ...oldSessionKeys, ...externalTokens],
+        TE.fromPredicate(keys => keys.length === 0, identity),
+        TE.fold(
+          keys =>
+            pipe(
+              TE.tryCatch(() => this.redisClient.del(keys), E.toError),
+              this.integerReplyAsync()
+            ),
+          _ => TE.right(true)
         )
       )();
       await this.clearExpiredSetValues(user.fiscal_code);

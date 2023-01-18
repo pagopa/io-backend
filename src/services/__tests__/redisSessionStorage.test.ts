@@ -39,7 +39,7 @@ import {
 } from "../../__mocks__/user_mock";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
-import { RedisClient } from "redis";
+import { RedisClientType } from "redis";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -89,35 +89,37 @@ jest.mock("../../services/tokenService", () => {
 });
 
 const mockSet = jest.fn();
-const mockGet = jest.fn().mockImplementation((_, callback) => {
-  callback(undefined, JSON.stringify(aValidUser));
-});
+const mockGet = jest
+  .fn()
+  .mockImplementation(_ => Promise.resolve(JSON.stringify(aValidUser)));
 const mockMget = jest.fn();
 const mockDel = jest.fn().mockImplementation(
   // as del() can be can be called with variable arguments number, we extract the last as callback
-  callCallback(undefined, 7)
+  _ => Promise.resolve(7)
 );
 
 const mockSadd = jest.fn();
 const mockSrem = jest.fn();
 const mockSmembers = jest
   .fn()
-  .mockImplementation((_, callback) => callback(null, [mockSessionToken]));
+  .mockImplementation(_ => Promise.resolve([mockSessionToken]));
 const mockExists = jest.fn();
 const mockSismember = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = {} as RedisClient;
 
-mockRedisClient.set = mockSet;
-mockRedisClient.get = mockGet;
-mockRedisClient.mget = mockMget;
-mockRedisClient.del = mockDel;
-mockRedisClient.sadd = mockSadd;
-mockRedisClient.srem = mockSrem;
-mockRedisClient.smembers = mockSmembers;
-mockRedisClient.exists = mockExists;
-mockRedisClient.sismember = mockSismember;
-mockRedisClient.ttl = mockTtl;
+const mockRedisClient = ({
+  set: mockSet,
+  setEx: mockSet,
+  get: mockGet,
+  mGet: mockMget,
+  del: mockDel,
+  sAdd: mockSadd,
+  sRem: mockSrem,
+  sMembers: mockSmembers,
+  exists: mockExists,
+  sIsMember: mockSismember,
+  ttl: mockTtl
+} as unknown) as RedisClientType;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
@@ -346,42 +348,26 @@ describe("RedisSessionStorage#set", () => {
       _
       // tslint:disable-next-line: parameters-max-number
     ) => {
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(sessionSetErr, sessionSetSuccess);
-      });
+      const redisMethodImplFromError = (
+        mockFunction: jest.Mock<unknown, any>,
+        success?: unknown,
+        error?: Error
+      ) =>
+        mockFunction.mockImplementationOnce(() =>
+          error ? Promise.reject(error) : Promise.resolve(success)
+        );
 
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(walletSetErr, walletSetSuccess);
-      });
-
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(myPortalSetError, myPortalSetSuccess);
-      });
-
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(bpdSetError, bpdSetSuccess);
-      });
-
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(zendeskSetError, zendeskSetSuccess);
-      });
+      redisMethodImplFromError(mockSet, sessionSetSuccess, sessionSetErr);
+      redisMethodImplFromError(mockSet, walletSetSuccess, walletSetErr);
+      redisMethodImplFromError(mockSet, myPortalSetSuccess, myPortalSetError);
+      redisMethodImplFromError(mockSet, bpdSetSuccess, bpdSetError);
+      redisMethodImplFromError(mockSet, zendeskSetSuccess, zendeskSetError);
 
       // FIMS Token
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(undefined, "OK");
-      });
-
-      mockSet.mockImplementationOnce((_, __, ___, ____, callback) => {
-        callback(undefined, "OK");
-      });
-
-      mockSadd.mockImplementation((_, __, callback) => {
-        callback(undefined, 1);
-      });
-
-      mockSmembers.mockImplementationOnce((_, callback) => {
-        callback(undefined, []);
-      });
+      redisMethodImplFromError(mockSet, "OK");
+      redisMethodImplFromError(mockSet, "OK");
+      redisMethodImplFromError(mockSadd, 1);
+      redisMethodImplFromError(mockSmembers, []);
 
       const response = await sessionStorage.set(aValidUser);
 
@@ -390,31 +376,31 @@ describe("RedisSessionStorage#set", () => {
       expect(mockSet.mock.calls[0][0]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[0][1]).toEqual(JSON.stringify(aValidUser));
+      expect(mockSet.mock.calls[0][2]).toEqual(JSON.stringify(aValidUser));
 
       expect(mockSet.mock.calls[1][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
-      expect(mockSet.mock.calls[1][1]).toBe(aValidUser.session_token);
+      expect(mockSet.mock.calls[1][2]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[2][0]).toBe(
         `MYPORTAL-${aValidUser.myportal_token}`
       );
-      expect(mockSet.mock.calls[2][1]).toBe(aValidUser.session_token);
+      expect(mockSet.mock.calls[2][2]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
-      expect(mockSet.mock.calls[3][1]).toBe(aValidUser.session_token);
+      expect(mockSet.mock.calls[3][2]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[4][0]).toBe(
         `ZENDESK-${aValidUser.zendesk_token}`
       );
-      expect(mockSet.mock.calls[4][1]).toBe(aValidUser.session_token);
+      expect(mockSet.mock.calls[4][2]).toBe(aValidUser.session_token);
 
       expect(mockSet.mock.calls[6][0]).toBe(
         `SESSIONINFO-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[6][1]).toBeDefined();
-      expect(JSON.parse(mockSet.mock.calls[6][1])).toHaveProperty("createdAt");
+      expect(mockSet.mock.calls[6][2]).toBeDefined();
+      expect(JSON.parse(mockSet.mock.calls[6][2])).toHaveProperty("createdAt");
       expect(response).toEqual(expected);
     }
   );
@@ -448,48 +434,39 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       session_token: `${oldSessionToken}2` as SessionToken,
       wallet_token: `${oldWalletToken}2` as WalletToken
     };
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([
         `SESSIONINFO-${oldUserPayload.session_token}`,
         `SESSIONINFO-${oldUserPayload2.session_token}`,
         `SESSIONINFO-${aValidUser.session_token}`
-      ]);
-    });
-    mockMget.mockImplementation((_, __, callback) => {
-      callback(undefined, [
+      ])
+    );
+    mockMget.mockImplementation((_, __) =>
+      Promise.resolve([
         JSON.stringify(oldUserPayload),
         JSON.stringify(oldUserPayload2)
-      ]);
-    });
+      ])
+    );
 
     const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
 
-    expect(mockSmembers).toBeCalledTimes(1);
-    expect(mockSmembers.mock.calls[0][0]).toBe(
+    expect(mockSmembers).toHaveBeenCalledTimes(1);
+    expect(mockSmembers).toHaveBeenCalledWith(
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(
-      `SESSIONINFO-${oldUserPayload.session_token}`
-    );
-    expect(mockDel.mock.calls[0][1]).toBe(
-      `SESSIONINFO-${oldUserPayload2.session_token}`
-    );
-    expect(mockDel.mock.calls[0][2]).toBe(
-      `SESSION-${oldUserPayload.session_token}`
-    );
-    expect(mockDel.mock.calls[0][3]).toBe(
-      `SESSION-${oldUserPayload2.session_token}`
-    );
-    expect(mockDel.mock.calls[0][4]).toBe(
-      `WALLET-${oldUserPayload.wallet_token}`
-    );
-    expect(mockDel.mock.calls[0][5]).toBe(
+    //this also checks the order of the elements
+    expect(mockDel).toHaveBeenCalledWith([
+      `SESSIONINFO-${oldUserPayload.session_token}`,
+      `SESSIONINFO-${oldUserPayload2.session_token}`,
+      `SESSION-${oldUserPayload.session_token}`,
+      `SESSION-${oldUserPayload2.session_token}`,
+      `WALLET-${oldUserPayload.wallet_token}`,
       `WALLET-${oldUserPayload2.wallet_token}`
-    );
+    ]);
     expect(E.isRight(response));
   });
 
@@ -517,60 +494,44 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       wallet_token: `${oldWalletToken}2` as WalletToken
     };
 
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([
         `SESSIONINFO-${oldUserPayload.session_token}`,
         `SESSIONINFO-${oldUserPayload2.session_token}`,
         `SESSIONINFO-${aValidUser.session_token}`
-      ]);
-    });
+      ])
+    );
 
-    mockMget.mockImplementation((_, __, callback) => {
-      callback(undefined, [
+    mockMget.mockImplementation((_, __) =>
+      Promise.resolve([
         JSON.stringify(oldUserPayload),
         JSON.stringify(oldUserPayload2)
-      ]);
-    });
+      ])
+    );
 
     const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
 
-    expect(mockSmembers).toBeCalledTimes(1);
-    expect(mockSmembers.mock.calls[0][0]).toBe(
+    expect(mockSmembers).toHaveBeenCalledTimes(1);
+    expect(mockSmembers).toHaveBeenCalledWith(
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(
-      `SESSIONINFO-${oldUserPayload.session_token}`
-    );
-    expect(mockDel.mock.calls[0][1]).toBe(
-      `SESSIONINFO-${oldUserPayload2.session_token}`
-    );
-    expect(mockDel.mock.calls[0][2]).toBe(
-      `SESSION-${oldUserPayload.session_token}`
-    );
-    expect(mockDel.mock.calls[0][3]).toBe(
-      `SESSION-${oldUserPayload2.session_token}`
-    );
-    expect(mockDel.mock.calls[0][4]).toBe(`BPD-${oldUserPayload.bpd_token}`);
-    expect(mockDel.mock.calls[0][5]).toBe(
-      `MYPORTAL-${oldUserPayload.myportal_token}`
-    );
-    expect(mockDel.mock.calls[0][6]).toBe(
-      `WALLET-${oldUserPayload.wallet_token}`
-    );
-    expect(mockDel.mock.calls[0][7]).toBe(
-      `ZENDESK-${oldUserPayload.zendesk_token}`
-    );
-    expect(mockDel.mock.calls[0][8]).toBe(`BPD-${oldUserPayload2.bpd_token}`);
-    expect(mockDel.mock.calls[0][9]).toBe(
-      `MYPORTAL-${oldUserPayload2.myportal_token}`
-    );
-    expect(mockDel.mock.calls[0][10]).toBe(
+    expect(mockDel).toHaveBeenCalledWith([
+      `SESSIONINFO-${oldUserPayload.session_token}`,
+      `SESSIONINFO-${oldUserPayload2.session_token}`,
+      `SESSION-${oldUserPayload.session_token}`,
+      `SESSION-${oldUserPayload2.session_token}`,
+      `BPD-${oldUserPayload.bpd_token}`,
+      `MYPORTAL-${oldUserPayload.myportal_token}`,
+      `WALLET-${oldUserPayload.wallet_token}`,
+      `ZENDESK-${oldUserPayload.zendesk_token}`,
+      `BPD-${oldUserPayload2.bpd_token}`,
+      `MYPORTAL-${oldUserPayload2.myportal_token}`,
       `WALLET-${oldUserPayload2.wallet_token}`
-    );
+    ]);
     expect(E.isRight(response));
   });
 
@@ -592,54 +553,41 @@ describe("RedisSessionStorage#removeOtherUserSessions", () => {
       session_token: `${oldSessionToken}2` as SessionToken,
       wallet_token: `${oldWalletToken}2` as WalletToken
     };
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([
         `SESSIONINFO-${oldUserPayload.session_token}`,
         `SESSIONINFO-${oldUserPayload2.session_token}`,
         `SESSIONINFO-${aValidUser.session_token}`
-      ]);
-    });
-    mockMget.mockImplementation((_, __, callback) => {
-      callback(undefined, [
+      ])
+    );
+    mockMget.mockImplementation((_, __) =>
+      Promise.resolve([
         JSON.stringify(oldUserPayload),
         JSON.stringify(oldUserPayload2)
-      ]);
-    });
+      ])
+    );
 
     const response: E.Either<Error, boolean> = await sessionStorage[
       // tslint:disable-next-line: no-string-literal
       "removeOtherUserSessions"
     ](aValidUser);
-    expect(mockSmembers).toBeCalledTimes(1);
-    expect(mockSmembers.mock.calls[0][0]).toBe(
+    expect(mockSmembers).toHaveBeenCalledTimes(1);
+    expect(mockSmembers).toHaveBeenCalledWith(
       `USERSESSIONS-${aValidUser.fiscal_code}`
     );
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(
-      `SESSIONINFO-${oldUserPayload.session_token}`
-    );
-    expect(mockDel.mock.calls[0][1]).toBe(
-      `SESSIONINFO-${oldUserPayload2.session_token}`
-    );
-    expect(mockDel.mock.calls[0][2]).toBe(
-      `SESSION-${oldUserPayload.session_token}`
-    );
-    expect(mockDel.mock.calls[0][3]).toBe(
-      `SESSION-${oldUserPayload2.session_token}`
-    );
-    expect(mockDel.mock.calls[0][4]).toBe(`BPD-${oldUserPayload.bpd_token}`);
-    expect(mockDel.mock.calls[0][5]).toBe(
-      `MYPORTAL-${oldUserPayload.myportal_token}`
-    );
-    expect(mockDel.mock.calls[0][6]).toBe(
-      `WALLET-${oldUserPayload.wallet_token}`
-    );
-    expect(mockDel.mock.calls[0][7]).toBe(
-      `MYPORTAL-${oldUserPayload2.myportal_token}`
-    );
-    expect(mockDel.mock.calls[0][8]).toBe(
+    expect(mockDel).toHaveBeenCalledWith([
+      `SESSIONINFO-${oldUserPayload.session_token}`,
+
+      `SESSIONINFO-${oldUserPayload2.session_token}`,
+      `SESSION-${oldUserPayload.session_token}`,
+      `SESSION-${oldUserPayload2.session_token}`,
+      `BPD-${oldUserPayload.bpd_token}`,
+      `MYPORTAL-${oldUserPayload.myportal_token}`,
+      `WALLET-${oldUserPayload.wallet_token}`,
+      `MYPORTAL-${oldUserPayload2.myportal_token}`,
       `WALLET-${oldUserPayload2.wallet_token}`
-    );
+    ]);
     expect(E.isRight(response));
   });
 });
