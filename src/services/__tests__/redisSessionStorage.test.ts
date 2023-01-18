@@ -41,12 +41,6 @@ import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import { RedisClientType } from "redis";
 
-// utils that extracts the last argument as callback and calls it
-const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
-  const callback = args[args.length - 1];
-  return callback(err, value);
-};
-
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const theCurrentTimestampMillis = 1518010929530;
@@ -93,10 +87,7 @@ const mockGet = jest
   .fn()
   .mockImplementation(_ => Promise.resolve(JSON.stringify(aValidUser)));
 const mockMget = jest.fn();
-const mockDel = jest.fn().mockImplementation(
-  // as del() can be can be called with variable arguments number, we extract the last as callback
-  _ => Promise.resolve(7)
-);
+const mockDel = jest.fn().mockImplementation(_ => Promise.resolve(7));
 
 const mockSadd = jest.fn();
 const mockSrem = jest.fn();
@@ -128,6 +119,15 @@ const sessionStorage = new RedisSessionStorage(
 );
 
 let clock: any;
+
+const redisMethodImplFromError = (
+  mockFunction: jest.Mock<unknown, any>,
+  success?: unknown,
+  error?: Error
+) =>
+  mockFunction.mockImplementationOnce(() =>
+    error ? Promise.reject(error) : Promise.resolve(success)
+  );
 
 beforeEach(() => {
   // We need to mock time to test token expiration.
@@ -348,15 +348,6 @@ describe("RedisSessionStorage#set", () => {
       _
       // tslint:disable-next-line: parameters-max-number
     ) => {
-      const redisMethodImplFromError = (
-        mockFunction: jest.Mock<unknown, any>,
-        success?: unknown,
-        error?: Error
-      ) =>
-        mockFunction.mockImplementationOnce(() =>
-          error ? Promise.reject(error) : Promise.resolve(success)
-        );
-
       redisMethodImplFromError(mockSet, sessionSetSuccess, sessionSetErr);
       redisMethodImplFromError(mockSet, walletSetSuccess, walletSetErr);
       redisMethodImplFromError(mockSet, myPortalSetSuccess, myPortalSetError);
@@ -961,36 +952,31 @@ describe("RedisSessionStorage#del", () => {
       myportal_token: mockMyPortalToken
     };
     const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
-    mockDel.mockImplementationOnce(callCallback(tokenDelErr, tokenDelResponse));
-    mockSrem.mockImplementationOnce((_, __, callback) => callback(null, 1));
+
+    redisMethodImplFromError(mockDel, tokenDelResponse, tokenDelErr);
+    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(1));
 
     const response = await sessionStorage.del(aValidUserWithExternalTokens);
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(
-      `BPD-${aValidUserWithExternalTokens.bpd_token}`
-    );
-    expect(mockDel.mock.calls[0][1]).toBe(
-      `FIMS-${aValidUserWithExternalTokens.fims_token}`
-    );
-    expect(mockDel.mock.calls[0][2]).toBe(
-      `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
-    );
-    expect(mockDel.mock.calls[0][3]).toBe(expectedSessionInfoKey);
-    expect(mockDel.mock.calls[0][4]).toBe(
-      `SESSION-${aValidUserWithExternalTokens.session_token}`
-    );
-    expect(mockDel.mock.calls[0][5]).toBe(
-      `WALLET-${aValidUserWithExternalTokens.wallet_token}`
-    );
+    expect(mockDel).toHaveBeenCalledWith([
+      `BPD-${aValidUserWithExternalTokens.bpd_token}`,
+      `FIMS-${aValidUserWithExternalTokens.fims_token}`,
+
+      `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`,
+      expectedSessionInfoKey,
+      `SESSION-${aValidUserWithExternalTokens.session_token}`,
+      `WALLET-${aValidUserWithExternalTokens.wallet_token}`,
+      `ZENDESK-${aValidUserWithExternalTokens.zendesk_token}`
+    ]);
     if (E.isRight(expected)) {
-      expect(mockSrem).toBeCalledWith(
+      expect(mockSrem).toHaveBeenCalledTimes(1);
+      expect(mockSrem).toHaveBeenCalledWith(
         `USERSESSIONS-${aValidUserWithExternalTokens.fiscal_code}`,
-        `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`,
-        expect.any(Function)
+        `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`
       );
     } else {
-      expect(mockSrem).not.toBeCalled();
+      expect(mockSrem).not.toHaveBeenCalled();
     }
     expect(response).toEqual(expected);
   });

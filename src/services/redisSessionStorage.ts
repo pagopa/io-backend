@@ -356,14 +356,12 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async del(user: User): Promise<Either<Error, boolean>> {
-    const tokens: ReadonlyArray<string> = R.collect(
+    const tokens: Array<string> = R.collect(
       (_, { prefix, value }) => `${prefix}${value}`
     )(this.getUserTokens(user));
 
     const deleteTokensPromiseV2 = await pipe(
-      // TODO: Check types for tokens array on del command
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      TE.tryCatch(() => this.redisClient.del(...(tokens as any)), E.toError),
+      TE.tryCatch(() => this.redisClient.del(tokens), E.toError),
       this.integerReplyAsync(tokens.length),
       this.falsyResponseToErrorAsync(
         new Error("Unexpected response from redis client deleting user tokens.")
@@ -393,7 +391,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
       TE.mapLeft(_ => {
         log.warn(`Error updating USERSESSIONS Set for ${user.fiscal_code}`);
       })
-    );
+    )();
     return E.right(true);
   }
 
