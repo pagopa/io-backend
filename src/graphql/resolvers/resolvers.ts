@@ -15,7 +15,7 @@ import * as T from "fp-ts/Task";
 import {
   Maybe,
   Message,
-  MessageContent,
+  MessageContent as MessageContentGraphQL,
   Resolvers,
   Service
 } from "generated/graphql/types";
@@ -109,7 +109,7 @@ export const resolvers: Resolvers<ContextWithUser> = {
           if (E.isLeft(_)) {
             throw new GraphQLError(_.left);
           }
-          return _.right as MessageContent;
+          return _.right as MessageContentGraphQL;
         })
       )();
 
@@ -164,7 +164,7 @@ export const resolvers: Resolvers<ContextWithUser> = {
         ),
         TE.chain(r =>
           r.kind === "IResponseSuccessJson"
-            ? TE.of(r.value.items)
+            ? TE.of(r.value.items.map(m=>({...m,category: "GENERIC"})))
             : TE.left(`Error from message service: ${r.detail}`)
         ),
         TE.getOrElseW(_ => {
