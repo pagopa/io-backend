@@ -1365,7 +1365,7 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
 
 describe("RedisSessionStorage#delUserAllSessions", () => {
   it("should succeed if user has no session", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => callback(null, []));
+    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
     expect(E.isRight(result)).toBeTruthy();
@@ -1376,7 +1376,7 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
   it("should fail if there's an error retrieving user's sessions", async () => {
     const aError = new Error("any error");
-    mockSmembers.mockImplementationOnce((_, callback) => callback(aError));
+    mockSmembers.mockImplementationOnce(_ => Promise.reject(aError));
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
     expect(E.isLeft(result)).toBeTruthy();
@@ -1387,9 +1387,7 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
   it("should fail if the stored user profile is not valid", async () => {
     const invalidProfile = { foo: "bar" };
-    mockGet.mockImplementationOnce((_, callback) =>
-      callback(null, invalidProfile)
-    );
+    mockGet.mockImplementationOnce(_ => Promise.resolve(invalidProfile));
 
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
@@ -1400,7 +1398,7 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
   });
 
   it("should succeed if there's no user stored", async () => {
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce(_ => Promise.resolve());
 
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
@@ -1411,6 +1409,8 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
   });
 
   it("should succeed if everything is fine", async () => {
+    mockSrem.mockImplementationOnce(_ => Promise.resolve(1));
+
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
     expect(E.isRight(result)).toBeTruthy();

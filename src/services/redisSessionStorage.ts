@@ -625,7 +625,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
       TE.fromEither(errorOrSessions),
       TE.fold(
         // as we're deleting stuff, a NotFound error can be considered as a success
-        _ => (_ === sessionNotFoundError ? TE.of(true) : TE.left(_)),
+        error =>
+          error === sessionNotFoundError ? TE.of(true) : TE.left(error),
         sessionInfoKeys =>
           delEverySession(
             sessionInfoKeys.map(
