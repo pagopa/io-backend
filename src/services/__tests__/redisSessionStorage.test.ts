@@ -1328,9 +1328,7 @@ describe("RedisSessionStorage#setBlockedUser", () => {
 describe("RedisSessionStorage#unsetBlockedUser", () => {
   it("should return E.right(true) if the user is correctly unlocked", async () => {
     const sremSuccess = 1;
-    mockSrem.mockImplementation((_, __, callback) =>
-      callback(null, sremSuccess)
-    );
+    mockSrem.mockImplementation((_, __) => Promise.resolve(sremSuccess));
 
     const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
 
@@ -1342,9 +1340,7 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
 
   it("should return E.left(Error) if the user is not correctly unlocked", async () => {
     const sremFailure = 0;
-    mockSrem.mockImplementationOnce((_, __, callback) =>
-      callback(null, sremFailure)
-    );
+    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(sremFailure));
 
     const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
 
@@ -1356,7 +1352,7 @@ describe("RedisSessionStorage#unsetBlockedUser", () => {
 
   it("should return left if for any unhandled failures", async () => {
     const aError = new Error("any error");
-    mockSadd.mockImplementationOnce((_, __, callback) => callback(aError));
+    mockSadd.mockImplementationOnce((_, __) => Promise.reject(aError));
 
     const result = await sessionStorage.setBlockedUser(aFiscalCode);
 
