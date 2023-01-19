@@ -107,7 +107,7 @@ const badRequestErrorResponse = {
 jest.mock("../../services/notificationService");
 jest.mock("../../services/redisSessionStorage");
 
-const redisClient = {} as redis.RedisClient;
+const redisClient = {} as redis.RedisClientType;
 
 const tokenDurationSecs = 0;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
