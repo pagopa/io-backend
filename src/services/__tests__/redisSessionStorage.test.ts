@@ -984,121 +984,114 @@ describe("RedisSessionStorage#del", () => {
 
 describe("RedisSessionStorage#listUserSessions", () => {
   it("should re-init session info and session info set for a user", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, []);
-    });
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, []);
-    });
-    mockSet.mockImplementation((_, __, ___, ____, callback) => {
-      callback(undefined, "OK");
-    });
-    mockSadd.mockImplementation((_, __, callback) => {
-      callback(undefined, 1);
-    });
+    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
+
+    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
+
+    mockSet.mockImplementation((_, __, ___, ____) => Promise.resolve("OK"));
+
+    mockSadd.mockImplementation((_, __) => Promise.resolve(1));
+
     const expectedSessionInfo: SessionInfo = {
       createdAt: new Date(),
       sessionToken: aValidUser.session_token
     };
-    mockMget.mockImplementation((_, callback) => {
-      callback(undefined, [JSON.stringify(expectedSessionInfo)]);
-    });
+    mockMget.mockImplementation(_ =>
+      Promise.resolve([JSON.stringify(expectedSessionInfo)])
+    );
     const response = await sessionStorage.listUserSessions(aValidUser);
     const expectedSessionInfoKey = `SESSIONINFO-${aValidUser.session_token}`;
-    expect(mockSet.mock.calls[0][0]).toBe(expectedSessionInfoKey);
-    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(expectedSessionInfo));
-    expect(mockSadd.mock.calls[0][0]).toBe(
-      `USERSESSIONS-${aValidUser.fiscal_code}`
+    // setEx here
+    expect(mockSet).toHaveBeenCalledWith(
+      expectedSessionInfoKey,
+      aTokenDurationSecs,
+      JSON.stringify(expectedSessionInfo)
     );
-    expect(mockSadd.mock.calls[0][1]).toBe(expectedSessionInfoKey);
+    expect(mockSadd).toHaveBeenCalledWith(
+      `USERSESSIONS-${aValidUser.fiscal_code}`,
+      expectedSessionInfoKey
+    );
     expect(response).toEqual(E.right({ sessions: [expectedSessionInfo] }));
   });
 
   it("should fails if re-init session info and session info set don't complete", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, []);
-    });
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, []);
-    });
-    mockSet.mockImplementation((_, __, ___, ____, callback) => {
-      callback(new Error("REDIS ERROR"), undefined);
-    });
+    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
+
+    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
+
+    mockSet.mockImplementation((_, __, ___, ____) =>
+      Promise.reject(new Error("REDIS ERROR"))
+    );
     const response = await sessionStorage.listUserSessions(aValidUser);
     expect(mockSadd).not.toBeCalled();
     expect(response).toEqual(E.left(sessionNotFoundError));
   });
 
   it("should skip a session with invalid value", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
-    });
-    mockExists.mockImplementationOnce((_, callback) => {
-      callback(undefined, 1);
-    });
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
-    });
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
 
-    mockMget.mockImplementation((_, callback) => {
-      callback(undefined, [JSON.stringify({ test: "Invalid SessionInfo" })]);
-    });
+    mockExists.mockImplementationOnce(_ => Promise.resolve(1));
+
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
+
+    mockMget.mockImplementation(_ =>
+      Promise.resolve([JSON.stringify({ test: "Invalid SessionInfo" })])
+    );
 
     const response = await sessionStorage.listUserSessions(aValidUser);
 
     expect(mockMget).toHaveBeenCalledTimes(1);
-    expect(mockMget.mock.calls[0][0]).toBe(
+    expect(mockMget).toHaveBeenCalledWith([
       `SESSIONINFO-${aValidUser.session_token}`
-    );
+    ]);
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
   });
 
   it("should skip a session with unparseble value", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
-    });
-    mockExists.mockImplementationOnce((_, callback) => {
-      callback(undefined, 1);
-    });
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
-    });
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
 
-    mockMget.mockImplementation((_, callback) => {
-      callback(undefined, ["Invalid JSON value"]);
-    });
+    mockExists.mockImplementationOnce(_ => Promise.resolve(1));
+
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
+
+    mockMget.mockImplementation(_ => Promise.resolve(["Invalid JSON value"]));
 
     const response = await sessionStorage.listUserSessions(aValidUser);
 
     expect(mockMget).toHaveBeenCalledTimes(1);
-    expect(mockMget.mock.calls[0][0]).toBe(
+    expect(mockMget).toHaveBeenCalledWith([
       `SESSIONINFO-${aValidUser.session_token}`
-    );
+    ]);
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
   });
 
   it("should handle expired keys on user tokens set", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
-      ]);
-    });
-    mockExists.mockImplementationOnce((_, callback) => {
-      callback(undefined, 1);
-    });
-    mockExists.mockImplementationOnce((_, callback) => {
-      callback(undefined, 0);
-    });
-    mockSrem.mockImplementationOnce((_, __, callback) => {
-      callback(undefined, 1);
-    });
+      ])
+    );
 
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [`SESSIONINFO-${aValidUser.session_token}`]);
-    });
+    mockExists.mockImplementationOnce(_ => Promise.resolve(1));
+
+    mockExists.mockImplementationOnce(_ => Promise.resolve(0));
+
+    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(1));
+
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
 
     const expectedSessionInfo = SessionInfo.decode({
       createdAt: new Date(),
@@ -1106,16 +1099,16 @@ describe("RedisSessionStorage#listUserSessions", () => {
     });
     expect(E.isRight(expectedSessionInfo)).toBeTruthy();
     if (E.isRight(expectedSessionInfo)) {
-      mockMget.mockImplementationOnce((_, callback) => {
-        callback(undefined, [JSON.stringify(expectedSessionInfo.right)]);
-      });
+      mockMget.mockImplementationOnce(_ =>
+        Promise.resolve([JSON.stringify(expectedSessionInfo.right)])
+      );
 
       const response = await sessionStorage.listUserSessions(aValidUser);
 
       expect(mockMget).toHaveBeenCalledTimes(1);
-      expect(mockMget.mock.calls[0][0]).toBe(
+      expect(mockMget).toHaveBeenCalledWith([
         `SESSIONINFO-${aValidUser.session_token}`
-      );
+      ]);
       const expectedSessionsList = SessionsList.decode({
         sessions: [expectedSessionInfo.right]
       });
