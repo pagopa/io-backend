@@ -1446,6 +1446,7 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
 
   it("should return an email if exists the notice key", async () => {
     mockGet.mockImplementationOnce(_ => Promise.resolve(anEmailAddress));
+
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
     expect(response).toEqual(E.right(anEmailAddress));
   });
@@ -1453,18 +1454,17 @@ describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
 
 describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
   it("should succeded deleting a notice email", async () => {
-    mockDel.mockImplementationOnce((_, callback) => {
-      callback(undefined, 1);
-    });
+    mockDel.mockImplementationOnce(_ => Promise.resolve(1));
+
     const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
     expect(response).toEqual(E.right(true));
   });
 
   it("should fail deleting a notice email", async () => {
     const expectedError = new Error("Redis Error");
-    mockDel.mockImplementationOnce((_, callback) => {
-      callback(expectedError, undefined);
-    });
+
+    mockDel.mockImplementationOnce(_ => Promise.reject(expectedError));
+
     const response = await sessionStorage.delPagoPaNoticeEmail(aValidUser);
     expect(response).toEqual(E.left(expectedError));
   });
