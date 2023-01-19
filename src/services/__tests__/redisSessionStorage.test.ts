@@ -1119,9 +1119,9 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
 describe("RedisSessionStorage#clearExpiredSetValues", () => {
   it("error reading set members", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(new Error("smembers error"), undefined);
-    });
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.reject(new Error("smembers error"))
+    );
     // tslint:disable-next-line: no-string-literal
     const clearResults = await sessionStorage["clearExpiredSetValues"](
       aValidUser.fiscal_code
@@ -1129,21 +1129,18 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
     expect(clearResults).toEqual([]);
   });
   it("delete expired session key reference from user token set", async () => {
-    mockSmembers.mockImplementationOnce((_, callback) => {
-      callback(undefined, [
+    mockSmembers.mockImplementationOnce(_ =>
+      Promise.resolve([
         `SESSIONINFO-${aValidUser.session_token}`,
         `SESSIONINFO-expired_session_token`
-      ]);
-    });
-    mockExists.mockImplementationOnce((_, callback) => {
-      callback(undefined, 1);
-    });
-    mockExists.mockImplementationOnce((_, callback) => {
-      callback(undefined, 0);
-    });
-    mockSrem.mockImplementation((_, __, callback) => {
-      callback(undefined, 1);
-    });
+      ])
+    );
+
+    mockExists.mockImplementationOnce(_ => Promise.resolve(1));
+
+    mockExists.mockImplementationOnce(_ => Promise.resolve(0));
+
+    mockSrem.mockImplementation((_, __) => Promise.resolve(1));
 
     // tslint:disable-next-line: no-string-literal
     const clearResults = await sessionStorage["clearExpiredSetValues"](
@@ -1161,10 +1158,10 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
       `SESSIONINFO-expired_session_token`
     );
     expect(mockSrem).toHaveBeenCalledTimes(1);
-    expect(mockSrem.mock.calls[0][0]).toBe(
-      `USERSESSIONS-${aValidUser.fiscal_code}`
+    expect(mockSrem).toHaveBeenCalledWith(
+      `USERSESSIONS-${aValidUser.fiscal_code}`,
+      `SESSIONINFO-expired_session_token`
     );
-    expect(mockSrem.mock.calls[0][1]).toBe(`SESSIONINFO-expired_session_token`);
     expect(clearResults).toHaveLength(1);
   });
 });
