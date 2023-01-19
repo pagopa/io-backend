@@ -1286,7 +1286,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   it("should return left value if a redis error occurs searching session info", async () => {
     const expectedRedisError = new Error("Generic Redis Error");
 
-    mockSmembers.mockImplementationOnce((_) => 
+    mockSmembers.mockImplementationOnce(_ =>
       Promise.reject(expectedRedisError)
     );
 
@@ -1302,7 +1302,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
 
 describe("RedisSessionStorage#setBlockedUser", () => {
   it("should return E.right(true) if the user is correctly locked", async () => {
-    mockSadd.mockImplementationOnce((_, __, callback) => callback(null));
+    mockSadd.mockImplementationOnce((_, __) => Promise.resolve());
 
     const result = await sessionStorage.setBlockedUser(aFiscalCode);
 
@@ -1314,7 +1314,7 @@ describe("RedisSessionStorage#setBlockedUser", () => {
 
   it("should return left if the user is not correctly locked", async () => {
     const aError = new Error("any error");
-    mockSadd.mockImplementationOnce((_, __, callback) => callback(aError));
+    mockSadd.mockImplementationOnce((_, __) => Promise.reject(aError));
 
     const result = await sessionStorage.setBlockedUser(aFiscalCode);
 
