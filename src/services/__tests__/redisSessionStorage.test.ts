@@ -988,7 +988,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
 
-    mockSet.mockImplementation((_, __, ___, ____) => Promise.resolve("OK"));
+    mockSet.mockImplementation((_, __, ___) => Promise.resolve("OK"));
 
     mockSadd.mockImplementation((_, __) => Promise.resolve(1));
 
@@ -1019,7 +1019,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
 
-    mockSet.mockImplementation((_, __, ___, ____) =>
+    mockSet.mockImplementation((_, __, ___) =>
       Promise.reject(new Error("REDIS ERROR"))
     );
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -1476,7 +1476,7 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
 
     mockTtl.mockImplementationOnce(_ => Promise.resolve(expectedTtl));
 
-    mockSet.mockImplementationOnce((_, __, ___, ____) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
 
     const response = await sessionStorage.setPagoPaNoticeEmail(
       aValidUser,
@@ -1496,7 +1496,7 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
 
     mockTtl.mockImplementationOnce(_ => Promise.resolve(expectedTtl));
 
-    mockSet.mockImplementationOnce((_, __, ___, ____) =>
+    mockSet.mockImplementationOnce((_, __, ___) =>
       Promise.reject(expectedError)
     );
 
