@@ -1473,22 +1473,19 @@ describe("RedisSessionStorage#delPagoPaNoticeEmail", () => {
 describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
   it("should succeded setting a notice email key", async () => {
     const expectedTtl = 1000;
-    mockTtl.mockImplementationOnce((_, callback) => {
-      callback(undefined, expectedTtl);
-    });
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
+
+    mockTtl.mockImplementationOnce(_ => Promise.resolve(expectedTtl));
+
+    mockSet.mockImplementationOnce((_, __, ___, ____) => Promise.resolve("OK"));
+
     const response = await sessionStorage.setPagoPaNoticeEmail(
       aValidUser,
       anEmailAddress
     );
     expect(mockSet).toBeCalledWith(
       `NOTICEEMAIL-${aValidUser.session_token}`,
-      anEmailAddress,
-      "EX",
       expectedTtl,
-      expect.any(Function)
+      anEmailAddress
     );
     expect(response).toEqual(E.right(true));
   });
@@ -1496,22 +1493,21 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
   it("should return left if the notice email key was not created", async () => {
     const expectedTtl = 1000;
     const expectedError = new Error("RedisError");
-    mockTtl.mockImplementationOnce((_, callback) => {
-      callback(undefined, expectedTtl);
-    });
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(expectedError, undefined)
+
+    mockTtl.mockImplementationOnce(_ => Promise.resolve(expectedTtl));
+
+    mockSet.mockImplementationOnce((_, __, ___, ____) =>
+      Promise.reject(expectedError)
     );
+
     const response = await sessionStorage.setPagoPaNoticeEmail(
       aValidUser,
       anEmailAddress
     );
     expect(mockSet).toBeCalledWith(
       `NOTICEEMAIL-${aValidUser.session_token}`,
-      anEmailAddress,
-      "EX",
       expectedTtl,
-      expect.any(Function)
+      anEmailAddress
     );
     expect(response).toEqual(E.left(expectedError));
   });
