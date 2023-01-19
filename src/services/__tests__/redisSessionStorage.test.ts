@@ -1422,34 +1422,30 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
 
 describe("RedisSessionStorage#getPagoPaNoticeEmail", () => {
   it("should fail getting a notice email for an missing key", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, null);
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
+
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
     expect(E.isLeft(response)).toBeTruthy();
   });
 
   it("should fail if the value is not a valid email", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, "fake-wrong-value");
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve("fake-wrong-value"));
+
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
     expect(E.isLeft(response)).toBeTruthy();
   });
 
   it("should fail if redis get fail with an error", async () => {
     const expectedError = new Error("Redis Error");
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(expectedError, undefined);
-    });
+
+    mockGet.mockImplementationOnce(_ => Promise.reject(expectedError));
+
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
     expect(response).toEqual(E.left(expectedError));
   });
 
   it("should return an email if exists the notice key", async () => {
-    mockGet.mockImplementationOnce((_, callback) => {
-      callback(undefined, anEmailAddress);
-    });
+    mockGet.mockImplementationOnce(_ => Promise.resolve(anEmailAddress));
     const response = await sessionStorage.getPagoPaNoticeEmail(aValidUser);
     expect(response).toEqual(E.right(anEmailAddress));
   });
