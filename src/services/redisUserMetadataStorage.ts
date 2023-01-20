@@ -95,7 +95,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
     return pipe(
       TE.tryCatch(
         () => this.redisClient.get(`${userMetadataPrefix}${fiscalCode}`),
-        () => metadataNotFoundError
+        () => new Error("REDIS CLIENT ERROR")
       ),
       TE.chain(
         flow(
