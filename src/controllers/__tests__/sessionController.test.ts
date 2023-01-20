@@ -261,7 +261,7 @@ describe("SessionController#listSessions", () => {
   it("returns list of sessions for an authenticated user", async () => {
     req.user = mockedUser;
     mockSrem.mockImplementationOnce((_, __) => Promise.resolve(true));
-    mockExists.mockImplementationOnce(_ => Promise.resolve(1));
+    mockExists.mockImplementationOnce(_ => Promise.reject());
 
     const response = await controller.listSessions(req);
     response.apply(res);
