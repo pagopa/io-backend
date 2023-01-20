@@ -33,6 +33,7 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
+const mockExists = jest.fn();
 const mockRedisClient = ({
   get: mockGet,
   mGet: mockMget,
@@ -43,7 +44,8 @@ const mockRedisClient = ({
   ttl: mockTtl,
   set: mockSet,
   sRem: mockSrem,
-  setEx: mockSet
+  setEx: mockSet,
+  exists: mockExists
 } as unknown) as RedisClientType;
 
 const mockGetProfile = jest.fn();
@@ -251,19 +253,15 @@ describe("SessionController#listSessions", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockMget.mockImplementationOnce((_, callback) => {
-      callback(null, [JSON.stringify(expectedSessionInfo)]);
-    });
+    mockMget.mockImplementationOnce(_ =>
+      Promise.resolve([JSON.stringify(expectedSessionInfo)])
+    );
   });
 
   it("returns list of sessions for an authenticated user", async () => {
     req.user = mockedUser;
-    mockSrem.mockImplementationOnce((_, __, callback) =>
-      callback(undefined, true)
-    );
-    mockExists.mockImplementationOnce((_, callback) =>
-      callback(undefined, false)
-    );
+    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(true));
+    mockExists.mockImplementationOnce(_ => Promise.resolve(1));
 
     const response = await controller.listSessions(req);
     response.apply(res);
@@ -272,10 +270,8 @@ describe("SessionController#listSessions", () => {
     expect(mockSrem).toBeCalledTimes(1);
     // smembers is called by clearExpiredSetValues and readSessionInfoKeys
     expect(mockSmembers).toBeCalledTimes(2);
-    expect(mockSrem.mock.calls[0][0]).toEqual(
-      `USERSESSIONS-${mockedUser.fiscal_code}`
-    );
-    expect(mockSrem.mock.calls[0][1]).toEqual(
+    expect(mockSrem).toHaveBeenCalledWith(
+      `USERSESSIONS-${mockedUser.fiscal_code}`,
       `SESSIONINFO-${mockedUser.session_token}`
     );
     const expectedResponse = SessionsList.decode({
