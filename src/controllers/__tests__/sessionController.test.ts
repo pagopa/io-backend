@@ -22,7 +22,7 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import * as crypto from "crypto";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
-import { RedisClient } from "redis";
+import { RedisClientType } from "redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -33,18 +33,18 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
-const mockExists = jest.fn();
-const mockRedisClient = {} as RedisClient;
-mockRedisClient.get = mockGet;
-mockRedisClient.mget = mockMget;
-mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
-  callback(null, [`SESSIONINFO-${mockedUser.session_token}`]);
-});
-mockRedisClient.sismember = mockSismember;
-mockRedisClient.ttl = mockTtl;
-mockRedisClient.set = mockSet;
-mockRedisClient.srem = mockSrem;
-mockRedisClient.exists = mockExists;
+const mockRedisClient = ({
+  get: mockGet,
+  mGet: mockMget,
+  sMembers: mockSmembers.mockImplementation(_ =>
+    Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
+  ),
+  sIsMember: mockSismember,
+  ttl: mockTtl,
+  set: mockSet,
+  sRem: mockSrem,
+  setEx: mockSet
+} as unknown) as RedisClientType;
 
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
@@ -188,28 +188,14 @@ describe("SessionController#getSessionState", () => {
     mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
     mockGetNewToken.mockImplementationOnce(() => mockZendeskToken);
 
-    mockTtl.mockImplementationOnce((_, callback) => callback(undefined, 2000));
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSmembers.mockImplementationOnce((_, callback) =>
-      callback(undefined, [])
-    );
+    mockTtl.mockImplementationOnce(_ => Promise.resolve(2000));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
