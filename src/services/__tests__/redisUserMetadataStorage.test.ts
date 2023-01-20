@@ -46,6 +46,15 @@ mockRedisClient.get = mockGet;
 const userMetadataStorage = new RedisUserMetadataStorage(mockRedisClient);
 const redisClientError = new Error("REDIS CLIENT ERROR");
 
+const redisMethodImplFromError = (
+  mockFunction: jest.Mock<unknown, any>,
+  success?: unknown,
+  error?: Error
+) =>
+  mockFunction.mockImplementationOnce(() =>
+    error ? Promise.reject(error) : Promise.resolve(success)
+  );
+
 describe("RedisUserMetadataStorage#get", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,9 +91,7 @@ describe("RedisUserMetadataStorage#get", () => {
       "should fail if user metadata don't exists"
     ]
   ])("%s, %s, %s, %s", async (mockGetError, mockGetResponse, expected, _) => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(mockGetError, mockGetResponse);
-    });
+    redisMethodImplFromError(mockGet, mockGetResponse, mockGetError);
 
     const response = await userMetadataStorage.get(aValidUser);
     expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
