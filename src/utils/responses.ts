@@ -217,3 +217,27 @@ export const ResponseErrorNotImplemented = (
     kind: "IResponseErrorNotImplemented"
   }
 });
+
+/**
+ * Interface for `Unsupported Media Type` error response.
+ */
+export interface IResponseErrorUnsupportedMediaType
+  extends IResponse<"IResponseErrorUnsupportedMediaType"> {
+  readonly detail: string;
+}
+/**
+ * Returns an `Unsupported Media Type` error response with status code 415.
+ */
+export const ResponseErrorUnsupportedMediaType = (
+  detail: string
+): IResponseErrorUnsupportedMediaType => ({
+  ...ResponseErrorGeneric(
+    HttpStatusCodeEnum.HTTP_STATUS_415,
+    "Unsupported Media Type",
+    detail
+  ),
+  ...{
+    detail,
+    kind: "IResponseErrorUnsupportedMediaType"
+  }
+});
