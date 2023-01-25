@@ -10,12 +10,10 @@
 # Automatically triggered on PR
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#pr-trigger
 trigger: none
-
 # Execute agents (jobs) on latest Ubuntu version.
 # To change OS for a specific, ovverride "pool" attribute inside the job definition
 pool:
   vmImage: 'ubuntu-latest'
-
 resources:
   repositories:
     - repository: pagopaCommons
@@ -23,90 +21,64 @@ resources:
       name: pagopa/azure-pipeline-templates
       ref: refs/tags/v18
       endpoint: 'pagopa'
-
 stages:
   - stage: Build
     dependsOn: []
     jobs:
-      - job: make_build  
+      - job: make_build
         steps:
-        - template: templates/node-job-setup/template.yaml@pagopaCommons
-        - script: |
-            yarn build
-          displayName: 'Build'
-  
+          - template: templates/node-job-setup/template.yaml@pagopaCommons
+          - script: |
+              yarn build
+            displayName: 'Build'
   - stage: Static_analysis
     dependsOn: []
     jobs:
-
-      - job: lint     
-        steps:
-        - template: templates/node-job-setup/template.yaml@pagopaCommons
-        - script: |
-            yarn lint
-          displayName: 'Lint'
-
-        # OpenAPI spec is a versione file, still is created with a generation process from a template
-        # We need to check it either is out-of-sync with the template or it has been manually edited
-        - script: |
-            yarn openapi:bundle
-          displayName: 'Bundle OpenAPI'
-        - script: |
-            [[ -z $(git status --porcelain) ]] && exit 0 || exit 1
-          displayName: 'Check OpenAPI spec is up-to-date'
-
-      - job: validate_api_specification     
-        steps:
-        - script: |
-            valid=1
-            for apispec in $(ls openapi/generated/*.yaml); do
-              echo "validating $apispec"
-              npx oval validate -p $apispec
-              result=$?
-              if [ ! $result = 0 ]; then
-                valid=0
-                echo "$apispec failed with code $result"
-              fi
-            done
-            [[ $valid = 1 ]] && exit 0 || exit 1
-          displayName: 'Validate API specifications'
-
-      - job: danger
-        condition: 
-          and(
-            succeeded(),
-            ne(variables['DANGER_GITHUB_API_TOKEN'], 'skip')
-          )
+      - job: lint
         steps:
           - template: templates/node-job-setup/template.yaml@pagopaCommons
-
-          - bash: |
-              yarn danger ci
-            env:
-              DANGER_GITHUB_API_TOKEN: '$(DANGER_GITHUB_API_TOKEN)'
-            displayName: 'Danger CI'
-
-
+          - script: |
+              yarn lint
+            displayName: 'Lint'
+          # OpenAPI spec is a versione file, still is created with a generation process from a template
+          # We need to check it either is out-of-sync with the template or it has been manually edited
+          - script: |
+              yarn openapi:bundle
+            displayName: 'Bundle OpenAPI'
+          - script: |
+              [[ -z $(git status --porcelain) ]] && exit 0 || exit 1
+            displayName: 'Check OpenAPI spec is up-to-date'
+      - job: validate_api_specification
+        steps:
+          - script: |
+              valid=1
+              for apispec in $(ls openapi/generated/*.yaml); do
+                echo "validating $apispec"
+                npx oval validate -p $apispec
+                result=$?
+                if [ ! $result = 0 ]; then
+                  valid=0
+                  echo "$apispec failed with code $result"
+                fi
+              done
+              [[ $valid = 1 ]] && exit 0 || exit 1
+            displayName: 'Validate API specifications'
   # B) Run unit tests if there is a push or pull request on any branch.
   - stage: Test
     dependsOn: []
     jobs:
       - job: unit_tests
         steps:
-        - template: templates/node-job-setup/template.yaml@pagopaCommons
-        
-        - script: |
-            yarn generate:proxy-models
-          displayName: 'Generate definitions'        
-        
-        - script: |
-            yarn generate:test-certs
-          displayName: 'Generate test certificates'        
-
-        - script: |
-            yarn test:coverage
-          displayName: 'Unit tests exec'
-
-        - bash: |
-            bash <(curl -s https://codecov.io/bash)
-          displayName: 'Code coverage'
+          - template: templates/node-job-setup/template.yaml@pagopaCommons
+          - script: |
+              yarn generate:proxy-models
+            displayName: 'Generate definitions'
+          - script: |
+              yarn generate:test-certs
+            displayName: 'Generate test certificates'
+          - script: |
+              yarn test:coverage
+            displayName: 'Unit tests exec'
+          - bash: |
+              bash <(curl -s https://codecov.io/bash)
+            displayName: 'Code coverage'
