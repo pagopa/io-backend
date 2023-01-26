@@ -1047,3 +1047,18 @@ export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   NonEmptyString.decode,
   E.getOrElse((_) => "XYZ" as NonEmptyString)
 );
+
+export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
+  process.env.ALLOWED_CIE_TEST_FISCAL_CODES,
+  NonEmptyString.decode,
+  E.chain(CommaSeparatedListOf(FiscalCode).decode),
+  E.getOrElseW((errs) => {
+    log.warn(
+      `Missing or invalid CIE_TEST_FISCAL_CODES environment variable: ${readableReport(
+        errs
+      )}`
+    );
+
+    return [] as Readonly<any[]>;
+  })
+);

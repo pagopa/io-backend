@@ -70,6 +70,7 @@ import {
   IDP_NAMES,
   Issuer,
   SPID_IDP_IDENTIFIERS,
+  CIE_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
 
 const req = mockReq();
@@ -102,6 +103,8 @@ const invalidUserPayload = {
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
 };
+
+const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
 
 const anErrorResponse = {
   detail: undefined,
@@ -288,6 +291,7 @@ const controller = new AuthenticationController(
   tokenDurationSecs as Second,
   lvTokenDurationSecs as Second,
   lvLongSessionDurationSecs as Second,
+  [validUserPayload.fiscalNumber],
   mockTelemetryClient
 );
 
@@ -309,6 +313,7 @@ const lollipopActivatedController = new AuthenticationController(
   tokenDurationSecs as Second,
   lvTokenDurationSecs as Second,
   lvLongSessionDurationSecs as Second,
+  [validUserPayload.fiscalNumber],
   mockTelemetryClient
 );
 
@@ -928,6 +933,64 @@ describe("AuthenticationController#acs", () => {
       expect(res.redirect).toHaveBeenCalledWith(
         301,
         expectedUriScheme + "//localhost/profile.html?token=" + mockSessionToken
+      );
+    }
+  );
+
+  it("should return unauthorized using a CIE test environment but the user isn't in whitelist", async () => {
+    const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
+    const res = mockRes();
+    const anInvalidCieTestUser = {
+      ...validUserPayload,
+      fiscalNumber: anotherFiscalCode,
+      issuer: Object.keys(CIE_IDP_IDENTIFIERS)[0],
+    };
+
+    const response = await controller.acs(anInvalidCieTestUser);
+    response.apply(res);
+
+    expect(controller).toBeTruthy();
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it.each`
+    title                                   | fiscalNumber                     | issuer
+    ${"if a CIE TEST user is in whitelist"} | ${validUserPayload.fiscalNumber} | ${Object.keys(CIE_IDP_IDENTIFIERS)[0]}
+    ${"if a user logs to PROD CIE IDP"}     | ${anotherFiscalCode}             | ${"https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"}
+  `(
+    "should redirect to success URL $title",
+    async ({ fiscalNumber, issuer }) => {
+      const res = mockRes();
+      const whitelistedCieTestUserPayload = {
+        ...validUserPayload,
+        fiscalNumber,
+        issuer,
+      };
+
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
+
+      mockGetProfile.mockReturnValue(
+        ResponseErrorNotFound("Not Found.", "Profile not found")
+      );
+      mockCreateProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+      const response = await controller.acs(whitelistedCieTestUserPayload);
+      response.apply(res);
+
+      expect(controller).toBeTruthy();
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        "/profile.html?token=" + mockSessionToken
       );
     }
   );

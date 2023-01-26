@@ -37,6 +37,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
+import * as ROA from "fp-ts/lib/ReadonlyArray";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -91,6 +92,7 @@ import {
   internalErrorOrIoLoginRedirect,
   getIsUserElegibleForIoLoginUrlScheme,
 } from "../utils/ioLoginUriScheme";
+import { CIE_IDP_IDENTIFIERS } from "@pagopa/io-spid-commons/dist/config";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -139,6 +141,7 @@ export default class AuthenticationController {
     private readonly standardTokenDurationSecs: Second,
     private readonly lvTokenDurationSecs: Second,
     private readonly lvLongSessionDurationSecs: Second,
+    private readonly allowedCieTestFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
@@ -170,6 +173,41 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrSpidUser.right;
+
+    // check for CIE IDP test login
+    const maybeCieTestUserInWhitelist = pipe(
+      Object.keys(CIE_IDP_IDENTIFIERS).filter(
+        (identifier) =>
+          identifier !==
+          "https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"
+      ),
+      // if issuer is one of CIE test identifiers
+      O.fromPredicate(ROA.some((identifier) => spidUser.issuer === identifier)),
+      // and if the spidUser fiscalcode is in whitelist
+      O.fold(
+        // some here to let the code continue the normal logic flow
+        // in case the issuer is not a CIE_TESTING one
+        () => O.some(true),
+        () =>
+          pipe(
+            this.allowedCieTestFiscalCodes,
+            ROA.some(
+              (CIETestFiscalCode) => CIETestFiscalCode === spidUser.fiscalNumber
+            ),
+            O.fromPredicate(identity)
+          )
+      )
+    );
+
+    // if the CIE test user is not in the whitelist we return
+    // with a not authorized
+    if (O.isNone(maybeCieTestUserInWhitelist)) {
+      log.warn(
+        `unallowed CF tried to login on CIE TEST IDP, issuer: [%s]`,
+        spidUser.issuer
+      );
+      return ResponseErrorForbiddenNotAuthorized;
+    }
 
     if (
       this.hasUserAgeLimitEnabled &&

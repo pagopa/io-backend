@@ -87,6 +87,7 @@ import {
   lvLongSessionDurationSecs,
   FF_FAST_LOGIN,
   FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
+  ALLOWED_CIE_TEST_FISCAL_CODES,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -517,6 +518,7 @@ export async function newApp({
             tokenDurationSecs as Second,
             lvTokenDurationSecs as Second,
             lvLongSessionDurationSecs as Second,
+            ALLOWED_CIE_TEST_FISCAL_CODES,
             appInsightsClient
           );
 
