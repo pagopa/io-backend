@@ -1059,6 +1059,6 @@ export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
       )}`
     );
 
-    return [] as Readonly<any[]>;
+    return [] as ReadonlyArray<FiscalCode>;
   })
 );
