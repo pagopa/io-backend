@@ -174,18 +174,16 @@ export default class MessagesController {
     | IResponseSuccessJson<MessageStatusAttributes>
   > =>
     withUserFromRequest(req, async user =>
-      withValidatedOrValidationError(
-        Ulid.decode(req.params.id),
-        messageId =>
-          withValidatedOrValidationError(
-            MessageStatusChange.decode(req.body),
-            change =>
-              this.messageService.upsertMessageStatus(
-                user.fiscal_code,
-                messageId,
-                change
-              )
-          )
+      withValidatedOrValidationError(Ulid.decode(req.params.id), messageId =>
+        withValidatedOrValidationError(
+          MessageStatusChange.decode(req.body),
+          change =>
+            this.messageService.upsertMessageStatus(
+              user.fiscal_code,
+              messageId,
+              change
+            )
+        )
       )
     );
 
