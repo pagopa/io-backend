@@ -39,9 +39,11 @@ import { errorsToError } from "../utils/errorsFormatter";
 import { PecBearerGeneratorT } from "../types/token";
 import { User } from "../types/user";
 import {
+  IResponseErrorUnsupportedMediaType,
   IResponseSuccessOctet,
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
+  ResponseErrorUnsupportedMediaType,
   ResponseSuccessOctet,
   unhandledResponseStatus,
   withCatchAsInternalError,
@@ -275,6 +277,7 @@ export default class NewMessagesService {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
+    | IResponseErrorUnsupportedMediaType
     | IResponseSuccessOctet<Buffer>
   > =>
     pipe(
@@ -288,8 +291,7 @@ export default class NewMessagesService {
         )
       ),
       TE.filterOrElseW(getIsFileTypeForTypes(ALLOWED_TYPES), () =>
-        ResponseErrorValidation(
-          "File Format Validation Error",
+        ResponseErrorUnsupportedMediaType(
           "The requested file is not a valid PDF"
         )
       ),

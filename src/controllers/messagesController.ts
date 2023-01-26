@@ -33,7 +33,8 @@ import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdParty
 import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
-  IResponseErrorNotImplemented
+  IResponseErrorNotImplemented,
+  IResponseErrorUnsupportedMediaType
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
@@ -221,6 +222,7 @@ export default class MessagesController {
     | IResponseErrorNotFound
     | IResponseErrorTooManyRequests
     | IResponseErrorNotImplemented
+    | IResponseErrorUnsupportedMediaType
     | IResponseSuccessOctet<Buffer>
   > =>
     withUserFromRequest(req, user =>

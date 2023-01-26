@@ -1307,7 +1307,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
     expect(res.kind).toEqual("IResponseErrorInternal");
   });
 
-  it("should return a Validation error if the attachment is not a PDF", async () => {
+  it("should return an Unsupported Media Type error if the attachment is not a PDF", async () => {
     mockGetTPAttachment.mockImplementation(async (_id, _attachmentUrl) => {
       return t.success({
         status: 200,
@@ -1341,7 +1341,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       attachment_url: anAttachmentUrl
     });
     expect(res).toMatchObject({
-      kind: "IResponseErrorValidation"
+      kind: "IResponseErrorUnsupportedMediaType"
     });
   });
 

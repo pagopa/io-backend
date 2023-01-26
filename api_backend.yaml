@@ -486,6 +486,8 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "410":
           description: Third Party Service no longer available
+        "415":
+          description: Unsupported Media TYPE - File Format Validation Error
         "429":
           description: Too Many Requests
         "500":
