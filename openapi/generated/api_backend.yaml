@@ -224,11 +224,7 @@ paths:
   /messages/{id}:
     x-swagger-router-controller: MessagesController
     parameters:
-      - name: id
-        in: path
-        type: string
-        required: true
-        description: The ID of the message.
+      - $ref: '#/parameters/MessageId'
       - $ref: '#/parameters/PublicMessage'
     get:
       operationId: getUserMessage
@@ -276,11 +272,7 @@ paths:
       summary: UpsertMessageStatusAttributes
       description: Updates the status of a message with attributes
       parameters:
-        - name: id
-          in: path
-          type: string
-          required: true
-          description: The ID of the message.
+        - $ref: '#/parameters/MessageId'
         - name: body
           in: body
           schema:
@@ -2218,6 +2210,12 @@ definitions:
     allOf:
       - $ref: '#/definitions/CreatedMessageWithContent'
       - $ref: '#/definitions/EnrichedMessage'
+  Ulid:
+    type: string
+    description: Ulid string.
+    format: Ulid
+    x-import: '@pagopa/ts-commons/lib/strings'
+    example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   PaymentProblemJson:
     description: >-
       A ProblemJson-like type specific for the GetPayment and ActivatePayment
@@ -2779,6 +2777,16 @@ definitions:
       - expires_in
 responses: {}
 parameters:
+  MessageId:
+    name: id
+    in: path
+    type: string
+    maxLength: 26
+    minLength: 26
+    required: true
+    description: The message id in ulid format
+    pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+    x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   PublicMessage:
     name: public_message
     in: query
@@ -2811,13 +2819,21 @@ parameters:
     type: string
     in: query
     required: false
+    maxLength: 26
+    minLength: 26
     description: The maximum id to get messages until to.
+    pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+    x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   MinimumId:
     name: minimum_id
     type: string
     in: query
     required: false
+    maxLength: 26
+    minLength: 26
     description: The minimum id to get messages from.
+    pattern: '[0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}'
+    x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   PaginationRequest:
     type: string
     name: cursor

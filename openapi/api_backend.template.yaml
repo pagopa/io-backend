@@ -1475,7 +1475,7 @@ definitions:
       - expires_in
 responses: {}
 parameters:
- MessageId:
+  MessageId:
     name: id
     in: path
     type: string
