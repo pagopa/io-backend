@@ -13,7 +13,7 @@ import { GetMessagesParameters } from "../../../generated/parameters/GetMessages
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
 import { MessageStatusValueEnum } from "../../../generated/io-messages-api/MessageStatusValue";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import { MessageStatusAttributes } from "../../../generated/io-messages-api/MessageStatusAttributes";
 import { MessageStatusWithAttributes } from "../../../generated/io-messages-api/MessageStatusWithAttributes";
 import { AppMessagesAPIClient } from "../../clients/app-messages.client";
@@ -29,7 +29,7 @@ import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
-const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
+const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as Ulid;
 const aPublicMessageParam = true;
 const getMessageParamOnlyWithMessageId = {
   id: aValidMessageId
@@ -836,7 +836,7 @@ describe("MessageService#upsertMessageStatus", () => {
     );
     const res = await service.upsertMessageStatus(
       mockedUser.fiscal_code,
-      aValidMessageId as NonEmptyString,
+      aValidMessageId,
       aMessageStatusChange
     );
 
@@ -888,7 +888,7 @@ describe("MessageService#upsertMessageStatus", () => {
       );
       const res = await service.upsertMessageStatus(
         mockedUser.fiscal_code,
-        aValidMessageId as NonEmptyString,
+        aValidMessageId,
         aMessageStatusChange
       );
 

@@ -218,11 +218,7 @@ paths:
   "/messages/{id}":
     x-swagger-router-controller: MessagesController
     parameters:
-      - name: id
-        in: path
-        type: string
-        required: true
-        description: The ID of the message.
+      - $ref: "#/parameters/MessageId"
       - $ref: "#/parameters/PublicMessage"
     get:
       operationId: getUserMessage
@@ -271,11 +267,7 @@ paths:
       summary: UpsertMessageStatusAttributes
       description: Updates the status of a message with attributes
       parameters:
-        - name: id
-          in: path
-          type: string
-          required: true
-          description: The ID of the message.
+        - $ref: "#/parameters/MessageId"
         - name: body
           in: body
           schema:
@@ -1219,6 +1211,8 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithContentResponse"
   CreatedMessageWithContentAndEnrichedData:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/CreatedMessageWithContentAndEnrichedData"
+  Ulid:
+    $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/Ulid"
   # Definitions from pagopa-proxy
   PaymentProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentProblemJson"
@@ -1481,6 +1475,17 @@ definitions:
       - expires_in
 responses: {}
 parameters:
+ MessageId:
+    name: id
+    in: path
+    type: string
+    maxLength: 26
+    minLength: 26
+    required: true
+    description: The message id in ulid format
+    pattern: >-
+      [0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}
+    x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   PublicMessage:
     name: public_message
     in: query
@@ -1511,15 +1516,23 @@ parameters:
     type: string
     in: query
     required: false
-    description: >-
-      The maximum id to get messages until to.
+    maxLength: 26
+    minLength: 26
+    description: The maximum id to get messages until to.
+    pattern: >-
+      [0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}
+    x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   MinimumId:
     name: minimum_id
     type: string
     in: query
     required: false
-    description: >-
-      The minimum id to get messages from.
+    maxLength: 26
+    minLength: 26
+    description: The minimum id to get messages from.
+    pattern: >-
+      [0-9a-hjkmnp-tv-zA-HJKMNP-TV-Z]{26}
+    x-example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
   PaginationRequest:
     type: string
     name: cursor

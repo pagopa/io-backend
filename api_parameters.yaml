@@ -21,16 +21,16 @@ definitions:
       getArchivedMessages:
         $ref: "#/definitions/BooleanFromString"
       maximumId:
-        $ref: "#/definitions/NonEmptyString"
+        $ref: "#/definitions/Ulid"
       minimumId:
-        $ref: "#/definitions/NonEmptyString"
+        $ref: "#/definitions/Ulid"
   GetMessageParameters:
     type: object
     title: GetMessageParameters
     description: Describes the GetMessage api parameters
     properties:
       id:
-        $ref: "#/definitions/NonEmptyString"
+        $ref: "#/definitions/Ulid"
       public_message:
         $ref: "#/definitions/BooleanFromString"
     required:
@@ -62,3 +62,5 @@ definitions:
     format: NonEmptyString
     x-import: '@pagopa/ts-commons/lib/strings'
     example: "xxxxxxxx"
+  Ulid:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.4.0/openapi/definitions.yaml#/Ulid"

@@ -20,7 +20,7 @@ import {
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString, Ulid } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { withUserFromRequest } from "../types/user";
 
@@ -174,7 +174,7 @@ export default class MessagesController {
   > =>
     withUserFromRequest(req, async user =>
       withValidatedOrValidationError(
-        NonEmptyString.decode(req.params.id),
+        Ulid.decode(req.params.id),
         messageId =>
           withValidatedOrValidationError(
             MessageStatusChange.decode(req.body),

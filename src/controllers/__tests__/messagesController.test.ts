@@ -183,8 +183,8 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const pageSize = 2;
     const enrichResultData = false;
-    const maximumId = "AAAA";
-    const minimumId = "BBBB";
+    const maximumId = proxyMessagesResponse.items[0].id;
+    const minimumId = proxyMessagesResponse.items[1].id;
 
     // query params should be strings
     req.query = {
@@ -255,7 +255,7 @@ describe("MessagesController#getMessage", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: proxyMessageResponse.id };
     req.query = { public_message: "true" };
 
     const controller = new MessagesController(
@@ -266,7 +266,7 @@ describe("MessagesController#getMessage", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId,
+      id: proxyMessageResponse.id,
       public_message: true
     });
     expect(response).toEqual({
@@ -284,7 +284,7 @@ describe("MessagesController#getMessage", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: proxyMessageResponse.id };
 
     const controller = new MessagesController(
       newMessageService,
@@ -294,7 +294,7 @@ describe("MessagesController#getMessage", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId
+      id: proxyMessageResponse.id
     });
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -312,7 +312,7 @@ describe("MessagesController#getMessage", () => {
     );
 
     req.user = "";
-    req.params = { id: anId };
+    req.params = { id: proxyMessageResponse.id };
 
     const controller = new MessagesController(
       newMessageService,
@@ -595,7 +595,7 @@ describe("MessagesController#upsertMessageStatus", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: proxyMessageResponse.id };
     req.body = aMessageStatusChange;
 
     const controller = new MessagesController(
@@ -609,7 +609,7 @@ describe("MessagesController#upsertMessageStatus", () => {
 
     expect(mockFnAppUpsertMessageStatus).toHaveBeenCalledWith(
       mockedUser.fiscal_code,
-      anId,
+      proxyMessageResponse.id,
       aMessageStatusChange
     );
     expect(response).toEqual({
