@@ -83,6 +83,7 @@ jest.mock("../../services/tokenService", () => {
 });
 
 const mockSet = jest.fn();
+const mockSetEx = jest.fn();
 const mockGet = jest
   .fn()
   .mockImplementation(_ => Promise.resolve(JSON.stringify(aValidUser)));
@@ -100,7 +101,7 @@ const mockTtl = jest.fn();
 
 const mockRedisClient = ({
   set: mockSet,
-  setEx: mockSet,
+  setEx: mockSetEx,
   get: mockGet,
   mGet: mockMget,
   del: mockDel,
@@ -348,50 +349,52 @@ describe("RedisSessionStorage#set", () => {
       _
       // tslint:disable-next-line: parameters-max-number
     ) => {
-      redisMethodImplFromError(mockSet, sessionSetSuccess, sessionSetErr);
-      redisMethodImplFromError(mockSet, walletSetSuccess, walletSetErr);
-      redisMethodImplFromError(mockSet, myPortalSetSuccess, myPortalSetError);
-      redisMethodImplFromError(mockSet, bpdSetSuccess, bpdSetError);
-      redisMethodImplFromError(mockSet, zendeskSetSuccess, zendeskSetError);
+      redisMethodImplFromError(mockSetEx, sessionSetSuccess, sessionSetErr);
+      redisMethodImplFromError(mockSetEx, walletSetSuccess, walletSetErr);
+      redisMethodImplFromError(mockSetEx, myPortalSetSuccess, myPortalSetError);
+      redisMethodImplFromError(mockSetEx, bpdSetSuccess, bpdSetError);
+      redisMethodImplFromError(mockSetEx, zendeskSetSuccess, zendeskSetError);
 
       // FIMS Token
-      redisMethodImplFromError(mockSet, "OK");
-      redisMethodImplFromError(mockSet, "OK");
+      redisMethodImplFromError(mockSetEx, "OK");
+      redisMethodImplFromError(mockSetEx, "OK");
       redisMethodImplFromError(mockSadd, 1);
       redisMethodImplFromError(mockSmembers, []);
 
       const response = await sessionStorage.set(aValidUser);
 
-      expect(mockSet).toHaveBeenCalledTimes(7);
+      expect(mockSetEx).toHaveBeenCalledTimes(7);
 
-      expect(mockSet.mock.calls[0][0]).toBe(
+      expect(mockSetEx.mock.calls[0][0]).toBe(
         `SESSION-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[0][2]).toEqual(JSON.stringify(aValidUser));
+      expect(mockSetEx.mock.calls[0][2]).toEqual(JSON.stringify(aValidUser));
 
-      expect(mockSet.mock.calls[1][0]).toBe(
+      expect(mockSetEx.mock.calls[1][0]).toBe(
         `WALLET-${aValidUser.wallet_token}`
       );
-      expect(mockSet.mock.calls[1][2]).toBe(aValidUser.session_token);
+      expect(mockSetEx.mock.calls[1][2]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[2][0]).toBe(
+      expect(mockSetEx.mock.calls[2][0]).toBe(
         `MYPORTAL-${aValidUser.myportal_token}`
       );
-      expect(mockSet.mock.calls[2][2]).toBe(aValidUser.session_token);
+      expect(mockSetEx.mock.calls[2][2]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
-      expect(mockSet.mock.calls[3][2]).toBe(aValidUser.session_token);
+      expect(mockSetEx.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
+      expect(mockSetEx.mock.calls[3][2]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[4][0]).toBe(
+      expect(mockSetEx.mock.calls[4][0]).toBe(
         `ZENDESK-${aValidUser.zendesk_token}`
       );
-      expect(mockSet.mock.calls[4][2]).toBe(aValidUser.session_token);
+      expect(mockSetEx.mock.calls[4][2]).toBe(aValidUser.session_token);
 
-      expect(mockSet.mock.calls[6][0]).toBe(
+      expect(mockSetEx.mock.calls[6][0]).toBe(
         `SESSIONINFO-${aValidUser.session_token}`
       );
-      expect(mockSet.mock.calls[6][2]).toBeDefined();
-      expect(JSON.parse(mockSet.mock.calls[6][2])).toHaveProperty("createdAt");
+      expect(mockSetEx.mock.calls[6][2]).toBeDefined();
+      expect(JSON.parse(mockSetEx.mock.calls[6][2])).toHaveProperty(
+        "createdAt"
+      );
       expect(response).toEqual(expected);
     }
   );
@@ -988,7 +991,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
 
-    mockSet.mockImplementation((_, __, ___) => Promise.resolve("OK"));
+    mockSetEx.mockImplementation((_, __, ___) => Promise.resolve("OK"));
 
     mockSadd.mockImplementation((_, __) => Promise.resolve(1));
 
@@ -1002,7 +1005,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
     const response = await sessionStorage.listUserSessions(aValidUser);
     const expectedSessionInfoKey = `SESSIONINFO-${aValidUser.session_token}`;
     // setEx here
-    expect(mockSet).toHaveBeenCalledWith(
+    expect(mockSetEx).toHaveBeenCalledWith(
       expectedSessionInfoKey,
       aTokenDurationSecs,
       JSON.stringify(expectedSessionInfo)
@@ -1019,7 +1022,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
 
-    mockSet.mockImplementation((_, __, ___) =>
+    mockSetEx.mockImplementation((_, __, ___) =>
       Promise.reject(new Error("REDIS ERROR"))
     );
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -1476,13 +1479,13 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
 
     mockTtl.mockImplementationOnce(_ => Promise.resolve(expectedTtl));
 
-    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
 
     const response = await sessionStorage.setPagoPaNoticeEmail(
       aValidUser,
       anEmailAddress
     );
-    expect(mockSet).toBeCalledWith(
+    expect(mockSetEx).toBeCalledWith(
       `NOTICEEMAIL-${aValidUser.session_token}`,
       expectedTtl,
       anEmailAddress
@@ -1496,7 +1499,7 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
 
     mockTtl.mockImplementationOnce(_ => Promise.resolve(expectedTtl));
 
-    mockSet.mockImplementationOnce((_, __, ___) =>
+    mockSetEx.mockImplementationOnce((_, __, ___) =>
       Promise.reject(expectedError)
     );
 
@@ -1504,7 +1507,7 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
       aValidUser,
       anEmailAddress
     );
-    expect(mockSet).toBeCalledWith(
+    expect(mockSetEx).toBeCalledWith(
       `NOTICEEMAIL-${aValidUser.session_token}`,
       expectedTtl,
       anEmailAddress
