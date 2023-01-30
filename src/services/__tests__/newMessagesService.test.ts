@@ -28,7 +28,7 @@ import { base64File } from "../../__mocks__/pn";
 import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
-const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
+const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as Ulid;
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as Ulid;
 const aPublicMessageParam = true;
 const getMessageParamOnlyWithMessageId = {
