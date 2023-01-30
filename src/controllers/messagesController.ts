@@ -55,9 +55,9 @@ type IGetLegalMessageAttachmentResponse =
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
-  f: (id: NonEmptyString, attachment_url: NonEmptyString) => Promise<T>
+  f: (id: Ulid, attachment_url: NonEmptyString) => Promise<T>
 ) =>
-  withValidatedOrValidationError(NonEmptyString.decode(req.params.id), id =>
+  withValidatedOrValidationError(Ulid.decode(req.params.id), id =>
     withValidatedOrValidationError(
       NonEmptyString.decode(req.params.attachment_url),
       attachment_url => f(id, attachment_url)
@@ -126,19 +126,21 @@ export default class MessagesController {
   public readonly getLegalMessage = (
     req: express.Request
   ): Promise<IGetLegalMessageResponse> =>
-    withUserFromRequest(req, user =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            this.messageService.getLegalMessage(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code)
-            ),
-          e => ResponseErrorInternal(E.toError(e).message)
-        ),
-        TE.toUnion
-      )()
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(Ulid.decode(req.params.id), messageId =>
+        pipe(
+          TE.tryCatch(
+            () =>
+              this.messageService.getLegalMessage(
+                user,
+                messageId,
+                this.tokenService.getPecServerTokenHandler(user.fiscal_code)
+              ),
+            e => ResponseErrorInternal(E.toError(e).message)
+          ),
+          TE.toUnion
+        )()
+      )
     );
 
   /**
@@ -147,20 +149,22 @@ export default class MessagesController {
   public readonly getLegalMessageAttachment = (
     req: express.Request
   ): Promise<IGetLegalMessageAttachmentResponse> =>
-    withUserFromRequest(req, user =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            this.messageService.getLegalMessageAttachment(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code),
-              req.params.attachment_id
-            ),
-          e => ResponseErrorInternal(E.toError(e).message)
-        ),
-        TE.toUnion
-      )()
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(Ulid.decode(req.params.id), messageId =>
+        pipe(
+          TE.tryCatch(
+            () =>
+              this.messageService.getLegalMessageAttachment(
+                user,
+                messageId,
+                this.tokenService.getPecServerTokenHandler(user.fiscal_code),
+                req.params.attachment_id
+              ),
+            e => ResponseErrorInternal(E.toError(e).message)
+          ),
+          TE.toUnion
+        )()
+      )
     );
 
   public readonly upsertMessageStatus = (
@@ -201,10 +205,8 @@ export default class MessagesController {
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
     withUserFromRequest(req, async user =>
-      withValidatedOrValidationError(
-        NonEmptyString.decode(req.params.id),
-        messageId =>
-          this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
+      withValidatedOrValidationError(Ulid.decode(req.params.id), messageId =>
+        this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
       )
     );
 
@@ -224,7 +226,7 @@ export default class MessagesController {
     | IResponseSuccessOctet<Buffer>
   > =>
     withUserFromRequest(req, user =>
-      withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
+      withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
         this.messageService.getThirdPartyAttachment(
           user.fiscal_code,
           messageId,

@@ -244,7 +244,7 @@ export default class NewMessagesService {
    */
   public readonly getThirdPartyMessage = async (
     fiscalCode: FiscalCode,
-    messageId: NonEmptyString
+    messageId: Ulid
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -273,7 +273,7 @@ export default class NewMessagesService {
    */
   public readonly getThirdPartyAttachment = async (
     fiscalCode: FiscalCode,
-    messageId: NonEmptyString,
+    messageId: Ulid,
     attachmentUrl: NonEmptyString
   ): Promise<
     | IResponseErrorInternal
@@ -312,7 +312,7 @@ export default class NewMessagesService {
    */
   public readonly getLegalMessage = (
     user: User,
-    messageId: string,
+    messageId: Ulid,
     bearerGenerator: PecBearerGeneratorT
   ): Promise<
     | IResponseErrorInternal
@@ -364,7 +364,7 @@ export default class NewMessagesService {
    */
   public readonly getLegalMessageAttachment = (
     user: User,
-    messageId: string,
+    messageId: Ulid,
     bearerGenerator: PecBearerGeneratorT,
     attachmentId: string
   ): Promise<
@@ -404,7 +404,7 @@ export default class NewMessagesService {
 
   private readonly getThirdPartyMessageFnApp = (
     fiscalCode: FiscalCode,
-    messageId: string
+    messageId: Ulid
   ): TE.TaskEither<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -466,7 +466,7 @@ export default class NewMessagesService {
       )
     );
 
-  private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
+  private readonly getLegalMessageFromFnApp = (user: User, messageId: Ulid) =>
     pipe(
       TE.tryCatch(
         () =>

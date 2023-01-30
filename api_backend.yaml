@@ -310,11 +310,7 @@ paths:
   "/legal-messages/{id}":
     x-swagger-router-controller: MessagesController
     parameters:
-      - name: id
-        in: path
-        type: string
-        required: true
-        description: The ID of the message.
+      - $ref: "#/parameters/MessageId"
     get:
       operationId: getUserLegalMessage
       summary: Get legal message
@@ -363,11 +359,7 @@ paths:
       produces:
         - application/octet-stream
       parameters:
-        - name: id
-          in: path
-          type: string
-          required: true
-          description: The ID of the message.
+        - $ref: "#/parameters/MessageId"
         - in: path
           name: attachment_id
           required: true
@@ -396,12 +388,7 @@ paths:
       description: |-
         Returns the Third Party message with the provided message ID.
       parameters:
-        - name: id
-          in: path
-          type: string
-          minLength: 1
-          required: true
-          description: ID of the IO message.
+        - $ref: "#/parameters/MessageId"
       responses:
         "200":
           description: Found.
@@ -457,12 +444,7 @@ paths:
       produces:
         - application/octet-stream
       parameters:
-        - name: id
-          in: path
-          type: string
-          minLength: 1
-          required: true
-          description: ID of the IO message.
+        - $ref: "#/parameters/MessageId"
         - in: path
           name: attachment_url
           type: string

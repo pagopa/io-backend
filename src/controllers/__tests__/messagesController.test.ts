@@ -10,8 +10,9 @@ import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
 import { base64File } from "../../__mocks__/pn";
+import { Ulid } from "@pagopa/ts-commons/lib/strings";
 
-const anId: string = "string-id";
+const anId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as Ulid;
 
 const proxyMessagesResponse = {
   items: [
@@ -408,7 +409,7 @@ describe("MessagesController#getLegalMessage", () => {
     );
 
     req.user = mockedUser;
-    req.params = { id: anId };
+    req.params = { id: proxyLegalMessageResponse.id };
 
     const controller = new MessagesController(
       newMessageService,
@@ -419,7 +420,7 @@ describe("MessagesController#getLegalMessage", () => {
 
     expect(mockGetLegalMessage).toHaveBeenCalledWith(
       mockedUser,
-      anId,
+      proxyLegalMessageResponse.id,
       expect.any(Function)
     );
     expect(response).toEqual({
@@ -438,7 +439,7 @@ describe("MessagesController#getLegalMessage", () => {
     );
 
     req.user = "";
-    req.params = { id: anId };
+    req.params = { id: proxyMessageResponse.id };
 
     const controller = new MessagesController(
       newMessageService,
