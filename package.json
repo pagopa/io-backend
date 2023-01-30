@@ -187,12 +187,12 @@
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/**/*.{ts}",
-      "!src/clients/api/*.{ts}",
-      "!src/clients/api/models/*.{ts}",
-      "!src/clients/pagopa/*.{ts}",
-      "!src/clients/pagopa/models/*.{ts}",
-      "!src/types/api/*.{ts}",
+      "src/**/*.ts",
+      "!src/clients/api/*.ts",
+      "!src/clients/api/models/*.ts",
+      "!src/clients/pagopa/*.ts",
+      "!src/clients/pagopa/models/*.ts",
+      "!src/types/api/*.ts",
       "!src/**/*.d.ts"
     ]
   },
