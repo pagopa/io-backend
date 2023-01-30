@@ -226,7 +226,7 @@ export default class MessagesController {
     | IResponseSuccessOctet<Buffer>
   > =>
     withUserFromRequest(req, user =>
-      withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
+      withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
         this.messageService.getThirdPartyAttachment(
           user.fiscal_code,
           messageId,
