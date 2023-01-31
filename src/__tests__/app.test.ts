@@ -6,13 +6,17 @@ import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
+import * as redisUtils from "../utils/redis";
+import { RedisClient } from "redis";
 
 jest.mock("@azure/storage-queue");
 
 jest.mock("../services/redisSessionStorage");
 jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
-jest.mock("../utils/redis");
+jest
+  .spyOn(redisUtils, "createClusterRedisClient")
+  .mockImplementation(() => () => ({} as RedisClient));
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {

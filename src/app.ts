@@ -234,7 +234,7 @@ export function newApp({
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
       ? createSimpleRedisClient(process.env.REDIS_URL)
-      : createClusterRedisClient(
+      : createClusterRedisClient(appInsightsClient)(
           getRequiredENVVar("REDIS_URL"),
           process.env.REDIS_PASSWORD,
           process.env.REDIS_PORT
