@@ -9,3 +9,7 @@ overrides:
   hosts:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
+  endpoints:
+    /api/v1/eucovidcert/certificate:
+      response_time_threshold: 3
+      availability_threshold: 0.98
