@@ -1,19 +1,19 @@
 microservice-chart:
   image:
     repository: 'iopcommonacr.azurecr.io/io-backend'
-    tag: '0.14.0'
+    tag: '0.1.0'
     pullPolicy: Always
   namespace: 'messages'
   livenessProbe:
     httpGet:
-      path: '/api/live'
+      path: '/ping'
       port: 80
     initialDelaySeconds: 30
     failureThreshold: 6
     periodSeconds: 10
   readinessProbe:
     httpGet:
-      path: '/api/ready'
+      path: '/ping'
       port: 80
     initialDelaySeconds: 30
     failureThreshold: 6
