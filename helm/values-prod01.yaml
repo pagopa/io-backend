@@ -51,7 +51,7 @@ microservice-chart:
     API_BASE_PATH: /api/v1
     API_URL: https://io-p-app-fn-1.azurewebsites.net/api/v1
     APP_MESSAGES_API_URL: https://io-p-app-messages-fn-1.azurewebsites.net/api/v1
-    AUTHENTICATION_BASE_PATH: 
+    AUTHENTICATION_BASE_PATH: ""
     BONUS_API_BASE_PATH: /api/v1
     BONUS_API_URL: http://io-p-func-bonus.azurewebsites.net/api/v1
     BPD_BASE_PATH: /bpd/api/v1
@@ -98,13 +98,11 @@ microservice-chart:
     PAGOPA_API_URL_PROD: https://api.platform.pagopa.it/checkout/auth/payments/v1
     PAGOPA_API_URL_TEST: https://api.uat.platform.pagopa.it/checkout/auth/payments/v1
     PAGOPA_BASE_PATH: /pagopa/api/v1
-    PECSERVER_BASE_PATH: 
     PECSERVER_TOKEN_ISSUER: app-backend.io.italia.it
     PECSERVER_URL: https://poc.pagopa.poste.it
     PECSERVERS_aruba_basePath: /apigateway/api/v2/pagopa/mailbox
     PECSERVERS_aruba_serviceId: 01FRMRD5P7H378MDXBBW3DTYCF
     PECSERVERS_aruba_url: https://pagopa-test.pec.aruba.it
-    PECSERVERS_poste_basePath: 
     PECSERVERS_poste_serviceId: 01FQ4945RG5WJGPHKY8ZYRJMQ7
     PECSERVERS_poste_url: https://poc.pagopa.poste.it
     PN_ACTIVATION_BASE_PATH: /api/v1/pn
@@ -120,7 +118,6 @@ microservice-chart:
     SAML_ISSUER: https://app-backend.io.italia.it
     SAML_LOGOUT_CALLBACK_URL: https://app-backend.io.italia.it/slo
     SPID_LOG_QUEUE_NAME: spidmsgitems
-    TEST_CGN_FISCAL_CODES: 
     TEST_LOGIN_FISCAL_CODES: EEEEEE00E00E000A,EEEEEE00E00E000B,EEEEEE00E00E000C,EEEEEE00E00E000D,AAAAAA00A00A000C,AAAAAA00A00A000D,AAAAAA00A00A000E,AAAAAA00A00A000B,PRVPRV25A01H501B,XXXXXP25A01H501L,YYYYYP25A01H501K,KKKKKP25A01H501U,QQQQQP25A01H501S,WWWWWP25A01H501A,ZZZZZP25A01H501J,JJJJJP25A01H501X,GGGGGP25A01H501Z
     THIRD_PARTY_CONFIG_LIST: '[]'
     TOKEN_DURATION_IN_SECONDS: 2592000
