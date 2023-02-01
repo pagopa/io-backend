@@ -103,6 +103,7 @@ microservice-chart:
     PECSERVERS_aruba_basePath: '/apigateway/api/v2/pagopa/mailbox'
     PECSERVERS_aruba_serviceId: '01FRMRD5P7H378MDXBBW3DTYCF'
     PECSERVERS_aruba_url: 'https://pagopa-test.pec.aruba.it'
+    PECSERVERS_poste_basePath: 'https://poc.pagopa.poste.it'
     PECSERVERS_poste_serviceId: '01FQ4945RG5WJGPHKY8ZYRJMQ7'
     PECSERVERS_poste_url: 'https://poc.pagopa.poste.it'
     PN_ACTIVATION_BASE_PATH: '/api/v1/pn'
