@@ -46,23 +46,23 @@ microservice-chart:
           type: Utilization
           value: '70'
   envConfig:
-    ALLOW_NOTIFY_IP_SOURCE_RANGE: 10.0.108.0/24
-    ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE: 10.0.101.0/24
-    API_BASE_PATH: /api/v1
-    API_URL: https://io-p-app-fn-1.azurewebsites.net/api/v1
-    APP_MESSAGES_API_URL: https://io-p-app-messages-fn-1.azurewebsites.net/api/v1
+    ALLOW_NOTIFY_IP_SOURCE_RANGE: '10.0.108.0/24'
+    ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE: '10.0.101.0/24'
+    API_BASE_PATH: '/api/v1'
+    API_URL: 'https://io-p-app-fn-1.azurewebsites.net/api/v1'
+    APP_MESSAGES_API_URL: 'https://io-p-app-messages-fn-1.azurewebsites.net/api/v1'
     AUTHENTICATION_BASE_PATH: ""
-    BONUS_API_BASE_PATH: /api/v1
-    BONUS_API_URL: http://io-p-func-bonus.azurewebsites.net/api/v1
-    BPD_BASE_PATH: /bpd/api/v1
-    CGN_API_BASE_PATH: /api/v1/cgn
-    CGN_API_URL: https://io-p-cgn-fn.azurewebsites.net
-    CGN_OPERATOR_SEARCH_API_BASE_PATH: /api/v1/cgn/operator-search
-    CGN_OPERATOR_SEARCH_API_URL: https://cgnonboardingportal-p-op.azurewebsites.net
-    CIE_METADATA_URL: https://api.is.eng.pagopa.it/idp-keys/cie/latest
+    BONUS_API_BASE_PATH: '/api/v1'
+    BONUS_API_URL: 'http://io-p-func-bonus.azurewebsites.net/api/v1'
+    BPD_BASE_PATH: '/bpd/api/v1'
+    CGN_API_BASE_PATH: '/api/v1/cgn'
+    CGN_API_URL: 'https://io-p-cgn-fn.azurewebsites.net'
+    CGN_OPERATOR_SEARCH_API_BASE_PATH: '/api/v1/cgn/operator-search'
+    CGN_OPERATOR_SEARCH_API_URL: 'https://cgnonboardingportal-p-op.azurewebsites.net'
+    CIE_METADATA_URL: 'https://api.is.eng.pagopa.it/idp-keys/cie/latest'
     DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS: 90
-    EUCOVIDCERT_API_BASE_PATH: /api/v1/eucovidcert
-    EUCOVIDCERT_API_URL: http://io-p-fn3-eucovidcert.azurewebsites.net/api/v1
+    EUCOVIDCERT_API_BASE_PATH: '/api/v1/eucovidcert'
+    EUCOVIDCERT_API_URL: 'http://io-p-fn3-eucovidcert.azurewebsites.net/api/v1'
     FETCH_KEEPALIVE_ENABLED: true
     FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT: 30000
     FETCH_KEEPALIVE_MAX_FREE_SOCKETS: 10
@@ -75,58 +75,58 @@ microservice-chart:
     FF_IO_SIGN_ENABLED: 1
     FF_MIT_VOUCHER_ENABLED: 1
     FF_PN_ACTIVATION_ENABLED: 1
-    FF_ROUTING_PUSH_NOTIF: ALL
-    FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX: ^([(0-9)|(a-f)|(A-F)]{63}[(0-4)]{1})$
+    FF_ROUTING_PUSH_NOTIF: 'ALL'
+    FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX: '^([(0-9)|(a-f)|(A-F)]{63}[(0-4)]{1})$'
     FF_USER_AGE_LIMIT_ENABLED: 1
-    FIMS_BASE_PATH: /fims/api/v1
+    FIMS_BASE_PATH: '/fims/api/v1'
     IDP_METADATA_REFRESH_INTERVAL_SECONDS: 864000
-    IDP_METADATA_URL: https://api.is.eng.pagopa.it/idp-keys/spid/latest
-    IO_SIGN_API_BASE_PATH: /api/v1/sign
-    IO_SIGN_API_URL: https://io-p-sign-user-func.azurewebsites.net
+    IDP_METADATA_URL: 'https://api.is.eng.pagopa.it/idp-keys/spid/latest'
+    IO_SIGN_API_BASE_PATH: '/api/v1/sign'
+    IO_SIGN_API_URL: 'https://io-p-sign-user-func.azurewebsites.net'
     IS_APPBACKENDLI: true
     JWT_MIT_VOUCHER_TOKEN_EXPIRATION: 1200
-    JWT_MIT_VOUCHER_TOKEN_ISSUER: app-backend.io.italia.it
+    JWT_MIT_VOUCHER_TOKEN_ISSUER: 'app-backend.io.italia.it'
     JWT_SUPPORT_TOKEN_EXPIRATION: 1209600
-    JWT_SUPPORT_TOKEN_ISSUER: app-backend.io.italia.it
+    JWT_SUPPORT_TOKEN_ISSUER: 'app-backend.io.italia.it'
     JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: 1200
-    JWT_ZENDESK_SUPPORT_TOKEN_ISSUER: app-backend.io.italia.it
-    LOLLIPOP_ALLOWED_USER_AGENTS: IO-App/2.23.0
-    MIT_VOUCHER_API_BASE_PATH: /api/v1/mitvoucher/auth
-    MYPORTAL_BASE_PATH: /myportal/api/v1
-    NODE_ENV: production
-    NOTIFICATIONS_QUEUE_NAME: push-notifications
-    PAGOPA_API_URL_PROD: https://api.platform.pagopa.it/checkout/auth/payments/v1
-    PAGOPA_API_URL_TEST: https://api.uat.platform.pagopa.it/checkout/auth/payments/v1
-    PAGOPA_BASE_PATH: /pagopa/api/v1
-    PECSERVER_TOKEN_ISSUER: app-backend.io.italia.it
-    PECSERVER_URL: https://poc.pagopa.poste.it
-    PECSERVERS_aruba_basePath: /apigateway/api/v2/pagopa/mailbox
-    PECSERVERS_aruba_serviceId: 01FRMRD5P7H378MDXBBW3DTYCF
-    PECSERVERS_aruba_url: https://pagopa-test.pec.aruba.it
-    PECSERVERS_poste_serviceId: 01FQ4945RG5WJGPHKY8ZYRJMQ7
-    PECSERVERS_poste_url: https://poc.pagopa.poste.it
-    PN_ACTIVATION_BASE_PATH: /api/v1/pn
-    PN_API_URL: https://api-io.pn.pagopa.it
-    PN_API_URL_UAT: https://api-io.coll.pn.pagopa.it
-    PN_SERVICE_ID: 01G40DWQGKY5GRWSNM4303VNRP
-    PUSH_NOTIFICATIONS_QUEUE_NAME: push-notifications
+    JWT_ZENDESK_SUPPORT_TOKEN_ISSUER: 'app-backend.io.italia.it'
+    LOLLIPOP_ALLOWED_USER_AGENTS: 'IO-App/2.23.0'
+    MIT_VOUCHER_API_BASE_PATH: '/api/v1/mitvoucher/auth'
+    MYPORTAL_BASE_PATH: '/myportal/api/v1'
+    NODE_ENV: 'production'
+    NOTIFICATIONS_QUEUE_NAME: 'push-notifications'
+    PAGOPA_API_URL_PROD: 'https://api.platform.pagopa.it/checkout/auth/payments/v1'
+    PAGOPA_API_URL_TEST: 'https://api.uat.platform.pagopa.it/checkout/auth/payments/v1'
+    PAGOPA_BASE_PATH: '/pagopa/api/v1'
+    PECSERVER_TOKEN_ISSUER: 'app-backend.io.italia.it'
+    PECSERVER_URL: 'https://poc.pagopa.poste.it'
+    PECSERVERS_aruba_basePath: '/apigateway/api/v2/pagopa/mailbox'
+    PECSERVERS_aruba_serviceId: '01FRMRD5P7H378MDXBBW3DTYCF'
+    PECSERVERS_aruba_url: 'https://pagopa-test.pec.aruba.it'
+    PECSERVERS_poste_serviceId: '01FQ4945RG5WJGPHKY8ZYRJMQ7'
+    PECSERVERS_poste_url: 'https://poc.pagopa.poste.it'
+    PN_ACTIVATION_BASE_PATH: '/api/v1/pn'
+    PN_API_URL: 'https://api-io.pn.pagopa.it'
+    PN_API_URL_UAT: 'https://api-io.coll.pn.pagopa.it'
+    PN_SERVICE_ID: '01G40DWQGKY5GRWSNM4303VNRP'
+    PUSH_NOTIFICATIONS_QUEUE_NAME: 'push-notifications'
     REDIS_PORT: 6380
-    REDIS_URL: io-p-redis-common.redis.cache.windows.net
+    REDIS_URL: 'io-p-redis-common.redis.cache.windows.net'
     SAML_ACCEPTED_CLOCK_SKEW_MS: 5000
     SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX: 0
-    SAML_CALLBACK_URL: https://app-backend.io.italia.it/assertionConsumerService
-    SAML_ISSUER: https://app-backend.io.italia.it
-    SAML_LOGOUT_CALLBACK_URL: https://app-backend.io.italia.it/slo
-    SPID_LOG_QUEUE_NAME: spidmsgitems
-    TEST_LOGIN_FISCAL_CODES: EEEEEE00E00E000A,EEEEEE00E00E000B,EEEEEE00E00E000C,EEEEEE00E00E000D,AAAAAA00A00A000C,AAAAAA00A00A000D,AAAAAA00A00A000E,AAAAAA00A00A000B,PRVPRV25A01H501B,XXXXXP25A01H501L,YYYYYP25A01H501K,KKKKKP25A01H501U,QQQQQP25A01H501S,WWWWWP25A01H501A,ZZZZZP25A01H501J,JJJJJP25A01H501X,GGGGGP25A01H501Z
+    SAML_CALLBACK_URL: 'https://app-backend.io.italia.it/assertionConsumerService'
+    SAML_ISSUER: 'https://app-backend.io.italia.it'
+    SAML_LOGOUT_CALLBACK_URL: 'https://app-backend.io.italia.it/slo'
+    SPID_LOG_QUEUE_NAME: 'spidmsgitems'
+    TEST_LOGIN_FISCAL_CODES: 'EEEEEE00E00E000A,EEEEEE00E00E000B,EEEEEE00E00E000C,EEEEEE00E00E000D,AAAAAA00A00A000C,AAAAAA00A00A000D,AAAAAA00A00A000E,AAAAAA00A00A000B,PRVPRV25A01H501B,XXXXXP25A01H501L,YYYYYP25A01H501K,KKKKKP25A01H501U,QQQQQP25A01H501S,WWWWWP25A01H501A,ZZZZZP25A01H501J,JJJJJP25A01H501X,GGGGGP25A01H501Z'
     THIRD_PARTY_CONFIG_LIST: '[]'
     TOKEN_DURATION_IN_SECONDS: 2592000
-    USERS_LOGIN_QUEUE_NAME: userslogin
+    USERS_LOGIN_QUEUE_NAME: 'userslogin'
     WEBSITE_ADD_SITENAME_BINDINGS_IN_APPHOST_CONFIG: 1
-    WEBSITE_DNS_SERVER: 168.63.129.16
+    WEBSITE_DNS_SERVER: '168.63.129.16'
     WEBSITE_HEALTHCHECK_MAXPINGFAILURES: 3
     WEBSITE_RUN_FROM_PACKAGE: 1
-    ZENDESK_BASE_PATH: /api/backend/zendesk/v1
+    ZENDESK_BASE_PATH: '/api/backend/zendesk/v1'
   envSecret:
     API_KEY: 'funcapp-KEY-APPBACKEND'
     BONUS_API_KEY: 'funcbonus-KEY-APPBACKEND'
