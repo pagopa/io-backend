@@ -60,7 +60,7 @@ microservice-chart:
     CGN_OPERATOR_SEARCH_API_BASE_PATH: '/api/v1/cgn/operator-search'
     CGN_OPERATOR_SEARCH_API_URL: 'https://cgnonboardingportal-p-op.azurewebsites.net'
     CIE_METADATA_URL: 'https://api.is.eng.pagopa.it/idp-keys/cie/latest'
-    DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS: 90
+    DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS: '90'
     EUCOVIDCERT_API_BASE_PATH: '/api/v1/eucovidcert'
     EUCOVIDCERT_API_URL: 'http://io-p-fn3-eucovidcert.azurewebsites.net/api/v1'
     FETCH_KEEPALIVE_ENABLED: 'true'
