@@ -15,6 +15,8 @@ import { DepartmentName } from "../../generated/backend/DepartmentName";
 import { OrganizationName } from "../../generated/backend/OrganizationName";
 import { ServiceName } from "../../generated/backend/ServiceName";
 import { ServicePublic } from "../../generated/backend/ServicePublic";
+import * as redisUtils from "../utils/redis";
+import { RedisClient } from "redis";
 
 // Bypass user autentication
 jest.spyOn(passport, "authenticate").mockImplementation((_, __) => {
@@ -45,7 +47,9 @@ jest.mock("../services/notificationService", () => {
     default: jest.fn().mockImplementation(() => ({}))
   };
 });
-jest.mock("../utils/redis");
+jest
+  .spyOn(redisUtils, "createClusterRedisClient")
+  .mockImplementation(() => () => ({} as RedisClient));
 
 import appModule from "../app";
 
