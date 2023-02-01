@@ -1,0 +1,68 @@
+openapi: 3.0.1
+info:
+  title: Test API
+  description: Test API.
+  version: 1.0.0
+
+# Dummy unused endpoint
+paths:
+  /dummy:
+    get:
+      responses:
+        "200":
+          description: "ok"
+
+components:
+  
+  parameters:
+    LollipopMethodHeader:
+      name: x-pagopa-lollipop-method
+      in: header
+      description: 
+      required: true
+      schema:
+        $ref: "#/components/schemas/LolliopMethod"
+    LollipopAuthorityHeader:
+      name: x-pagopa-lollipop-authority
+      in: header
+      description: 
+      required: true
+      schema:
+        $ref: "#/components/schemas/LolliopAuthority"
+    LollipopOriginalURLHeader:
+      name: x-pagopa-lollipop-original-url
+      in: header
+      description: 
+      required: true
+      schema:
+        $ref: "#/components/schemas/LolliopOriginalURL"
+    LollipopSignatureInputHeader:
+      name: x-pagopa-lollipop-original-url
+      in: header
+      description: 
+      required: true
+      schema:
+        $ref: "#/components/schemas/LolliopSignatureInput"
+  
+  schemas:
+    LollipopMethod:
+      type: string
+      description: 
+      x-extensible-enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopAuthority:
+      type: string
+      description: 
+      pattern: "^[0-9a-zA-Z.]*$"
+    LollipopOriginalURL:
+      type: string
+      description: 
+      pattern: "^[0-9a-zA-Z\/]*$"
+    LolliopSignatureInput:
+      type: string
+      description: 
+      pattern: "^[0-9a-zA-Z\/]*$"
