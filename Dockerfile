@@ -1,4 +1,4 @@
-FROM circleci/node:10.14.2 as builder
+FROM node:14.16.0-alpine as builder
 
 RUN sudo apt-get -y install --no-install-recommends libunwind8=1.1-4.1
 
@@ -29,7 +29,7 @@ RUN sudo chmod -R 777 /usr/src/app \
   && yarn generate:proxy-models \
   && yarn build
 
-FROM node:10.14.2-alpine
+FROM node:14.16.0-alpine
 LABEL maintainer="https://pagopa.gov.it"
 
 # Install major CA certificates to cover
@@ -41,9 +41,10 @@ WORKDIR /usr/src/app
 COPY /package.json /usr/src/app/package.json
 COPY /public /usr/src/app/public
 COPY --from=builder /usr/src/app/src /usr/src/app/src
+COPY --from=builder /usr/src/app/dist /usr/src/app/dist
 COPY --from=builder /usr/src/app/generated /usr/src/app/generated
 COPY --from=builder /usr/src/app/node_modules /usr/src/app/node_modules
 
 EXPOSE 80
 
-CMD ["node", "src/server.js"]
+CMD ["node", "dist/server.js"]
