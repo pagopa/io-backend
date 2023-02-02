@@ -949,14 +949,13 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(anInvalidCieTestUser);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
   it.each`
     title                                   | fiscalNumber                     | issuer
     ${"if a CIE TEST user is in whitelist"} | ${validUserPayload.fiscalNumber} | ${Object.keys(CIE_IDP_IDENTIFIERS)[0]}
-    ${"if a user logs to PROD CIE IDP"}     | ${anotherFiscalCode}             | ${"https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"}
+    ${"if a user logs to PROD CIE IDP"}     | ${anotherFiscalCode}             | ${Object.keys(CIE_IDP_IDENTIFIERS)[1]}
   `(
     "should redirect to success URL $title",
     async ({ fiscalNumber, issuer }) => {
@@ -987,7 +986,6 @@ describe("AuthenticationController#acs", () => {
       const response = await controller.acs(whitelistedCieTestUserPayload);
       response.apply(res);
 
-      expect(controller).toBeTruthy();
       expect(res.redirect).toHaveBeenCalledWith(
         301,
         "/profile.html?token=" + mockSessionToken
