@@ -13,56 +13,96 @@ paths:
           description: "ok"
 
 components:
-  
   parameters:
+
+    # --------------------------------------------
+    # Custom LolliPoP headers
+    # --------------------------------------------
     LollipopMethodHeader:
-      name: x-pagopa-lollipop-method
+      name: x-pagopa-lollipop-original-method
       in: header
       description: 
       required: true
       schema:
-        $ref: "#/components/schemas/LolliopMethod"
-    LollipopAuthorityHeader:
-      name: x-pagopa-lollipop-authority
-      in: header
-      description: 
-      required: true
-      schema:
-        $ref: "#/components/schemas/LolliopAuthority"
+        $ref: "#/components/schemas/LollipopMethod"
     LollipopOriginalURLHeader:
       name: x-pagopa-lollipop-original-url
       in: header
       description: 
       required: true
       schema:
-        $ref: "#/components/schemas/LolliopOriginalURL"
-    LollipopSignatureInputHeader:
-      name: x-pagopa-lollipop-original-url
+        $ref: "#/components/schemas/LollipopOriginalURL"
+
+    # --------------------------------------------
+    # Standard HTTP Message Signatures headers
+    # --------------------------------------------
+    LollipopContentTypeHeader:
+      name: content-type
       in: header
-      description: 
+      description: The content type, if any.
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentType"
+    LollipopContentLengthHeader:
+      name: content-length
+      in: header
+      description: The body length, if any.
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentLength"
+    LollipopContentDigestHeader:
+      name: content-digest
+      in: header
+      description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentDigest"
+
+
+    LollipopSignatureInputHeader:
+      name: signature-input
+      in: header
+      description: The signature input, needed to verify the `signature` header
       required: true
       schema:
-        $ref: "#/components/schemas/LolliopSignatureInput"
+        $ref: "#/components/schemas/LollipopSignatureInput"
+    LollipopSignatureHeader:
+      name: signature
+      in: header
+      description: The signature of the HTTP request, signed by the client with its private key.
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopSignature"
   
   schemas:
     LollipopMethod:
       type: string
-      description: 
       x-extensible-enum:
         - GET
         - POST
         - PUT
         - PATCH
         - DELETE
-    LollipopAuthority:
-      type: string
-      description: 
-      pattern: "^[0-9a-zA-Z.]*$"
     LollipopOriginalURL:
       type: string
-      description: 
-      pattern: "^[0-9a-zA-Z\/]*$"
-    LolliopSignatureInput:
+      pattern: "^(\\b(https?)://)?((?!\\.\\.)[a-9a-zA-Z\/&\\?])*$"
+
+    LollipopContentType:
+      type: string
+      x-extensible-enum:
+        - application/json
+        - application/octet-stream
+    LollipopContentLength:
+      type: number
+    LollipopContentDigest:
+      type: string
+      pattern: "^(sha-256|sha-512)=:[0-9a-zA-Z( \\n\\)+\/=]*:$"
+
+    LollipopSignatureInput:
       type: string
       description: 
-      pattern: "^[0-9a-zA-Z\/]*$"
+      pattern: "^(((sig[0-9]*)=.*?)(, ){0,1}){1,}$"
+    LollipopSignature:
+      type: string
+      description: 
+      pattern: "^((sig[0-9]*)=:[0-9a-zA-Z( \\n\\)+\/=]*:(, ){0,1}){1,}$"
