@@ -42,6 +42,18 @@ const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
+export const keyPrefixes = [
+  sessionKeyPrefix,
+  walletKeyPrefix,
+  myPortalTokenPrefix,
+  fimsTokenPrefix,
+  bpdTokenPrefix,
+  zendeskTokenPrefix,
+  userSessionsSetKeyPrefix,
+  sessionInfoKeyPrefix,
+  noticeEmailPrefix,
+  blockedUserSetKey
+];
 export const sessionNotFoundError = new Error("Session not found");
 
 export default class RedisSessionStorage extends RedisStorageUtils
