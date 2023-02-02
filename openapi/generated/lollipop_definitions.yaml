@@ -100,9 +100,7 @@ components:
 
     LollipopSignatureInput:
       type: string
-      description: 
       pattern: "^(((sig[0-9]{1,})=.*?)(, ){0,1}){1,}$"
     LollipopSignature:
       type: string
-      description: 
       pattern: "^((sig[0-9]{1,})=:[A-Za-z0-9+/=]*:(, ){0,1}){1,}$"

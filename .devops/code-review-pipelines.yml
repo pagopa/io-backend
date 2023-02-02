@@ -54,7 +54,7 @@ stages:
               valid=1
               for apispec in $(ls openapi/generated/*.yaml); do
                 echo "validating $apispec"
-                npx oval validate -p $apispec
+                npx swagger-cli validate  $apispec
                 result=$?
                 if [ ! $result = 0 ]; then
                   valid=0
