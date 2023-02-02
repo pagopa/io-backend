@@ -4,17 +4,12 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import * as RA from "fp-ts/ReadonlyArray";
 import * as O from "fp-ts/Option";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
-import { NotificationDocument } from "generated/piattaforma-notifiche/NotificationDocument";
 import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { match } from "ts-pattern";
-import { FullReceivedNotification } from "../../generated/piattaforma-notifiche/FullReceivedNotification";
-import { ThirdPartyAttachment } from "../../generated/third-party-service/ThirdPartyAttachment";
-import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPartyMessage";
 import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
@@ -42,6 +37,21 @@ export const PnDocumentUrl = pathParamsFromUrl(
     `/delivery/notifications/sent/${iun}/attachments/documents/${docIdx}`
 );
 
+/**
+ * Enrich a fetch api with  Accept: "application/io+json"
+ */
+const withAccept_iojson = (fetchApi: typeof fetch): typeof fetch => async (
+  input,
+  init
+) =>
+  fetchApi(input, {
+    ...init,
+    headers: {
+      ...(init?.headers ?? {}),
+      Accept: "application/io+json"
+    }
+  });
+
 const WithFiscalCode = t.interface({ fiscal_code: FiscalCode });
 type WithFiscalCode = t.TypeOf<typeof WithFiscalCode>;
 
@@ -54,7 +64,7 @@ const retrieveNotificationDetails = (
 ) =>
   pipe(
     () =>
-      PnAPIClient(pnUrl, origFetch).getReceivedNotification({
+      PnAPIClient(pnUrl, withAccept_iojson(origFetch)).getReceivedNotification({
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode
@@ -66,24 +76,7 @@ const retrieveNotificationDetails = (
         r => Error(`Failed to fetch PN ReceivedNotification: ${r.status}`)
       )
     ),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    TE.map(response => response.value as FullReceivedNotification)
-  );
-
-const retrieveAttachmentsMetadata = (
-  [_, iun]: ReadonlyArray<string>,
-  { docIdx, contentType, title }: NotificationDocument
-): TE.TaskEither<Error, ThirdPartyAttachment> =>
-  pipe(
-    {
-      content_type: contentType,
-      id: `${iun}${docIdx}`,
-      name: title,
-      url: PnDocumentUrl.encode([iun, docIdx ?? ""])
-    },
-    ThirdPartyAttachment.decode,
-    E.mapLeft(errorsToError),
-    TE.fromEither
+    TE.map(response => response.value)
   );
 
 const checkHeaders = (
@@ -136,21 +129,6 @@ export const redirectMessages = (
               pnApiKey,
               headers.fiscal_code,
               params
-            ),
-            TE.chain(receivedNotification =>
-              pipe(
-                receivedNotification.documents,
-                RA.map(document =>
-                  retrieveAttachmentsMetadata(params, document)
-                ),
-                TE.sequenceArray,
-                TE.map(attachments =>
-                  ThirdPartyMessage.encode({
-                    attachments,
-                    details: receivedNotification
-                  })
-                )
-              )
             )
           )
         )
