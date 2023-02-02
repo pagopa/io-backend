@@ -28,7 +28,7 @@
     "test:coverage": "jest -i --coverage",
     "start": "node dist/src/server.js",
     "openapi:bundle": "./openapi/bundle.sh $npm_package_version",
-    "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:*",
+    "generate:proxy-models": "npm-run-all generate:proxy:* generate:api:* generate:messages:* generate:lollipop-definitions",
     "generate:proxy:api-models": "rimraf generated/backend && gen-api-models --api-spec api_backend.yaml --out-dir generated/backend",
     "generate:proxy:api-parameters": "gen-api-models --api-spec api_parameters.yaml --out-dir generated/parameters",
     "generate:proxy:auth-models": "rimraf generated/auth && gen-api-models --api-spec api_auth.yaml --out-dir generated/auth",
