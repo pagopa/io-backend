@@ -937,7 +937,7 @@ describe("AuthenticationController#acs", () => {
     }
   );
 
-  it("should return unauthorized using a CIE test environment but the user isn't in whitelist", async () => {
+  it("should return unauthorized using a CIE test environment with no whitelisted user fiscalcode", async () => {
     const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
     const res = mockRes();
     const anInvalidCieTestUser = {
