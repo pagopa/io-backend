@@ -85,7 +85,7 @@ components:
         - DELETE
     LollipopOriginalURL:
       type: string
-      pattern: "^(\\b(https?)://)?((?!\\.\\.)[a-9a-zA-Z\/&\\?])*$"
+      pattern: "^(\\b(https?)://)?((?!\\.\\.).)*$"
 
     LollipopContentType:
       type: string
