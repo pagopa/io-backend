@@ -123,11 +123,7 @@ microservice-chart:
     THIRD_PARTY_CONFIG_LIST: '[]'
     TOKEN_DURATION_IN_SECONDS: '2592000'
     USERS_LOGIN_QUEUE_NAME: 'userslogin'
-    WEBSITE_SITE_NAME: 'io-p-weuprod01-reminder-ms' # required to show cloud role name in application insights
-    WEBSITE_ADD_SITENAME_BINDINGS_IN_APPHOST_CONFIG: '1'
-    WEBSITE_DNS_SERVER: '168.63.129.16'
-    WEBSITE_HEALTHCHECK_MAXPINGFAILURES: '3'
-    WEBSITE_RUN_FROM_PACKAGE: '1'
+    WEBSITE_SITE_NAME: 'io-p-weuprod01-io-backend-ms'
     ZENDESK_BASE_PATH: '/api/backend/zendesk/v1'
   envSecret:
     APPINSIGHTS_INSTRUMENTATIONKEY: 'appinsights-instrumentation-key'
