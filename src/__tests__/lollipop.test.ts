@@ -60,8 +60,7 @@ describe("LollipopContentType", () => {
 describe("LollipopContentDigest", () => {
   it("should decode a valid digest", async () => {
     const value =
-      "sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+T\
-  aPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:";
+      "sha-512=:WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:";
 
     const res = LollipopContentDigest.decode(value);
 
@@ -70,8 +69,7 @@ describe("LollipopContentDigest", () => {
 
   it("should fail with an invalid digest", async () => {
     const value =
-      ":WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+T\
-  aPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:";
+      ":WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:";
 
     const res = LollipopContentDigest.decode(value);
     expect(res).toMatchObject(E.left(expect.any(Array)));

@@ -21,14 +21,14 @@ components:
     LollipopMethodHeader:
       name: x-pagopa-lollipop-original-method
       in: header
-      description: 
+      description: The method of the endpoint called by IO app
       required: true
       schema:
         $ref: "#/components/schemas/LollipopMethod"
     LollipopOriginalURLHeader:
       name: x-pagopa-lollipop-original-url
       in: header
-      description: 
+      description: The url of the endpoint called by IO app
       required: true
       schema:
         $ref: "#/components/schemas/LollipopOriginalURL"
@@ -96,13 +96,13 @@ components:
       type: number
     LollipopContentDigest:
       type: string
-      pattern: "^(sha-256|sha-512)=:[0-9a-zA-Z( \\n\\)+\/=]*:$"
+      pattern: "^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-512=:[A-Za-z0-9+/=]{88}:)$"
 
     LollipopSignatureInput:
       type: string
       description: 
-      pattern: "^(((sig[0-9]*)=.*?)(, ){0,1}){1,}$"
+      pattern: "^(((sig[0-9]{1,})=.*?)(, ){0,1}){1,}$"
     LollipopSignature:
       type: string
       description: 
-      pattern: "^((sig[0-9]*)=:[0-9a-zA-Z( \\n\\)+\/=]*:(, ){0,1}){1,}$"
+      pattern: "^((sig[0-9]{1,})=:[A-Za-z0-9+/=]*:(, ){0,1}){1,}$"
