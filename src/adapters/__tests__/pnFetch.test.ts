@@ -13,11 +13,10 @@ import {
   aDocIdx,
   aPnAttachmentUrl,
   aPnKey,
-  aPnNotification,
   aPnNotificationDocument,
   aPnNotificationId,
-  aPnNotificationObject,
   aPNServiceId,
+  aPNThirdPartyNotification,
   aPnUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody
@@ -32,7 +31,7 @@ const dummyGetSentNotificationDocument = jest.fn();
 dummyGetReceivedNotification.mockImplementation(() =>
   TE.of({
     status: 200,
-    value: aPnNotification,
+    value: aPNThirdPartyNotification,
     headers: {}
   })()
 );
@@ -84,22 +83,14 @@ describe("getThirdPartyMessageDetails", () => {
       fiscal_code: aFiscalCode,
       id: aPnNotificationId
     });
+
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
+      console.log(JSON.stringify(result.right));
       expect(result.right).toEqual(
         expect.objectContaining({
           status: 200,
-          value: {
-            details: aPnNotificationObject,
-            attachments: [
-              {
-                content_type: aPnNotification.documents[0].contentType,
-                id: `${aPnNotificationId}${aPnNotification.documents[0].docIdx}`,
-                name: aPnNotification.documents[0].title,
-                url: `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}`
-              }
-            ]
-          }
+          value: aPNThirdPartyNotification
         })
       );
     }
@@ -209,6 +200,7 @@ describe("getThirdPartyAttachments", () => {
       baseUrl: "https://localhost",
       fetchApi: aFetch
     });
+
     const result = await client.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,

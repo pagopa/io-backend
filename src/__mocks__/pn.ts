@@ -1,15 +1,11 @@
 import * as util from "util";
 import * as E from "fp-ts/Either";
-import { FullReceivedNotification } from "../../generated/piattaforma-notifiche/FullReceivedNotification";
-import { RecipientTypeEnum } from "../../generated/piattaforma-notifiche/NotificationRecipient";
-import {
-  NotificationFeePolicyEnum,
-  PhysicalCommunicationTypeEnum
-} from "../../generated/piattaforma-notifiche/NewNotificationRequest";
 import { NotificationAttachmentDownloadMetadataResponse } from "../../generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { pipe } from "fp-ts/lib/function";
 import { ServiceId } from "../../generated/io-messages-api/ServiceId";
 import { VALID_PDF } from "../utils/__mocks__/pdf_files";
+import { ThirdPartyMessage } from "../../generated/piattaforma-notifiche/ThirdPartyMessage";
+import { aFiscalCode } from "./user_mock";
 
 const STATUS_ACCEPTED = "ACCEPTED";
 
@@ -23,8 +19,8 @@ export const aPnAttachmentUrl = `https://a.s3.pn.attachment/attachments/an-attac
 export const aPnNotificationId = "a-notification-id";
 export const aDocIdx = "1";
 export const aPnNotificationRecipient = {
-  recipientType: RecipientTypeEnum.PF,
-  taxId: "a-tax-id",
+  recipientType: "PF",
+  taxId: aFiscalCode,
   denomination: "a-denomination"
 };
 export const aPnDocument = {
@@ -33,31 +29,42 @@ export const aPnDocument = {
   ref: { key: "a-doc-key", versionToken: "1" },
   docIdx: aDocIdx
 };
-export const aPnNotificationObject = {
-  paProtocolNumber: "a-protocol-number",
+export const aPnNotificationDetails = {
   subject: "a-subject",
-  recipients: [aPnNotificationRecipient],
-  documents: [aPnDocument],
-  notificationFeePolicy: NotificationFeePolicyEnum.FLAT_RATE,
-  physicalCommunicationType:
-    PhysicalCommunicationTypeEnum.SIMPLE_REGISTERED_LETTER,
   iun: aPnNotificationId,
-  sentAt: aDate.toISOString(),
-  notificationStatus: STATUS_ACCEPTED,
+  recipients: [aPnNotificationRecipient],
   notificationStatusHistory: [
     {
       activeFrom: aDate.toISOString(),
       status: STATUS_ACCEPTED,
       relatedTimelineElements: [aTimelineId]
     }
-  ],
-  timeline: [{ elementId: aTimelineId }]
+  ]
 };
-export const aPnNotification: FullReceivedNotification = pipe(
-  aPnNotificationObject,
-  FullReceivedNotification.decode,
+
+export const aPNThirdPartyNotification = {
+  attachments: [
+    {
+      id: "JGQG-YPJT-AUQZ-202301-R-1_DOC0",
+      content_type: "application/pdf",
+      name: "Atto",
+      url: `/delivery/notifications/sent/${aPnNotificationId}/attachments/documents/0`
+    },
+    {
+      id: "JGQG-YPJT-AUQZ-202301-R-1_DOC1",
+      content_type: "application/pdf",
+      name: "Lettera di accompagnamento",
+      url: `/delivery/notifications/sent/${aPnNotificationId}/attachments/documents/1`
+    }
+  ],
+  details: aPnNotificationDetails
+};
+
+export const aPnNotification: ThirdPartyMessage = pipe(
+  aPNThirdPartyNotification,
+  ThirdPartyMessage.decode,
   E.getOrElseW(() => {
-    throw new Error("a pn notfication is not valid");
+    throw new Error("a TP pn notfication is not valid");
   })
 );
 export const aPnNotificationDocument: NotificationAttachmentDownloadMetadataResponse = {
@@ -68,6 +75,7 @@ export const aPnNotificationDocument: NotificationAttachmentDownloadMetadataResp
   url: aPnAttachmentUrl
 };
 export const documentBody = new util.TextEncoder().encode("a-document-body");
-export const aThirdPartyAttachmentForPnRelativeUrl = `/delivery/notifications/sent/${aPnNotification.iun}/attachments/documents/${aPnNotification.documents[0].docIdx}`;
+export const aThirdPartyAttachmentForPnRelativeUrl =
+  aPNThirdPartyNotification.attachments[1].url;
 
 export const base64File = VALID_PDF;
