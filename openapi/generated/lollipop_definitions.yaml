@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Test API
-  description: Test API.
+  title: LolliPoP Definitions
+  description: The definitions of the headers needed by the LolliPoP protocol.
   version: 1.0.0
 
 # Dummy unused endpoint

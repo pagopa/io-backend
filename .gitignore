@@ -49,3 +49,6 @@ local.*
 
 # Exclude ESLint cache file
 .eslintcache
+
+# Exclude swagger codegen (needed to generate PN specs)
+swagger-codegen-cli-*.jar
