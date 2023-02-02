@@ -123,7 +123,7 @@ microservice-chart:
     THIRD_PARTY_CONFIG_LIST: '[]'
     TOKEN_DURATION_IN_SECONDS: '2592000'
     USERS_LOGIN_QUEUE_NAME: 'userslogin'
-    WEBSITE_SITE_NAME: 'io-p-weuprod01-io-backend-ms'
+    WEBSITE_SITE_NAME: 'io-p-weuprod01-appbackend'
     ZENDESK_BASE_PATH: '/api/backend/zendesk/v1'
   envSecret:
     APPINSIGHTS_INSTRUMENTATIONKEY: 'appinsights-instrumentation-key'
