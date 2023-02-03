@@ -25,7 +25,7 @@ describe("LollipopMethodHeader", () => {
 
 describe("LollipopOriginalURL", () => {
   it("should decode a valid url", async () => {
-    const value = "http://example.com/foo?param=value&pet=dog";
+    const value = "https://app-backend.io.italia.it/foo?param=value&pet=dog";
 
     const res = LollipopOriginalURL.decode(value);
 
@@ -33,7 +33,8 @@ describe("LollipopOriginalURL", () => {
   });
 
   it("should fail with an invalid URL", async () => {
-    const value = "http://example.com/foo/../foo2?param=value&pet=dog";
+    const value =
+      "https://app-backend.io.italia.it/foo/../foo2?param=value&pet=dog";
 
     const res = LollipopOriginalURL.decode(value);
     expect(res).toMatchObject(E.left(expect.any(Array)));
