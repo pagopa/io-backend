@@ -10,9 +10,9 @@ import { getThirdPartyServiceClient } from "../third-party-service-client";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
-  aPnNotification,
-  aPnNotificationObject,
+  aPnThirdPartyMessage,
   aPNServiceId,
+  aPNThirdPartyNotification,
   base64File
 } from "../../__mocks__/pn";
 
@@ -72,7 +72,7 @@ mockNodeFetch.mockImplementation(
       ok: true,
       status: 200,
       json: async () => {
-        return aPnNotification;
+        return aPnThirdPartyMessage;
       }
     } as Response)
 );
@@ -152,16 +152,7 @@ describe("third-party-service-client", () => {
     expect(res).toMatchObject(
       E.right({
         status: 200,
-        value: {
-          details: aPnNotificationObject,
-          attachments: [
-            {
-              content_type: aPnNotification.documents[0].contentType,
-              id: `${aThirdPartyId}${aPnNotification.documents[0].docIdx}`,
-              url: `/delivery/notifications/sent/${aThirdPartyId}/attachments/documents/${aPnNotification.documents[0].docIdx}`
-            }
-          ]
-        }
+        value: aPNThirdPartyNotification
       })
     );
 
@@ -169,6 +160,7 @@ describe("third-party-service-client", () => {
       `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}`,
       {
         headers: {
+          Accept: "application/io+json",
           "x-pagopa-cx-taxid": aProdFiscalCode,
           "x-api-key": "aKey",
           [expectedConfig.detailsAuthentication.header_key_name]:
