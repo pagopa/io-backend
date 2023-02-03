@@ -4,7 +4,7 @@ import { NotificationAttachmentDownloadMetadataResponse } from "../../generated/
 import { pipe } from "fp-ts/lib/function";
 import { ServiceId } from "../../generated/io-messages-api/ServiceId";
 import { VALID_PDF } from "../utils/__mocks__/pdf_files";
-import { ThirdPartyMessage } from "../../generated/piattaforma-notifiche/ThirdPartyMessage";
+import { ThirdPartyMessage as PNThirdParthyMessage } from "../../generated/piattaforma-notifiche/ThirdPartyMessage";
 import { aFiscalCode } from "./user_mock";
 
 const STATUS_ACCEPTED = "ACCEPTED";
@@ -60,11 +60,11 @@ export const aPNThirdPartyNotification = {
   details: aPnNotificationDetails
 };
 
-export const aPnNotification: ThirdPartyMessage = pipe(
+export const aPnThirdPartyMessage: PNThirdParthyMessage = pipe(
   aPNThirdPartyNotification,
-  ThirdPartyMessage.decode,
+  PNThirdParthyMessage.decode,
   E.getOrElseW(() => {
-    throw new Error("a TP pn notfication is not valid");
+    throw new Error("a ThirdParty PN message is not valid");
   })
 );
 export const aPnNotificationDocument: NotificationAttachmentDownloadMetadataResponse = {

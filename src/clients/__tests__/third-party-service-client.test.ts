@@ -10,7 +10,7 @@ import { getThirdPartyServiceClient } from "../third-party-service-client";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import {
-  aPnNotification,
+  aPnThirdPartyMessage,
   aPNServiceId,
   aPNThirdPartyNotification,
   base64File
@@ -72,7 +72,7 @@ mockNodeFetch.mockImplementation(
       ok: true,
       status: 200,
       json: async () => {
-        return aPnNotification;
+        return aPnThirdPartyMessage;
       }
     } as Response)
 );

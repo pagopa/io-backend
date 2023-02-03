@@ -1,7 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/Either";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { ThirdPartyMessage } from "../../generated/piattaforma-notifiche/ThirdPartyMessage";
+import { ThirdPartyMessage as PNThirdParthyMessage } from "../../generated/piattaforma-notifiche/ThirdPartyMessage";
 
 export const notificationDetailResponseExampleAsObject = {
   abstract: "Infrazione del codice della strada Art.666",
@@ -206,7 +206,7 @@ export const notificationResponseExampleAsObject = {
 
 export const notificationDetailResponseExample = pipe(
   notificationResponseExampleAsObject,
-  ThirdPartyMessage.decode,
+  PNThirdParthyMessage.decode,
   E.getOrElseW(e => {
     throw new Error(
       "a pn notfication is not valid: " +
