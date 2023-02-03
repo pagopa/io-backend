@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 9.12.0
+  version: 9.13.0
   title: Carta Giovani Nazionale API
 host: localhost
 basePath: /api/v1
