@@ -85,7 +85,7 @@ components:
         - DELETE
     LollipopOriginalURL:
       type: string
-      pattern: "^https?:\/\/app-backend\\.io\\.italia\\.it\\/\\w+\\/{0,1}\\?{0,1}(?:\\w+={0,1}\\w&{0,1})+$"
+      pattern: "^https:\/\/"
 
     LollipopContentType:
       type: string
