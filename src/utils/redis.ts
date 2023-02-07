@@ -1,6 +1,10 @@
 import * as redis from "redis";
 import RedisClustr = require("redis-clustr");
 import * as appInsights from "applicationinsights";
+import { pipe } from "fp-ts/lib/function";
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as O from "fp-ts/lib/Option";
+import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
 
 export function createSimpleRedisClient(redisUrl?: string): redis.RedisClient {
@@ -8,6 +12,17 @@ export function createSimpleRedisClient(redisUrl?: string): redis.RedisClient {
   log.info("Creating SIMPLE redis client", { url: redisUrlOrDefault });
   return redis.createClient(redisUrlOrDefault);
 }
+
+export const obfuscateTokensInfo = (message: string) =>
+  pipe(
+    keyPrefixes,
+    RA.findFirst(key => message.includes(key)),
+    O.map(key =>
+      // eslint-disable-next-line no-useless-escape
+      message.replace(new RegExp(`\\"${key}\\w+\\"`), `"${key}redacted"`)
+    ),
+    O.getOrElse(() => message)
+  );
 
 export const createClusterRedisClient = (
   appInsightsClient?: appInsights.TelemetryClient
@@ -41,7 +56,8 @@ export const createClusterRedisClient = (
       name: "io-backend.redis.error",
       properties: {
         error: String(err),
-        message: err instanceof Object ? JSON.stringify(err) : ""
+        message:
+          err instanceof Object ? obfuscateTokensInfo(JSON.stringify(err)) : ""
       },
       tagOverrides: { samplingEnabled: "false" }
     });
