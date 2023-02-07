@@ -13,7 +13,7 @@ export function createSimpleRedisClient(redisUrl?: string): redis.RedisClient {
   return redis.createClient(redisUrlOrDefault);
 }
 
-export const offuscateTokensInfo = (message: string) =>
+export const obfuscateTokensInfo = (message: string) =>
   pipe(
     keyPrefixes,
     RA.findFirst(key => message.includes(key)),
@@ -57,7 +57,7 @@ export const createClusterRedisClient = (
       properties: {
         error: String(err),
         message:
-          err instanceof Object ? offuscateTokensInfo(JSON.stringify(err)) : ""
+          err instanceof Object ? obfuscateTokensInfo(JSON.stringify(err)) : ""
       },
       tagOverrides: { samplingEnabled: "false" }
     });
