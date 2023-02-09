@@ -992,6 +992,27 @@ describe("AuthenticationController#acs", () => {
       );
     }
   );
+
+  // this test ensures CIE prod, coll and test URLs are present in the identifiers object.
+  // since in the authenticationcontroller we filter the keys based on the prod URL, we ensure here
+  // that at least coll and test URLs are in the array, to let the logic work in the controller.
+  // instead, if the order of the keys changes, the unit tests above should fail when the library is updated
+  it("should verify that the CIE_IDP_IDENTIFIERS urls are present", () => {
+    const CIE_IDP_IDENTIFIERS_KEYS = Object.keys(CIE_IDP_IDENTIFIERS);
+
+    const prodUrlFilter = CIE_IDP_IDENTIFIERS_KEYS.filter(
+      k =>
+        k ===
+        "https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"
+    );
+
+    // expect prod url to be present
+    expect(prodUrlFilter.length).toBe(1);
+    // expect at least test and coll urls to be present
+    expect(
+      CIE_IDP_IDENTIFIERS_KEYS.length - prodUrlFilter.length
+    ).toBeGreaterThanOrEqual(2);
+  });
 });
 
 describe("AuthenticationController|>LV|>acs", () => {
