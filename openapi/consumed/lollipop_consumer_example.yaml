@@ -1,0 +1,216 @@
+openapi: 3.0.1
+info:
+  title: LolliPoP Consumer Example
+  description: >-
+    ## Abstract
+      Definition of the headers needed by the Lollipop Consumer to conclude a LolliPoP operation
+
+    ## Diagram
+      Below is a flowchart showing the headers, the ones signed by the app and those added by io-backend
+
+                      ┌───┐                                       ┌─────┐                                    ┌──┐  
+                      │APP│                                       │IO-BE│                                    │LC│  
+                      └─┬─┘                                       └──┬──┘                                    └┬─┘  
+        ╔═══════════════╧═════════════════╗                          │                                        │    
+        ║ask user for fingerprint or pwd ░║                          │                                        │    
+        ╚═══════════════╤═════════════════╝                          │                                        │    
+                       ┌┴┐[01] <METHOD> /v1/custom/io-be/request/path┴┐                                       │    
+                       │ │ ────────────────────────────────────────>│ │                                       │    
+                       │ │                                          │ │                                       │    
+                     ╔═╧═╧══════════════════════════════════════════╧═╧══╗                                    │    
+                     ║x-pagopa-lollipop-original-method                 ░║                                    │    
+                     ║x-pagopa-lollipop-original-url                     ║                                    │    
+                     ║signature-input                                    ║                                    │    
+                     ║signature                                          ║                                    │    
+                     ╚═╤═╤══════════════════════════════════════════╤═╤══╝                                    │    
+                       │ │                                          │ │[02] forward enriched original request┌┴┐   
+                       │ │                                          │ │ ────────────────────────────────────>│ │   
+                       │ │                                          │ │                                      │ │   
+                       │ │                                        ╔═╧═╧══════════════════════════════════════╧═╧══╗
+                       │ │                                        ║[NEW] x-pagopa-lollipop-assertion-ref         ░║
+                       │ │                                        ║[NEW] x-pagopa-lollipop-assertion-type         ║
+                       │ │                                        ║[NEW] x-pagopa-lollipop-user-id                ║
+                       │ │                                        ║[NEW] x-pagopa-lollipop-public-key             ║
+                       │ │                                        ║[NEW] x-pagopa-lollipop-auth-jwt               ║
+                       │ │                                        ║x-pagopa-lollipop-original-method              ║
+                       │ │                                        ║x-pagopa-lollipop-original-url                 ║
+                       │ │                                        ║signature-input                                ║
+                       │ │                                        ║signature                                      ║
+                       │ │                                        ╚═╤═╤══════════════════════════════════════╤═╤══╝
+                       │ │                                          │ │                                      │ │    
+                       └┬┘                                          └┬┘                                      └┬┘
+                      ┌───┐                                       ┌─────┐                                    ┌──┐  
+                      │APP│                                       │IO-BE│                                    │LC│  
+                      └───┘                                       └─────┘                                    └──┘  
+  version: 1.0.0
+
+# Example endpoint
+paths:
+  /example:
+    get:
+      parameters:
+        - $ref: "#/components/parameters/LollipopMethodHeader"
+        - $ref: "#/components/parameters/LollipopOriginalURLHeader"
+        - $ref: "#/components/parameters/LollipopJWTAuthorizationHeader"
+        - $ref: "#/components/parameters/LollipopAssertionRefHeader"
+        - $ref: "#/components/parameters/LollipopAssertionTypeHeader"
+        - $ref: "#/components/parameters/LollipopUserIdHeader"
+        - $ref: "#/components/parameters/LollipopPublicKeyHeader"
+        - $ref: "#/components/parameters/LollipopContentTypeHeader"
+        - $ref: "#/components/parameters/LollipopContentDigestHeader"
+        - $ref: "#/components/parameters/LollipopSignatureInputHeader"
+        - $ref: "#/components/parameters/LollipopSignatureHeader"
+      responses:
+        "200":
+          description: "ok"
+
+components:
+  parameters:
+    # --------------------------------------------
+    # Custom LolliPoP headers
+    # --------------------------------------------
+    LollipopMethodHeader:
+      name: x-pagopa-lollipop-original-method
+      in: header
+      description: The method of the endpoint called by IO app
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopMethod"
+    LollipopOriginalURLHeader:
+      name: x-pagopa-lollipop-original-url
+      in: header
+      description: The url of the endpoint called by IO app
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopOriginalURL"
+    LollipopJWTAuthorizationHeader:
+      name: x-pagopa-lollipop-auth-jwt
+      in: header
+      description: User's public key
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopJWTAuthorization"
+    LollipopAssertionRefHeader:
+      name: x-pagopa-lollipop-assertion-ref
+      in: header
+      description: The id of the assertion to retrieve
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopAssertionRef"
+    LollipopAssertionTypeHeader:
+      name: x-pagopa-lollipop-assertion-type
+      in: header
+      description: The assertion type (SAML / OIDC)
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopAssertionType"
+    LollipopUserIdHeader:
+      name: x-pagopa-lollipop-user-id
+      in: header
+      description: User's fiscal code.
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopUserId"
+    LollipopPublicKeyHeader:
+      name: x-pagopa-lollipop-public-key
+      in: header
+      description: User's public key
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopPublicKey"
+
+    # --------------------------------------------
+    # Standard HTTP Message Signatures headers
+    # --------------------------------------------
+    LollipopContentTypeHeader:
+      name: content-type
+      in: header
+      description: The content type, if any.
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentType"
+    LollipopContentDigestHeader:
+      name: content-digest
+      in: header
+      description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
+      required: false
+      schema:
+        $ref: "#/components/schemas/LollipopContentDigest"
+
+    LollipopSignatureInputHeader:
+      name: signature-input
+      in: header
+      description: The signature input, needed to verify the `signature` header
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopSignatureInput"
+    LollipopSignatureHeader:
+      name: signature
+      in: header
+      description: The signature of the HTTP request, signed by the client with its private key.
+      required: true
+      schema:
+        $ref: "#/components/schemas/LollipopSignature"
+
+  schemas:
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: "^https:\/\/"
+    LollipopAssertionType:
+      type: string
+      enum:
+        - SAML
+        - OIDC
+    LollipopAssertionRef:
+      oneOf:
+        - $ref: "#/components/schemas/AssertionRefSha256"
+        - $ref: "#/components/schemas/AssertionRefSha384"
+        - $ref: "#/components/schemas/AssertionRefSha512"
+    LollipopUserId:
+      type: string
+      description: User's fiscal code.
+      format: FiscalCode
+      x-import: "@pagopa/ts-commons/lib/strings"
+    LollipopPublicKey:
+      type: string
+      description: represents a Base64url encode of a JWK Public Key
+      format: JwkPublicKey
+      x-import: "@pagopa/ts-commons/lib/jwk"
+    LollipopJWTAuthorization:
+      type: string
+      minLength: 1
+
+    LollipopContentType:
+      type: string
+      enum:
+        - application/json
+        - application/octet-stream
+    LollipopContentDigest:
+      type: string
+      pattern: "^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-512=:[A-Za-z0-9+/=]{88}:)$"
+
+    LollipopSignatureInput:
+      type: string
+      pattern: "^(((sig[0-9]{1,})=.*?)(, ){0,1}){1,}$"
+    LollipopSignature:
+      type: string
+      pattern: "^((sig[0-9]{1,})=:[A-Za-z0-9+/=]*:(, ){0,1}){1,}$"
+
+    # AssertionRef possible inputs
+    AssertionRefSha256:
+      type: string
+      pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+    AssertionRefSha384:
+      type: string
+      pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+    AssertionRefSha512:
+      type: string
+      pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
