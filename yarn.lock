@@ -754,10 +754,10 @@
     xmldom "^0.6.0"
     yargs "^15.3.0"
 
-"@pagopa/openapi-codegen-ts@^12.0.2":
-  version "12.0.2"
-  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-12.0.2.tgz#1913ba4fefe3d28f5a4f8497d8f824cdd9844cd0"
-  integrity sha512-waI+xROMPDgfYZnJ55GzjBsfVIrH+0C52BsQDJz2NjM66qssF8LLmixHfET8KrIBPdBZO8ogh2M3+mX36uE7+w==
+"@pagopa/openapi-codegen-ts@^12.1.2":
+  version "12.1.2"
+  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-12.1.2.tgz#41c51850f537b0a26c311bcfe9c6fd2db2c12d17"
+  integrity sha512-pJS4WTS4XkV6fyNFRfL9J/8CBcV+VUHWnweLNYwEgRXvYuaday/aaEEy/7JRjKuMI0c0jfX0gq8SbspMb/lx0A==
   dependencies:
     "@pagopa/ts-commons" "^10.3.0"
     fs-extra "^6.0.0"
@@ -1193,7 +1193,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/redis@^2.8.32", "@types/redis@^3.1.2":
+"@types/redis@^2.8.32":
   version "2.8.32"
   resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.32.tgz#1d3430219afbee10f8cfa389dad2571a05ecfb11"
   integrity sha512-7jkMKxcGq9p242exlbsVzuJb57KqHRhNl4dHoQu2Y5v9bCAbtIXXH0R3HleSQW4CTOqpHIYUW3t6tpUj4BVQ+w==
