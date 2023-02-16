@@ -62,6 +62,7 @@ import {
   CommaSeparatedListOf,
   PipeSeparatedListOf
 } from "./utils/separated-list";
+import { LollipopApiClient } from "./clients/lollipop";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -466,6 +467,16 @@ export const CGN_API_CLIENT = CgnAPIClient(
   CGN_API_KEY,
   CGN_API_URL,
   CGN_API_BASE_PATH,
+  httpOrHttpsApiFetch
+);
+
+export const LOLLIPOP_API_KEY = getRequiredENVVar("LOLLIPOP_API_KEY");
+export const LOLLIPOP_API_URL = getRequiredENVVar("CGN_API_URL");
+export const LOLLIPOP_API_BASE_PATH = getRequiredENVVar("CGN_API_BASE_PATH");
+export const LOLLIPOP_API_CLIENT = LollipopApiClient(
+  LOLLIPOP_API_KEY,
+  LOLLIPOP_API_URL,
+  LOLLIPOP_API_BASE_PATH,
   httpOrHttpsApiFetch
 );
 

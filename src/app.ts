@@ -77,7 +77,8 @@ import {
   IO_SIGN_API_CLIENT,
   FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   FF_ROUTING_PUSH_NOTIF,
-  FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX
+  FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
+  LOLLIPOP_API_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -675,7 +676,9 @@ export function newApp({
               },
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
-              lollipopMiddleware: toExpressMiddleware(lollipopLoginHandler()),
+              lollipopMiddleware: toExpressMiddleware(
+                lollipopLoginHandler(LOLLIPOP_API_CLIENT)
+              ),
               redisClient: REDIS_CLIENT,
               samlConfig,
               serviceProviderConfig
