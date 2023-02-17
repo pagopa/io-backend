@@ -407,6 +407,15 @@ definitions:
           - WAIT_FOR_QTSP
           - SIGNED
           - REJECTED
+      issuer:
+        type: object
+        properties:
+          email:
+            type: string
+            format: email
+          description:
+            type: string
+            minLength: 1
       dossier_id:
         $ref: "#/definitions/Id"
       signer_id:
