@@ -828,11 +828,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   }
 
   /**
-   *
-   * @param user
-   * @param assertionRef
-   * @param expireAssertionRefSec
-   * @returns
+   * {@inheritDoc}
    */
   public async delLollipopAssertionRefForUser(user: UserV5) {
     return new Promise<Either<Error, boolean>>(resolve => {
