@@ -39,6 +39,7 @@ import {
   mockWalletToken,
   mockZendeskToken
 } from "../../__mocks__/user_mock";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -47,6 +48,7 @@ const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
 };
 
 const aTokenDurationSecs = 3600;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const theCurrentTimestampMillis = 1518010929530;
 
 const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
@@ -119,7 +121,8 @@ mockRedisClient.ttl = mockTtl;
 
 const sessionStorage = new RedisSessionStorage(
   mockRedisClient,
-  aTokenDurationSecs
+  aTokenDurationSecs,
+  aDefaultLollipopAssertionRefDurationSec
 );
 
 let clock: any;

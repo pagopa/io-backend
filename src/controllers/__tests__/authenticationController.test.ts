@@ -46,6 +46,7 @@ import { addDays, addMonths, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
 import * as appInsights from "applicationinsights";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -147,9 +148,11 @@ const redisClient = {} as redis.RedisClient;
 const tokenService = new TokenService();
 
 const tokenDurationSecs = 0;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  aDefaultLollipopAssertionRefDurationSec
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {

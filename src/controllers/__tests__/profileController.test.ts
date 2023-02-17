@@ -29,6 +29,7 @@ import { ServicesPreferencesModeEnum } from "../../../generated/backend/Services
 import { AppVersion } from "../../../generated/backend/AppVersion";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 const aTimestamp = 1518010929530;
 
@@ -118,9 +119,11 @@ jest.mock("../../services/redisSessionStorage", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenDurationSecs = 0;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  aDefaultLollipopAssertionRefDurationSec
 );
 
 describe("ProfileController#getProfile", () => {

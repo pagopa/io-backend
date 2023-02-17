@@ -8,8 +8,10 @@ import * as E from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { ZendeskToken } from "../../types/token";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 const aTokenDurationSecs = 3600;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const mockGet = jest.fn();
 const mockSet = jest.fn();
 const mockMget = jest.fn();
@@ -53,7 +55,8 @@ jest.mock("../../services/redisSessionStorage", () => {
 
 const sessionService = new RedisSessionStorage(
   mockRedisClient,
-  aTokenDurationSecs
+  aTokenDurationSecs,
+  aDefaultLollipopAssertionRefDurationSec
 );
 
 const res = mockRes();

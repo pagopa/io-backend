@@ -21,8 +21,10 @@ import ApiClient from "../../services/apiClientFactory";
 import ProfileService from "../../services/profileService";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import * as crypto from "crypto";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 const aTokenDurationSecs = 3600;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const mockGet = jest.fn();
 const mockSet = jest.fn();
 const mockMget = jest.fn();
@@ -61,7 +63,11 @@ const tokenService = new TokenService();
 const mockGetNewToken = jest.spyOn(tokenService, "getNewToken");
 
 const controller = new SessionController(
-  new RedisSessionStorage(mockRedisClient, aTokenDurationSecs),
+  new RedisSessionStorage(
+    mockRedisClient,
+    aTokenDurationSecs,
+    aDefaultLollipopAssertionRefDurationSec
+  ),
   tokenService,
   profileService
 );
