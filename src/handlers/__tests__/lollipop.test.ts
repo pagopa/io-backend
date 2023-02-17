@@ -11,6 +11,7 @@ import {
   LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME,
   LOLLIPOP_PUB_KEY_HEADER_NAME
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
+import * as E from "fp-ts/lib/Either";
 import { JwkPubKeyHashAlgorithmEnum } from "../../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 
@@ -91,7 +92,9 @@ describe("lollipopLoginHandler", () => {
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
       aJwkPubKey
     );
-    reservePubKeyMock.mockRejectedValueOnce(new Error("network error"));
+    reservePubKeyMock.mockImplementationOnce(async () =>
+      E.left("unparseable response")
+    );
     const result = await lollipopLoginHandler(lollipopApiClientMock)(req);
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
@@ -155,6 +158,29 @@ describe("lollipopLoginHandler", () => {
       expect.objectContaining({
         kind: "IResponseErrorInternal",
         detail: "Internal server error: Cannot reserve pubKey"
+      })
+    );
+  });
+
+  it("should return an internal server error if pubKey reservation API is unreacheable", async () => {
+    const req = mockReq();
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
+      aJwkPubKey
+    );
+    reservePubKeyMock.mockRejectedValueOnce("Network Error");
+    const result = await lollipopLoginHandler(lollipopApiClientMock)(req);
+    expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
+    expect(reservePubKeyMock).toHaveBeenCalledWith({
+      body: {
+        algo: JwkPubKeyHashAlgorithmEnum.sha256,
+        pub_key: aJwkPubKey
+      }
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        kind: "IResponseErrorInternal",
+        detail: "Internal server error: Error while calling reservePubKey API"
       })
     );
   });

@@ -20,7 +20,6 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { LollipopApiClient } from "src/clients/lollipop";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
-import { errorsToError } from "../utils/errorsFormatter";
 import { JwkPubKeyHashAlgorithmEnum } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { NewPubKey } from "../../generated/lollipop-api/NewPubKey";
 import { withValidatedOrValidationError } from "../utils/responses";
@@ -84,10 +83,12 @@ export const lollipopLoginHandler = (
           TE.mapLeft(() =>
             ResponseErrorInternal("Error while calling reservePubKey API")
           ),
-          TE.chainEitherKW(E.mapLeft(errorsToError)),
-          TE.mapLeft(() =>
-            ResponseErrorInternal("Cannot parse reserve response")
+          TE.chainEitherKW(
+            E.mapLeft(() =>
+              ResponseErrorInternal("Cannot parse reserve response")
+            )
           ),
+
           TE.filterOrElseW(isReservePubKeyResponseSuccess, errorResponse =>
             errorResponse.status === 409
               ? ResponseErrorConflict("PubKey is already reserved")
