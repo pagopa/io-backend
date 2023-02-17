@@ -19,10 +19,10 @@ import {
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import { LollipopApiClient } from "src/clients/lollipop";
-import { JwkPubKeyHashAlgorithmEnum } from "generated/lollipop-api/JwkPubKeyHashAlgorithm";
-import { errorsToError } from "src/utils/errorsFormatter";
-import { NewPubKey } from "generated/lollipop-api/NewPubKey";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { errorsToError } from "../utils/errorsFormatter";
+import { JwkPubKeyHashAlgorithmEnum } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
+import { NewPubKey } from "../../generated/lollipop-api/NewPubKey";
 import { withValidatedOrValidationError } from "../utils/responses";
 
 /**
@@ -59,7 +59,8 @@ export const lollipopLoginHandler = (
         pipe(
           req.headers[LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME],
           O.fromNullable,
-          O.chainNullableK(() => DEFAULT_LOLLIPOP_HASH_ALGORITHM),
+          O.getOrElseW(() => DEFAULT_LOLLIPOP_HASH_ALGORITHM),
+          O.of,
           O.map(LollipopHashAlgorithm.decode)
         )
       ),
@@ -81,7 +82,7 @@ export const lollipopLoginHandler = (
             E.toError
           ),
           TE.mapLeft(() =>
-            ResponseErrorInternal("Error while calling pubKey reservation")
+            ResponseErrorInternal("Error while calling reservePubKey API")
           ),
           TE.chainEitherKW(E.mapLeft(errorsToError)),
           TE.mapLeft(() =>
