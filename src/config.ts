@@ -404,6 +404,7 @@ const fetchWithTimeout = setFetchTimeout(
   DEFAULT_REQUEST_TIMEOUT_MS,
   abortableFetch
 );
+
 const httpOrHttpsApiFetch = toFetch(fetchWithTimeout);
 
 const bearerAuthFetch = (
@@ -472,9 +473,13 @@ export const CGN_API_CLIENT = CgnAPIClient(
 
 export const LOLLIPOP_API_KEY = getRequiredENVVar("LOLLIPOP_API_KEY");
 export const LOLLIPOP_API_URL = getRequiredENVVar("LOLLIPOP_API_URL");
+export const LOLLIPOP_API_BASE_PATH = getRequiredENVVar(
+  "LOLLIPOP_API_BASE_PATH"
+);
 export const LOLLIPOP_API_CLIENT = LollipopApiClient(
   LOLLIPOP_API_KEY,
   LOLLIPOP_API_URL,
+  LOLLIPOP_API_BASE_PATH,
   httpOrHttpsApiFetch
 );
 
