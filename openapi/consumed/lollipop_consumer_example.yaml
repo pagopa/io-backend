@@ -86,7 +86,7 @@ components:
     LollipopJWTAuthorizationHeader:
       name: x-pagopa-lollipop-auth-jwt
       in: header
-      description: User's public key
+      description: Auth token to retrieve the SPID/CIE User identity from IO
       required: true
       schema:
         $ref: "#/components/schemas/LollipopJWTAuthorization"
