@@ -416,6 +416,9 @@ definitions:
           description:
             type: string
             minLength: 1
+        required:
+            - email
+            - description
       dossier_id:
         $ref: "#/definitions/Id"
       signer_id:
