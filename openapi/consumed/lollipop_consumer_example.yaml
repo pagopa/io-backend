@@ -176,14 +176,15 @@ components:
         - $ref: "#/components/schemas/AssertionRefSha512"
     LollipopUserId:
       type: string
-      description: User's fiscal code.
-      format: FiscalCode
-      x-import: "@pagopa/ts-commons/lib/strings"
+      maxLength: 16
+      minLength: 16
+      required: true
+      description: The user's fiscal code, all upper case.
+      pattern: >-
+        ^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$
     LollipopPublicKey:
       type: string
       description: represents a Base64url encode of a JWK Public Key
-      format: JwkPublicKey
-      x-import: "@pagopa/ts-commons/lib/jwk"
     LollipopJWTAuthorization:
       type: string
       minLength: 1
