@@ -23,6 +23,8 @@ const mockGetInfo = jest.fn();
 const mockGetQtspClausesMetadata = jest.fn();
 const mockGetSignatureRequest = jest.fn();
 const mockCreateSignature = jest.fn();
+const mockGetThirdPartyMessageDetails = jest.fn();
+const mockGetThirdPartyMessageAttachmentContent = jest.fn();
 
 const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
@@ -155,13 +157,33 @@ mockCreateSignature.mockImplementation(() =>
   })
 );
 
+mockGetThirdPartyMessageDetails.mockImplementation(() =>
+  t.success({
+    status: 200,
+    value: {
+      attachments: []
+    }
+  })
+);
+
+mockGetThirdPartyMessageAttachmentContent.mockImplementation(() =>
+  t.success({
+    status: 200,
+    value: {
+      format: "pdf"
+    }
+  })
+);
+
 const api = {
   createFilledDocument: mockCreateFilledDocument,
   getSignerByFiscalCode: mockGetSignerByFiscalCode,
   getInfo: mockGetInfo,
   getQtspClausesMetadata: mockGetQtspClausesMetadata,
   getSignatureRequestById: mockGetSignatureRequest,
-  createSignature: mockCreateSignature
+  createSignature: mockCreateSignature,
+  getThirdPartyMessageDetails: mockGetThirdPartyMessageDetails,
+  getThirdPartyMessageAttachmentContent: mockGetThirdPartyMessageAttachmentContent
 } as ReturnType<IoSignAPIClient>;
 
 describe("IoSignService#getSignerByFiscalCode", () => {
