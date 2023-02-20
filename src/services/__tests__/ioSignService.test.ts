@@ -170,7 +170,7 @@ mockGetThirdPartyMessageAttachmentContent.mockImplementation(() =>
   t.success({
     status: 200,
     value: {
-      format: "pdf"
+      format: "fakeRawString"
     }
   })
 );
