@@ -471,6 +471,7 @@ export const CGN_API_CLIENT = CgnAPIClient(
   httpOrHttpsApiFetch
 );
 
+export const FF_LOLLIPOP_ENABLED = process.env.FF_LOLLIPOP_ENABLED === "1";
 export const LOLLIPOP_API_KEY = getRequiredENVVar("LOLLIPOP_API_KEY");
 export const LOLLIPOP_API_URL = getRequiredENVVar("LOLLIPOP_API_URL");
 export const LOLLIPOP_API_BASE_PATH = getRequiredENVVar(

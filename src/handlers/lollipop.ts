@@ -6,10 +6,11 @@ import {
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
 import { JwkPublicKeyFromToken } from "@pagopa/ts-commons/lib/jwk";
 import * as express from "express";
-import { constUndefined, flow, pipe } from "fp-ts/lib/function";
+import { constUndefined, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
 import * as A from "fp-ts/lib/Apply";
+import * as B from "fp-ts/lib/boolean";
 import * as TE from "fp-ts/lib/TaskEither";
 import {
   IResponseErrorConflict,
@@ -39,6 +40,7 @@ const isReservePubKeyResponseSuccess = (
 ): res is IResponseType<201, NewPubKey> => res.status === 201;
 
 export const lollipopLoginHandler = (
+  isLollipopEnabled: boolean,
   lollipopApiClient: ReturnType<LollipopApiClient>
 ) => async (
   req: express.Request
@@ -66,38 +68,51 @@ export const lollipopLoginHandler = (
       O.map(A.sequenceS(E.Applicative)),
       O.getOrElseW(() => E.right(void 0))
     ),
-    flow(
-      O.fromNullable,
-      O.map(({ algo, jwk }) =>
-        pipe(
-          TE.tryCatch(
-            () =>
-              lollipopApiClient.reservePubKey({
-                body: {
-                  algo: JwkPubKeyHashAlgorithmEnum[algo],
-                  pub_key: jwk
-                }
-              }),
-            E.toError
-          ),
-          TE.mapLeft(() =>
-            ResponseErrorInternal("Error while calling reservePubKey API")
-          ),
-          TE.chainEitherKW(
-            E.mapLeft(() =>
-              ResponseErrorInternal("Cannot parse reserve response")
-            )
-          ),
+    lollipopParams =>
+      pipe(
+        isLollipopEnabled,
+        B.fold(
+          () => O.none,
+          () =>
+            pipe(
+              lollipopParams,
+              O.fromNullable,
+              O.map(({ algo, jwk }) =>
+                pipe(
+                  TE.tryCatch(
+                    () =>
+                      lollipopApiClient.reservePubKey({
+                        body: {
+                          algo: JwkPubKeyHashAlgorithmEnum[algo],
+                          pub_key: jwk
+                        }
+                      }),
+                    E.toError
+                  ),
+                  TE.mapLeft(() =>
+                    ResponseErrorInternal(
+                      "Error while calling reservePubKey API"
+                    )
+                  ),
+                  TE.chainEitherKW(
+                    E.mapLeft(() =>
+                      ResponseErrorInternal("Cannot parse reserve response")
+                    )
+                  ),
 
-          TE.filterOrElseW(isReservePubKeyResponseSuccess, errorResponse =>
-            errorResponse.status === 409
-              ? ResponseErrorConflict("PubKey is already reserved")
-              : ResponseErrorInternal("Cannot reserve pubKey")
-          ),
-          TE.map(constUndefined),
-          TE.toUnion
-        )()
-      ),
-      O.toUndefined
-    )
+                  TE.filterOrElseW(
+                    isReservePubKeyResponseSuccess,
+                    errorResponse =>
+                      errorResponse.status === 409
+                        ? ResponseErrorConflict("PubKey is already reserved")
+                        : ResponseErrorInternal("Cannot reserve pubKey")
+                  ),
+                  TE.map(constUndefined),
+                  TE.toUnion
+                )()
+              )
+            )
+        ),
+        O.toUndefined
+      )
   );
