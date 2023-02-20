@@ -184,6 +184,7 @@ components:
         ^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$
     LollipopPublicKey:
       type: string
+      minLength: 1
       description: represents a Base64url encode of a JWK Public Key
     LollipopJWTAuthorization:
       type: string
