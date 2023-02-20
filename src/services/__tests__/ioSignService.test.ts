@@ -27,11 +27,17 @@ const mockCreateSignature = jest.fn();
 const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
 const fakeSignerId = "0000000000000" as NonEmptyString;
+const fakeIssuerEmail = "issuer@fakedomain.com" as EmailString;
+const fakeIssuerDescription = "Fake description" as NonEmptyString;
 
 const fakeSignatureRequest: SignatureRequestDetailView = {
   id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
   status: SignatureRequestStatusEnum.WAIT_FOR_SIGNATURE,
   signer_id: fakeSignerId,
+  issuer: {
+    email: fakeIssuerEmail,
+    description: fakeIssuerDescription
+  },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
   documents: [
     {
