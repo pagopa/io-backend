@@ -84,6 +84,13 @@ describe("LollipopSignatureInput", () => {
     expect(res).toMatchObject(E.right(value));
   });
 
+  it("should decode a valid multi-signature input without space", async () => {
+    const value = `sig1=("x-io-sign-qtspclauses");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId,sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
+
+    const res = LollipopSignatureInput.decode(value);
+    expect(res).toMatchObject(E.right(value));
+  });
+
   it("should decode a valid multi-signature input", async () => {
     const value = `sig1=("x-io-sign-qtspclauses");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId, sig2=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url");created=1675258547;nonce="aNonce";alg="ecdsa-p384-sha384";keyid="aKeyId"`;
 
@@ -102,6 +109,14 @@ describe("LollipopSignatureInput", () => {
 describe("LollipopSignature", () => {
   it("should decode a valid signature", async () => {
     const value = `sig1=:wdsNx2jtTeDayCaf6wn1IKxdxuvUV2EZnbPhAVS9v1ZWAfyN0gbVRC1hi+0T7ysuHF6dHdxHB81ELTbe7tz3lzQbRMYn7FW+kjeT8CL+gb1hUHeWESvxlPgbd7xZxp0i:`;
+
+    const res = LollipopSignature.decode(value);
+
+    expect(res).toMatchObject(E.right(value));
+  });
+
+  it("should decode a valid multi-signature without space", async () => {
+    const value = `sig1=:wdsNx2jtTeDayCaf6wn1IKxdxuvUV2EZnbPhAVS9v1ZWAfyN0gbVRC1hi+0T7ysuHF6dHdxHB81ELTbe7tz3lzQbRMYn7FW+kjeT8CL+gb1hUHeWESvxlPgbd7xZxp0i:,sig2=:Y3p2rx43PYOwsvR/7xRK3ysbOwxVJQdhE3OSVhGDtrMWqsdfo6iDGL8HhyHVhdcE/GiLUsLKhYClJuNtWN46nHnKAz2OarVuhplQCxG/dxgA/b8jDddFjZuiJKi2n5d+:`;
 
     const res = LollipopSignature.decode(value);
 

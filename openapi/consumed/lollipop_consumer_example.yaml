@@ -196,14 +196,14 @@ components:
         - application/octet-stream
     LollipopContentDigest:
       type: string
-      pattern: "^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-512=:[A-Za-z0-9+/=]{88}:)$"
+      pattern: "^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-384=:[A-Za-z0-9+/=]{66}:|sha-512=:[A-Za-z0-9+/=]{88}:)$"
 
     LollipopSignatureInput:
       type: string
-      pattern: "^(((sig[0-9]{1,})=.*?)(, ){0,1}){1,}$"
+      pattern: "^(((sig[0-9]+)=[^,]*?)(, ?)?)+$"
     LollipopSignature:
       type: string
-      pattern: "^((sig[0-9]{1,})=:[A-Za-z0-9+/=]*:(, ){0,1}){1,}$"
+      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"
 
     # AssertionRef possible inputs
     AssertionRefSha256:
