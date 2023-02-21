@@ -91,6 +91,10 @@ const signatureRequest: SignatureRequestDetailView = {
   id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
   status: SignatureRequestStatusEnum.WAIT_FOR_SIGNATURE,
   signer_id: "37862aff-3436-4487-862b-fd9e7d2a114e" as Id,
+  issuer: {
+    email: "issuer@fakedomain.com" as EmailString,
+    description: "Fake description" as NonEmptyString
+  },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
   documents: [
     {
