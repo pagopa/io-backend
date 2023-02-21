@@ -1758,7 +1758,7 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
 });
 
 describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
-  it("should return a right eather with true value on success", async () => {
+  it("should return a right either with true value on success", async () => {
     mockDel.mockImplementationOnce((_, callback) => callback(null, 1));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
       aValidUser
