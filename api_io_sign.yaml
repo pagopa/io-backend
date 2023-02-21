@@ -439,6 +439,7 @@ definitions:
     required:
       - id
       - status
+      - issuer
       - dossier_id
       - signer_id
       - expires_at
