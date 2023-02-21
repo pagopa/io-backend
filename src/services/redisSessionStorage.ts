@@ -830,10 +830,10 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * {@inheritDoc}
    */
-  public async delLollipopAssertionRefForUser(user: UserV5) {
+  public async delLollipopAssertionRefForUser(fiscalCode: FiscalCode) {
     return new Promise<Either<Error, boolean>>(resolve => {
       this.redisClient.del(
-        `${lollipopFingerprintPrefix}${user.fiscal_code}`,
+        `${lollipopFingerprintPrefix}${fiscalCode}`,
         (err, value) => {
           resolve(this.integerReply(err, value));
         }

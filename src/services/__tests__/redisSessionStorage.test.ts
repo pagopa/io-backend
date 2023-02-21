@@ -1776,7 +1776,7 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
   it("should return a right either with true value on success", async () => {
     mockDel.mockImplementationOnce((_, callback) => callback(null, 1));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
@@ -1792,7 +1792,7 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
     const expectedError = new Error("redis Error");
     mockDel.mockImplementationOnce((_, callback) => callback(expectedError));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
@@ -1807,7 +1807,7 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
   it("should success if no element are removed from redis", async () => {
     mockDel.mockImplementationOnce((_, callback) => callback(null, 0));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);

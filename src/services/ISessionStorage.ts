@@ -96,7 +96,7 @@ export interface ISessionStorage {
    * @param user The AppUser value used to get the related fiscalCode
    */
   readonly delLollipopAssertionRefForUser: (
-    user: UserV5
+    fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 
   /**
