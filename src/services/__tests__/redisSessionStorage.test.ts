@@ -1648,7 +1648,8 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
       expect.any(Function)
     );
     expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response)) expect(response.right).toEqual(anAssertionRef);
+    if (E.isRight(response) && O.isSome(response.right))
+      expect(response.right.value).toEqual(anAssertionRef);
   });
 
   it("should fail with a left response if an error occurs on redis", async () => {

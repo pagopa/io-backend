@@ -19,30 +19,29 @@ import {
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
-import { IoSignAPIClient } from "src/clients/io-sign";
-import { SignerDetailView } from "generated/io-sign-api/SignerDetailView";
-import { FilledDocumentDetailView } from "generated/io-sign/FilledDocumentDetailView";
 import {
   EmailString,
   FiscalCode,
   NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
-import { Id } from "generated/io-sign/Id";
-
-import { QtspClausesMetadataDetailView } from "generated/io-sign/QtspClausesMetadataDetailView";
-
 import * as E from "fp-ts/Either";
+import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
+import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
+import { Id } from "../../generated/io-sign/Id";
 
-import { DocumentToSign } from "generated/io-sign/DocumentToSign";
-import { QtspClauses } from "generated/io-sign/QtspClauses";
-import { SignatureDetailView } from "generated/io-sign/SignatureDetailView";
-import { SignatureRequestDetailView } from "generated/io-sign/SignatureRequestDetailView";
+import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
+
+import { DocumentToSign } from "../../generated/io-sign/DocumentToSign";
+import { QtspClauses } from "../../generated/io-sign/QtspClauses";
+import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
+import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
+import { IoSignAPIClient } from "../clients/io-sign";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../../src/utils/errorsFormatter";
+import { readableProblem } from "../utils/errorsFormatter";
 import { ResponseErrorNotFound403 } from "./eucovidcertService";
 
 const internalServerError = "Internal server error";

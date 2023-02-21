@@ -31,7 +31,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../../src/utils/errorsFormatter";
+import { readableProblem } from "../utils/errorsFormatter";
 
 export default class BonusService {
   constructor(private readonly bonusApiClient: ReturnType<BonusAPIClient>) {}

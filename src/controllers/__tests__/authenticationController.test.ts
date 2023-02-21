@@ -54,10 +54,14 @@ const validUserPayload = {
   email: aSpidEmailAddress,
   familyName: aValidFamilyname,
   fiscalNumber: aFiscalCode,
-  getAssertionXml: () => "",
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
-  name: aValidName
+  name: aValidName,
+  getAssertionXml: () => `<samlp:Response Destination="https://that.spid.example.org/saml2/acs/post" ID="_5e728601-9ad4-4686-b269-81d107a8194a" InResponseTo="id-wr6bt7ZpfqiYVrqTd" IssueInstant="2021-02-04T15:41:59Z" Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+    <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">
+        http://localhost:8080
+    </saml:Issuer>
+</samlp:Response>`
 };
 // invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
@@ -87,11 +91,13 @@ const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
 const mockGetByWalletToken = jest.fn();
 const mockDel = jest.fn();
+const mockDelLollipop = jest.fn();
 const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
+      delLollipopAssertionRefForUser: mockDelLollipop,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
       isBlockedUser: mockIsBlockedUser,
@@ -99,6 +105,8 @@ jest.mock("../../services/redisSessionStorage", () => {
     }))
   };
 });
+
+mockDelLollipop.mockImplementation(() => E.right(true));
 
 const mockGetNewToken = jest.fn();
 jest.mock("../../services/tokenService", () => {
@@ -181,6 +189,10 @@ beforeAll(async () => {
     usersLoginLogService,
     [],
     true,
+    {
+      isLollipopEnabled: false,
+      lollipopService: {} as any
+    },
     mockTelemetryClient
   );
 });

@@ -36,7 +36,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { readableProblem } from "../../src/utils/errorsFormatter";
+import { readableProblem } from "../utils/errorsFormatter";
 export default class CgnService {
   constructor(private readonly cgnApiClient: ReturnType<CgnAPIClient>) {}
 

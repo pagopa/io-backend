@@ -168,6 +168,7 @@ import {
   NotificationServiceFactory
 } from "./services/notificationServiceFactory";
 import { lollipopLoginHandler } from "./handlers/lollipop";
+import LollipopService from "./services/lollipopService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -465,6 +466,22 @@ export function newApp({
           })
         );
 
+        const LOLLIPOP_SERVICE = pipe(
+          E.tryCatch(
+            () =>
+              new LollipopService(
+                LOLLIPOP_API_CLIENT,
+                USERS_LOGIN_STORAGE_CONNECTION_STRING, // TODO: Lollipop variant
+                USERS_LOGIN_QUEUE_NAME // TODO: Lollipop variant
+              ),
+            err =>
+              new Error(`Error initializing UsersLoginLogService: [${err}]`)
+          ),
+          E.getOrElseW(err => {
+            throw err;
+          })
+        );
+
         const acsController: AuthenticationController = new AuthenticationController(
           SESSION_STORAGE,
           TOKEN_SERVICE,
@@ -475,6 +492,10 @@ export function newApp({
           USERS_LOGIN_LOG_SERVICE,
           TEST_LOGIN_FISCAL_CODES,
           FF_USER_AGE_LIMIT_ENABLED,
+          {
+            isLollipopEnabled: FF_LOLLIPOP_ENABLED,
+            lollipopService: LOLLIPOP_SERVICE
+          },
           appInsightsClient
         );
 
