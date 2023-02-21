@@ -219,7 +219,7 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_KEY                       | The key used to authenticate to the io-function-lollipop API                      | string  |
 | LOLLIPOP_API_URL                       | The io-function-lollipop URL                                                      | string  |
 | LOLLIPOP_API_BASE_PATH                 | The io-function-lollipop api base path                                            | string  |
-| FF_LOLLIPOP_ENABLED                    | Enable Lollipop flows                                                             | boolean  |
+| FF_LOLLIPOP_ENABLED                    | (Optional) Enable Lollipop flows default false                                    | boolean |
 
 Notes:
 

@@ -29,7 +29,7 @@ const aNewPubKey: NewPubKey = {
   version: 0 as NonNegativeNumber
 };
 
-const getJwkPubKeyInHeader = (jwk: JwkPubKey) =>
+const tokenizeJwk = (jwk: JwkPubKey) =>
   jose.base64url.encode(JSON.stringify(jwk));
 
 const buildResponse = <T>(statusCode: number, value: T) =>
@@ -50,9 +50,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should not perform pubkey reservation if Lollipop FF is disabled", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     req.headers[LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME] = "sha512";
     const result = await lollipopLoginHandler(
       false,
@@ -64,9 +62,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should perform lollipop validation and pubkey reservation successfully if Lollipop pub key and algo headers are present", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     req.headers[LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME] = "sha512";
     const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
@@ -81,9 +77,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should perform lollipop validation and pubkey reservation successfully if Lollipop pub key is present with fallback on default hashing algorithm", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
@@ -104,9 +98,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should return InternalServerError if reservePubKey cannot be parsed", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockImplementationOnce(async () =>
       E.left("unparseable response")
     );
@@ -129,9 +121,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should return a conflict error if pubKey is alredy reserved", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockImplementationOnce(async () =>
       t.success(buildResponse(409, {}))
     );
@@ -154,9 +144,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should return an internal server error if pubKey reservation fails", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockImplementationOnce(async () =>
       t.success(buildResponse(500, {}))
     );
@@ -179,9 +167,7 @@ describe("lollipopLoginHandler", () => {
 
   it("should return an internal server error if pubKey reservation API is unreacheable", async () => {
     const req = mockReq();
-    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = getJwkPubKeyInHeader(
-      aJwkPubKey
-    );
+    req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockRejectedValueOnce("Network Error");
     const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
