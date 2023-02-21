@@ -93,7 +93,7 @@ export interface ISessionStorage {
   /**
    * Delete the Lollipop assertionRef related to an user
    *
-   * @param user The AppUser value used to get the related fiscalCode
+   * @param fiscalCode A user fiscal code
    */
   readonly delLollipopAssertionRefForUser: (
     fiscalCode: FiscalCode
