@@ -216,8 +216,10 @@ Those are all Environment variables needed by the application:
 | IO_SIGN_API_KEY                        | The key used to authenticate to the io-func-sign-user API                         | string  |
 | IO_SIGN_API_URL                        | The io-func-sign-user  URL                                                        | string  |
 | LOLLIPOP_ALLOWED_USER_AGENTS           | Pipe separated list of allowed user agents for Lollipop Login flow                | string  |
-
-
+| LOLLIPOP_API_KEY                       | The key used to authenticate to the io-function-lollipop API                      | string  |
+| LOLLIPOP_API_URL                       | The io-function-lollipop URL                                                      | string  |
+| LOLLIPOP_API_BASE_PATH                 | The io-function-lollipop api base path                                            | string  |
+| FF_LOLLIPOP_ENABLED                    | (Optional) Enable Lollipop flows default false                                    | boolean |
 
 Notes:
 

@@ -5,6 +5,7 @@
 
 export default function mockReq({
   params = {},
+  headers = {},
   body = {},
   query = {}
 }: any = {}): any {
@@ -18,6 +19,7 @@ export default function mockReq({
     acceptsLanguages: jest.fn(),
     body,
     header: jest.fn(),
+    headers,
     is: jest.fn(),
     param: jest.fn(),
     params,
