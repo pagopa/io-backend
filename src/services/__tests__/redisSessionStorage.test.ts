@@ -1643,7 +1643,10 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(anAssertionRef);
   });
@@ -1656,7 +1659,10 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
   });
@@ -1670,7 +1676,10 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(E.isLeft(response)).toBeTruthy();
   });
 });
@@ -1686,11 +1695,12 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     );
 
     expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(anAssertionRef);
-    expect(mockSet.mock.calls[0][2]).toBe("EX");
-    expect(mockSet.mock.calls[0][3]).toBe(
-      aDefaultLollipopAssertionRefDurationSec
+    expect(mockSet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      anAssertionRef,
+      "EX",
+      aDefaultLollipopAssertionRefDurationSec,
+      expect.any(Function)
     );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
@@ -1708,10 +1718,13 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     );
 
     expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(anAssertionRef);
-    expect(mockSet.mock.calls[0][2]).toBe("EX");
-    expect(mockSet.mock.calls[0][3]).toBe(expectedAssertionRefTtl);
+    expect(mockSet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      anAssertionRef,
+      "EX",
+      expectedAssertionRefTtl,
+      expect.any(Function)
+    );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
@@ -1727,11 +1740,12 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     );
 
     expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(anAssertionRef);
-    expect(mockSet.mock.calls[0][2]).toBe("EX");
-    expect(mockSet.mock.calls[0][3]).toBe(
-      aDefaultLollipopAssertionRefDurationSec
+    expect(mockSet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      anAssertionRef,
+      "EX",
+      aDefaultLollipopAssertionRefDurationSec,
+      expect.any(Function)
     );
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
@@ -1747,11 +1761,12 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     );
 
     expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(anAssertionRef);
-    expect(mockSet.mock.calls[0][2]).toBe("EX");
-    expect(mockSet.mock.calls[0][3]).toBe(
-      aDefaultLollipopAssertionRefDurationSec
+    expect(mockSet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      anAssertionRef,
+      "EX",
+      aDefaultLollipopAssertionRefDurationSec,
+      expect.any(Function)
     );
     expect(E.isLeft(response)).toBeTruthy();
   });
@@ -1765,7 +1780,10 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockDel).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
@@ -1778,7 +1796,10 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockDel).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
   });
@@ -1790,7 +1811,10 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel.mock.calls[0][0]).toBe(`KEYS-${aValidUser.fiscal_code}`);
+    expect(mockDel).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
