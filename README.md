@@ -220,6 +220,8 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_API_URL                       | The io-function-lollipop URL                                                      | string  |
 | LOLLIPOP_API_BASE_PATH                 | The io-function-lollipop api base path                                            | string  |
 | FF_LOLLIPOP_ENABLED                    | (Optional) Enable Lollipop flows default false                                    | boolean |
+| LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for revoke Users lollipop PubKeys     | string  |
+| LOLLIPOP_REVOKE_QUEUE_NAME             | Queue name of Azure queue storage for revoke Users lollipop PubKeys               | string  |
 
 Notes:
 

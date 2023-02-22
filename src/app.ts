@@ -80,7 +80,9 @@ import {
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   LOLLIPOP_API_CLIENT,
   FF_LOLLIPOP_ENABLED,
-  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
+  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
+  LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
+  LOLLIPOP_REVOKE_QUEUE_NAME
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -471,8 +473,8 @@ export function newApp({
             () =>
               new LollipopService(
                 LOLLIPOP_API_CLIENT,
-                USERS_LOGIN_STORAGE_CONNECTION_STRING, // TODO: Lollipop variant
-                USERS_LOGIN_QUEUE_NAME // TODO: Lollipop variant
+                LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
+                LOLLIPOP_REVOKE_QUEUE_NAME
               ),
             err =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)
