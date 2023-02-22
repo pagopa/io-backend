@@ -26,7 +26,7 @@ import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
+import { identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
@@ -276,7 +276,7 @@ export default class AuthenticationController {
                 ),
               E.toError
             ),
-            TE.chain(TE.fromEither),
+            TE.chainEitherK(identity),
             TE.chain(
               TE.fromPredicate(
                 _ => _ === true,
