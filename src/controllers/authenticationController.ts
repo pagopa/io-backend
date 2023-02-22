@@ -26,7 +26,7 @@ import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { identity, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
@@ -99,7 +99,7 @@ export default class AuthenticationController {
   /**
    * The Assertion consumer service.
    */
-  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity, complexity
+  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
   public async acs(
     userPayload: unknown
   ): Promise<
@@ -233,64 +233,89 @@ export default class AuthenticationController {
         });
     }
 
-    // Delete the reference to CF and assertionRef for lollipop.
-    // This operation must be performed even if the lollipop FF is disabled
-    // to avoid inconsistency on CF-key relation if the FF will be re-enabled.
-    const errorOrDelLollipop = await this.sessionStorage.delLollipopAssertionRefForUser(
-      spidUser.fiscalNumber
-    );
-
-    if (E.isLeft(errorOrDelLollipop) || !errorOrDelLollipop.right) {
-      return ResponseErrorInternal("Error on LolliPoP initialization");
-    }
-
-    const maybeRequestId = getRequestIDFromResponse(
-      new DOMParser().parseFromString(
-        errorOrSpidUser.right.getAssertionXml(),
-        "text/xml"
-      )
-    );
-
-    if (
-      this.lollipopParams.isLollipopEnabled &&
-      O.isSome(maybeRequestId) &&
-      AssertionRef.is(maybeRequestId.value)
-    ) {
-      const assertionRef: AssertionRef = maybeRequestId.value;
-
-      const errorOrActivatedPubKey = await pipe(
-        AP.sequenceT(TE.ApplicativeSeq)(
-          pipe(
-            this.lollipopParams.lollipopService.activateLolliPoPKey(
-              assertionRef,
-              user.fiscal_code,
-              errorOrSpidUser.right.getAssertionXml()
-            )
+    const errorOrActivatedPubKey = await pipe(
+      // Delete the reference to CF and assertionRef for lollipop.
+      // This operation must be performed even if the lollipop FF is disabled
+      // to avoid inconsistency on CF-key relation if the FF will be re-enabled.
+      TE.tryCatch(
+        () =>
+          this.sessionStorage.delLollipopAssertionRefForUser(
+            spidUser.fiscalNumber
           ),
-          pipe(
-            TE.tryCatch(
-              () =>
-                this.sessionStorage.setLollipopAssertionRefForUser(
-                  user,
-                  assertionRef
-                ),
-              E.toError
-            ),
-            TE.chainEitherK(identity),
-            TE.chain(
-              TE.fromPredicate(
-                _ => _ === true,
-                () =>
-                  new Error("Error creating CF thumbprint relation in redis")
-              )
+        E.toError
+      ),
+      TE.chainEitherK(identity),
+      TE.chain(
+        TE.fromPredicate(
+          _ => _ === true,
+          () => new Error("Error on LolliPoP initialization")
+        )
+      ),
+      TE.mapLeft(_ => O.some(ResponseErrorInternal(_.message))),
+      TE.chainW(() =>
+        TE.of(
+          getRequestIDFromResponse(
+            new DOMParser().parseFromString(
+              errorOrSpidUser.right.getAssertionXml(),
+              "text/xml"
             )
           )
         )
-      )();
-      if (E.isLeft(errorOrActivatedPubKey)) {
-        return ResponseErrorInternal("Error Activation Lollipop Key");
-      }
+      ),
+      TE.chainW(
+        flow(
+          TE.fromPredicate(
+            (_): _ is O.Some<AssertionRef> =>
+              this.lollipopParams.isLollipopEnabled &&
+              O.isSome(_) &&
+              AssertionRef.is(_.value),
+            () => O.none as O.Option<IResponseErrorInternal>
+          ),
+          TE.map(_ => _.value)
+        )
+      ),
+      TE.chainW(assertionRef =>
+        pipe(
+          AP.sequenceT(TE.ApplicativeSeq)(
+            pipe(
+              this.lollipopParams.lollipopService.activateLolliPoPKey(
+                assertionRef,
+                user.fiscal_code,
+                errorOrSpidUser.right.getAssertionXml()
+              )
+            ),
+            pipe(
+              TE.tryCatch(
+                () =>
+                  this.sessionStorage.setLollipopAssertionRefForUser(
+                    user,
+                    assertionRef
+                  ),
+                E.toError
+              ),
+              TE.chainEitherK(identity),
+              TE.chain(
+                TE.fromPredicate(
+                  _ => _ === true,
+                  () =>
+                    new Error("Error creating CF thumbprint relation in redis")
+                )
+              )
+            )
+          ),
+          TE.mapLeft(() =>
+            O.some(ResponseErrorInternal("Error Activation Lollipop Key"))
+          )
+        )
+      )
+    )();
+    if (
+      E.isLeft(errorOrActivatedPubKey) &&
+      O.isSome(errorOrActivatedPubKey.left)
+    ) {
+      return errorOrActivatedPubKey.left.value;
     }
+
     // Attempt to create a new session object while we fetch an existing profile
     // for the user
     const [errorOrIsSessionCreated, getProfileResponse] = await Promise.all([
