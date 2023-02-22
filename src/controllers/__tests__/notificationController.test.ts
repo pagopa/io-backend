@@ -21,6 +21,7 @@ import {
 } from "../../__mocks__/user_mock";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 const aTimestamp = 1518010929530;
 const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
@@ -109,9 +110,11 @@ jest.mock("../../services/redisSessionStorage");
 const redisClient = {} as redis.RedisClient;
 
 const tokenDurationSecs = 0;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  aDefaultLollipopAssertionRefDurationSec
 );
 
 const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = jest.fn());

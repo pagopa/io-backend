@@ -251,6 +251,11 @@ log.info(
   IDP_METADATA_REFRESH_INTERVAL_SECONDS
 );
 
+// LolliPoP protocol configuration params
+export const DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION = (3600 *
+  24 *
+  365 *
+  2) as Second; // 2y default assertionRef duration on redis cache
 export const LOLLIPOP_ALLOWED_USER_AGENTS = pipe(
   process.env.LOLLIPOP_ALLOWED_USER_AGENTS,
   PipeSeparatedListOf(SemverFromFromUserAgentString).decode,
@@ -260,6 +265,8 @@ export const LOLLIPOP_ALLOWED_USER_AGENTS = pipe(
     );
   })
 );
+
+// Spid/Cie Service Provider Config.
 export const serviceProviderConfig: IServiceProviderConfig = {
   IDPMetadataUrl: IDP_METADATA_URL,
   lollipopProviderConfig: pipe(

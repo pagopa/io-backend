@@ -79,7 +79,8 @@ import {
   FF_ROUTING_PUSH_NOTIF,
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   LOLLIPOP_API_CLIENT,
-  FF_LOLLIPOP_ENABLED
+  FF_LOLLIPOP_ENABLED,
+  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -244,7 +245,8 @@ export function newApp({
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
     REDIS_CLIENT,
-    tokenDurationSecs
+    tokenDurationSecs,
+    DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
   );
   // Setup Passport.
   // Add the strategy to authenticate proxy clients.

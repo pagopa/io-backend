@@ -1,6 +1,5 @@
 import * as redis from "redis";
 
-
 import { PagoPAUser } from "../../../generated/pagopa/PagoPAUser";
 
 import mockReq from "../../__mocks__/request";
@@ -12,7 +11,12 @@ import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import { User } from "../../types/user";
 import PagoPAController from "../pagoPAController";
-import { aCustomEmailAddress, mockedInitializedProfile, mockedUser } from "../../__mocks__/user_mock";
+import {
+  aCustomEmailAddress,
+  mockedInitializedProfile,
+  mockedUser
+} from "../../__mocks__/user_mock";
+import { Second } from "@pagopa/ts-commons/lib/units";
 
 const proxyUserResponse: PagoPAUser = {
   family_name: mockedUser.family_name,
@@ -53,9 +57,11 @@ jest.mock("../../services/profileService", () => {
 const redisClient = {} as redis.RedisClient;
 
 const tokenDurationSecs = 0;
+const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
-  tokenDurationSecs
+  tokenDurationSecs,
+  aDefaultLollipopAssertionRefDurationSec
 );
 
 describe("PagoPaController#getUser", () => {

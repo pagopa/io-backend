@@ -5,6 +5,8 @@
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import {
   BPDToken,
   FIMSToken,
@@ -65,6 +67,37 @@ export interface ISessionStorage {
   readonly getByFIMSToken: (
     token: FIMSToken
   ) => Promise<Either<Error, Option<User>>>;
+
+  /**
+   * Retrieve the LolliPoP assertionRef related to an user
+   *
+   * @param user The AppUser value used to get the related fiscalCode
+   */
+  readonly getLollipopAssertionRefForUser: (
+    user: UserV5
+  ) => Promise<Either<Error, AssertionRef>>;
+
+  /**
+   * Upsert the LolliPoP assertionRef related to an user
+   *
+   * @param user The AppUser value used to get the related fiscalCode
+   * @param assertionRef The identifier for the pubkey
+   * @param expireAssertionRefSec The ttl for the key, default value is configured in RedisSessionStorage instance
+   */
+  readonly setLollipopAssertionRefForUser: (
+    user: UserV5,
+    assertionRef: AssertionRef,
+    expireAssertionRefSec?: Second
+  ) => Promise<Either<Error, boolean>>;
+
+  /**
+   * Delete the Lollipop assertionRef related to an user
+   *
+   * @param fiscalCode A user fiscal code
+   */
+  readonly delLollipopAssertionRefForUser: (
+    fiscalCode: FiscalCode
+  ) => Promise<Either<Error, boolean>>;
 
   /**
    * Removes a value from the cache.

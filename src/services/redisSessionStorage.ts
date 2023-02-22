@@ -15,6 +15,8 @@ import { TaskEither } from "fp-ts/lib/TaskEither";
 import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
@@ -42,6 +44,7 @@ const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
+const lollipopFingerprintPrefix = "KEYS-";
 export const keyPrefixes = [
   sessionKeyPrefix,
   walletKeyPrefix,
@@ -52,7 +55,8 @@ export const keyPrefixes = [
   userSessionsSetKeyPrefix,
   sessionInfoKeyPrefix,
   noticeEmailPrefix,
-  blockedUserSetKey
+  blockedUserSetKey,
+  lollipopFingerprintPrefix
 ];
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -67,7 +71,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
   private readonly ttlTask: (key: string) => TaskEither<Error, number>;
   constructor(
     private readonly redisClient: redis.RedisClient,
-    private readonly tokenDurationSecs: number
+    private readonly tokenDurationSecs: number,
+    private readonly defaultDurationAssertionRefSec: Second
   ) {
     super();
     this.mgetTask = TE.taskify(this.redisClient.mget.bind(this.redisClient));
@@ -755,6 +760,82 @@ export default class RedisSessionStorage extends RedisStorageUtils
             )
           );
           return resolve(errorOrNoticeEmail);
+        }
+      );
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getLollipopAssertionRefForUser(user: UserV5) {
+    return new Promise<Either<Error, AssertionRef>>(resolve => {
+      this.redisClient.get(
+        `${lollipopFingerprintPrefix}${user.fiscal_code}`,
+        (err, value) => {
+          if (err) {
+            // Client returns an error.
+            return resolve(E.left(err));
+          }
+
+          if (value === null) {
+            return resolve(
+              E.left(new Error("The User have not registered a key"))
+            );
+          }
+          const errorOrLollipopFingerprint = pipe(
+            value,
+            AssertionRef.decode,
+            E.mapLeft(
+              validationErrors =>
+                new Error(errorsToReadableMessages(validationErrors).join("/"))
+            )
+          );
+          return resolve(errorOrLollipopFingerprint);
+        }
+      );
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async setLollipopAssertionRefForUser(
+    user: UserV5,
+    assertionRef: AssertionRef,
+    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
+  ) {
+    return new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.set(
+        `${lollipopFingerprintPrefix}${user.fiscal_code}`,
+        assertionRef,
+        "EX",
+        expireAssertionRefSec,
+        (err, value) => {
+          if (err) {
+            // Client returns an error.
+            return resolve(E.left(err));
+          }
+
+          const saveSessionInfoResult = this.falsyResponseToError(
+            this.singleStringReply(err, value),
+            new Error("Error setting user key")
+          );
+          resolve(saveSessionInfoResult);
+        }
+      );
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async delLollipopAssertionRefForUser(fiscalCode: FiscalCode) {
+    return new Promise<Either<Error, boolean>>(resolve => {
+      this.redisClient.del(
+        `${lollipopFingerprintPrefix}${fiscalCode}`,
+        (err, value) => {
+          resolve(this.integerReply(err, value));
         }
       );
     });
