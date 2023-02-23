@@ -666,59 +666,70 @@ describe("AuthenticationController#acs", () => {
     expect(mockCreateProfile).not.toBeCalled();
   });
 
-  it(`should fail if an error occours saving assertionRef for user in redis`, async () => {
-    const res = mockRes();
+  it.each`
+    scenario                      | setLollipopAssertionRefForUserResponse
+    ${"with false response"}      | ${Promise.resolve(E.right(false))}
+    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}
+    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}
+  `(
+    "should fail if an error occours saving assertionRef for user in redis $scenario",
+    async ({ setLollipopAssertionRefForUserResponse }) => {
+      const res = mockRes();
 
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
-      TE.of({
-        ...anActivatedPubKey,
-        assertion_ref: newAssertionRef
-      } as ActivatedPubKey)
-    );
-    mockSetLollipop.mockImplementationOnce(
-      (_, __, ___) => Promise.resolve(E.right(false)) // TODO: test left and reject
-    );
+      mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+      mockDelLollipop.mockResolvedValueOnce(E.right(true));
+      mockActivateLolliPoPKey.mockImplementationOnce(
+        (newAssertionRef, __, ___) =>
+          TE.of({
+            ...anActivatedPubKey,
+            assertion_ref: newAssertionRef
+          } as ActivatedPubKey)
+      );
+      mockSetLollipop.mockImplementationOnce(
+        (_, __, ___) => setLollipopAssertionRefForUserResponse
+      );
 
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
-    response.apply(res);
+      const response = await lollipopActivatedController.acs(validUserPayload);
+      response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      detail: "Internal server error: Error Activation Lollipop Key",
-      kind: "IResponseErrorInternal"
-    });
-    expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
-    expect(mockActivateLolliPoPKey).toBeCalledWith(
-      aNewAssertionRef,
-      aFiscalCode,
-      anAssertion
-    );
-    expect(mockSetLollipop).toBeCalledWith(
-      expect.objectContaining({
-        fiscal_code: aFiscalCode
-      }),
-      aNewAssertionRef
-    );
-    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+      expect(lollipopActivatedController).toBeTruthy();
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        detail: "Internal server error: Error Activation Lollipop Key",
+        kind: "IResponseErrorInternal"
+      });
+      expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
+      expect(mockActivateLolliPoPKey).toBeCalledWith(
+        aNewAssertionRef,
+        aFiscalCode,
+        anAssertion
+      );
+      expect(mockSetLollipop).toBeCalledWith(
+        expect.objectContaining({
+          fiscal_code: aFiscalCode
+        }),
+        aNewAssertionRef
+      );
+      expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
+        anAssertionRef
+      );
 
-    expect(mockSet).not.toBeCalled();
-    expect(mockGetProfile).not.toBeCalled();
-    expect(mockCreateProfile).not.toBeCalled();
-  });
+      expect(mockSet).not.toBeCalled();
+      expect(mockGetProfile).not.toBeCalled();
+      expect(mockCreateProfile).not.toBeCalled();
+    }
+  );
 
   it(`should fail if an error occours activating a pubkey for lollipop`, async () => {
     const res = mockRes();
@@ -763,41 +774,53 @@ describe("AuthenticationController#acs", () => {
     expect(mockCreateProfile).not.toBeCalled();
   });
 
-  it(`should fail if an error occours deleting the previous CF-assertionRef link on redis`, async () => {
-    const res = mockRes();
+  it.each`
+    scenario                      | delLollipopAssertionRefForUserResponse                 | errorMessage
+    ${"with false response"}      | ${Promise.resolve(E.right(false))}                     | ${"Error on LolliPoP initialization"}
+    ${"with left response"}       | ${Promise.resolve(E.left(new Error("Error on left")))} | ${"Error on left"}
+    ${"with a promise rejection"} | ${Promise.reject(new Error("Error on reject"))}        | ${"Error on reject"}
+  `(
+    "should fail if an error occours deleting the previous CF-assertionRef link on redis $scenario",
+    async ({ delLollipopAssertionRefForUserResponse, errorMessage }) => {
+      const res = mockRes();
 
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockDelLollipop.mockResolvedValueOnce(E.right(false)); // TODO: test right and reject
+      mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+      mockDelLollipop.mockImplementationOnce(
+        _ => delLollipopAssertionRefForUserResponse
+      );
 
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
-    response.apply(res);
+      const response = await lollipopActivatedController.acs(validUserPayload);
+      response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      detail: "Internal server error: Error on LolliPoP initialization",
-      kind: "IResponseErrorInternal"
-    });
-    expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
-    expect(mockActivateLolliPoPKey).not.toBeCalled();
-    expect(mockSetLollipop).not.toBeCalled();
-    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+      expect(lollipopActivatedController).toBeTruthy();
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(response).toEqual({
+        apply: expect.any(Function),
+        detail: `Internal server error: ${errorMessage}`,
+        kind: "IResponseErrorInternal"
+      });
+      expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
+      expect(mockActivateLolliPoPKey).not.toBeCalled();
+      expect(mockSetLollipop).not.toBeCalled();
+      expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
+        anAssertionRef
+      );
 
-    expect(mockSet).not.toBeCalled();
-    expect(mockGetProfile).not.toBeCalled();
-    expect(mockCreateProfile).not.toBeCalled();
-  });
+      expect(mockSet).not.toBeCalled();
+      expect(mockGetProfile).not.toBeCalled();
+      expect(mockCreateProfile).not.toBeCalled();
+    }
+  );
 
   it(`should fail if an error occours reading the previous CF-assertionRef link on redis`, async () => {
     const res = mockRes();
