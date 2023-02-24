@@ -56,7 +56,6 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
   THEN the message is correctly sent
   `, async () => {
     const service = new LollipopService(mockLollipopApiClient, "", "");
-    expect(service).toBeDefined();
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef
     };
@@ -74,7 +73,6 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
   THEN the method returns a reject
   `, async () => {
     const service = new LollipopService(mockLollipopApiClient, "", "");
-    expect(service).toBeDefined();
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef
     };
@@ -95,7 +93,6 @@ describe("LollipopService#activateLolliPoPKey", () => {
   THEN returns an ActivatedPubKey object
   `, async () => {
     const service = new LollipopService(mockLollipopApiClient, "", "");
-    expect(service).toBeDefined();
     mockActivatePubKey.mockResolvedValueOnce(
       t.success({
         status: 200,
@@ -120,7 +117,6 @@ describe("LollipopService#activateLolliPoPKey", () => {
   THEN returns an error
   `, async () => {
     const service = new LollipopService(mockLollipopApiClient, "", "");
-    expect(service).toBeDefined();
     mockActivatePubKey.mockResolvedValueOnce(
       t.success({
         status: 400,
@@ -149,7 +145,6 @@ describe("LollipopService#activateLolliPoPKey", () => {
   THEN returns an error
   `, async () => {
     const service = new LollipopService(mockLollipopApiClient, "", "");
-    expect(service).toBeDefined();
     // We use a failed decode to map a generic Validation Errors
     mockActivatePubKey.mockResolvedValueOnce(NonEmptyString.decode(""));
     const response = await service.activateLolliPoPKey(
@@ -170,7 +165,6 @@ describe("LollipopService#activateLolliPoPKey", () => {
   THEN returns an error
   `, async () => {
     const service = new LollipopService(mockLollipopApiClient, "", "");
-    expect(service).toBeDefined();
     mockActivatePubKey.mockRejectedValueOnce(new Error("Error"));
     const response = await service.activateLolliPoPKey(
       anAssertionRef,
