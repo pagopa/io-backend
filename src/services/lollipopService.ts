@@ -73,8 +73,8 @@ export default class LollipopService {
       TE.chain(flow(TE.fromEither, TE.mapLeft(errorsToError))),
       TE.chain(
         TE.fromPredicate(
-          (_): _ is IResponseType<200, ActivatedPubKey, never> =>
-            _.status === 200,
+          (res): res is IResponseType<200, ActivatedPubKey, never> =>
+            res.status === 200,
           () =>
             new Error(
               "Error calling the function lollipop api for pubkey activation"
