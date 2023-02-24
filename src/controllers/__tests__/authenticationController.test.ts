@@ -646,6 +646,12 @@ describe("AuthenticationController#acs", () => {
       "/profile.html?token=" + mockSessionToken
     );
 
+    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
+    expect(mockGetLollipop).toBeCalledWith(
+      expect.objectContaining({
+        fiscal_code: aFiscalCode
+      })
+    );
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
@@ -710,6 +716,12 @@ describe("AuthenticationController#acs", () => {
         kind: "IResponseErrorInternal"
       });
 
+      expect(mockGetLollipop).toHaveBeenCalledTimes(1);
+      expect(mockGetLollipop).toBeCalledWith(
+        expect.objectContaining({
+          fiscal_code: aFiscalCode
+        })
+      );
       expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
         anAssertionRef
       );
@@ -763,6 +775,12 @@ describe("AuthenticationController#acs", () => {
       kind: "IResponseErrorInternal"
     });
 
+    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
+    expect(mockGetLollipop).toBeCalledWith(
+      expect.objectContaining({
+        fiscal_code: aFiscalCode
+      })
+    );
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
@@ -814,6 +832,12 @@ describe("AuthenticationController#acs", () => {
         kind: "IResponseErrorInternal"
       });
 
+      expect(mockGetLollipop).toHaveBeenCalledTimes(1);
+      expect(mockGetLollipop).toBeCalledWith(
+        expect.objectContaining({
+          fiscal_code: aFiscalCode
+        })
+      );
       expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
         anAssertionRef
       );
@@ -854,6 +878,12 @@ describe("AuthenticationController#acs", () => {
       kind: "IResponseErrorInternal"
     });
 
+    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
+    expect(mockGetLollipop).toBeCalledWith(
+      expect.objectContaining({
+        fiscal_code: aFiscalCode
+      })
+    );
     expect(mockRevokePreviousAssertionRef).not.toBeCalled();
     expect(mockDelLollipop).not.toBeCalled();
     expect(mockActivateLolliPoPKey).not.toBeCalled();
