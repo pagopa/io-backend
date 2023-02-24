@@ -274,13 +274,11 @@ export default class AuthenticationController {
       TE.chainW(assertionRef =>
         pipe(
           AP.sequenceT(TE.ApplicativeSeq)(
-            pipe(
-              this.lollipopParams.lollipopService.activateLolliPoPKey(
-                assertionRef,
-                user.fiscal_code,
-                spidUser.getAssertionXml(),
-                () => addSeconds(new Date(), tokenDurationSecs)
-              )
+            this.lollipopParams.lollipopService.activateLolliPoPKey(
+              assertionRef,
+              user.fiscal_code,
+              spidUser.getAssertionXml(),
+              () => addSeconds(new Date(), tokenDurationSecs)
             ),
             pipe(
               TE.tryCatch(
