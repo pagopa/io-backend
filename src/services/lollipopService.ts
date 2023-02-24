@@ -43,7 +43,7 @@ export default class LollipopService {
   }
 
   /**
-   * Update the pub key status to VALiDATED into the fn-lollipop
+   * Update the pub key status to VALIDATED into the fn-lollipop
    * when the login process is completed.
    *
    * @param assertionRef the pub key identifier
