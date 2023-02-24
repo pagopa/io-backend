@@ -81,7 +81,7 @@ export default class LollipopService {
             )
         )
       ),
-      TE.map(_ => _.value)
+      TE.map(res => res.value)
     );
   }
 }
