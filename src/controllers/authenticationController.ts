@@ -266,14 +266,9 @@ export default class AuthenticationController {
       ),
       TE.chainW(
         flow(
-          TE.fromPredicate(
-            (_): _ is O.Some<AssertionRef> =>
-              this.lollipopParams.isLollipopEnabled &&
-              O.isSome(_) &&
-              AssertionRef.is(_.value),
-            () => O.none as O.Option<IResponseErrorInternal>
-          ),
-          TE.map(_ => _.value)
+          O.chain(O.fromPredicate(() => this.lollipopParams.isLollipopEnabled)),
+          O.chainEitherK(AssertionRef.decode),
+          TE.fromOption(() => O.none)
         )
       ),
       TE.chainW(assertionRef =>
