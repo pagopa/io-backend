@@ -253,7 +253,7 @@ export default class AuthenticationController {
           () => new Error("Error on LolliPoP initialization")
         )
       ),
-      TE.mapLeft(_ => O.some(ResponseErrorInternal(_.message))),
+      TE.mapLeft(error => O.some(ResponseErrorInternal(error.message))),
       TE.chainW(() =>
         TE.of(
           getRequestIDFromResponse(
