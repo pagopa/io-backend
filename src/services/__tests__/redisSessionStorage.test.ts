@@ -1650,6 +1650,20 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
       expect(response.right.value).toEqual(anAssertionRef);
   });
 
+  it("should success and return none if assertionRef is missing", async () => {
+    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    const response = await sessionStorage.getLollipopAssertionRefForUser(
+      aValidUser
+    );
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
+    expect(E.isRight(response)).toBeTruthy();
+    if (E.isRight(response)) expect(O.isNone(response.right)).toBeTruthy();
+  });
   it("should fail with a left response if an error occurs on redis", async () => {
     const expectedError = new Error("redis Error");
     mockGet.mockImplementationOnce((_, callback) => callback(expectedError));
