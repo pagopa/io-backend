@@ -247,11 +247,9 @@ export default class AuthenticationController {
         E.toError
       ),
       TE.chainEitherK(identity),
-      TE.chain(
-        TE.fromPredicate(
-          _ => _ === true,
-          () => new Error("Error on LolliPoP initialization")
-        )
+      TE.filterOrElse(
+        delLollipopAssertionRefResult => delLollipopAssertionRefResult === true,
+        () => new Error("Error on LolliPoP initialization")
       ),
       TE.mapLeft(error => O.some(ResponseErrorInternal(error.message))),
       TE.chainW(() =>
@@ -290,12 +288,11 @@ export default class AuthenticationController {
                 E.toError
               ),
               TE.chainEitherK(identity),
-              TE.chain(
-                TE.fromPredicate(
-                  _ => _ === true,
-                  () =>
-                    new Error("Error creating CF thumbprint relation in redis")
-                )
+              TE.filterOrElse(
+                setLollipopAssertionRefForUserRes =>
+                  setLollipopAssertionRefForUserRes === true,
+                () =>
+                  new Error("Error creating CF thumbprint relation in redis")
               )
             )
           ),
