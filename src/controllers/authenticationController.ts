@@ -32,6 +32,7 @@ import * as appInsights from "applicationinsights";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
+import { addSeconds } from "date-fns";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
@@ -42,7 +43,8 @@ import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
-  clientProfileRedirectionUrl
+  clientProfileRedirectionUrl,
+  tokenDurationSecs
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -256,7 +258,7 @@ export default class AuthenticationController {
         TE.of(
           getRequestIDFromResponse(
             new DOMParser().parseFromString(
-              errorOrSpidUser.right.getAssertionXml(),
+              spidUser.getAssertionXml(),
               "text/xml"
             )
           )
@@ -281,7 +283,8 @@ export default class AuthenticationController {
               this.lollipopParams.lollipopService.activateLolliPoPKey(
                 assertionRef,
                 user.fiscal_code,
-                errorOrSpidUser.right.getAssertionXml()
+                spidUser.getAssertionXml(),
+                () => addSeconds(new Date(), tokenDurationSecs)
               )
             ),
             pipe(

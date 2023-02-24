@@ -56,14 +56,12 @@ import { PubKeyStatusEnum } from "../../../generated/lollipop-api/PubKeyStatus";
 import { AssertionRef } from "../../../generated/lollipop-api/AssertionRef";
 import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType";
 import { JwkPubKey } from "../../../generated/lollipop-api/JwkPubKey";
+import {
+  aLollipopAssertion,
+  anAssertionRef,
+  anotherAssertionRef
+} from "../../__mocks__/lollipop";
 
-const anAssertionRef = `sha256-avalue` as AssertionRef;
-const aNewAssertionRef = `sha256-anewvalue` as AssertionRef;
-const anAssertion = `<samlp:Response Destination="https://that.spid.example.org/saml2/acs/post" ID="_5e728601-9ad4-4686-b269-81d107a8194a" InResponseTo="${aNewAssertionRef}" IssueInstant="2021-02-04T15:41:59Z" Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
-    <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">
-        http://localhost:8080
-    </saml:Issuer>
-</samlp:Response>`;
 // validUser has all every field correctly set.
 const validUserPayload = {
   authnContextClassRef: aValidSpidLevel,
@@ -73,7 +71,7 @@ const validUserPayload = {
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
-  getAssertionXml: () => anAssertion
+  getAssertionXml: () => aLollipopAssertion
 };
 // invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
@@ -649,15 +647,16 @@ describe("AuthenticationController#acs", () => {
 
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
-      aNewAssertionRef,
+      anotherAssertionRef,
       aFiscalCode,
-      anAssertion
+      aLollipopAssertion,
+      expect.any(Function)
     );
     expect(mockSetLollipop).toBeCalledWith(
       expect.objectContaining({
         fiscal_code: aFiscalCode
       }),
-      aNewAssertionRef
+      anotherAssertionRef
     );
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
 
@@ -711,15 +710,16 @@ describe("AuthenticationController#acs", () => {
       });
       expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
       expect(mockActivateLolliPoPKey).toBeCalledWith(
-        aNewAssertionRef,
+        anotherAssertionRef,
         aFiscalCode,
-        anAssertion
+        aLollipopAssertion,
+        expect.any(Function)
       );
       expect(mockSetLollipop).toBeCalledWith(
         expect.objectContaining({
           fiscal_code: aFiscalCode
         }),
-        aNewAssertionRef
+        anotherAssertionRef
       );
       expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
         anAssertionRef
@@ -762,9 +762,10 @@ describe("AuthenticationController#acs", () => {
     });
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
-      aNewAssertionRef,
+      anotherAssertionRef,
       aFiscalCode,
-      anAssertion
+      aLollipopAssertion,
+      expect.any(Function)
     );
     expect(mockSetLollipop).not.toBeCalled();
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);

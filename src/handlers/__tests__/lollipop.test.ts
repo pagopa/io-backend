@@ -1,4 +1,4 @@
-import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import * as t from "io-ts";
 import * as jose from "jose";
 import { AssertionRef } from "../../../generated/lollipop-api/AssertionRef";
@@ -14,6 +14,7 @@ import {
 import * as E from "fp-ts/lib/Either";
 import { JwkPubKeyHashAlgorithmEnum } from "../../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { anEncodedJwkPubKey } from "../../__mocks__/lollipop";
 
 const aJwkPubKey: JwkPubKey = {
   alg: "alg",
@@ -23,10 +24,10 @@ const aJwkPubKey: JwkPubKey = {
 };
 const aNewPubKey: NewPubKey = {
   assertion_ref: "sha256-123ac" as AssertionRef,
-  pub_key: aJwkPubKey,
+  pub_key: anEncodedJwkPubKey,
   status: PubKeyStatusEnum.PENDING,
-  ttl: 2 as NonNegativeNumber,
-  version: 0 as NonNegativeNumber
+  ttl: 2 as NonNegativeInteger,
+  version: 0 as NonNegativeInteger
 };
 
 const tokenizeJwk = (jwk: JwkPubKey) =>

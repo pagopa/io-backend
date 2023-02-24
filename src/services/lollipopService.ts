@@ -5,6 +5,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { IO } from "fp-ts/lib/IO";
 import { errorsToError } from "../utils/errorsFormatter";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { ActivatedPubKey } from "../../generated/lollipop-api/ActivatedPubKey";
@@ -26,6 +27,12 @@ export default class LollipopService {
     );
   }
 
+  /**
+   * Send a message into the Queue to schedule the pub key revoke process
+   * on fn-lollipop.
+   *
+   * @param assertionRef the pub key identifier
+   */
   public revokePreviousAssertionRef(
     assertionRef: AssertionRef
   ): Promise<QueueSendMessageResponse> {
@@ -35,10 +42,19 @@ export default class LollipopService {
     return this.queueClient.sendMessage(base64EncodeObject(revokeMessage));
   }
 
+  /**
+   * Update the pub key status to VALiDATED into the fn-lollipop
+   * when the login process is completed.
+   *
+   * @param assertionRef the pub key identifier
+   * @param fiscalCode the user fiscal code
+   * @param assertion the SAML assertion related the login process
+   */
   public activateLolliPoPKey(
     assertionRef: AssertionRef,
     fiscalCode: FiscalCode,
-    assertion: NonEmptyString
+    assertion: NonEmptyString,
+    getExpirePubKeyFn: IO<Date>
   ): TE.TaskEither<Error, ActivatedPubKey> {
     return pipe(
       TE.tryCatch(
@@ -48,7 +64,7 @@ export default class LollipopService {
             body: {
               assertion,
               assertion_type: AssertionTypeEnum.SAML,
-              expires_at: new Date(), // TODO: Set the right expire time
+              expires_at: getExpirePubKeyFn(),
               fiscal_code: fiscalCode
             }
           }),
