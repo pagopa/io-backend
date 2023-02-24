@@ -636,15 +636,17 @@ describe("AuthenticationController#acs", () => {
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
     );
+
+    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
       "/profile.html?token=" + mockSessionToken
     );
 
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
       anotherAssertionRef,
@@ -658,7 +660,6 @@ describe("AuthenticationController#acs", () => {
       }),
       anotherAssertionRef
     );
-    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
 
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -698,16 +699,20 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
+      expect(lollipopActivatedController).toBeTruthy();
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
-      expect(lollipopActivatedController).toBeTruthy();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
         apply: expect.any(Function),
         detail: "Internal server error: Error Activation Lollipop Key",
         kind: "IResponseErrorInternal"
       });
+
+      expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
+        anAssertionRef
+      );
       expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
       expect(mockActivateLolliPoPKey).toBeCalledWith(
         anotherAssertionRef,
@@ -720,9 +725,6 @@ describe("AuthenticationController#acs", () => {
           fiscal_code: aFiscalCode
         }),
         anotherAssertionRef
-      );
-      expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
-        anAssertionRef
       );
 
       expect(mockSet).not.toBeCalled();
@@ -750,16 +752,18 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
+    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: "Internal server error: Error Activation Lollipop Key",
       kind: "IResponseErrorInternal"
     });
+
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
       anotherAssertionRef,
@@ -768,7 +772,6 @@ describe("AuthenticationController#acs", () => {
       expect.any(Function)
     );
     expect(mockSetLollipop).not.toBeCalled();
-    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
 
     expect(mockSet).not.toBeCalled();
     expect(mockGetProfile).not.toBeCalled();
@@ -800,22 +803,23 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
+      expect(lollipopActivatedController).toBeTruthy();
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
-      expect(lollipopActivatedController).toBeTruthy();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
         apply: expect.any(Function),
         detail: `Internal server error: ${errorMessage}`,
         kind: "IResponseErrorInternal"
       });
-      expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
-      expect(mockActivateLolliPoPKey).not.toBeCalled();
-      expect(mockSetLollipop).not.toBeCalled();
+
       expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
         anAssertionRef
       );
+      expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
+      expect(mockActivateLolliPoPKey).not.toBeCalled();
+      expect(mockSetLollipop).not.toBeCalled();
 
       expect(mockSet).not.toBeCalled();
       expect(mockGetProfile).not.toBeCalled();
@@ -838,10 +842,10 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
+    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -849,10 +853,11 @@ describe("AuthenticationController#acs", () => {
         "Internal server error: Error retrieving previous lollipop configuration",
       kind: "IResponseErrorInternal"
     });
+
+    expect(mockRevokePreviousAssertionRef).not.toBeCalled();
     expect(mockDelLollipop).not.toBeCalled();
     expect(mockActivateLolliPoPKey).not.toBeCalled();
     expect(mockSetLollipop).not.toBeCalled();
-    expect(mockRevokePreviousAssertionRef).not.toBeCalled();
 
     expect(mockSet).not.toBeCalled();
     expect(mockGetProfile).not.toBeCalled();
