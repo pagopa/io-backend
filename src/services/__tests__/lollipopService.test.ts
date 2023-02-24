@@ -104,6 +104,16 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+    expect(mockActivatePubKey).toBeCalledTimes(1);
+    expect(mockActivatePubKey).toBeCalledWith({
+      assertion_ref: anAssertionRef,
+      body: expect.objectContaining({
+        assertion: aLollipopAssertion,
+        assertion_type: AssertionTypeEnum.SAML,
+        expires_at: expect.any(Date),
+        fiscal_code: aFiscalCode
+      })
+    });
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) {
       expect(response.right).toEqual(anActivatedPubKey);
@@ -127,6 +137,16 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+    expect(mockActivatePubKey).toBeCalledTimes(1);
+    expect(mockActivatePubKey).toBeCalledWith({
+      assertion_ref: anAssertionRef,
+      body: expect.objectContaining({
+        assertion: aLollipopAssertion,
+        assertion_type: AssertionTypeEnum.SAML,
+        expires_at: expect.any(Date),
+        fiscal_code: aFiscalCode
+      })
+    });
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) {
       expect(response.left).toEqual(
@@ -150,6 +170,16 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+    expect(mockActivatePubKey).toBeCalledTimes(1);
+    expect(mockActivatePubKey).toBeCalledWith({
+      assertion_ref: anAssertionRef,
+      body: expect.objectContaining({
+        assertion: aLollipopAssertion,
+        assertion_type: AssertionTypeEnum.SAML,
+        expires_at: expect.any(Date),
+        fiscal_code: aFiscalCode
+      })
+    });
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) {
       expect(response.left).toEqual(expect.any(Error));
@@ -168,6 +198,16 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+    expect(mockActivatePubKey).toBeCalledTimes(1);
+    expect(mockActivatePubKey).toBeCalledWith({
+      assertion_ref: anAssertionRef,
+      body: expect.objectContaining({
+        assertion: aLollipopAssertion,
+        assertion_type: AssertionTypeEnum.SAML,
+        expires_at: expect.any(Date),
+        fiscal_code: aFiscalCode
+      })
+    });
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) {
       expect(response.left).toEqual(new Error("Error"));
