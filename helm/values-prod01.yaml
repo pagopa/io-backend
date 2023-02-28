@@ -90,7 +90,6 @@ microservice-chart:
     JWT_SUPPORT_TOKEN_ISSUER: 'app-backend.io.italia.it'
     JWT_ZENDESK_SUPPORT_TOKEN_EXPIRATION: '1200'
     JWT_ZENDESK_SUPPORT_TOKEN_ISSUER: 'app-backend.io.italia.it'
-    LOLLIPOP_ALLOWED_USER_AGENTS: 'IO-App/2.23.0'
     MIT_VOUCHER_API_BASE_PATH: '/api/v1/mitvoucher/auth'
     MYPORTAL_BASE_PATH: '/myportal/api/v1'
     NODE_ENV: 'production'

@@ -64,7 +64,7 @@ export default class LollipopService {
             body: {
               assertion,
               assertion_type: AssertionTypeEnum.SAML,
-              expires_at: getExpirePubKeyFn(),
+              expired_at: getExpirePubKeyFn(),
               fiscal_code: fiscalCode
             }
           }),

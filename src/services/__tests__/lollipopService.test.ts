@@ -15,6 +15,7 @@ import {
 } from "../../__mocks__/lollipop";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import LollipopService from "../lollipopService";
+import { AssertionFileName } from "../../../generated/lollipop-api/AssertionFileName";
 
 const mockSendMessage = jest.fn();
 jest.mock("@azure/storage-queue", () => ({
@@ -38,10 +39,10 @@ const mockLollipopApiClient = {
 } as ReturnType<LollipopApiClient>;
 
 const anActivatedPubKey: ActivatedPubKey = {
-  assertion_file_name: `${aFiscalCode}-${anAssertionRef}` as NonEmptyString,
+  assertion_file_name: `${aFiscalCode}-${anAssertionRef}` as AssertionFileName,
   assertion_ref: anAssertionRef,
   assertion_type: AssertionTypeEnum.SAML,
-  expires_at: new Date(),
+  expired_at: new Date(),
   fiscal_code: aFiscalCode,
   pub_key: anEncodedJwkPubKey,
   status: PubKeyStatusEnum.VALID,
@@ -110,7 +111,7 @@ describe("LollipopService#activateLolliPoPKey", () => {
       body: expect.objectContaining({
         assertion: aLollipopAssertion,
         assertion_type: AssertionTypeEnum.SAML,
-        expires_at: expect.any(Date),
+        expired_at: expect.any(Date),
         fiscal_code: aFiscalCode
       })
     });
@@ -143,7 +144,7 @@ describe("LollipopService#activateLolliPoPKey", () => {
       body: expect.objectContaining({
         assertion: aLollipopAssertion,
         assertion_type: AssertionTypeEnum.SAML,
-        expires_at: expect.any(Date),
+        expired_at: expect.any(Date),
         fiscal_code: aFiscalCode
       })
     });
@@ -176,7 +177,7 @@ describe("LollipopService#activateLolliPoPKey", () => {
       body: expect.objectContaining({
         assertion: aLollipopAssertion,
         assertion_type: AssertionTypeEnum.SAML,
-        expires_at: expect.any(Date),
+        expired_at: expect.any(Date),
         fiscal_code: aFiscalCode
       })
     });
@@ -204,7 +205,7 @@ describe("LollipopService#activateLolliPoPKey", () => {
       body: expect.objectContaining({
         assertion: aLollipopAssertion,
         assertion_type: AssertionTypeEnum.SAML,
-        expires_at: expect.any(Date),
+        expired_at: expect.any(Date),
         fiscal_code: aFiscalCode
       })
     });
