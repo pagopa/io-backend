@@ -256,12 +256,17 @@ export default class AuthenticationController {
         TE.of(
           getRequestIDFromResponse(
             new DOMParser().parseFromString(
-              spidUser.getAssertionXml(),
+              spidUser.getSamlResponseXml(),
               "text/xml"
             )
           )
         )
       ),
+      TE.map(inResponseTo => {
+        log.info(inResponseTo);
+        log.info(spidUser.getSamlResponseXml());
+        return inResponseTo;
+      }),
       TE.chainW(
         flow(
           O.chain(O.fromPredicate(() => this.lollipopParams.isLollipopEnabled)),
@@ -275,7 +280,7 @@ export default class AuthenticationController {
             this.lollipopParams.lollipopService.activateLolliPoPKey(
               assertionRef,
               user.fiscal_code,
-              spidUser.getAssertionXml(),
+              spidUser.getSamlResponseXml(),
               () => addSeconds(new Date(), tokenDurationSecs)
             ),
             pipe(

@@ -71,13 +71,15 @@ const validUserPayload = {
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
-  getAssertionXml: () => aLollipopAssertion
+  getAssertionXml: () => aLollipopAssertion,
+  getSamlResponseXml: () => aLollipopAssertion
 };
 // invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   fiscalNumber: aFiscalCode,
   getAssertionXml: () => "",
+  getSamlResponseXml: () => "",
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
   name: aValidName

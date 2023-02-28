@@ -19,7 +19,7 @@ services:
     image: node:10.14.2-alpine
     command: ["yarn", "hot-reload"]
     volumes:
-      - ".:/usr/src/app:cached"
+      - ".:/usr/src/app"
     networks:
       - io-be
 
