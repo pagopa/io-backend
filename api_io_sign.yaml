@@ -9,6 +9,26 @@ schemes:
 security:
   - Bearer: []
 paths:
+  "/metadata":
+    get:
+      operationId: getMetadata
+      summary: Get the io-sign metadata
+      responses:
+        "200":
+          description: io-sign metadata
+          schema:
+            $ref: "#/definitions/Metadata"
+        "401":
+          description: Bearer token null or expired.
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
   "/qtsp/clauses":
     get:
       operationId: getQtspClausesMetadata
@@ -433,6 +453,16 @@ definitions:
       - documents
       - created_at
       - updated_at
+
+  Metadata:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          minLength: 1
+      required:
+        - serviceId
+
 
 securityDefinitions:
   Bearer:

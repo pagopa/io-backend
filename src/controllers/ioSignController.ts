@@ -15,7 +15,8 @@ import {
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
   ResponseErrorInternal,
-  ResponseErrorValidation
+  ResponseErrorValidation,
+  ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
 import IoSignService from "src/services/ioSignService";
@@ -23,8 +24,10 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
+import { IO_SIGN_SERVICE_ID } from "../config";
 import { Id } from "../../generated/io-sign/Id";
 import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
+import { Metadata as IoSignMetadata } from "../../generated/io-sign/Metadata";
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
 import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
@@ -220,4 +223,9 @@ export default class IoSignController {
   public readonly getQtspClausesMetadata = (): Promise<
     IResponseErrorInternal | IResponseSuccessJson<QtspClausesMetadataDetailView>
   > => this.ioSignService.getQtspClausesMetadata();
+
+  public readonly getMetadata = (): IResponseSuccessJson<IoSignMetadata> =>
+    ResponseSuccessJson({
+      serviceId: IO_SIGN_SERVICE_ID as NonEmptyString
+    });
 }

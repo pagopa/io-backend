@@ -1304,6 +1304,12 @@ function registerIoSignAPIRoutes(
     profileService
   );
 
+  app.get(
+    `${basePath}/metadata`,
+    bearerSessionTokenAuth,
+    constantExpressHandler(ioSignController.getMetadata())
+  );
+
   app.post(
     `${basePath}/qtsp/clauses/filled_document`,
     bearerSessionTokenAuth,
