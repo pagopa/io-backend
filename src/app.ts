@@ -80,7 +80,9 @@ import {
   FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   LOLLIPOP_API_CLIENT,
   FF_LOLLIPOP_ENABLED,
-  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION
+  DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
+  LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
+  LOLLIPOP_REVOKE_QUEUE_NAME
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -168,6 +170,7 @@ import {
   NotificationServiceFactory
 } from "./services/notificationServiceFactory";
 import { lollipopLoginHandler } from "./handlers/lollipop";
+import LollipopService from "./services/lollipopService";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -465,6 +468,22 @@ export function newApp({
           })
         );
 
+        const LOLLIPOP_SERVICE = pipe(
+          E.tryCatch(
+            () =>
+              new LollipopService(
+                LOLLIPOP_API_CLIENT,
+                LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
+                LOLLIPOP_REVOKE_QUEUE_NAME
+              ),
+            err =>
+              new Error(`Error initializing UsersLoginLogService: [${err}]`)
+          ),
+          E.getOrElseW(err => {
+            throw err;
+          })
+        );
+
         const acsController: AuthenticationController = new AuthenticationController(
           SESSION_STORAGE,
           TOKEN_SERVICE,
@@ -475,6 +494,10 @@ export function newApp({
           USERS_LOGIN_LOG_SERVICE,
           TEST_LOGIN_FISCAL_CODES,
           FF_USER_AGE_LIMIT_ENABLED,
+          {
+            isLollipopEnabled: FF_LOLLIPOP_ENABLED,
+            lollipopService: LOLLIPOP_SERVICE
+          },
           appInsightsClient
         );
 

@@ -7,6 +7,7 @@
 import * as express from "express";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as AP from "fp-ts/lib/Apply";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -25,10 +26,16 @@ import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
 import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
+import * as TE from "fp-ts/lib/TaskEither";
+import { DOMParser } from "xmldom";
+import { addSeconds } from "date-fns";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { LollipopParams } from "../types/lollipop";
+import { getRequestIDFromResponse } from "../utils/spid";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { isOlderThan } from "../utils/date";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
@@ -36,7 +43,8 @@ import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
-  clientProfileRedirectionUrl
+  clientProfileRedirectionUrl,
+  tokenDurationSecs
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -86,13 +94,14 @@ export default class AuthenticationController {
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
+    private readonly lollipopParams: LollipopParams,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
    * The Assertion consumer service.
    */
-  // eslint-disable-next-line max-lines-per-function
+  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
   public async acs(
     userPayload: unknown
   ): Promise<
@@ -199,6 +208,106 @@ export default class AuthenticationController {
       fimsToken as FIMSToken,
       sessionTrackingId
     );
+
+    const errorOrMaybeAssertionRef = this.lollipopParams.isLollipopEnabled
+      ? await this.sessionStorage.getLollipopAssertionRefForUser(user)
+      : E.right(O.none);
+
+    if (E.isLeft(errorOrMaybeAssertionRef)) {
+      return ResponseErrorInternal(
+        "Error retrieving previous lollipop configuration"
+      );
+    }
+
+    if (
+      this.lollipopParams.isLollipopEnabled &&
+      O.isSome(errorOrMaybeAssertionRef.right)
+    ) {
+      // Sending a revoke message for previous assertionRef related to the same fiscalCode
+      // This operation is fire and forget
+      this.lollipopParams.lollipopService
+        .revokePreviousAssertionRef(errorOrMaybeAssertionRef.right.value)
+        .catch(err => {
+          log.error(
+            "acs: error sending revoke message for previous assertionRef [%s]",
+            err
+          );
+        });
+    }
+
+    const errorOrActivatedPubKey = await pipe(
+      // Delete the reference to CF and assertionRef for lollipop.
+      // This operation must be performed even if the lollipop FF is disabled
+      // to avoid inconsistency on CF-key relation if the FF will be re-enabled.
+      TE.tryCatch(
+        () =>
+          this.sessionStorage.delLollipopAssertionRefForUser(
+            spidUser.fiscalNumber
+          ),
+        E.toError
+      ),
+      TE.chainEitherK(identity),
+      TE.filterOrElse(
+        delLollipopAssertionRefResult => delLollipopAssertionRefResult === true,
+        () => new Error("Error on LolliPoP initialization")
+      ),
+      TE.mapLeft(error => O.some(ResponseErrorInternal(error.message))),
+      TE.chainW(() =>
+        TE.of(
+          getRequestIDFromResponse(
+            new DOMParser().parseFromString(
+              spidUser.getAssertionXml(),
+              "text/xml"
+            )
+          )
+        )
+      ),
+      TE.chainW(
+        flow(
+          O.chain(O.fromPredicate(() => this.lollipopParams.isLollipopEnabled)),
+          O.chainEitherK(AssertionRef.decode),
+          TE.fromOption(() => O.none)
+        )
+      ),
+      TE.chainW(assertionRef =>
+        pipe(
+          AP.sequenceT(TE.ApplicativeSeq)(
+            this.lollipopParams.lollipopService.activateLolliPoPKey(
+              assertionRef,
+              user.fiscal_code,
+              spidUser.getAssertionXml(),
+              () => addSeconds(new Date(), tokenDurationSecs)
+            ),
+            pipe(
+              TE.tryCatch(
+                () =>
+                  this.sessionStorage.setLollipopAssertionRefForUser(
+                    user,
+                    assertionRef
+                  ),
+                E.toError
+              ),
+              TE.chainEitherK(identity),
+              TE.filterOrElse(
+                setLollipopAssertionRefForUserRes =>
+                  setLollipopAssertionRefForUserRes === true,
+                () =>
+                  new Error("Error creating CF thumbprint relation in redis")
+              )
+            )
+          ),
+          TE.mapLeft(() =>
+            O.some(ResponseErrorInternal("Error Activation Lollipop Key"))
+          )
+        )
+      )
+    )();
+    if (
+      E.isLeft(errorOrActivatedPubKey) &&
+      O.isSome(errorOrActivatedPubKey.left)
+    ) {
+      return errorOrActivatedPubKey.left.value;
+    }
 
     // Attempt to create a new session object while we fetch an existing profile
     // for the user

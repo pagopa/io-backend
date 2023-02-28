@@ -769,7 +769,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async getLollipopAssertionRefForUser(user: UserV5) {
-    return new Promise<Either<Error, AssertionRef>>(resolve => {
+    return new Promise<Either<Error, O.Option<AssertionRef>>>(resolve => {
       this.redisClient.get(
         `${lollipopFingerprintPrefix}${user.fiscal_code}`,
         (err, value) => {
@@ -779,9 +779,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
           }
 
           if (value === null) {
-            return resolve(
-              E.left(new Error("The User have not registered a key"))
-            );
+            return resolve(E.right(O.none));
           }
           const errorOrLollipopFingerprint = pipe(
             value,
@@ -789,7 +787,8 @@ export default class RedisSessionStorage extends RedisStorageUtils
             E.mapLeft(
               validationErrors =>
                 new Error(errorsToReadableMessages(validationErrors).join("/"))
-            )
+            ),
+            E.map(O.some)
           );
           return resolve(errorOrLollipopFingerprint);
         }

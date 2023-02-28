@@ -694,13 +694,13 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-functions-commons@^26.3.0":
-  version "26.3.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-26.3.0.tgz#6ac816adb0778bbec8a237f4bfa90a6ecbb3a9f4"
-  integrity sha512-Ngbv19s+HJmdY8hCKxZi0AfHsFVFM8Q6gE+CXMoE3LfxTSlqRmVf0bWsZEpZmjrC/BpIEpX9Ot5k30FXN0UzGw==
+"@pagopa/io-functions-commons@^27.2.0":
+  version "27.2.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-27.2.0.tgz#273284aeb21ec077a9d94db92a23e70284eb1262"
+  integrity sha512-/LUQSedyEtzBOffIcsQCSOR93HPLOXBH5ZuPDZxEfmUy79SR/fjZhuGQs8C0dkeufaPjx1EnA3gxF3uirT3nig==
   dependencies:
     "@azure/cosmos" "^3.17.1"
-    "@pagopa/ts-commons" "^10.9.0"
+    "@pagopa/ts-commons" "^10.13.0"
     applicationinsights "^1.8.10"
     azure-storage "^2.10.5"
     cidr-matcher "^2.1.1"
@@ -730,10 +730,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^9.2.0":
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-9.2.0.tgz#909a78bb77b61e57f11e943687fc539e3c72b826"
-  integrity sha512-qewhSx2pULMkT3XMjASzQmKIkqYmknf1B4ddlMM7o3E7Btdn9XUX5IPbw2FVJ9mK+SlclOQ3KOmr1G5TiPK1cQ==
+"@pagopa/io-spid-commons@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-10.0.0.tgz#5fc485d4e61f2439ca11510c109db6d8056d4e96"
+  integrity sha512-zR8cFDDdZzryBahEd2dSpJyfAk9/p+WtqaTndxnxnUbXI8IS1p8UitiDqD2xUf0vnu0PDO7ezIVizMIXUpsSRQ==
   dependencies:
     "@pagopa/ts-commons" "^10.12.0"
     "@types/redis" "^2.8.32"
@@ -799,24 +799,26 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^10.3.0":
-  version "10.7.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.7.0.tgz#fdadae0a996cc96455c21ac9383f61da3e4a14fd"
-  integrity sha512-SusRIu787SRRtUBFumnaCdZzLvk12+PqxuQT0/o4la3dCm0OxeA0Zhmg2Cx4DbeAGddJFB1rtWn4ekTCWlLc4A==
+"@pagopa/ts-commons@^10.13.0":
+  version "10.14.1"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.14.1.tgz#d5cfbd1b3637a6938500648f1e117e83067fa6a9"
+  integrity sha512-QbsI7KhJvY1s7nRZBa8sOIevtgmC80T0OAb8BxtYBq3th2BRj4ZLhYRoQWyt2mA5pmgfFp6j6U0fpocFLM1ivA==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"
     applicationinsights "^1.8.10"
     fp-ts "^2.11.0"
     io-ts "^2.2.16"
+    jose "^4.11.2"
     json-set-map "^1.1.2"
     node-fetch "^2.6.0"
+    semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^10.9.0":
-  version "10.10.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.10.0.tgz#9eae84003956ac44aad710b91abd7614bb09665e"
-  integrity sha512-/bIEHIvswrp9mi+NdBOJftPAP9YeI5Z1+mK1WV/RDTvy6nb5Zd7C9kwdBJbXjl4zW/eiQsb5PqLHEC6odQKlWg==
+"@pagopa/ts-commons@^10.3.0":
+  version "10.7.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.7.0.tgz#fdadae0a996cc96455c21ac9383f61da3e4a14fd"
+  integrity sha512-SusRIu787SRRtUBFumnaCdZzLvk12+PqxuQT0/o4la3dCm0OxeA0Zhmg2Cx4DbeAGddJFB1rtWn4ekTCWlLc4A==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"

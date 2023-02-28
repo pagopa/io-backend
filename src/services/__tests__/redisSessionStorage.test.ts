@@ -40,7 +40,7 @@ import {
   mockZendeskToken
 } from "../../__mocks__/user_mock";
 import { Second } from "@pagopa/ts-commons/lib/units";
-import { AssertionRefSha256 } from "../../../generated/lollipop-api/AssertionRefSha256";
+import { anAssertionRef } from "../../__mocks__/lollipop";
 
 // utils that extracts the last argument as callback and calls it
 const callCallback = (err: any, value?: any) => (...args: readonly any[]) => {
@@ -56,8 +56,6 @@ const aFiscalCode = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalCode = "INVALID-FC" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-
-const anAssertionRef = "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha256;
 
 // mock for a valid User
 const aValidUser: UserV5 = {
@@ -1648,9 +1646,24 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
       expect.any(Function)
     );
     expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response)) expect(response.right).toEqual(anAssertionRef);
+    if (E.isRight(response) && O.isSome(response.right))
+      expect(response.right.value).toEqual(anAssertionRef);
   });
 
+  it("should success and return none if assertionRef is missing", async () => {
+    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    const response = await sessionStorage.getLollipopAssertionRefForUser(
+      aValidUser
+    );
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${aValidUser.fiscal_code}`,
+      expect.any(Function)
+    );
+    expect(E.isRight(response)).toBeTruthy();
+    if (E.isRight(response)) expect(O.isNone(response.right)).toBeTruthy();
+  });
   it("should fail with a left response if an error occurs on redis", async () => {
     const expectedError = new Error("redis Error");
     mockGet.mockImplementationOnce((_, callback) => callback(expectedError));

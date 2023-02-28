@@ -6,6 +6,7 @@ import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import * as O from "fp-ts/lib/Option";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import {
   BPDToken,
@@ -75,7 +76,7 @@ export interface ISessionStorage {
    */
   readonly getLollipopAssertionRefForUser: (
     user: UserV5
-  ) => Promise<Either<Error, AssertionRef>>;
+  ) => Promise<Either<Error, O.Option<AssertionRef>>>;
 
   /**
    * Upsert the LolliPoP assertionRef related to an user
