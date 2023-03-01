@@ -7,10 +7,10 @@ import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
-import { ISessionStorage } from "src/services/ISessionStorage";
 import * as E from "fp-ts/Either";
 import { ulid } from "ulid";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { ISessionStorage } from "../../services/ISessionStorage";
 import { withUserFromRequest } from "../../types/user";
 import { LollipopApiClient } from "../../clients/lollipop";
 import {

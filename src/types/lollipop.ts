@@ -3,7 +3,7 @@ import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
-import { withValidatedOrValidationError } from "src/utils/responses";
+import { withValidatedOrValidationError } from "../utils/responses";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { AssertionType } from "../../generated/lollipop-api/AssertionType";
 import { JwkPubKeyToken } from "../../generated/lollipop-api/JwkPubKeyToken";
