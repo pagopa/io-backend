@@ -768,7 +768,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * {@inheritDoc}
    */
-  public async getLollipopAssertionRefForUser(user: UserV5) {
+  public async getLollipopAssertionRefForUser(user: User) {
     return new Promise<Either<Error, O.Option<AssertionRef>>>(resolve => {
       this.redisClient.get(
         `${lollipopFingerprintPrefix}${user.fiscal_code}`,

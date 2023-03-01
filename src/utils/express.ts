@@ -13,18 +13,22 @@ export type ExpressMiddleware = (
   res: express.Response,
   next: express.NextFunction
 ) => void;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type
+export type ResLocals = Record<string, any> & { detail?: string };
 /**
  * Convenience method that transforms a function (handler),
  * which takes an express.Request as input and returns an IResponse,
  * into an express controller.
  */
-export function toExpressHandler<T, P>(
-  handler: (req: express.Request) => Promise<IResponse<T>>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function toExpressHandler<T, P, L extends ResLocals>(
+  handler: (req: express.Request, locals?: L) => Promise<IResponse<T>>,
   object?: P
-): (req: express.Request, res: express.Response) => void {
+): (req: express.Request, res: express.Response<T, L>) => void {
   return (req, res): Promise<void | undefined> =>
     handler
-      .call(object, req)
+      .call(object, req, res.locals)
       .catch(ResponseErrorInternal)
       .then(response => {
         // eslint-disable-next-line functional/immutable-data

@@ -171,6 +171,10 @@ import {
 } from "./services/notificationServiceFactory";
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
+import { firstLollipopSign } from "./controllers/firstLollipopLCController";
+import { lollipopMiddleware } from "./utils/middleware/lollipop";
+import { LollipopApiClient } from "./clients/lollipop";
+import { ISessionStorage } from "./services/ISessionStorage";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -503,6 +507,15 @@ export function newApp({
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerPublicRoutes(app);
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerFirstLollipopLC(
+          app,
+          "/first-lollipop",
+          LOLLIPOP_API_CLIENT,
+          SESSION_STORAGE,
+          authMiddlewares.bearerSession
+        );
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAuthenticationRoutes(
@@ -1537,6 +1550,22 @@ function registerPublicRoutes(app: Express): void {
   // @see
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
   app.get("/ping", (_, res) => res.status(200).send("ok"));
+}
+
+function registerFirstLollipopLC(
+  app: Express,
+  basePath: string,
+  lollipopClient: ReturnType<typeof LollipopApiClient>,
+  sessionStorage: ISessionStorage,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  app.get(
+    `${basePath}/profile`,
+    bearerSessionTokenAuth,
+    lollipopMiddleware(lollipopClient, sessionStorage),
+    toExpressHandler(firstLollipopSign)
+  );
 }
 
 export default defaultModule;
