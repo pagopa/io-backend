@@ -1560,8 +1560,8 @@ function registerFirstLollipopLC(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  app.get(
-    `${basePath}/profile`,
+  app.post(
+    `${basePath}/sign`,
     bearerSessionTokenAuth,
     lollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign)
