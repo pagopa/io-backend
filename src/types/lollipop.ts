@@ -37,8 +37,6 @@ export type LollipopLocals = ResLocals & {
   readonly originalUrl: LollipopOriginalURL;
   readonly signatureParams: LollipopSignatureInput;
   readonly signature: LollipopSignature;
-  readonly body?: any;
-  readonly digest?: any;
 };
 
 export const withLollipopHeadersFromRequest = async <T>(

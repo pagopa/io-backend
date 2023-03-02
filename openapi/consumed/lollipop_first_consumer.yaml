@@ -133,7 +133,7 @@ components:
         - DELETE
     LollipopOriginalURL:
       type: string
-      pattern: "^https://"
+      pattern: "^https:\/\/"
     LollipopAssertionType:
       type: string
       enum:
