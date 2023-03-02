@@ -46,10 +46,10 @@ info:
 
 # Example endpoint
 paths:
-  /sign:
-    get:
-      operationId: sign
-      summary: Get a signed request with Lollipop
+  /sign-message:
+    post:
+      operationId: signMessage
+      summary: POST a signed request with Lollipop
       parameters:
         - name: x-pagopa-lollipop-original-method
           in: header
@@ -96,13 +96,13 @@ paths:
         - name: content-type
           in: header
           description: The content type, if any.
-          required: false
+          required: true
           schema:
             $ref: "#/components/schemas/LollipopContentType"
         - name: content-digest
           in: header
           description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
-          required: false
+          required: true
           schema:
             $ref: "#/components/schemas/LollipopContentDigest"
         - name: signature-input
@@ -117,6 +117,12 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/LollipopSignature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignMessagePayload"
       responses:
         "200":
           description: "ok"
@@ -185,3 +191,9 @@ components:
     AssertionRefSha512:
       type: string
       pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+
+    SignMessagePayload:
+      type: object
+      properties:
+        message:
+          type: string
