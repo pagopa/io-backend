@@ -51,129 +51,77 @@ paths:
       operationId: sign
       summary: Get a signed request with Lollipop
       parameters:
-        - $ref: "#/components/parameters/LollipopMethodHeader"
-        - $ref: "#/components/parameters/LollipopOriginalURLHeader"
-        - $ref: "#/components/parameters/LollipopJWTAuthorizationHeader"
-        - $ref: "#/components/parameters/LollipopAssertionRefHeader"
-        - $ref: "#/components/parameters/LollipopAssertionTypeHeader"
-        - $ref: "#/components/parameters/LollipopUserIdHeader"
-        - $ref: "#/components/parameters/LollipopPublicKeyHeader"
-        - $ref: "#/components/parameters/LollipopContentTypeHeader"
-        - $ref: "#/components/parameters/LollipopContentDigestHeader"
-        - $ref: "#/components/parameters/LollipopSignatureInputHeader"
-        - $ref: "#/components/parameters/LollipopSignatureHeader"
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          description: The method of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopMethod"
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          description: The url of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopOriginalURL"
+        - name: x-pagopa-lollipop-auth-jwt
+          in: header
+          description: Auth token to retrieve the SPID/CIE User identity from IO
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopJWTAuthorization"
+        - name: x-pagopa-lollipop-assertion-ref
+          in: header
+          description: The id of the assertion to retrieve
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopAssertionRef"
+        - name: x-pagopa-lollipop-assertion-type
+          in: header
+          description: The assertion type (SAML / OIDC)
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopAssertionType"
+        - name: x-pagopa-lollipop-user-id
+          in: header
+          description: User's fiscal code.
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopUserId"
+        - name: x-pagopa-lollipop-public-key
+          in: header
+          description: User's public key
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopPublicKey"
+        - name: content-type
+          in: header
+          description: The content type, if any.
+          required: false
+          schema:
+            $ref: "#/components/schemas/LollipopContentType"
+        - name: content-digest
+          in: header
+          description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
+          required: false
+          schema:
+            $ref: "#/components/schemas/LollipopContentDigest"
+        - name: signature-input
+          in: header
+          description: The signature input, needed to verify the `signature` header
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopSignatureInput"
+        - name: signature
+          in: header
+          description: The signature of the HTTP request, signed by the client with its private key.
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopSignature"
       responses:
         "200":
           description: "ok"
-          schema:
-            $ref: '#/components/schemas/ProblemJson'
 
 components:
-  parameters:
-    # --------------------------------------------
-    # Custom LolliPoP headers
-    # --------------------------------------------
-    LollipopMethodHeader:
-      name: x-pagopa-lollipop-original-method
-      in: header
-      description: The method of the endpoint called by IO app
-      required: true
-      type: string
-      enum:
-        - GET
-        - POST
-        - PUT
-        - PATCH
-        - DELETE
-    LollipopOriginalURLHeader:
-      name: x-pagopa-lollipop-original-url
-      in: header
-      description: The url of the endpoint called by IO app
-      required: true
-      type: string
-      pattern: "^https://"
-    LollipopJWTAuthorizationHeader:
-      name: x-pagopa-lollipop-auth-jwt
-      in: header
-      description: Auth token to retrieve the SPID/CIE User identity from IO
-      required: true
-      type: string
-      minLength: 1
-    LollipopAssertionRefHeader:
-      name: x-pagopa-lollipop-assertion-ref
-      in: header
-      description: The id of the assertion to retrieve
-      required: true
-      type: string
-      #schema:
-      #  type: string
-      #  oneOf:
-      #    - $ref: "#/components/schemas/AssertionRefSha256"
-      #    - $ref: "#/components/schemas/AssertionRefSha384"
-      #    - $ref: "#/components/schemas/AssertionRefSha512"
-    LollipopAssertionTypeHeader:
-      name: x-pagopa-lollipop-assertion-type
-      in: header
-      description: The assertion type (SAML / OIDC)
-      required: true
-      type: string
-      enum:
-        - SAML
-        - OIDC
-    LollipopUserIdHeader:
-      name: x-pagopa-lollipop-user-id
-      in: header
-      description: User's fiscal code.
-      required: true
-      type: string
-      maxLength: 16
-      minLength: 16
-      pattern: >-
-        ^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$
-    LollipopPublicKeyHeader:
-      name: x-pagopa-lollipop-public-key
-      in: header
-      description: User's public key
-      required: true
-      type: string
-      minLength: 1
-
-    # --------------------------------------------
-    # Standard HTTP Message Signatures headers
-    # --------------------------------------------
-    LollipopContentTypeHeader:
-      name: content-type
-      in: header
-      description: The content type, if any.
-      required: false
-      type: string
-      enum:
-        - application/json
-        - application/octet-stream
-    LollipopContentDigestHeader:
-      name: content-digest
-      in: header
-      description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
-      required: false
-      type: string
-      pattern: "^(sha-256=:[A-Za-z0-9+/=]{44}:|sha-384=:[A-Za-z0-9+/=]{66}:|sha-512=:[A-Za-z0-9+/=]{88}:)$"
-
-    LollipopSignatureInputHeader:
-      name: signature-input
-      in: header
-      description: The signature input, needed to verify the `signature` header
-      required: true
-      type: string
-      pattern: "^(((sig[0-9]+)=[^,]*?)(, ?)?)+$"
-    LollipopSignatureHeader:
-      name: signature
-      in: header
-      description: The signature of the HTTP request, signed by the client with its private key.
-      required: true
-      type: string
-      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"
-
-
   schemas:
     LollipopMethod:
       type: string
@@ -237,47 +185,3 @@ components:
     AssertionRefSha512:
       type: string
       pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
-    ProblemJson:
-      type: object
-      properties:
-        type:
-          type: string
-          format: uri
-          description: |-
-            An absolute URI that identifies the problem type. When dereferenced,
-            it SHOULD provide human-readable documentation for the problem type
-            (e.g., using HTML).
-          default: about:blank
-          example: https://example.com/problem/constraint-violation
-        title:
-          type: string
-          description: |-
-            A short, summary of the problem type. Written in english and readable
-            for engineers (usually not suited for non technical stakeholders and
-            not localized); example: Service Unavailable
-        status:
-          type: integer
-          format: int32
-          description: >-
-            The HTTP status code generated by the origin server for this
-            occurrence
-
-            of the problem.
-          minimum: 100
-          maximum: 600
-          exclusiveMaximum: true
-          example: 200
-        detail:
-          type: string
-          description: |-
-            A human readable explanation specific to this occurrence of the
-            problem.
-          example: There was an error processing the request
-        instance:
-          type: string
-          format: uri
-          description: >-
-            An absolute URI that identifies the specific occurrence of the
-            problem.
-
-            It may or may not yield further information if dereferenced.
