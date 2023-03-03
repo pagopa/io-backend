@@ -2,7 +2,12 @@ import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
-import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
+import {
+  IResponseErrorValidation,
+  ResponseErrorValidation
+} from "@pagopa/ts-commons/lib/responses";
+import * as E from "fp-ts/Either";
+import { pipe } from "fp-ts/lib/function";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { AssertionType } from "../../generated/lollipop-api/AssertionType";
@@ -20,35 +25,45 @@ export interface LollipopParams {
 }
 
 export const LollipopRequiredHeaders = t.type({
-  originalMethod: LollipopMethod,
-  originalUrl: LollipopOriginalURL,
   signature: LollipopSignature,
-  signatureParams: LollipopSignatureInput
+  ["signature-input"]: LollipopSignatureInput,
+  ["x-pagopa-lollipop-original-method"]: LollipopMethod,
+  ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL
 });
 export type LollipopRequiredHeaders = t.TypeOf<typeof LollipopRequiredHeaders>;
 
 export type LollipopLocals = ResLocals & {
-  readonly assertionRef: AssertionRef;
-  readonly assertionType: AssertionType;
-  readonly userId: FiscalCode;
-  readonly publicKey: JwkPubKeyToken;
-  readonly authJwt: NonEmptyString;
-  readonly originalMethod: LollipopMethod;
-  readonly originalUrl: LollipopOriginalURL;
-  readonly signatureParams: LollipopSignatureInput;
+  readonly ["x-pagopa-lollipop-assertion-ref"]: AssertionRef;
+  readonly ["x-pagopa-lollipop-assertion-type"]: AssertionType;
+  readonly ["x-pagopa-lollipop-user-id"]: FiscalCode;
+  readonly ["x-pagopa-lollipop-public-key"]: JwkPubKeyToken;
+  readonly ["x-pagopa-lollipop-auth-jwt"]: NonEmptyString;
+  readonly ["x-pagopa-lollipop-original-method"]: LollipopMethod;
+  readonly ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL;
+  readonly ["signature-input"]: LollipopSignatureInput;
   readonly signature: LollipopSignature;
 };
+
+type LollipopLocalsWithBody = LollipopLocals & {
+  readonly body: ReadableStream<Uint8Array>;
+};
+
+export const withRequiredRawBody = (
+  locals: LollipopLocals | undefined
+): E.Either<IResponseErrorValidation, LollipopLocalsWithBody> =>
+  pipe(
+    locals,
+    E.fromPredicate(
+      (l): l is LollipopLocalsWithBody => l?.body !== undefined,
+      () => ResponseErrorValidation("Bad request", "Missing required body")
+    )
+  );
 
 export const withLollipopHeadersFromRequest = async <T>(
   req: express.Request,
   f: (lollipopHeaders: LollipopRequiredHeaders) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(
-    LollipopRequiredHeaders.decode({
-      originalMethod: req.header("X-PagoPa-LolliPoP-Original-Method"),
-      originalUrl: req.header("x-pagopa-lollipop-original-url"),
-      signature: req.header("signature"),
-      signatureParams: req.header("signature-input")
-    }),
+    t.exact(LollipopRequiredHeaders).decode(req.headers),
     f
   );

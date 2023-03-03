@@ -58,6 +58,7 @@ import { IoSignAPIClient } from "./clients/io-sign";
 import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -475,6 +476,13 @@ export const LOLLIPOP_API_CLIENT = LollipopApiClient(
   LOLLIPOP_API_URL,
   LOLLIPOP_API_BASE_PATH,
   httpOrHttpsApiFetch
+);
+
+// TODO: Add configurations to the First lollipop consumer from ENVs
+export const FIRST_LOLLIPOP_CONSUMER_CLIENT = FirstLollipopConsumerClient(
+  "",
+  "",
+  "secret"
 );
 
 export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(

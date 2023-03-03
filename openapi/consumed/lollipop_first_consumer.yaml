@@ -43,6 +43,8 @@ info:
                       │APP│                                       │IO-BE│                                    │LC│  
                       └───┘                                       └─────┘                                    └──┘  
   version: 1.0.0
+security:
+  - ApiKeyAuth: []
 
 # Example endpoint
 paths:
@@ -80,7 +82,7 @@ paths:
           description: The assertion type (SAML / OIDC)
           required: true
           schema:
-            $ref: "#/components/schemas/LollipopAssertionType"
+            $ref: "#/components/schemas/AssertionType"
         - name: x-pagopa-lollipop-user-id
           in: header
           description: User's fiscal code.
@@ -93,18 +95,6 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/LollipopPublicKey"
-        - name: content-type
-          in: header
-          description: The content type, if any.
-          required: true
-          schema:
-            $ref: "#/components/schemas/LollipopContentType"
-        - name: content-digest
-          in: header
-          description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
-          required: true
-          schema:
-            $ref: "#/components/schemas/LollipopContentDigest"
         - name: signature-input
           in: header
           description: The signature input, needed to verify the `signature` header
@@ -125,9 +115,19 @@ paths:
               $ref: "#/components/schemas/SignMessagePayload"
       responses:
         "200":
-          description: "ok"
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignMessageResponse"
 
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      description: This is an example of authentication. The LC can choose their custom auth method
+      in: header
+      name: X-Functions-Key
   schemas:
     LollipopMethod:
       type: string
@@ -140,7 +140,7 @@ components:
     LollipopOriginalURL:
       type: string
       pattern: "^https:\/\/"
-    LollipopAssertionType:
+    AssertionType:
       type: string
       enum:
         - SAML
@@ -196,4 +196,11 @@ components:
       type: object
       properties:
         message:
+          type: string
+      required:
+        - message
+    SignMessageResponse:
+      type: object
+      properties:
+        response:
           type: string

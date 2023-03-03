@@ -14,8 +14,13 @@ export type ExpressMiddleware = (
   next: express.NextFunction
 ) => void;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type
-export type ResLocals = Record<string, any> & { detail?: string };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ResLocals = Record<string, any> & {
+  // eslint-disable-next-line functional/prefer-readonly-type
+  detail?: string;
+  // eslint-disable-next-line functional/prefer-readonly-type
+  body?: ReadableStream<Uint8Array>;
+};
 /**
  * Convenience method that transforms a function (handler),
  * which takes an express.Request as input and returns an IResponse,

@@ -3,6 +3,7 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
+import { Readable } from "stream";
 import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -82,7 +83,8 @@ import {
   FF_LOLLIPOP_ENABLED,
   DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-  LOLLIPOP_REVOKE_QUEUE_NAME
+  LOLLIPOP_REVOKE_QUEUE_NAME,
+  FIRST_LOLLIPOP_CONSUMER_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -171,7 +173,7 @@ import {
 } from "./services/notificationServiceFactory";
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
-import { firstLollipopSign } from "./controllers/firstLollipopLCController";
+import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
 import { lollipopMiddleware } from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
@@ -361,7 +363,16 @@ export function newApp({
   //
 
   // Parse the incoming request body. This is needed by Passport spid strategy.
-  app.use(bodyParser.json());
+  app.use(
+    bodyParser.json({
+      verify: (_req, res: express.Response, buf, encoding: BufferEncoding) => {
+        // eslint-disable-next-line functional/immutable-data
+        res.locals.body = Readable.from(buf, {
+          encoding
+        });
+      }
+    })
+  );
 
   // Parse an urlencoded body.
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -509,7 +520,7 @@ export function newApp({
         registerPublicRoutes(app);
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        registerFirstLollipopLC(
+        registerFirstLollipopConsumer(
           app,
           "/first-lollipop",
           LOLLIPOP_API_CLIENT,
@@ -1552,7 +1563,7 @@ function registerPublicRoutes(app: Express): void {
   app.get("/ping", (_, res) => res.status(200).send("ok"));
 }
 
-function registerFirstLollipopLC(
+function registerFirstLollipopConsumer(
   app: Express,
   basePath: string,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
@@ -1564,7 +1575,7 @@ function registerFirstLollipopLC(
     `${basePath}/sign`,
     bearerSessionTokenAuth,
     lollipopMiddleware(lollipopClient, sessionStorage),
-    toExpressHandler(firstLollipopSign)
+    toExpressHandler(firstLollipopSign(FIRST_LOLLIPOP_CONSUMER_CLIENT))
   );
 }
 

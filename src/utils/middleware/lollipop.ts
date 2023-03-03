@@ -88,11 +88,12 @@ export const lollipopMiddleware: (
               ),
               TE.map(lcParams => {
                 const lollipopParams: LollipopLocals = {
-                  assertionRef: lcParams.assertion_ref,
-                  assertionType: lcParams.assertion_type,
-                  authJwt: lcParams.lc_authentication_bearer,
-                  publicKey: lcParams.pub_key,
-                  userId: user.fiscal_code,
+                  ["x-pagopa-lollipop-assertion-ref"]: lcParams.assertion_ref,
+                  ["x-pagopa-lollipop-assertion-type"]: lcParams.assertion_type,
+                  ["x-pagopa-lollipop-auth-jwt"]:
+                    lcParams.lc_authentication_bearer,
+                  ["x-pagopa-lollipop-public-key"]: lcParams.pub_key,
+                  ["x-pagopa-lollipop-user-id"]: user.fiscal_code,
                   ...lollipopHeaders
                 };
                 // eslint-disable-next-line functional/immutable-data
