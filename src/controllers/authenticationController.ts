@@ -464,22 +464,81 @@ export default class AuthenticationController {
     | IResponseSuccessJson<SuccessResponse>
   > {
     return withUserFromRequest(req, user =>
-      withCatchAsInternalError(async () => {
-        const errorOrResponse = await this.sessionStorage.del(user);
-
-        if (E.isLeft(errorOrResponse)) {
-          const error = errorOrResponse.left;
-          return ResponseErrorInternal(error.message);
-        }
-
-        const response = errorOrResponse.right;
-
-        if (!response) {
-          return ResponseErrorInternal("Error destroying the user session");
-        }
-
-        return ResponseSuccessJson({ message: "ok" });
-      })
+      withCatchAsInternalError(async () =>
+        pipe(
+          // retrieve the assertionRef for the user
+          TE.tryCatch(
+            async () =>
+              await this.sessionStorage.getLollipopAssertionRefForUser(user),
+            E.toError
+          ),
+          TE.chainEitherK(identity),
+          TE.chainW(maybeAssertionRef =>
+            pipe(
+              // delete the assertionRef for the user
+              TE.tryCatch(
+                async () =>
+                  await this.sessionStorage.delLollipopAssertionRefForUser(
+                    user.fiscal_code
+                  ),
+                E.toError
+              ),
+              TE.chainEitherK(identity),
+              TE.chainW(_ =>
+                pipe(
+                  maybeAssertionRef,
+                  O.map(assertionRef =>
+                    pipe(
+                      // send the revoke pubkey message with the assertionRef for the user
+                      TE.tryCatch(
+                        async () =>
+                          await this.lollipopParams.lollipopService.revokePreviousAssertionRef(
+                            assertionRef
+                          ),
+                        E.toError
+                      ),
+                      TE.chain(
+                        TE.fromPredicate(
+                          response => response.errorCode === undefined,
+                          response => new Error(response.errorCode)
+                        )
+                      ),
+                      TE.map(_ => true)
+                    )
+                  ),
+                  // ignore if there's no assertionRef on redis
+                  O.getOrElseW(() => TE.of(true))
+                )
+              )
+            )
+          ),
+          TE.chain(_ =>
+            pipe(
+              // delete the session for the user
+              TE.tryCatch(
+                async () => await this.sessionStorage.del(user),
+                E.toError
+              ),
+              TE.chainEitherK(identity),
+              TE.chain(
+                TE.fromPredicate(
+                  identity,
+                  _ => new Error("Error destroying the user session")
+                )
+              )
+            )
+          ),
+          TE.bimap(
+            error => {
+              const errorMessage = `Error during logout: ${error.message}`;
+              log.error(errorMessage);
+              return ResponseErrorInternal(errorMessage);
+            },
+            _ => ResponseSuccessJson({ message: "ok" })
+          ),
+          TE.toUnion
+        )()
+      )
     );
   }
 
