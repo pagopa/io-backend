@@ -466,52 +466,63 @@ export default class AuthenticationController {
     return withUserFromRequest(req, user =>
       withCatchAsInternalError(async () =>
         pipe(
-          // retrieve the assertionRef for the user
-          TE.tryCatch(
-            async () =>
-              await this.sessionStorage.getLollipopAssertionRefForUser(user),
-            E.toError
-          ),
-          TE.chainEitherK(identity),
-          TE.chainW(maybeAssertionRef =>
+          this.lollipopParams.isLollipopEnabled,
+          O.fromPredicate(identity),
+          // if lollipop is enabled we delete the reference and send the revoke pub key message
+          O.map(_ =>
             pipe(
-              // delete the assertionRef for the user
+              // retrieve the assertionRef for the user
               TE.tryCatch(
                 async () =>
-                  await this.sessionStorage.delLollipopAssertionRefForUser(
-                    user.fiscal_code
+                  await this.sessionStorage.getLollipopAssertionRefForUser(
+                    user
                   ),
                 E.toError
               ),
               TE.chainEitherK(identity),
-              TE.chainW(_ =>
+              TE.chainW(maybeAssertionRef =>
                 pipe(
-                  maybeAssertionRef,
-                  O.map(assertionRef =>
-                    pipe(
-                      // send the revoke pubkey message with the assertionRef for the user
-                      TE.tryCatch(
-                        async () =>
-                          await this.lollipopParams.lollipopService.revokePreviousAssertionRef(
-                            assertionRef
-                          ),
-                        E.toError
+                  // delete the assertionRef for the user
+                  TE.tryCatch(
+                    async () =>
+                      await this.sessionStorage.delLollipopAssertionRefForUser(
+                        user.fiscal_code
                       ),
-                      TE.chain(
-                        TE.fromPredicate(
-                          response => response.errorCode === undefined,
-                          response => new Error(response.errorCode)
+                    E.toError
+                  ),
+                  TE.chainEitherK(identity),
+                  TE.chainW(_ =>
+                    pipe(
+                      maybeAssertionRef,
+                      O.map(assertionRef =>
+                        pipe(
+                          // send the revoke pubkey message with the assertionRef for the user
+                          TE.tryCatch(
+                            async () =>
+                              await this.lollipopParams.lollipopService.revokePreviousAssertionRef(
+                                assertionRef
+                              ),
+                            E.toError
+                          ),
+                          TE.chain(
+                            TE.fromPredicate(
+                              response => response.errorCode === undefined,
+                              response => new Error(response.errorCode)
+                            )
+                          ),
+                          TE.map(__ => true)
                         )
                       ),
-                      TE.map(_ => true)
+                      // ignore if there's no assertionRef on redis
+                      O.getOrElseW(() => TE.of(true))
                     )
-                  ),
-                  // ignore if there's no assertionRef on redis
-                  O.getOrElseW(() => TE.of(true))
+                  )
                 )
               )
             )
           ),
+          // if lollipop is not enabled we go on
+          O.getOrElse(() => TE.of(true)),
           TE.chain(_ =>
             pipe(
               // delete the session for the user
@@ -523,14 +534,14 @@ export default class AuthenticationController {
               TE.chain(
                 TE.fromPredicate(
                   identity,
-                  _ => new Error("Error destroying the user session")
+                  __ => new Error("Error destroying the user session")
                 )
               )
             )
           ),
           TE.bimap(
             error => {
-              const errorMessage = `Error during logout: ${error.message}`;
+              const errorMessage = `${error.message}`;
               log.error(errorMessage);
               return ResponseErrorInternal(errorMessage);
             },
