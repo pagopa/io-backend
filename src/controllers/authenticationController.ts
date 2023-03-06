@@ -473,10 +473,7 @@ export default class AuthenticationController {
             pipe(
               // retrieve the assertionRef for the user
               TE.tryCatch(
-                async () =>
-                  await this.sessionStorage.getLollipopAssertionRefForUser(
-                    user
-                  ),
+                () => this.sessionStorage.getLollipopAssertionRefForUser(user),
                 E.toError
               ),
               TE.chainEitherK(identity),
@@ -484,8 +481,8 @@ export default class AuthenticationController {
                 pipe(
                   // delete the assertionRef for the user
                   TE.tryCatch(
-                    async () =>
-                      await this.sessionStorage.delLollipopAssertionRefForUser(
+                    () =>
+                      this.sessionStorage.delLollipopAssertionRefForUser(
                         user.fiscal_code
                       ),
                     E.toError
@@ -498,8 +495,8 @@ export default class AuthenticationController {
                         pipe(
                           // send the revoke pubkey message with the assertionRef for the user
                           TE.tryCatch(
-                            async () =>
-                              await this.lollipopParams.lollipopService.revokePreviousAssertionRef(
+                            () =>
+                              this.lollipopParams.lollipopService.revokePreviousAssertionRef(
                                 assertionRef
                               ),
                             E.toError
@@ -526,10 +523,7 @@ export default class AuthenticationController {
           TE.chain(_ =>
             pipe(
               // delete the session for the user
-              TE.tryCatch(
-                async () => await this.sessionStorage.del(user),
-                E.toError
-              ),
+              TE.tryCatch(() => this.sessionStorage.del(user), E.toError),
               TE.chainEitherK(identity),
               TE.chain(
                 TE.fromPredicate(
