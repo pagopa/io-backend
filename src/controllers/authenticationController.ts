@@ -507,7 +507,7 @@ export default class AuthenticationController {
                               response => new Error(response.errorCode)
                             )
                           ),
-                          TE.map(__ => true)
+                          TE.map(___ => true)
                         )
                       ),
                       // continue if there's no assertionRef on redis
