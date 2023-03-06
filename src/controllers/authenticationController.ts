@@ -456,7 +456,7 @@ export default class AuthenticationController {
   /**
    * Retrieves the logout url from the IDP.
    */
-  public async logout(
+  public logout(
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -464,7 +464,7 @@ export default class AuthenticationController {
     | IResponseSuccessJson<SuccessResponse>
   > {
     return withUserFromRequest(req, user =>
-      withCatchAsInternalError(async () =>
+      withCatchAsInternalError(() =>
         pipe(
           this.lollipopParams.isLollipopEnabled,
           O.fromPredicate(identity),
@@ -491,7 +491,7 @@ export default class AuthenticationController {
                     E.toError
                   ),
                   TE.chainEitherK(identity),
-                  TE.chainW(_ =>
+                  TE.chainW(__ =>
                     pipe(
                       maybeAssertionRef,
                       O.map(assertionRef =>
@@ -513,7 +513,7 @@ export default class AuthenticationController {
                           TE.map(__ => true)
                         )
                       ),
-                      // ignore if there's no assertionRef on redis
+                      // continue if there's no assertionRef on redis
                       O.getOrElseW(() => TE.of(true))
                     )
                   )
