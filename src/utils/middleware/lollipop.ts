@@ -15,7 +15,7 @@ import { ISessionStorage } from "../../services/ISessionStorage";
 import { withUserFromRequest } from "../../types/user";
 import { LollipopApiClient } from "../../clients/lollipop";
 import {
-  LollipopLocals,
+  LollipopLocalsType,
   withLollipopHeadersFromRequest
 } from "../../types/lollipop";
 import { log } from "../logger";
@@ -104,7 +104,7 @@ export const lollipopMiddleware: (
                 )
               ),
               TE.map(lcParams => {
-                const lollipopParams: LollipopLocals = {
+                const lollipopParams: LollipopLocalsType = {
                   ["x-pagopa-lollipop-assertion-ref"]: lcParams.assertion_ref,
                   ["x-pagopa-lollipop-assertion-type"]: lcParams.assertion_type,
                   ["x-pagopa-lollipop-auth-jwt"]:

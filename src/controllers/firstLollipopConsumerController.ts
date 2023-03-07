@@ -6,18 +6,19 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import { FirstLollipopConsumerClient } from "src/clients/firstLollipopConsumer";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
-import { LollipopLocals, withRequiredRawBody } from "../types/lollipop";
+import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
+import { ResLocals } from "../utils/express";
+import { withLollipopLocals, withRequiredRawBody } from "../types/lollipop";
 import { SignMessageResponse } from "../../generated/lollipop-first-consumer/SignMessageResponse";
 
 export const firstLollipopSign = (
   client: ReturnType<FirstLollipopConsumerClient>
-) => async (
+) => async <T extends ResLocals>(
   _: express.Request,
-  locals?: LollipopLocals
+  locals?: T
 ): Promise<
   | IResponseErrorValidation
   | IResponseErrorInternal
@@ -25,7 +26,8 @@ export const firstLollipopSign = (
 > =>
   pipe(
     locals,
-    withRequiredRawBody,
+    withLollipopLocals,
+    E.chain(withRequiredRawBody),
     TE.fromEither,
     TE.chainW(localsWithBody =>
       TE.tryCatch(
