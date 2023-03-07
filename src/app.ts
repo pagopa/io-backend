@@ -177,6 +177,7 @@ import { firstLollipopSign } from "./controllers/firstLollipopConsumerController
 import { lollipopMiddleware } from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -525,6 +526,7 @@ export function newApp({
           "/first-lollipop",
           LOLLIPOP_API_CLIENT,
           SESSION_STORAGE,
+          FIRST_LOLLIPOP_CONSUMER_CLIENT,
           authMiddlewares.bearerSession
         );
 
@@ -1563,11 +1565,13 @@ function registerPublicRoutes(app: Express): void {
   app.get("/ping", (_, res) => res.status(200).send("ok"));
 }
 
+// eslint-disable-next-line max-params
 function registerFirstLollipopConsumer(
   app: Express,
   basePath: string,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage,
+  firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
@@ -1575,7 +1579,7 @@ function registerFirstLollipopConsumer(
     `${basePath}/sign`,
     bearerSessionTokenAuth,
     lollipopMiddleware(lollipopClient, sessionStorage),
-    toExpressHandler(firstLollipopSign(FIRST_LOLLIPOP_CONSUMER_CLIENT))
+    toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
   );
 }
 
