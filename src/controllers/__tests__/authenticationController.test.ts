@@ -176,9 +176,11 @@ const anActivatedPubKey = ({
 const mockRevokePreviousAssertionRef = jest
   .fn()
   .mockImplementation(_ => Promise.resolve({}));
+
 const mockActivateLolliPoPKey = jest
   .fn()
   .mockImplementation((_, __, ___) => TE.of(anActivatedPubKey));
+
 jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -637,7 +639,6 @@ describe("AuthenticationController#acs", () => {
       ResponseSuccessJson(mockedInitializedProfile)
     );
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
@@ -705,7 +706,7 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
-      expect(lollipopActivatedController).toBeTruthy();
+  
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
@@ -764,7 +765,6 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
@@ -821,7 +821,7 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
-      expect(lollipopActivatedController).toBeTruthy();
+  
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
@@ -866,7 +866,6 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
@@ -1162,7 +1161,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
@@ -1196,7 +1194,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
@@ -1233,7 +1230,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
@@ -1253,7 +1249,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).not.toHaveBeenCalled();
     expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
@@ -1270,9 +1265,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const req = mockReq();
     req.user = mockedUser;
 
-    mockGetLollipop.mockImplementationOnce(() => {
-      throw "error";
-    });
+    mockGetLollipop.mockImplementationOnce(() => Promise.reject("error"));
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockRevokePreviousAssertionRef.mockResolvedValueOnce({
       messageId: "anid",
@@ -1286,7 +1279,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).not.toBeCalled();
     expect(mockRevokePreviousAssertionRef).not.toBeCalled();
@@ -1307,9 +1299,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     req.user = mockedUser;
 
     mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockDelLollipop.mockImplementationOnce(() => {
-      throw "error";
-    });
+    mockDelLollipop.mockImplementationOnce(() => Promise.reject("error"));
     mockRevokePreviousAssertionRef.mockResolvedValueOnce({
       messageId: "anid",
       popReceipt: "1234",
@@ -1322,7 +1312,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).not.toBeCalled();
@@ -1352,7 +1341,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
@@ -1374,15 +1362,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
 
     mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockRevokePreviousAssertionRef.mockImplementation(() => {
-      throw "error";
-    });
+    mockRevokePreviousAssertionRef.mockImplementationOnce(() => Promise.reject("error"));
     mockDel.mockReturnValue(Promise.resolve(E.right(false)));
 
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
@@ -1415,7 +1400,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
@@ -1448,7 +1432,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(lollipopActivatedController).toBeTruthy();
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
