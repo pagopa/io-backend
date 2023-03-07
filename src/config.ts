@@ -478,11 +478,11 @@ export const LOLLIPOP_API_CLIENT = LollipopApiClient(
   httpOrHttpsApiFetch
 );
 
-// TODO: Add configurations to the First lollipop consumer from ENVs
 export const FIRST_LOLLIPOP_CONSUMER_CLIENT = FirstLollipopConsumerClient(
-  "",
-  "",
-  "secret"
+  // We access to the first lollipop consumer implementation that is now locatend
+  // within the Lollipop function.
+  LOLLIPOP_API_KEY,
+  LOLLIPOP_API_URL
 );
 
 export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(

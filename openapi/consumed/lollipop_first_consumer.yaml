@@ -1,4 +1,6 @@
 openapi: 3.0.1
+servers:
+  - url: https://io-p-weu-lollipop-fn.azurewebsites.net/api/v1/first-lollipop-consumer
 info:
   title: LolliPoP Consumer Example
   description: >-
