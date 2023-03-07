@@ -26,6 +26,9 @@ const mockSessionStorage = ({
   getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser
 } as unknown) as ISessionStorage;
 
+const aBearerToken = "a bearer token";
+const aPubKey = "a pub key";
+
 const mockNext = jest.fn();
 describe("lollipopMiddleware", () => {
   beforeEach(() => {
@@ -55,9 +58,9 @@ describe("lollipopMiddleware", () => {
           assertion_file_name: `${aFiscalCode}-${anAssertionRef}`,
           assertion_type: AssertionTypeEnum.SAML,
           expired_at: Date.now(),
-          lc_authentication_bearer: "a bearer token",
+          lc_authentication_bearer: aBearerToken,
           assertion_ref: anAssertionRef,
-          pub_key: "aPubKey",
+          pub_key: aPubKey,
           version: 1,
           status: PubKeyStatusEnum.VALID,
           ttl: 900
@@ -78,8 +81,8 @@ describe("lollipopMiddleware", () => {
     expect(res.locals).toEqual({
       ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
       ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
-      ["x-pagopa-lollipop-auth-jwt"]: "a bearer token",
-      ["x-pagopa-lollipop-public-key"]: "aPubKey",
+      ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
+      ["x-pagopa-lollipop-public-key"]: aPubKey,
       ["x-pagopa-lollipop-user-id"]: aFiscalCode,
       ...lollipopRequestHeaders
     });
@@ -111,31 +114,8 @@ describe("lollipopMiddleware", () => {
   });
 
   it(`
-  GIVEN an user and valid Lollipop Headers
+  GIVEN a user and valid Lollipop Headers
   WHEN the user is invalid
-  THEN returns a validation error
-  `, async () => {
-    const lollipopRequestHeaders = {
-      signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
-      ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
-      ["x-pagopa-lollipop-original-method"]: "POST"
-    };
-    const req = mockReq({
-      headers: lollipopRequestHeaders,
-      user: mockedUser
-    });
-    const res = mockRes();
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
-    await middleware(req, res, mockNext);
-    expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
-    expect(mockGenerateLCParams).not.toBeCalled();
-    expect(res.status).toBeCalledWith(400);
-    expect(mockNext).not.toBeCalled();
-  });
-
-  it(`
-  GIVEN a valid user and Lollipop Headers
-  WHEN the headers are invalid
   THEN returns a validation error
   `, async () => {
     const lollipopRequestHeaders = {
@@ -166,7 +146,7 @@ describe("lollipopMiddleware", () => {
     `
   GIVEN a valid user and Lollipop Headers
   WHEN $title
-  THEN returns a validation error
+  THEN returns a response error with status $expectedResponseStatus
   `,
     async ({ lollipopAssertionRefForUser, expectedResponseStatus }) => {
       const lollipopRequestHeaders = {
