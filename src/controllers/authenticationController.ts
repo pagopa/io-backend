@@ -5,6 +5,7 @@
  */
 
 import * as express from "express";
+import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as AP from "fp-ts/lib/Apply";
@@ -467,59 +468,58 @@ export default class AuthenticationController {
       withCatchAsInternalError(() =>
         pipe(
           this.lollipopParams.isLollipopEnabled,
-          O.fromPredicate(identity),
-          // if lollipop is enabled we delete the reference and send the revoke pub key message
-          O.map(() =>
-            pipe(
-              // retrieve the assertionRef for the user
-              TE.tryCatch(
-                () => this.sessionStorage.getLollipopAssertionRefForUser(user),
-                E.toError
-              ),
-              TE.chainEitherK(identity),
-              TE.chainW(maybeAssertionRef =>
-                pipe(
-                  // delete the assertionRef for the user
-                  TE.tryCatch(
-                    () =>
-                      this.sessionStorage.delLollipopAssertionRefForUser(
-                        user.fiscal_code
-                      ),
-                    E.toError
-                  ),
-                  TE.chainEitherK(identity),
-                  TE.chainW(() =>
-                    pipe(
-                      maybeAssertionRef,
-                      O.map(assertionRef =>
-                        pipe(
-                          // send the revoke pubkey message with the assertionRef for the user
-                          TE.tryCatch(
-                            () =>
-                              this.lollipopParams.lollipopService.revokePreviousAssertionRef(
-                                assertionRef
-                              ),
-                            E.toError
-                          ),
-                          TE.chain(
-                            TE.fromPredicate(
-                              response => response.errorCode === undefined,
-                              response => new Error(response.errorCode)
-                            )
-                          ),
-                          TE.map(() => true)
-                        )
-                      ),
-                      // continue if there's no assertionRef on redis
-                      O.getOrElseW(() => TE.of(true))
-                    )
+          B.match(
+            // if lollipop is not enabled we go on
+            () => TE.of(true),
+            // if lollipop is enabled we get the assertionRef and send the pub key revokal message
+            () =>
+              pipe(
+                TE.tryCatch(
+                  () =>
+                    // retrieve the assertionRef for the user
+                    this.sessionStorage.getLollipopAssertionRefForUser(user),
+                  E.toError
+                ),
+                TE.chainEitherK(identity),
+                TE.chainW(
+                  flow(
+                    O.map(assertionRef =>
+                      TE.tryCatch(
+                        () =>
+                          // send the revoke pubkey message with the assertionRef for the user in a fire&forget mode
+                          new Promise<true>(resolve => {
+                            this.lollipopParams.lollipopService
+                              .revokePreviousAssertionRef(assertionRef)
+                              .catch(err => {
+                                log.error(
+                                  "logout: error sending revoke message for previous assertionRef [%s]",
+                                  err
+                                );
+                              });
+                            resolve(true);
+                          }),
+                        E.toError
+                      )
+                    ),
+                    // continue if there's no assertionRef on redis
+                    O.getOrElseW(() => TE.of(true))
                   )
                 )
               )
+          ),
+          TE.chain(() =>
+            pipe(
+              // delete the assertionRef for the user
+              TE.tryCatch(
+                () =>
+                  this.sessionStorage.delLollipopAssertionRefForUser(
+                    user.fiscal_code
+                  ),
+                E.toError
+              ),
+              TE.chainEitherK(identity)
             )
           ),
-          // if lollipop is not enabled we go on
-          O.getOrElse(() => TE.of(true)),
           TE.chain(() =>
             pipe(
               // delete the session for the user
@@ -539,7 +539,7 @@ export default class AuthenticationController {
               log.error(errorMessage);
               return ResponseErrorInternal(errorMessage);
             },
-            () => ResponseSuccessJson({ message: "ok" })
+            _ => ResponseSuccessJson({ message: "ok" })
           ),
           TE.toUnion
         )()
