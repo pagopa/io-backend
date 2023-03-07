@@ -32,24 +32,21 @@ export const LollipopRequiredHeaders = t.type({
 });
 export type LollipopRequiredHeaders = t.TypeOf<typeof LollipopRequiredHeaders>;
 
-export type LollipopLocals = ResLocals & {
-  readonly ["x-pagopa-lollipop-assertion-ref"]: AssertionRef;
-  readonly ["x-pagopa-lollipop-assertion-type"]: AssertionType;
-  readonly ["x-pagopa-lollipop-user-id"]: FiscalCode;
-  readonly ["x-pagopa-lollipop-public-key"]: JwkPubKeyToken;
-  readonly ["x-pagopa-lollipop-auth-jwt"]: NonEmptyString;
-  readonly ["x-pagopa-lollipop-original-method"]: LollipopMethod;
-  readonly ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL;
-  readonly ["signature-input"]: LollipopSignatureInput;
-  readonly signature: LollipopSignature;
-};
+export type LollipopLocals = ResLocals &
+  Readonly<LollipopRequiredHeaders> & {
+    readonly ["x-pagopa-lollipop-assertion-ref"]: AssertionRef;
+    readonly ["x-pagopa-lollipop-assertion-type"]: AssertionType;
+    readonly ["x-pagopa-lollipop-user-id"]: FiscalCode;
+    readonly ["x-pagopa-lollipop-public-key"]: JwkPubKeyToken;
+    readonly ["x-pagopa-lollipop-auth-jwt"]: NonEmptyString;
+  };
 
 type LollipopLocalsWithBody = LollipopLocals & {
   readonly body: ReadableStream<Uint8Array>;
 };
 
 export const withRequiredRawBody = (
-  locals: LollipopLocals | undefined
+  locals?: LollipopLocals
 ): E.Either<IResponseErrorValidation, LollipopLocalsWithBody> =>
   pipe(
     locals,
