@@ -213,55 +213,51 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   } as UrlFromString;
 };
 
-let controller: AuthenticationController;
-let lollipopActivatedController: AuthenticationController;
-beforeAll(async () => {
-  const api = new ApiClientFactory("", "");
-  const profileService = new ProfileService(api);
-  const lollipopService = new LollipopService(
-    {} as ReturnType<LollipopApiClient>,
-    "",
-    ""
-  );
-  const notificationService = new NotificationService("", "");
-  const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
-    notificationService;
-  const usersLoginLogService = new UsersLoginLogService("", "");
+const api = new ApiClientFactory("", "");
+const profileService = new ProfileService(api);
+const lollipopService = new LollipopService(
+  {} as ReturnType<LollipopApiClient>,
+  "",
+  ""
+);
+const notificationService = new NotificationService("", "");
+const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
+  notificationService;
+const usersLoginLogService = new UsersLoginLogService("", "");
 
-  controller = new AuthenticationController(
-    redisSessionStorage,
-    tokenService,
-    getClientProfileRedirectionUrl,
-    getClientErrorRedirectionUrl,
-    profileService,
-    notificationServiceFactory,
-    usersLoginLogService,
-    [],
-    true,
-    {
-      isLollipopEnabled: false,
-      lollipopService: lollipopService
-    },
-    mockTelemetryClient
-  );
+const controller = new AuthenticationController(
+  redisSessionStorage,
+  tokenService,
+  getClientProfileRedirectionUrl,
+  getClientErrorRedirectionUrl,
+  profileService,
+  notificationServiceFactory,
+  usersLoginLogService,
+  [],
+  true,
+  {
+    isLollipopEnabled: false,
+    lollipopService: lollipopService
+  },
+  mockTelemetryClient
+);
 
-  lollipopActivatedController = new AuthenticationController(
-    redisSessionStorage,
-    tokenService,
-    getClientProfileRedirectionUrl,
-    getClientErrorRedirectionUrl,
-    profileService,
-    notificationServiceFactory,
-    usersLoginLogService,
-    [],
-    true,
-    {
-      isLollipopEnabled: true,
-      lollipopService: lollipopService
-    },
-    mockTelemetryClient
-  );
-});
+const lollipopActivatedController = new AuthenticationController(
+  redisSessionStorage,
+  tokenService,
+  getClientProfileRedirectionUrl,
+  getClientErrorRedirectionUrl,
+  profileService,
+  notificationServiceFactory,
+  usersLoginLogService,
+  [],
+  true,
+  {
+    isLollipopEnabled: true,
+    lollipopService: lollipopService
+  },
+  mockTelemetryClient
+);
 
 let clock: any;
 beforeEach(() => {
@@ -694,7 +690,6 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
-  
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
@@ -809,7 +804,6 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
-  
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
@@ -1338,7 +1332,9 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
 
     mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockRevokePreviousAssertionRef.mockImplementationOnce(() => Promise.reject("error"));
+    mockRevokePreviousAssertionRef.mockImplementationOnce(() =>
+      Promise.reject("error")
+    );
     mockDel.mockReturnValue(Promise.resolve(E.right(false)));
 
     const response = await lollipopActivatedController.logout(req);
