@@ -469,7 +469,7 @@ export default class AuthenticationController {
           this.lollipopParams.isLollipopEnabled,
           O.fromPredicate(identity),
           // if lollipop is enabled we delete the reference and send the revoke pub key message
-          O.map(_ =>
+          O.map(() =>
             pipe(
               // retrieve the assertionRef for the user
               TE.tryCatch(
@@ -488,7 +488,7 @@ export default class AuthenticationController {
                     E.toError
                   ),
                   TE.chainEitherK(identity),
-                  TE.chainW(__ =>
+                  TE.chainW(() =>
                     pipe(
                       maybeAssertionRef,
                       O.map(assertionRef =>
@@ -507,7 +507,7 @@ export default class AuthenticationController {
                               response => new Error(response.errorCode)
                             )
                           ),
-                          TE.map(___ => true)
+                          TE.map(() => true)
                         )
                       ),
                       // continue if there's no assertionRef on redis
@@ -520,7 +520,7 @@ export default class AuthenticationController {
           ),
           // if lollipop is not enabled we go on
           O.getOrElse(() => TE.of(true)),
-          TE.chain(_ =>
+          TE.chain(() =>
             pipe(
               // delete the session for the user
               TE.tryCatch(() => this.sessionStorage.del(user), E.toError),
@@ -528,7 +528,7 @@ export default class AuthenticationController {
               TE.chain(
                 TE.fromPredicate(
                   identity,
-                  __ => new Error("Error destroying the user session")
+                  () => new Error("Error destroying the user session")
                 )
               )
             )
@@ -539,7 +539,7 @@ export default class AuthenticationController {
               log.error(errorMessage);
               return ResponseErrorInternal(errorMessage);
             },
-            _ => ResponseSuccessJson({ message: "ok" })
+            () => ResponseSuccessJson({ message: "ok" })
           ),
           TE.toUnion
         )()
