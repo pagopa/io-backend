@@ -303,7 +303,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
       "/profile.html?token=" + mockSessionToken
@@ -336,7 +335,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
       "/profile.html?token=" + mockSessionToken
@@ -374,7 +372,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -409,7 +406,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -427,7 +423,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(invalidUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(400);
 
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
@@ -442,7 +437,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -457,7 +451,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
@@ -470,7 +463,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -486,7 +478,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -507,7 +498,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockTelemetryClient.trackEvent).toBeCalledWith(
       expect.objectContaining({
         name: "spid.error.generic",
@@ -538,7 +528,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockTelemetryClient.trackEvent).toBeCalledWith(
       expect.objectContaining({
         name: "spid.error.generic",
@@ -587,7 +576,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockTelemetryClient.trackEvent).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
@@ -917,7 +905,6 @@ describe("AuthenticationController#acsTest", () => {
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(response.kind).toEqual("IResponseSuccessJson");
     expect(res.json).toHaveBeenCalledWith({ token: expectedToken });
   });
@@ -930,7 +917,6 @@ describe("AuthenticationController#acsTest", () => {
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(response).toEqual(expectedResponse);
   });
   it("should return ResponseErrorInternal if the token is missing", async () => {
@@ -942,7 +928,6 @@ describe("AuthenticationController#acsTest", () => {
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(response.kind).toEqual("IResponseErrorInternal");
   });
 });
@@ -967,8 +952,6 @@ describe("AuthenticationController#getUserIdentity", () => {
 
     const response = await controller.getUserIdentity(req);
     response.apply(res);
-
-    expect(controller).toBeTruthy();
 
     const expectedValue = exactUserIdentityDecode(
       (mockedUser as unknown) as UserIdentity
@@ -997,7 +980,6 @@ describe("AuthenticationController#getUserIdentity", () => {
     const response = await controller.getUserIdentity(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -1018,7 +1000,6 @@ describe("AuthenticationController#slo", () => {
     const response = await controller.slo();
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(301, "/");
   });
 });
@@ -1039,7 +1020,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockGetLollipop).not.toHaveBeenCalled();
     expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
@@ -1066,7 +1046,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockGetLollipop).not.toHaveBeenCalled();
     expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
@@ -1086,7 +1065,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockGetLollipop).not.toHaveBeenCalled();
     expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
@@ -1104,7 +1082,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockGetLollipop).not.toHaveBeenCalled();
     expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
@@ -1124,7 +1101,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockGetLollipop).not.toHaveBeenCalled();
     expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
