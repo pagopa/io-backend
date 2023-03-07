@@ -76,7 +76,7 @@ export const lollipopMiddleware: (
                   }
                 )
               ),
-              TE.chainW(
+              TE.chain(
                 flow(
                   TE.fromEither,
                   TE.mapLeft(err => {
@@ -88,7 +88,7 @@ export const lollipopMiddleware: (
                       "Unexpected response from lollipop service"
                     );
                   }),
-                  TE.chainW(lollipopRes =>
+                  TE.chain(lollipopRes =>
                     lollipopRes.status === 200
                       ? TE.of(lollipopRes.value)
                       : lollipopRes.status === 403
@@ -128,7 +128,7 @@ export const lollipopMiddleware: (
         return ResponseErrorInternal("Error executing middleware");
       }
     ),
-    TE.chainW(maybeErrorResponse =>
+    TE.chain(maybeErrorResponse =>
       maybeErrorResponse === undefined
         ? TE.of(void 0)
         : TE.left(maybeErrorResponse)
