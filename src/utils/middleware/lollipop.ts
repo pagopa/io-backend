@@ -10,6 +10,7 @@ import {
 import * as E from "fp-ts/Either";
 import { ulid } from "ulid";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { ISessionStorage } from "../../services/ISessionStorage";
 import { withUserFromRequest } from "../../types/user";
 import { LollipopApiClient } from "../../clients/lollipop";
@@ -17,6 +18,7 @@ import {
   LollipopLocals,
   withLollipopHeadersFromRequest
 } from "../../types/lollipop";
+import { log } from "../logger";
 
 type ErrorsResponses =
   | IResponseErrorInternal
@@ -40,9 +42,15 @@ export const lollipopMiddleware: (
                 E.toError
               ),
               TE.chainEitherK(identity),
-              TE.mapLeft(() =>
-                ResponseErrorInternal("Error retrieving the assertionRef")
-              ),
+              TE.mapLeft(err => {
+                log.error(
+                  "lollipopMiddleware|error reading the assertionRef from redis [%s]",
+                  err.message
+                );
+                return ResponseErrorInternal(
+                  "Error retrieving the assertionRef"
+                );
+              }),
               TE.chainW(
                 TE.fromOption(() => ResponseErrorForbiddenNotAuthorized)
               ),
@@ -57,20 +65,29 @@ export const lollipopMiddleware: (
                         operation_id: operationId
                       }
                     }),
-                  () =>
-                    ResponseErrorInternal(
+                  err => {
+                    log.error(
+                      "lollipopMiddleware|error trying to call the Lollipop function service [%s]",
+                      E.toError(err).message
+                    );
+                    return ResponseErrorInternal(
                       "Error calling the Lollipop function service"
-                    )
+                    );
+                  }
                 )
               ),
               TE.chainW(
                 flow(
                   TE.fromEither,
-                  TE.mapLeft(_ =>
-                    ResponseErrorInternal(
+                  TE.mapLeft(err => {
+                    log.error(
+                      "lollipopMiddleware|error calling the Lollipop function service [%s]",
+                      readableReportSimplified(err)
+                    );
+                    return ResponseErrorInternal(
                       "Unexpected response from lollipop service"
-                    )
-                  ),
+                    );
+                  }),
                   TE.chainW(lollipopRes =>
                     lollipopRes.status === 200
                       ? TE.of(lollipopRes.value)
@@ -103,7 +120,13 @@ export const lollipopMiddleware: (
             )()
           )
         ),
-      () => ResponseErrorInternal("Error executing middleware")
+      err => {
+        log.error(
+          "lollipopMiddleware|error executing the middleware [%s]",
+          E.toError(err).message
+        );
+        return ResponseErrorInternal("Error executing middleware");
+      }
     ),
     TE.chainW(maybeErrorResponse =>
       maybeErrorResponse === undefined
