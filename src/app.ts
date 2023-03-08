@@ -16,7 +16,7 @@ import {
   NodeEnvironment,
   NodeEnvironmentEnum
 } from "@pagopa/ts-commons/lib/environment";
-import { CIDR } from "@pagopa/ts-commons/lib/strings";
+import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { QueueClient } from "@azure/storage-queue";
 import { withSpid } from "@pagopa/io-spid-commons";
 import { getSpidStrategyOption } from "@pagopa/io-spid-commons/dist/utils/middleware";
@@ -26,6 +26,7 @@ import * as E from "fp-ts/lib/Either";
 import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -82,7 +83,8 @@ import {
   FF_LOLLIPOP_ENABLED,
   DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-  LOLLIPOP_REVOKE_QUEUE_NAME
+  LOLLIPOP_REVOKE_QUEUE_NAME,
+  IO_SIGN_SERVICE_ID
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -1307,7 +1309,11 @@ function registerIoSignAPIRoutes(
   app.get(
     `${basePath}/metadata`,
     bearerSessionTokenAuth,
-    constantExpressHandler(ioSignController.getMetadata())
+    constantExpressHandler(
+      ResponseSuccessJson({
+        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString
+      })
+    )
   );
 
   app.post(
