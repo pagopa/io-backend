@@ -23,6 +23,8 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
+import { ResLocals } from "src/utils/express";
+import { withLollipopLocals, withRequiredRawBody } from "src/types/lollipop";
 import { Id } from "../../generated/io-sign/Id";
 import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
@@ -137,8 +139,9 @@ export default class IoSignController {
   /**
    * Create a Signature from a Signature Request
    */
-  public readonly createSignature = (
-    req: express.Request
+  public readonly createSignature = async <T extends ResLocals>(
+    req: express.Request,
+    locals?: T
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -147,33 +150,38 @@ export default class IoSignController {
   > =>
     withUserFromRequest(req, async user =>
       pipe(
-        req.body,
-        CreateSignatureBody.decode,
-        E.mapLeft(responseErrorValidation),
+        locals,
+        withLollipopLocals,
+        E.chain(withRequiredRawBody),
         TE.fromEither,
-        TE.chainW(body =>
+        TE.chainW(localsWithBody =>
           pipe(
-            sequenceS(TE.ApplySeq)({
-              signerId: pipe(
-                retrieveSignerId(this.ioSignService, user.fiscal_code),
-                TE.mapLeft(() => toErrorRetrievingTheSignerId)
-              ),
-              userProfile: pipe(
-                profileWithEmailValidatedOrError(this.profileService, user),
-                TE.mapLeft(
-                  responseErrorInternal(
-                    "Error retrieving a user profile with validated email address"
+            localsWithBody.body,
+            CreateSignatureBody.decode,
+            E.mapLeft(responseErrorValidation),
+            TE.fromEither,
+            TE.chainW(() =>
+              pipe(
+                sequenceS(TE.ApplySeq)({
+                  signerId: pipe(
+                    retrieveSignerId(this.ioSignService, user.fiscal_code),
+                    TE.mapLeft(() => toErrorRetrievingTheSignerId)
+                  ),
+                  userProfile: pipe(
+                    profileWithEmailValidatedOrError(this.profileService, user),
+                    TE.mapLeft(
+                      responseErrorInternal(
+                        "Error retrieving a user profile with validated email address"
+                      )
+                    )
+                  )
+                }),
+                TE.map(({ userProfile, signerId }) =>
+                  this.ioSignService.createSignature(localsWithBody)(
+                    signerId.value.id,
+                    userProfile.email
                   )
                 )
-              )
-            }),
-            TE.map(({ userProfile, signerId }) =>
-              this.ioSignService.createSignature(
-                body.signature_request_id,
-                userProfile.email,
-                body.documents_to_sign,
-                body.qtsp_clauses,
-                signerId.value.id
               )
             )
           )

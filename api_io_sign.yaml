@@ -13,7 +13,11 @@ paths:
       summary: Get the qtsp clauses
       responses:
         "200":
-          $ref: "#/components/schemas/QtspClausesMetadataDetailView"
+          description: The QTSP clauses list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QtspClausesMetadataDetailView"
         "401":
           description: Bearer token null or expired.
         "502":
