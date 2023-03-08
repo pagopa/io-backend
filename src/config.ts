@@ -479,7 +479,7 @@ export const LOLLIPOP_API_CLIENT = LollipopApiClient(
 );
 
 export const FIRST_LOLLIPOP_CONSUMER_CLIENT = FirstLollipopConsumerClient(
-  // We access to the first lollipop consumer implementation that is now locatend
+  // We access to the first lollipop consumer implementation that is now located
   // within the Lollipop function.
   LOLLIPOP_API_KEY,
   LOLLIPOP_API_URL
