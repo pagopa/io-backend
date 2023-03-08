@@ -1078,7 +1078,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     req.user = mockedUser;
 
     mockDelLollipop.mockResolvedValueOnce(E.left(new Error("Redis error")));
-    mockDel.mockResolvedValueOnce(E.right(false));
 
     expect(controller).toBeTruthy();
     const response = await controller.logout(req);
