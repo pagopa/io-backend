@@ -1012,7 +1012,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(controller).toBeTruthy();
     const response = await controller.logout(req);
     response.apply(res);
 
@@ -1041,14 +1040,13 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(controller).toBeTruthy();
     const response = await controller.logout(req);
     response.apply(res);
 
     expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(userWithExternalToken);
-    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
@@ -1065,8 +1063,8 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     response.apply(res);
 
     expect(mockGetLollipop).not.toHaveBeenCalled();
-    expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockDel).not.toBeCalled();
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
@@ -1079,7 +1077,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
 
     mockDelLollipop.mockResolvedValueOnce(E.left(new Error("Redis error")));
 
-    expect(controller).toBeTruthy();
     const response = await controller.logout(req);
     response.apply(res);
 
@@ -1102,7 +1099,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(false));
 
-    expect(controller).toBeTruthy();
     const response = await controller.logout(req);
     response.apply(res);
 
@@ -1125,7 +1121,6 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.left(new Error("Redis error")));
 
-    expect(controller).toBeTruthy();
     const response = await controller.logout(req);
     response.apply(res);
 
@@ -1161,7 +1156,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
@@ -1186,11 +1180,9 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     req.user = mockedUser;
 
     mockGetLollipop.mockResolvedValueOnce(E.right(O.none));
-    mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
@@ -1220,13 +1212,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
-    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -1243,13 +1234,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const req = mockReq();
     req.user = invalidUserPayload;
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
     expect(mockGetLollipop).not.toHaveBeenCalled();
-    expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockDel).not.toBeCalled();
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
@@ -1264,17 +1254,13 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     req.user = mockedUser;
 
     mockGetLollipop.mockImplementationOnce(() => Promise.reject("error"));
-    mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
-    mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
     expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
-    expect(mockDelLollipop).not.toBeCalled();
     expect(mockRevokePreviousAssertionRef).not.toBeCalled();
+    expect(mockDelLollipop).not.toBeCalled();
     expect(mockDel).not.toBeCalled();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
@@ -1294,9 +1280,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
     mockDelLollipop.mockImplementationOnce(() => Promise.reject("error"));
-    mockDel.mockResolvedValueOnce(E.right(true));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
@@ -1324,7 +1308,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.right(false));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
@@ -1352,7 +1335,6 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDel.mockResolvedValueOnce(E.left(new Error("Redis error")));
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
