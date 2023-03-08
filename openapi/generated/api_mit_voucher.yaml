@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 10.0.0
+  version: 10.1.0
   title: MIT Voucher service for IO App
 basePath: /api/v1/mitvoucher/auth
 schemes:
