@@ -3,6 +3,7 @@
  * Main entry point for the Digital Citizenship proxy.
  */
 
+import { Readable } from "stream";
 import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -84,7 +85,8 @@ import {
   DEFAULT_LOLLIPOP_ASSERTION_REF_DURATION,
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
   LOLLIPOP_REVOKE_QUEUE_NAME,
-  IO_SIGN_SERVICE_ID
+  IO_SIGN_SERVICE_ID,
+  FIRST_LOLLIPOP_CONSUMER_CLIENT
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -173,6 +175,11 @@ import {
 } from "./services/notificationServiceFactory";
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
+import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
+import { lollipopMiddleware } from "./utils/middleware/lollipop";
+import { LollipopApiClient } from "./clients/lollipop";
+import { ISessionStorage } from "./services/ISessionStorage";
+import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -359,7 +366,16 @@ export function newApp({
   //
 
   // Parse the incoming request body. This is needed by Passport spid strategy.
-  app.use(bodyParser.json());
+  app.use(
+    bodyParser.json({
+      verify: (_req, res: express.Response, buf, encoding: BufferEncoding) => {
+        // eslint-disable-next-line functional/immutable-data
+        res.locals.body = Readable.from(buf, {
+          encoding
+        });
+      }
+    })
+  );
 
   // Parse an urlencoded body.
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -505,6 +521,16 @@ export function newApp({
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerPublicRoutes(app);
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        registerFirstLollipopConsumer(
+          app,
+          "/first-lollipop",
+          LOLLIPOP_API_CLIENT,
+          SESSION_STORAGE,
+          FIRST_LOLLIPOP_CONSUMER_CLIENT,
+          authMiddlewares.bearerSession
+        );
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerAuthenticationRoutes(
@@ -1549,6 +1575,24 @@ function registerPublicRoutes(app: Express): void {
   // @see
   // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
   app.get("/ping", (_, res) => res.status(200).send("ok"));
+}
+
+// eslint-disable-next-line max-params
+function registerFirstLollipopConsumer(
+  app: Express,
+  basePath: string,
+  lollipopClient: ReturnType<typeof LollipopApiClient>,
+  sessionStorage: ISessionStorage,
+  firstLollipopConsumerClient: ReturnType<typeof FirstLollipopConsumerClient>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bearerSessionTokenAuth: any
+): void {
+  app.post(
+    `${basePath}/sign`,
+    bearerSessionTokenAuth,
+    lollipopMiddleware(lollipopClient, sessionStorage),
+    toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
+  );
 }
 
 export default defaultModule;
