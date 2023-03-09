@@ -176,9 +176,11 @@ const anActivatedPubKey = ({
 const mockRevokePreviousAssertionRef = jest
   .fn()
   .mockImplementation(_ => Promise.resolve({}));
+
 const mockActivateLolliPoPKey = jest
   .fn()
   .mockImplementation((_, __, ___) => TE.of(anActivatedPubKey));
+
 jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -211,55 +213,51 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
   } as UrlFromString;
 };
 
-let controller: AuthenticationController;
-let lollipopActivatedController: AuthenticationController;
-beforeAll(async () => {
-  const api = new ApiClientFactory("", "");
-  const profileService = new ProfileService(api);
-  const lollipopService = new LollipopService(
-    {} as ReturnType<LollipopApiClient>,
-    "",
-    ""
-  );
-  const notificationService = new NotificationService("", "");
-  const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
-    notificationService;
-  const usersLoginLogService = new UsersLoginLogService("", "");
+const api = new ApiClientFactory("", "");
+const profileService = new ProfileService(api);
+const lollipopService = new LollipopService(
+  {} as ReturnType<LollipopApiClient>,
+  "",
+  ""
+);
+const notificationService = new NotificationService("", "");
+const notificationServiceFactory = (_fiscalCode: FiscalCode) =>
+  notificationService;
+const usersLoginLogService = new UsersLoginLogService("", "");
 
-  controller = new AuthenticationController(
-    redisSessionStorage,
-    tokenService,
-    getClientProfileRedirectionUrl,
-    getClientErrorRedirectionUrl,
-    profileService,
-    notificationServiceFactory,
-    usersLoginLogService,
-    [],
-    true,
-    {
-      isLollipopEnabled: false,
-      lollipopService: lollipopService
-    },
-    mockTelemetryClient
-  );
+const controller = new AuthenticationController(
+  redisSessionStorage,
+  tokenService,
+  getClientProfileRedirectionUrl,
+  getClientErrorRedirectionUrl,
+  profileService,
+  notificationServiceFactory,
+  usersLoginLogService,
+  [],
+  true,
+  {
+    isLollipopEnabled: false,
+    lollipopService: lollipopService
+  },
+  mockTelemetryClient
+);
 
-  lollipopActivatedController = new AuthenticationController(
-    redisSessionStorage,
-    tokenService,
-    getClientProfileRedirectionUrl,
-    getClientErrorRedirectionUrl,
-    profileService,
-    notificationServiceFactory,
-    usersLoginLogService,
-    [],
-    true,
-    {
-      isLollipopEnabled: true,
-      lollipopService: lollipopService
-    },
-    mockTelemetryClient
-  );
-});
+const lollipopActivatedController = new AuthenticationController(
+  redisSessionStorage,
+  tokenService,
+  getClientProfileRedirectionUrl,
+  getClientErrorRedirectionUrl,
+  profileService,
+  notificationServiceFactory,
+  usersLoginLogService,
+  [],
+  true,
+  {
+    isLollipopEnabled: true,
+    lollipopService: lollipopService
+  },
+  mockTelemetryClient
+);
 
 let clock: any;
 beforeEach(() => {
@@ -301,7 +299,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
       "/profile.html?token=" + mockSessionToken
@@ -334,7 +331,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
       "/profile.html?token=" + mockSessionToken
@@ -372,7 +368,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -407,7 +402,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -425,7 +419,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(invalidUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(400);
 
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
@@ -440,7 +433,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -455,7 +447,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
@@ -468,7 +459,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -484,7 +474,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -505,7 +494,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockTelemetryClient.trackEvent).toBeCalledWith(
       expect.objectContaining({
         name: "spid.error.generic",
@@ -536,7 +524,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockTelemetryClient.trackEvent).toBeCalledWith(
       expect.objectContaining({
         name: "spid.error.generic",
@@ -585,7 +572,6 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(mockTelemetryClient.trackEvent).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
@@ -637,7 +623,6 @@ describe("AuthenticationController#acs", () => {
       ResponseSuccessJson(mockedInitializedProfile)
     );
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
@@ -705,7 +690,6 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
-      expect(lollipopActivatedController).toBeTruthy();
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
@@ -764,7 +748,6 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
@@ -821,7 +804,6 @@ describe("AuthenticationController#acs", () => {
         .mockReturnValueOnce(mockFIMSToken)
         .mockReturnValueOnce(aSessionTrackingId);
 
-      expect(lollipopActivatedController).toBeTruthy();
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
@@ -866,7 +848,6 @@ describe("AuthenticationController#acs", () => {
       .mockReturnValueOnce(mockFIMSToken)
       .mockReturnValueOnce(aSessionTrackingId);
 
-    expect(lollipopActivatedController).toBeTruthy();
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
 
@@ -918,7 +899,6 @@ describe("AuthenticationController#acsTest", () => {
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(response.kind).toEqual("IResponseSuccessJson");
     expect(res.json).toHaveBeenCalledWith({ token: expectedToken });
   });
@@ -931,7 +911,6 @@ describe("AuthenticationController#acsTest", () => {
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(response).toEqual(expectedResponse);
   });
   it("should return ResponseErrorInternal if the token is missing", async () => {
@@ -943,7 +922,6 @@ describe("AuthenticationController#acsTest", () => {
     const response = await controller.acsTest(validUserPayload);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(response.kind).toEqual("IResponseErrorInternal");
   });
 });
@@ -968,8 +946,6 @@ describe("AuthenticationController#getUserIdentity", () => {
 
     const response = await controller.getUserIdentity(req);
     response.apply(res);
-
-    expect(controller).toBeTruthy();
 
     const expectedValue = exactUserIdentityDecode(
       (mockedUser as unknown) as UserIdentity
@@ -998,7 +974,6 @@ describe("AuthenticationController#getUserIdentity", () => {
     const response = await controller.getUserIdentity(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -1019,28 +994,30 @@ describe("AuthenticationController#slo", () => {
     const response = await controller.slo();
     response.apply(res);
 
-    expect(controller).toBeTruthy();
     expect(res.redirect).toHaveBeenCalledWith(301, "/");
   });
 });
 
-describe("AuthenticationController#logout", () => {
+describe("AuthenticationController|>LollipopDisabled|>logout", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
   });
 
-  it("shoud return success after deleting session token and wallet token", async () => {
+  it("should return success after deleting session token and wallet token", async () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
 
-    mockDel.mockReturnValue(Promise.resolve(E.right(true)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(true));
 
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -1048,7 +1025,8 @@ describe("AuthenticationController#logout", () => {
       value: { message: "ok" }
     });
   });
-  it("shoud return success after deleting all auth tokens", async () => {
+
+  it("should return success after deleting all auth tokens", async () => {
     const res = mockRes();
     const req = mockReq();
     const userWithExternalToken = {
@@ -1059,12 +1037,15 @@ describe("AuthenticationController#logout", () => {
     };
     req.user = userWithExternalToken;
 
-    mockDel.mockReturnValue(Promise.resolve(E.right(true)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(true));
 
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(userWithExternalToken);
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -1081,22 +1062,50 @@ describe("AuthenticationController#logout", () => {
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
     expect(mockDel).not.toBeCalled();
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it("should fail if the assertionRef can not be deleted for a redis error", async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockDelLollipop.mockResolvedValueOnce(E.left(new Error("Redis error")));
+
+    const response = await controller.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).not.toBeCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Redis error"
+    });
   });
 
   it("should fail if the session can not be destroyed", async () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
-    mockDel.mockReturnValue(Promise.resolve(E.right(false)));
+
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(false));
 
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -1108,12 +1117,231 @@ describe("AuthenticationController#logout", () => {
     const res = mockRes();
     const req = mockReq();
     req.user = mockedUser;
-    mockDel.mockReturnValue(Promise.resolve(E.left(new Error("Redis error"))));
+
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.left(new Error("Redis error")));
 
     const response = await controller.logout(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Redis error"
+    });
+  });
+});
+
+describe("AuthenticationController|>LollipopEnabled|>logout", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  it(`
+    GIVEN a lollipop enabled flow
+    WHEN assertionRef exists on redis
+    THEN it should send the pub key revokal message and succeed deleting the assertionRef and the session tokens
+  `, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+    mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(true));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+  });
+
+  it(`
+  GIVEN a lollipop enabled flow 
+  WHEN there is no assertionRef on redis
+  THEN it should not send the pub key revokal message and succeed deleting the assertionRef and the session tokens
+  `, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.none));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(true));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+  });
+
+  it(`
+  GIVEN an enabled lollipop flow 
+  WHEN the pub key revokal message sending fails
+  THEN it should succeed deleting the assertionRef and the session tokens`, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+    mockRevokePreviousAssertionRef.mockImplementationOnce(() =>
+      Promise.reject("error")
+    );
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(true));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: { message: "ok" }
+    });
+  });
+
+  it(`
+  GIVEN an enabled lollipop flow 
+  WHEN the user data is invalid
+  THEN it should fail and not call internal functions`, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = invalidUserPayload;
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).not.toHaveBeenCalled();
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
+    expect(mockDel).not.toBeCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+
+  it(`
+  GIVEN an enabled lollipop flow 
+  WHEN it can't retrieve the assertionRef from redis because of an error
+  THEN it should fail not sending the pub key revokal message and not deleting the assertionRef and the session tokens`, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockImplementationOnce(() => Promise.reject("error"));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).not.toBeCalled();
+    expect(mockDelLollipop).not.toBeCalled();
+    expect(mockDel).not.toBeCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "error"
+    });
+  });
+
+  it(`
+  GIVEN an enabled lollipop flow 
+  WHEN it can't delete the assertionRef from redis because of an error
+  THEN it should fail after sending the pub key revokal message but not deleting the session tokens`, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+    mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
+    mockDelLollipop.mockImplementationOnce(() => Promise.reject("error"));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).not.toBeCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "error"
+    });
+  });
+
+  it(`
+  GIVEN an enabled lollipop flow 
+  WHEN the session can not be destroyed
+  THEN it should fail after sending the pub key revokal message and deleting the assertionRef`, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+    mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.right(false));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      ...anErrorResponse,
+      detail: "Error destroying the user session"
+    });
+  });
+
+  it(`
+  GIVEN an enabled lollipop flow 
+  WHEN the Redis client returns an error
+  THEN it should fail after sending the pub key revokal message and deleting the assertionRef`, async () => {
+    const res = mockRes();
+    const req = mockReq();
+    req.user = mockedUser;
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
+    mockRevokePreviousAssertionRef.mockResolvedValueOnce({});
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDel.mockResolvedValueOnce(E.left(new Error("Redis error")));
+
+    const response = await lollipopActivatedController.logout(req);
+    response.apply(res);
+
+    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
+    expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
+    expect(mockDel).toHaveBeenCalledWith(mockedUser);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
