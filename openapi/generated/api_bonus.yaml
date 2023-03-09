@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 10.2.0
+  version: 10.2.1
   title: Bonus vacanze API
 host: localhost
 basePath: /api/v1
