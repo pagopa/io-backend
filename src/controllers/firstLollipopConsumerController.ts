@@ -6,9 +6,10 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
+import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
 import { ResLocals } from "../utils/express";
 import { withLollipopLocals, withRequiredRawBody } from "../types/lollipop";
@@ -39,10 +40,23 @@ export const firstLollipopSign = (
       )
     ),
     TE.chainEitherKW(
-      E.mapLeft(() =>
-        ResponseErrorInternal("Unexpeded Lollipop consumer response")
+      E.mapLeft(
+        flow(readableReportSimplified, message =>
+          ResponseErrorInternal(
+            `Unexpected Lollipop consumer response: ${message}`
+          )
+        )
       )
     ),
-    TE.map(lcResponse => ResponseSuccessJson(lcResponse.value)),
+    TE.chain(response =>
+      response.status === 200
+        ? TE.right(response.value)
+        : TE.left(
+            ResponseErrorInternal(
+              `signMessage returned ${response.status}: ${response.value?.title},${response.value?.detail}`
+            )
+          )
+    ),
+    TE.map(lcResponse => ResponseSuccessJson(lcResponse)),
     TE.toUnion
   )();
