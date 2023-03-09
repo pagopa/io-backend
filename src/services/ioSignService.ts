@@ -25,7 +25,8 @@ import {
   NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
-import { LollipopLocalsType } from "src/types/lollipop";
+import { CreateSignatureBody as CreateSignatureBodyApiModel } from "generated/io-sign-api/CreateSignatureBody";
+import { LollipopLocalsType } from "../types/lollipop";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 import { Id } from "../../generated/io-sign/Id";
@@ -180,9 +181,10 @@ export default class IoSignService {
   /**
    * Create a Signature from a Signature Request
    */
-  public readonly createSignature = (localsWithBody: LollipopLocalsType) => (
-    signerId: Id,
-    email: EmailString
+  public readonly createSignature = (
+    lollipopLocals: LollipopLocalsType,
+    body: CreateSignatureBodyApiModel,
+    signerId: Id
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -191,11 +193,8 @@ export default class IoSignService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.ioSignApiClient.createSignature({
-        ...localsWithBody,
-        body: {
-          ...localsWithBody.body,
-          email
-        },
+        ...lollipopLocals,
+        body,
         "x-iosign-signer-id": signerId
       });
       return withValidatedOrInternalError(validated, response => {

@@ -13,6 +13,7 @@ import ProfileService from "../../services/profileService";
 import { FilledDocumentDetailView } from "../../../generated/io-sign-api/FilledDocumentDetailView";
 
 import {
+  aFiscalCode,
   mockedInitializedProfile,
   mockedUser
 } from "../../__mocks__/user_mock";
@@ -31,6 +32,16 @@ import {
   SignatureDetailView,
   StatusEnum as SignatureStatusEnum
 } from "../../../generated/io-sign/SignatureDetailView";
+import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
+import { LollipopSignature } from "../../../generated/lollipop/LollipopSignature";
+import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
+import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
+import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
+import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
+import { anAssertionRef } from "../../__mocks__/lollipop";
+import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
+import { CreateSignatureBody } from "../../../generated/io-sign/CreateSignatureBody";
+import { LollipopLocalsType } from "../../types/lollipop";
 
 const API_KEY = "";
 const API_URL = "";
@@ -48,6 +59,29 @@ const mockGetSignerByFiscalCode = jest.fn();
 const mockGetQtspClausesMetadata = jest.fn();
 const mockGetSignatureRequest = jest.fn();
 const mockCreateSignature = jest.fn();
+
+const aBearerToken = "a bearer token" as LollipopJWTAuthorization;
+const aPubKey = "a pub key" as LollipopPublicKey;
+
+const lollipopRequestHeaders = {
+  signature: "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:" as LollipopSignature,
+  ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput,
+  ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
+  ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it" as LollipopOriginalURL
+};
+
+const lollipopEnrichedRequestHeaders = {
+  ...lollipopRequestHeaders,
+  ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
+  ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
+  ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
+  ["x-pagopa-lollipop-public-key"]: aPubKey,
+  ["x-pagopa-lollipop-user-id"]: aFiscalCode
+};
+
+const lollipopLocals: LollipopLocalsType = {
+  ...lollipopEnrichedRequestHeaders
+};
 
 jest.mock("../../services/ioSignService", () => {
   return {
@@ -385,39 +419,44 @@ describe("IoSignController#createSignature", () => {
     mockGetProfile.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
     );
-
+    const body = {
+      signature_request_id: signature.signature_request_id,
+      documents_to_sign: documentsToSign,
+      qtsp_clauses: qtspAcceptedClauses
+    };
     const req = {
       ...mockReq({
-        body: {
-          signature_request_id: signature.signature_request_id,
-          documents_to_sign: documentsToSign,
-          qtsp_clauses: qtspAcceptedClauses
-        }
+        body
       }),
+      headers: lollipopRequestHeaders,
       user: mockedUser
     };
 
     const controller = new IoSignController(ioSignService, profileService);
-    await controller.createSignature(req);
+    await controller.createSignature(req, lollipopLocals);
 
     expect(mockCreateSignature).toHaveBeenCalledWith(
-      signature.signature_request_id,
-      mockedInitializedProfile.email as EmailString,
-      documentsToSign,
-      qtspAcceptedClauses,
+      lollipopLocals,
+      {
+        ...body,
+        email: mockedInitializedProfile.email
+      },
       signerDetailMock.id
     );
   });
 
   it("should call createSignature method on the IoSignService with valid values", async () => {
+    const body: CreateSignatureBody = {
+      signature_request_id: signature.signature_request_id,
+      documents_to_sign: documentsToSign,
+      qtsp_clauses: qtspAcceptedClauses
+    };
+
     const req = {
       ...mockReq({
-        body: {
-          signature_request_id: signature.signature_request_id,
-          documents_to_sign: documentsToSign,
-          qtsp_clauses: qtspAcceptedClauses
-        }
+        body
       }),
+      headers: lollipopRequestHeaders,
       user: mockedUser
     };
 
@@ -431,7 +470,7 @@ describe("IoSignController#createSignature", () => {
 
     const controller = new IoSignController(ioSignService, profileService);
 
-    const response = await controller.createSignature(req);
+    const response = await controller.createSignature(req, lollipopLocals);
 
     expect(response).toEqual({
       apply: expect.any(Function),
@@ -443,13 +482,14 @@ describe("IoSignController#createSignature", () => {
   it("should not call createSignature method on the IoSignService with empty body", async () => {
     const req = {
       ...mockReq(),
-      user: mockedUser
+      user: mockedUser,
+      headers: lollipopRequestHeaders
     };
 
     const res = mockRes();
 
     const controller = new IoSignController(ioSignService, profileService);
-    const response = await controller.createSignature(req);
+    const response = await controller.createSignature(req, lollipopLocals);
 
     response.apply(res);
 
@@ -475,11 +515,12 @@ describe("IoSignController#createSignature", () => {
           qtsp_clauses: qtspAcceptedClauses
         }
       }),
+      headers: lollipopRequestHeaders,
       user: mockedUser
     };
 
     const controller = new IoSignController(ioSignService, profileService);
-    const response = await controller.createSignature(req);
+    const response = await controller.createSignature(req, lollipopLocals);
 
     expect(response).toEqual(
       expect.objectContaining({
@@ -506,11 +547,12 @@ describe("IoSignController#createSignature", () => {
           qtsp_clauses: qtspAcceptedClauses
         }
       }),
+      headers: lollipopRequestHeaders,
       user: mockedUser
     };
 
     const controller = new IoSignController(ioSignService, profileService);
-    const response = await controller.createSignature(req);
+    const response = await controller.createSignature(req, lollipopLocals);
 
     expect(response).toEqual(
       expect.objectContaining({
