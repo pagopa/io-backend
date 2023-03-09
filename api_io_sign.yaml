@@ -100,7 +100,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/LollipopSignature"
-        - name: x-pagopa-lollipop-custom-tos-challange
+        - name: x-pagopa-lollipop-custom-tos-challenge
           in: header
           description: The tos challenge to sign.
           required: true

@@ -6,6 +6,7 @@
 import * as express from "express";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
+import * as t from "io-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 
 import {
@@ -24,7 +25,7 @@ import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
 import IoSignService from "../services/ioSignService";
 import { ResLocals } from "../utils/express";
-import { withLollipopLocals } from "../types/lollipop";
+import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
 import { Id } from "../../generated/io-sign/Id";
 import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClausesMetadataDetailView";
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
@@ -44,6 +45,37 @@ const responseErrorValidation = (errs: Errors) =>
   ResponseErrorValidation(
     "Bad request",
     errorsToReadableMessages(errs).join(" / ")
+  );
+
+export const IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE =
+  "x-pagopa-lollipop-custom-tos-challenge";
+export const IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE =
+  "x-pagopa-lollipop-custom-sign-challenge";
+
+export const IoSignLollipopLocalsType = t.intersection([
+  LollipopLocalsType,
+  t.type({
+    [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE]: NonEmptyString,
+    [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE]: NonEmptyString
+  })
+]);
+export type IoSignLollipopLocalsType = t.TypeOf<
+  typeof IoSignLollipopLocalsType
+>;
+
+export const withIoSignCustomLollipopLocals = (req: express.Request) => (
+  lollipopLocals: LollipopLocalsType
+): E.Either<IResponseErrorValidation, IoSignLollipopLocalsType> =>
+  pipe(
+    {
+      ...lollipopLocals,
+      [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE]:
+        req.headers[IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE],
+      [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE]:
+        req.headers[IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE]
+    },
+    IoSignLollipopLocalsType.decode,
+    E.mapLeft(responseErrorValidation)
   );
 
 const responseErrorInternal = (reason: string) => (e: Error) =>
@@ -151,8 +183,9 @@ export default class IoSignController {
       pipe(
         locals,
         withLollipopLocals,
+        E.chain(withIoSignCustomLollipopLocals(req)),
         TE.fromEither,
-        TE.chainW(lollipopLocals =>
+        TE.chainW(ioSignLollipopLocals =>
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
@@ -184,7 +217,11 @@ export default class IoSignController {
               )
             ),
             TE.map(({ signerId, body }) =>
-              this.ioSignService.createSignature(lollipopLocals, body, signerId)
+              this.ioSignService.createSignature(
+                ioSignLollipopLocals,
+                body,
+                signerId
+              )
             )
           )
         ),
