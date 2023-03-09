@@ -47,32 +47,29 @@ const responseErrorValidation = (errs: Errors) =>
     errorsToReadableMessages(errs).join(" / ")
   );
 
-export const IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE =
-  "x-pagopa-lollipop-custom-tos-challenge";
-export const IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE =
-  "x-pagopa-lollipop-custom-sign-challenge";
-
 export const IoSignLollipopLocalsType = t.intersection([
   LollipopLocalsType,
   t.type({
-    [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE]: NonEmptyString,
-    [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE]: NonEmptyString
+    ["x-pagopa-lollipop-custom-sign-challenge"]: NonEmptyString,
+    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString
   })
 ]);
 export type IoSignLollipopLocalsType = t.TypeOf<
   typeof IoSignLollipopLocalsType
 >;
 
-export const withIoSignCustomLollipopLocals = (req: express.Request) => (
+export const withIoSignCustomLollipopLocalsFromRequest = (
+  req: express.Request
+) => (
   lollipopLocals: LollipopLocalsType
 ): E.Either<IResponseErrorValidation, IoSignLollipopLocalsType> =>
   pipe(
     {
       ...lollipopLocals,
-      [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE]:
-        req.headers[IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_SIGN_CHALLENGE],
-      [IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE]:
-        req.headers[IO_SIGN_LOLLIPOP_CUSTOM_HEADER_NAME_TOS_CHALLENGE]
+      ["x-pagopa-lollipop-custom-sign-challenge"]:
+        req.headers["x-pagopa-lollipop-custom-sign-challenge"],
+      ["x-pagopa-lollipop-custom-tos-challenge"]:
+        req.headers["x-pagopa-lollipop-custom-tos-challenge"]
     },
     IoSignLollipopLocalsType.decode,
     E.mapLeft(responseErrorValidation)
@@ -183,7 +180,7 @@ export default class IoSignController {
       pipe(
         locals,
         withLollipopLocals,
-        E.chain(withIoSignCustomLollipopLocals(req)),
+        E.chain(withIoSignCustomLollipopLocalsFromRequest(req)),
         TE.fromEither,
         TE.chainW(ioSignLollipopLocals =>
           pipe(
