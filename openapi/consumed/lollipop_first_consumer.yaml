@@ -43,7 +43,7 @@ info:
                        └┬┘                                          └┬┘                                      └┬┘
                       ┌───┐                                       ┌─────┐                                    ┌──┐  
                       │APP│                                       │IO-BE│                                    │LC│  
-                      └───┘                                       └─────┘                                    └──┘  
+                      └───┘                                       └─────┘                                    └──┘
   version: 1.0.0
 security:
   - ApiKeyAuth: []
@@ -126,8 +126,8 @@ paths:
           description: Bad Request
           content:
             application/json:
-            schema:
-              $ref: '#/components/schemas/ProblemJson'
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Unauthorized
         "403":
@@ -137,13 +137,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProblemJson'
+                $ref: "#/components/schemas/ProblemJson"
 
 components:
   securitySchemes:
