@@ -263,11 +263,6 @@ export default class AuthenticationController {
           )
         )
       ),
-      TE.map(inResponseTo => {
-        log.info(inResponseTo);
-        log.info(spidUser.getSamlResponseXml());
-        return inResponseTo;
-      }),
       TE.chainW(
         flow(
           O.chain(O.fromPredicate(() => this.lollipopParams.isLollipopEnabled)),
