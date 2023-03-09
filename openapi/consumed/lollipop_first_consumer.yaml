@@ -50,7 +50,7 @@ security:
 
 # Example endpoint
 paths:
-  /sign-message:
+  /signed-message:
     post:
       operationId: signMessage
       summary: POST a signed request with Lollipop
