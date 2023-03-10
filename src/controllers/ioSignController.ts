@@ -179,9 +179,10 @@ export default class IoSignController {
     withUserFromRequest(req, user =>
       pipe(
         locals,
-        // validate locals to check if all the properties required for lollipop are present
+        /* Here we check the mandatory LolliPop HTTP headers[https://github.com/pagopa/io-backend/blob/master/openapi/consumed/lollipop_first_consumer.yaml#L58]
+         * which contain the signatures and the parameters necessary for the QTSP to verify them.
+         */
         withLollipopLocals,
-        // validate locals to check if all the custom io-sign properties for lollipop are present
         E.chain(withIoSignCustomLollipopLocalsFromRequest(req)),
         TE.fromEither,
         TE.chainW(ioSignLollipopLocals =>
