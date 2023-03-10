@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-backend",
-  "version": "10.2.5",
+  "version": "10.2.6",
   "min_app_version": {
     "ios": "2.3.0",
     "android": "2.3.0"
