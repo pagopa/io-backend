@@ -179,7 +179,9 @@ export default class IoSignController {
     withUserFromRequest(req, user =>
       pipe(
         locals,
+        // validate locals to check if all the properties required for lollipop are present
         withLollipopLocals,
+        // validate locals to check if all the custom io-sign properties for lollipop are present
         E.chain(withIoSignCustomLollipopLocalsFromRequest(req)),
         TE.fromEither,
         TE.chainW(ioSignLollipopLocals =>
@@ -204,9 +206,9 @@ export default class IoSignController {
                 CreateSignatureBody.decode,
                 E.mapLeft(responseErrorValidation),
                 TE.fromEither,
-                TE.map(body => ({
+                TE.map(signatureBody => ({
                   body: {
-                    ...body,
+                    ...signatureBody,
                     email: userProfile.email
                   },
                   signerId: signerId.value.id
