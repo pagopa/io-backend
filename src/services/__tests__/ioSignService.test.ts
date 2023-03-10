@@ -47,6 +47,8 @@ const lollipopRequestHeaders = {
   ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput,
   ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
   ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it" as LollipopOriginalURL,
+  ["x-pagopa-lollipop-custom-sign-challenge"]: "customTosChallenge" as NonEmptyString,
+  ["x-pagopa-lollipop-custom-tos-challenge"]: "customSignChallenge" as NonEmptyString,
   ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
   ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
   ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
