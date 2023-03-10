@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 10.2.4
+  version: 10.2.5
   title: EU Covid Certificate service for IO App
 basePath: /api/v1/eucovidcert
 schemes:
