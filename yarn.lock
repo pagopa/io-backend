@@ -754,12 +754,12 @@
     xmldom "^0.6.0"
     yargs "^15.3.0"
 
-"@pagopa/openapi-codegen-ts@^12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-12.2.0.tgz#cf63c6f99a16cf80b02a56c54ebf86f630bd6ca5"
-  integrity sha512-gctiqQx2vNzdr6m9h1OLw7v+OAxaH2WEGQhDsoZTEp59hPpnJT0Wh60U5mjGCOkc9YneRapKsJycIS7f18TOhQ==
+"@pagopa/openapi-codegen-ts@^12.2.1":
+  version "12.2.1"
+  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-12.2.1.tgz#e2cc9cedcbb23077b4f3f80e970ebd9c55e71afe"
+  integrity sha512-NO+z8+FUuR04Kc6I6fZk2mh+PWc1wrrBiTmcmnwuGGAWcObPqt4oF7b0fpAiZF91YuAMf5BOaXsFIIeSQv3i8g==
   dependencies:
-    "@pagopa/ts-commons" "^10.3.0"
+    "@pagopa/ts-commons" "^10.15.0"
     fs-extra "^6.0.0"
     nunjucks "^3.2.3"
     openapi-types "^10.0.0"
@@ -799,7 +799,7 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^10.13.0", "@pagopa/ts-commons@^10.3.0":
+"@pagopa/ts-commons@^10.13.0":
   version "10.14.1"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.14.1.tgz#d5cfbd1b3637a6938500648f1e117e83067fa6a9"
   integrity sha512-QbsI7KhJvY1s7nRZBa8sOIevtgmC80T0OAb8BxtYBq3th2BRj4ZLhYRoQWyt2mA5pmgfFp6j6U0fpocFLM1ivA==
@@ -815,10 +815,10 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^10.14.2":
-  version "10.14.2"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.14.2.tgz#a27bdbe00a376d0f71e9d2859ebaedc1d16b6a10"
-  integrity sha512-rRSAbAnIZidEsM8Vto1TK0jOKOOs8MUFora72OSM0VM18RWp1gsVd3WC7JbPaw8vztX+wB7PINBJUdq66j+aow==
+"@pagopa/ts-commons@^10.15.0":
+  version "10.15.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.15.0.tgz#8e3030a2ebc16c3edb5ef99962c6e8d534826957"
+  integrity sha512-MTmD0geIN9L9vnEYjPTE7v6Bu+IRTFMre+3K4LWYjy1AaRmYcpSrc9HTZgyCRW8uLCvw1BmDKcKtSiETM817kw==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"

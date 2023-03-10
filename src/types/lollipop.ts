@@ -48,7 +48,7 @@ export const LollipopLocalsType = t.intersection([
 export type LollipopLocalsType = t.TypeOf<typeof LollipopLocalsType>;
 
 type LollipopLocalsWithBody = LollipopLocalsType & {
-  readonly body: ReadableStream<Uint8Array>;
+  readonly body: Buffer;
 };
 
 /**
