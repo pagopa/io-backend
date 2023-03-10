@@ -118,7 +118,7 @@
     "redis-clustr": "^1.6.0",
     "ts-pattern": "^4.0.3",
     "ulid": "^2.2.2",
-    "validator": "^10.8.0",
+    "validator": "^13.7.0",
     "winston": "^3.3.3",
     "xmldom": "^0.6.0"
   },
