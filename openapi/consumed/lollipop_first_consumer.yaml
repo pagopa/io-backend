@@ -109,6 +109,12 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/LollipopSignature"
+        - name: content-digest
+          in: header
+          description: The body digest, if any, as defined in https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-digest-headers-10
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopContentDigest"
       requestBody:
         required: true
         content:
