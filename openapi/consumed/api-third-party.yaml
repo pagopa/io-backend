@@ -116,9 +116,7 @@ definitions:
         items:
           $ref: '#/definitions/ThirdPartyAttachment'
       details:
-        type: object
-        schema:
-          $ref: '#/definitions/ThirdPartyDetails'
+        $ref: '#/definitions/ThirdPartyDetails' 
   ThirdPartyDetails:
     type: object
     additionalProperties: true
