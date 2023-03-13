@@ -12,7 +12,15 @@ import {
   User,
   validateSpidUser
 } from "../user";
-import { mockBPDToken, mockedUser, mockFIMSToken, mockMyPortalToken, mockSessionToken, mockWalletToken, mockZendeskToken } from "../../__mocks__/user_mock";
+import {
+  mockBPDToken,
+  mockedUser,
+  mockFIMSToken,
+  mockMyPortalToken,
+  mockSessionToken,
+  mockWalletToken,
+  mockZendeskToken
+} from "../../__mocks__/user_mock";
 
 const anIssuer = "onelogin_saml" as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -26,6 +34,7 @@ const mockedSpidUser: any = {
   familyName: mockedUser.family_name,
   fiscalNumber: mockedUser.fiscal_code,
   getAssertionXml: () => "",
+  getSamlResponseXml: () => "",
   issuer: anIssuer,
   name: mockedUser.name
 };

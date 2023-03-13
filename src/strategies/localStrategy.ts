@@ -25,7 +25,8 @@ export const localStrategy = (
         dateOfBirth: "2000-06-02",
         familyName: "Rossi",
         fiscalNumber: username,
-        getAssertionXml: () => "",
+        getAssertionXml: () => "<xml></xml>",
+        getSamlResponseXml: () => "<xml></xml>",
         issuer: "IO",
         name: "Mario"
       };
