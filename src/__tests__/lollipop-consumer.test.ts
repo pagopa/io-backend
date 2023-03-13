@@ -137,7 +137,8 @@ describe("lollipopSign", () => {
       signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
       ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
       ["x-pagopa-lollipop-original-method"]: "POST",
-      ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it"
+      ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it",
+      "content-digest": "sha-256=:cpyRqJ1VhoVC+MSs9fq4/4wXs4c46EyEFriskys43Zw=:"
     };
 
     const expectedRequestBody = { message: "aMessage" };
@@ -145,17 +146,9 @@ describe("lollipopSign", () => {
     await request(app)
       .post(`${basePath}/sign`)
       .send(expectedRequestBody)
-      .set("signature", lollipopRequestHeaders.signature)
-      .set("signature-input", lollipopRequestHeaders["signature-input"])
-      .set(
-        "x-pagopa-lollipop-original-method",
-        lollipopRequestHeaders["x-pagopa-lollipop-original-method"]
-      )
-      .set(
-        "x-pagopa-lollipop-original-url",
-        lollipopRequestHeaders["x-pagopa-lollipop-original-url"]
-      )
+      .set(lollipopRequestHeaders)
       .expect(200);
+
     expect(mockLCMiddleware).toBeCalledTimes(1);
     expect(mockFetch).toBeCalledWith(
       `http://localhost:${port}${expectedLollipopLCPath}`,

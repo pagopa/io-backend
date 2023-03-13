@@ -16,6 +16,7 @@ import { ResLocals } from "../utils/express";
 import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
 import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
 import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
+import { LollipopContentDigest } from "../../generated/lollipop/LollipopContentDigest";
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import LollipopService from "../services/lollipopService";
 
@@ -24,12 +25,15 @@ export interface LollipopParams {
   readonly lollipopService: LollipopService;
 }
 
-export const LollipopRequiredHeaders = t.type({
-  signature: LollipopSignature,
-  ["signature-input"]: LollipopSignatureInput,
-  ["x-pagopa-lollipop-original-method"]: LollipopMethod,
-  ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL
-});
+export const LollipopRequiredHeaders = t.intersection([
+  t.type({
+    signature: LollipopSignature,
+    ["signature-input"]: LollipopSignatureInput,
+    ["x-pagopa-lollipop-original-method"]: LollipopMethod,
+    ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL
+  }),
+  t.partial({ ["content-digest"]: LollipopContentDigest })
+]);
 export type LollipopRequiredHeaders = t.TypeOf<typeof LollipopRequiredHeaders>;
 
 export const LollipopLocalsType = t.intersection([
@@ -42,13 +46,15 @@ export const LollipopLocalsType = t.intersection([
     ["x-pagopa-lollipop-user-id"]: FiscalCode
   }),
   t.partial({
-    body: t.any
+    body: t.any,
+    ["content-digest"]: LollipopContentDigest
   })
 ]);
 export type LollipopLocalsType = t.TypeOf<typeof LollipopLocalsType>;
 
 type LollipopLocalsWithBody = LollipopLocalsType & {
   readonly body: Buffer;
+  readonly ["content-digest"]: LollipopContentDigest;
 };
 
 /**
@@ -91,8 +97,13 @@ export const withRequiredRawBody = (
   pipe(
     locals,
     E.fromPredicate(
-      (l): l is LollipopLocalsWithBody => l?.body !== undefined,
-      () => ResponseErrorValidation("Bad request", "Missing required body")
+      (l): l is LollipopLocalsWithBody =>
+        l?.body !== undefined && l?.["content-digest"] !== undefined,
+      () =>
+        ResponseErrorValidation(
+          "Bad request",
+          "Missing required body or content-digest"
+        )
     )
   );
 
