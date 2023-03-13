@@ -441,6 +441,7 @@ export const BONUS_API_CLIENT = BonusAPIClient(
 
 export const IO_SIGN_API_KEY = getRequiredENVVar("IO_SIGN_API_KEY");
 export const IO_SIGN_API_URL = getRequiredENVVar("IO_SIGN_API_URL");
+export const IO_SIGN_SERVICE_ID = getRequiredENVVar("IO_SIGN_SERVICE_ID");
 export const IO_SIGN_API_BASE_PATH = getRequiredENVVar("IO_SIGN_API_BASE_PATH");
 export const IO_SIGN_API_CLIENT = IoSignAPIClient(
   IO_SIGN_API_KEY,
