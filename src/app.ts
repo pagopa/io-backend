@@ -616,7 +616,9 @@ export function newApp({
             IoSignAPIBasePath,
             IO_SIGN_SERVICE,
             PROFILE_SERVICE,
-            authMiddlewares.bearerSession
+            authMiddlewares.bearerSession,
+            LOLLIPOP_API_CLIENT,
+            SESSION_STORAGE
           );
         }
 
@@ -1315,13 +1317,16 @@ function registerCgnAPIRoutes(
   );
 }
 
+// eslint-disable-next-line max-params
 function registerIoSignAPIRoutes(
   app: Express,
   basePath: string,
   ioSignService: IoSignService,
   profileService: ProfileService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: any,
+  lollipopClient: ReturnType<typeof LollipopApiClient>,
+  sessionStorage: ISessionStorage
 ): void {
   const ioSignController: IoSignController = new IoSignController(
     ioSignService,
@@ -1353,6 +1358,7 @@ function registerIoSignAPIRoutes(
   app.post(
     `${basePath}/signatures`,
     bearerSessionTokenAuth,
+    lollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(ioSignController.createSignature, ioSignController)
   );
 

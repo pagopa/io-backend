@@ -13,9 +13,17 @@ import {
   StatusEnum as SignatureRequestStatusEnum
 } from "../../../generated/io-sign-api/SignatureRequestDetailView";
 import { IoSignAPIClient } from "../../clients/io-sign";
-import { mockedUser } from "../../__mocks__/user_mock";
+import { aFiscalCode, mockedUser } from "../../__mocks__/user_mock";
 import IoSignService from "../ioSignService";
 import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
+import { anAssertionRef } from "../../__mocks__/lollipop";
+import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
+import { LollipopSignature } from "../../../generated/lollipop/LollipopSignature";
+import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
+import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
+import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
+import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
+import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
 
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
@@ -23,12 +31,30 @@ const mockGetInfo = jest.fn();
 const mockGetQtspClausesMetadata = jest.fn();
 const mockGetSignatureRequest = jest.fn();
 const mockCreateSignature = jest.fn();
+const mockFakeSuccess = jest.fn();
 
 const fakeDocumentUrl = "http://fakedomain.com/mock.pdf" as NonEmptyString;
 const fakeEmail = "mock@fakedomain.com" as EmailString;
 const fakeSignerId = "0000000000000" as NonEmptyString;
 const fakeIssuerEmail = "issuer@fakedomain.com" as EmailString;
 const fakeIssuerDescription = "Fake description" as NonEmptyString;
+
+const aBearerToken = "a bearer token" as LollipopJWTAuthorization;
+const aPubKey = "a pub key" as LollipopPublicKey;
+
+const lollipopRequestHeaders = {
+  signature: "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:" as LollipopSignature,
+  ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput,
+  ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
+  ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it" as LollipopOriginalURL,
+  ["x-pagopa-lollipop-custom-sign-challenge"]: "customTosChallenge" as NonEmptyString,
+  ["x-pagopa-lollipop-custom-tos-challenge"]: "customSignChallenge" as NonEmptyString,
+  ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
+  ["x-pagopa-lollipop-assertion-type"]: AssertionTypeEnum.SAML,
+  ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
+  ["x-pagopa-lollipop-public-key"]: aPubKey,
+  ["x-pagopa-lollipop-user-id"]: aFiscalCode
+};
 
 const fakeSignatureRequest: SignatureRequestDetailView = {
   id: "01GKVMRN408NXRT3R5HN3ADBJJ" as Id,
@@ -155,13 +181,21 @@ mockCreateSignature.mockImplementation(() =>
   })
 );
 
+mockFakeSuccess.mockImplementation(() =>
+  t.success({
+    status: 200
+  })
+);
+
 const api = {
   createFilledDocument: mockCreateFilledDocument,
   getSignerByFiscalCode: mockGetSignerByFiscalCode,
   getInfo: mockGetInfo,
   getQtspClausesMetadata: mockGetQtspClausesMetadata,
   getSignatureRequestById: mockGetSignatureRequest,
-  createSignature: mockCreateSignature
+  createSignature: mockCreateSignature,
+  getThirdPartyMessageDetails: mockFakeSuccess,
+  getThirdPartyMessageAttachmentContent: mockFakeSuccess
 } as ReturnType<IoSignAPIClient>;
 
 describe("IoSignService#getSignerByFiscalCode", () => {
@@ -585,14 +619,19 @@ describe("IoSignService#createSignature", () => {
     jest.clearAllMocks();
   });
 
+  const createSignatureBody = {
+    signature_request_id: fakeSignature.id,
+    documents_to_sign: fakeDocumentsToSign,
+    qtsp_clauses: fakeQtspAcceptedClauses,
+    email: fakeEmail
+  };
+
   it("should make the correct api call", async () => {
     const service = new IoSignService(api);
 
     await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -603,7 +642,8 @@ describe("IoSignService#createSignature", () => {
         documents_to_sign: fakeDocumentsToSign,
         qtsp_clauses: fakeQtspAcceptedClauses
       },
-      "x-iosign-signer-id": fakeSignerId
+      "x-iosign-signer-id": fakeSignerId,
+      ...lollipopRequestHeaders
     });
   });
 
@@ -611,10 +651,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -631,10 +669,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -651,10 +687,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -671,10 +705,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -693,10 +725,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -712,10 +742,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
@@ -732,10 +760,8 @@ describe("IoSignService#createSignature", () => {
     const service = new IoSignService(api);
 
     const res = await service.createSignature(
-      fakeSignature.id,
-      fakeEmail,
-      fakeDocumentsToSign,
-      fakeQtspAcceptedClauses,
+      lollipopRequestHeaders,
+      createSignatureBody,
       fakeSignatureRequest.signer_id
     );
 
