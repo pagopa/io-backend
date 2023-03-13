@@ -2,8 +2,6 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-
-import { Readable } from "stream";
 import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
 import * as express from "express";
@@ -368,11 +366,9 @@ export function newApp({
   // Parse the incoming request body. This is needed by Passport spid strategy.
   app.use(
     bodyParser.json({
-      verify: (_req, res: express.Response, buf, encoding: BufferEncoding) => {
+      verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
         // eslint-disable-next-line functional/immutable-data
-        res.locals.body = Readable.from(buf, {
-          encoding
-        });
+        res.locals.body = buf;
       }
     })
   );

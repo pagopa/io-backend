@@ -18,7 +18,7 @@ export type ResLocals = Record<string, unknown> & {
   // eslint-disable-next-line functional/prefer-readonly-type
   detail?: string;
   // eslint-disable-next-line functional/prefer-readonly-type
-  body?: ReadableStream<Uint8Array>;
+  body?: Buffer;
 };
 /**
  * Convenience method that transforms a function (handler),

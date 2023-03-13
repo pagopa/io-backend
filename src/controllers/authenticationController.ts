@@ -5,6 +5,7 @@
  */
 
 import * as express from "express";
+import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as AP from "fp-ts/lib/Apply";
@@ -256,7 +257,7 @@ export default class AuthenticationController {
         TE.of(
           getRequestIDFromResponse(
             new DOMParser().parseFromString(
-              spidUser.getAssertionXml(),
+              spidUser.getSamlResponseXml(),
               "text/xml"
             )
           )
@@ -275,7 +276,7 @@ export default class AuthenticationController {
             this.lollipopParams.lollipopService.activateLolliPoPKey(
               assertionRef,
               user.fiscal_code,
-              spidUser.getAssertionXml(),
+              spidUser.getSamlResponseXml(),
               () => addSeconds(new Date(), tokenDurationSecs)
             ),
             pipe(
@@ -456,7 +457,7 @@ export default class AuthenticationController {
   /**
    * Retrieves the logout url from the IDP.
    */
-  public async logout(
+  public logout(
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -464,22 +465,85 @@ export default class AuthenticationController {
     | IResponseSuccessJson<SuccessResponse>
   > {
     return withUserFromRequest(req, user =>
-      withCatchAsInternalError(async () => {
-        const errorOrResponse = await this.sessionStorage.del(user);
-
-        if (E.isLeft(errorOrResponse)) {
-          const error = errorOrResponse.left;
-          return ResponseErrorInternal(error.message);
-        }
-
-        const response = errorOrResponse.right;
-
-        if (!response) {
-          return ResponseErrorInternal("Error destroying the user session");
-        }
-
-        return ResponseSuccessJson({ message: "ok" });
-      })
+      withCatchAsInternalError(() =>
+        pipe(
+          this.lollipopParams.isLollipopEnabled,
+          B.match(
+            // if lollipop is not enabled we go on
+            () => TE.of(true),
+            // if lollipop is enabled we get the assertionRef and send the pub key revokal message
+            () =>
+              pipe(
+                TE.tryCatch(
+                  () =>
+                    // retrieve the assertionRef for the user
+                    this.sessionStorage.getLollipopAssertionRefForUser(user),
+                  E.toError
+                ),
+                TE.chainEitherK(identity),
+                TE.chainW(
+                  flow(
+                    O.map(assertionRef =>
+                      TE.tryCatch(
+                        () =>
+                          // send the revoke pubkey message with the assertionRef for the user in a fire&forget mode
+                          new Promise<true>(resolve => {
+                            this.lollipopParams.lollipopService
+                              .revokePreviousAssertionRef(assertionRef)
+                              .catch(err => {
+                                log.error(
+                                  "logout: error sending revoke message for previous assertionRef [%s]",
+                                  err
+                                );
+                              });
+                            resolve(true);
+                          }),
+                        E.toError
+                      )
+                    ),
+                    // continue if there's no assertionRef on redis
+                    O.getOrElseW(() => TE.of(true))
+                  )
+                )
+              )
+          ),
+          TE.chain(() =>
+            pipe(
+              // delete the assertionRef for the user
+              TE.tryCatch(
+                () =>
+                  this.sessionStorage.delLollipopAssertionRefForUser(
+                    user.fiscal_code
+                  ),
+                E.toError
+              ),
+              TE.chainEitherK(identity)
+            )
+          ),
+          TE.chain(() =>
+            pipe(
+              // delete the session for the user
+              TE.tryCatch(() => this.sessionStorage.del(user), E.toError),
+              TE.chainEitherK(identity),
+              TE.chain(
+                TE.fromPredicate(
+                  identity,
+                  () => new Error("Error destroying the user session")
+                )
+              )
+            )
+          ),
+          TE.bimap(
+            error => {
+              const errorMessage = `${error.message}`;
+              log.error(errorMessage);
+              return ResponseErrorInternal(errorMessage);
+            },
+            _ => ResponseSuccessJson({ message: "ok" })
+          ),
+          TE.toUnion
+        )()
+      )
     );
   }
 
