@@ -28,6 +28,7 @@ import { ServicePreferencesSettings } from "../../../generated/backend/ServicePr
 import { ServicesPreferencesModeEnum } from "../../../generated/backend/ServicesPreferencesMode";
 import { ReminderStatus } from "../../../generated/backend/ReminderStatus";
 import { AppVersion } from "../../../generated/backend/AppVersion";
+import { anAssertionRef } from "../../__mocks__/lollipop";
 
 const aTosVersion = 1 as AcceptedTosVersion;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
@@ -143,6 +144,25 @@ describe("profile type", () => {
 
     expect(userData.accepted_tos_version).toBe(undefined);
     expect(userData.is_email_enabled).toBe(anIsEmailEnabled);
+  });
+
+  it("should get an App proxy Profile without the assertionRef value populated", () => {
+    // return app Proxy Profile.
+    const userData = toInitializedProfile(
+      mockedExtendedProfileWithoutTos, // from
+      mockedUser // user
+    );
+    expect(userData.assertion_ref).toBeUndefined();
+  });
+
+  it("should get an App proxy Profile with an assertionRef", () => {
+    // return app Proxy Profile.
+    const userData = toInitializedProfile(
+      mockedExtendedProfileWithoutTos, // from
+      mockedUser, // user
+      anAssertionRef
+    );
+    expect(userData.assertion_ref).toEqual(anAssertionRef);
   });
 
   /*test case: Converts an empty API profile to a Proxy profile using only the user data extracted from SPID.*/

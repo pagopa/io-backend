@@ -2537,6 +2537,21 @@ definitions:
         maxLength: 35
       spezzoneStrutturatoCausaleVersamento:
         $ref: '#/definitions/SpezzoneStrutturatoCausaleVersamento'
+  AssertionRefSha256:
+    type: string
+    pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+  AssertionRefSha384:
+    type: string
+    pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+  AssertionRefSha512:
+    type: string
+    pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+  AssertionRef:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/AssertionRefSha512'
+      - $ref: '#/definitions/AssertionRefSha384'
+      - $ref: '#/definitions/AssertionRefSha256'
   MessageContentWithAttachments:
     allOf:
       - type: object
@@ -2589,6 +2604,8 @@ definitions:
     properties:
       accepted_tos_version:
         $ref: '#/definitions/AcceptedTosVersion'
+      assertion_ref:
+        $ref: '#/definitions/AssertionRef'
       email:
         $ref: '#/definitions/EmailAddress'
       blocked_inbox_or_channels:

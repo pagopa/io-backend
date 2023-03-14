@@ -12,6 +12,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
+import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 
 import { formatDate } from "../utils/date";
@@ -22,9 +23,11 @@ import { User } from "./user";
  */
 export const toInitializedProfile = (
   profile: ExtendedProfile,
-  user: User
+  user: User,
+  assertionRef?: AssertionRef
 ): InitializedProfile => ({
   accepted_tos_version: profile.accepted_tos_version,
+  assertion_ref: assertionRef,
   blocked_inbox_or_channels: profile.blocked_inbox_or_channels,
   date_of_birth:
     user.date_of_birth !== undefined

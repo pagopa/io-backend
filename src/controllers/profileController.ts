@@ -11,11 +11,14 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  ResponseErrorInternal
 } from "@pagopa/ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
 
 import { ExtendedProfile as ExtendedProfileApi } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
+import * as O from "fp-ts/Option";
+import * as E from "fp-ts/Either";
 import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 import { Profile } from "../../generated/backend/Profile";
 
@@ -43,7 +46,18 @@ export default class ProfileController {
     | IResponseSuccessJson<InitializedProfile>
   > =>
     withUserFromRequest(req, async user => {
-      const response = await this.profileService.getProfile(user);
+      const maybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
+        user
+      );
+      if (E.isLeft(maybeAssertionRef)) {
+        return ResponseErrorInternal(
+          `Error retrieving the assertionRef: ${maybeAssertionRef.left.message}`
+        );
+      }
+      const response = await this.profileService.getProfile(
+        user,
+        O.toUndefined(maybeAssertionRef.right)
+      );
       return response.kind === "IResponseErrorNotFound"
         ? profileMissingErrorResponse
         : response;
@@ -82,8 +96,20 @@ export default class ProfileController {
       withValidatedOrValidationError(
         Profile.decode(req.body),
         async extendedProfile => {
+          const maybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
+            user
+          );
+          if (E.isLeft(maybeAssertionRef)) {
+            return ResponseErrorInternal(
+              `Error retrieving the assertionRef: ${maybeAssertionRef.left.message}`
+            );
+          }
           await this.sessionStorage.delPagoPaNoticeEmail(user);
-          return this.profileService.updateProfile(user, extendedProfile);
+          return this.profileService.updateProfile(
+            user,
+            extendedProfile,
+            O.toUndefined(maybeAssertionRef.right)
+          );
         }
       )
     );

@@ -16,7 +16,7 @@ import { Either } from "fp-ts/lib/Either";
 import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Second } from "@pagopa/ts-commons/lib/units";
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { assertUnreachable } from "../types/commons";
@@ -769,31 +769,35 @@ export default class RedisSessionStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public async getLollipopAssertionRefForUser(user: User) {
-    return new Promise<Either<Error, O.Option<AssertionRef>>>(resolve => {
-      this.redisClient.get(
-        `${lollipopFingerprintPrefix}${user.fiscal_code}`,
-        (err, value) => {
-          if (err) {
-            // Client returns an error.
-            return resolve(E.left(err));
-          }
+    return new Promise<Either<Error, O.Option<BackendAssertionRef>>>(
+      resolve => {
+        this.redisClient.get(
+          `${lollipopFingerprintPrefix}${user.fiscal_code}`,
+          (err, value) => {
+            if (err) {
+              // Client returns an error.
+              return resolve(E.left(err));
+            }
 
-          if (value === null) {
-            return resolve(E.right(O.none));
+            if (value === null) {
+              return resolve(E.right(O.none));
+            }
+            const errorOrLollipopFingerprint = pipe(
+              value,
+              BackendAssertionRef.decode,
+              E.mapLeft(
+                validationErrors =>
+                  new Error(
+                    errorsToReadableMessages(validationErrors).join("/")
+                  )
+              ),
+              E.map(O.some)
+            );
+            return resolve(errorOrLollipopFingerprint);
           }
-          const errorOrLollipopFingerprint = pipe(
-            value,
-            AssertionRef.decode,
-            E.mapLeft(
-              validationErrors =>
-                new Error(errorsToReadableMessages(validationErrors).join("/"))
-            ),
-            E.map(O.some)
-          );
-          return resolve(errorOrLollipopFingerprint);
-        }
-      );
-    });
+        );
+      }
+    );
   }
 
   /**
@@ -801,7 +805,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
    */
   public async setLollipopAssertionRefForUser(
     user: UserV5,
-    assertionRef: AssertionRef,
+    assertionRef: BackendAssertionRef,
     expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
   ) {
     return new Promise<Either<Error, boolean>>(resolve => {

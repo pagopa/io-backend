@@ -35,6 +35,7 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
+import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ProfileService {
@@ -44,7 +45,8 @@ export default class ProfileService {
    * Retrieves the profile for a specific user.
    */
   public readonly getProfile = (
-    user: User
+    user: User,
+    assertionRef?: AssertionRef
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
@@ -68,7 +70,7 @@ export default class ProfileService {
           );
 
           return withValidatedOrInternalError(validatedExtendedProfile, p =>
-            ResponseSuccessJson(toInitializedProfile(p, user))
+            ResponseSuccessJson(toInitializedProfile(p, user, assertionRef))
           );
         }
 
@@ -136,7 +138,9 @@ export default class ProfileService {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict
-    | IResponseSuccessJson<InitializedProfile>
+    // This Service response is not binded with any API, so we remove any payload
+    // from this Response Success JSON.
+    | IResponseSuccessJson<unknown>
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
@@ -147,7 +151,8 @@ export default class ProfileService {
 
       return withValidatedOrInternalError(validated, response =>
         response.status === 200
-          ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+          ? // An empty response.
+            ResponseSuccessJson({})
           : response.status === 409
           ? ResponseErrorConflict(
               response.value ||
@@ -165,7 +170,8 @@ export default class ProfileService {
    */
   public readonly updateProfile = async (
     user: User,
-    profileBackend: ProfileBackend
+    profileBackend: ProfileBackend,
+    assertionRef?: AssertionRef
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -188,7 +194,9 @@ export default class ProfileService {
 
           return withValidatedOrInternalError(validated, response =>
             response.status === 200
-              ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+              ? ResponseSuccessJson(
+                  toInitializedProfile(response.value, user, assertionRef)
+                )
               : response.status === 404
               ? ResponseErrorNotFound("Not found", "User not found")
               : response.status === 409
