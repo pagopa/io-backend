@@ -143,7 +143,7 @@ describe("SessionController#getSessionState", () => {
     });
   });
 
-  it("should returns an error if the retrieve of the lollipop assertion ref fails with error", async () => {
+  it("should return an error if the lollipop assertion ref retrieval fails with an error", async () => {
     req.user = {
       ...mockedUser,
       bpd_token: mockBPDToken,
