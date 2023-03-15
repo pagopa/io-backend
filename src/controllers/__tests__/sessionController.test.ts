@@ -83,7 +83,7 @@ const res = mockRes();
 const req = mockReq();
 
 describe("SessionController#getSessionState", () => {
-  it("should returns correct session state for valid session with initialized lollipop", async () => {
+  it("should return a correct session state for a valid session with lollipop initialized", async () => {
     req.user = {
       ...mockedUser,
       bpd_token: mockBPDToken,
