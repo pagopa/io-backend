@@ -60,7 +60,6 @@ paths:
       parameters: 
         - $ref: "#/parameters/EntityId"
         - $ref: "#/parameters/AuthLevel"
-        - $ref: "#/parameters/UserAgent"
         - $ref: "#/parameters/JwkPubKeyToken"
         - $ref: "#/parameters/JwkPubKeyHashAlgorithm"
       responses:
@@ -168,5 +167,3 @@ parameters:
     $ref: "./api_lollipop.yaml#/parameters/JwkPubKeyToken"
   JwkPubKeyHashAlgorithm:
     $ref: "./api_lollipop.yaml#/parameters/JwkPubKeyHashAlgorithm"
-  UserAgent:
-    $ref: "./api_lollipop.yaml#/parameters/UserAgent"
