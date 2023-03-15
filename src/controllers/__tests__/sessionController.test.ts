@@ -115,7 +115,7 @@ describe("SessionController#getSessionState", () => {
     });
   });
 
-  it("should returns correct session state for valid session not initialized lollipop", async () => {
+  it("should return a correct session state for a valid session with lollipop NOT initialized", async () => {
     req.user = {
       ...mockedUser,
       bpd_token: mockBPDToken,
