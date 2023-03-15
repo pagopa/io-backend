@@ -2604,8 +2604,6 @@ definitions:
     properties:
       accepted_tos_version:
         $ref: '#/definitions/AcceptedTosVersion'
-      assertion_ref:
-        $ref: '#/definitions/AssertionRef'
       email:
         $ref: '#/definitions/EmailAddress'
       blocked_inbox_or_channels:
@@ -2671,6 +2669,8 @@ definitions:
     properties:
       spidLevel:
         $ref: '#/definitions/SpidLevel'
+      lollipop_assertion_ref:
+        $ref: '#/definitions/AssertionRef'
       walletToken:
         type: string
       myPortalToken:

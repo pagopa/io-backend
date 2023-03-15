@@ -30,8 +30,6 @@ import { AppVersion } from "../../../generated/backend/AppVersion";
 import { PushNotificationsContentTypeEnum } from "../../../generated/backend/PushNotificationsContentType";
 import { ReminderStatusEnum } from "../../../generated/backend/ReminderStatus";
 import { Second } from "@pagopa/ts-commons/lib/units";
-import * as O from "fp-ts/Option";
-import { anAssertionRef } from "../../__mocks__/lollipop";
 
 const aTimestamp = 1518010929530;
 
@@ -110,15 +108,10 @@ const mockDelPagoPaNoticeEmail = jest
   .fn()
   .mockImplementation(_ => Promise.resolve(E.right(true)));
 
-const mockGetLollipopAssertionRefForUser = jest
-  .fn()
-  .mockResolvedValue(E.right(O.none));
-
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail,
-      getLollipopAssertionRefForUser: mockGetLollipopAssertionRefForUser
+      delPagoPaNoticeEmail: mockDelPagoPaNoticeEmail
     }))
   };
 });
@@ -156,100 +149,11 @@ describe("ProfileController#getProfile", () => {
 
     const response = await controller.getProfile(req);
 
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledTimes(1);
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser, undefined);
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: proxyUserResponse
-    });
-  });
-
-  it("calls the getProfile on the ProfileService with assertion ref if lollipop is initialized and return a success response", async () => {
-    const req = mockReq();
-
-    mockGetLollipopAssertionRefForUser.mockResolvedValueOnce(
-      E.right(O.some(anAssertionRef))
-    );
-    mockGetProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          ...proxyUserResponse,
-          assertion_ref: anAssertionRef
-        })
-      )
-    );
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.getProfile(req);
-
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledTimes(1);
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser, anAssertionRef);
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: { ...proxyUserResponse, assertion_ref: anAssertionRef }
-    });
-  });
-
-  it("should not calls the getProfile on the ProfileService if the retrieve of the lollipop assertion ref reject", async () => {
-    const req = mockReq();
-
-    const expectedError = new Error("netcom error");
-    mockGetLollipopAssertionRefForUser.mockRejectedValueOnce(expectedError);
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    await expect(controller.getProfile(req)).rejects.toEqual(expectedError);
-
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledTimes(1);
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockGetProfile).not.toBeCalled();
-  });
-
-  it("should not calls the getProfile on the ProfileService if the retrieve of the lollipop assertion ref returns an error", async () => {
-    const req = mockReq();
-
-    const expectedError = new Error("Error retieving the assertion ref");
-    mockGetLollipopAssertionRefForUser.mockResolvedValueOnce(
-      E.left(expectedError)
-    );
-
-    req.user = mockedUser;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.getProfile(req);
-
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledTimes(1);
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockGetProfile).not.toBeCalled();
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorInternal",
-      detail: expect.stringContaining(expectedError.message)
     });
   });
 
@@ -285,7 +189,7 @@ describe("ProfileController#getProfile", () => {
 
       const response = await controller.getProfile(req);
 
-      expect(mockGetProfile).toHaveBeenCalledWith(mockedUser, undefined);
+      expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
       expect(response).toEqual({
         apply: expect.any(Function),
         kind: "IResponseSuccessJson",
@@ -342,7 +246,7 @@ describe("ProfileController#getProfile", () => {
     const response = await controller.getProfile(req);
     response.apply(res);
 
-    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser, undefined);
+    expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(response).toEqual({
       ...profileMissingErrorResponse,
       apply: expect.any(Function)
@@ -504,117 +408,13 @@ describe("ProfileController#upsertProfile", () => {
     if (E.isRight(errorOrProfile)) {
       expect(mockUpdateProfile).toHaveBeenCalledWith(
         mockedUser,
-        errorOrProfile.right,
-        undefined
+        errorOrProfile.right
       );
     }
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: proxyUserResponse
-    });
-  });
-
-  it("calls the upsertProfile on the ProfileService with assertion ref if lollipop is initialized and return a success response", async () => {
-    const req = mockReq();
-
-    mockGetLollipopAssertionRefForUser.mockResolvedValueOnce(
-      E.right(O.some(anAssertionRef))
-    );
-    mockUpdateProfile.mockReturnValue(
-      Promise.resolve(
-        ResponseSuccessJson({
-          ...proxyUserResponse,
-          assertion_ref: anAssertionRef
-        })
-      )
-    );
-
-    req.user = mockedUser;
-    req.body = mockedUpsertProfile;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.updateProfile(req);
-
-    const errorOrProfile = Profile.decode(req.body);
-    expect(E.isRight(errorOrProfile)).toBeTruthy();
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockDelPagoPaNoticeEmail).toBeCalledWith(mockedUser);
-    if (E.isRight(errorOrProfile)) {
-      expect(mockUpdateProfile).toHaveBeenCalledWith(
-        mockedUser,
-        errorOrProfile.right,
-        anAssertionRef
-      );
-    }
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: {
-        ...proxyUserResponse,
-        assertion_ref: anAssertionRef
-      }
-    });
-  });
-
-  it("should not calls the updateProfile on the ProfileService if the retrieve of the lollipop assertion ref reject", async () => {
-    const req = mockReq();
-
-    const expectedError = new Error("netcom error");
-    mockGetLollipopAssertionRefForUser.mockRejectedValueOnce(expectedError);
-
-    req.user = mockedUser;
-    req.body = mockedUpsertProfile;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    await expect(controller.updateProfile(req)).rejects.toEqual(expectedError);
-
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledTimes(1);
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockDelPagoPaNoticeEmail).not.toBeCalled();
-    expect(mockUpdateProfile).not.toBeCalled();
-  });
-
-  it("should not calls the updateProfile on the ProfileService if the retrieve of the lollipop assertion ref returns an error", async () => {
-    const req = mockReq();
-
-    const expectedError = new Error("Error retieving the assertion ref");
-    mockGetLollipopAssertionRefForUser.mockResolvedValueOnce(
-      E.left(expectedError)
-    );
-
-    req.user = mockedUser;
-    req.body = mockedUpsertProfile;
-
-    const apiClient = new ApiClient("XUZTCT88A51Y311X", "");
-    const profileService = new ProfileService(apiClient);
-    const controller = new ProfileController(
-      profileService,
-      redisSessionStorage
-    );
-
-    const response = await controller.updateProfile(req);
-
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledTimes(1);
-    expect(mockGetLollipopAssertionRefForUser).toBeCalledWith(mockedUser);
-    expect(mockDelPagoPaNoticeEmail).not.toBeCalled();
-    expect(mockUpdateProfile).not.toBeCalled();
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseErrorInternal",
-      detail: expect.stringContaining(expectedError.message)
     });
   });
 
@@ -660,8 +460,7 @@ describe("ProfileController#upsertProfile", () => {
       if (E.isRight(errorOrProfile)) {
         expect(mockUpdateProfile).toHaveBeenCalledWith(
           mockedUser,
-          errorOrProfile.right,
-          undefined
+          errorOrProfile.right
         );
       }
       expect(response).toEqual({

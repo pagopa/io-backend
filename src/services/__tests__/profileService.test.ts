@@ -25,7 +25,6 @@ import {
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../apiClientFactory";
 import ProfileService from "../profileService";
-import { anAssertionRef } from "../../__mocks__/lollipop";
 
 const aValidAPIEmail = anEmailAddress;
 const aValidSPIDEmail = aSpidEmailAddress;
@@ -163,28 +162,6 @@ describe("ProfileService#getProfile", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: proxyInitializedProfileResponse
-    });
-    if (res.kind === "IResponseSuccessJson") {
-      expect(res.value.assertion_ref).toBeUndefined();
-    }
-  });
-
-  it("returns a user profile from the API with the lollipop assertionRef", async () => {
-    mockGetProfile.mockImplementation(() => t.success(validApiProfileResponse));
-
-    const service = new ProfileService(api);
-
-    const res = await service.getProfile(mockedUser, anAssertionRef);
-
-    expect(mockGetProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: {
-        ...proxyInitializedProfileResponse,
-        assertion_ref: anAssertionRef
-      }
     });
   });
 
@@ -446,36 +423,6 @@ describe("ProfileService#updateProfile", () => {
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
       value: proxyInitializedProfileResponse
-    });
-    if (res.kind === "IResponseSuccessJson") {
-      expect(res.value.assertion_ref).toBeUndefined();
-    }
-  });
-
-  it("update an user profile to the API with the lollipop assertionRef", async () => {
-    mockUpdateProfile.mockImplementation(() =>
-      t.success(validApiProfileResponse)
-    );
-
-    const service = new ProfileService(api);
-
-    const res = await service.updateProfile(
-      mockedUser,
-      updateProfileRequest,
-      anAssertionRef
-    );
-
-    expect(mockUpdateProfile).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      body: updateProfileRequest
-    });
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: {
-        ...proxyInitializedProfileResponse,
-        assertion_ref: anAssertionRef
-      }
     });
   });
 

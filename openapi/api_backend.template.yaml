@@ -1314,8 +1314,6 @@ definitions:
     properties:
       accepted_tos_version:
         $ref: "#/definitions/AcceptedTosVersion"
-      assertion_ref:
-        $ref: "#/definitions/AssertionRef"
       email:
         $ref: '#/definitions/EmailAddress'
       blocked_inbox_or_channels:
@@ -1380,7 +1378,9 @@ definitions:
     description: Describe the current session of an authenticated user.
     properties:
       spidLevel:
-         $ref: '#/definitions/SpidLevel'
+        $ref: '#/definitions/SpidLevel'
+      lollipop_assertion_ref:
+        $ref: "#/definitions/AssertionRef"
       walletToken:
         type: string
       myPortalToken:

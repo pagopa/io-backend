@@ -35,7 +35,6 @@ import {
   withCatchAsInternalError,
   withValidatedOrInternalError
 } from "../utils/responses";
-import { AssertionRef } from "../../generated/backend/AssertionRef";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
 export default class ProfileService {
@@ -45,8 +44,7 @@ export default class ProfileService {
    * Retrieves the profile for a specific user.
    */
   public readonly getProfile = (
-    user: User,
-    assertionRef?: AssertionRef
+    user: User
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
@@ -70,7 +68,7 @@ export default class ProfileService {
           );
 
           return withValidatedOrInternalError(validatedExtendedProfile, p =>
-            ResponseSuccessJson(toInitializedProfile(p, user, assertionRef))
+            ResponseSuccessJson(toInitializedProfile(p, user))
           );
         }
 
@@ -170,8 +168,7 @@ export default class ProfileService {
    */
   public readonly updateProfile = async (
     user: User,
-    profileBackend: ProfileBackend,
-    assertionRef?: AssertionRef
+    profileBackend: ProfileBackend
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorNotFound
@@ -194,9 +191,7 @@ export default class ProfileService {
 
           return withValidatedOrInternalError(validated, response =>
             response.status === 200
-              ? ResponseSuccessJson(
-                  toInitializedProfile(response.value, user, assertionRef)
-                )
+              ? ResponseSuccessJson(toInitializedProfile(response.value, user))
               : response.status === 404
               ? ResponseErrorNotFound("Not found", "User not found")
               : response.status === 409
