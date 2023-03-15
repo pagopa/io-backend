@@ -69,12 +69,12 @@ export default class SessionController {
       )();
 
       // Read the assertionRef related to the User for Lollipop.
-      const maybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
+      const errorOrMaybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
         user
       );
-      if (E.isLeft(maybeAssertionRef)) {
+      if (E.isLeft(errorOrMaybeAssertionRef)) {
         return ResponseErrorInternal(
-          `Error retrieving the assertionRef: ${maybeAssertionRef.left.message}`
+          `Error retrieving the assertionRef: ${errorOrMaybeAssertionRef.left.message}`
         );
       }
 
@@ -83,7 +83,7 @@ export default class SessionController {
         return ResponseSuccessJson<PublicSession>({
           bpdToken: user.bpd_token,
           fimsToken: user.fims_token,
-          lollipop_assertion_ref: O.toUndefined(maybeAssertionRef.right),
+          lollipop_assertion_ref: O.toUndefined(errorOrMaybeAssertionRef.right),
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
@@ -127,7 +127,9 @@ export default class SessionController {
           ResponseSuccessJson<PublicSession>({
             bpdToken: updatedUser.bpd_token,
             fimsToken: updatedUser.fims_token,
-            lollipop_assertion_ref: O.toUndefined(maybeAssertionRef.right),
+            lollipop_assertion_ref: O.toUndefined(
+              errorOrMaybeAssertionRef.right
+            ),
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,
