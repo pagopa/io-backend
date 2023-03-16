@@ -508,8 +508,7 @@ export default class AuthenticationController {
                     // continue if there's no assertionRef on redis
                     O.getOrElseW(() => TE.of(true))
                   )
-                ),
-                x => x
+                )
               )
           ),
           TE.chain(() =>
