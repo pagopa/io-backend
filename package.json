@@ -12,7 +12,7 @@
   "description": "IO app and web backend",
   "main": "index.js",
   "engines": {
-    "node": "14.16.0"
+    "node": "18.13.0"
   },
   "scripts": {
     "watch": "tsc -w",
@@ -88,7 +88,7 @@
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
     "@pagopa/io-spid-commons": "^10.0.0",
     "@pagopa/ts-commons": "^10.15.0",
-    "apicache": "^1.4.0",
+    "apicache": "^1.6.3",
     "applicationinsights": "^1.8.10",
     "body-parser": "^1.19.2",
     "bwip-js": "^2.0.6",
@@ -201,7 +201,6 @@
   },
   "resolutions": {
     "handlebars": "~4.5.3",
-    "@types/serve-static": "1.13.10",
-    "@types/node": "14.14.45"
+    "@types/serve-static": "1.13.10"
   }
 }
