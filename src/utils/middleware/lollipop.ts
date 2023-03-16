@@ -38,7 +38,10 @@ export const lollipopMiddleware: (
           withLollipopHeadersFromRequest(req, async lollipopHeaders =>
             pipe(
               TE.tryCatch(
-                () => sessionStorage.getLollipopAssertionRefForUser(user.fiscal_code),
+                () =>
+                  sessionStorage.getLollipopAssertionRefForUser(
+                    user.fiscal_code
+                  ),
                 E.toError
               ),
               TE.chainEitherK(identity),

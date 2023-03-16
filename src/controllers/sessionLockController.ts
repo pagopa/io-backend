@@ -18,11 +18,11 @@ import * as O from "fp-ts/lib/Option";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { SuccessResponse } from "src/types/commons";
-import { pipe, flow } from "fp-ts/lib/function";
+import { pipe, flow, constVoid } from "fp-ts/lib/function";
+import LollipopService from "src/services/lollipopService";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
-import LollipopService from "src/services/lollipopService";
 
 export default class SessionLockController {
   constructor(
@@ -119,7 +119,7 @@ export default class SessionLockController {
                         new Promise<true>(resolve => {
                           this.lollipopService
                             .revokePreviousAssertionRef(assertionRef)
-                            .catch();
+                            .catch(constVoid);
                           resolve(true);
                         }),
                       E.toError
