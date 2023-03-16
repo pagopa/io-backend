@@ -217,6 +217,78 @@ describe("SessionLockController#lockUserSession", () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
+  it("should fail when get assertionRef return left", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockGetLollipop.mockImplementationOnce(async () => E.left("any error"));
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.lockUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail when get assertionRef throws", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockGetLollipop.mockImplementationOnce(async () => {throw "error";});
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.lockUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail when delete assertionRef return left", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockDelLollipop.mockImplementationOnce(async () => E.left("any error"));
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.lockUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("should fail when delete assertionRef throws", async () => {
+    const req = mockReq({ params: { fiscal_code: aFiscalCode } });
+    const res = mockRes();
+
+    mockDelLollipop.mockImplementationOnce(async () => {throw "error";});
+
+    const controller = new SessionLockController(
+      mockRedisSessionStorage,
+      mockRedisUserMetadataStorage,
+      mockLollipopService
+    );
+
+    const response = await controller.lockUserSession(req);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
   it("should fail on delete session error", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
