@@ -99,7 +99,7 @@ export default class SessionLockController {
               ),
               TE.chain(TE.fromEither)
             ),
-            //
+            // revoke pubkey
             pipe(
               TE.tryCatch(
                 () =>
@@ -115,7 +115,7 @@ export default class SessionLockController {
                   O.map(assertionRef =>
                     TE.tryCatch(
                       () =>
-                        // send the revoke pubkey message with the assertionRef for the user in a fire&forget mode
+                        // fire and forget the queue message
                         new Promise<true>(resolve => {
                           this.lollipopService
                             .revokePreviousAssertionRef(assertionRef)
@@ -130,9 +130,8 @@ export default class SessionLockController {
                 )
               )
             ),
-            //
+            // delete the assertionRef for the user
             pipe(
-              // delete the assertionRef for the user
               TE.tryCatch(
                 () =>
                   this.sessionStorage.delLollipopAssertionRefForUser(

@@ -1637,7 +1637,7 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
       callback(null, anAssertionRef)
     );
     const response = await sessionStorage.getLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
@@ -1653,7 +1653,7 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
   it("should success and return none if assertionRef is missing", async () => {
     mockGet.mockImplementationOnce((_, callback) => callback(null, null));
     const response = await sessionStorage.getLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
@@ -1668,7 +1668,7 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
     const expectedError = new Error("redis Error");
     mockGet.mockImplementationOnce((_, callback) => callback(expectedError));
     const response = await sessionStorage.getLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
@@ -1685,7 +1685,7 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
       callback(null, "an invalid value")
     );
     const response = await sessionStorage.getLollipopAssertionRefForUser(
-      aValidUser
+      aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
