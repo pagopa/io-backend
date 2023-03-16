@@ -14,18 +14,21 @@ import {
 import * as E from "fp-ts/lib/Either";
 import * as AP from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { SuccessResponse } from "src/types/commons";
-import { pipe } from "fp-ts/lib/function";
+import { pipe, flow } from "fp-ts/lib/function";
 import RedisSessionStorage from "../services/redisSessionStorage";
 import RedisUserMetadataStorage from "../services/redisUserMetadataStorage";
 import { UserSessionInfo } from "../../generated/session/UserSessionInfo";
+import LollipopService from "src/services/lollipopService";
 
 export default class SessionLockController {
   constructor(
     private readonly sessionStorage: RedisSessionStorage,
-    private readonly metadataStorage: RedisUserMetadataStorage
+    private readonly metadataStorage: RedisUserMetadataStorage,
+    private readonly lollipopService: LollipopService
   ) {}
 
   /**
@@ -92,6 +95,49 @@ export default class SessionLockController {
             pipe(
               TE.tryCatch(
                 () => this.sessionStorage.setBlockedUser(fiscalCode),
+                E.toError
+              ),
+              TE.chain(TE.fromEither)
+            ),
+            //
+            pipe(
+              TE.tryCatch(
+                () =>
+                  // retrieve the assertionRef for the user
+                  this.sessionStorage.getLollipopAssertionRefForUser(
+                    fiscalCode
+                  ),
+                E.toError
+              ),
+              TE.chain(TE.fromEither),
+              TE.chain(
+                flow(
+                  O.map(assertionRef =>
+                    TE.tryCatch(
+                      () =>
+                        // send the revoke pubkey message with the assertionRef for the user in a fire&forget mode
+                        new Promise<true>(resolve => {
+                          this.lollipopService
+                            .revokePreviousAssertionRef(assertionRef)
+                            .catch();
+                          resolve(true);
+                        }),
+                      E.toError
+                    )
+                  ),
+                  // continue if there's no assertionRef on redis
+                  O.getOrElse(() => TE.of(true))
+                )
+              )
+            ),
+            //
+            pipe(
+              // delete the assertionRef for the user
+              TE.tryCatch(
+                () =>
+                  this.sessionStorage.delLollipopAssertionRefForUser(
+                    fiscalCode
+                  ),
                 E.toError
               ),
               TE.chain(TE.fromEither)

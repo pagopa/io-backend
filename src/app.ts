@@ -579,7 +579,8 @@ export function newApp({
           allowSessionHandleIPSourceRange,
           authMiddlewares.urlToken,
           SESSION_STORAGE,
-          USER_METADATA_STORAGE
+          USER_METADATA_STORAGE,
+          LOLLIPOP_SERVICE
         );
         if (FF_BONUS_ENABLED) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -1219,12 +1220,14 @@ function registerSessionAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   urlTokenAuth: any,
   sessionStorage: RedisSessionStorage,
-  userMetadataStorage: RedisUserMetadataStorage
+  userMetadataStorage: RedisUserMetadataStorage,
+  lollipopService: LollipopService
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
     const sessionLockController: SessionLockController = new SessionLockController(
       sessionStorage,
-      userMetadataStorage
+      userMetadataStorage,
+      lollipopService
     );
 
     app.get(
