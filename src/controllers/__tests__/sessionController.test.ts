@@ -111,7 +111,7 @@ describe("SessionController#getSessionState", () => {
       walletToken: mockedUser.wallet_token,
       zendeskToken:
         mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
-      lollipop_assertion_ref: anAssertionRef
+      lollipopAssertionRef: anAssertionRef
     });
   });
 

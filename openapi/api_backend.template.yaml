@@ -1379,7 +1379,7 @@ definitions:
     properties:
       spidLevel:
         $ref: '#/definitions/SpidLevel'
-      lollipop_assertion_ref:
+      lollipopAssertionRef:
         $ref: "#/definitions/AssertionRef"
       walletToken:
         type: string

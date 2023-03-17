@@ -83,7 +83,7 @@ export default class SessionController {
         return ResponseSuccessJson({
           bpdToken: user.bpd_token,
           fimsToken: user.fims_token,
-          lollipop_assertion_ref: O.toUndefined(errorOrMaybeAssertionRef.right),
+          lollipopAssertionRef: O.toUndefined(errorOrMaybeAssertionRef.right),
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
@@ -127,9 +127,7 @@ export default class SessionController {
           ResponseSuccessJson({
             bpdToken: updatedUser.bpd_token,
             fimsToken: updatedUser.fims_token,
-            lollipop_assertion_ref: O.toUndefined(
-              errorOrMaybeAssertionRef.right
-            ),
+            lollipopAssertionRef: O.toUndefined(errorOrMaybeAssertionRef.right),
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,
