@@ -136,9 +136,9 @@ export default class ProfileService {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict
-    // This Service response is not binded with any API, so we remove any payload
+    // This Service response is not binded with any API response, so we remove any payload
     // from this Response Success JSON.
-    | IResponseSuccessJson<unknown>
+    | IResponseSuccessJson<Record<string, never>>
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
