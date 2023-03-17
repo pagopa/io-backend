@@ -80,7 +80,7 @@ export default class SessionController {
 
       if (UserV5.is(user)) {
         // All required tokens are present on the current session, no update is required
-        return ResponseSuccessJson<PublicSession>({
+        return ResponseSuccessJson({
           bpdToken: user.bpd_token,
           fimsToken: user.fims_token,
           lollipop_assertion_ref: O.toUndefined(errorOrMaybeAssertionRef.right),
@@ -124,7 +124,7 @@ export default class SessionController {
           );
         }),
         E.map(_ =>
-          ResponseSuccessJson<PublicSession>({
+          ResponseSuccessJson({
             bpdToken: updatedUser.bpd_token,
             fimsToken: updatedUser.fims_token,
             lollipop_assertion_ref: O.toUndefined(
