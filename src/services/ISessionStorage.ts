@@ -72,7 +72,7 @@ export interface ISessionStorage {
   /**
    * Retrieve the LolliPoP assertionRef related to an user
    *
-   * @param user The AppUser value used to get the related fiscalCode
+   * @param fiscalCode The fiscalCode value used to get the related assertionRef
    */
   readonly getLollipopAssertionRefForUser: (
     fiscalCode: FiscalCode

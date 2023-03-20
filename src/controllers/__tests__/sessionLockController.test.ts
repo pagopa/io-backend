@@ -38,7 +38,9 @@ const mockUserHasActiveSessions = jest
   .fn()
   .mockImplementation(async () => E.right(true));
 const mockDelLollipop = jest.fn().mockResolvedValue(E.right(true));
-const mockGetLollipop = jest.fn().mockResolvedValue(E.right(O.some(anAssertionRef)));
+const mockGetLollipop = jest
+  .fn()
+  .mockResolvedValue(E.right(O.some(anAssertionRef)));
 const mockSetLollipop = jest.fn().mockResolvedValue(E.right(true));
 const mockRedisSessionStorage = ({
   delUserAllSessions: mockDelUserAllSessions,
@@ -148,6 +150,10 @@ describe("SessionLockController#getUserSession", () => {
 });
 
 describe("SessionLockController#lockUserSession", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should fail on invalid fiscal code", async () => {
     const req = mockReq({ params: { fiscal_code: "invalid" } });
     const res = mockRes();
@@ -232,6 +238,9 @@ describe("SessionLockController#lockUserSession", () => {
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
@@ -239,7 +248,9 @@ describe("SessionLockController#lockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockGetLollipop.mockImplementationOnce(async () => {throw "error";});
+    mockGetLollipop.mockImplementationOnce(async () => {
+      throw "error";
+    });
 
     const controller = new SessionLockController(
       mockRedisSessionStorage,
@@ -250,6 +261,9 @@ describe("SessionLockController#lockUserSession", () => {
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
+    expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
+    expect(mockDelLollipop).not.toHaveBeenCalled();
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
@@ -268,6 +282,7 @@ describe("SessionLockController#lockUserSession", () => {
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
@@ -275,7 +290,9 @@ describe("SessionLockController#lockUserSession", () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockDelLollipop.mockImplementationOnce(async () => {throw "error";});
+    mockDelLollipop.mockImplementationOnce(async () => {
+      throw "error";
+    });
 
     const controller = new SessionLockController(
       mockRedisSessionStorage,
@@ -286,6 +303,7 @@ describe("SessionLockController#lockUserSession", () => {
     const response = await controller.lockUserSession(req);
     response.apply(res);
 
+    expect(mockDelUserAllSessions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
