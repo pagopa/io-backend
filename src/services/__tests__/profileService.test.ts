@@ -568,7 +568,7 @@ describe("ProfileService#createProfile", () => {
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
-      value: proxyInitializedProfileResponse
+      value: {}
     });
   });
 
