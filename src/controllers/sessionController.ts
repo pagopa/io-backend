@@ -4,6 +4,7 @@
 
 import * as crypto from "crypto";
 import * as express from "express";
+import * as O from "fp-ts/Option";
 import {
   IResponseErrorInternal,
   IResponseErrorValidation,
@@ -67,11 +68,22 @@ export default class SessionController {
         TE.toUnion
       )();
 
+      // Read the assertionRef related to the User for Lollipop.
+      const errorOrMaybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
+        user.fiscal_code
+      );
+      if (E.isLeft(errorOrMaybeAssertionRef)) {
+        return ResponseErrorInternal(
+          `Error retrieving the assertionRef: ${errorOrMaybeAssertionRef.left.message}`
+        );
+      }
+
       if (UserV5.is(user)) {
         // All required tokens are present on the current session, no update is required
         return ResponseSuccessJson({
           bpdToken: user.bpd_token,
           fimsToken: user.fims_token,
+          lollipopAssertionRef: O.toUndefined(errorOrMaybeAssertionRef.right),
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
@@ -115,6 +127,7 @@ export default class SessionController {
           ResponseSuccessJson({
             bpdToken: updatedUser.bpd_token,
             fimsToken: updatedUser.fims_token,
+            lollipopAssertionRef: O.toUndefined(errorOrMaybeAssertionRef.right),
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,

@@ -22,6 +22,7 @@ import ProfileService from "../../services/profileService";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import * as crypto from "crypto";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { anAssertionRef } from "../../__mocks__/lollipop";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -82,7 +83,7 @@ const res = mockRes();
 const req = mockReq();
 
 describe("SessionController#getSessionState", () => {
-  it("returns correct session state for valid session", async () => {
+  it("should return a correct session state for a valid session with lollipop initialized", async () => {
     req.user = {
       ...mockedUser,
       bpd_token: mockBPDToken,
@@ -90,11 +91,47 @@ describe("SessionController#getSessionState", () => {
       myportal_token: mockMyPortalToken,
       zendesk_token: mockZendeskToken
     };
+    mockGet.mockImplementationOnce((_, callback) =>
+      callback(null, anAssertionRef)
+    );
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(controller).toBeTruthy();
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${mockedUser.fiscal_code}`,
+      expect.any(Function)
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      bpdToken: mockBPDToken,
+      fimsToken: mockFIMSToken,
+      myPortalToken: mockMyPortalToken,
+      spidLevel: "https://www.spid.gov.it/SpidL2",
+      walletToken: mockedUser.wallet_token,
+      zendeskToken:
+        mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
+      lollipopAssertionRef: anAssertionRef
+    });
+  });
+
+  it("should return a correct session state for a valid session with lollipop NOT initialized", async () => {
+    req.user = {
+      ...mockedUser,
+      bpd_token: mockBPDToken,
+      fims_token: mockFIMSToken,
+      myportal_token: mockMyPortalToken,
+      zendesk_token: mockZendeskToken
+    };
+    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+
+    const response = await controller.getSessionState(req);
+    response.apply(res);
+
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${mockedUser.fiscal_code}`,
+      expect.any(Function)
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
@@ -106,6 +143,34 @@ describe("SessionController#getSessionState", () => {
     });
   });
 
+  it("should return an error if the lollipop assertion ref retrieval fails with an error", async () => {
+    req.user = {
+      ...mockedUser,
+      bpd_token: mockBPDToken,
+      fims_token: mockFIMSToken,
+      myportal_token: mockMyPortalToken,
+      zendesk_token: mockZendeskToken
+    };
+    const expectedError = new Error("Error retrieving the assertion ref");
+    mockGet.mockImplementationOnce((_, callback) => callback(expectedError));
+
+    const response = await controller.getSessionState(req);
+    response.apply(res);
+
+    expect(mockGet).toBeCalledWith(
+      `KEYS-${mockedUser.fiscal_code}`,
+      expect.any(Function)
+    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        detail: expect.stringContaining(expectedError.message),
+        status: 500,
+        title: "Internal server error"
+      })
+    );
+  });
+
   it("create new tokens if missing for current session", async () => {
     req.user = req.user = {
       ...mockedUser,
@@ -114,6 +179,7 @@ describe("SessionController#getSessionState", () => {
       myportal_token: undefined,
       zendesk_token: undefined
     } as User;
+    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
 
     mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
     mockGetNewToken.mockImplementationOnce(() => mockFIMSToken);
@@ -171,6 +237,7 @@ describe("SessionController#getSessionState", () => {
       myportal_token: mockMyPortalToken,
       zendesk_token: mockZendeskToken
     };
+    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);

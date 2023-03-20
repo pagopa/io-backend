@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 10.4.0
+  version: 10.5.0
   title: Proxy API
   description: Mobile and web proxy API gateway.
 host: localhost
@@ -2537,6 +2537,21 @@ definitions:
         maxLength: 35
       spezzoneStrutturatoCausaleVersamento:
         $ref: '#/definitions/SpezzoneStrutturatoCausaleVersamento'
+  AssertionRefSha256:
+    type: string
+    pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+  AssertionRefSha384:
+    type: string
+    pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+  AssertionRefSha512:
+    type: string
+    pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+  AssertionRef:
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/AssertionRefSha512'
+      - $ref: '#/definitions/AssertionRefSha384'
+      - $ref: '#/definitions/AssertionRefSha256'
   MessageContentWithAttachments:
     allOf:
       - type: object
@@ -2654,6 +2669,8 @@ definitions:
     properties:
       spidLevel:
         $ref: '#/definitions/SpidLevel'
+      lollipopAssertionRef:
+        $ref: '#/definitions/AssertionRef'
       walletToken:
         type: string
       myPortalToken:

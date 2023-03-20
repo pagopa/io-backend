@@ -136,7 +136,9 @@ export default class ProfileService {
     | IResponseErrorInternal
     | IResponseErrorTooManyRequests
     | IResponseErrorConflict
-    | IResponseSuccessJson<InitializedProfile>
+    // This Service response is not binded with any API response, so we remove any payload
+    // from this Response Success JSON.
+    | IResponseSuccessJson<Record<string, never>>
   > => {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
@@ -147,7 +149,8 @@ export default class ProfileService {
 
       return withValidatedOrInternalError(validated, response =>
         response.status === 200
-          ? ResponseSuccessJson(toInitializedProfile(response.value, user))
+          ? // An empty response.
+            ResponseSuccessJson({})
           : response.status === 409
           ? ResponseErrorConflict(
               response.value ||
