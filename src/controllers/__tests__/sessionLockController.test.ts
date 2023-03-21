@@ -281,7 +281,7 @@ describe("SessionLockController#lockUserSession", () => {
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
-
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
     expect(mockDelUserAllSessions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });
@@ -302,7 +302,7 @@ describe("SessionLockController#lockUserSession", () => {
 
     const response = await controller.lockUserSession(req);
     response.apply(res);
-
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalled();
     expect(mockDelUserAllSessions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });
