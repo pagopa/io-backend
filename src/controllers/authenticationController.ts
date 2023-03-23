@@ -305,8 +305,8 @@ export default class AuthenticationController {
               name: "lollipop.error.acs",
               properties: {
                 assertion_ref: assertionRef,
-                fiscal_code: sha256(user.fiscal_code),
-                error: error.message
+                error: error.message,
+                fiscal_code: sha256(user.fiscal_code)
               }
             });
             return O.some(
