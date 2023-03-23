@@ -66,6 +66,7 @@ import {
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
+import { sha256 } from "../utils/crypto";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -299,9 +300,19 @@ export default class AuthenticationController {
               )
             )
           ),
-          TE.mapLeft(() =>
-            O.some(ResponseErrorInternal("Error Activation Lollipop Key"))
-          )
+          TE.mapLeft(error => {
+            this.appInsightsTelemetryClient?.trackEvent({
+              name: "lollipop.error.acs",
+              properties: {
+                assertion_ref: assertionRef,
+                fiscal_code: sha256(user.fiscal_code),
+                error: error.message
+              }
+            });
+            return O.some(
+              ResponseErrorInternal("Error Activation Lollipop Key")
+            );
+          })
         )
       )
     )();

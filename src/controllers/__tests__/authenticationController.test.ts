@@ -61,6 +61,7 @@ import {
   anAssertionRef,
   anotherAssertionRef
 } from "../../__mocks__/lollipop";
+import { sha256 } from "../../utils/crypto";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -691,6 +692,14 @@ describe("AuthenticationController#acs", () => {
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
+      expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+        name: "lollipop.error.acs",
+        properties: expect.objectContaining({
+          assertion_ref: anotherAssertionRef,
+          fiscal_code: sha256(aFiscalCode)
+        })
+      });
+
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
         apply: expect.any(Function),
@@ -744,6 +753,14 @@ describe("AuthenticationController#acs", () => {
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.acs",
+      properties: expect.objectContaining({
+        assertion_ref: anotherAssertionRef,
+        fiscal_code: sha256(aFiscalCode)
+      })
+    });
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({
