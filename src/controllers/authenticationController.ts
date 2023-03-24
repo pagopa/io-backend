@@ -4,6 +4,8 @@
  * the IDP.
  */
 
+/* eslint-disable sonarjs/no-duplicate-string */
+
 import * as express from "express";
 import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
@@ -218,6 +220,13 @@ export default class AuthenticationController {
       : E.right(O.none);
 
     if (E.isLeft(errorOrMaybeAssertionRef)) {
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: "lollipop.error.acs",
+        properties: {
+          error: "Error retrieving previous lollipop configuration",
+          fiscal_code: sha256(user.fiscal_code)
+        }
+      });
       return ResponseErrorInternal(
         "Error retrieving previous lollipop configuration"
       );
@@ -227,11 +236,20 @@ export default class AuthenticationController {
       this.lollipopParams.isLollipopEnabled &&
       O.isSome(errorOrMaybeAssertionRef.right)
     ) {
+      const assertionRefToRevoke = errorOrMaybeAssertionRef.right.value;
       // Sending a revoke message for previous assertionRef related to the same fiscalCode
       // This operation is fire and forget
       this.lollipopParams.lollipopService
-        .revokePreviousAssertionRef(errorOrMaybeAssertionRef.right.value)
+        .revokePreviousAssertionRef(assertionRefToRevoke)
         .catch(err => {
+          this.appInsightsTelemetryClient?.trackEvent({
+            name: "lollipop.error.acs",
+            properties: {
+              assertion_ref: assertionRefToRevoke,
+              error: err,
+              fiscal_code: sha256(user.fiscal_code)
+            }
+          });
           log.error(
             "acs: error sending revoke message for previous assertionRef [%s]",
             err
