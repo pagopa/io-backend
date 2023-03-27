@@ -155,7 +155,7 @@ export const logLollipopSignRequest = (lollipopConsumerId: NonEmptyString) => (
     ({ body, ...lollipopHeadersWithoutBody }) =>
       O.fromNullable(lollipopHeadersWithoutBody),
     eventLog.option.info(lollipopHeadersWithoutBody => [
-      "",
+      `Lollipop Request log`,
       {
         name: LOLLIPOP_SIGN_EVENT_NAME,
         ...lollipopHeadersWithoutBody,
