@@ -634,11 +634,7 @@ describe("AuthenticationController#acs", () => {
     );
 
     expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(mockGetLollipop).toBeCalledWith(
-      expect.objectContaining({
-        fiscal_code: aFiscalCode
-      })
-    );
+    expect(mockGetLollipop).toBeCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
@@ -703,11 +699,7 @@ describe("AuthenticationController#acs", () => {
       });
 
       expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-      expect(mockGetLollipop).toBeCalledWith(
-        expect.objectContaining({
-          fiscal_code: aFiscalCode
-        })
-      );
+      expect(mockGetLollipop).toBeCalledWith(aFiscalCode);
       expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
         anAssertionRef
       );
@@ -761,11 +753,7 @@ describe("AuthenticationController#acs", () => {
     });
 
     expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(mockGetLollipop).toBeCalledWith(
-      expect.objectContaining({
-        fiscal_code: aFiscalCode
-      })
-    );
+    expect(mockGetLollipop).toBeCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toBeCalledWith(aFiscalCode);
     expect(mockActivateLolliPoPKey).toBeCalledWith(
@@ -817,11 +805,7 @@ describe("AuthenticationController#acs", () => {
       });
 
       expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-      expect(mockGetLollipop).toBeCalledWith(
-        expect.objectContaining({
-          fiscal_code: aFiscalCode
-        })
-      );
+      expect(mockGetLollipop).toBeCalledWith(aFiscalCode);
       expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(
         anAssertionRef
       );
@@ -862,11 +846,7 @@ describe("AuthenticationController#acs", () => {
     });
 
     expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(mockGetLollipop).toBeCalledWith(
-      expect.objectContaining({
-        fiscal_code: aFiscalCode
-      })
-    );
+    expect(mockGetLollipop).toBeCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).not.toBeCalled();
     expect(mockDelLollipop).not.toBeCalled();
     expect(mockActivateLolliPoPKey).not.toBeCalled();
@@ -1161,7 +1141,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);
@@ -1188,7 +1168,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).not.toHaveBeenCalled();
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);
@@ -1217,7 +1197,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);
@@ -1260,7 +1240,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).not.toBeCalled();
     expect(mockDelLollipop).not.toBeCalled();
     expect(mockDel).not.toBeCalled();
@@ -1286,7 +1266,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).not.toBeCalled();
@@ -1313,7 +1293,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);
@@ -1340,7 +1320,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     const response = await lollipopActivatedController.logout(req);
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledWith(mockedUser);
+    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockRevokePreviousAssertionRef).toHaveBeenCalledWith(anAssertionRef);
     expect(mockDelLollipop).toHaveBeenCalledWith(mockedUser.fiscal_code);
     expect(mockDel).toHaveBeenCalledWith(mockedUser);

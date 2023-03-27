@@ -70,7 +70,7 @@ export default class SessionController {
 
       // Read the assertionRef related to the User for Lollipop.
       const errorOrMaybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
-        user
+        user.fiscal_code
       );
       if (E.isLeft(errorOrMaybeAssertionRef)) {
         return ResponseErrorInternal(

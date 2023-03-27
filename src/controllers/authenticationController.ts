@@ -211,7 +211,9 @@ export default class AuthenticationController {
     );
 
     const errorOrMaybeAssertionRef = this.lollipopParams.isLollipopEnabled
-      ? await this.sessionStorage.getLollipopAssertionRefForUser(user)
+      ? await this.sessionStorage.getLollipopAssertionRefForUser(
+          user.fiscal_code
+        )
       : E.right(O.none);
 
     if (E.isLeft(errorOrMaybeAssertionRef)) {
@@ -477,7 +479,9 @@ export default class AuthenticationController {
                 TE.tryCatch(
                   () =>
                     // retrieve the assertionRef for the user
-                    this.sessionStorage.getLollipopAssertionRefForUser(user),
+                    this.sessionStorage.getLollipopAssertionRefForUser(
+                      user.fiscal_code
+                    ),
                   E.toError
                 ),
                 TE.chainEitherK(identity),
