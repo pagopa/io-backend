@@ -813,6 +813,13 @@ describe("AuthenticationController#acs", () => {
 
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
+      
+      expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+        name: "lollipop.error.acs",
+        properties: expect.objectContaining({
+          fiscal_code: sha256(aFiscalCode)
+        })
+      });
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
@@ -853,6 +860,14 @@ describe("AuthenticationController#acs", () => {
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.acs",
+      properties: expect.objectContaining({
+        fiscal_code: sha256(aFiscalCode),
+        message: "Error retrieving previous lollipop configuration"
+      })
+    });
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({

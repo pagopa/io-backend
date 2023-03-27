@@ -219,12 +219,14 @@ export default class AuthenticationController {
         )
       : E.right(O.none);
 
+    const lollipopErrorEventName = "lollipop.error.acs";
+
     if (E.isLeft(errorOrMaybeAssertionRef)) {
       this.appInsightsTelemetryClient?.trackEvent({
-        name: "lollipop.error.acs",
+        name: lollipopErrorEventName,
         properties: {
-          error: "Error retrieving previous lollipop configuration",
-          fiscal_code: sha256(user.fiscal_code)
+          fiscal_code: sha256(user.fiscal_code),
+          message: "Error retrieving previous lollipop configuration"
         }
       });
       return ResponseErrorInternal(
@@ -243,11 +245,13 @@ export default class AuthenticationController {
         .revokePreviousAssertionRef(assertionRefToRevoke)
         .catch(err => {
           this.appInsightsTelemetryClient?.trackEvent({
-            name: "lollipop.error.acs",
+            name: lollipopErrorEventName,
             properties: {
               assertion_ref: assertionRefToRevoke,
               error: err,
-              fiscal_code: sha256(user.fiscal_code)
+              fiscal_code: sha256(user.fiscal_code),
+              message:
+                "acs: error sending revoke message for previous assertionRef"
             }
           });
           log.error(
@@ -273,7 +277,16 @@ export default class AuthenticationController {
         delLollipopAssertionRefResult => delLollipopAssertionRefResult === true,
         () => new Error("Error on LolliPoP initialization")
       ),
-      TE.mapLeft(error => O.some(ResponseErrorInternal(error.message))),
+      TE.mapLeft(error => {
+        this.appInsightsTelemetryClient?.trackEvent({
+          name: lollipopErrorEventName,
+          properties: {
+            fiscal_code: sha256(user.fiscal_code),
+            message: `acs: ${error.message}`
+          }
+        });
+        return O.some(ResponseErrorInternal(error.message));
+      }),
       TE.chainW(() =>
         TE.of(
           getRequestIDFromResponse(
@@ -319,17 +332,17 @@ export default class AuthenticationController {
             )
           ),
           TE.mapLeft(error => {
+            const message = "Error Activation Lollipop Key";
             this.appInsightsTelemetryClient?.trackEvent({
-              name: "lollipop.error.acs",
+              name: lollipopErrorEventName,
               properties: {
                 assertion_ref: assertionRef,
                 error: error.message,
-                fiscal_code: sha256(user.fiscal_code)
+                fiscal_code: sha256(user.fiscal_code),
+                message
               }
             });
-            return O.some(
-              ResponseErrorInternal("Error Activation Lollipop Key")
-            );
+            return O.some(ResponseErrorInternal(message));
           })
         )
       )
