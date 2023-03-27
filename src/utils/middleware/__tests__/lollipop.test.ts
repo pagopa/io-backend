@@ -1,6 +1,6 @@
 import { LollipopApiClient } from "../../../clients/lollipop";
 import { ISessionStorage } from "../../../services/ISessionStorage";
-import { lollipopMiddleware } from "../lollipop";
+import { expressLollipopMiddleware } from "../lollipop";
 import mockReq from "../../../__mocks__/request";
 import { aFiscalCode, mockedUser } from "../../../__mocks__/user_mock";
 import { anAssertionRef } from "../../../__mocks__/lollipop";
@@ -67,7 +67,10 @@ describe("lollipopMiddleware", () => {
         }
       })
     );
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+    const middleware = expressLollipopMiddleware(
+      mockClient,
+      mockSessionStorage
+    );
     await middleware(req, res, mockNext);
     expect(mockGenerateLCParams).toBeCalledTimes(1);
     expect(mockGenerateLCParams).toBeCalledWith({
@@ -105,7 +108,10 @@ describe("lollipopMiddleware", () => {
       user: mockedUser
     });
     const res = mockRes();
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+    const middleware = expressLollipopMiddleware(
+      mockClient,
+      mockSessionStorage
+    );
     await middleware(req, res, mockNext);
     expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
@@ -129,7 +135,10 @@ describe("lollipopMiddleware", () => {
       user: { ...mockedUser, fiscal_code: "invalidFiscalCode" }
     });
     const res = mockRes();
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+    const middleware = expressLollipopMiddleware(
+      mockClient,
+      mockSessionStorage
+    );
     await middleware(req, res, mockNext);
     expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
@@ -163,7 +172,10 @@ describe("lollipopMiddleware", () => {
       mockGetlollipopAssertionRefForUser.mockImplementationOnce(
         () => lollipopAssertionRefForUser
       );
-      const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+      const middleware = expressLollipopMiddleware(
+        mockClient,
+        mockSessionStorage
+      );
       await middleware(req, res, mockNext);
       expect(mockGenerateLCParams).not.toBeCalled();
       expect(res.status).toBeCalledWith(expectedResponseStatus);
@@ -198,7 +210,10 @@ describe("lollipopMiddleware", () => {
       });
       const res = mockRes();
       mockGenerateLCParams.mockImplementationOnce(() => generateLCParams);
-      const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+      const middleware = expressLollipopMiddleware(
+        mockClient,
+        mockSessionStorage
+      );
       await middleware(req, res, mockNext);
       expect(mockGenerateLCParams).toBeCalledTimes(1);
       expect(res.status).toBeCalledWith(expectedResponseStatus);

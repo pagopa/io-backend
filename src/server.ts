@@ -7,6 +7,9 @@ import * as appInsights from "applicationinsights";
 import * as O from "fp-ts/lib/Option";
 import { NodeEnvironmentEnum } from "@pagopa/ts-commons/lib/environment";
 import { pipe } from "fp-ts/lib/function";
+import { useWinstonFor } from "@pagopa/winston-ts";
+import { LoggerId } from "@pagopa/winston-ts/dist/types/logging";
+import { withApplicationInsight } from "@pagopa/io-functions-commons/dist/src/utils/transports/application_insight";
 import { newApp } from "./app";
 import {
   ALLOW_BPD_IP_SOURCE_RANGE,
@@ -93,6 +96,16 @@ const maybeAppInsightsClient = pipe(
         ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
         : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
     })
+  ),
+  O.chainFirst(telemetryClient =>
+    O.some(
+      useWinstonFor({
+        loggerId: LoggerId.event,
+        transports: [
+          withApplicationInsight(telemetryClient, "") // TODO: Should we set a prefix here?
+        ]
+      })
+    )
   )
 );
 

@@ -1,6 +1,6 @@
 import * as express from "express";
 import { toExpressHandler } from "../utils/express";
-import { lollipopMiddleware } from "../utils/middleware/lollipop";
+import { expressLollipopMiddleware } from "../utils/middleware/lollipop";
 import { firstLollipopSign } from "../controllers/firstLollipopConsumerController";
 import * as request from "supertest";
 import { LollipopApiClient } from "../clients/lollipop";
@@ -129,7 +129,7 @@ describe("lollipopSign", () => {
         req.user = mockedUser;
         next();
       },
-      lollipopMiddleware(mockClient, mockSessionStorage),
+      expressLollipopMiddleware(mockClient, mockSessionStorage),
       toExpressHandler(firstLollipopSign(FIRST_LOLLIPOP_CONSUMER_CLIENT))
     );
 
