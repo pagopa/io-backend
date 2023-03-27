@@ -657,13 +657,13 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    scenario                      | setLollipopAssertionRefForUserResponse
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}
-    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}
+    scenario                      | setLollipopAssertionRefForUserResponse | errorMessage
+    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF thumbprint relation in redis"}
+    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}    | ${undefined}
+    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}  | ${"Error"}
   `(
     "should fail if an error occours saving assertionRef for user in redis $scenario",
-    async ({ setLollipopAssertionRefForUserResponse }) => {
+    async ({ setLollipopAssertionRefForUserResponse, errorMessage }) => {
       const res = mockRes();
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
@@ -696,7 +696,9 @@ describe("AuthenticationController#acs", () => {
         name: "lollipop.error.acs",
         properties: expect.objectContaining({
           assertion_ref: anotherAssertionRef,
-          fiscal_code: sha256(aFiscalCode)
+          error: errorMessage,
+          fiscal_code: sha256(aFiscalCode),
+          message: "Error Activation Lollipop Key"
         })
       });
 
@@ -758,7 +760,9 @@ describe("AuthenticationController#acs", () => {
       name: "lollipop.error.acs",
       properties: expect.objectContaining({
         assertion_ref: anotherAssertionRef,
-        fiscal_code: sha256(aFiscalCode)
+        error: "Error",
+        fiscal_code: sha256(aFiscalCode),
+        message: "Error Activation Lollipop Key"
       })
     });
 
@@ -813,11 +817,12 @@ describe("AuthenticationController#acs", () => {
 
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
-      
+
       expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
         name: "lollipop.error.acs",
         properties: expect.objectContaining({
-          fiscal_code: sha256(aFiscalCode)
+          fiscal_code: sha256(aFiscalCode),
+          message: `acs: ${errorMessage}`
         })
       });
 
