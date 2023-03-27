@@ -1,4 +1,4 @@
-oa3_spec: api_public.yaml
+oa3_spec: openapi/generated/api_public.yaml
 name: opex_iobackend_api_public
 location: West Europe
 timespan: 5m
