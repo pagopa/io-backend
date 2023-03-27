@@ -4,12 +4,12 @@ import {
   initAppInsights as startAppInsights
 } from "@pagopa/ts-commons/lib/appinsights";
 import { eventLog } from "@pagopa/winston-ts";
-import { NonEmptyString } from "io-ts-types";
-import { LollipopLocalsType } from "src/types/lollipop";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import { Request } from "express";
 import * as E from "fp-ts/lib/Either";
+import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
 import { sha256 } from "./crypto";
