@@ -4,8 +4,6 @@
  * the IDP.
  */
 
-/* eslint-disable sonarjs/no-duplicate-string */
-
 import * as express from "express";
 import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
