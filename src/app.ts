@@ -730,7 +730,11 @@ export function newApp({
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
               lollipopMiddleware: toExpressMiddleware(
-                lollipopLoginHandler(FF_LOLLIPOP_ENABLED, LOLLIPOP_API_CLIENT)
+                lollipopLoginHandler(
+                  FF_LOLLIPOP_ENABLED,
+                  LOLLIPOP_API_CLIENT,
+                  appInsightsClient
+                )
               ),
               redisClient: REDIS_CLIENT,
               samlConfig,

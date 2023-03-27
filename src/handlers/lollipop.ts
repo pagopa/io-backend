@@ -6,6 +6,7 @@ import {
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
 import { JwkPublicKeyFromToken } from "@pagopa/ts-commons/lib/jwk";
 import * as express from "express";
+import * as appInsights from "applicationinsights";
 import { constUndefined, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
@@ -41,7 +42,8 @@ const isReservePubKeyResponseSuccess = (
 
 export const lollipopLoginHandler = (
   isLollipopEnabled: boolean,
-  lollipopApiClient: ReturnType<LollipopApiClient>
+  lollipopApiClient: ReturnType<LollipopApiClient>,
+  appInsightsTelemetryClient?: appInsights.TelemetryClient
 ) => async (
   req: express.Request
 ): Promise<
@@ -99,7 +101,6 @@ export const lollipopLoginHandler = (
                       ResponseErrorInternal("Cannot parse reserve response")
                     )
                   ),
-
                   TE.filterOrElseW(
                     isReservePubKeyResponseSuccess,
                     errorResponse =>
@@ -108,6 +109,15 @@ export const lollipopLoginHandler = (
                         : ResponseErrorInternal("Cannot reserve pubKey")
                   ),
                   TE.map(constUndefined),
+                  TE.mapLeft(error => {
+                    appInsightsTelemetryClient?.trackEvent({
+                      name: "lollipop.error.get-login",
+                      properties: {
+                        message: `get-login: ${error.detail}`
+                      }
+                    });
+                    return error;
+                  }),
                   TE.toUnion
                 )()
               )
