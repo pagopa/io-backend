@@ -375,6 +375,20 @@ describe("IoSignController#getQtspClausesMetadata", () => {
     );
   });
 
+  it("should make the correct service method call without issuer env", async () => {
+    const reqWithoutIssuerEnv = {
+      ...mockReq({}),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    await controller.getQtspClausesMetadata(reqWithoutIssuerEnv);
+
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith(
+      IssuerEnvironmentEnum.TEST
+    );
+  });
+
   it("should call getQtspClausesMetadata method on the IoSignService with valid values", async () => {
     mockGetQtspClausesMetadata.mockReturnValue(
       Promise.resolve(ResponseSuccessJson(qtspClausesMetadata))
