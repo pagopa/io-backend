@@ -21,10 +21,7 @@ import {
 } from "../../__mocks__/user_mock";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import {
-  SignatureRequestDetailView,
-  StatusEnum as SignatureRequestStatusEnum
-} from "../../../generated/io-sign/SignatureRequestDetailView";
+import { SignatureRequestDetailView } from "../../../generated/io-sign/SignatureRequestDetailView";
 import { Id } from "../../../generated/io-sign/Id";
 import { QtspClauses } from "../../../generated/io-sign/QtspClauses";
 import { DocumentToSign } from "../../../generated/io-sign/DocumentToSign";
@@ -43,6 +40,8 @@ import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublic
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
 import { CreateSignatureBody } from "../../../generated/io-sign/CreateSignatureBody";
+import { IssuerEnvironmentEnum } from "../../../generated/io-sign/IssuerEnvironment";
+import { SignatureRequestStatusEnum } from "../../../generated/io-sign/SignatureRequestStatus";
 
 const API_KEY = "";
 const API_URL = "";
@@ -126,7 +125,8 @@ const signatureRequest: SignatureRequestDetailView = {
   signer_id: "37862aff-3436-4487-862b-fd9e7d2a114e" as Id,
   issuer: {
     email: "issuer@fakedomain.com" as EmailString,
-    description: "Fake description" as NonEmptyString
+    description: "Fake description" as NonEmptyString,
+    environment: IssuerEnvironmentEnum.TEST
   },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
   documents: [
@@ -339,11 +339,40 @@ describe("IoSignController#getQtspClausesMetadata", () => {
     jest.clearAllMocks();
   });
 
-  it("should make the correct service method call", async () => {
-    const controller = new IoSignController(ioSignService, profileService);
-    await controller.getQtspClausesMetadata();
+  const req = {
+    ...mockReq({
+      headers: {
+        "x-iosign-issuer-environment": "TEST"
+      }
+    }),
+    user: mockedUser
+  };
 
-    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith();
+  it("should make the correct service method call with TEST issuer env", async () => {
+    const controller = new IoSignController(ioSignService, profileService);
+    await controller.getQtspClausesMetadata(req);
+
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith(
+      IssuerEnvironmentEnum.TEST
+    );
+  });
+
+  it("should make the correct service method call with DEFAULT issuer env", async () => {
+    const reqWithDefaultEnv = {
+      ...mockReq({
+        headers: {
+          "x-iosign-issuer-environment": "DEFAULT"
+        }
+      }),
+      user: mockedUser
+    };
+
+    const controller = new IoSignController(ioSignService, profileService);
+    await controller.getQtspClausesMetadata(reqWithDefaultEnv);
+
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith(
+      IssuerEnvironmentEnum.DEFAULT
+    );
   });
 
   it("should call getQtspClausesMetadata method on the IoSignService with valid values", async () => {
@@ -351,7 +380,7 @@ describe("IoSignController#getQtspClausesMetadata", () => {
       Promise.resolve(ResponseSuccessJson(qtspClausesMetadata))
     );
     const controller = new IoSignController(ioSignService, profileService);
-    const response = await controller.getQtspClausesMetadata();
+    const response = await controller.getQtspClausesMetadata(req);
 
     expect(response).toEqual({
       apply: expect.any(Function),

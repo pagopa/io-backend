@@ -25,8 +25,8 @@ import {
   NonEmptyString
 } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
-import { CreateSignatureBody as CreateSignatureBodyApiModel } from "generated/io-sign-api/CreateSignatureBody";
-
+import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
+import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 import { Id } from "../../generated/io-sign/Id";
@@ -153,11 +153,15 @@ export default class IoSignService {
   /**
    * Get the QTSP clauses
    */
-  public readonly getQtspClausesMetadata = (): Promise<
+  public readonly getQtspClausesMetadata = (
+    issuerEnvironment: IssuerEnvironment
+  ): Promise<
     IResponseErrorInternal | IResponseSuccessJson<QtspClausesMetadataDetailView>
   > =>
     withCatchAsInternalError(async () => {
-      const validated = await this.ioSignApiClient.getQtspClausesMetadata({});
+      const validated = await this.ioSignApiClient.getQtspClausesMetadata({
+        "x-iosign-issuer-environment": issuerEnvironment
+      });
       return withValidatedOrInternalError(validated, response => {
         switch (response.status) {
           case 200:
