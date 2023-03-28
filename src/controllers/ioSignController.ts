@@ -274,7 +274,10 @@ export default class IoSignController {
   > =>
     withUserFromRequest(req, async () =>
       pipe(
-        req.headers["x-iosign-issuer-environment"],
+        // if the header is not present, use TEST as the default value
+        "x-iosign-issuer-environment" in req.headers
+          ? req.headers["x-iosign-issuer-environment"]
+          : "TEST",
         IssuerEnvironment.decode,
         TE.fromEither,
         TE.mapLeft(_ =>
