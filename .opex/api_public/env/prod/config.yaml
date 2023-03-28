@@ -11,4 +11,4 @@ overrides:
     - api-app.io.pagopa.it
   endpoints:
     /assertionConsumerService:
-      response_time_threshold: 1.5
+      response_time_threshold: 3
