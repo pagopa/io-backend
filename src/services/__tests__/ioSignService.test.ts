@@ -8,10 +8,7 @@ import {
   StatusEnum as SignatureStatusEnum
 } from "../../../generated/io-sign-api/SignatureDetailView";
 import { TypeEnum as ClauseTypeEnum } from "../../../generated/io-sign-api/Clause";
-import {
-  SignatureRequestDetailView,
-  StatusEnum as SignatureRequestStatusEnum
-} from "../../../generated/io-sign-api/SignatureRequestDetailView";
+import { SignatureRequestDetailView } from "../../../generated/io-sign-api/SignatureRequestDetailView";
 import { IoSignAPIClient } from "../../clients/io-sign";
 import { aFiscalCode, mockedUser } from "../../__mocks__/user_mock";
 import IoSignService from "../ioSignService";
@@ -24,6 +21,8 @@ import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
 import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
 import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
+import { SignatureRequestStatusEnum } from "../../../generated/io-sign-api/SignatureRequestStatus";
+import { IssuerEnvironmentEnum } from "../../../generated/io-sign-api/IssuerEnvironment";
 
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
@@ -62,9 +61,11 @@ const fakeSignatureRequest: SignatureRequestDetailView = {
   signer_id: fakeSignerId,
   issuer: {
     email: fakeIssuerEmail,
-    description: fakeIssuerDescription
+    description: fakeIssuerDescription,
+    environment: IssuerEnvironmentEnum.TEST
   },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
+  dossier_title: "Dossier title mock" as NonEmptyString,
   documents: [
     {
       id: "01GKVMRN42JXW34AN6MRJ6843E" as Id,
@@ -445,12 +446,32 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     jest.clearAllMocks();
   });
 
-  it("should make the correct api call and handle a success response", async () => {
+  it("should make the correct api call with TEST issuer env and handle a success response", async () => {
     const service = new IoSignService(api);
 
-    const res = await service.getQtspClausesMetadata();
+    const res = await service.getQtspClausesMetadata(
+      IssuerEnvironmentEnum.TEST
+    );
 
-    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({});
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({
+      "x-iosign-issuer-environment": "TEST"
+    });
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should make the correct api call with DEFAULT issuer env and handle a success response", async () => {
+    const service = new IoSignService(api);
+
+    const res = await service.getQtspClausesMetadata(
+      IssuerEnvironmentEnum.DEFAULT
+    );
+
+    expect(mockGetQtspClausesMetadata).toHaveBeenCalledWith({
+      "x-iosign-issuer-environment": "DEFAULT"
+    });
 
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson"
@@ -463,7 +484,9 @@ describe("IoSignService#getQtspClausesMetadata", () => {
       t.success({ status: 500, value: aGenericProblem })
     );
     const service = new IoSignService(api);
-    const res = await service.getQtspClausesMetadata();
+    const res = await service.getQtspClausesMetadata(
+      IssuerEnvironmentEnum.TEST
+    );
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -475,7 +498,9 @@ describe("IoSignService#getQtspClausesMetadata", () => {
       t.success({ status: 123 })
     );
     const service = new IoSignService(api);
-    const res = await service.getQtspClausesMetadata();
+    const res = await service.getQtspClausesMetadata(
+      IssuerEnvironmentEnum.TEST
+    );
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
@@ -487,7 +512,9 @@ describe("IoSignService#getQtspClausesMetadata", () => {
       throw new Error();
     });
     const service = new IoSignService(api);
-    const res = await service.getQtspClausesMetadata();
+    const res = await service.getQtspClausesMetadata(
+      IssuerEnvironmentEnum.TEST
+    );
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"

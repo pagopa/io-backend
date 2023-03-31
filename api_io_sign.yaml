@@ -31,6 +31,12 @@ paths:
     get:
       operationId: getQtspClausesMetadata
       summary: Get the qtsp clauses
+      parameters:
+        - in: header
+          name: x-iosign-issuer-environment
+          schema:
+            $ref: "#/components/schemas/IssuerEnvironment"
+          required: true
       responses:
         "200":
           description: The QTSP clauses list
@@ -506,12 +512,7 @@ components:
         id:
           $ref: "#/components/schemas/Id"
         status:
-          type: string
-          x-extensible-enum:
-            - WAIT_FOR_SIGNATURE
-            - WAIT_FOR_QTSP
-            - SIGNED
-            - REJECTED
+          $ref: "#/components/schemas/SignatureRequestStatus"
         issuer:
           type: object
           properties:
@@ -521,9 +522,12 @@ components:
             description:
               type: string
               minLength: 1
+            environment:
+              $ref: "#/components/schemas/IssuerEnvironment"
           required:
               - email
               - description
+              - environment
         dossier_id:
           $ref: "#/components/schemas/Id"
         signer_id:
@@ -551,6 +555,21 @@ components:
         - documents
         - created_at
         - updated_at
+
+    SignatureRequestStatus:
+      type: string
+      x-extensible-enum:
+        - WAIT_FOR_SIGNATURE
+        - WAIT_FOR_QTSP
+        - SIGNED
+        - REJECTED
+
+    IssuerEnvironment:
+      type: string
+      enum:
+        - TEST
+        - DEFAULT
+
     LollipopMethod:
       type: string
       enum:

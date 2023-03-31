@@ -23,6 +23,14 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
+import {
+  withValidatedOrValidationError,
+  withCatchAsInternalError
+} from "../utils/responses";
+import {
+  IssuerEnvironment,
+  IssuerEnvironmentEnum
+} from "../../generated/io-sign/IssuerEnvironment";
 import IoSignService from "../services/ioSignService";
 import { ResLocals } from "../utils/express";
 import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
@@ -264,7 +272,21 @@ export default class IoSignController {
       )()
     );
 
-  public readonly getQtspClausesMetadata = (): Promise<
-    IResponseErrorInternal | IResponseSuccessJson<QtspClausesMetadataDetailView>
-  > => this.ioSignService.getQtspClausesMetadata();
+  public readonly getQtspClausesMetadata = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseSuccessJson<QtspClausesMetadataDetailView>
+  > =>
+    withCatchAsInternalError(async () =>
+      withValidatedOrValidationError(
+        IssuerEnvironment.decode(
+          "x-iosign-issuer-environment" in req.headers
+            ? req.headers["x-iosign-issuer-environment"]
+            : IssuerEnvironmentEnum.TEST
+        ),
+        this.ioSignService.getQtspClausesMetadata
+      )
+    );
 }
