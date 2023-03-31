@@ -26,7 +26,7 @@ import { Errors } from "io-ts";
 import {
   withValidatedOrValidationError,
   withCatchAsInternalError
-} from "src/utils/responses";
+} from "../utils/responses";
 import {
   IssuerEnvironment,
   IssuerEnvironmentEnum
