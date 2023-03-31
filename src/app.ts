@@ -488,7 +488,8 @@ export function newApp({
               new LollipopService(
                 LOLLIPOP_API_CLIENT,
                 LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-                LOLLIPOP_REVOKE_QUEUE_NAME
+                LOLLIPOP_REVOKE_QUEUE_NAME,
+                appInsightsClient
               ),
             err =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)

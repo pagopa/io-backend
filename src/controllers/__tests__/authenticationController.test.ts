@@ -696,9 +696,8 @@ describe("AuthenticationController#acs", () => {
         name: "lollipop.error.acs",
         properties: expect.objectContaining({
           assertion_ref: anotherAssertionRef,
-          error: errorMessage,
           fiscal_code: sha256(aFiscalCode),
-          message: "Error Activation Lollipop Key"
+          message: errorMessage
         })
       });
 
@@ -755,16 +754,6 @@ describe("AuthenticationController#acs", () => {
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
-
-    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
-      name: "lollipop.error.acs",
-      properties: expect.objectContaining({
-        assertion_ref: anotherAssertionRef,
-        error: "Error",
-        fiscal_code: sha256(aFiscalCode),
-        message: "Error Activation Lollipop Key"
-      })
-    });
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({

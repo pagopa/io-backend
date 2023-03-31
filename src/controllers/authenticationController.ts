@@ -326,22 +326,23 @@ export default class AuthenticationController {
                   setLollipopAssertionRefForUserRes === true,
                 () =>
                   new Error("Error creating CF thumbprint relation in redis")
-              )
+              ),
+              TE.mapLeft(error => {
+                this.appInsightsTelemetryClient?.trackEvent({
+                  name: lollipopErrorEventName,
+                  properties: {
+                    assertion_ref: assertionRef,
+                    fiscal_code: sha256(user.fiscal_code),
+                    message: error.message
+                  }
+                });
+                return error;
+              })
             )
           ),
-          TE.mapLeft(error => {
-            const message = "Error Activation Lollipop Key";
-            this.appInsightsTelemetryClient?.trackEvent({
-              name: lollipopErrorEventName,
-              properties: {
-                assertion_ref: assertionRef,
-                error: error.message,
-                fiscal_code: sha256(user.fiscal_code),
-                message
-              }
-            });
-            return O.some(ResponseErrorInternal(message));
-          })
+          TE.mapLeft(() =>
+            O.some(ResponseErrorInternal("Error Activation Lollipop Key"))
+          )
         )
       )
     )();
