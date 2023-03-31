@@ -35,11 +35,7 @@ paths:
         - in: header
           name: x-iosign-issuer-environment
           schema:
-            type: string
-            description: Issuer environment
-            enum:
-              - TEST
-              - DEFAULT
+            $ref: "#/components/schemas/IssuerEnvironment"
           required: true
       responses:
         "200":

@@ -23,7 +23,11 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
-import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
+import { withValidatedOrValidationError } from "src/utils/responses";
+import {
+  IssuerEnvironment,
+  IssuerEnvironmentEnum
+} from "../../generated/io-sign/IssuerEnvironment";
 import IoSignService from "../services/ioSignService";
 import { ResLocals } from "../utils/express";
 import { LollipopLocalsType, withLollipopLocals } from "../types/lollipop";
@@ -273,22 +277,13 @@ export default class IoSignController {
     | IResponseSuccessJson<QtspClausesMetadataDetailView>
   > =>
     withUserFromRequest(req, async () =>
-      pipe(
-        // if the header is not present, use TEST as the default value
-        "x-iosign-issuer-environment" in req.headers
-          ? req.headers["x-iosign-issuer-environment"]
-          : "TEST",
-        IssuerEnvironment.decode,
-        TE.fromEither,
-        TE.mapLeft(_ =>
-          ResponseErrorInternal(
-            `Error retrieving the issuer environment from header`
-          )
+      withValidatedOrValidationError(
+        IssuerEnvironment.decode(
+          "x-iosign-issuer-environment" in req.headers
+            ? req.headers["x-iosign-issuer-environment"]
+            : IssuerEnvironmentEnum.TEST
         ),
-        TE.map(issuerEnvironment =>
-          this.ioSignService.getQtspClausesMetadata(issuerEnvironment)
-        ),
-        TE.toUnion
-      )()
+        this.ioSignService.getQtspClausesMetadata
+      )
     );
 }
