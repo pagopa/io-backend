@@ -23,7 +23,10 @@ import { pipe } from "fp-ts/lib/function";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
-import { withValidatedOrValidationError } from "src/utils/responses";
+import {
+  withValidatedOrValidationError,
+  withCatchAsInternalError
+} from "src/utils/responses";
 import {
   IssuerEnvironment,
   IssuerEnvironmentEnum
@@ -276,7 +279,7 @@ export default class IoSignController {
     | IResponseErrorValidation
     | IResponseSuccessJson<QtspClausesMetadataDetailView>
   > =>
-    withUserFromRequest(req, async () =>
+    withCatchAsInternalError(async () =>
       withValidatedOrValidationError(
         IssuerEnvironment.decode(
           "x-iosign-issuer-environment" in req.headers
