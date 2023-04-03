@@ -43,23 +43,21 @@ export const firstLollipopSign = (
             }),
           () => ResponseErrorInternal("Error calling the Lollipop Consumer")
         ),
-        TE.map(lcResponse => {
-          logLollipopSignRequest(FIRST_LOLLIPOP_CONSUMER_ID)(
-            localsWithBody,
-            req
-          )(
-            pipe(
-              lcResponse,
-              E.map(r => ({
-                status: r.status
-              })),
-              E.mapLeft(
-                flow(readableReportSimplified, message => new Error(message))
-              )
-            )
-          );
-          return lcResponse;
-        })
+        TE.chainFirstW(
+          flow(
+            E.map(r => ({
+              status: r.status
+            })),
+            E.mapLeft(
+              flow(readableReportSimplified, message => new Error(message))
+            ),
+            logLollipopSignRequest(FIRST_LOLLIPOP_CONSUMER_ID)(
+              localsWithBody,
+              req
+            ),
+            TE.of
+          )
+        )
       )
     ),
     TE.chainEitherKW(

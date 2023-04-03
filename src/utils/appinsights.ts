@@ -123,7 +123,7 @@ export function initAppInsights(
   return appInsights.defaultClient;
 }
 
-const LOLLIPOP_SIGN_EVENT_NAME = "lollipop.info.sign";
+export const LOLLIPOP_SIGN_EVENT_NAME = "lollipop.sign";
 
 export type LCResponseLogLollipop = (
   lcResponse: E.Either<Error, { readonly status: number }>

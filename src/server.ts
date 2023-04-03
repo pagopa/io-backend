@@ -101,9 +101,7 @@ const maybeAppInsightsClient = pipe(
     O.some(
       useWinstonFor({
         loggerId: LoggerId.event,
-        transports: [
-          withApplicationInsight(telemetryClient, "") // TODO: Should we set a prefix here?
-        ]
+        transports: [withApplicationInsight(telemetryClient, "io-backend")]
       })
     )
   )
