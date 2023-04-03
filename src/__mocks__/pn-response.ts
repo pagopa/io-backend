@@ -198,7 +198,7 @@ export const notificationResponseExampleAsObject = {
       content_type: "application/pdf",
       name: "Verbale",
       url:
-        "/delivery/notifications/sent/KMZV-LYMY-TDMZ-202207-J-1/attachments/documents/0"
+        "/delivery/notifications/received/KMZV-LYMY-TDMZ-202207-J-1/attachments/documents/0"
     }
   ],
   details: notificationDetailResponseExampleAsObject
