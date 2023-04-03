@@ -230,12 +230,12 @@ describe("third-party-service-client", () => {
 
     await client.getThirdPartyMessageAttachment({
       id: aThirdPartyId,
-      attachment_url: `delivery/notifications/sent/${aThirdPartyId}/attachments/documents/0`
+      attachment_url: `delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
-      `${expectedConfig.baseUrl}/delivery/notifications/sent/${aThirdPartyId}/attachments/documents/0`,
+      `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
       {
         headers: {
           "x-pagopa-cx-taxid": aProdFiscalCode,

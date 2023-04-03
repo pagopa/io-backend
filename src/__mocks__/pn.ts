@@ -48,13 +48,13 @@ export const aPNThirdPartyNotification = {
       id: "JGQG-YPJT-AUQZ-202301-R-1_DOC0",
       content_type: "application/pdf",
       name: "Atto",
-      url: `/delivery/notifications/sent/${aPnNotificationId}/attachments/documents/0`
+      url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/0`
     },
     {
       id: "JGQG-YPJT-AUQZ-202301-R-1_DOC1",
       content_type: "application/pdf",
       name: "Lettera di accompagnamento",
-      url: `/delivery/notifications/sent/${aPnNotificationId}/attachments/documents/1`
+      url: `/delivery/notifications/received/${aPnNotificationId}/attachments/documents/1`
     }
   ],
   details: aPnNotificationDetails
