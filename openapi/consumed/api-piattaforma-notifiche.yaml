@@ -70,7 +70,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  delivery/notifications/sent/{iun}/attachments/documents/{docIdx}:
+  delivery/notifications/received/{iun}/attachments/documents/{docIdx}:
     get:
       tags:
       - AppIO-PN-Documents
