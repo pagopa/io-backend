@@ -8,27 +8,11 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { ZendeskToken } from "../../types/token";
 import { Second } from "@pagopa/ts-commons/lib/units";
-import { RedisClient } from "redis";
+import { RedisClientType } from "redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
-const mockGet = jest.fn();
-const mockSet = jest.fn();
-const mockMget = jest.fn();
-const mockSmembers = jest.fn();
-const mockSismember = jest.fn();
-const mockSrem = jest.fn();
-const mockTtl = jest.fn();
-const mockRedisClient = {} as RedisClient;
-mockRedisClient.get = mockGet;
-mockRedisClient.mget = mockMget;
-mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
-  callback(null, [`SESSIONINFO-${mockedUser.session_token}`]);
-});
-mockRedisClient.sismember = mockSismember;
-mockRedisClient.ttl = mockTtl;
-mockRedisClient.set = mockSet;
-mockRedisClient.srem = mockSrem;
+const mockRedisClient = {} as RedisClientType;
 
 const aValidOldTransitorySessionZendeskToken = mockZendeskToken;
 const aValidZendeskToken = mockZendeskToken + "1234abcd";

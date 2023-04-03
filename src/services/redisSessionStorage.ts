@@ -989,7 +989,7 @@ export default class RedisSessionStorage extends RedisStorageUtils
   /**
    * Remove other user sessions and wallet tokens
    */
-  //TODO: refactor this to return taskeither
+  // TODO: refactor this to return taskeither
   private async removeOtherUserSessions(
     user: UserV5
   ): Promise<Either<Error, boolean>> {
