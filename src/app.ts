@@ -246,8 +246,8 @@ export async function newApp({
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
-      ? createSimpleRedisClient(process.env.REDIS_URL)
-      : createClusterRedisClient(appInsightsClient)(
+      ? await createSimpleRedisClient(process.env.REDIS_URL)
+      : await createClusterRedisClient(appInsightsClient)(
           getRequiredENVVar("REDIS_URL"),
           process.env.REDIS_PASSWORD,
           process.env.REDIS_PORT
