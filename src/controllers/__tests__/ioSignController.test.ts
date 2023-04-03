@@ -42,6 +42,7 @@ import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType"
 import { CreateSignatureBody } from "../../../generated/io-sign/CreateSignatureBody";
 import { IssuerEnvironmentEnum } from "../../../generated/io-sign/IssuerEnvironment";
 import { SignatureRequestStatusEnum } from "../../../generated/io-sign/SignatureRequestStatus";
+import { SignatureRequestList } from "../../../generated/io-sign-api/SignatureRequestList";
 
 const API_KEY = "";
 const API_URL = "";
@@ -57,6 +58,7 @@ const badRequestErrorResponse = {
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetQtspClausesMetadata = jest.fn();
+const mockGetSignatureRequests = jest.fn();
 const mockGetSignatureRequest = jest.fn();
 const mockCreateSignature = jest.fn();
 
@@ -87,6 +89,7 @@ jest.mock("../../services/ioSignService", () => {
       createFilledDocument: mockCreateFilledDocument,
       getSignerByFiscalCode: mockGetSignerByFiscalCode,
       getQtspClausesMetadata: mockGetQtspClausesMetadata,
+      getSignatureRequests: mockGetSignatureRequests,
       getSignatureRequest: mockGetSignatureRequest,
       createSignature: mockCreateSignature
     }))
@@ -129,6 +132,7 @@ const signatureRequest: SignatureRequestDetailView = {
     environment: IssuerEnvironmentEnum.TEST
   },
   dossier_id: "01ARZ3NDEKTSV4RRFFQ69G5FAV" as Id,
+  dossier_title: "Contratto 150 ore" as NonEmptyString,
   documents: [
     {
       id: "01GKVMRN42JXW34AN6MRJ6843E" as Id,
@@ -144,6 +148,21 @@ const signatureRequest: SignatureRequestDetailView = {
   created_at: new Date(),
   updated_at: new Date(),
   expires_at: new Date()
+};
+
+const signatureRequestList: SignatureRequestList = {
+  items: [
+    {
+      id: signatureRequest.id,
+      signer_id: signatureRequest.signer_id,
+      dossier_id: signatureRequest.dossier_id,
+      dossier_title: signatureRequest.dossier_title,
+      status: signatureRequest.status,
+      created_at: signatureRequest.created_at,
+      expires_at: signatureRequest.expires_at,
+      updated_at: signatureRequest.updated_at
+    }
+  ]
 };
 
 const signature: SignatureDetailView = {
@@ -400,6 +419,40 @@ describe("IoSignController#getQtspClausesMetadata", () => {
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
       value: qtspClausesMetadata
+    });
+  });
+});
+
+describe("IoSignController#getSignatureRequests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct service method call", async () => {
+    const controller = new IoSignController(ioSignService, profileService);
+    const req = {
+      ...mockReq({}),
+      user: mockedUser
+    };
+    await controller.getSignatureRequests(req);
+    expect(mockGetSignatureRequests).toHaveBeenCalledWith(signerDetailMock.id);
+  });
+
+  it("should call getSignatureRequests method on the IoSignService with valid values", async () => {
+    mockGetSignatureRequests.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(signatureRequestList))
+    );
+    const controller = new IoSignController(ioSignService, profileService);
+    const req = {
+      ...mockReq({}),
+      user: mockedUser
+    };
+    const response = await controller.getSignatureRequests(req);
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: signatureRequestList
     });
   });
 });

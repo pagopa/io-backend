@@ -190,6 +190,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
 
+  "/signature-requests":
+    get:
+      operationId: getSignatureRequests
+      summary: Get the list of Signature Requests received by a Signer
+      responses:
+        "200":
+          description: The Signature Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignatureRequestList"
+        "401":
+          description: Bearer token null or expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "403":
+          description: Resource not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+        "500":
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+
   "/signature-requests/{id}":
     get:
       operationId: getSignatureRequestById
@@ -506,6 +540,10 @@ components:
           - created_at
           - updated_at
 
+    DossierTitle:
+      type: string
+      minLength: 1
+
     SignatureRequestDetailView:
       type: object
       properties:
@@ -530,6 +568,8 @@ components:
               - environment
         dossier_id:
           $ref: "#/components/schemas/Id"
+        dossier_title:
+          $ref: "#/components/schemas/DossierTitle"
         signer_id:
           $ref: "#/components/schemas/Id"
         expires_at:
@@ -550,6 +590,7 @@ components:
         - status
         - issuer
         - dossier_id
+        - dossier_title
         - signer_id
         - expires_at
         - documents
@@ -563,6 +604,45 @@ components:
         - WAIT_FOR_QTSP
         - SIGNED
         - REJECTED
+
+    SignatureRequestListView:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        signer_id:
+          $ref: "#/components/schemas/Id"
+        dossier_id:
+          $ref: "#/components/schemas/Id"
+        dossier_title:
+          $ref: "#/components/schemas/DossierTitle"
+        status:
+          $ref: "#/components/schemas/SignatureRequestStatus"
+        created_at:
+          $ref: "#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "#/components/schemas/Timestamp"
+        expires_at:
+          $ref: "#/components/schemas/Timestamp"
+      required:
+        - id
+        - signer_id
+        - dossier_id
+        - dossier_title
+        - status
+        - created_at
+        - updated_at
+        - expires_at
+
+    SignatureRequestList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignatureRequestListView"
+      required:
+        - items
 
     IssuerEnvironment:
       type: string

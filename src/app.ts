@@ -1366,6 +1366,12 @@ function registerIoSignAPIRoutes(
   );
 
   app.get(
+    `${basePath}/signature-requests`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioSignController.getSignatureRequests, ioSignController)
+  );
+
+  app.get(
     `${basePath}/signature-requests/:id`,
     bearerSessionTokenAuth,
     toExpressHandler(ioSignController.getSignatureRequest, ioSignController)
