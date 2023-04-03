@@ -1518,87 +1518,67 @@ describe("RedisSessionStorage#setPagoPaNoticeEmail", () => {
 
 describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
   it("should success and return an assertionRef", async () => {
-    mockGet.mockImplementationOnce((_, callback) =>
-      callback(null, anAssertionRef)
-    );
+    mockGet.mockImplementationOnce(_ => Promise.resolve(anAssertionRef));
     const response = await sessionStorage.getLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response) && O.isSome(response.right))
       expect(response.right.value).toEqual(anAssertionRef);
   });
 
   it("should success and return none if assertionRef is missing", async () => {
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
     const response = await sessionStorage.getLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(O.isNone(response.right)).toBeTruthy();
   });
   it("should fail with a left response if an error occurs on redis", async () => {
     const expectedError = new Error("redis Error");
-    mockGet.mockImplementationOnce((_, callback) => callback(expectedError));
+    mockGet.mockImplementationOnce(_ => Promise.reject(expectedError));
     const response = await sessionStorage.getLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
   });
 
   it("should fail with a left response if the value stored is invalid", async () => {
-    mockGet.mockImplementationOnce((_, callback) =>
-      callback(null, "an invalid value")
-    );
+    mockGet.mockImplementationOnce(_ => Promise.resolve("an invalid value"));
     const response = await sessionStorage.getLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isLeft(response)).toBeTruthy();
   });
 });
 
 describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
   it("should success if the response from redis is OK on set command with default ttl", async () => {
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(null, "OK")
-    );
+    mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
       anAssertionRef
     );
 
-    expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet).toBeCalledWith(
+    expect(mockSetEx).toHaveBeenCalledTimes(1);
+    expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
-      anAssertionRef,
-      "EX",
       aDefaultLollipopAssertionRefDurationSec,
-      expect.any(Function)
+      anAssertionRef
     );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
@@ -1606,22 +1586,18 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
 
   it("should success if the response from redis is OK on set command with custom ttl", async () => {
     const expectedAssertionRefTtl = 100 as Second;
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(null, "OK")
-    );
+    mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
       anAssertionRef,
       expectedAssertionRefTtl
     );
 
-    expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet).toBeCalledWith(
+    expect(mockSetEx).toHaveBeenCalledTimes(1);
+    expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
-      anAssertionRef,
-      "EX",
       expectedAssertionRefTtl,
-      expect.any(Function)
+      anAssertionRef
     );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
@@ -1629,42 +1605,38 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
 
   it("should fail with a left response if an error occurs on redis", async () => {
     const expectedError = new Error("redis Error");
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(expectedError)
+    mockSetEx.mockImplementationOnce((_, __, ___) =>
+      Promise.reject(expectedError)
     );
     const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
       anAssertionRef
     );
 
-    expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet).toBeCalledWith(
+    expect(mockSetEx).toHaveBeenCalledTimes(1);
+    expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
-      anAssertionRef,
-      "EX",
       aDefaultLollipopAssertionRefDurationSec,
-      expect.any(Function)
+      anAssertionRef
     );
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
   });
 
   it("should fail with a left response if the redis session is not OK", async () => {
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(null, undefined)
+    mockSetEx.mockImplementationOnce((_, __, ___) =>
+      Promise.resolve(undefined)
     );
     const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
       anAssertionRef
     );
 
-    expect(mockSet).toHaveBeenCalledTimes(1);
-    expect(mockSet).toBeCalledWith(
+    expect(mockSetEx).toHaveBeenCalledTimes(1);
+    expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
-      anAssertionRef,
-      "EX",
       aDefaultLollipopAssertionRefDurationSec,
-      expect.any(Function)
+      anAssertionRef
     );
     expect(E.isLeft(response)).toBeTruthy();
   });
@@ -1672,47 +1644,38 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
 
 describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
   it("should return a right either with true value on success", async () => {
-    mockDel.mockImplementationOnce((_, callback) => callback(null, 1));
+    mockDel.mockImplementationOnce(_ => Promise.resolve(1));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockDel).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
 
   it("should fail with a left response if an error occurs on redis", async () => {
     const expectedError = new Error("redis Error");
-    mockDel.mockImplementationOnce((_, callback) => callback(expectedError));
+    mockDel.mockImplementationOnce(_ => Promise.reject(expectedError));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockDel).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
   });
 
   it("should success if no element are removed from redis", async () => {
-    mockDel.mockImplementationOnce((_, callback) => callback(null, 0));
+    mockDel.mockImplementationOnce(_ => Promise.resolve(0));
     const response = await sessionStorage.delLollipopAssertionRefForUser(
       aValidUser.fiscal_code
     );
 
     expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toBeCalledWith(
-      `KEYS-${aValidUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockDel).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });

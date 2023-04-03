@@ -95,17 +95,12 @@ describe("SessionController#getSessionState", () => {
       myportal_token: mockMyPortalToken,
       zendesk_token: mockZendeskToken
     };
-    mockGet.mockImplementationOnce((_, callback) =>
-      callback(null, anAssertionRef)
-    );
+    mockGet.mockImplementationOnce(_ => Promise.resolve(anAssertionRef));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${mockedUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
@@ -127,15 +122,12 @@ describe("SessionController#getSessionState", () => {
       myportal_token: mockMyPortalToken,
       zendesk_token: mockZendeskToken
     };
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${mockedUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
@@ -156,15 +148,12 @@ describe("SessionController#getSessionState", () => {
       zendesk_token: mockZendeskToken
     };
     const expectedError = new Error("Error retrieving the assertion ref");
-    mockGet.mockImplementationOnce((_, callback) => callback(expectedError));
+    mockGet.mockImplementationOnce(_ => Promise.reject(expectedError));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${mockedUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -183,7 +172,7 @@ describe("SessionController#getSessionState", () => {
       myportal_token: undefined,
       zendesk_token: undefined
     } as User;
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
 
     mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
     mockGetNewToken.mockImplementationOnce(() => mockFIMSToken);
@@ -227,7 +216,7 @@ describe("SessionController#getSessionState", () => {
       myportal_token: mockMyPortalToken,
       zendesk_token: mockZendeskToken
     };
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
