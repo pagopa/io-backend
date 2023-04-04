@@ -20,9 +20,7 @@ import {
 } from "../../__mocks__/lollipop";
 import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
 import { aSignature } from "../../__mocks__/lollipop";
-import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
 import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
-import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
 import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
 import { SignatureRequestStatusEnum } from "../../../generated/io-sign-api/SignatureRequestStatus";

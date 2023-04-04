@@ -32,9 +32,6 @@ import {
   StatusEnum as SignatureStatusEnum
 } from "../../../generated/io-sign/SignatureDetailView";
 import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
-import { LollipopSignature } from "../../../generated/lollipop/LollipopSignature";
-import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
-import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
 import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
 import {
