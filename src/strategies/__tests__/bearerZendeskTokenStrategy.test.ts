@@ -73,7 +73,7 @@ describe("bearerZendeskTokenStrategy", function() {
         session: false
       },
       // this is the "done" function of the strategy
-      (error, user, options) => {
+      (error: any, user: any, options: any) => {
         expect(error).toEqual(null);
         expect(user).toEqual(mockedUser);
         expect(options).toEqual("");
@@ -92,7 +92,7 @@ describe("bearerZendeskTokenStrategy", function() {
         session: false
       },
       // this is the "done" function of the strategy
-      (error, user, options) => {
+      (error: any, user: any, options: any) => {
         expect(error).toEqual(null);
         expect(user).toEqual(mockedUser);
         expect(options).toEqual("");
@@ -111,7 +111,7 @@ describe("bearerZendeskTokenStrategy", function() {
         session: false
       },
       // this is the "done" function of the strategy
-      (error, user, options) => {
+      (error: any, user: any, options: any) => {
         expect(error).toEqual(errorMessage);
         expect(user).toEqual(undefined);
         expect(options).toEqual(undefined);

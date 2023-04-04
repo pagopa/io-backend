@@ -16,8 +16,12 @@ import { pathParamsFromUrl } from "../types/pathParams";
 import { ServiceId } from "../../generated/backend/ServiceId";
 import { PN_SERVICE_ID } from "../config";
 
-const getPath = (input: RequestInfo): string =>
-  pipe(typeof input === "string" ? input : input.url, i => new URL(i).pathname);
+const getPath = (input: RequestInfo | URL): string =>
+  input instanceof URL
+    ? input.pathname
+    : typeof input === "string"
+    ? new URL(input).pathname
+    : new URL(input.url).pathname;
 
 export const ThirdPartyMessagesUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)$"),
