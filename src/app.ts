@@ -335,11 +335,11 @@ export function newApp({
   //
 
   // Adds the detail of the response, see toExpressHandler for how it gets set
-  morgan.token("detail", (_, res) => res.locals.detail);
+  morgan.token("detail", (_, res: express.Response) => res.locals.detail);
 
   // Adds the user fiscal code
   // we take only the first 6 characters of the fiscal code
-  morgan.token("fiscal_code_short", (req, _) =>
+  morgan.token("fiscal_code_short", (req: express.Request, _) =>
     pipe(
       req.user,
       User.decode,
@@ -352,7 +352,9 @@ export function newApp({
     originalUrl.replace(/([?&]token=|[?&]access_token=)([^&]*)/g, "$1REDACTED");
 
   // Obfuscate token in url on morgan logs
-  morgan.token("obfuscated_url", (req, _) => obfuscateToken(req.originalUrl));
+  morgan.token("obfuscated_url", (req: express.Request, _) =>
+    obfuscateToken(req.originalUrl)
+  );
 
   const loggerFormat =
     ":date[iso] - :method :obfuscated_url :status - :fiscal_code_short - :response-time ms - :detail";

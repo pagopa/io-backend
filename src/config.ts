@@ -398,7 +398,7 @@ const httpOrHttpsApiFetch = toFetch(fetchWithTimeout);
 const bearerAuthFetch = (
   origFetch: typeof fetch = fetch,
   bearerToken: string
-): typeof fetch => (input: RequestInfo, init: RequestInit | undefined) =>
+): typeof fetch => (input, init) =>
   origFetch(input, {
     ...init,
     headers: { Authorization: `Bearer ${bearerToken}` }
