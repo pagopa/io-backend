@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 10.7.1
+  version: 10.8.0
   title: Zendesk API
   description: User authentication for zendesk
 host: localhost
