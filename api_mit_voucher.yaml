@@ -2,6 +2,7 @@ swagger: "2.0"
 info:
   version: 0.0.1
   title: MIT Voucher service for IO App
+host: localhost
 basePath: /api/v1/mitvoucher/auth
 schemes:
   - https
