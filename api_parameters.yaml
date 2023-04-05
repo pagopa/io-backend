@@ -2,6 +2,8 @@ swagger: "2.0"
 info:
   title: "IO API parameters"
   version: "0.1"
+host: localhost
+basePath: /
 paths:
   "/dummy":
     get:
