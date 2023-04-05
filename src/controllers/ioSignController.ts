@@ -39,6 +39,7 @@ import { QtspClausesMetadataDetailView } from "../../generated/io-sign/QtspClaus
 import { SignatureDetailView } from "../../generated/io-sign/SignatureDetailView";
 import { SignatureRequestDetailView } from "../../generated/io-sign/SignatureRequestDetailView";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
+import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 
 import { CreateFilledDocument } from "../../generated/io-sign/CreateFilledDocument";
@@ -268,6 +269,27 @@ export default class IoSignController {
         TE.map(({ signerId, signatureRequestId: id }) =>
           this.ioSignService.getSignatureRequest(id, signerId)
         ),
+        TE.toUnion
+      )()
+    );
+
+  /**
+   * Get Signature Requests list from Signer
+   */
+  public readonly getSignatureRequests = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestList>
+  > =>
+    withUserFromRequest(req, async user =>
+      pipe(
+        retrieveSignerId(this.ioSignService, user.fiscal_code),
+        TE.mapLeft(() => toErrorRetrievingTheSignerId),
+        TE.map(response => response.value.id),
+        TE.map(signerId => this.ioSignService.getSignatureRequests(signerId)),
         TE.toUnion
       )()
     );
