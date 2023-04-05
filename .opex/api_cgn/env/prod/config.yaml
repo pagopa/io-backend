@@ -2,9 +2,12 @@ oa3_spec: api_cgn.yaml
 name: opex_iobackend_api_cgn
 location: West Europe
 timespan: 5m
+evaluation_frequency: 5
+evaluation_time_window: 30
+event_occurrences: 3
 data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
 action_groups:
-- /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/SlackPagoPA
+- /subscriptions/EC285037-C673-4F58-B594-D7C480DA4E8B/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/iopquarantineerror
 overrides:
   hosts:
     - app-backend.io.italia.it

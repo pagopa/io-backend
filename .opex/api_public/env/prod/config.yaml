@@ -7,7 +7,7 @@ evaluation_time_window: 30
 event_occurrences: 3
 data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
 action_groups:
-  - /subscriptions/EC285037-C673-4F58-B594-D7C480DA4E8B/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/iopquarantineerror
+  - /subscriptions/EC285037-C673-4F58-B594-D7C480DA4E8B/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/ioperror
 overrides:
   hosts:
     - app-backend.io.italia.it
