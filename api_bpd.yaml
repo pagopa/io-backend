@@ -35,6 +35,8 @@ paths:
 definitions:
   BPDUser:
     $ref: "api_backend.yaml#/definitions/FederatedUser"
+  LimitedFederatedUser:
+    $ref: "api_backend.yaml#/definitions/LimitedFederatedUser"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v5.0.0/openapi/definitions.yaml#/ProblemJson"
   FiscalCode:
