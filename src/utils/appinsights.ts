@@ -12,7 +12,7 @@ import * as E from "fp-ts/lib/Either";
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
-import { sha256 } from "./crypto";
+import { sha256, validateDigestHeader } from "./crypto";
 
 const SESSION_TRACKING_ID_KEY = "session_tracking_id";
 const USER_TRACKING_ID_KEY = "user_tracking_id";
@@ -143,8 +143,11 @@ export type RequestLogLollipop = (
  *
  * @returns void
  */
-export const logLollipopSignRequest = (lollipopConsumerId: NonEmptyString) => (
-  lollipopParams: LollipopLocalsType,
+export const logLollipopSignRequest = (lollipopConsumerId: NonEmptyString) => <
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Exclude<Record<string, string>, LollipopLocalsType>
+>(
+  lollipopParams: LollipopLocalsType & T,
   req: Request
 ): LCResponseLogLollipop => (
   lcResponse: E.Either<Error, { readonly status: number }>
@@ -172,6 +175,21 @@ export const logLollipopSignRequest = (lollipopConsumerId: NonEmptyString) => (
         // The fiscal code will be sent hashed to the logs
         ["x-pagopa-lollipop-user-id"]: sha256(
           lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
+        ),
+        ...pipe(
+          O.fromNullable(lollipopParams["content-digest"]),
+          O.chain(contentDigest =>
+            pipe(
+              E.tryCatch(
+                () => validateDigestHeader(contentDigest, lollipopParams.body),
+                E.toError
+              ),
+              E.map(() => O.some(true)),
+              E.getOrElse(() => O.some(false))
+            )
+          ),
+          O.map(is_valid_content_digest => ({ is_valid_content_digest })),
+          O.getOrElse(() => ({}))
         )
       }
     ])
