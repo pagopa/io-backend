@@ -15,7 +15,11 @@ overrides:
   endpoints:
     /api/v1/payment-requests/{rptId}:
       response_time_threshold: 7
-      availability_threshold: 0.25
+      availability_event_occurrences: 5
+      availability_threshold: 0.50
+      response_time_event_occurrences: 5
     /api/v1/payment-activations:
       response_time_threshold: 4
+      availability_event_occurrences: 5
       availability_threshold: 0.95
+      response_time_event_occurrences: 5
