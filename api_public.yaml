@@ -141,18 +141,20 @@ parameters:
     in: query
     type: string
     enum: 
-      - lepidaid,
-      - infocertid,
-      - sielteid,
-      - namirialid,
-      - timid,
-      - arubaid,
-      - posteid,
-      - intesaid,
-      - spiditalia,
-      - teamsystemid,
-      - xx_servizicie_coll,
-      - xx_servizicie,
+      - lepidaid
+      - infocertid
+      - sielteid
+      - namirialid
+      - timid
+      - arubaid
+      - posteid
+      - intesaid
+      - spiditalia
+      - teamsystemid
+      - ehtid
+      - infocamereid
+      - xx_servizicie_coll
+      - xx_servizicie
       - xx_servizicie_test
     description: An ID that refers to a specific IDP
     required: true
