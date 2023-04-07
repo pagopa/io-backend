@@ -389,3 +389,5 @@ localhost.
 This problem seems to be dependent on how Docker for Mac (doesn't) manage well the /etc/hosts file. If you install
 Docker Toolbox it works fine (and can [coexist](https://docs.docker.com/docker-for-mac/docker-toolbox/#setting-up-to-run-docker-for-mac))
 (Read more at [https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448](https://medium.com/@itseranga/set-hosts-in-docker-for-mac-2029276fd448))
+
+Do not merge
