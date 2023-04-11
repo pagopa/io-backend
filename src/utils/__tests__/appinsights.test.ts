@@ -18,7 +18,11 @@ import { withApplicationInsight } from "@pagopa/io-functions-commons/dist/src/ut
 import { TelemetryClient } from "applicationinsights";
 import { useWinstonFor } from "@pagopa/winston-ts";
 import { LOLLIPOP_SIGN_EVENT_NAME } from "../appinsights";
-import { constants, generateDigestHeader, sha256 } from "../crypto";
+import {
+  CONTENT_DIGEST_CONSTANTS,
+  generateDigestHeader,
+  sha256
+} from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { logLollipopSignRequest } from "../appinsights";
 
 const lollipopParams: LollipopLocalsType = {
@@ -57,12 +61,12 @@ describe("logLollipopSignRequest", () => {
   };
 
   it.each`
-    scenario                                                                 | LCResponse                    | lollipopParams                                                                                                | eventProperties
-    ${"valid params without body"}                                           | ${E.right({ status: 200 })}   | ${lollipopParams}                                                                                             | ${eventPropertiesWithoutLCResponse}
-    ${"valid params with body (body removed from event)"}                    | ${E.right({ status: 200 })}   | ${{ ...lollipopParams, body: "a body", "content-digest": "a wrong content digest" }}                          | ${{ ...eventPropertiesWithoutLCResponse, "content-digest": "a wrong content digest", is_valid_content_digest: false }}
-    ${"valid params with body and content-digest (body removed from event)"} | ${E.right({ status: 200 })}   | ${{ ...lollipopParams, body: "a body", "content-digest": generateDigestHeader("a body", constants.SHA_256) }} | ${{ ...eventPropertiesWithoutLCResponse, "content-digest": generateDigestHeader("a body", constants.SHA_256), is_valid_content_digest: true }}
-    ${"valid params if LC forward request fail"}                             | ${E.left(new Error("Error"))} | ${{ ...lollipopParams, body: "a body", "content-digest": "a wrong content digest" }}                          | ${{ ...eventPropertiesWithoutLCResponse, "content-digest": "a wrong content digest", is_valid_content_digest: false }}
-    ${"valid params with extra headers"}                                     | ${E.right({ status: 200 })}   | ${{ ...lollipopParams, "x-pagopa-extra-header": "another value" }}                                            | ${{ ...eventPropertiesWithoutLCResponse, "x-pagopa-extra-header": "another value" }}
+    scenario                                                                 | LCResponse                    | lollipopParams                                                                                                               | eventProperties
+    ${"valid params without body"}                                           | ${E.right({ status: 200 })}   | ${lollipopParams}                                                                                                            | ${eventPropertiesWithoutLCResponse}
+    ${"valid params with body (body removed from event)"}                    | ${E.right({ status: 200 })}   | ${{ ...lollipopParams, body: "a body", "content-digest": "a wrong content digest" }}                                         | ${{ ...eventPropertiesWithoutLCResponse, "content-digest": "a wrong content digest", is_valid_content_digest: false }}
+    ${"valid params with body and content-digest (body removed from event)"} | ${E.right({ status: 200 })}   | ${{ ...lollipopParams, body: "a body", "content-digest": generateDigestHeader("a body", CONTENT_DIGEST_CONSTANTS.SHA_256) }} | ${{ ...eventPropertiesWithoutLCResponse, "content-digest": generateDigestHeader("a body", CONTENT_DIGEST_CONSTANTS.SHA_256), is_valid_content_digest: true }}
+    ${"valid params if LC forward request fail"}                             | ${E.left(new Error("Error"))} | ${{ ...lollipopParams, body: "a body", "content-digest": "a wrong content digest" }}                                         | ${{ ...eventPropertiesWithoutLCResponse, "content-digest": "a wrong content digest", is_valid_content_digest: false }}
+    ${"valid params with extra headers"}                                     | ${E.right({ status: 200 })}   | ${{ ...lollipopParams, "x-pagopa-extra-header": "another value" }}                                                           | ${{ ...eventPropertiesWithoutLCResponse, "x-pagopa-extra-header": "another value" }}
   `(
     "should track a custom event with $scenario",
     ({

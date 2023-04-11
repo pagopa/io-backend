@@ -12,6 +12,7 @@ import { ulid } from "ulid";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { eventLog } from "@pagopa/winston-ts";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { ISessionStorage } from "../../services/ISessionStorage";
 import { withUserFromRequest } from "../../types/user";
 import { LollipopApiClient } from "../../clients/lollipop";
@@ -21,7 +22,6 @@ import {
 } from "../../types/lollipop";
 import { log } from "../logger";
 import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
-import { sha256 } from "../crypto";
 
 type ErrorsResponses =
   | IResponseErrorInternal
