@@ -25,7 +25,11 @@ paths:
         "504":
           description: Gateway timeout.
         "500":
-          $ref: "#/components/schemas/ProblemJson"
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
 
   "/qtsp/clauses":
     get:
@@ -51,7 +55,11 @@ paths:
         "504":
           description: Gateway timeout.
         "500":
-          $ref: "#/components/schemas/ProblemJson"
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
 
   "/qtsp/clauses/filled_document":
     post:
