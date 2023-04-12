@@ -12,10 +12,10 @@ import {
   LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME,
   LOLLIPOP_PUB_KEY_HEADER_NAME
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
-import * as E from "fp-ts/lib/Either";
 import { JwkPubKeyHashAlgorithmEnum } from "../../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { anEncodedJwkPubKey } from "../../__mocks__/lollipop";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const mockTelemetryClient = ({
   trackEvent: jest.fn()
@@ -119,7 +119,7 @@ describe("lollipopLoginHandler", () => {
     const req = mockReq();
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockImplementationOnce(async () =>
-      E.left("unparseable response")
+      NonEmptyString.decode("")
     );
     const result = await lollipopLoginHandler(
       true,
@@ -127,10 +127,12 @@ describe("lollipopLoginHandler", () => {
       mockTelemetryClient
     )(req);
 
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
       name: "lollipop.error.get-login",
       properties: expect.objectContaining({
-        message: "get-login: Internal server error: Cannot parse reserve response"
+        message:
+          'Error calling reservePubKey endpoint: value [""] at [root] is not a valid [non empty string]'
       })
     });
 
@@ -162,12 +164,8 @@ describe("lollipopLoginHandler", () => {
       mockTelemetryClient
     )(req);
 
-    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
-      name: "lollipop.error.get-login",
-      properties: expect.objectContaining({
-        message: "get-login: Conflict: PubKey is already reserved"
-      })
-    });
+    // We expect this event to be raised by fn-lollipop function
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
@@ -197,12 +195,7 @@ describe("lollipopLoginHandler", () => {
       mockTelemetryClient
     )(req);
 
-    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
-      name: "lollipop.error.get-login",
-      properties: expect.objectContaining({
-        message: "get-login: Internal server error: Cannot reserve pubKey"
-      })
-    });
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
@@ -230,10 +223,11 @@ describe("lollipopLoginHandler", () => {
       mockTelemetryClient
     )(req);
 
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
       name: "lollipop.error.get-login",
       properties: expect.objectContaining({
-        message: "get-login: Internal server error: Error while calling reservePubKey API"
+        message: "Error calling reservePubKey endpoint: Network Error"
       })
     });
 

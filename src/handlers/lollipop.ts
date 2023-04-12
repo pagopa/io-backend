@@ -25,6 +25,9 @@ import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { JwkPubKeyHashAlgorithmEnum } from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { NewPubKey } from "../../generated/lollipop-api/NewPubKey";
 import { withValidatedOrValidationError } from "../utils/responses";
+import { errorsToError } from "../utils/errorsFormatter";
+
+const getLoginErrorEventName = "lollipop.error.get-login";
 
 /**
  * 1. Read pubkey header
@@ -89,7 +92,16 @@ export const lollipopLoginHandler = (
                           pub_key: jwk
                         }
                       }),
-                    E.toError
+                    e => {
+                      const error = E.toError(e);
+                      appInsightsTelemetryClient?.trackEvent({
+                        name: getLoginErrorEventName,
+                        properties: {
+                          message: `Error calling reservePubKey endpoint: ${error.message}`
+                        }
+                      });
+                      return error;
+                    }
                   ),
                   TE.mapLeft(() =>
                     ResponseErrorInternal(
@@ -97,8 +109,22 @@ export const lollipopLoginHandler = (
                     )
                   ),
                   TE.chainEitherKW(
-                    E.mapLeft(() =>
-                      ResponseErrorInternal("Cannot parse reserve response")
+                    E.mapLeft(err =>
+                      pipe(
+                        err,
+                        errorsToError,
+                        e => {
+                          appInsightsTelemetryClient?.trackEvent({
+                            name: getLoginErrorEventName,
+                            properties: {
+                              message: `Error calling reservePubKey endpoint: ${e.message}`
+                            }
+                          });
+                          return e;
+                        },
+                        () =>
+                          ResponseErrorInternal("Cannot parse reserve response")
+                      )
                     )
                   ),
                   TE.filterOrElseW(
@@ -109,15 +135,6 @@ export const lollipopLoginHandler = (
                         : ResponseErrorInternal("Cannot reserve pubKey")
                   ),
                   TE.map(constUndefined),
-                  TE.mapLeft(error => {
-                    appInsightsTelemetryClient?.trackEvent({
-                      name: "lollipop.error.get-login",
-                      properties: {
-                        message: `get-login: ${error.detail}`
-                      }
-                    });
-                    return error;
-                  }),
                   TE.toUnion
                 )()
               )
