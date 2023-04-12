@@ -25,6 +25,7 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
@@ -216,7 +217,16 @@ export default class AuthenticationController {
         )
       : E.right(O.none);
 
+    const lollipopErrorEventName = "lollipop.error.acs";
+
     if (E.isLeft(errorOrMaybeAssertionRef)) {
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: lollipopErrorEventName,
+        properties: {
+          fiscal_code: sha256(user.fiscal_code),
+          message: "Error retrieving previous lollipop configuration"
+        }
+      });
       return ResponseErrorInternal(
         "Error retrieving previous lollipop configuration"
       );
@@ -226,11 +236,22 @@ export default class AuthenticationController {
       this.lollipopParams.isLollipopEnabled &&
       O.isSome(errorOrMaybeAssertionRef.right)
     ) {
+      const assertionRefToRevoke = errorOrMaybeAssertionRef.right.value;
       // Sending a revoke message for previous assertionRef related to the same fiscalCode
       // This operation is fire and forget
       this.lollipopParams.lollipopService
-        .revokePreviousAssertionRef(errorOrMaybeAssertionRef.right.value)
+        .revokePreviousAssertionRef(assertionRefToRevoke)
         .catch(err => {
+          this.appInsightsTelemetryClient?.trackEvent({
+            name: lollipopErrorEventName,
+            properties: {
+              assertion_ref: assertionRefToRevoke,
+              error: err,
+              fiscal_code: sha256(user.fiscal_code),
+              message:
+                "acs: error sending revoke message for previous assertionRef"
+            }
+          });
           log.error(
             "acs: error sending revoke message for previous assertionRef [%s]",
             err
@@ -254,7 +275,16 @@ export default class AuthenticationController {
         delLollipopAssertionRefResult => delLollipopAssertionRefResult === true,
         () => new Error("Error on LolliPoP initialization")
       ),
-      TE.mapLeft(error => O.some(ResponseErrorInternal(error.message))),
+      TE.mapLeft(error => {
+        this.appInsightsTelemetryClient?.trackEvent({
+          name: lollipopErrorEventName,
+          properties: {
+            fiscal_code: sha256(user.fiscal_code),
+            message: `acs: ${error.message}`
+          }
+        });
+        return O.some(ResponseErrorInternal(error.message));
+      }),
       TE.chainW(() =>
         TE.of(
           getRequestIDFromResponse(
@@ -296,7 +326,18 @@ export default class AuthenticationController {
                   setLollipopAssertionRefForUserRes === true,
                 () =>
                   new Error("Error creating CF thumbprint relation in redis")
-              )
+              ),
+              TE.mapLeft(error => {
+                this.appInsightsTelemetryClient?.trackEvent({
+                  name: lollipopErrorEventName,
+                  properties: {
+                    assertion_ref: assertionRef,
+                    fiscal_code: sha256(user.fiscal_code),
+                    message: error.message
+                  }
+                });
+                return error;
+              })
             )
           ),
           TE.mapLeft(() =>

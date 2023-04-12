@@ -12,6 +12,7 @@ import {
   ResponsePermanentRedirect,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { UserIdentity } from "../../../generated/auth/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -656,13 +657,13 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    scenario                      | setLollipopAssertionRefForUserResponse
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}
-    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}
+    scenario                      | setLollipopAssertionRefForUserResponse | errorMessage
+    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF thumbprint relation in redis"}
+    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}    | ${undefined}
+    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}  | ${"Error"}
   `(
     "should fail if an error occours saving assertionRef for user in redis $scenario",
-    async ({ setLollipopAssertionRefForUserResponse }) => {
+    async ({ setLollipopAssertionRefForUserResponse, errorMessage }) => {
       const res = mockRes();
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
@@ -690,6 +691,15 @@ describe("AuthenticationController#acs", () => {
 
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
+
+      expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+        name: "lollipop.error.acs",
+        properties: expect.objectContaining({
+          assertion_ref: anotherAssertionRef,
+          fiscal_code: sha256(aFiscalCode),
+          message: errorMessage
+        })
+      });
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
@@ -797,6 +807,14 @@ describe("AuthenticationController#acs", () => {
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
 
+      expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+        name: "lollipop.error.acs",
+        properties: expect.objectContaining({
+          fiscal_code: sha256(aFiscalCode),
+          message: `acs: ${errorMessage}`
+        })
+      });
+
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
         apply: expect.any(Function),
@@ -836,6 +854,14 @@ describe("AuthenticationController#acs", () => {
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.acs",
+      properties: expect.objectContaining({
+        fiscal_code: sha256(aFiscalCode),
+        message: "Error retrieving previous lollipop configuration"
+      })
+    });
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(response).toEqual({
