@@ -22,6 +22,7 @@ import {
 } from "../../types/lollipop";
 import { log } from "../logger";
 import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
+import { LcParams } from "../../../generated/lollipop-api/LcParams";
 
 type ErrorsResponses =
   | IResponseErrorInternal
@@ -148,28 +149,28 @@ export const expressLollipopMiddleware: (
                         "Unexpected response from lollipop service"
                       );
                     }),
-                    TE.chain(lollipopRes =>
-                      lollipopRes.status === 200
-                        ? TE.of(lollipopRes.value)
-                        : lollipopRes.status === 403
-                        ? TE.left(
-                            ResponseErrorForbiddenNotAuthorized as ErrorsResponses
-                          )
-                        : TE.left(
-                            ResponseErrorInternal(
-                              "The lollipop service returns an error"
-                            ) as ErrorsResponses
-                          )
-                    ),
-                    eventLog.taskEither.errorLeft(errorResponse => [
-                      `The lollipop function service returns an error | ${errorResponse.kind}`,
-                      {
-                        assertion_ref: assertionRef,
-                        fiscal_code: sha256(user.fiscal_code),
-                        name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
-                        operation_id: operationId
-                      }
-                    ])
+                    TE.chainW(lollipopRes =>
+                      pipe(
+                        lollipopRes.status === 200
+                          ? TE.of<ErrorsResponses, LcParams>(lollipopRes.value)
+                          : lollipopRes.status === 403
+                          ? TE.left(ResponseErrorForbiddenNotAuthorized)
+                          : TE.left(
+                              ResponseErrorInternal(
+                                "The lollipop service returns an error"
+                              )
+                            ),
+                        eventLog.taskEither.errorLeft(errorResponse => [
+                          `The lollipop function service returns an error | ${errorResponse.kind}`,
+                          {
+                            assertion_ref: assertionRef,
+                            fiscal_code: sha256(user.fiscal_code),
+                            name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
+                            operation_id: operationId
+                          }
+                        ])
+                      )
+                    )
                   )
               ),
               TE.map(lcParams => {
