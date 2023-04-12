@@ -25,6 +25,7 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
@@ -66,7 +67,6 @@ import {
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
-import { sha256 } from "../utils/crypto";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;

@@ -1,4 +1,5 @@
 import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/entities/revoke_assertion_ref_info";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey";
@@ -17,7 +18,6 @@ import { aFiscalCode } from "../../__mocks__/user_mock";
 import LollipopService from "../lollipopService";
 import { AssertionFileName } from "../../../generated/lollipop-api/AssertionFileName";
 import * as appInsights from "applicationinsights";
-import { sha256 } from "../../utils/crypto";
 
 const mockSendMessage = jest.fn();
 jest.mock("@azure/storage-queue", () => ({
@@ -194,7 +194,8 @@ describe("LollipopService#activateLolliPoPKey", () => {
       properties: expect.objectContaining({
         assertion_ref: anAssertionRef,
         fiscal_code: sha256(aFiscalCode),
-        message: "Error activating lollipop pub key | value [\"\"] at [root] is not a valid [non empty string]"
+        message:
+          'Error activating lollipop pub key | value [""] at [root] is not a valid [non empty string]'
       })
     });
 

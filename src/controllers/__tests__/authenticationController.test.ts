@@ -12,6 +12,7 @@ import {
   ResponsePermanentRedirect,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { UserIdentity } from "../../../generated/auth/UserIdentity";
 import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
@@ -61,7 +62,6 @@ import {
   anAssertionRef,
   anotherAssertionRef
 } from "../../__mocks__/lollipop";
-import { sha256 } from "../../utils/crypto";
 
 // validUser has all every field correctly set.
 const validUserPayload = {

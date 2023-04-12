@@ -1,6 +1,7 @@
 import * as appInsights from "applicationinsights";
 import { QueueClient, QueueSendMessageResponse } from "@azure/storage-queue";
 import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/entities/revoke_assertion_ref_info";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -13,7 +14,6 @@ import { ActivatedPubKey } from "../../generated/lollipop-api/ActivatedPubKey";
 import { AssertionTypeEnum } from "../../generated/lollipop-api/AssertionType";
 import { base64EncodeObject } from "../utils/messages";
 import { LollipopApiClient } from "../clients/lollipop";
-import { sha256 } from "../utils/crypto";
 
 const lollipopErrorEventName = "lollipop.error.acs";
 

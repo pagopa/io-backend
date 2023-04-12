@@ -694,13 +694,13 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-functions-commons@^27.2.0":
-  version "27.2.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-27.2.0.tgz#273284aeb21ec077a9d94db92a23e70284eb1262"
-  integrity sha512-/LUQSedyEtzBOffIcsQCSOR93HPLOXBH5ZuPDZxEfmUy79SR/fjZhuGQs8C0dkeufaPjx1EnA3gxF3uirT3nig==
+"@pagopa/io-functions-commons@^28.1.0":
+  version "28.1.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-commons/-/io-functions-commons-28.1.0.tgz#a3ddbe5da07e5a38a685cad8fddd1c856fa0d233"
+  integrity sha512-YP89Z75wrl5ICOqYzJwBy6oI05bfiaPEd93FR3PrfdHcFMNDiZENoyidZkJk4t1qKb6P3DqiKN3W9SRN0zEL5Q==
   dependencies:
     "@azure/cosmos" "^3.17.1"
-    "@pagopa/ts-commons" "^10.13.0"
+    "@pagopa/ts-commons" "^11.0.0"
     applicationinsights "^1.8.10"
     azure-storage "^2.10.5"
     cidr-matcher "^2.1.1"
@@ -799,10 +799,10 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^10.13.0":
-  version "10.14.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.14.1.tgz#d5cfbd1b3637a6938500648f1e117e83067fa6a9"
-  integrity sha512-QbsI7KhJvY1s7nRZBa8sOIevtgmC80T0OAb8BxtYBq3th2BRj4ZLhYRoQWyt2mA5pmgfFp6j6U0fpocFLM1ivA==
+"@pagopa/ts-commons@^10.15.0":
+  version "10.15.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.15.0.tgz#8e3030a2ebc16c3edb5ef99962c6e8d534826957"
+  integrity sha512-MTmD0geIN9L9vnEYjPTE7v6Bu+IRTFMre+3K4LWYjy1AaRmYcpSrc9HTZgyCRW8uLCvw1BmDKcKtSiETM817kw==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"
@@ -815,10 +815,10 @@
     semver "^7.3.7"
     validator "^13.7.0"
 
-"@pagopa/ts-commons@^10.15.0":
-  version "10.15.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.15.0.tgz#8e3030a2ebc16c3edb5ef99962c6e8d534826957"
-  integrity sha512-MTmD0geIN9L9vnEYjPTE7v6Bu+IRTFMre+3K4LWYjy1AaRmYcpSrc9HTZgyCRW8uLCvw1BmDKcKtSiETM817kw==
+"@pagopa/ts-commons@^11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-11.0.0.tgz#e0384863e564e87815c43b2ab7999af682ee5fc1"
+  integrity sha512-KA+riHTKhNcv5UGP33+AIYBWx7bAwk3c5/eQAUFl16gDYeXrceQpJ/cq0fyOC0AnUmNuMPiHQOksgjjeioaLIQ==
   dependencies:
     abort-controller "^3.0.0"
     agentkeepalive "^4.1.4"
