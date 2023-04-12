@@ -73,6 +73,8 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
       assertion_ref: anAssertionRef
     };
 
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
+
     mockSendMessage.mockResolvedValueOnce("any");
     const response = await service.revokePreviousAssertionRef(anAssertionRef);
     expect(mockSendMessage).toBeCalledTimes(1);
@@ -88,6 +90,8 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef
     };
+
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     mockSendMessage.mockRejectedValueOnce(new Error("Error"));
     await expect(
@@ -189,6 +193,7 @@ describe("LollipopService#activateLolliPoPKey", () => {
       () => new Date()
     )();
 
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
       name: "lollipop.error.acs",
       properties: expect.objectContaining({
@@ -228,6 +233,7 @@ describe("LollipopService#activateLolliPoPKey", () => {
       () => new Date()
     )();
 
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
       name: "lollipop.error.acs",
       properties: expect.objectContaining({
