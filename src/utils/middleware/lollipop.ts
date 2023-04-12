@@ -104,7 +104,7 @@ export const expressLollipopMiddleware: (
                       E.toError
                     ),
                     eventLog.taskEither.errorLeft(error => [
-                      `An error occurs retrieving the assertion ref from Redis | ${error.message}`,
+                      `Error trying to call the Lollipop function service | ${error.message}`,
                       {
                         assertion_ref: assertionRef,
                         fiscal_code: sha256(user.fiscal_code),
