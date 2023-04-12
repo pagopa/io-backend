@@ -101,11 +101,7 @@ describe("logLollipopSignRequest", () => {
   );
 
   it("should typescrypt return a build error if the type mismatch", () => {
-    expect.assertions(1);
     const req = mockReq();
-    const mockedLCRes = E.right({
-      status: 200
-    });
     const invalidLollipopParamsWithoutUserId = {
       signature: aSignature,
       "signature-input": aSignatureInput,
@@ -117,17 +113,10 @@ describe("logLollipopSignRequest", () => {
       "x-pagopa-lollipop-public-key": "a pub key" as LollipopPublicKey,
       "a-custom-header": "a custom header value"
     };
-    try {
-      logLollipopSignRequest(aLollipopConsumerId)(
-        // @ts-ignore
-        invalidLollipopParamsWithoutUserId,
-        req
-      )(mockedLCRes);
-    } catch (err) {
-      // We check that Jest returns an exception on type cheking fase.
-      expect(err).toEqual(
-        expect.objectContaining({ code: "ERR_INVALID_ARG_TYPE" })
-      );
-    }
+    logLollipopSignRequest(aLollipopConsumerId)(
+      // @ts-expect-error
+      invalidLollipopParamsWithoutUserId,
+      req
+    );
   });
 });
