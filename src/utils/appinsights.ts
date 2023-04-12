@@ -13,6 +13,7 @@ import {
   sha256,
   validateDigestHeader
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { LollipopLocalsType } from "../types/lollipop";
 import { toFiscalCodeHash } from "../types/notification";
 import { User } from "../types/user";
@@ -160,41 +161,44 @@ export const logLollipopSignRequest = (lollipopConsumerId: NonEmptyString) => <
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ({ body, ...lollipopHeadersWithoutBody }) =>
       O.fromNullable(lollipopHeadersWithoutBody),
-    eventLog.option.info(lollipopHeadersWithoutBody => [
-      `Lollipop Request log`,
-      {
-        name: LOLLIPOP_SIGN_EVENT_NAME,
-        ...lollipopHeadersWithoutBody,
-        // A string rapresenting the response from the LC.
-        lc_response: pipe(
-          lcResponse,
-          E.map(JSON.stringify),
-          E.mapLeft(err => err.message),
-          E.toUnion
-        ),
-        lollipop_consumer_id: lollipopConsumerId,
-        method: req.method,
-        original_url: req.originalUrl,
-        // The fiscal code will be sent hashed to the logs
-        ["x-pagopa-lollipop-user-id"]: sha256(
-          lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
-        ),
-        ...pipe(
-          O.fromNullable(lollipopParams["content-digest"]),
-          O.chain(contentDigest =>
-            pipe(
-              E.tryCatch(
-                () => validateDigestHeader(contentDigest, lollipopParams.body),
-                E.toError
-              ),
-              E.map(() => O.some(true)),
-              E.getOrElse(() => O.some(false))
+    O.map(lollipopHeadersWithoutBody => ({
+      name: LOLLIPOP_SIGN_EVENT_NAME,
+      ...lollipopHeadersWithoutBody,
+      is_valid_content_digest: pipe(
+        O.fromNullable(lollipopParams["content-digest"]),
+        O.map(contentDigest =>
+          pipe(
+            E.tryCatch(
+              () => validateDigestHeader(contentDigest, lollipopParams.body),
+              E.toError
+            ),
+            E.fold(
+              () => false,
+              () => true
             )
-          ),
-          O.map(is_valid_content_digest => ({ is_valid_content_digest })),
-          O.getOrElse(() => ({}))
-        )
-      }
+          )
+        ),
+        O.toUndefined
+      ),
+      // A string rapresenting the response from the LC.
+      lc_response: pipe(
+        lcResponse,
+        E.map(JSON.stringify),
+        E.mapLeft(err => err.message),
+        E.toUnion
+      ),
+      lollipop_consumer_id: lollipopConsumerId,
+      method: req.method,
+      original_url: req.originalUrl,
+      // The fiscal code will be sent hashed to the logs
+      ["x-pagopa-lollipop-user-id"]: sha256(
+        lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
+      )
+    })),
+    O.map(withoutUndefinedValues),
+    eventLog.option.info(lollipopEventData => [
+      `Lollipop Request log`,
+      lollipopEventData
     ])
   );
 };
