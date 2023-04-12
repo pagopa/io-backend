@@ -28,7 +28,7 @@ type ErrorsResponses =
   | IResponseErrorForbiddenNotAuthorized;
 
 const LOLLIPOP_SIGN_ERROR_EVENT_NAME = "lollipop.error.sign";
-const NONCE_REGEX = new RegExp(';?nonce="(.+)";?');
+const NONCE_REGEX = new RegExp(';?nonce="([^"]+)";?');
 
 const getNonceOrUlid = (
   lollipopSignatureInput: LollipopSignatureInput
