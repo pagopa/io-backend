@@ -11,6 +11,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { pick } from "@pagopa/ts-commons/lib/types";
 import { logLollipopSignRequest } from "../utils/appinsights";
 import { FirstLollipopConsumerClient } from "../clients/firstLollipopConsumer";
 import { ResLocals } from "../utils/express";
@@ -45,9 +46,7 @@ export const firstLollipopSign = (
         ),
         TE.chainFirstW(
           flow(
-            E.map(r => ({
-              status: r.status
-            })),
+            E.map(res => pick(["status"], res)),
             E.mapLeft(
               flow(readableReportSimplified, message => new Error(message))
             ),
