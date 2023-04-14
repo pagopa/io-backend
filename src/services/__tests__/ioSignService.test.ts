@@ -13,12 +13,14 @@ import { IoSignAPIClient } from "../../clients/io-sign";
 import { aFiscalCode, mockedUser } from "../../__mocks__/user_mock";
 import IoSignService from "../ioSignService";
 import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
-import { anAssertionRef } from "../../__mocks__/lollipop";
+import {
+  aLollipopOriginalUrl,
+  anAssertionRef,
+  aSignatureInput
+} from "../../__mocks__/lollipop";
 import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
-import { LollipopSignature } from "../../../generated/lollipop/LollipopSignature";
-import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
+import { aSignature } from "../../__mocks__/lollipop";
 import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
-import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
 import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
 import { SignatureRequestStatusEnum } from "../../../generated/io-sign-api/SignatureRequestStatus";
@@ -44,10 +46,10 @@ const aBearerToken = "a bearer token" as LollipopJWTAuthorization;
 const aPubKey = "a pub key" as LollipopPublicKey;
 
 const lollipopRequestHeaders = {
-  signature: "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:" as LollipopSignature,
-  ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput,
+  signature: aSignature,
+  ["signature-input"]: aSignatureInput,
   ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
-  ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it" as LollipopOriginalURL,
+  ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl,
   ["x-pagopa-lollipop-custom-sign-challenge"]: "customTosChallenge" as NonEmptyString,
   ["x-pagopa-lollipop-custom-tos-challenge"]: "customSignChallenge" as NonEmptyString,
   ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,

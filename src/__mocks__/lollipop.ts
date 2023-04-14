@@ -3,6 +3,10 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AssertionRefSha256 } from "../../generated/lollipop-api/AssertionRefSha256";
 import { AssertionRefSha512 } from "../../generated/lollipop-api/AssertionRefSha512";
 import * as jose from "jose";
+import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
+import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
+import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
+import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
 
 export const anAssertionRef = "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha256;
 export const anotherAssertionRef = "sha512-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha512;
@@ -23,3 +27,8 @@ export const aLollipopAssertion = `<samlp:Response Destination="https://that.spi
         http://localhost:8080
     </saml:Issuer>
 </samlp:Response>` as NonEmptyString;
+
+export const aSignature = `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:` as LollipopSignature;
+export const aSignatureInput = `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput;
+export const aLollipopOriginalMethod = "POST" as LollipopMethod;
+export const aLollipopOriginalUrl = "https://api.pagopa.it" as LollipopOriginalURL;
