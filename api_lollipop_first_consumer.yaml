@@ -57,6 +57,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SignMessageResponse"
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        "401":
+          description: Token null or invalid.
+        "500":
+          description: There was an error
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
 components:
   securitySchemes:
