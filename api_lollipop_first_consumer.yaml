@@ -115,3 +115,6 @@ components:
       properties:
         response:
           type: string
+  
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.1.0/openapi/definitions.yaml#/ProblemJson"
