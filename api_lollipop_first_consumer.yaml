@@ -59,14 +59,18 @@ paths:
                 $ref: "#/components/schemas/SignMessageResponse"
         "400":
           description: Bad request
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
         "401":
           description: Token null or invalid.
         "500":
           description: There was an error
-          schema:
-            $ref: "#/definitions/ProblemJson"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
 
 components:
   securitySchemes:
@@ -115,6 +119,6 @@ components:
       properties:
         response:
           type: string
-  
+          
     ProblemJson:
       $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v26.1.0/openapi/definitions.yaml#/ProblemJson"
