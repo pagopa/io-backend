@@ -174,7 +174,7 @@ import {
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
-import { lollipopMiddleware } from "./utils/middleware/lollipop";
+import { expressLollipopMiddleware } from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
@@ -490,7 +490,8 @@ export function newApp({
               new LollipopService(
                 LOLLIPOP_API_CLIENT,
                 LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
-                LOLLIPOP_REVOKE_QUEUE_NAME
+                LOLLIPOP_REVOKE_QUEUE_NAME,
+                appInsightsClient
               ),
             err =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)
@@ -732,7 +733,11 @@ export function newApp({
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
               lollipopMiddleware: toExpressMiddleware(
-                lollipopLoginHandler(FF_LOLLIPOP_ENABLED, LOLLIPOP_API_CLIENT)
+                lollipopLoginHandler(
+                  FF_LOLLIPOP_ENABLED,
+                  LOLLIPOP_API_CLIENT,
+                  appInsightsClient
+                )
               ),
               redisClient: REDIS_CLIENT,
               samlConfig,
@@ -1363,8 +1368,14 @@ function registerIoSignAPIRoutes(
   app.post(
     `${basePath}/signatures`,
     bearerSessionTokenAuth,
-    lollipopMiddleware(lollipopClient, sessionStorage),
+    expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(ioSignController.createSignature, ioSignController)
+  );
+
+  app.get(
+    `${basePath}/signature-requests`,
+    bearerSessionTokenAuth,
+    toExpressHandler(ioSignController.getSignatureRequests, ioSignController)
   );
 
   app.get(
@@ -1597,7 +1608,7 @@ function registerFirstLollipopConsumer(
   app.post(
     `${basePath}/sign`,
     bearerSessionTokenAuth,
-    lollipopMiddleware(lollipopClient, sessionStorage),
+    expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
   );
 }

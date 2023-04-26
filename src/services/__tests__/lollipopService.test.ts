@@ -1,4 +1,5 @@
 import { RevokeAssertionRefInfo } from "@pagopa/io-functions-commons/dist/src/entities/revoke_assertion_ref_info";
+import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey";
@@ -16,6 +17,7 @@ import {
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import LollipopService from "../lollipopService";
 import { AssertionFileName } from "../../../generated/lollipop-api/AssertionFileName";
+import * as appInsights from "applicationinsights";
 
 const mockSendMessage = jest.fn();
 jest.mock("@azure/storage-queue", () => ({
@@ -50,7 +52,16 @@ const anActivatedPubKey: ActivatedPubKey = {
   version: 1 as NonNegativeInteger
 };
 
-const service = new LollipopService(mockLollipopApiClient, "", "");
+const mockTelemetryClient = ({
+  trackEvent: jest.fn()
+} as unknown) as appInsights.TelemetryClient;
+
+const service = new LollipopService(
+  mockLollipopApiClient,
+  "",
+  "",
+  mockTelemetryClient
+);
 
 describe("LollipopService#revokePreviousAssertionRef", () => {
   it(`
@@ -61,6 +72,8 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef
     };
+
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     mockSendMessage.mockResolvedValueOnce("any");
     const response = await service.revokePreviousAssertionRef(anAssertionRef);
@@ -77,6 +90,8 @@ describe("LollipopService#revokePreviousAssertionRef", () => {
     const expectedMessage: RevokeAssertionRefInfo = {
       assertion_ref: anAssertionRef
     };
+
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
 
     mockSendMessage.mockRejectedValueOnce(new Error("Error"));
     await expect(
@@ -105,6 +120,9 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
+
     expect(mockActivatePubKey).toBeCalledTimes(1);
     expect(mockActivatePubKey).toBeCalledWith({
       assertion_ref: anAssertionRef,
@@ -138,6 +156,9 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
+
     expect(mockActivatePubKey).toBeCalledTimes(1);
     expect(mockActivatePubKey).toBeCalledWith({
       assertion_ref: anAssertionRef,
@@ -171,6 +192,18 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.acs",
+      properties: expect.objectContaining({
+        assertion_ref: anAssertionRef,
+        fiscal_code: sha256(aFiscalCode),
+        message:
+          'Error activating lollipop pub key | value [""] at [root] is not a valid [non empty string]'
+      })
+    });
+
     expect(mockActivatePubKey).toBeCalledTimes(1);
     expect(mockActivatePubKey).toBeCalledWith({
       assertion_ref: anAssertionRef,
@@ -199,6 +232,17 @@ describe("LollipopService#activateLolliPoPKey", () => {
       aLollipopAssertion,
       () => new Date()
     )();
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.acs",
+      properties: expect.objectContaining({
+        assertion_ref: anAssertionRef,
+        fiscal_code: sha256(aFiscalCode),
+        message: "Error activating lollipop pub key | Error"
+      })
+    });
+
     expect(mockActivatePubKey).toBeCalledTimes(1);
     expect(mockActivatePubKey).toBeCalledWith({
       assertion_ref: anAssertionRef,

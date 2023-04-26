@@ -1,6 +1,7 @@
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import * as t from "io-ts";
 import * as jose from "jose";
+import * as appInsights from "applicationinsights";
 import { AssertionRef } from "../../../generated/lollipop-api/AssertionRef";
 import { JwkPubKey } from "../../../generated/lollipop-api/JwkPubKey";
 import { NewPubKey } from "../../../generated/lollipop-api/NewPubKey";
@@ -11,10 +12,14 @@ import {
   LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME,
   LOLLIPOP_PUB_KEY_HEADER_NAME
 } from "@pagopa/io-spid-commons/dist/types/lollipop";
-import * as E from "fp-ts/lib/Either";
 import { JwkPubKeyHashAlgorithmEnum } from "../../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { anEncodedJwkPubKey } from "../../__mocks__/lollipop";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
+const mockTelemetryClient = ({
+  trackEvent: jest.fn()
+} as unknown) as appInsights.TelemetryClient;
 
 const aJwkPubKey: JwkPubKey = {
   alg: "alg",
@@ -55,7 +60,8 @@ describe("lollipopLoginHandler", () => {
     req.headers[LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME] = "sha512";
     const result = await lollipopLoginHandler(
       false,
-      lollipopApiClientMock
+      lollipopApiClientMock,
+      mockTelemetryClient
     )(req);
     expect(reservePubKeyMock).not.toHaveBeenCalled();
     expect(result).toBeUndefined();
@@ -65,7 +71,11 @@ describe("lollipopLoginHandler", () => {
     const req = mockReq();
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     req.headers[LOLLIPOP_PUB_KEY_HASHING_ALGO_HEADER_NAME] = "sha512";
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
@@ -79,7 +89,11 @@ describe("lollipopLoginHandler", () => {
   it("should perform lollipop validation and pubkey reservation successfully if Lollipop pub key is present with fallback on default hashing algorithm", async () => {
     const req = mockReq();
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
@@ -92,7 +106,11 @@ describe("lollipopLoginHandler", () => {
 
   it("should not perform lollipop validation and pubkey reservation if no lollipop headers are present", async () => {
     const req = mockReq();
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
     expect(reservePubKeyMock).not.toHaveBeenCalled();
     expect(result).toBeUndefined();
   });
@@ -101,9 +119,23 @@ describe("lollipopLoginHandler", () => {
     const req = mockReq();
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockImplementationOnce(async () =>
-      E.left("unparseable response")
+      NonEmptyString.decode("")
     );
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.get-login",
+      properties: expect.objectContaining({
+        message:
+          'Error calling reservePubKey endpoint: value [""] at [root] is not a valid [non empty string]'
+      })
+    });
+
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
@@ -126,7 +158,15 @@ describe("lollipopLoginHandler", () => {
     reservePubKeyMock.mockImplementationOnce(async () =>
       t.success(buildResponse(409, {}))
     );
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
+
+    // We expect this event to be raised by fn-lollipop function
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
+
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
@@ -149,7 +189,14 @@ describe("lollipopLoginHandler", () => {
     reservePubKeyMock.mockImplementationOnce(async () =>
       t.success(buildResponse(500, {}))
     );
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
+
+    expect(mockTelemetryClient.trackEvent).not.toHaveBeenCalled();
+
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
@@ -170,7 +217,20 @@ describe("lollipopLoginHandler", () => {
     const req = mockReq();
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = tokenizeJwk(aJwkPubKey);
     reservePubKeyMock.mockRejectedValueOnce("Network Error");
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(1);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
+      name: "lollipop.error.get-login",
+      properties: expect.objectContaining({
+        message: "Error calling reservePubKey endpoint: Network Error"
+      })
+    });
+
     expect(reservePubKeyMock).toHaveBeenCalledTimes(1);
     expect(reservePubKeyMock).toHaveBeenCalledWith({
       body: {
@@ -190,7 +250,12 @@ describe("lollipopLoginHandler", () => {
   it("should return a validation error if request is not well formed", async () => {
     const req = mockReq();
     req.headers[LOLLIPOP_PUB_KEY_HEADER_NAME] = "wrong jwk";
-    const result = await lollipopLoginHandler(true, lollipopApiClientMock)(req);
+    const result = await lollipopLoginHandler(
+      true,
+      lollipopApiClientMock,
+      mockTelemetryClient
+    )(req);
+
     expect(reservePubKeyMock).not.toHaveBeenCalled();
 
     expect(result).toEqual(

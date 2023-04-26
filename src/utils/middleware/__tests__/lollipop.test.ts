@@ -1,9 +1,15 @@
 import { LollipopApiClient } from "../../../clients/lollipop";
 import { ISessionStorage } from "../../../services/ISessionStorage";
-import { lollipopMiddleware } from "../lollipop";
+import { expressLollipopMiddleware } from "../lollipop";
 import mockReq from "../../../__mocks__/request";
 import { aFiscalCode, mockedUser } from "../../../__mocks__/user_mock";
-import { anAssertionRef } from "../../../__mocks__/lollipop";
+import {
+  aLollipopOriginalMethod,
+  aLollipopOriginalUrl,
+  anAssertionRef,
+  aSignature,
+  aSignatureInput
+} from "../../../__mocks__/lollipop";
 import mockRes from "../../../__mocks__/response";
 import * as E from "fp-ts/Either";
 import { AssertionTypeEnum } from "../../../../generated/lollipop-api/AssertionType";
@@ -29,6 +35,13 @@ const mockSessionStorage = ({
 const aBearerToken = "a bearer token";
 const aPubKey = "a pub key";
 
+const aValidLollipopRequestHeaders = {
+  signature: aSignature,
+  ["signature-input"]: aSignatureInput,
+  ["x-pagopa-lollipop-original-method"]: aLollipopOriginalMethod,
+  ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl
+};
+
 const mockNext = jest.fn();
 describe("lollipopMiddleware", () => {
   beforeEach(() => {
@@ -39,14 +52,8 @@ describe("lollipopMiddleware", () => {
   WHEN redis returns an assertionRef for the user and lollipop-fn generate LC Params
   THEN additional lollipop headers are included in res.locals
   `, async () => {
-    const lollipopRequestHeaders = {
-      signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
-      ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
-      ["x-pagopa-lollipop-original-method"]: "POST",
-      ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it"
-    };
     const req = mockReq({
-      headers: lollipopRequestHeaders,
+      headers: aValidLollipopRequestHeaders,
       user: mockedUser
     });
     const res = mockRes();
@@ -67,7 +74,10 @@ describe("lollipopMiddleware", () => {
         }
       })
     );
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+    const middleware = expressLollipopMiddleware(
+      mockClient,
+      mockSessionStorage
+    );
     await middleware(req, res, mockNext);
     expect(mockGenerateLCParams).toBeCalledTimes(1);
     expect(mockGenerateLCParams).toBeCalledWith({
@@ -84,7 +94,7 @@ describe("lollipopMiddleware", () => {
       ["x-pagopa-lollipop-auth-jwt"]: aBearerToken,
       ["x-pagopa-lollipop-public-key"]: aPubKey,
       ["x-pagopa-lollipop-user-id"]: aFiscalCode,
-      ...lollipopRequestHeaders
+      ...aValidLollipopRequestHeaders
     });
     expect(mockNext).toBeCalledTimes(1);
     expect(mockNext).toBeCalledWith();
@@ -96,16 +106,18 @@ describe("lollipopMiddleware", () => {
   THEN returns a validation error
   `, async () => {
     const lollipopRequestHeaders = {
-      signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
-      ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
-      ["x-pagopa-lollipop-original-method"]: "POST"
+      ...aValidLollipopRequestHeaders,
+      ["x-pagopa-lollipop-original-url"]: undefined
     };
     const req = mockReq({
       headers: lollipopRequestHeaders,
       user: mockedUser
     });
     const res = mockRes();
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+    const middleware = expressLollipopMiddleware(
+      mockClient,
+      mockSessionStorage
+    );
     await middleware(req, res, mockNext);
     expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
@@ -118,18 +130,15 @@ describe("lollipopMiddleware", () => {
   WHEN the user is invalid
   THEN returns a validation error
   `, async () => {
-    const lollipopRequestHeaders = {
-      signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
-      ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
-      ["x-pagopa-lollipop-original-method"]: "POST",
-      ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it"
-    };
     const req = mockReq({
-      headers: lollipopRequestHeaders,
+      headers: aValidLollipopRequestHeaders,
       user: { ...mockedUser, fiscal_code: "invalidFiscalCode" }
     });
     const res = mockRes();
-    const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+    const middleware = expressLollipopMiddleware(
+      mockClient,
+      mockSessionStorage
+    );
     await middleware(req, res, mockNext);
     expect(mockGetlollipopAssertionRefForUser).not.toBeCalled();
     expect(mockGenerateLCParams).not.toBeCalled();
@@ -149,21 +158,18 @@ describe("lollipopMiddleware", () => {
   THEN returns a response error with status $expectedResponseStatus
   `,
     async ({ lollipopAssertionRefForUser, expectedResponseStatus }) => {
-      const lollipopRequestHeaders = {
-        signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
-        ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
-        ["x-pagopa-lollipop-original-method"]: "POST",
-        ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it"
-      };
       const req = mockReq({
-        headers: lollipopRequestHeaders,
+        headers: aValidLollipopRequestHeaders,
         user: mockedUser
       });
       const res = mockRes();
       mockGetlollipopAssertionRefForUser.mockImplementationOnce(
         () => lollipopAssertionRefForUser
       );
-      const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+      const middleware = expressLollipopMiddleware(
+        mockClient,
+        mockSessionStorage
+      );
       await middleware(req, res, mockNext);
       expect(mockGenerateLCParams).not.toBeCalled();
       expect(res.status).toBeCalledWith(expectedResponseStatus);
@@ -186,19 +192,16 @@ describe("lollipopMiddleware", () => {
   THEN returns an error with status $expectedResponseStatus
   `,
     async ({ generateLCParams, expectedResponseStatus }) => {
-      const lollipopRequestHeaders = {
-        signature: `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:`,
-        ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"`,
-        ["x-pagopa-lollipop-original-method"]: "POST",
-        ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it"
-      };
       const req = mockReq({
-        headers: lollipopRequestHeaders,
+        headers: aValidLollipopRequestHeaders,
         user: mockedUser
       });
       const res = mockRes();
       mockGenerateLCParams.mockImplementationOnce(() => generateLCParams);
-      const middleware = lollipopMiddleware(mockClient, mockSessionStorage);
+      const middleware = expressLollipopMiddleware(
+        mockClient,
+        mockSessionStorage
+      );
       await middleware(req, res, mockNext);
       expect(mockGenerateLCParams).toBeCalledTimes(1);
       expect(res.status).toBeCalledWith(expectedResponseStatus);

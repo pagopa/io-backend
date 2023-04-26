@@ -13,21 +13,25 @@ import { IoSignAPIClient } from "../../clients/io-sign";
 import { aFiscalCode, mockedUser } from "../../__mocks__/user_mock";
 import IoSignService from "../ioSignService";
 import { NonNegativeNumber } from "@pagopa/ts-commons/lib/numbers";
-import { anAssertionRef } from "../../__mocks__/lollipop";
+import {
+  aLollipopOriginalUrl,
+  anAssertionRef,
+  aSignatureInput
+} from "../../__mocks__/lollipop";
 import { AssertionTypeEnum } from "../../../generated/io-sign-api/AssertionType";
-import { LollipopSignature } from "../../../generated/lollipop/LollipopSignature";
-import { LollipopSignatureInput } from "../../../generated/lollipop/LollipopSignatureInput";
+import { aSignature } from "../../__mocks__/lollipop";
 import { LollipopMethodEnum } from "../../../generated/lollipop/LollipopMethod";
-import { LollipopOriginalURL } from "../../../generated/lollipop/LollipopOriginalURL";
 import { LollipopJWTAuthorization } from "../../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../../generated/io-sign-api/LollipopPublicKey";
 import { SignatureRequestStatusEnum } from "../../../generated/io-sign-api/SignatureRequestStatus";
 import { IssuerEnvironmentEnum } from "../../../generated/io-sign-api/IssuerEnvironment";
+import { SignatureRequestList } from "../../../generated/io-sign-api/SignatureRequestList";
 
 const mockCreateFilledDocument = jest.fn();
 const mockGetSignerByFiscalCode = jest.fn();
 const mockGetInfo = jest.fn();
 const mockGetQtspClausesMetadata = jest.fn();
+const mockGetSignatureRequests = jest.fn();
 const mockGetSignatureRequest = jest.fn();
 const mockCreateSignature = jest.fn();
 const mockFakeSuccess = jest.fn();
@@ -42,10 +46,10 @@ const aBearerToken = "a bearer token" as LollipopJWTAuthorization;
 const aPubKey = "a pub key" as LollipopPublicKey;
 
 const lollipopRequestHeaders = {
-  signature: "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:" as LollipopSignature,
-  ["signature-input"]: `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput,
+  signature: aSignature,
+  ["signature-input"]: aSignatureInput,
   ["x-pagopa-lollipop-original-method"]: LollipopMethodEnum.POST,
-  ["x-pagopa-lollipop-original-url"]: "https://api.pagopa.it" as LollipopOriginalURL,
+  ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl,
   ["x-pagopa-lollipop-custom-sign-challenge"]: "customTosChallenge" as NonEmptyString,
   ["x-pagopa-lollipop-custom-tos-challenge"]: "customSignChallenge" as NonEmptyString,
   ["x-pagopa-lollipop-assertion-ref"]: anAssertionRef,
@@ -81,6 +85,21 @@ const fakeSignatureRequest: SignatureRequestDetailView = {
   created_at: new Date(),
   updated_at: new Date(),
   expires_at: new Date()
+};
+
+const fakeSignatureRequestList: SignatureRequestList = {
+  items: [
+    {
+      id: fakeSignatureRequest.id,
+      signer_id: fakeSignatureRequest.signer_id,
+      dossier_id: fakeSignatureRequest.dossier_id,
+      dossier_title: fakeSignatureRequest.dossier_title,
+      status: fakeSignatureRequest.status,
+      created_at: fakeSignatureRequest.created_at,
+      updated_at: fakeSignatureRequest.updated_at,
+      expires_at: fakeSignatureRequest.expires_at
+    }
+  ]
 };
 
 const fakeSignature: SignatureDetailView = {
@@ -168,6 +187,13 @@ mockGetQtspClausesMetadata.mockImplementation(() =>
   })
 );
 
+mockGetSignatureRequests.mockImplementation(() =>
+  t.success({
+    status: 200,
+    value: fakeSignatureRequestList
+  })
+);
+
 mockGetSignatureRequest.mockImplementation(() =>
   t.success({
     status: 200,
@@ -193,6 +219,7 @@ const api = {
   getSignerByFiscalCode: mockGetSignerByFiscalCode,
   getInfo: mockGetInfo,
   getQtspClausesMetadata: mockGetQtspClausesMetadata,
+  getSignatureRequests: mockGetSignatureRequests,
   getSignatureRequestById: mockGetSignatureRequest,
   createSignature: mockCreateSignature,
   getThirdPartyMessageDetails: mockFakeSuccess,
@@ -514,6 +541,99 @@ describe("IoSignService#getQtspClausesMetadata", () => {
     const service = new IoSignService(api);
     const res = await service.getQtspClausesMetadata(
       IssuerEnvironmentEnum.TEST
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+});
+
+describe("IoSignService#getSignatureRequests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should make the correct api call", async () => {
+    const service = new IoSignService(api);
+
+    await service.getSignatureRequests(fakeSignatureRequest.signer_id);
+
+    expect(mockGetSignatureRequests).toHaveBeenCalledWith({
+      "x-iosign-signer-id": fakeSignatureRequest.signer_id
+    });
+  });
+
+  it("should handle a success response", async () => {
+    const service = new IoSignService(api);
+
+    const res = await service.getSignatureRequests(
+      fakeSignatureRequest.signer_id
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson"
+    });
+  });
+
+  it("should handle a not found error (403) when the user is not found", async () => {
+    mockGetSignatureRequests.mockImplementationOnce(() =>
+      t.success({ status: 403 })
+    );
+
+    const service = new IoSignService(api);
+
+    const res = await service.getSignatureRequests(
+      fakeSignatureRequest.signer_id
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound"
+    });
+  });
+
+  it("should handle an internal error response", async () => {
+    const aGenericProblem = {};
+
+    mockGetSignatureRequests.mockImplementationOnce(() =>
+      t.success({ status: 500, value: aGenericProblem })
+    );
+
+    const service = new IoSignService(api);
+
+    const res = await service.getSignatureRequests(
+      fakeSignatureRequest.signer_id
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal"
+    });
+  });
+
+  it("should return an error for unhandled response status code", async () => {
+    mockGetSignatureRequests.mockImplementationOnce(() =>
+      t.success({ status: 123 })
+    );
+    const service = new IoSignService(api);
+
+    const res = await service.getSignatureRequests(
+      fakeSignatureRequest.signer_id
+    );
+
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+      detail: "Internal server error: unhandled API response status [123]"
+    });
+  });
+
+  it("should return an error if the api call thows", async () => {
+    mockGetSignatureRequests.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const service = new IoSignService(api);
+
+    const res = await service.getSignatureRequests(
+      fakeSignatureRequest.signer_id
     );
 
     expect(res).toMatchObject({

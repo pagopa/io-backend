@@ -28,6 +28,7 @@ import * as E from "fp-ts/Either";
 import { CreateSignatureBody as CreateSignatureBodyApiModel } from "../../generated/io-sign-api/CreateSignatureBody";
 import { IssuerEnvironment } from "../../generated/io-sign/IssuerEnvironment";
 import { SignerDetailView } from "../../generated/io-sign-api/SignerDetailView";
+import { SignatureRequestList } from "../../generated/io-sign-api/SignatureRequestList";
 import { FilledDocumentDetailView } from "../../generated/io-sign/FilledDocumentDetailView";
 import { Id } from "../../generated/io-sign/Id";
 
@@ -258,6 +259,32 @@ export default class IoSignService {
               resourcesNotFound,
               "Signature request not found"
             );
+          case 403:
+            return ResponseErrorNotFound403(userNotFound);
+          default:
+            return ResponseErrorStatusNotDefinedInSpec(response);
+        }
+      });
+    });
+
+  /**
+   * Get Signature Requests list from Signer
+   */
+  public readonly getSignatureRequests = (
+    signerId: Id
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<SignatureRequestList>
+  > =>
+    withCatchAsInternalError(async () => {
+      const validated = await this.ioSignApiClient.getSignatureRequests({
+        "x-iosign-signer-id": signerId
+      });
+      return withValidatedOrInternalError(validated, response => {
+        switch (response.status) {
+          case 200:
+            return ResponseSuccessJson(response.value);
           case 403:
             return ResponseErrorNotFound403(userNotFound);
           default:
