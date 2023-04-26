@@ -1,6 +1,7 @@
 // tslint:disable no-object-mutation
 
 import { left, right } from "fp-ts/lib/Either";
+import { RedisClient } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -38,7 +39,7 @@ const validNewVersion = 11;
 
 const mockSet = jest.fn();
 const mockGet = jest.fn();
-const mockRedisClient = {} as any;
+const mockRedisClient = {} as RedisClient;
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;
 
