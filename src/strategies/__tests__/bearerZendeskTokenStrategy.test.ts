@@ -8,6 +8,7 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { ZendeskToken } from "../../types/token";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { RedisClient } from "redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -18,7 +19,7 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = {} as any;
+const mockRedisClient = {} as RedisClient;
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
