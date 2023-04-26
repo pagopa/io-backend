@@ -8,12 +8,10 @@
 import * as E from "fp-ts/lib/Either";
 
 import * as lolex from "lolex";
-import { createMockRedis } from "mock-redis-client";
 
 import * as O from "fp-ts/lib/Option";
 import { ValidationError } from "io-ts";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { RedisClient } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
@@ -107,7 +105,7 @@ const mockSmembers = jest
 const mockExists = jest.fn();
 const mockSismember = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = createMockRedis().createClient() as RedisClient;
+const mockRedisClient = {} as any;
 
 mockRedisClient.set = mockSet;
 mockRedisClient.get = mockGet;

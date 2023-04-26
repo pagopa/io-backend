@@ -1,4 +1,3 @@
-import { createMockRedis } from "mock-redis-client";
 import { mockedUser, mockZendeskToken } from "../../__mocks__/user_mock";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import * as passport from "passport";
@@ -19,7 +18,7 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = createMockRedis().createClient();
+const mockRedisClient = {} as any;
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {

@@ -1,4 +1,3 @@
-import { createMockRedis } from "mock-redis-client";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import mockReq from "../../__mocks__/request";
@@ -33,7 +32,8 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = createMockRedis().createClient();
+const mockExists = jest.fn();
+const mockRedisClient = {} as any;
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
@@ -43,6 +43,7 @@ mockRedisClient.sismember = mockSismember;
 mockRedisClient.ttl = mockTtl;
 mockRedisClient.set = mockSet;
 mockRedisClient.srem = mockSrem;
+mockRedisClient.exists = mockExists;
 
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
@@ -272,6 +273,9 @@ describe("SessionController#listSessions", () => {
     req.user = mockedUser;
     mockSrem.mockImplementationOnce((_, __, callback) =>
       callback(undefined, true)
+    );
+    mockExists.mockImplementationOnce((_, callback) =>
+      callback(undefined, false)
     );
 
     const response = await controller.listSessions(req);
