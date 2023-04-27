@@ -9,7 +9,8 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
+  IResponseSuccessNoContent
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
@@ -29,6 +30,7 @@ import { MessageStatusAttributes } from "../../generated/io-messages-api/Message
 import { PaginatedPublicMessagesCollection } from "../../generated/backend/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
+import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
 import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
 import {
   withValidatedOrValidationError,
@@ -185,6 +187,31 @@ export default class MessagesController {
                 messageId,
                 change
               )
+          )
+      )
+    );
+
+  /**
+   * Returns the precondition for the required third party message.
+   */
+  public readonly getThirdPartyMessagePrecondition = (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessNoContent
+    | IResponseSuccessJson<ThirdPartyMessagePrecondition>
+  > =>
+    withUserFromRequest(req, async user =>
+      withValidatedOrValidationError(
+        NonEmptyString.decode(req.params.id),
+        messageId =>
+          this.messageService.getThirdPartyMessagePrecondition(
+            user.fiscal_code,
+            messageId
           )
       )
     );
