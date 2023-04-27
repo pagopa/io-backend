@@ -13,6 +13,15 @@ overrides:
     - app-backend.io.italia.it
     - api-app.io.pagopa.it
   endpoints:
+    /info:
+      response_time_threshold: 3
+      availability_threshold: 0.70
+    /test-login:
+      response_time_threshold: 3
+      availability_threshold: 0.70
+    /login:
+      response_time_threshold: 3
+      availability_threshold: 0.70
     /assertionConsumerService:
-      response_time_threshold: 4
-      availability_threshold: 0.50
+      response_time_threshold: 3
+      availability_threshold: 0.70
