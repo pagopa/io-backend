@@ -14,7 +14,8 @@ import {
   ResponseSuccessJson,
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
-  ResponseErrorValidation
+  ResponseErrorValidation,
+  IResponseSuccessNoContent
 } from "@pagopa/ts-commons/lib/responses";
 import { AppMessagesAPIClient } from "src/clients/app-messages.client";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -32,6 +33,7 @@ import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-a
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
 import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdPartyMessageWithContent";
+import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
 import { StrictUTCISODateFromString } from "../utils/date";
@@ -234,6 +236,30 @@ export default class NewMessagesService {
   // ------------------------------
   // THIRD_PARTY MESSAGE
   // ------------------------------
+
+  /**
+   * Retrieves the precondition of a specific Third-Party message.
+   */
+  public readonly getThirdPartyMessagePrecondition = async (
+    fiscalCode: FiscalCode,
+    messageId: NonEmptyString
+  ): Promise<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessNoContent
+    | IResponseSuccessJson<ThirdPartyMessagePrecondition>
+  > =>
+    pipe(
+      this.getThirdPartyMessageFnApp(fiscalCode, messageId),
+      TE.chain(message =>
+        this.getThirdPartyMessagePreconditionFromThirdPartyService(message)
+      ),
+      TE.map(ResponseSuccessJson),
+      TE.toUnion
+    )();
 
   /**
    * Retrieves a specific Third-Party message.
@@ -490,6 +516,26 @@ export default class NewMessagesService {
         )
       )
     );
+
+  // Retrieve a ThirdParty message precondition for a specific message, if exists
+  // return an error otherwise
+  private readonly getThirdPartyMessagePreconditionFromThirdPartyService = (
+    _: MessageWithThirdPartyData
+  ): TE.TaskEither<
+    | IResponseErrorInternal
+    | IResponseErrorValidation
+    | IResponseErrorForbiddenNotAuthorized
+    | IResponseErrorNotFound
+    | IResponseErrorTooManyRequests
+    | IResponseSuccessNoContent,
+    ThirdPartyMessagePrecondition
+  > =>
+    // TODO remove dummy implementation with the real one that calls the api of pn to get the third party content
+    TE.of({
+      markdown:
+        "Se continui, la notifica risulterà legalmente recapitata a te. Aprire il messaggio su IO equivale infatti a firmare la ricevuta di ritorno di una raccomandata tradizionale.\n**Mittente**: Comune di Xxxxxxx  \n**Oggetto**: Infrazione al codice della strada  \n**Data e ora**: 12 Luglio 2022 - 12.36  \n**Codice IUN**: YYYYMM-1-ABCD-EFGH-X",
+      title: "Questo messaggio contiene una comunicazione a valore legale"
+    });
 
   // Retrieve a ThirdParty message detail from related service, if exists
   // return an error otherwise
