@@ -535,9 +535,9 @@ export default class NewMessagesService {
     // TODO remove dummy implementation with the real one that calls the api of pn to get the third party content
     pipe(
       TE.of({
-        markdown: "Questo messaggio contiene una comunicazione a valore legale",
-        title:
-          "Se continui, la notifica risulterà legalmente recapitata a te. Aprire il messaggio su IO equivale infatti a firmare la ricevuta di ritorno di una raccomandata tradizionale.\n**Mittente**: Comune di Xxxxxxx  \n**Oggetto**: Infrazione al codice della strada  \n**Data e ora**: 12 Luglio 2022 - 12.36  \n**Codice IUN**: YYYYMM-1-ABCD-EFGH-X"
+        markdown:
+          "Se continui, la notifica risulterà legalmente recapitata a te. Aprire il messaggio su IO equivale infatti a firmare la ricevuta di ritorno di una raccomandata tradizionale.\n**Mittente**: Comune di Xxxxxxx  \n**Oggetto**: Infrazione al codice della strada  \n**Data e ora**: 12 Luglio 2022 - 12.36  \n**Codice IUN**: YYYYMM-1-ABCD-EFGH-X",
+        title: "Questo messaggio contiene una comunicazione a valore legale"
       })
     );
 
