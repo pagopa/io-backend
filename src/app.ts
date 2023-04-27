@@ -1105,7 +1105,7 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/third-party-messages/{id}/precondition`,
+    `${basePath}/third-party-messages/:id/precondition`,
     bearerSessionTokenAuth,
     toExpressHandler(
       messagesController.getThirdPartyMessagePrecondition,
