@@ -10,7 +10,7 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  IResponseErrorConflict
+  IResponseErrorConflict,
 } from "@pagopa/ts-commons/lib/responses";
 import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { withUserFromRequest } from "../../src/types/user";
@@ -53,10 +53,10 @@ export default class ServicesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePreference>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         ServiceId.decode(req.params.id),
-        serviceId =>
+        (serviceId) =>
           this.fnAppService.getServicePreferences(user.fiscal_code, serviceId)
       )
     );
@@ -74,13 +74,13 @@ export default class ServicesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ServicePreference>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         ServiceId.decode(req.params.id),
-        serviceId =>
+        (serviceId) =>
           withValidatedOrValidationError(
             UpsertServicePreference.decode(req.body),
-            pref =>
+            (pref) =>
               this.fnAppService.upsertServicePreferences(
                 user.fiscal_code,
                 serviceId,

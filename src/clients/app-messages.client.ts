@@ -5,17 +5,17 @@ export function AppMessagesAPIClient(
   token: string,
   baseUrl: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
 ): Client<"SubscriptionKey"> {
   return createClient<"SubscriptionKey">({
     basePath: "",
     baseUrl,
     fetchApi,
-    withDefaults: op => params =>
+    withDefaults: (op) => (params) =>
       op({
         ...params,
-        SubscriptionKey: token
-      })
+        SubscriptionKey: token,
+      }),
   });
 }
 

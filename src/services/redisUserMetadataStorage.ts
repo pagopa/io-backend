@@ -16,8 +16,10 @@ export const invalidVersionNumberError = new Error("Invalid version number");
 /**
  * Service that manages user metadata stored into Redis database.
  */
-export default class RedisUserMetadataStorage extends RedisStorageUtils
-  implements IUserMetadataStorage {
+export default class RedisUserMetadataStorage
+  extends RedisStorageUtils
+  implements IUserMetadataStorage
+{
   constructor(private readonly redisClient: redis.RedisClient) {
     super();
   }
@@ -47,7 +49,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
     ) {
       return E.left(getUserMetadataResult.left);
     }
-    return await new Promise<Either<Error, boolean>>(resolve => {
+    return await new Promise<Either<Error, boolean>>((resolve) => {
       // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
       // @see https://redis.io/commands/set
       this.redisClient.set(
@@ -71,9 +73,9 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
    * {@inheritDoc}
    */
   public del(fiscalCode: FiscalCode): Promise<Either<Error, true>> {
-    return new Promise<Either<Error, true>>(resolve => {
+    return new Promise<Either<Error, true>>((resolve) => {
       log.info(`Deleting metadata for ${fiscalCode}`);
-      this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`, err => {
+      this.redisClient.del(`${userMetadataPrefix}${fiscalCode}`, (err) => {
         if (err) {
           resolve(E.left(err));
         } else {
@@ -86,7 +88,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
   private loadUserMetadataByFiscalCode(
     fiscalCode: string
   ): Promise<Either<Error, UserMetadata>> {
-    return new Promise<Either<Error, UserMetadata>>(resolve => {
+    return new Promise<Either<Error, UserMetadata>>((resolve) => {
       // Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type.
       // @see https://redis.io/commands/set
       this.redisClient.get(
@@ -98,9 +100,8 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
             // Try-catch is needed because parse() may throw an exception.
             try {
               const metadataPayload = JSON.parse(response);
-              const errorOrDeserializedUserMetadata = UserMetadata.decode(
-                metadataPayload
-              );
+              const errorOrDeserializedUserMetadata =
+                UserMetadata.decode(metadataPayload);
 
               if (E.isLeft(errorOrDeserializedUserMetadata)) {
                 log.error(

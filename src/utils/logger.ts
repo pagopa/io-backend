@@ -8,7 +8,7 @@ export const log = createLogger({
     timestamp(),
     format.splat(),
     format.simple(),
-    printf(nfo => `${nfo.timestamp} [${nfo.level}]: ${nfo.message}`)
+    printf((nfo) => `${nfo.timestamp} [${nfo.level}]: ${nfo.message}`)
   ),
-  transports: [new transports.Console()]
+  transports: [new transports.Console()],
 });

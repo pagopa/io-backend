@@ -16,7 +16,7 @@ import {
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
   ResponseErrorInternal,
-  ResponseErrorValidation
+  ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { pipe } from "fp-ts/lib/function";
@@ -25,11 +25,11 @@ import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { Errors } from "io-ts";
 import {
   withValidatedOrValidationError,
-  withCatchAsInternalError
+  withCatchAsInternalError,
 } from "../utils/responses";
 import {
   IssuerEnvironment,
-  IssuerEnvironmentEnum
+  IssuerEnvironmentEnum,
 } from "../../generated/io-sign/IssuerEnvironment";
 import IoSignService from "../services/ioSignService";
 import { ResLocals } from "../utils/express";
@@ -60,29 +60,29 @@ export const IoSignLollipopLocalsType = t.intersection([
   LollipopLocalsType,
   t.type({
     ["x-pagopa-lollipop-custom-sign-challenge"]: NonEmptyString,
-    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString
-  })
+    ["x-pagopa-lollipop-custom-tos-challenge"]: NonEmptyString,
+  }),
 ]);
 export type IoSignLollipopLocalsType = t.TypeOf<
   typeof IoSignLollipopLocalsType
 >;
 
-export const withIoSignCustomLollipopLocalsFromRequest = (
-  req: express.Request
-) => (
-  lollipopLocals: LollipopLocalsType
-): E.Either<IResponseErrorValidation, IoSignLollipopLocalsType> =>
-  pipe(
-    {
-      ...lollipopLocals,
-      ["x-pagopa-lollipop-custom-sign-challenge"]:
-        req.headers["x-pagopa-lollipop-custom-sign-challenge"],
-      ["x-pagopa-lollipop-custom-tos-challenge"]:
-        req.headers["x-pagopa-lollipop-custom-tos-challenge"]
-    },
-    IoSignLollipopLocalsType.decode,
-    E.mapLeft(responseErrorValidation)
-  );
+export const withIoSignCustomLollipopLocalsFromRequest =
+  (req: express.Request) =>
+  (
+    lollipopLocals: LollipopLocalsType
+  ): E.Either<IResponseErrorValidation, IoSignLollipopLocalsType> =>
+    pipe(
+      {
+        ...lollipopLocals,
+        ["x-pagopa-lollipop-custom-sign-challenge"]:
+          req.headers["x-pagopa-lollipop-custom-sign-challenge"],
+        ["x-pagopa-lollipop-custom-tos-challenge"]:
+          req.headers["x-pagopa-lollipop-custom-tos-challenge"],
+      },
+      IoSignLollipopLocalsType.decode,
+      E.mapLeft(responseErrorValidation)
+    );
 
 const responseErrorInternal = (reason: string) => (e: Error) =>
   ResponseErrorInternal(`${reason} | ${e.message}`);
@@ -104,7 +104,7 @@ export const retrieveSignerId = (
       TE.fromPredicate(
         (r): r is IResponseSuccessJson<SignerDetailView> =>
           r.kind === "IResponseSuccessJson",
-        e =>
+        (e) =>
           e.kind === "IResponseErrorNotFound"
             ? new Error(
                 `Your profile is not enabled to use this service. | ${e.detail}`
@@ -136,13 +136,13 @@ export default class IoSignController {
         FilledDocumentDetailView
       >
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       pipe(
         req.body,
         CreateFilledDocument.decode,
         E.mapLeft(responseErrorValidation),
         TE.fromEither,
-        TE.chainW(body =>
+        TE.chainW((body) =>
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
@@ -156,7 +156,7 @@ export default class IoSignController {
                     "Error retrieving a user profile with validated email address"
                   )
                 )
-              )
+              ),
             }),
             TE.map(({ userProfile, signerId }) =>
               this.ioSignService.createFilledDocument(
@@ -185,7 +185,7 @@ export default class IoSignController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<SignatureDetailView>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       pipe(
         locals,
         /* Here we check the mandatory LolliPop HTTP headers[https://github.com/pagopa/io-backend/blob/master/openapi/consumed/lollipop_first_consumer.yaml#L58]
@@ -194,7 +194,7 @@ export default class IoSignController {
         withLollipopLocals,
         E.chain(withIoSignCustomLollipopLocalsFromRequest(req)),
         TE.fromEither,
-        TE.chainW(ioSignLollipopLocals =>
+        TE.chainW((ioSignLollipopLocals) =>
           pipe(
             sequenceS(TE.ApplySeq)({
               signerId: pipe(
@@ -208,7 +208,7 @@ export default class IoSignController {
                     "Error retrieving a user profile with validated email address"
                   )
                 )
-              )
+              ),
             }),
             TE.chainW(({ signerId, userProfile }) =>
               pipe(
@@ -216,12 +216,12 @@ export default class IoSignController {
                 CreateSignatureBody.decode,
                 E.mapLeft(responseErrorValidation),
                 TE.fromEither,
-                TE.map(signatureBody => ({
+                TE.map((signatureBody) => ({
                   body: {
                     ...signatureBody,
-                    email: userProfile.email
+                    email: userProfile.email,
                   },
-                  signerId: signerId.value.id
+                  signerId: signerId.value.id,
                 }))
               )
             ),
@@ -249,22 +249,22 @@ export default class IoSignController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<SignatureRequestDetailView>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       pipe(
         sequenceS(TE.ApplyPar)({
           signatureRequestId: pipe(
             req.params.id,
             Id.decode,
             TE.fromEither,
-            TE.mapLeft(_ =>
+            TE.mapLeft((_) =>
               ResponseErrorInternal(`Error validating the signature request id`)
             )
           ),
           signerId: pipe(
             retrieveSignerId(this.ioSignService, user.fiscal_code),
             TE.mapLeft(() => toErrorRetrievingTheSignerId),
-            TE.map(response => response.value.id)
-          )
+            TE.map((response) => response.value.id)
+          ),
         }),
         TE.map(({ signerId, signatureRequestId: id }) =>
           this.ioSignService.getSignatureRequest(id, signerId)
@@ -284,12 +284,12 @@ export default class IoSignController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<SignatureRequestList>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       pipe(
         retrieveSignerId(this.ioSignService, user.fiscal_code),
         TE.mapLeft(() => toErrorRetrievingTheSignerId),
-        TE.map(response => response.value.id),
-        TE.map(signerId => this.ioSignService.getSignatureRequests(signerId)),
+        TE.map((response) => response.value.id),
+        TE.map((signerId) => this.ioSignService.getSignatureRequests(signerId)),
         TE.toUnion
       )()
     );

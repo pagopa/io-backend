@@ -10,7 +10,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -20,7 +20,7 @@ import {
   BPDToken,
   FIMSToken,
   MyPortalToken,
-  ZendeskToken
+  ZendeskToken,
 } from "../types/token";
 import { SessionsList } from "../../generated/backend/SessionsList";
 import { PublicSession } from "../../generated/backend/PublicSession";
@@ -30,7 +30,7 @@ import {
   UserV3,
   UserV4,
   UserV5,
-  withUserFromRequest
+  withUserFromRequest,
 } from "../types/user";
 
 import { log } from "../utils/logger";
@@ -51,14 +51,14 @@ export default class SessionController {
     | IResponseErrorValidation
     | IResponseSuccessJson<PublicSession>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const zendeskSuffix = await pipe(
         profileWithEmailValidatedOrError(this.profileService, user),
         TE.bimap(
           // we generate 4 bytes and convert them to hex string for a length of 8 chars
-          _ => crypto.randomBytes(4).toString("hex"),
+          (_) => crypto.randomBytes(4).toString("hex"),
           // or we take 8 chars from the hash hex string
-          p =>
+          (p) =>
             crypto
               .createHash("sha256")
               .update(p.email)
@@ -69,9 +69,10 @@ export default class SessionController {
       )();
 
       // Read the assertionRef related to the User for Lollipop.
-      const errorOrMaybeAssertionRef = await this.sessionStorage.getLollipopAssertionRefForUser(
-        user.fiscal_code
-      );
+      const errorOrMaybeAssertionRef =
+        await this.sessionStorage.getLollipopAssertionRefForUser(
+          user.fiscal_code
+        );
       if (E.isLeft(errorOrMaybeAssertionRef)) {
         return ResponseErrorInternal(
           `Error retrieving the assertionRef: ${errorOrMaybeAssertionRef.left.message}`
@@ -87,7 +88,7 @@ export default class SessionController {
           myPortalToken: user.myportal_token,
           spidLevel: user.spid_level,
           walletToken: user.wallet_token,
-          zendeskToken: `${user.zendesk_token}${zendeskSuffix}`
+          zendeskToken: `${user.zendesk_token}${zendeskSuffix}`,
         });
       }
 
@@ -112,18 +113,18 @@ export default class SessionController {
           ? user.zendesk_token
           : (this.tokenService.getNewToken(
               SESSION_TOKEN_LENGTH_BYTES
-            ) as ZendeskToken)
+            ) as ZendeskToken),
       };
 
       return pipe(
         await this.sessionStorage.update(updatedUser),
-        E.mapLeft(err => {
+        E.mapLeft((err) => {
           log.error(`getSessionState: ${err.message}`);
           return ResponseErrorInternal(
             `Error updating user session [${err.message}]`
           );
         }),
-        E.map(_ =>
+        E.map((_) =>
           ResponseSuccessJson({
             bpdToken: updatedUser.bpd_token,
             fimsToken: updatedUser.fims_token,
@@ -131,7 +132,7 @@ export default class SessionController {
             myPortalToken: updatedUser.myportal_token,
             spidLevel: updatedUser.spid_level,
             walletToken: updatedUser.wallet_token,
-            zendeskToken: `${updatedUser.zendesk_token}${zendeskSuffix}`
+            zendeskToken: `${updatedUser.zendesk_token}${zendeskSuffix}`,
           })
         ),
         E.toUnion
@@ -145,7 +146,7 @@ export default class SessionController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SessionsList>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const sessionsList = await this.sessionStorage.listUserSessions(user);
       if (E.isLeft(sessionsList)) {
         return ResponseErrorInternal(sessionsList.left.message);

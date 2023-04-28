@@ -9,7 +9,7 @@ import * as O from "fp-ts/Option";
 import * as t from "io-ts";
 import {
   errorsToReadableMessages,
-  readableReport
+  readableReport,
 } from "@pagopa/ts-commons/lib/reporters";
 import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
@@ -33,7 +33,7 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken
+  ZendeskToken,
 } from "./token";
 
 // required attributes
@@ -46,7 +46,7 @@ export const UserWithoutTokens = t.intersection([
     family_name: t.string,
     fiscal_code: FiscalCode,
     name: t.string,
-    spid_level: SpidLevel
+    spid_level: SpidLevel,
   }),
   t.partial({
     nameID: t.string,
@@ -54,12 +54,12 @@ export const UserWithoutTokens = t.intersection([
     sessionIndex: t.string,
     session_tracking_id: t.string, // unique ID used for tracking in appinsights
     spid_email: EmailAddress,
-    spid_idp: t.string
-  })
+    spid_idp: t.string,
+  }),
 ]);
 const RequiredUserTokensV1 = t.interface({
   session_token: SessionToken,
-  wallet_token: WalletToken
+  wallet_token: WalletToken,
 });
 export const UserV1 = t.intersection([UserWithoutTokens, RequiredUserTokensV1]);
 export type UserV1 = t.TypeOf<typeof UserV1>;
@@ -67,8 +67,8 @@ export type UserV1 = t.TypeOf<typeof UserV1>;
 const RequiredUserTokensV2 = t.intersection([
   RequiredUserTokensV1,
   t.interface({
-    myportal_token: MyPortalToken
-  })
+    myportal_token: MyPortalToken,
+  }),
 ]);
 export const UserV2 = t.intersection([UserWithoutTokens, RequiredUserTokensV2]);
 export type UserV2 = t.TypeOf<typeof UserV2>;
@@ -76,8 +76,8 @@ export type UserV2 = t.TypeOf<typeof UserV2>;
 const RequiredUserTokensV3 = t.intersection([
   RequiredUserTokensV2,
   t.interface({
-    bpd_token: BPDToken
-  })
+    bpd_token: BPDToken,
+  }),
 ]);
 export const UserV3 = t.intersection([UserWithoutTokens, RequiredUserTokensV3]);
 export type UserV3 = t.TypeOf<typeof UserV3>;
@@ -85,8 +85,8 @@ export type UserV3 = t.TypeOf<typeof UserV3>;
 const RequiredUserTokensV4 = t.intersection([
   RequiredUserTokensV3,
   t.interface({
-    zendesk_token: ZendeskToken
-  })
+    zendesk_token: ZendeskToken,
+  }),
 ]);
 export const UserV4 = t.intersection([UserWithoutTokens, RequiredUserTokensV4]);
 export type UserV4 = t.TypeOf<typeof UserV4>;
@@ -94,8 +94,8 @@ export type UserV4 = t.TypeOf<typeof UserV4>;
 const RequiredUserTokensV5 = t.intersection([
   RequiredUserTokensV4,
   t.interface({
-    fims_token: FIMSToken
-  })
+    fims_token: FIMSToken,
+  }),
 ]);
 export const UserV5 = t.intersection([UserWithoutTokens, RequiredUserTokensV5]);
 export type UserV5 = t.TypeOf<typeof UserV5>;
@@ -113,14 +113,14 @@ export const SpidUser = t.intersection([
     getAssertionXml: t.Function,
     getSamlResponseXml: t.Function,
     issuer: Issuer,
-    name: t.string
+    name: t.string,
   }),
   t.partial({
     email: EmailAddress,
     nameID: t.string,
     nameIDFormat: t.string,
-    sessionIndex: t.string
-  })
+    sessionIndex: t.string,
+  }),
 ]);
 
 export type SpidUser = t.TypeOf<typeof SpidUser>;
@@ -153,7 +153,7 @@ export function toAppUser(
     spid_email: from.email,
     spid_level: from.authnContextClassRef,
     wallet_token: walletToken,
-    zendesk_token: zendeskToken
+    zendesk_token: zendeskToken,
   };
 }
 
@@ -181,12 +181,12 @@ const SpidObject = t.intersection([
   t.interface({
     fiscalNumber: t.string,
     getAssertionXml: t.Function,
-    getSamlResponseXml: t.Function
+    getSamlResponseXml: t.Function,
   }),
   t.partial({
     authnContextClassRef: t.any,
-    issuer: t.any
-  })
+    issuer: t.any,
+  }),
 ]);
 
 /**
@@ -198,15 +198,15 @@ const SpidObject = t.intersection([
 function getAuthnContextFromResponse(xml: string): O.Option<string> {
   return pipe(
     O.fromNullable(xml),
-    O.chain(xmlStr =>
+    O.chain((xmlStr) =>
       O.tryCatch(() => new DOMParser().parseFromString(xmlStr))
     ),
-    O.chain(xmlResponse =>
+    O.chain((xmlResponse) =>
       xmlResponse
         ? O.some(xmlResponse.getElementsByTagName("saml:AuthnContextClassRef"))
         : O.none
     ),
-    O.chain(responseAuthLevelEl =>
+    O.chain((responseAuthLevelEl) =>
       responseAuthLevelEl?.[0]?.textContent
         ? O.some(responseAuthLevelEl[0].textContent.trim())
         : O.none
@@ -255,12 +255,12 @@ export function validateSpidUser(
 
   const valueWithoutPrefix = {
     ...value,
-    fiscalNumber: fiscalNumberWithoutPrefix.toUpperCase()
+    fiscalNumber: fiscalNumberWithoutPrefix.toUpperCase(),
   };
 
   const valueWithDefaultSPIDLevel = {
     ...valueWithoutPrefix,
-    authnContextClassRef
+    authnContextClassRef,
   };
 
   // Log the invalid SPID level to audit IDP responses.
@@ -275,7 +275,7 @@ export function validateSpidUser(
   return pipe(
     SpidUser.decode(valueWithDefaultSPIDLevel),
     E.mapLeft(
-      err =>
+      (err) =>
         "Cannot validate SPID user object: " +
         errorsToReadableMessages(err).join(" / ")
     )
@@ -296,13 +296,13 @@ export const extractUserFromJson = (from: string): E.Either<string, User> =>
     O.tryCatch(() => JSON.parse(from)),
     O.fold(
       () => E.left<string, unknown>(`Invalid JSON for User [${from}]`),
-      _ => E.right<string, unknown>(_)
+      (_) => E.right<string, unknown>(_)
     ),
     E.chain(
       flow(
         User.decode,
         E.mapLeft(
-          err =>
+          (err) =>
             `Cannot decode User from JSON: ${errorsToReadableMessages(err).join(
               " / "
             )}`

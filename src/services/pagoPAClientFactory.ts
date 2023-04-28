@@ -7,12 +7,13 @@ import nodeFetch from "node-fetch";
 import { PagoPAClient } from "../clients/pagopa";
 import {
   IPagoPAClientFactoryInterface,
-  PagoPAEnvironment
+  PagoPAEnvironment,
 } from "./IPagoPAClientFactory";
 
 // TODO: this class is actually useless as PagoPAClient is immutable, it can be removed
 export default class PagoPAClientFactory
-  implements IPagoPAClientFactoryInterface {
+  implements IPagoPAClientFactoryInterface
+{
   private readonly prodApiClient!: ReturnType<PagoPAClient>;
   private readonly testApiClient!: ReturnType<PagoPAClient>;
 
@@ -23,7 +24,7 @@ export default class PagoPAClientFactory
     pagoPAApiKeyUAT: string,
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+    fetchApi: typeof fetch = nodeFetch as any as typeof fetch
   ) {
     this.prodApiClient = PagoPAClient(
       pagoPAApiUrlProd,

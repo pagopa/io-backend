@@ -1,7 +1,7 @@
 import * as express from "express";
 import {
   IResponse,
-  ResponseErrorInternal
+  ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
@@ -33,7 +33,7 @@ export function toExpressHandler<T, P, L extends ResLocals>(
     handler
       .call(object, req, res.locals)
       .catch(ResponseErrorInternal)
-      .then(response => {
+      .then((response) => {
         // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);
@@ -54,7 +54,7 @@ export function toExpressMiddleware<T, P>(
     pipe(
       TE.tryCatch(
         () => handler.call(object, req),
-        flow(E.toError, e => ResponseErrorInternal(e.message))
+        flow(E.toError, (e) => ResponseErrorInternal(e.message))
       ),
       TE.chainW(
         flow(
@@ -63,7 +63,7 @@ export function toExpressMiddleware<T, P>(
           O.getOrElseW(() => TE.right(next()))
         )
       ),
-      TE.mapLeft(response => {
+      TE.mapLeft((response) => {
         // eslint-disable-next-line functional/immutable-data
         res.locals.detail = response.detail;
         response.apply(res);

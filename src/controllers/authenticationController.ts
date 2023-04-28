@@ -19,7 +19,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorValidation,
   ResponsePermanentRedirect,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
@@ -46,7 +46,7 @@ import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
-  tokenDurationSecs
+  tokenDurationSecs,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -57,13 +57,13 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken
+  ZendeskToken,
 } from "../types/token";
 import {
   exactUserIdentityDecode,
   toAppUser,
   validateSpidUser,
-  withUserFromRequest
+  withUserFromRequest,
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
@@ -138,7 +138,7 @@ export default class AuthenticationController {
       // this constraint could be ignored when this PR https://github.com/pagopa/io-app/pull/3642 is merged,
       // released in a certain app version and that version become the minimum version supported.
       const redirectionUrl = this.getClientErrorRedirectionUrl({
-        errorCode: AGE_LIMIT_ERROR_CODE
+        errorCode: AGE_LIMIT_ERROR_CODE,
       });
       log.error(
         `acs: the age of the user is less than ${AGE_LIMIT} yo [%s]`,
@@ -148,8 +148,8 @@ export default class AuthenticationController {
         name: "spid.error.generic",
         properties: {
           message: "User login blocked for reached age limits",
-          type: "INFO"
-        }
+          type: "INFO",
+        },
       });
       return ResponsePermanentRedirect(redirectionUrl);
     }
@@ -168,7 +168,7 @@ export default class AuthenticationController {
       bpdToken,
       zendeskToken,
       fimsToken,
-      sessionTrackingId
+      sessionTrackingId,
     ] = await Promise.all([
       // ask the session storage whether this user is blocked
       this.sessionStorage.isBlockedUser(spidUser.fiscalNumber),
@@ -185,7 +185,7 @@ export default class AuthenticationController {
       // authentication token for FIMS
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // unique ID for tracking the user session
-      this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES)
+      this.tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES),
     ]);
 
     if (E.isLeft(errorOrIsBlockedUser)) {
@@ -224,8 +224,8 @@ export default class AuthenticationController {
         name: lollipopErrorEventName,
         properties: {
           fiscal_code: sha256(user.fiscal_code),
-          message: "Error retrieving previous lollipop configuration"
-        }
+          message: "Error retrieving previous lollipop configuration",
+        },
       });
       return ResponseErrorInternal(
         "Error retrieving previous lollipop configuration"
@@ -241,7 +241,7 @@ export default class AuthenticationController {
       // This operation is fire and forget
       this.lollipopParams.lollipopService
         .revokePreviousAssertionRef(assertionRefToRevoke)
-        .catch(err => {
+        .catch((err) => {
           this.appInsightsTelemetryClient?.trackEvent({
             name: lollipopErrorEventName,
             properties: {
@@ -249,8 +249,8 @@ export default class AuthenticationController {
               error: err,
               fiscal_code: sha256(user.fiscal_code),
               message:
-                "acs: error sending revoke message for previous assertionRef"
-            }
+                "acs: error sending revoke message for previous assertionRef",
+            },
           });
           log.error(
             "acs: error sending revoke message for previous assertionRef [%s]",
@@ -272,16 +272,17 @@ export default class AuthenticationController {
       ),
       TE.chainEitherK(identity),
       TE.filterOrElse(
-        delLollipopAssertionRefResult => delLollipopAssertionRefResult === true,
+        (delLollipopAssertionRefResult) =>
+          delLollipopAssertionRefResult === true,
         () => new Error("Error on LolliPoP initialization")
       ),
-      TE.mapLeft(error => {
+      TE.mapLeft((error) => {
         this.appInsightsTelemetryClient?.trackEvent({
           name: lollipopErrorEventName,
           properties: {
             fiscal_code: sha256(user.fiscal_code),
-            message: `acs: ${error.message}`
-          }
+            message: `acs: ${error.message}`,
+          },
         });
         return O.some(ResponseErrorInternal(error.message));
       }),
@@ -302,7 +303,7 @@ export default class AuthenticationController {
           TE.fromOption(() => O.none)
         )
       ),
-      TE.chainW(assertionRef =>
+      TE.chainW((assertionRef) =>
         pipe(
           AP.sequenceT(TE.ApplicativeSeq)(
             this.lollipopParams.lollipopService.activateLolliPoPKey(
@@ -322,19 +323,19 @@ export default class AuthenticationController {
               ),
               TE.chainEitherK(identity),
               TE.filterOrElse(
-                setLollipopAssertionRefForUserRes =>
+                (setLollipopAssertionRefForUserRes) =>
                   setLollipopAssertionRefForUserRes === true,
                 () =>
                   new Error("Error creating CF thumbprint relation in redis")
               ),
-              TE.mapLeft(error => {
+              TE.mapLeft((error) => {
                 this.appInsightsTelemetryClient?.trackEvent({
                   name: lollipopErrorEventName,
                   properties: {
                     assertion_ref: assertionRef,
                     fiscal_code: sha256(user.fiscal_code),
-                    message: error.message
-                  }
+                    message: error.message,
+                  },
                 });
                 return error;
               })
@@ -357,7 +358,7 @@ export default class AuthenticationController {
     // for the user
     const [errorOrIsSessionCreated, getProfileResponse] = await Promise.all([
       this.sessionStorage.set(user),
-      this.profileService.getProfile(user)
+      this.profileService.getProfile(user),
     ]);
 
     if (E.isLeft(errorOrIsSessionCreated)) {
@@ -386,10 +387,10 @@ export default class AuthenticationController {
         is_email_validated: pipe(
           spidUser.email,
           O.fromNullable,
-          O.map(_ => true),
+          O.map((_) => true),
           O.getOrElseW(() => false)
         ),
-        is_test_profile: isTestProfile
+        is_test_profile: isTestProfile,
       };
       const createProfileResponse = await this.profileService.createProfile(
         user,
@@ -419,7 +420,7 @@ export default class AuthenticationController {
       await this.usersLoginLogService.logUserLogin({
         fiscalCode: spidUser.fiscalNumber,
         lastLoginAt: new Date(),
-        source: spidUser.email !== undefined ? "spid" : "cie"
+        source: spidUser.email !== undefined ? "spid" : "cie",
       });
     } catch (e) {
       // Fire & forget, so just print a debug message
@@ -429,7 +430,7 @@ export default class AuthenticationController {
     // async fire & forget
     this.notificationServiceFactory(user.fiscal_code)
       .deleteInstallation(user.fiscal_code)
-      .then(deleteInstallationResponse => {
+      .then((deleteInstallationResponse) => {
         if (deleteInstallationResponse.kind !== "IResponseSuccessJson") {
           log.debug(
             "Cannot delete Notification Installation: %s",
@@ -437,7 +438,7 @@ export default class AuthenticationController {
           );
         }
       })
-      .catch(err => {
+      .catch((err) => {
         log.error(
           "Cannot delete Notification Installation: %s",
           JSON.stringify(err)
@@ -474,24 +475,24 @@ export default class AuthenticationController {
         E.fromNullable(
           new Error("Missing detail in ResponsePermanentRedirect")
         ),
-        E.chain(_ => {
+        E.chain((_) => {
           if (_.includes(REDIRECT_URL)) {
             return E.right(_.replace(REDIRECT_URL, ""));
           }
           return E.left(new Error("Unexpected redirection url"));
         }),
-        E.chain(token =>
+        E.chain((token) =>
           pipe(
             token,
             NonEmptyString.decode,
             E.mapLeft(
-              err =>
+              (err) =>
                 new Error(`Decode Error: [${errorsToReadableMessages(err)}]`)
             )
           )
         ),
-        E.map(token => ResponseSuccessJson({ token })),
-        E.mapLeft(err => ResponseErrorInternal(err.message)),
+        E.map((token) => ResponseSuccessJson({ token })),
+        E.mapLeft((err) => ResponseErrorInternal(err.message)),
         E.toUnion
       );
     }
@@ -507,7 +508,7 @@ export default class AuthenticationController {
     | IResponseErrorValidation
     | IResponseSuccessJson<SuccessResponse>
   > {
-    return withUserFromRequest(req, user =>
+    return withUserFromRequest(req, (user) =>
       withCatchAsInternalError(() =>
         pipe(
           this.lollipopParams.isLollipopEnabled,
@@ -528,14 +529,14 @@ export default class AuthenticationController {
                 TE.chainEitherK(identity),
                 TE.chainW(
                   flow(
-                    O.map(assertionRef =>
+                    O.map((assertionRef) =>
                       TE.tryCatch(
                         () =>
                           // send the revoke pubkey message with the assertionRef for the user in a fire&forget mode
-                          new Promise<true>(resolve => {
+                          new Promise<true>((resolve) => {
                             this.lollipopParams.lollipopService
                               .revokePreviousAssertionRef(assertionRef)
-                              .catch(err => {
+                              .catch((err) => {
                                 log.error(
                                   "logout: error sending revoke message for previous assertionRef [%s]",
                                   err
@@ -579,12 +580,12 @@ export default class AuthenticationController {
             )
           ),
           TE.bimap(
-            error => {
+            (error) => {
               const errorMessage = `${error.message}`;
               log.error(errorMessage);
               return ResponseErrorInternal(errorMessage);
             },
-            _ => ResponseSuccessJson({ message: "ok" })
+            (_) => ResponseSuccessJson({ message: "ok" })
           ),
           TE.toUnion
         )()
@@ -598,7 +599,7 @@ export default class AuthenticationController {
   public async slo(): Promise<IResponsePermanentRedirect> {
     return pipe(
       UrlFromString.decode("/"),
-      E.fold(_ => {
+      E.fold((_) => {
         throw new Error("Unexpected redirect url decoding");
       }, ResponsePermanentRedirect)
     );
@@ -614,18 +615,18 @@ export default class AuthenticationController {
     | IResponseErrorInternal
     | IResponseSuccessJson<UserIdentity>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       pipe(
         user,
         UserIdentity.decode,
-        E.mapLeft(_ =>
+        E.mapLeft((_) =>
           ResponseErrorInternal("Unexpected User Identity data format.")
         ),
-        E.map(_ =>
+        E.map((_) =>
           pipe(
             _,
             exactUserIdentityDecode,
-            E.mapLeft(_1 => ResponseErrorInternal("Exact decode failed.")),
+            E.mapLeft((_1) => ResponseErrorInternal("Exact decode failed.")),
             E.map(ResponseSuccessJson),
             E.toUnion
           )

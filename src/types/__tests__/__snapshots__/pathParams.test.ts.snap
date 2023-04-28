@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`pathParamsFromUrl decode a not vaild simple test 1`] = `
-Array [
-  Object {
-    "context": Array [
-      Object {
+[
+  {
+    "context": [
+      {
         "actual": "/tests/12345",
         "key": "",
         "type": Type {
@@ -16,7 +16,7 @@ Array [
         },
       },
     ],
-    "message": "input is not a valid /^\\\\/test\\\\/([^/]+)$/",
+    "message": "input is not a valid /^\\/test\\/([^/]+)$/",
     "value": "/tests/12345",
   },
 ]

@@ -35,12 +35,12 @@ import {
   SAML_CERT,
   SAML_KEY,
   SERVER_PORT,
-  ZENDESK_BASE_PATH
+  ZENDESK_BASE_PATH,
 } from "./config";
 import {
   initAppInsights,
   StartupEventName,
-  trackStartupTime
+  trackStartupTime,
 } from "./utils/appinsights";
 
 import { initHttpGracefulShutdown } from "./utils/gracefulShutdown";
@@ -88,20 +88,20 @@ const timer = TimeTracer();
 const maybeAppInsightsClient = pipe(
   process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
   O.fromNullable,
-  O.map(k =>
+  O.map((k) =>
     initAppInsights(k, {
       applicationVersion: getCurrentBackendVersion(),
       disableAppInsights: process.env.APPINSIGHTS_DISABLED === "true",
       samplingPercentage: process.env.APPINSIGHTS_SAMPLING_PERCENTAGE
         ? parseInt(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE, 10)
-        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE
+        : DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE,
     })
   ),
-  O.chainFirst(telemetryClient =>
+  O.chainFirst((telemetryClient) =>
     O.some(
       useWinstonFor({
         loggerId: LoggerId.event,
-        transports: [withApplicationInsight(telemetryClient, "io-backend")]
+        transports: [withApplicationInsight(telemetryClient, "io-backend")],
       })
     )
   )
@@ -128,9 +128,9 @@ newApp({
   allowZendeskIPSourceRange: ALLOW_ZENDESK_IP_SOURCE_RANGE,
   appInsightsClient: O.toUndefined(maybeAppInsightsClient),
   authenticationBasePath,
-  env: ENV
+  env: ENV,
 })
-  .then(app => {
+  .then((app) => {
     const startupTimeMs = timer.getElapsedMilliseconds();
     // In test and production environments the HTTPS is terminated by the Kubernetes Ingress controller. In dev we don't use
     // Kubernetes so the proxy has to run on HTTPS to behave correctly.
@@ -142,7 +142,7 @@ newApp({
         log.info(`Startup time: %sms`, startupTimeMs.toString());
         pipe(
           maybeAppInsightsClient,
-          O.map(_ =>
+          O.map((_) =>
             trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
           )
         );
@@ -154,7 +154,7 @@ newApp({
         log.info(`Startup time: %sms`, startupTimeMs.toString());
         pipe(
           maybeAppInsightsClient,
-          O.map(_ =>
+          O.map((_) =>
             trackStartupTime(_, StartupEventName.SERVER, startupTimeMs)
           )
         );
@@ -166,7 +166,7 @@ newApp({
       // If an AppInsights Client is initialized, flush all pending data and reset the configuration.
       pipe(
         maybeAppInsightsClient,
-        O.map(appInsightsClient => {
+        O.map((appInsightsClient) => {
           appInsightsClient.flush();
           appInsights.dispose();
         })
@@ -180,10 +180,10 @@ newApp({
         log.info("Server graceful shutdown complete.");
       },
       signals: shutdownSignals,
-      timeout: shutdownTimeout
+      timeout: shutdownTimeout,
     });
   })
-  .catch(err => {
+  .catch((err) => {
     log.error("Error loading app: %s", err);
     process.exit(1);
   });

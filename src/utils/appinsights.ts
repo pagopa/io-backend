@@ -1,7 +1,7 @@
 import * as appInsights from "applicationinsights";
 import {
   ApplicationInsightsConfig,
-  initAppInsights as startAppInsights
+  initAppInsights as startAppInsights,
 } from "@pagopa/ts-commons/lib/appinsights";
 import { eventLog } from "@pagopa/winston-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -11,7 +11,7 @@ import { Request } from "express";
 import * as E from "fp-ts/lib/Either";
 import {
   sha256,
-  validateDigestHeader
+  validateDigestHeader,
 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { LollipopLocalsType } from "../types/lollipop";
@@ -66,23 +66,23 @@ export function sessionIdPreprocessor(
 ): boolean {
   if (context !== undefined) {
     try {
-      const userTrackingId = context.correlationContext.customProperties.getProperty(
-        USER_TRACKING_ID_KEY
-      );
+      const userTrackingId =
+        context.correlationContext.customProperties.getProperty(
+          USER_TRACKING_ID_KEY
+        );
       if (userTrackingId !== undefined) {
         // eslint-disable-next-line functional/immutable-data
-        envelope.tags[
-          appInsights.defaultClient.context.keys.userId
-        ] = userTrackingId;
+        envelope.tags[appInsights.defaultClient.context.keys.userId] =
+          userTrackingId;
       }
-      const sessionTrackingId = context.correlationContext.customProperties.getProperty(
-        SESSION_TRACKING_ID_KEY
-      );
+      const sessionTrackingId =
+        context.correlationContext.customProperties.getProperty(
+          SESSION_TRACKING_ID_KEY
+        );
       if (sessionTrackingId !== undefined) {
         // eslint-disable-next-line functional/immutable-data
-        envelope.tags[
-          appInsights.defaultClient.context.keys.sessionId
-        ] = sessionTrackingId;
+        envelope.tags[appInsights.defaultClient.context.keys.sessionId] =
+          sessionTrackingId;
       }
     } catch (e) {
       // ignore errors caused by missing properties
@@ -93,7 +93,7 @@ export function sessionIdPreprocessor(
 
 export enum StartupEventName {
   SERVER = "api-backend.httpserver.startup",
-  SPID = "api-backend.spid.config"
+  SPID = "api-backend.spid.config",
 }
 
 export const trackStartupTime = (
@@ -104,9 +104,9 @@ export const trackStartupTime = (
   telemetryClient.trackEvent({
     name: type,
     properties: {
-      time: timeMs.toString()
+      time: timeMs.toString(),
     },
-    tagOverrides: { samplingEnabled: "false" }
+    tagOverrides: { samplingEnabled: "false" },
   });
 };
 
@@ -147,58 +147,59 @@ export type RequestLogLollipop = (
  *
  * @returns void
  */
-export const logLollipopSignRequest = (lollipopConsumerId: NonEmptyString) => <
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends Exclude<Record<string, string>, LollipopLocalsType>
->(
-  lollipopParams: LollipopLocalsType & T,
-  req: Request
-): LCResponseLogLollipop => (
-  lcResponse: E.Either<Error, { readonly status: number }>
-) => {
-  pipe(
-    lollipopParams,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ({ body, ...lollipopHeadersWithoutBody }) =>
-      O.fromNullable(lollipopHeadersWithoutBody),
-    O.map(lollipopHeadersWithoutBody => ({
-      name: LOLLIPOP_SIGN_EVENT_NAME,
-      ...lollipopHeadersWithoutBody,
-      is_valid_content_digest: pipe(
-        O.fromNullable(lollipopParams["content-digest"]),
-        O.map(contentDigest =>
-          pipe(
-            E.tryCatch(
-              () => validateDigestHeader(contentDigest, lollipopParams.body),
-              E.toError
-            ),
-            E.fold(
-              () => false,
-              () => true
+export const logLollipopSignRequest =
+  (lollipopConsumerId: NonEmptyString) =>
+  <
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    T extends Exclude<Record<string, string>, LollipopLocalsType>
+  >(
+    lollipopParams: LollipopLocalsType & T,
+    req: Request
+  ): LCResponseLogLollipop =>
+  (lcResponse: E.Either<Error, { readonly status: number }>) => {
+    pipe(
+      lollipopParams,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ({ body, ...lollipopHeadersWithoutBody }) =>
+        O.fromNullable(lollipopHeadersWithoutBody),
+      O.map((lollipopHeadersWithoutBody) => ({
+        name: LOLLIPOP_SIGN_EVENT_NAME,
+        ...lollipopHeadersWithoutBody,
+        is_valid_content_digest: pipe(
+          O.fromNullable(lollipopParams["content-digest"]),
+          O.map((contentDigest) =>
+            pipe(
+              E.tryCatch(
+                () => validateDigestHeader(contentDigest, lollipopParams.body),
+                E.toError
+              ),
+              E.fold(
+                () => false,
+                () => true
+              )
             )
-          )
+          ),
+          O.toUndefined
         ),
-        O.toUndefined
-      ),
-      // A string rapresenting the response from the LC.
-      lc_response: pipe(
-        lcResponse,
-        E.map(JSON.stringify),
-        E.mapLeft(err => err.message),
-        E.toUnion
-      ),
-      lollipop_consumer_id: lollipopConsumerId,
-      method: req.method,
-      original_url: req.originalUrl,
-      // The fiscal code will be sent hashed to the logs
-      ["x-pagopa-lollipop-user-id"]: sha256(
-        lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
-      )
-    })),
-    O.map(withoutUndefinedValues),
-    eventLog.option.info(lollipopEventData => [
-      `Lollipop Request log`,
-      lollipopEventData
-    ])
-  );
-};
+        // A string rapresenting the response from the LC.
+        lc_response: pipe(
+          lcResponse,
+          E.map(JSON.stringify),
+          E.mapLeft((err) => err.message),
+          E.toUnion
+        ),
+        lollipop_consumer_id: lollipopConsumerId,
+        method: req.method,
+        original_url: req.originalUrl,
+        // The fiscal code will be sent hashed to the logs
+        ["x-pagopa-lollipop-user-id"]: sha256(
+          lollipopHeadersWithoutBody["x-pagopa-lollipop-user-id"]
+        ),
+      })),
+      O.map(withoutUndefinedValues),
+      eventLog.option.info((lollipopEventData) => [
+        `Lollipop Request log`,
+        lollipopEventData,
+      ])
+    );
+  };

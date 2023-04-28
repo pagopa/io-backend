@@ -11,7 +11,7 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson
+  IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
 
@@ -42,7 +42,7 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const response = await this.profileService.getProfile(user);
       return response.kind === "IResponseErrorNotFound"
         ? profileMissingErrorResponse
@@ -62,7 +62,7 @@ export default class ProfileController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<ExtendedProfileApi>
   > =>
-    withUserFromRequest(req, user => this.profileService.getApiProfile(user));
+    withUserFromRequest(req, (user) => this.profileService.getApiProfile(user));
 
   /**
    * Update the preferences for the user identified by the provided
@@ -78,10 +78,10 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<InitializedProfile>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         Profile.decode(req.body),
-        async extendedProfile => {
+        async (extendedProfile) => {
           await this.sessionStorage.delPagoPaNoticeEmail(user);
           return this.profileService.updateProfile(user, extendedProfile);
         }
@@ -100,7 +100,7 @@ export default class ProfileController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       this.profileService.emailValidationProcess(user)
     );
 }

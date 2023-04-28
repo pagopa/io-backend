@@ -15,7 +15,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
@@ -33,7 +33,7 @@ import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -54,10 +54,10 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response => {
+      return withValidatedOrInternalError(validated, (response) => {
         if (response.status === 200) {
           // we need an ExtendedProfile (and that's what we should have got) but
           // since the response may be an ExtendedProfile or a LimitedProfile
@@ -67,7 +67,7 @@ export default class ProfileService {
             response.value
           );
 
-          return withValidatedOrInternalError(validatedExtendedProfile, p =>
+          return withValidatedOrInternalError(validatedExtendedProfile, (p) =>
             ResponseSuccessJson(toInitializedProfile(p, user))
           );
         }
@@ -97,14 +97,14 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.getProfile({
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
-      return withValidatedOrInternalError(validated, response => {
+      return withValidatedOrInternalError(validated, (response) => {
         if (response.status === 200) {
           return pipe(
             response.value,
             ExtendedProfileApi.decode,
-            E.mapLeft(_ =>
+            E.mapLeft((_) =>
               ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
             ),
             E.map(ResponseSuccessJson),
@@ -144,10 +144,10 @@ export default class ProfileService {
     return withCatchAsInternalError(async () => {
       const validated = await client.createProfile({
         body: newProfile,
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? // An empty response.
             ResponseSuccessJson({})
@@ -182,14 +182,14 @@ export default class ProfileService {
       // ExtendedProfile model of the API specs - this decode should always
       // succeed as the models should be exactly the same
       ProfileApi.decode(profileBackend),
-      async extendedProfileApi =>
+      async (extendedProfileApi) =>
         withCatchAsInternalError(async () => {
           const validated = await client.updateProfile({
             body: extendedProfileApi,
-            fiscal_code: user.fiscal_code
+            fiscal_code: user.fiscal_code,
           });
 
-          return withValidatedOrInternalError(validated, response =>
+          return withValidatedOrInternalError(validated, (response) =>
             response.status === 200
               ? ResponseSuccessJson(toInitializedProfile(response.value, user))
               : response.status === 404
@@ -220,9 +220,9 @@ export default class ProfileService {
     const client = this.apiClient.getClient();
     return withCatchAsInternalError(async () => {
       const validated = await client.startEmailValidationProcess({
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 202
           ? ResponseSuccessAccepted()
           : response.status === 404

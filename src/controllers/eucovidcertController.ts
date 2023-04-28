@@ -5,7 +5,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
@@ -21,7 +21,7 @@ export const withGetCertificateParams = async <T>(
 ) =>
   withValidatedOrValidationError(
     GetCertificateParams.decode(req.body.accessData),
-    val => f(val.auth_code, val.preferred_languages)
+    (val) => f(val.auth_code, val.preferred_languages)
   );
 
 export default class EUCovidCertController {
@@ -39,7 +39,7 @@ export default class EUCovidCertController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Certificate>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withGetCertificateParams(req, (auth_code, preferred_languages) =>
         this.eucovidCertService.getEUCovidCertificate(
           user,

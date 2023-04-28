@@ -7,7 +7,7 @@ import { IPecServerClient, pecServerClient } from "../clients/pecserver";
 import {
   PecServersConfig,
   PecServerConfig,
-  getHttpsApiFetchWithBearer
+  getHttpsApiFetchWithBearer,
 } from "../config";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
@@ -15,11 +15,12 @@ const findById = (sources: PecServersConfig, serviceId: NonEmptyString) =>
   O.fromNullable(
     Object.values(sources)
       .filter(PecServerConfig.is)
-      .find(c => c.serviceId === serviceId)
+      .find((c) => c.serviceId === serviceId)
   );
 
 export default class PecServerClientFactory
-  implements IPecServerClientFactoryInterface {
+  implements IPecServerClientFactoryInterface
+{
   private readonly DEFAULT_PEC_CONFIG = this.pecConfigs.poste;
 
   constructor(private readonly pecConfigs: PecServersConfig) {}
@@ -35,13 +36,13 @@ export default class PecServerClientFactory
   ): TE.TaskEither<Error, ReturnType<IPecServerClient>> {
     const pecServerConfig = pipe(
       O.fromNullable(maybeServiceId),
-      O.chain(serviceId => findById(this.pecConfigs, serviceId)),
+      O.chain((serviceId) => findById(this.pecConfigs, serviceId)),
       O.getOrElse(() => this.DEFAULT_PEC_CONFIG)
     );
 
     return pipe(
       bearerGenerator(pecServerConfig),
-      TE.map(token =>
+      TE.map((token) =>
         pecServerClient(
           pecServerConfig.url,
           pecServerConfig.basePath,

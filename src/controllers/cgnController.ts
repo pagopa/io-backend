@@ -13,7 +13,7 @@ import {
   IResponseSuccessAccepted,
   IResponseSuccessJson,
   IResponseSuccessRedirectToResource,
-  ResponseErrorForbiddenNotAuthorized
+  ResponseErrorForbiddenNotAuthorized,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { EycaActivationDetail } from "@pagopa/io-functions-cgn-sdk/EycaActivationDetail";
@@ -54,7 +54,7 @@ export default class CgnController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Card>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -75,7 +75,7 @@ export default class CgnController {
     | IResponseErrorConflict
     | IResponseSuccessJson<EycaCard>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -96,7 +96,7 @@ export default class CgnController {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -116,7 +116,7 @@ export default class CgnController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<CgnActivationDetail>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -136,7 +136,7 @@ export default class CgnController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<EycaActivationDetail>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -157,7 +157,7 @@ export default class CgnController {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -178,7 +178,7 @@ export default class CgnController {
     | IResponseSuccessRedirectToResource<InstanceId, InstanceId>
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,
@@ -197,7 +197,7 @@ export default class CgnController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Otp>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withAllowedUser(
         user,
         this.allowedFiscalCodes,

@@ -4,7 +4,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import {
   IResponseErrorValidation,
-  ResponseErrorValidation
+  ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -30,9 +30,9 @@ export const LollipopRequiredHeaders = t.intersection([
     signature: LollipopSignature,
     ["signature-input"]: LollipopSignatureInput,
     ["x-pagopa-lollipop-original-method"]: LollipopMethod,
-    ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL
+    ["x-pagopa-lollipop-original-url"]: LollipopOriginalURL,
   }),
-  t.partial({ ["content-digest"]: LollipopContentDigest })
+  t.partial({ ["content-digest"]: LollipopContentDigest }),
 ]);
 export type LollipopRequiredHeaders = t.TypeOf<typeof LollipopRequiredHeaders>;
 
@@ -43,12 +43,12 @@ export const LollipopLocalsType = t.intersection([
     ["x-pagopa-lollipop-assertion-type"]: AssertionType,
     ["x-pagopa-lollipop-auth-jwt"]: NonEmptyString,
     ["x-pagopa-lollipop-public-key"]: JwkPubKeyToken,
-    ["x-pagopa-lollipop-user-id"]: FiscalCode
+    ["x-pagopa-lollipop-user-id"]: FiscalCode,
   }),
   t.partial({
     body: t.any,
-    ["content-digest"]: LollipopContentDigest
-  })
+    ["content-digest"]: LollipopContentDigest,
+  }),
 ]);
 export type LollipopLocalsType = t.TypeOf<typeof LollipopLocalsType>;
 

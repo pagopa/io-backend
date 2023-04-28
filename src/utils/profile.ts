@@ -11,9 +11,9 @@ import { InitializedProfile } from "../../generated/backend/InitializedProfile";
 // define a type that represents a Profile with a non optional email address
 const ProfileWithEmail = t.intersection([
   t.interface({
-    email: EmailAddress
+    email: EmailAddress,
   }),
-  InitializedProfile
+  InitializedProfile,
 ]);
 
 type ProfileWithEmail = t.TypeOf<typeof ProfileWithEmail>;
@@ -53,14 +53,16 @@ export const profileWithEmailValidatedOrError = (
       TE.fromPredicate(
         (r): r is IResponseSuccessJson<InitializedProfile> =>
           r.kind === "IResponseSuccessJson",
-        e => new Error(`Error retrieving user profile | ${e.detail}`)
+        (e) => new Error(`Error retrieving user profile | ${e.detail}`)
       )
     ),
-    TE.chainW(profile =>
+    TE.chainW((profile) =>
       pipe(
         profile.value,
         ProfileWithEmailValidated.decode,
-        E.mapLeft(_ => new Error("Profile has not a validated email address")),
+        E.mapLeft(
+          (_) => new Error("Profile has not a validated email address")
+        ),
         TE.fromEither
       )
     )
