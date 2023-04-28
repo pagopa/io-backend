@@ -972,10 +972,12 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@../io-spid-commons":
-  version "11.1.0"
+"@pagopa/io-spid-commons@^12.0.0":
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-12.0.0.tgz#984194d7b5ca80ff83f00194e986c183fc190c04"
+  integrity sha512-xF0tmXzlDI3cem/GcXaInGR28StiB1JpuDaw5nlJPkI/WpOwAKT9GWt9VUTJAfttw7u/YoH7AfFGc0AuE96xwg==
   dependencies:
-    "@pagopa/ts-commons" "../io-ts-commons"
+    "@pagopa/ts-commons" "^12.0.0"
     "@types/redis" "^2.8.32"
     date-fns "^1.30.1"
     fp-ts "2.14.0"
@@ -1009,20 +1011,6 @@
     write-yaml-file "^4.1.3"
     yargs "^15.0.1"
 
-"@pagopa/ts-commons@../io-ts-commons", "@pagopa/ts-commons@^11.0.0":
-  version "11.0.0"
-  dependencies:
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.1.4"
-    applicationinsights "^1.8.10"
-    fp-ts "2.14.0"
-    io-ts "2.2.20"
-    jose "^4.11.2"
-    json-set-map "^1.1.2"
-    node-fetch "^2.6.0"
-    semver "^7.3.7"
-    validator "^13.7.0"
-
 "@pagopa/ts-commons@^10.0.0":
   version "10.2.0"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.2.0.tgz#ac4c65f2d24f8d2c427ab5e7fcb88732976800ef"
@@ -1047,6 +1035,38 @@
     applicationinsights "^1.8.10"
     fp-ts "^2.11.0"
     io-ts "^2.2.16"
+    jose "^4.11.2"
+    json-set-map "^1.1.2"
+    node-fetch "^2.6.0"
+    semver "^7.3.7"
+    validator "^13.7.0"
+
+"@pagopa/ts-commons@^11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-11.0.0.tgz#e0384863e564e87815c43b2ab7999af682ee5fc1"
+  integrity sha512-KA+riHTKhNcv5UGP33+AIYBWx7bAwk3c5/eQAUFl16gDYeXrceQpJ/cq0fyOC0AnUmNuMPiHQOksgjjeioaLIQ==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.4"
+    applicationinsights "^1.8.10"
+    fp-ts "^2.11.0"
+    io-ts "^2.2.16"
+    jose "^4.11.2"
+    json-set-map "^1.1.2"
+    node-fetch "^2.6.0"
+    semver "^7.3.7"
+    validator "^13.7.0"
+
+"@pagopa/ts-commons@^12.0.0":
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-12.0.0.tgz#913ef473f15df9fd594e51394bf12d17a72d6f29"
+  integrity sha512-h+RlSWBgBld/ij1rePH0oGaxYm097dUiIwxxhQwD2AVz9iMpeVPzbneoOzKt4Irwra8+IcSOExEX4rW15xyggQ==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.4"
+    applicationinsights "^1.8.10"
+    fp-ts "2.14.0"
+    io-ts "2.2.20"
     jose "^4.11.2"
     json-set-map "^1.1.2"
     node-fetch "^2.6.0"
