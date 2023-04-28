@@ -9,7 +9,7 @@ import { toBarcode } from "./barcode";
 
 const MIME_TYPES = {
   png: "image/png",
-  svg: "image/svg+xml"
+  svg: "image/svg+xml",
 };
 
 /**
@@ -22,9 +22,9 @@ const MIME_TYPES = {
 const toBarcodeAttachments = (name: string, value: string) =>
   pipe(
     toBarcode(value),
-    TE.map(barcodes => [
+    TE.map((barcodes) => [
       { content: barcodes.png, mime_type: MIME_TYPES.png, name },
-      { content: barcodes.svg, mime_type: MIME_TYPES.svg, name }
+      { content: barcodes.svg, mime_type: MIME_TYPES.svg, name },
     ]),
     TE.mapLeft(() => []),
     TE.toUnion
@@ -45,7 +45,7 @@ export function getPrescriptionAttachments(
       toBarcodeAttachments(
         "prescriber_fiscal_code",
         prescriptionData.prescriber_fiscal_code as string
-      )
+      ),
     ]),
     T.map(A.flatten)
   );

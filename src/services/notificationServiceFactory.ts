@@ -5,7 +5,7 @@ import { flow } from "fp-ts/lib/function";
 import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import {
   FeatureFlag,
-  getIsUserEligibleForNewFeature
+  getIsUserEligibleForNewFeature,
 } from "../utils/featureFlag";
 import { toFiscalCodeHash } from "../types/notification";
 
@@ -45,8 +45,8 @@ export const getNotificationServiceFactory: (
   const isUserACanaryTestUser = getIsUserACanaryTestUser(canaryTestUserRegex);
 
   const isUserEligible = getIsUserEligibleForNewFeature<FiscalCode>(
-    cf => betaTesters.includes(cf),
-    cf => isUserACanaryTestUser(toFiscalCodeHash(cf)),
+    (cf) => betaTesters.includes(cf),
+    (cf) => isUserACanaryTestUser(toFiscalCodeHash(cf)),
     ff
   );
 

@@ -9,26 +9,25 @@ import * as t from "io-ts";
  *
  * @returns either a decode error or the array of decoded items
  */
-export const GetArbitrarySeparatedListOf = (separator: string) => (
-  decoder: t.Mixed
-) =>
-  new t.Type<ReadonlyArray<t.TypeOf<typeof decoder>>, string, unknown>(
-    `ArbitrarySeparatedListOf<${decoder.name}>`,
-    (value: unknown): value is ReadonlyArray<t.TypeOf<typeof decoder>> =>
-      Array.isArray(value) && value.every(e => decoder.is(e)),
-    input =>
-      t.readonlyArray(decoder).decode(
-        typeof input === "string"
-          ? input
-              .split(separator)
-              .map(e => e.trim())
-              .filter(Boolean)
-          : !input
-          ? [] // fallback to empty array in case of empty input
-          : input // it should not happen, but in case we let the decoder fail
-      ),
-    String
-  );
+export const GetArbitrarySeparatedListOf =
+  (separator: string) => (decoder: t.Mixed) =>
+    new t.Type<ReadonlyArray<t.TypeOf<typeof decoder>>, string, unknown>(
+      `ArbitrarySeparatedListOf<${decoder.name}>`,
+      (value: unknown): value is ReadonlyArray<t.TypeOf<typeof decoder>> =>
+        Array.isArray(value) && value.every((e) => decoder.is(e)),
+      (input) =>
+        t.readonlyArray(decoder).decode(
+          typeof input === "string"
+            ? input
+                .split(separator)
+                .map((e) => e.trim())
+                .filter(Boolean)
+            : !input
+            ? [] // fallback to empty array in case of empty input
+            : input // it should not happen, but in case we let the decoder fail
+        ),
+      String
+    );
 
 export const CommaSeparatedListOf = GetArbitrarySeparatedListOf(",");
 export const PipeSeparatedListOf = GetArbitrarySeparatedListOf("|");

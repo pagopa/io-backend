@@ -1,4 +1,3 @@
-import { createMockRedis } from "mock-redis-client";
 import { mockedUser, mockZendeskToken } from "../../__mocks__/user_mock";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import * as passport from "passport";
@@ -9,6 +8,7 @@ import mockReq from "../../__mocks__/request";
 import mockRes from "../../__mocks__/response";
 import { ZendeskToken } from "../../types/token";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { RedisClient } from "redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -19,7 +19,7 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = createMockRedis().createClient();
+const mockRedisClient = {} as RedisClient;
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
@@ -73,7 +73,7 @@ describe("bearerZendeskTokenStrategy", function() {
         session: false
       },
       // this is the "done" function of the strategy
-      (error, user, options) => {
+      (error: any, user: any, options: any) => {
         expect(error).toEqual(null);
         expect(user).toEqual(mockedUser);
         expect(options).toEqual("");
@@ -92,7 +92,7 @@ describe("bearerZendeskTokenStrategy", function() {
         session: false
       },
       // this is the "done" function of the strategy
-      (error, user, options) => {
+      (error: any, user: any, options: any) => {
         expect(error).toEqual(null);
         expect(user).toEqual(mockedUser);
         expect(options).toEqual("");
@@ -111,7 +111,7 @@ describe("bearerZendeskTokenStrategy", function() {
         session: false
       },
       // this is the "done" function of the strategy
-      (error, user, options) => {
+      (error: any, user: any, options: any) => {
         expect(error).toEqual(errorMessage);
         expect(user).toEqual(undefined);
         expect(options).toEqual(undefined);

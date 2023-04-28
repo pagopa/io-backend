@@ -57,15 +57,12 @@ export const nestifyPrefixedType = (
 ): Record<string, unknown> =>
   pipe(
     env,
-    R.filterWithIndex(fieldName => fieldName.split("_")[0] === prefix),
+    R.filterWithIndex((fieldName) => fieldName.split("_")[0] === prefix),
     R.reduceWithIndex({}, (k, b, a) =>
       set(
         b,
         // eslint-disable-next-line functional/immutable-data
-        k
-          .split("_")
-          .splice(1)
-          .join("."),
+        k.split("_").splice(1).join("."),
         a
       )
     )
@@ -74,18 +71,17 @@ export const nestifyPrefixedType = (
 const isRecordOfString = (i: unknown): i is Record<string, unknown> =>
   typeof i === "object" &&
   i !== null &&
-  !Object.keys(i).some(property => typeof property !== "string");
+  !Object.keys(i).some((property) => typeof property !== "string");
 
-const createNotRecordOfStringErrorL = (
-  input: unknown,
-  context: t.Context
-) => (): t.Errors => [
-  {
-    context,
-    message: "input is not a valid record of string",
-    value: input
-  }
-];
+const createNotRecordOfStringErrorL =
+  (input: unknown, context: t.Context) => (): t.Errors =>
+    [
+      {
+        context,
+        message: "input is not a valid record of string",
+        value: input,
+      },
+    ];
 
 /**
  * Create a io-ts decoder for the input type.
@@ -110,7 +106,7 @@ export const ognlTypeFor = <T>(
           isRecordOfString,
           createNotRecordOfStringErrorL(input, context)
         ),
-        E.chainW(inputRecord =>
+        E.chainW((inputRecord) =>
           type.validate(nestifyPrefixedType(inputRecord, prefix), context)
         )
       ),

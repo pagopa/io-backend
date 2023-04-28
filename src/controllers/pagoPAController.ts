@@ -14,7 +14,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { ISessionStorage } from "src/services/ISessionStorage";
 import { pipe } from "fp-ts/lib/function";
@@ -45,14 +45,14 @@ export default class PagoPAController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PagoPAUser>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const getProfileAndSaveNoticeEmailCache = pipe(
         TE.tryCatch(
           () => this.profileService.getProfile(user),
           () => new Error("Error getting the profile")
         ),
-        TE.mapLeft(_ => ResponseErrorInternal("Internal server error")),
-        TE.chain(response => {
+        TE.mapLeft((_) => ResponseErrorInternal("Internal server error")),
+        TE.chain((response) => {
           if (response.kind !== "IResponseSuccessJson") {
             return TE.left(response);
           }
@@ -64,7 +64,7 @@ export default class PagoPAController {
               : user.spid_email;
           return TE.of(O.fromNullable(maybeNoticeEmail));
         }),
-        TE.chain(maybeNoticeEmail => {
+        TE.chain((maybeNoticeEmail) => {
           if (O.isNone(maybeNoticeEmail)) {
             return TE.of(maybeNoticeEmail as O.Option<EmailString>);
           }
@@ -77,8 +77,8 @@ export default class PagoPAController {
                 ),
               () => new Error("Error caching the notify email value")
             ),
-            TE.orElseW(_1 => TE.of(maybeNoticeEmail)),
-            TE.chain(_1 => TE.of(maybeNoticeEmail))
+            TE.orElseW((_1) => TE.of(maybeNoticeEmail)),
+            TE.chain((_1) => TE.of(maybeNoticeEmail))
           );
         })
       );
@@ -87,11 +87,11 @@ export default class PagoPAController {
         ? pipe(
             TE.tryCatch(
               () => this.sessionStorage.getPagoPaNoticeEmail(user),
-              _ => new Error("Error reading the notify email cache")
+              (_) => new Error("Error reading the notify email cache")
             ),
             TE.chain(TE.fromEither),
             TE.map(O.some),
-            TE.orElse(_ => getProfileAndSaveNoticeEmailCache)
+            TE.orElse((_) => getProfileAndSaveNoticeEmailCache)
           )
         : getProfileAndSaveNoticeEmailCache)();
 
@@ -106,10 +106,10 @@ export default class PagoPAController {
           fiscal_code: user.fiscal_code,
           name: user.name,
           notice_email: O.toUndefined(errorResponseOrNoticeEmail.right),
-          spid_email: user.spid_email
+          spid_email: user.spid_email,
         },
         PagoPAUser.decode,
-        E.mapLeft(_ =>
+        E.mapLeft((_) =>
           ResponseErrorValidation(VALIDATION_ERROR_TITLE, "Invalid User Data")
         ),
         E.map(ResponseSuccessJson),

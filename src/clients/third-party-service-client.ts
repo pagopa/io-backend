@@ -9,11 +9,11 @@ import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
   ApiKeyAuthenticationConfig,
-  EnvironmentConfig
+  EnvironmentConfig,
 } from "../../src/utils/thirdPartyConfig";
 import {
   Client,
-  createClient
+  createClient,
 } from "../../generated/third-party-service/client";
 
 import { pnFetch } from "../adapters/pnFetch";
@@ -33,24 +33,27 @@ export type ThirdPartyServiceClient = typeof getThirdPartyServiceClient;
  * @param apiKey the api key couple name/value to be added to fetch
  * @returns a fetch with api key name/value in header
  */
-const withApiKey = (apiKey: ApiKeyAuthenticationConfig) => (
-  fetchApi: Fetch
-): Fetch => async (input, init) =>
-  fetchApi(input, {
-    ...init,
-    headers: {
-      ...(init?.headers ?? {}),
-      ...{ [apiKey.header_key_name]: apiKey.key }
-    }
-  });
+const withApiKey =
+  (apiKey: ApiKeyAuthenticationConfig) =>
+  (fetchApi: Fetch): Fetch =>
+  async (input, init) =>
+    fetchApi(input, {
+      ...init,
+      headers: {
+        ...(init?.headers ?? {}),
+        ...{ [apiKey.header_key_name]: apiKey.key },
+      },
+    });
 
 /**
  * Enrich a fetch api with manual redirect configuration
  *
  * @returns a fetch with manual redirect
  */
-const withoutRedirect = (fetchApi: Fetch): Fetch => async (input, init) =>
-  fetchApi(input, { ...init, redirect: "manual" });
+const withoutRedirect =
+  (fetchApi: Fetch): Fetch =>
+  async (input, init) =>
+    fetchApi(input, { ...init, redirect: "manual" });
 
 /**
  * Enrich a fetch api with pnFetch
@@ -59,15 +62,15 @@ const withoutRedirect = (fetchApi: Fetch): Fetch => async (input, init) =>
  * @param environment the enviroment to call (test/prod)
  * @returns a fetch that redirects calls in case TP is PN service
  */
-const withPNFetch = (serviceId: ServiceId, environment: EnvironmentConfig) => (
-  fetchApi: Fetch
-): Fetch =>
-  pnFetch(
-    fetchApi,
-    serviceId,
-    environment.baseUrl,
-    environment.detailsAuthentication.key
-  ) as Fetch;
+const withPNFetch =
+  (serviceId: ServiceId, environment: EnvironmentConfig) =>
+  (fetchApi: Fetch): Fetch =>
+    pnFetch(
+      fetchApi,
+      serviceId,
+      environment.baseUrl,
+      environment.detailsAuthentication.key
+    ) as Fetch;
 
 // ------------------
 
@@ -78,36 +81,35 @@ const withPNFetch = (serviceId: ServiceId, environment: EnvironmentConfig) => (
  * @param fetchApi
  * @returns
  */
-export const getThirdPartyServiceClient = (
-  thirdPartyConfig: ThirdPartyConfig,
-  fetchApi: Fetch
-) => (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
-  const environment = thirdPartyConfig.testEnvironment?.testUsers.includes(
-    fiscalCode
-  )
-    ? thirdPartyConfig.testEnvironment
-    : // We defined thirdPartyConfig to contains at least one configuration
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      thirdPartyConfig.prodEnvironment ?? thirdPartyConfig.testEnvironment!;
+export const getThirdPartyServiceClient =
+  (thirdPartyConfig: ThirdPartyConfig, fetchApi: Fetch) =>
+  (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
+    const environment = thirdPartyConfig.testEnvironment?.testUsers.includes(
+      fiscalCode
+    )
+      ? thirdPartyConfig.testEnvironment
+      : // We defined thirdPartyConfig to contains at least one configuration
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        thirdPartyConfig.prodEnvironment ?? thirdPartyConfig.testEnvironment!;
 
-  const fetchApiWithRedirectAndAuthentication = pipe(
-    fetchApi,
-    withoutRedirect,
-    withApiKey(environment.detailsAuthentication),
-    withPNFetch(thirdPartyConfig.serviceId, environment)
-  );
+    const fetchApiWithRedirectAndAuthentication = pipe(
+      fetchApi,
+      withoutRedirect,
+      withApiKey(environment.detailsAuthentication),
+      withPNFetch(thirdPartyConfig.serviceId, environment)
+    );
 
-  return createClient<"fiscal_code">({
-    basePath: "",
-    baseUrl: environment.baseUrl,
-    fetchApi: fetchApiWithRedirectAndAuthentication,
-    withDefaults: op => params =>
-      op({
-        ...params,
-        fiscal_code: fiscalCode
-      })
-  });
-};
+    return createClient<"fiscal_code">({
+      basePath: "",
+      baseUrl: environment.baseUrl,
+      fetchApi: fetchApiWithRedirectAndAuthentication,
+      withDefaults: (op) => (params) =>
+        op({
+          ...params,
+          fiscal_code: fiscalCode,
+        }),
+    });
+  };
 
 export type ThirdPartyServiceClientFactory = ReturnType<
   typeof getThirdPartyServiceClientFactory
@@ -120,14 +122,18 @@ export type ThirdPartyServiceClientFactory = ReturnType<
  * @param fetchApi
  * @returns
  */
-export const getThirdPartyServiceClientFactory = (
-  thirdPartyConfigList: ThirdPartyConfigListFromString,
-  fetchApi: Fetch = (nodeFetch as unknown) as Fetch
-): ((
-  serviceId: ServiceId
-) => E.Either<Error, ReturnType<ThirdPartyServiceClient>>) => serviceId =>
-  pipe(
-    thirdPartyConfigList.find(c => c.serviceId === serviceId),
-    E.fromNullable(Error(`Cannot find configuration for service ${serviceId}`)),
-    E.map(config => getThirdPartyServiceClient(config, fetchApi))
-  );
+export const getThirdPartyServiceClientFactory =
+  (
+    thirdPartyConfigList: ThirdPartyConfigListFromString,
+    fetchApi: Fetch = nodeFetch as unknown as Fetch
+  ): ((
+    serviceId: ServiceId
+  ) => E.Either<Error, ReturnType<ThirdPartyServiceClient>>) =>
+  (serviceId) =>
+    pipe(
+      thirdPartyConfigList.find((c) => c.serviceId === serviceId),
+      E.fromNullable(
+        Error(`Cannot find configuration for service ${serviceId}`)
+      ),
+      E.map((config) => getThirdPartyServiceClient(config, fetchApi))
+    );

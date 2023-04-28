@@ -11,7 +11,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorConflict,
   ResponseErrorInternal,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as E from "fp-ts/lib/Either";
@@ -21,7 +21,7 @@ import { UserMetadata } from "../../generated/backend/UserMetadata";
 import { IUserMetadataStorage } from "../services/IUserMetadataStorage";
 import {
   invalidVersionNumberError,
-  metadataNotFoundError
+  metadataNotFoundError,
 } from "../services/redisUserMetadataStorage";
 import { withUserFromRequest } from "../types/user";
 import { withValidatedOrValidationError } from "../utils/responses";
@@ -40,7 +40,7 @@ export default class UserMetadataController {
     | IResponseNoContent
     | IResponseSuccessJson<UserMetadata>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const metadata = await this.userMetadataStorage.get(user);
       if (E.isLeft(metadata)) {
         return metadata.left === metadataNotFoundError
@@ -65,10 +65,10 @@ export default class UserMetadataController {
     | IResponseErrorInternal
     | IResponseSuccessJson<UserMetadata>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         UserMetadata.decode(req.body),
-        async metadata => {
+        async (metadata) => {
           const setMetadataResponse = await this.userMetadataStorage.set(
             user,
             metadata

@@ -12,7 +12,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessAccepted,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/lib/TaskEither";
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
@@ -29,7 +29,7 @@ import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import { readableProblem } from "../utils/errorsFormatter";
 
@@ -50,10 +50,10 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getBonusEligibilityCheck({
-        fiscalcode: user.fiscal_code
+        fiscalcode: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response => {
+      return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
             return ResponseSuccessJson(response.value);
@@ -91,16 +91,16 @@ export default class BonusService {
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getLatestBonusActivationById({
         bonus_id: bonusId,
-        fiscalcode: user.fiscal_code
+        fiscalcode: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response => {
+      return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
             return pipe(
               withQrcode(response.value),
-              TE.map(bonus => ResponseSuccessJson(bonus)),
-              TE.mapLeft(err =>
+              TE.map((bonus) => ResponseSuccessJson(bonus)),
+              TE.mapLeft((err) =>
                 ResponseErrorInternal(
                   `Cannot encode qrcode: ${JSON.stringify(err)}`
                 )
@@ -137,10 +137,10 @@ export default class BonusService {
   > =>
     withCatchAsInternalError(async () => {
       const validated = await this.bonusApiClient.getAllBonusActivations({
-        fiscalcode: user.fiscal_code
+        fiscalcode: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response => {
+      return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
             return ResponseSuccessJson(response.value);

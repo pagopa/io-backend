@@ -15,7 +15,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseSuccessAccepted,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 
@@ -27,7 +27,7 @@ import { User } from "../types/user";
 import {
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -50,10 +50,10 @@ export default class UserDataProcessingService {
     return withCatchAsInternalError(async () => {
       const validated = await client.upsertUserDataProcessing({
         body: userDataProcessingChoiceRequest,
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 429
@@ -86,10 +86,10 @@ export default class UserDataProcessingService {
     return withCatchAsInternalError(async () => {
       const validated = await client.getUserDataProcessing({
         choice: userDataProcessingChoiceParam,
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? ResponseSuccessJson(response.value)
           : response.status === 404
@@ -119,10 +119,10 @@ export default class UserDataProcessingService {
     return withCatchAsInternalError(async () => {
       const validated = await client.abortUserDataProcessing({
         choice: userDataProcessingChoiceParam,
-        fiscal_code: user.fiscal_code
+        fiscal_code: user.fiscal_code,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 202
           ? ResponseSuccessAccepted()
           : response.status === 404

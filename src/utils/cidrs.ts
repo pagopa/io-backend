@@ -12,8 +12,8 @@ export function decodeCIDRs(
     cidrs
       // may be a comma separated list of CIDR(s) or IP(s)
       ?.split(",")
-      .map(c => c.trim())
+      .map((c) => c.trim())
       // if we read a plain IP then append '/32'
-      .map(c => (c.indexOf("/") !== -1 ? c : c + "/32"))
+      .map((c) => (c.indexOf("/") !== -1 ? c : c + "/32"))
   );
 }

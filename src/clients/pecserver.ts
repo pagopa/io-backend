@@ -14,12 +14,12 @@ interface GetAttachmentBodyT {
 export const pecServerClient = (
   baseUrl: string,
   basePath: string,
-  fetchApi: typeof fetch = (nodeFetch as unknown) as typeof fetch // TODO: customize fetch with timeout
+  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch // TODO: customize fetch with timeout
 ): pecClient.Client & GetAttachmentBodyT => ({
   ...pecClient.createClient({
     basePath,
     baseUrl,
-    fetchApi
+    fetchApi,
   }),
   ...{
     /**
@@ -40,30 +40,30 @@ export const pecServerClient = (
           E.toError
         ),
         TE.mapLeft(
-          fetchError =>
+          (fetchError) =>
             new Error(
               `Failed to perform fetch call for MVL attachment|ERROR=${fetchError.message}`
             )
         ),
         TE.chain(
           TE.fromPredicate(
-            r => r.status === 200,
-            r => new Error(`Failed to fetch MVL attachment: ${r.status}`)
+            (r) => r.status === 200,
+            (r) => new Error(`Failed to fetch MVL attachment: ${r.status}`)
           )
         ),
-        TE.chain(rawResponse =>
+        TE.chain((rawResponse) =>
           pipe(
             TE.tryCatch(() => rawResponse.arrayBuffer(), E.toError),
             TE.mapLeft(
-              bufferError =>
+              (bufferError) =>
                 new Error(
                   `Failed to parse MVL attachment's buffer|ERROR=${bufferError.message}`
                 )
             ),
-            TE.map(attachment => Buffer.from(attachment))
+            TE.map((attachment) => Buffer.from(attachment))
           )
         )
-      )
-  }
+      ),
+  },
 });
 export type IPecServerClient = typeof pecServerClient;

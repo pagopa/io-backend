@@ -17,7 +17,7 @@ const bearerFIMSTokenStrategy = (
   const options = {
     passReqToCallback: true,
     realm: "Proxy API",
-    scope: "request"
+    scope: "request",
   };
   return new passport.Strategy<passport.VerifyFunctionWithRequest>(
     options,

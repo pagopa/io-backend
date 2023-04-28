@@ -28,8 +28,8 @@ export const getObjectFromPackageJson = <T>(
   pipe(
     type.decode(packageJson[key]),
     E.fold(
-      _ => O.none,
-      _ => O.some(_)
+      (_) => O.none,
+      (_) => O.some(_)
     )
   );
 

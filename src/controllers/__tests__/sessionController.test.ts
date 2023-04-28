@@ -1,4 +1,3 @@
-import { createMockRedis } from "mock-redis-client";
 import { SessionInfo } from "../../../generated/backend/SessionInfo";
 import { SessionsList } from "../../../generated/backend/SessionsList";
 import mockReq from "../../__mocks__/request";
@@ -23,6 +22,7 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import * as crypto from "crypto";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
+import { RedisClient } from "redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -33,7 +33,8 @@ const mockSmembers = jest.fn();
 const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
-const mockRedisClient = createMockRedis().createClient();
+const mockExists = jest.fn();
+const mockRedisClient = {} as RedisClient;
 mockRedisClient.get = mockGet;
 mockRedisClient.mget = mockMget;
 mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
@@ -43,6 +44,7 @@ mockRedisClient.sismember = mockSismember;
 mockRedisClient.ttl = mockTtl;
 mockRedisClient.set = mockSet;
 mockRedisClient.srem = mockSrem;
+mockRedisClient.exists = mockExists;
 
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
@@ -272,6 +274,9 @@ describe("SessionController#listSessions", () => {
     req.user = mockedUser;
     mockSrem.mockImplementationOnce((_, __, callback) =>
       callback(undefined, true)
+    );
+    mockExists.mockImplementationOnce((_, callback) =>
+      callback(undefined, false)
     );
 
     const response = await controller.listSessions(req);

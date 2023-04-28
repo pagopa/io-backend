@@ -12,8 +12,8 @@ export const UserLogin = t.interface({
   lastLoginAt: UTCISODateFromString,
   source: t.keyof({
     cie: null,
-    spid: null
-  })
+    spid: null,
+  }),
 });
 
 export type UserLogin = t.TypeOf<typeof UserLogin>;

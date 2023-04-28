@@ -9,7 +9,7 @@ import {
   FiscalCode,
   IPString,
   NonEmptyString,
-  PatternString
+  PatternString,
 } from "@pagopa/ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 import { pipe } from "fp-ts/lib/function";
@@ -18,7 +18,7 @@ import { base64EncodeObject } from "./messages";
 
 const SAML_NAMESPACE = {
   ASSERTION: "urn:oasis:names:tc:SAML:2.0:assertion",
-  PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol"
+  PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol",
 };
 
 export const getFiscalNumberFromPayload = (
@@ -28,26 +28,26 @@ export const getFiscalNumberFromPayload = (
     O.fromNullable(
       doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
     ),
-    O.chainNullableK(collection =>
+    O.chainNullableK((collection) =>
       Array.from(collection).find(
-        elem => elem.getAttribute("Name") === "fiscalNumber"
+        (elem) => elem.getAttribute("Name") === "fiscalNumber"
       )
     ),
-    O.chainNullableK(_ => _.textContent?.trim().replace("TINIT-", "")),
-    O.chain(_ => O.fromEither(FiscalCode.decode(_)))
+    O.chainNullableK((_) => _.textContent?.trim().replace("TINIT-", "")),
+    O.chain((_) => O.fromEither(FiscalCode.decode(_)))
   );
 
-const getRequestIDFromPayload = (tagName: string, attrName: string) => (
-  doc: Document
-): O.Option<string> =>
-  pipe(
-    O.fromNullable(
-      doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
-    ),
-    O.chain(element =>
-      O.fromEither(NonEmptyString.decode(element.getAttribute(attrName)))
-    )
-  );
+const getRequestIDFromPayload =
+  (tagName: string, attrName: string) =>
+  (doc: Document): O.Option<string> =>
+    pipe(
+      O.fromNullable(
+        doc.getElementsByTagNameNS(SAML_NAMESPACE.PROTOCOL, tagName).item(0)
+      ),
+      O.chain((element) =>
+        O.fromEither(NonEmptyString.decode(element.getAttribute(attrName)))
+      )
+    );
 
 export const getRequestIDFromRequest = getRequestIDFromPayload(
   "AuthnRequest",
@@ -79,76 +79,78 @@ const SpidMsg = t.interface({
   responsePayload: t.string,
 
   // SPID request id
-  spidRequestId: t.union([t.undefined, t.string])
+  spidRequestId: t.union([t.undefined, t.string]),
 });
 
 type SpidMsg = t.TypeOf<typeof SpidMsg>;
 
-export const makeSpidLogCallback = (queueClient: QueueClient) => (
-  sourceIp: string | null,
-  requestPayload: string,
-  responsePayload: string
-): void => {
-  const logPrefix = `SpidLogCallback`;
-  E.tryCatch(
-    () => {
-      const responseXML = new DOMParser().parseFromString(
-        responsePayload,
-        "text/xml"
-      );
-      if (!responseXML) {
-        log.error(`${logPrefix}|ERROR=Cannot parse SPID XML`);
-        return;
-      }
-
-      const maybeRequestId = getRequestIDFromResponse(responseXML);
-      if (O.isNone(maybeRequestId)) {
-        log.error(`${logPrefix}|ERROR=Cannot get Request ID from SPID XML`);
-        return;
-      }
-      const requestId = maybeRequestId.value;
-
-      const maybeFiscalCode = getFiscalNumberFromPayload(responseXML);
-      if (O.isNone(maybeFiscalCode)) {
-        log.error(
-          `${logPrefix}|ERROR=Cannot get user's fiscal Code from SPID XML`
+export const makeSpidLogCallback =
+  (queueClient: QueueClient) =>
+  (
+    sourceIp: string | null,
+    requestPayload: string,
+    responsePayload: string
+  ): void => {
+    const logPrefix = `SpidLogCallback`;
+    E.tryCatch(
+      () => {
+        const responseXML = new DOMParser().parseFromString(
+          responsePayload,
+          "text/xml"
         );
-        return;
+        if (!responseXML) {
+          log.error(`${logPrefix}|ERROR=Cannot parse SPID XML`);
+          return;
+        }
+
+        const maybeRequestId = getRequestIDFromResponse(responseXML);
+        if (O.isNone(maybeRequestId)) {
+          log.error(`${logPrefix}|ERROR=Cannot get Request ID from SPID XML`);
+          return;
+        }
+        const requestId = maybeRequestId.value;
+
+        const maybeFiscalCode = getFiscalNumberFromPayload(responseXML);
+        if (O.isNone(maybeFiscalCode)) {
+          log.error(
+            `${logPrefix}|ERROR=Cannot get user's fiscal Code from SPID XML`
+          );
+          return;
+        }
+        const fiscalCode = maybeFiscalCode.value;
+
+        const errorOrSpidMsg = SpidMsg.decode({
+          createdAt: new Date(),
+          createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
+          fiscalCode,
+          ip: sourceIp as IPString,
+          requestPayload,
+          responsePayload,
+          spidRequestId: requestId,
+        } as SpidMsg);
+
+        if (E.isLeft(errorOrSpidMsg)) {
+          log.error(`${logPrefix}|ERROR=Invalid format for SPID log payload`);
+          log.debug(
+            `${logPrefix}|ERROR_DETAILS=${readableReport(errorOrSpidMsg.left)}`
+          );
+          return;
+        }
+        const spidMsg = errorOrSpidMsg.right;
+
+        // encode to base64 since the queue payload is an XML
+        // and cannot contain markup characters
+        const spidMsgBase64 = base64EncodeObject(spidMsg);
+
+        // we don't return the promise here
+        // the call follows fire & forget pattern
+        queueClient.sendMessage(spidMsgBase64).catch((err) => {
+          log.error(`${logPrefix}|ERROR=Cannot enqueue SPID log`);
+          log.debug(`${logPrefix}|ERROR_DETAILS=${err}`);
+        });
+      },
+      (err) => {
+        log.error(`${logPrefix}|ERROR=${err}`);
       }
-      const fiscalCode = maybeFiscalCode.value;
-
-      const errorOrSpidMsg = SpidMsg.decode({
-        createdAt: new Date(),
-        createdAtDay: dateFnsFormat(new Date(), "YYYY-MM-DD"),
-        fiscalCode,
-        ip: sourceIp as IPString,
-        requestPayload,
-        responsePayload,
-        spidRequestId: requestId
-      } as SpidMsg);
-
-      if (E.isLeft(errorOrSpidMsg)) {
-        log.error(`${logPrefix}|ERROR=Invalid format for SPID log payload`);
-        log.debug(
-          `${logPrefix}|ERROR_DETAILS=${readableReport(errorOrSpidMsg.left)}`
-        );
-        return;
-      }
-      const spidMsg = errorOrSpidMsg.right;
-
-      // encode to base64 since the queue payload is an XML
-      // and cannot contain markup characters
-      const spidMsgBase64 = base64EncodeObject(spidMsg);
-
-      // we don't return the promise here
-      // the call follows fire & forget pattern
-      queueClient.sendMessage(spidMsgBase64).catch(err => {
-        log.error(`${logPrefix}|ERROR=Cannot enqueue SPID log`);
-        log.debug(`${logPrefix}|ERROR_DETAILS=${err}`);
-      });
-    },
-    err => {
-      log.error(`${logPrefix}|ERROR=${err}`);
-    }
-  );
-};
+    );
+  };

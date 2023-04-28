@@ -6,7 +6,7 @@ import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
-  ResponseErrorInternal
+  ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
 import { identity, pipe } from "fp-ts/lib/function";
@@ -18,7 +18,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorValidation,
   IResponseSuccessJson,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import ProfileService from "../services/profileService";
 
@@ -39,14 +39,14 @@ export const getUserForMyPortal = (
   | IResponseErrorInternal
   | IResponseSuccessJson<MyPortalUser>
 > =>
-  withUserFromRequest(req, async user =>
+  withUserFromRequest(req, async (user) =>
     withValidatedOrInternalError(
       MyPortalUser.decode({
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
-        name: user.name
+        name: user.name,
       }),
-      _ => ResponseSuccessJson(_)
+      (_) => ResponseSuccessJson(_)
     )
   );
 
@@ -61,60 +61,62 @@ export const getUserForBPD = (
   | IResponseErrorInternal
   | IResponseSuccessJson<BPDUser>
 > =>
-  withUserFromRequest(req, async user =>
+  withUserFromRequest(req, async (user) =>
     withValidatedOrInternalError(
       BPDUser.decode({
         family_name: user.family_name,
         fiscal_code: user.fiscal_code,
-        name: user.name
+        name: user.name,
       }),
-      _ => ResponseSuccessJson(_)
+      (_) => ResponseSuccessJson(_)
     )
   );
 
-export const getUserForFIMS = (profileService: ProfileService) => (
-  req: express.Request
-): Promise<
-  | IResponseErrorValidation
-  | IResponseErrorInternal
-  | IResponseErrorTooManyRequests
-  | IResponseErrorNotFound
-  | IResponseSuccessJson<FIMSUser>
-> =>
-  withUserFromRequest(req, async user =>
-    pipe(
-      TE.tryCatch(
-        () => profileService.getProfile(user),
-        () => ResponseErrorInternal("Cannot retrieve profile")
-      ),
-      TE.chain(r =>
-        r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
-      ),
-      TE.chainW(userProfile =>
-        TE.fromEither(
-          pipe(
-            FIMSUser.decode({
-              acr: user.spid_level,
-              auth_time: user.created_at,
-              date_of_birth: user.date_of_birth,
-              // If the email is not validated yet, the value returned will be undefined
-              email: pipe(
-                O.fromNullable(userProfile.is_email_validated),
-                O.chain(fromPredicate(identity)),
-                O.chain(() => O.fromNullable(userProfile.email)),
-                O.toUndefined
-              ),
-              family_name: user.family_name,
-              fiscal_code: user.fiscal_code,
-              name: user.name
-            }),
-            E.mapLeft(_ =>
-              ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
+export const getUserForFIMS =
+  (profileService: ProfileService) =>
+  (
+    req: express.Request
+  ): Promise<
+    | IResponseErrorValidation
+    | IResponseErrorInternal
+    | IResponseErrorTooManyRequests
+    | IResponseErrorNotFound
+    | IResponseSuccessJson<FIMSUser>
+  > =>
+    withUserFromRequest(req, async (user) =>
+      pipe(
+        TE.tryCatch(
+          () => profileService.getProfile(user),
+          () => ResponseErrorInternal("Cannot retrieve profile")
+        ),
+        TE.chain((r) =>
+          r.kind === "IResponseSuccessJson" ? TE.of(r.value) : TE.left(r)
+        ),
+        TE.chainW((userProfile) =>
+          TE.fromEither(
+            pipe(
+              FIMSUser.decode({
+                acr: user.spid_level,
+                auth_time: user.created_at,
+                date_of_birth: user.date_of_birth,
+                // If the email is not validated yet, the value returned will be undefined
+                email: pipe(
+                  O.fromNullable(userProfile.is_email_validated),
+                  O.chain(fromPredicate(identity)),
+                  O.chain(() => O.fromNullable(userProfile.email)),
+                  O.toUndefined
+                ),
+                family_name: user.family_name,
+                fiscal_code: user.fiscal_code,
+                name: user.name,
+              }),
+              E.mapLeft((_) =>
+                ResponseErrorInternal(errorsToReadableMessages(_).join(" / "))
+              )
             )
           )
-        )
-      ),
-      TE.map(ResponseSuccessJson),
-      TE.toUnion
-    )()
-  );
+        ),
+        TE.map(ResponseSuccessJson),
+        TE.toUnion
+      )()
+    );

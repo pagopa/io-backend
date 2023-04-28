@@ -9,7 +9,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import {
   FiscalCode,
   NonEmptyString,
-  EmailString
+  EmailString,
 } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import * as jwt from "jsonwebtoken";
@@ -34,7 +34,7 @@ export default class TokenService {
    */
   public getNewTokenAsync(length: number): Promise<string> {
     // Use the crypto.randomBytes as token.
-    return asyncRandomBytes(length).then(_ => _.toString("hex"));
+    return asyncRandomBytes(length).then((_) => _.toString("hex"));
   }
 
   /**
@@ -52,7 +52,7 @@ export default class TokenService {
     issuer: NonEmptyString
   ): TaskEither<Error, string> {
     return pipe(
-      TE.taskify<Error, string>(cb =>
+      TE.taskify<Error, string>((cb) =>
         jwt.sign(
           { fiscalCode },
           privateKey,
@@ -60,7 +60,7 @@ export default class TokenService {
             algorithm: "RS256",
             expiresIn: `${tokenTtl} seconds`,
             issuer,
-            jwtid: ulid()
+            jwtid: ulid(),
           },
           cb
         )
@@ -91,20 +91,20 @@ export default class TokenService {
     issuer: NonEmptyString
   ): TaskEither<Error, string> {
     return pipe(
-      TE.taskify<Error, string>(cb =>
+      TE.taskify<Error, string>((cb) =>
         jwt.sign(
           {
             email: emailAddress,
             external_id: fiscalCode,
             iat: new Date().getTime() / 1000,
             jti: ulid(),
-            name: `${name} ${familyName}`
+            name: `${name} ${familyName}`,
           },
           secret,
           {
             algorithm: "HS256",
             expiresIn: `${tokenTtl} seconds`,
-            issuer
+            issuer,
           },
           cb
         )
@@ -130,7 +130,7 @@ export default class TokenService {
     audience: NonEmptyString
   ): TaskEither<Error, string> {
     return pipe(
-      TE.taskify<Error, string>(cb =>
+      TE.taskify<Error, string>((cb) =>
         jwt.sign(
           {},
           privateKey,
@@ -139,7 +139,7 @@ export default class TokenService {
             audience,
             expiresIn: `${tokenTtl} seconds`,
             issuer,
-            subject: fiscalCode
+            subject: fiscalCode,
           },
           cb
         )
@@ -154,23 +154,23 @@ export default class TokenService {
    * @param config: The Pec Server configuration
    * @param fiscalCode: The logged user's fiscal code
    */
-  public readonly getPecServerTokenHandler = (fiscalCode: FiscalCode) => (
-    config: PecServerConfig
-  ): TE.TaskEither<Error, string> =>
-    pipe(
-      TE.taskify<Error, string>(cb =>
-        jwt.sign(
-          {
-            account: fiscalCode
-          },
-          config.secret,
-          {
-            algorithm: "HS256",
-            noTimestamp: true
-          },
-          cb
-        )
-      )(),
-      TE.mapLeft(E.toError)
-    );
+  public readonly getPecServerTokenHandler =
+    (fiscalCode: FiscalCode) =>
+    (config: PecServerConfig): TE.TaskEither<Error, string> =>
+      pipe(
+        TE.taskify<Error, string>((cb) =>
+          jwt.sign(
+            {
+              account: fiscalCode,
+            },
+            config.secret,
+            {
+              algorithm: "HS256",
+              noTimestamp: true,
+            },
+            cb
+          )
+        )(),
+        TE.mapLeft(E.toError)
+      );
 }

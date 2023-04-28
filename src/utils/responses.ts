@@ -7,7 +7,7 @@ import * as E from "fp-ts/lib/Either";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IWithinRangeIntegerTag,
-  WithinRangeInteger
+  WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 import {
   HttpStatusCodeEnum,
@@ -17,7 +17,7 @@ import {
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorNotFound,
-  ResponseErrorValidation
+  ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -37,7 +37,7 @@ export function ResponseNoContent(): IResponseNoContent {
   return {
     apply: (res: express.Response): unknown => res.status(204).json({}),
     kind: "IResponseNoContent",
-    value: {}
+    value: {},
   };
 }
 
@@ -56,7 +56,7 @@ export const withCatchAsInternalError = <T>(
   f: () => Promise<T>,
   message: string = "Exception while calling upstream API (likely a timeout)."
 ): Promise<T | IResponseErrorInternal> =>
-  f().catch(_ => {
+  f().catch((_) => {
     // eslint-disable-next-line no-console
     console.error(_);
     return ResponseErrorInternal(`${message} [${_}]`);
@@ -114,8 +114,8 @@ export function ResponseErrorUnauthorizedForLegalReasons(
     ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_451, title, detail),
     ...{
       detail: `${title}: ${detail}`,
-      kind: "IResponseErrorUnauthorizedForLegalReasons"
-    }
+      kind: "IResponseErrorUnauthorizedForLegalReasons",
+    },
   };
 }
 
@@ -132,7 +132,7 @@ export const ResponseErrorUnexpectedAuthProblem = () =>
 export type HttpStatusCode = t.TypeOf<typeof HttpStatusCode>;
 export const HttpStatusCode = t.union([
   WithinRangeInteger<100, 599, IWithinRangeIntegerTag<100, 599>>(100, 599),
-  t.literal(599)
+  t.literal(599),
 ]);
 
 export type IResponsePaymentInternalError = IResponse<"IResponseErrorInternal">;
@@ -148,15 +148,15 @@ export const ResponsePaymentError = (
     detail,
     detail_v2: detailV2,
     status: HttpStatusCodeEnum.HTTP_STATUS_500 as HttpStatusCode,
-    title: "Internal server error"
+    title: "Internal server error",
   };
   return {
-    apply: res =>
+    apply: (res) =>
       res
         .status(HttpStatusCodeEnum.HTTP_STATUS_500)
         .set("Content-Type", "application/problem+json")
         .json(problem),
-    kind: "IResponseErrorInternal"
+    kind: "IResponseErrorInternal",
   };
 };
 
@@ -176,22 +176,22 @@ export interface IResponseSuccessOctet<T>
 export const ResponseSuccessOctet = (
   o: Buffer
 ): IResponseSuccessOctet<typeof o> => ({
-  apply: res =>
+  apply: (res) =>
     res
       .status(HttpStatusCodeEnum.HTTP_STATUS_200)
       .set("Content-Type", "application/octet-stream")
       .end(o),
   kind: "IResponseSuccessOctet",
-  value: o
+  value: o,
 });
 
 export const wrapValidationWithInternalError: <A>(
   fa: t.Validation<A>
-) => TE.TaskEither<IResponseErrorInternal, A> = fa =>
+) => TE.TaskEither<IResponseErrorInternal, A> = (fa) =>
   pipe(
     TE.fromEither(fa),
     TE.mapLeft(errorsToError),
-    TE.mapLeft(e => ResponseErrorInternal(e.message))
+    TE.mapLeft((e) => ResponseErrorInternal(e.message))
   );
 
 /**
@@ -214,8 +214,8 @@ export const ResponseErrorNotImplemented = (
   ),
   ...{
     detail: `Not Implemented: ${detail}`,
-    kind: "IResponseErrorNotImplemented"
-  }
+    kind: "IResponseErrorNotImplemented",
+  },
 });
 
 /**
@@ -238,6 +238,6 @@ export const ResponseErrorUnsupportedMediaType = (
   ),
   ...{
     detail,
-    kind: "IResponseErrorUnsupportedMediaType"
-  }
+    kind: "IResponseErrorUnsupportedMediaType",
+  },
 });

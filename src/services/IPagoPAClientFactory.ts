@@ -5,7 +5,7 @@ import { PagoPAClient } from "../clients/pagopa";
 
 export enum PagoPAEnvironment {
   PRODUCTION = "PRODUCTION",
-  TEST = "TEST"
+  TEST = "TEST",
 }
 
 export interface IPagoPAClientFactoryInterface {

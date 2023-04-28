@@ -28,7 +28,7 @@ export const localStrategy = (
         getAssertionXml: () => "<xml></xml>",
         getSamlResponseXml: () => "<xml></xml>",
         issuer: "IO",
-        name: "Mario"
+        name: "Mario",
       };
       return done(null, testUser);
     }

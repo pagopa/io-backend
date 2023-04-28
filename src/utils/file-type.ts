@@ -37,11 +37,10 @@ export const eqFunction: EQ.Eq<ReturnType<typeof typeToCheck>> = EQ.fromEquals(
  * @param types a set of allowed type
  * @returns a function to verify a buffer
  */
-export const getIsFileTypeForTypes = (types: ReadonlySet<FileType>) => (
-  data: Buffer
-) =>
-  pipe(
-    types,
-    RS.map(eqFunction)(typeToCheck),
-    RS.some(is => is(data))
-  );
+export const getIsFileTypeForTypes =
+  (types: ReadonlySet<FileType>) => (data: Buffer) =>
+    pipe(
+      types,
+      RS.map(eqFunction)(typeToCheck),
+      RS.some((is) => is(data))
+    );

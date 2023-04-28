@@ -9,7 +9,7 @@ export const IDPEntityDescriptor = t.interface({
 
   entryPoint: t.string,
 
-  logoutUrl: t.string
+  logoutUrl: t.string,
 });
 
 export type IDPEntityDescriptor = t.TypeOf<typeof IDPEntityDescriptor>;

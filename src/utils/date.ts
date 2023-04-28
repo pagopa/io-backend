@@ -28,7 +28,7 @@ const months: { readonly [k: string]: number } = {
   ["P"]: 9,
   ["R"]: 10,
   ["S"]: 11,
-  ["T"]: 12
+  ["T"]: 12,
 };
 
 /**
@@ -108,12 +108,12 @@ export const StrictUTCISODateFromString = new t.Type<Date, string>(
       ? t.success(v)
       : pipe(
           STRICT_UTC_ISO8601_FULL_REGEX.validate(v, c),
-          E.chain(s => {
+          E.chain((s) => {
             const d = new Date(s);
             return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
           })
         ),
-  a => a.toISOString()
+  (a) => a.toISOString()
 );
 
 export type StrictUTCISODateFromString = t.TypeOf<

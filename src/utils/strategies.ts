@@ -26,10 +26,10 @@ export function fulfill(
   pipe(
     errorOrUser,
     E.fold(
-      error => done(error),
+      (error) => done(error),
       // passport-http-custom-bearer uses the last options parameter
       // we need to pass it as an empty string or we get an error
-      user => done(undefined, O.isNone(user) ? false : user.value, "")
+      (user) => done(undefined, O.isNone(user) ? false : user.value, "")
     )
   );
 }
