@@ -6,7 +6,7 @@ import {
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { PaymentActivationsGetResponse } from "../../generated/backend/PaymentActivationsGetResponse";
@@ -17,11 +17,11 @@ import { PaymentActivationsPostRequest } from "../../generated/pagopa-proxy/Paym
 import {
   ResponsePaymentError,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import {
   IPagoPAClientFactoryInterface,
-  PagoPAEnvironment
+  PagoPAEnvironment,
 } from "./IPagoPAClientFactory";
 
 export default class PagoPAProxyService {
@@ -43,9 +43,9 @@ export default class PagoPAProxyService {
         isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.getPaymentInfo({
-        rpt_id_from_string: rptId
+        rpt_id_from_string: rptId,
       });
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
               PaymentRequestsGetResponse.decode(response.value),
@@ -82,10 +82,10 @@ export default class PagoPAProxyService {
         isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.activatePayment({
-        paymentActivationsPostRequest
+        paymentActivationsPostRequest,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
               PaymentActivationsPostResponse.decode(response.value),
@@ -120,9 +120,9 @@ export default class PagoPAProxyService {
         isTest ? PagoPAEnvironment.TEST : PagoPAEnvironment.PRODUCTION
       );
       const validated = await client.getActivationStatus({
-        codice_contesto_pagamento: codiceContestoPagamento
+        codice_contesto_pagamento: codiceContestoPagamento,
       });
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
               PaymentActivationsGetResponse.decode(response.value),

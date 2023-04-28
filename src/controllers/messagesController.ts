@@ -9,13 +9,13 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import {
   IResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal
+  ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
@@ -34,7 +34,7 @@ import {
   withValidatedOrValidationError,
   IResponseSuccessOctet,
   IResponseErrorNotImplemented,
-  IResponseErrorUnsupportedMediaType
+  IResponseErrorUnsupportedMediaType,
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
@@ -57,10 +57,10 @@ export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
   f: (id: NonEmptyString, attachment_url: NonEmptyString) => Promise<T>
 ) =>
-  withValidatedOrValidationError(NonEmptyString.decode(req.params.id), id =>
+  withValidatedOrValidationError(NonEmptyString.decode(req.params.id), (id) =>
     withValidatedOrValidationError(
       NonEmptyString.decode(req.params.attachment_url),
-      attachment_url => f(id, attachment_url)
+      (attachment_url) => f(id, attachment_url)
     )
   );
 
@@ -83,7 +83,7 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<PaginatedPublicMessagesCollection>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         GetMessagesParameters.decode({
           /* eslint-disable sort-keys */
@@ -91,10 +91,10 @@ export default class MessagesController {
           enrichResultData: req.query.enrich_result_data,
           getArchivedMessages: req.query.archived,
           maximumId: req.query.maximum_id,
-          minimumId: req.query.minimum_id
+          minimumId: req.query.minimum_id,
           /* eslint-enable sort-keys */
         }),
-        params => this.messageService.getMessagesByUser(user, params)
+        (params) => this.messageService.getMessagesByUser(user, params)
       )
     );
 
@@ -110,13 +110,13 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<CreatedMessageWithContentAndAttachments>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         GetMessageParameters.decode({
           id: req.params.id,
-          public_message: req.query.public_message
+          public_message: req.query.public_message,
         }),
-        params => this.messageService.getMessage(user, params)
+        (params) => this.messageService.getMessage(user, params)
       )
     );
 
@@ -126,7 +126,7 @@ export default class MessagesController {
   public readonly getLegalMessage = (
     req: express.Request
   ): Promise<IGetLegalMessageResponse> =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       pipe(
         TE.tryCatch(
           () =>
@@ -135,7 +135,7 @@ export default class MessagesController {
               req.params.id,
               this.tokenService.getPecServerTokenHandler(user.fiscal_code)
             ),
-          e => ResponseErrorInternal(E.toError(e).message)
+          (e) => ResponseErrorInternal(E.toError(e).message)
         ),
         TE.toUnion
       )()
@@ -147,7 +147,7 @@ export default class MessagesController {
   public readonly getLegalMessageAttachment = (
     req: express.Request
   ): Promise<IGetLegalMessageAttachmentResponse> =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       pipe(
         TE.tryCatch(
           () =>
@@ -157,7 +157,7 @@ export default class MessagesController {
               this.tokenService.getPecServerTokenHandler(user.fiscal_code),
               req.params.attachment_id
             ),
-          e => ResponseErrorInternal(E.toError(e).message)
+          (e) => ResponseErrorInternal(E.toError(e).message)
         ),
         TE.toUnion
       )()
@@ -173,13 +173,13 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<MessageStatusAttributes>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
-        messageId =>
+        (messageId) =>
           withValidatedOrValidationError(
             MessageStatusChange.decode(req.body),
-            change =>
+            (change) =>
               this.messageService.upsertMessageStatus(
                 user.fiscal_code,
                 messageId,
@@ -202,10 +202,10 @@ export default class MessagesController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
-        messageId =>
+        (messageId) =>
           this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
       )
     );
@@ -225,7 +225,7 @@ export default class MessagesController {
     | IResponseErrorUnsupportedMediaType
     | IResponseSuccessOctet<Buffer>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
         this.messageService.getThirdPartyAttachment(
           user.fiscal_code,

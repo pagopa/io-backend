@@ -4,7 +4,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
-  IResponseSuccessJson
+  IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import PagoPAProxyService from "../services/pagoPAProxyService";
@@ -33,7 +33,7 @@ export default class PagoPAProxyController {
     | IResponseErrorValidation
     | IResponseSuccessJson<PaymentRequestsGetResponse>
   > =>
-    withValidatedOrInternalError(t.string.decode(req.params.rptId), rptId =>
+    withValidatedOrInternalError(t.string.decode(req.params.rptId), (rptId) =>
       this.pagoPAProxyService.getPaymentInfo(
         rptId,
         parsePagopaTestParam(req.query.test)
@@ -50,7 +50,7 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       PaymentActivationsPostRequest.decode(req.body),
-      paymentActivationsPostRequest =>
+      (paymentActivationsPostRequest) =>
         this.pagoPAProxyService.activatePayment(
           paymentActivationsPostRequest,
           parsePagopaTestParam(req.query.test)
@@ -67,7 +67,7 @@ export default class PagoPAProxyController {
   > =>
     withValidatedOrInternalError(
       t.string.decode(req.params.codiceContestoPagamento),
-      codiceContestoPagamento =>
+      (codiceContestoPagamento) =>
         this.pagoPAProxyService.getActivationStatus(
           codiceContestoPagamento,
           parsePagopaTestParam(req.query.test)

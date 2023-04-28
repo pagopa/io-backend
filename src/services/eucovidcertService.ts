@@ -8,7 +8,7 @@ import {
   ResponseErrorGeneric,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { Certificate } from "@pagopa/io-functions-eucovidcerts-sdk/Certificate";
@@ -20,7 +20,7 @@ import {
   ResponseErrorStatusNotDefinedInSpec,
   ResponseErrorUnexpectedAuthProblem,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import { User } from "../types/user";
 
@@ -36,7 +36,7 @@ export function ResponseGatewayTimeout(detail: string): IResponseErrorInternal {
       "Gateway Timeout",
       detail
     ),
-    kind: "IResponseErrorInternal"
+    kind: "IResponseErrorInternal",
   };
 }
 
@@ -54,7 +54,7 @@ export function ResponseErrorNotFound403(
       "Not Found",
       detail
     ),
-    kind: "IResponseErrorNotFound"
+    kind: "IResponseErrorNotFound",
   };
 }
 
@@ -82,11 +82,11 @@ export default class EUCovidCertService {
         accessData: {
           auth_code,
           fiscal_code: user.fiscal_code,
-          preferred_languages
-        }
+          preferred_languages,
+        },
       });
 
-      return withValidatedOrInternalError(validated, response => {
+      return withValidatedOrInternalError(validated, (response) => {
         switch (response.status) {
           case 200:
             return ResponseSuccessJson(response.value);

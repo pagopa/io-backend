@@ -27,7 +27,7 @@ const toBufferSvg = (options: ToBufferOptions) =>
       const svg = bwipjs.render(opts, DrawingSVG(opts, bwipjs.FontLib));
       return Buffer.from(svg);
     },
-    errs => new Error(`Cannot generate svg barcode|${errs}`) as Error | string
+    (errs) => new Error(`Cannot generate svg barcode|${errs}`) as Error | string
   );
 
 /**
@@ -45,15 +45,15 @@ export function toBarcode(
 ): TaskEither<Error, IBarcodeOutput> {
   const options = {
     bcid,
-    text
+    text,
   };
   return pipe(
     AP.sequenceS(TE.ApplicativePar)({
       png: toBufferPng(options),
-      svg: TE.fromEither(toBufferSvg(options))
+      svg: TE.fromEither(toBufferSvg(options)),
     }),
     TE.fold(
-      errorOrString =>
+      (errorOrString) =>
         TE.fromEither(
           E.left(
             typeof errorOrString === "string"
@@ -61,11 +61,11 @@ export function toBarcode(
               : errorOrString
           )
         ),
-      images =>
+      (images) =>
         TE.fromEither(
           E.right({
             png: images.png.toString("base64"),
-            svg: images.svg.toString("base64")
+            svg: images.svg.toString("base64"),
           })
         )
     )

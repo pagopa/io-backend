@@ -9,7 +9,7 @@ import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
 import * as AP from "fp-ts/lib/Apply";
@@ -48,21 +48,21 @@ export default class SessionLockController {
     pipe(
       req.params.fiscal_code,
       FiscalCode.decode,
-      E.mapLeft(err =>
+      E.mapLeft((err) =>
         ResponseErrorValidation("Invalid Fiscal Code", readableReport(err))
       ),
       TE.fromEither,
-      TE.chainW(fiscalCode =>
+      TE.chainW((fiscalCode) =>
         pipe(
           TE.tryCatch(
             () => this.sessionStorage.userHasActiveSessions(fiscalCode),
             E.toError
           ),
           TE.chain(TE.fromEither),
-          TE.mapLeft(e => ResponseErrorInternal(`${e.message} [${e}]`))
+          TE.mapLeft((e) => ResponseErrorInternal(`${e.message} [${e}]`))
         )
       ),
-      TE.map(active => UserSessionInfo.encode({ active })),
+      TE.map((active) => UserSessionInfo.encode({ active })),
       TE.map(ResponseSuccessJson),
       TE.toUnion
     )();
@@ -84,11 +84,11 @@ export default class SessionLockController {
     pipe(
       req.params.fiscal_code,
       FiscalCode.decode,
-      E.mapLeft(err =>
+      E.mapLeft((err) =>
         ResponseErrorValidation("Invalid fiscal code", readableReport(err))
       ),
       TE.fromEither,
-      TE.chainW(fiscalCode =>
+      TE.chainW((fiscalCode) =>
         pipe(
           AP.sequenceT(TE.ApplicativeSeq)(
             // lock the account
@@ -112,11 +112,11 @@ export default class SessionLockController {
               TE.chain(TE.fromEither),
               TE.chain(
                 flow(
-                  O.map(assertionRef =>
+                  O.map((assertionRef) =>
                     TE.tryCatch(
                       () =>
                         // fire and forget the queue message
-                        new Promise<true>(resolve => {
+                        new Promise<true>((resolve) => {
                           this.lollipopService
                             .revokePreviousAssertionRef(assertionRef)
                             .catch(constVoid);
@@ -158,10 +158,10 @@ export default class SessionLockController {
               TE.chain(TE.fromEither)
             )
           ),
-          TE.mapLeft(err => ResponseErrorInternal(err.message))
+          TE.mapLeft((err) => ResponseErrorInternal(err.message))
         )
       ),
-      TE.map(_ => ResponseSuccessJson({ message: "ok" })),
+      TE.map((_) => ResponseSuccessJson({ message: "ok" })),
       TE.toUnion
     )();
 
@@ -182,11 +182,11 @@ export default class SessionLockController {
     pipe(
       req.params.fiscal_code,
       FiscalCode.decode,
-      E.mapLeft(err =>
+      E.mapLeft((err) =>
         ResponseErrorValidation("Invalid fiscal code", readableReport(err))
       ),
       TE.fromEither,
-      TE.chainW(fiscalCode =>
+      TE.chainW((fiscalCode) =>
         // unlock the account
         pipe(
           TE.tryCatch(
@@ -194,10 +194,10 @@ export default class SessionLockController {
             E.toError
           ),
           TE.chain(TE.fromEither),
-          TE.mapLeft(err => ResponseErrorInternal(err.message))
+          TE.mapLeft((err) => ResponseErrorInternal(err.message))
         )
       ),
-      TE.map(_ => ResponseSuccessJson({ message: "ok" })),
+      TE.map((_) => ResponseSuccessJson({ message: "ok" })),
       TE.toUnion
     )();
 }

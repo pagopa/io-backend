@@ -13,7 +13,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorTooManyRequests,
   ResponseErrorValidation,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import * as E from "fp-ts/Either";
@@ -32,7 +32,7 @@ import {
   ResponseErrorUnexpectedAuthProblem,
   unhandledResponseStatus,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import { IApiClientFactoryInterface } from "./IApiClientFactory";
 
@@ -86,10 +86,10 @@ export default class FunctionsAppService {
       const client = this.apiClient.getClient();
 
       const validated = await client.getService({
-        service_id: serviceId
+        service_id: serviceId,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
               ServicePublic.decode(response.value),
@@ -122,7 +122,7 @@ export default class FunctionsAppService {
 
       const validated = await client.getServicePreferences({
         fiscal_code: fiscalCode,
-        service_id: serviceId
+        service_id: serviceId,
       });
 
       return withValidatedOrInternalError(
@@ -152,7 +152,7 @@ export default class FunctionsAppService {
       const validated = await client.upsertServicePreferences({
         body: servicePreferences,
         fiscal_code: fiscalCode,
-        service_id: serviceId
+        service_id: serviceId,
       });
 
       return withValidatedOrInternalError(
@@ -171,7 +171,7 @@ export default class FunctionsAppService {
 
       const validated = await client.getVisibleServices({});
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         response.status === 200
           ? withValidatedOrInternalError(
               PaginatedServiceTupleCollection.decode(response.value),

@@ -12,7 +12,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal
+  ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import CgnService from "src/services/cgnService";
@@ -48,10 +48,10 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<PublishedProductCategoriesResult>
   > =>
-    withUserFromRequest(req, async _ =>
+    withUserFromRequest(req, async (_) =>
       withValidatedOrValidationError(
         GetPublishedCategoriesParameters.decode(req.query),
-        params =>
+        (params) =>
           this.cgnOperatorSearchService.getPublishedProductCategories(params)
       )
     );
@@ -68,7 +68,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<Merchant>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const eligibleUserOrErrorResult = await this.eligibleUserOrError(user);
       if (E.isLeft(eligibleUserOrErrorResult)) {
         return eligibleUserOrErrorResult.left;
@@ -76,7 +76,7 @@ export default class CgnOperatorSearchController {
 
       return withValidatedOrValidationError(
         NonEmptyString.decode(req.params.merchantId),
-        merchantId => this.cgnOperatorSearchService.getMerchant(merchantId)
+        (merchantId) => this.cgnOperatorSearchService.getMerchant(merchantId)
       );
     });
 
@@ -92,10 +92,10 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<OnlineMerchants>
   > =>
-    withUserFromRequest(req, async _ =>
+    withUserFromRequest(req, async (_) =>
       withValidatedOrValidationError(
         OnlineMerchantSearchRequest.decode(req.body),
-        onlineSearchRequest =>
+        (onlineSearchRequest) =>
           this.cgnOperatorSearchService.getOnlineMerchants(onlineSearchRequest)
       )
     );
@@ -112,10 +112,10 @@ export default class CgnOperatorSearchController {
     | IResponseErrorNotFound
     | IResponseSuccessJson<OfflineMerchants>
   > =>
-    withUserFromRequest(req, async _ =>
+    withUserFromRequest(req, async (_) =>
       withValidatedOrValidationError(
         OfflineMerchantSearchRequest.decode(req.body),
-        offlineSearchRequest =>
+        (offlineSearchRequest) =>
           this.cgnOperatorSearchService.getOfflineMerchants(
             offlineSearchRequest
           )
@@ -134,7 +134,7 @@ export default class CgnOperatorSearchController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<DiscountBucketCode>
   > =>
-    withUserFromRequest(req, async user => {
+    withUserFromRequest(req, async (user) => {
       const eligibleUserOrErrorResult = await this.eligibleUserOrError(user);
       if (E.isLeft(eligibleUserOrErrorResult)) {
         return eligibleUserOrErrorResult.left;
@@ -142,7 +142,7 @@ export default class CgnOperatorSearchController {
 
       return withValidatedOrValidationError(
         NonEmptyString.decode(req.params.discountId),
-        discountId =>
+        (discountId) =>
           this.cgnOperatorSearchService.getDiscountBucketCode(discountId)
       );
     });
@@ -166,10 +166,10 @@ export default class CgnOperatorSearchController {
       E.fromPredicate(this.isCgnStatusResponseSuccess, () =>
         ResponseErrorInternal("Cannot retrieve cgn card status")
       ),
-      E.map(res => res.value.status),
+      E.map((res) => res.value.status),
       E.chainW(
         E.fromPredicate(
-          status => status === "ACTIVATED",
+          (status) => status === "ACTIVATED",
           () => ResponseErrorForbiddenNotAuthorized
         )
       )

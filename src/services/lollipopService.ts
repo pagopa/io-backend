@@ -42,7 +42,7 @@ export default class LollipopService {
     assertionRef: AssertionRef
   ): Promise<QueueSendMessageResponse> {
     const revokeMessage = RevokeAssertionRefInfo.encode({
-      assertion_ref: assertionRef
+      assertion_ref: assertionRef,
     });
     return this.queueClient.sendMessage(base64EncodeObject(revokeMessage));
   }
@@ -70,18 +70,18 @@ export default class LollipopService {
               assertion,
               assertion_type: AssertionTypeEnum.SAML,
               expired_at: getExpirePubKeyFn(),
-              fiscal_code: fiscalCode
-            }
+              fiscal_code: fiscalCode,
+            },
           }),
-        e => {
+        (e) => {
           const error = E.toError(e);
           this.appInsightsTelemetryClient?.trackEvent({
             name: lollipopErrorEventName,
             properties: {
               assertion_ref: assertionRef,
               fiscal_code: sha256(fiscalCode),
-              message: `Error activating lollipop pub key | ${error.message}`
-            }
+              message: `Error activating lollipop pub key | ${error.message}`,
+            },
           });
           return error;
         }
@@ -89,15 +89,15 @@ export default class LollipopService {
       TE.chain(
         flow(
           TE.fromEither,
-          TE.mapLeft(errors => {
+          TE.mapLeft((errors) => {
             const error = errorsToError(errors);
             this.appInsightsTelemetryClient?.trackEvent({
               name: lollipopErrorEventName,
               properties: {
                 assertion_ref: assertionRef,
                 fiscal_code: sha256(fiscalCode),
-                message: `Error activating lollipop pub key | ${error.message}`
-              }
+                message: `Error activating lollipop pub key | ${error.message}`,
+              },
             });
             return error;
           })
@@ -113,7 +113,7 @@ export default class LollipopService {
             )
         )
       ),
-      TE.map(res => res.value)
+      TE.map((res) => res.value)
     );
   }
 }

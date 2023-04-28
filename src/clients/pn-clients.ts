@@ -3,21 +3,21 @@ import { ValidUrl } from "@pagopa/ts-commons/lib/url";
 import { stripTrailingSlashIfPresent } from "../utils/url";
 import {
   Client,
-  createClient
+  createClient,
 } from "../../generated/piattaforma-notifiche/client";
 import {
   Client as AddressBookClient,
-  createClient as createAddressBookClient
+  createClient as createAddressBookClient,
 } from "../../generated/piattaforma-notifiche-courtesy/client";
 
 export function PnAPIClient(
   baseUrl: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
 ): Client {
   return createClient({
     baseUrl,
-    fetchApi
+    fetchApi,
   });
 }
 export type PnAPIClient = typeof PnAPIClient;
@@ -31,17 +31,17 @@ export const PnAddressBookIOClient = (
   baseUrl: string,
   apiKey: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
+  fetchApi: typeof fetch = nodeFetch as any as typeof fetch
 ): AddressBookClient<"ApiKeyAuth"> =>
   createAddressBookClient({
     basePath: "",
     baseUrl,
     fetchApi,
-    withDefaults: op => params =>
+    withDefaults: (op) => (params) =>
       op({
         ...params,
-        ApiKeyAuth: apiKey
-      })
+        ApiKeyAuth: apiKey,
+      }),
   });
 export type PnAddressBookIOClient = typeof PnAddressBookIOClient;
 
@@ -51,34 +51,36 @@ export type PnAddressBookIOClient = typeof PnAddressBookIOClient;
 export enum PNEnvironment {
   PRODUCTION = "PRODUCTION",
   UAT = "UAT",
-  DEV = "DEV"
+  DEV = "DEV",
 }
 
 /**
  * Generate a Client Selector based on enviroment.
  */
-export const PNClientFactory = (
-  pnApiUrlProd: ValidUrl,
-  pnApiKeyProd: string,
-  pnApiUrlUAT: ValidUrl,
-  pnApiKeyUAT: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetchApi: typeof fetch = (nodeFetch as any) as typeof fetch
-) => (pnEnvironment: PNEnvironment) => {
-  switch (pnEnvironment) {
-    case PNEnvironment.PRODUCTION:
-      return PnAddressBookIOClient(
-        stripTrailingSlashIfPresent(pnApiUrlProd),
-        pnApiKeyProd,
-        fetchApi
-      );
-    case PNEnvironment.UAT:
-      return PnAddressBookIOClient(
-        stripTrailingSlashIfPresent(pnApiUrlUAT),
-        pnApiKeyUAT,
-        fetchApi
-      );
-    default:
-      throw new Error("Unimplemented PN Environment");
-  }
-};
+export const PNClientFactory =
+  (
+    pnApiUrlProd: ValidUrl,
+    pnApiKeyProd: string,
+    pnApiUrlUAT: ValidUrl,
+    pnApiKeyUAT: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetchApi: typeof fetch = nodeFetch as any as typeof fetch
+  ) =>
+  (pnEnvironment: PNEnvironment) => {
+    switch (pnEnvironment) {
+      case PNEnvironment.PRODUCTION:
+        return PnAddressBookIOClient(
+          stripTrailingSlashIfPresent(pnApiUrlProd),
+          pnApiKeyProd,
+          fetchApi
+        );
+      case PNEnvironment.UAT:
+        return PnAddressBookIOClient(
+          stripTrailingSlashIfPresent(pnApiUrlUAT),
+          pnApiKeyUAT,
+          fetchApi
+        );
+      default:
+        throw new Error("Unimplemented PN Environment");
+    }
+  };

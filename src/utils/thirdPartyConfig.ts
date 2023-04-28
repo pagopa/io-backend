@@ -9,14 +9,14 @@ import { JsonFromString, withFallback } from "io-ts-types";
 export const ClientCert = t.interface({
   client_cert: NonEmptyString,
   client_key: NonEmptyString,
-  server_ca: NonEmptyString
+  server_ca: NonEmptyString,
 });
 
 export type ApiKeyAuthenticationConfig = t.TypeOf<typeof AuthenticationConfig>;
 export const ApiKeyAuthenticationConfig = t.interface({
   type: t.literal("API_KEY"),
   key: NonEmptyString,
-  header_key_name: NonEmptyString
+  header_key_name: NonEmptyString,
 });
 
 export type AuthenticationConfig = t.TypeOf<typeof AuthenticationConfig>;
@@ -24,28 +24,28 @@ export const AuthenticationConfig = t.intersection([
   // Right now we only handle API_KEY
   // In future we will also handle BEARER and TOKEN authentications
   ApiKeyAuthenticationConfig,
-  t.partial({ cert: ClientCert })
+  t.partial({ cert: ClientCert }),
 ]);
 
 export type EnvironmentConfig = t.TypeOf<typeof EnvironmentConfig>;
 export const EnvironmentConfig = t.interface({
   baseUrl: NonEmptyString,
-  detailsAuthentication: AuthenticationConfig
+  detailsAuthentication: AuthenticationConfig,
 });
 
 export type TestEnvironmentConfig = t.TypeOf<typeof TestEnvironmentConfig>;
 export const TestEnvironmentConfig = t.intersection([
   t.interface({
-    testUsers: t.readonlyArray(FiscalCode)
+    testUsers: t.readonlyArray(FiscalCode),
   }),
-  EnvironmentConfig
+  EnvironmentConfig,
 ]);
 
 export type ThirdPartyConfigBase = t.TypeOf<typeof ThirdPartyConfigBase>;
 export const ThirdPartyConfigBase = t.interface({
   serviceId: NonEmptyString,
   schemaKind: NonEmptyString,
-  jsonSchema: NonEmptyString
+  jsonSchema: NonEmptyString,
 });
 
 /**
@@ -59,13 +59,13 @@ export const ThirdPartyConfig = t.intersection([
   t.union([
     t.intersection([
       t.interface({ prodEnvironment: EnvironmentConfig }),
-      t.partial({ testEnvironment: TestEnvironmentConfig })
+      t.partial({ testEnvironment: TestEnvironmentConfig }),
     ]),
     t.intersection([
       t.partial({ prodEnvironment: EnvironmentConfig }),
-      t.interface({ testEnvironment: TestEnvironmentConfig })
-    ])
-  ])
+      t.interface({ testEnvironment: TestEnvironmentConfig }),
+    ]),
+  ]),
 ]);
 
 export type ThirdPartyConfigList = t.TypeOf<typeof ThirdPartyConfigList>;

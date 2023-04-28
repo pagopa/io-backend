@@ -6,7 +6,7 @@ import * as S from "fp-ts/lib/string";
 export const stripTrailingSlashIfPresent = (aValidUrl: ValidUrl): string =>
   pipe(
     aValidUrl.href,
-    E.fromPredicate(S.endsWith("/"), _ => aValidUrl.href),
+    E.fromPredicate(S.endsWith("/"), (_) => aValidUrl.href),
     E.map(S.slice(0, aValidUrl.href.length - 1)),
     E.fold(identity, identity)
   );

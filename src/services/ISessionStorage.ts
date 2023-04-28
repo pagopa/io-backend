@@ -14,7 +14,7 @@ import {
   MyPortalToken,
   SessionToken,
   WalletToken,
-  ZendeskToken
+  ZendeskToken,
 } from "../types/token";
 import { User, UserV5 } from "../types/user";
 

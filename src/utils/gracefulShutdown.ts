@@ -17,6 +17,6 @@ export function initHttpGracefulShutdown(
         options.finally();
       }
       app.emit("server:stop");
-    }
+    },
   });
 }

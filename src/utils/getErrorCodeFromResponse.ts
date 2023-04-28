@@ -16,17 +16,17 @@ export default function getErrorCodeFromResponse(
 ): O.Option<SpidError> {
   return pipe(
     O.tryCatch(() => new DOMParser().parseFromString(xml)),
-    O.chain(xmlResponse =>
+    O.chain((xmlResponse) =>
       xmlResponse
         ? O.some(xmlResponse.getElementsByTagName("StatusMessage"))
         : O.none
     ),
-    O.chain(responseStatusMessageEl =>
+    O.chain((responseStatusMessageEl) =>
       responseStatusMessageEl?.[0]?.textContent
         ? O.some(responseStatusMessageEl[0].textContent.trim())
         : O.none
     ),
-    O.chain(errorString => {
+    O.chain((errorString) => {
       const indexString = "ErrorCode nr";
       const errorCode = errorString.slice(
         errorString.indexOf(indexString) + indexString.length

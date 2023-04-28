@@ -10,7 +10,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson
+  IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { BonusActivationWithQrCode } from "generated/bonus/BonusActivationWithQrCode";
@@ -49,7 +49,7 @@ export default class BonusController {
     | IResponseErrorGone
     | IResponseSuccessJson<EligibilityCheck>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       this.bonusService.getBonusEligibilityCheck(user)
     );
 
@@ -67,8 +67,8 @@ export default class BonusController {
     | IResponseSuccessAccepted<InstanceId>
     | IResponseSuccessJson<BonusActivationWithQrCode>
   > =>
-    withUserFromRequest(req, user =>
-      withBonusIdFromRequest(req, bonusId =>
+    withUserFromRequest(req, (user) =>
+      withBonusIdFromRequest(req, (bonusId) =>
         this.bonusService.getLatestBonusActivationById(user, bonusId)
       )
     );
@@ -84,7 +84,7 @@ export default class BonusController {
     | IResponseErrorInternal
     | IResponseSuccessJson<PaginatedBonusActivationsCollection>
   > =>
-    withUserFromRequest(req, user =>
+    withUserFromRequest(req, (user) =>
       this.bonusService.getAllBonusActivations(user)
     );
 }

@@ -6,7 +6,7 @@ import {
   IResponseErrorInternal,
   IResponseSuccessJson,
   ResponseErrorInternal,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { QueueClient } from "@azure/storage-queue";
@@ -16,16 +16,16 @@ import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { Installation } from "../../generated/backend/Installation";
 import {
   CreateOrUpdateInstallationMessage,
-  KindEnum as CreateOrUpdateKind
+  KindEnum as CreateOrUpdateKind,
 } from "../../generated/messages/CreateOrUpdateInstallationMessage";
 import {
   DeleteInstallationMessage,
-  KindEnum as DeleteKind
+  KindEnum as DeleteKind,
 } from "../../generated/messages/DeleteInstallationMessage";
 import { NotificationMessageKindEnum } from "../../generated/messages/NotificationMessageKind";
 import {
   KindEnum as NotifyKind,
-  NotifyMessage
+  NotifyMessage,
 } from "../../generated/messages/NotifyMessage";
 import { Notification } from "../../generated/notifications/Notification";
 import { SuccessResponse } from "../../generated/notifications/SuccessResponse";
@@ -62,13 +62,13 @@ export default class NotificationService {
           notificationTitle,
           O.fromNullable,
           O.getOrElse(() => `${notification.sender_metadata.organization_name}`)
-        )
-      }
+        ),
+      },
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(notifyMessage))
       .then(() => ResponseSuccessJson({ message: "ok" }))
-      .catch(error =>
+      .catch((error) =>
         ResponseErrorInternal(
           `Error while sending notify message to the queue [${error.message}]`
         )
@@ -86,18 +86,17 @@ export default class NotificationService {
       // will have an unique installationId referred to that user.
       // The installationId provided by the client is ignored.
       installationId: toFiscalCodeHash(fiscalCode),
-      kind:
-        CreateOrUpdateKind[
-          NotificationMessageKindEnum.CreateOrUpdateInstallation
-        ],
+      kind: CreateOrUpdateKind[
+        NotificationMessageKindEnum.CreateOrUpdateInstallation
+      ],
       platform: installation.platform,
       pushChannel: installation.pushChannel,
-      tags: [toFiscalCodeHash(fiscalCode)]
+      tags: [toFiscalCodeHash(fiscalCode)],
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(azureInstallation))
       .then(() => ResponseSuccessJson({ message: "ok" }))
-      .catch(error =>
+      .catch((error) =>
         ResponseErrorInternal(
           `Error while sending create or update installation message to the queue [${error.message}]`
         )
@@ -111,12 +110,12 @@ export default class NotificationService {
   > => {
     const deleteMessage: DeleteInstallationMessage = {
       installationId: toFiscalCodeHash(fiscalCode),
-      kind: DeleteKind[NotificationMessageKindEnum.DeleteInstallation]
+      kind: DeleteKind[NotificationMessageKindEnum.DeleteInstallation],
     };
     return this.notificationQueueClient
       .sendMessage(base64EncodeObject(deleteMessage))
       .then(() => ResponseSuccessJson({ message: "ok" }))
-      .catch(error =>
+      .catch((error) =>
         ResponseErrorInternal(
           `Error while sending delete installation message to the queue [${error.message}]`
         )

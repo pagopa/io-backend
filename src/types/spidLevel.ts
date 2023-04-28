@@ -8,9 +8,9 @@ import { SPID_LEVELS } from "@pagopa/io-spid-commons/dist/config";
 import * as t from "io-ts";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
-type SpidLevel1 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL1"];
-type SpidLevel2 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-type SpidLevel3 = typeof SpidLevelEnum["https://www.spid.gov.it/SpidL3"];
+type SpidLevel1 = (typeof SpidLevelEnum)["https://www.spid.gov.it/SpidL1"];
+type SpidLevel2 = (typeof SpidLevelEnum)["https://www.spid.gov.it/SpidL2"];
+type SpidLevel3 = (typeof SpidLevelEnum)["https://www.spid.gov.it/SpidL3"];
 type SpidLevel = SpidLevel1 | SpidLevel2 | SpidLevel3;
 
 function isSpidL1(uri: string): uri is SpidLevel1 {

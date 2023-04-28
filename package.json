@@ -85,23 +85,23 @@
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
     "@pagopa/io-functions-cgn-sdk": "x",
-    "@pagopa/ts-commons": "^11.0.0",
+    "@pagopa/ts-commons": "../io-ts-commons",
     "@pagopa/io-functions-commons": "^28.1.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
-    "@pagopa/io-spid-commons": "^10.1.1",
+    "@pagopa/io-spid-commons": "../io-spid-commons",
     "@pagopa/winston-ts": "^2.2.0",
-    "apicache": "^1.4.0",
+    "apicache": "^1.6.3",
     "applicationinsights": "^1.8.10",
     "body-parser": "^1.19.2",
     "bwip-js": "^2.0.6",
     "date-fns": "^1.30.1",
     "dotenv": "^6.0.0",
-    "express": "^4.17.3",
+    "express": "4.17.3",
     "express-enforces-ssl": "1.1.0",
-    "fp-ts": "2.13.1",
+    "fp-ts": "2.14.0",
     "helmet": "3.23.3",
     "http-graceful-shutdown": "^2.3.2",
-    "io-ts": "^2.2.16",
+    "io-ts": "2.2.20",
     "io-ts-types": "^0.5.16",
     "jsonwebtoken": "^8.5.1",
     "monocle-ts": "^2.3.13",
@@ -125,7 +125,7 @@
     "xmldom": "^0.6.0"
   },
   "devDependencies": {
-    "@pagopa/eslint-config": "^1.1.1",
+    "@pagopa/eslint-config": "^3.0.0",
     "@pagopa/openapi-codegen-ts": "^12.2.1",
     "@types/apicache": "^1.2.0",
     "@types/dotenv": "^4.0.2",
@@ -133,7 +133,7 @@
     "@types/express-enforces-ssl": "^1.1.1",
     "@types/glob": "^5.0.35",
     "@types/helmet": "^0.0.43",
-    "@types/jest": "^24.9.0",
+    "@types/jest": "^29.5.1",
     "@types/jsonwebtoken": "7.2.7",
     "@types/lolex": "2.1.3",
     "@types/morgan": "^1.7.35",
@@ -156,21 +156,21 @@
     "@types/xmldom": "^0.1.29",
     "auto-changelog": "^2.2.1",
     "dotenv-cli": "^3.1.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "jest": "^24.9.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.5.0",
     "lolex": "4.2.0",
     "modclean": "^3.0.0-beta.1",
-    "nodemon": "^1.19.2",
+    "nodemon": "^2.0.22",
     "npm-run-all": "^4.1.3",
-    "prettier": "^1.14.3",
+    "prettier": "^2.8.8",
     "shx": "^0.3.2",
     "superagent": "^3.8.3",
     "supertest": "^3.3.0",
     "swagger-cli": "^2.3.1",
     "swagger-parser": "^5.0.5",
-    "ts-jest": "^23.10.4",
+    "ts-jest": "^29.1.0",
     "ts-node": "^7.0.1",
-    "typescript": "^4.3.5"
+    "typescript": "4.9.5"
   },
   "jest": {
     "setupFiles": [
@@ -203,6 +203,6 @@
   "resolutions": {
     "handlebars": "~4.5.3",
     "@types/serve-static": "1.13.10",
-    "@types/node": "14.14.45"
+    "@types/express-serve-static-core": "4.17.34"
   }
 }

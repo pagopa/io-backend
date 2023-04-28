@@ -11,7 +11,7 @@ import {
   IResponseErrorTooManyRequests,
   IResponseErrorValidation,
   IResponseSuccessAccepted,
-  IResponseSuccessJson
+  IResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { UserDataProcessing } from "../../generated/backend/UserDataProcessing";
@@ -39,10 +39,10 @@ export default class UserDataProcessingController {
     | IResponseErrorConflict
     | IResponseSuccessJson<UserDataProcessing>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         UserDataProcessingChoiceRequest.decode(req.body),
-        dataProcessingChoice =>
+        (dataProcessingChoice) =>
           this.userDataProcessingService.upsertUserDataProcessing(
             user,
             dataProcessingChoice
@@ -63,10 +63,10 @@ export default class UserDataProcessingController {
     | IResponseErrorTooManyRequests
     | IResponseSuccessJson<UserDataProcessing>
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         UserDataProcessingChoice.decode(req.params.choice),
-        dataProcessingChoice =>
+        (dataProcessingChoice) =>
           this.userDataProcessingService.getUserDataProcessing(
             user,
             dataProcessingChoice
@@ -87,10 +87,10 @@ export default class UserDataProcessingController {
     | IResponseErrorConflict
     | IResponseSuccessAccepted
   > =>
-    withUserFromRequest(req, async user =>
+    withUserFromRequest(req, async (user) =>
       withValidatedOrValidationError(
         UserDataProcessingChoice.decode(req.params.choice),
-        dataProcessingChoice =>
+        (dataProcessingChoice) =>
           this.userDataProcessingService.abortUserDataProcessing(
             user,
             dataProcessingChoice

@@ -11,25 +11,25 @@ import { agent } from "@pagopa/ts-commons";
 
 import {
   getNodeEnvironmentFromProcessEnv,
-  NodeEnvironmentEnum
+  NodeEnvironmentEnum,
 } from "@pagopa/ts-commons/lib/environment";
 import {
   errorsToReadableMessages,
-  readableReport
+  readableReport,
 } from "@pagopa/ts-commons/lib/reporters";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import {
   IApplicationConfig,
   IServiceProviderConfig,
-  SamlConfig
+  SamlConfig,
 } from "@pagopa/io-spid-commons";
 
 import * as A from "fp-ts/lib/Array";
 import {
   AbortableFetch,
   setFetchTimeout,
-  toFetch
+  toFetch,
 } from "@pagopa/ts-commons/lib/fetch";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -83,7 +83,7 @@ export const CACHE_MAX_AGE_SECONDS: number = parseInt(
 export const ENABLE_NOTICE_EMAIL_CACHE: boolean = pipe(
   process.env.ENABLE_NOTICE_EMAIL_CACHE,
   O.fromNullable,
-  O.map(_ => _.toLowerCase() === "true"),
+  O.map((_) => _.toLowerCase() === "true"),
   O.getOrElseW(() => false)
 );
 
@@ -142,7 +142,7 @@ const DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS = 10 * 60 * 1000;
 const SAML_REQUEST_EXPIRATION_PERIOD_MS = pipe(
   process.env.SAML_REQUEST_EXPIRATION_PERIOD_MS,
   E.fromNullable(new Error("Missing Environment configuration")),
-  E.chain(_ => pipe(IntegerFromString.decode(_), E.mapLeft(toError))),
+  E.chain((_) => pipe(IntegerFromString.decode(_), E.mapLeft(toError))),
   E.getOrElse(() => DEFAULT_SAML_REQUEST_EXPIRATION_PERIOD_MS)
 );
 const DEFAULT_SAML_ACCEPTED_CLOCK_SKEW_MS = "-1";
@@ -161,14 +161,16 @@ const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
 export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
   process.env.STARTUP_IDPS_METADATA,
   O.fromNullable,
-  O.map(_ =>
+  O.map((_) =>
     pipe(
       E.parseJSON(_, E.toError),
-      E.chain(_1 =>
+      E.chain((_1) =>
         pipe(
           _1,
           STRINGS_RECORD.decode,
-          E.mapLeft(err => new Error(errorsToReadableMessages(err).join(" / ")))
+          E.mapLeft(
+            (err) => new Error(errorsToReadableMessages(err).join(" / "))
+          )
         )
       ),
       E.getOrElseW(() => undefined)
@@ -186,7 +188,7 @@ export const CLIENT_REDIRECTION_URL =
 const SPID_LEVEL_WHITELIST = pipe(
   process.env.SPID_LEVEL_WHITELIST,
   O.fromNullable,
-  O.map(_ => _.split(",")),
+  O.map((_) => _.split(",")),
   O.fold(
     // SPID_LEVEL_WHITELIST is unset
     () => {
@@ -195,15 +197,15 @@ const SPID_LEVEL_WHITELIST = pipe(
         return E.right<t.Errors, SpidLevelArray>([
           "SpidL1",
           "SpidL2",
-          "SpidL3"
+          "SpidL3",
         ]);
       }
       // default config for production, only L2 and L3 are allowed
       return E.right<t.Errors, SpidLevelArray>(["SpidL2", "SpidL3"]);
     },
-    _ => SpidLevelArray.decode(_)
+    (_) => SpidLevelArray.decode(_)
   ),
-  E.getOrElseW(err => {
+  E.getOrElseW((err) => {
     log.error(
       "Invalid value for SPID_LEVEL_WHITELIST env [%s]",
       readableReport(err)
@@ -220,19 +222,19 @@ export const appConfig: IApplicationConfig = {
   metadataPath: "/metadata",
   sloPath: "/slo",
   spidLevelsWhitelist: SPID_LEVEL_WHITELIST,
-  startupIdpsMetadata: STARTUP_IDPS_METADATA
+  startupIdpsMetadata: STARTUP_IDPS_METADATA,
 };
 
 const maybeSpidValidatorUrlOption = pipe(
   process.env.SPID_VALIDATOR_URL,
   O.fromNullable,
-  O.map(_ => ({ [_]: true }))
+  O.map((_) => ({ [_]: true }))
 );
 const maybeSpidTestenvOption = pipe(
   SPID_TESTENV_URL,
   O.fromNullable,
-  O.map(_ => ({
-    [_]: true
+  O.map((_) => ({
+    [_]: true,
   }))
 );
 
@@ -259,12 +261,12 @@ export const serviceProviderConfig: IServiceProviderConfig = {
   organization: {
     URL: "https://io.italia.it",
     displayName: "IO - l'app dei servizi pubblici BETA",
-    name: "PagoPA S.p.A."
+    name: "PagoPA S.p.A.",
   },
   publicCert: samlCert(),
   requiredAttributes: {
     attributes: ["email", "name", "familyName", "fiscalNumber", "dateOfBirth"],
-    name: "IO - l'app dei servizi pubblici BETA"
+    name: "IO - l'app dei servizi pubblici BETA",
   },
   spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,
@@ -273,8 +275,8 @@ export const serviceProviderConfig: IServiceProviderConfig = {
     ...(O.isSome(maybeSpidTestenvOption) ? maybeSpidTestenvOption.value : {}),
     ...(O.isSome(maybeSpidValidatorUrlOption)
       ? maybeSpidValidatorUrlOption.value
-      : {})
-  }
+      : {}),
+  },
 };
 
 export const samlConfig: SamlConfig = {
@@ -288,7 +290,7 @@ export const samlConfig: SamlConfig = {
   issuer: SAML_ISSUER,
   logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
   privateCert: samlKey(),
-  requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS
+  requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS,
 };
 
 // Redirection urls
@@ -303,7 +305,7 @@ if (!clientProfileRedirectionUrl.includes("{token}")) {
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_NOTIFY_IP_SOURCE_RANGE,
   decodeCIDRs,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_NOTIFY_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
@@ -317,7 +319,7 @@ export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
 export const ALLOW_PAGOPA_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_PAGOPA_IP_SOURCE_RANGE,
   decodeCIDRs,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_PAGOPA_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
@@ -331,7 +333,7 @@ export const ALLOW_PAGOPA_IP_SOURCE_RANGE = pipe(
 export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_MYPORTAL_IP_SOURCE_RANGE,
   decodeCIDRs,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_MYPORTAL_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
@@ -345,7 +347,7 @@ export const ALLOW_MYPORTAL_IP_SOURCE_RANGE = pipe(
 export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_BPD_IP_SOURCE_RANGE,
   decodeCIDRs,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_BPD_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
@@ -359,7 +361,7 @@ export const ALLOW_BPD_IP_SOURCE_RANGE = pipe(
 export const ALLOW_ZENDESK_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_ZENDESK_IP_SOURCE_RANGE,
   decodeCIDRs,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_ZENDESK_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
@@ -373,7 +375,7 @@ export const ALLOW_ZENDESK_IP_SOURCE_RANGE = pipe(
 export const ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE = pipe(
   process.env.ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE,
   decodeCIDRs,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE environment variable: ${readableReport(
         errs
@@ -395,14 +397,13 @@ const fetchWithTimeout = setFetchTimeout(
 
 const httpOrHttpsApiFetch = toFetch(fetchWithTimeout);
 
-const bearerAuthFetch = (
-  origFetch: typeof fetch = fetch,
-  bearerToken: string
-): typeof fetch => (input, init) =>
-  origFetch(input, {
-    ...init,
-    headers: { Authorization: `Bearer ${bearerToken}` }
-  });
+const bearerAuthFetch =
+  (origFetch: typeof fetch = fetch, bearerToken: string): typeof fetch =>
+  (input, init) =>
+    origFetch(input, {
+      ...init,
+      headers: { Authorization: `Bearer ${bearerToken}` },
+    });
 
 export const getHttpsApiFetchWithBearer = (bearer: string) =>
   toFetch(
@@ -527,22 +528,22 @@ const IEnabledPnAddressBookConfig = t.interface({
   PN_API_KEY: NonEmptyString,
   PN_API_KEY_UAT: NonEmptyString,
   PN_API_URL: UrlFromString,
-  PN_API_URL_UAT: UrlFromString
+  PN_API_URL_UAT: UrlFromString,
 });
 type IEnabledPnAddressBookConfig = t.TypeOf<typeof IEnabledPnAddressBookConfig>;
 
 const IPNAddressBookConfig = t.union([
   IEnabledPnAddressBookConfig,
   t.partial({
-    FF_PN_ACTIVATION_ENABLED: t.literal("0")
-  })
+    FF_PN_ACTIVATION_ENABLED: t.literal("0"),
+  }),
 ]);
 type IPNAddressBookConfig = t.TypeOf<typeof IPNAddressBookConfig>;
 
 export const PNAddressBookConfig = pipe(
   process.env,
   IPNAddressBookConfig.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid PN Address book configuration envs: ${readableReport(
         errs
@@ -552,12 +553,12 @@ export const PNAddressBookConfig = pipe(
   })
 );
 
-export const PN_ADDRESS_BOOK_CLIENT_SELECTOR: O.Option<ReturnType<
-  typeof PNClientFactory
->> = pipe(
+export const PN_ADDRESS_BOOK_CLIENT_SELECTOR: O.Option<
+  ReturnType<typeof PNClientFactory>
+> = pipe(
   PNAddressBookConfig,
   E.fromPredicate(IEnabledPnAddressBookConfig.is, () => O.none),
-  E.map(pnConfig =>
+  E.map((pnConfig) =>
     O.some(
       PNClientFactory(
         pnConfig.PN_API_URL,
@@ -631,24 +632,24 @@ export const getClientProfileRedirectionUrl = (token: string): UrlFromString =>
 export const ClientErrorRedirectionUrlParams = t.union([
   t.intersection([
     t.interface({
-      errorMessage: NonEmptyString
+      errorMessage: NonEmptyString,
     }),
     t.partial({
-      errorCode: t.number
-    })
+      errorCode: t.number,
+    }),
   ]),
   t.intersection([
     t.partial({
-      errorMessage: NonEmptyString
+      errorMessage: NonEmptyString,
     }),
     t.interface({
-      errorCode: t.number
-    })
+      errorCode: t.number,
+    }),
   ]),
   t.interface({
     errorCode: t.number,
-    errorMessage: NonEmptyString
-  })
+    errorMessage: NonEmptyString,
+  }),
 ]);
 export type ClientErrorRedirectionUrlParams = t.TypeOf<
   typeof ClientErrorRedirectionUrlParams
@@ -661,7 +662,7 @@ export const getClientErrorRedirectionUrl = (
     record
       .collect(S.Ord)((key, value) => `${key}=${value}`)(params)
       .join("&"),
-    errorParams => CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
+    (errorParams) => CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
     UrlFromString.decode,
     E.getOrElseW(() => {
       throw new Error("Invalid url");
@@ -716,8 +717,8 @@ export const DEFAULT_APPINSIGHTS_SAMPLING_PERCENTAGE = 5;
 export const TEST_LOGIN_FISCAL_CODES = pipe(
   process.env.TEST_LOGIN_FISCAL_CODES,
   NonEmptyString.decode,
-  E.map(_ => _.split(",")),
-  E.map(_ => A.rights(_.map(FiscalCode.decode))),
+  E.map((_) => _.split(",")),
+  E.map((_) => A.rights(_.map(FiscalCode.decode))),
   E.getOrElseW(() => [])
 );
 
@@ -742,7 +743,7 @@ export const FF_USER_AGE_LIMIT_ENABLED =
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
   process.env.JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY environment variable: ${readableReport(
         errs
@@ -754,7 +755,7 @@ export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
 export const JWT_SUPPORT_TOKEN_ISSUER = pipe(
   process.env.JWT_SUPPORT_TOKEN_ISSUER,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
         errs
@@ -780,7 +781,7 @@ log.info(
 export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = pipe(
   process.env.JWT_ZENDESK_SUPPORT_TOKEN_SECRET,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_SECRET environment variable: ${readableReport(
         errs
@@ -792,7 +793,7 @@ export const JWT_ZENDESK_SUPPORT_TOKEN_SECRET = pipe(
 export const JWT_ZENDESK_SUPPORT_TOKEN_ISSUER = pipe(
   process.env.JWT_ZENDESK_SUPPORT_TOKEN_ISSUER,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_ZENDESK_SUPPORT_TOKEN_ISSUER environment variable: ${readableReport(
         errs
@@ -818,7 +819,7 @@ log.info(
 export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = pipe(
   process.env.JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY environment variable: ${readableReport(
         errs
@@ -830,7 +831,7 @@ export const JWT_MIT_VOUCHER_TOKEN_PRIVATE_ES_KEY = pipe(
 export const JWT_MIT_VOUCHER_TOKEN_ISSUER = pipe(
   process.env.JWT_MIT_VOUCHER_TOKEN_ISSUER,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_MIT_VOUCHER_TOKEN_ISSUER environment variable: ${readableReport(
         errs
@@ -855,7 +856,7 @@ log.info(
 export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
   process.env.JWT_MIT_VOUCHER_TOKEN_AUDIENCE,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid JWT_MIT_VOUCHER_TOKEN_AUDIENCE environment variable: ${readableReport(
         errs
@@ -868,7 +869,7 @@ export const JWT_MIT_VOUCHER_TOKEN_AUDIENCE = pipe(
 export const TEST_CGN_FISCAL_CODES = pipe(
   process.env.TEST_CGN_FISCAL_CODES || "",
   CommaSeparatedListOf(FiscalCode).decode,
-  E.getOrElseW(err => {
+  E.getOrElseW((err) => {
     throw new Error(
       `Invalid TEST_CGN_FISCAL_CODES value: ${readableReport(err)}`
     );
@@ -880,20 +881,20 @@ export const PecServerConfig = t.interface({
   basePath: t.string,
   secret: NonEmptyString,
   serviceId: NonEmptyString,
-  url: NonEmptyString
+  url: NonEmptyString,
 });
 export type PecServerConfig = t.TypeOf<typeof PecServerConfig>;
 
 export const PecServersConfig = t.interface({
   aruba: PecServerConfig,
-  poste: PecServerConfig
+  poste: PecServerConfig,
 });
 export type PecServersConfig = t.TypeOf<typeof PecServersConfig>;
 
 export const PECSERVERS = pipe(
   process.env,
   ognlTypeFor<PecServersConfig>(PecServersConfig, "PECSERVERS").decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid PECSERVERS environment variable: ${readableReport(
         errs
@@ -919,7 +920,7 @@ export const THIRD_PARTY_CONFIG_LIST = pipe(
 
 const IS_APPBACKENDLI = pipe(
   O.fromNullable(process.env.IS_APPBACKENDLI),
-  O.map(val => val.toLowerCase() === "true"),
+  O.map((val) => val.toLowerCase() === "true"),
   O.getOrElse(() => false)
 );
 
@@ -930,7 +931,7 @@ export const FF_ENABLE_SESSION_ENDPOINTS = IS_APPBACKENDLI;
 export const PN_SERVICE_ID = pipe(
   process.env.PN_SERVICE_ID,
   NonEmptyString.decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid PN_SERVICE_ID environment variable: ${readableReport(
         errs
@@ -943,13 +944,13 @@ export const PN_SERVICE_ID = pipe(
 export const FF_ROUTING_PUSH_NOTIF = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF,
   FeatureFlag.decode,
-  E.getOrElse(_ => FeatureFlagEnum.NONE)
+  E.getOrElse((_) => FeatureFlagEnum.NONE)
 );
 
 export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST,
   CommaSeparatedListOf(NonEmptyString).decode,
-  E.getOrElseW(errs => {
+  E.getOrElseW((errs) => {
     log.error(
       `Missing or invalid FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST environment variable: ${readableReport(
         errs
@@ -961,5 +962,5 @@ export const FF_ROUTING_PUSH_NOTIF_BETA_TESTER_SHA_LIST = pipe(
 export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
-  E.getOrElse(_ => "XYZ" as NonEmptyString)
+  E.getOrElse((_) => "XYZ" as NonEmptyString)
 );

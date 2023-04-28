@@ -8,7 +8,7 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
-  ResponseErrorInternal
+  ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
 import { ExtendedProfile } from "@pagopa/io-functions-app-sdk/ExtendedProfile";
@@ -48,12 +48,11 @@ export const toInitializedProfile = (
   reminder_status: profile.reminder_status,
   service_preferences_settings: profile.service_preferences_settings,
   spid_email: user.spid_email,
-  version: profile.version
+  version: profile.version,
 });
 
-export const profileMissingErrorResponse = ResponseErrorInternal(
-  "Profile Missing"
-);
+export const profileMissingErrorResponse =
+  ResponseErrorInternal("Profile Missing");
 
 export const notFoundProfileToInternalServerError = (
   getProfileResponse:

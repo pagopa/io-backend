@@ -9,7 +9,7 @@ import {
   ProblemJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -21,7 +21,7 @@ import { Merchant } from "../../generated/cgn-operator-search/Merchant";
 import {
   ResponseErrorStatusNotDefinedInSpec,
   withCatchAsInternalError,
-  withValidatedOrInternalError
+  withValidatedOrInternalError,
 } from "../utils/responses";
 import { readableProblem } from "../utils/errorsFormatter";
 import { CgnOperatorSearchAPIClient } from "../../src/clients/cgn-operator-search";
@@ -43,9 +43,7 @@ type ServiceResponses<T> =
 
 export default class CgnService {
   constructor(
-    private readonly cgnOperatorSearchApiClient: ReturnType<
-      CgnOperatorSearchAPIClient
-    >
+    private readonly cgnOperatorSearchApiClient: ReturnType<CgnOperatorSearchAPIClient>
   ) {}
 
   /**
@@ -55,11 +53,12 @@ export default class CgnService {
     params: GetPublishedCategoriesParameters
   ): Promise<ServiceResponses<PublishedProductCategoriesResult>> =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnOperatorSearchApiClient.getPublishedProductCategories(
-        params
-      );
+      const validated =
+        await this.cgnOperatorSearchApiClient.getPublishedProductCategories(
+          params
+        );
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<PublishedProductCategoriesResult>(response)
       );
     });
@@ -72,10 +71,10 @@ export default class CgnService {
   ): Promise<ServiceResponses<Merchant>> =>
     withCatchAsInternalError(async () => {
       const validated = await this.cgnOperatorSearchApiClient.getMerchant({
-        merchantId
+        merchantId,
       });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<Merchant>(response)
       );
     });
@@ -88,13 +87,12 @@ export default class CgnService {
     onlineMerchantSearchRequest: OnlineMerchantSearchRequest
   ): Promise<ServiceResponses<OnlineMerchants>> =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnOperatorSearchApiClient.getOnlineMerchants(
-        {
-          body: onlineMerchantSearchRequest
-        }
-      );
+      const validated =
+        await this.cgnOperatorSearchApiClient.getOnlineMerchants({
+          body: onlineMerchantSearchRequest,
+        });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<OnlineMerchants>(response)
       );
     });
@@ -107,13 +105,12 @@ export default class CgnService {
     offlineMerchantSearchRequest: OfflineMerchantSearchRequest
   ): Promise<ServiceResponses<OfflineMerchants>> =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnOperatorSearchApiClient.getOfflineMerchants(
-        {
-          body: offlineMerchantSearchRequest
-        }
-      );
+      const validated =
+        await this.cgnOperatorSearchApiClient.getOfflineMerchants({
+          body: offlineMerchantSearchRequest,
+        });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<OfflineMerchants>(response)
       );
     });
@@ -125,13 +122,12 @@ export default class CgnService {
     discountId: NonEmptyString
   ): Promise<ServiceResponses<DiscountBucketCode>> =>
     withCatchAsInternalError(async () => {
-      const validated = await this.cgnOperatorSearchApiClient.getDiscountBucketCode(
-        {
-          discountId
-        }
-      );
+      const validated =
+        await this.cgnOperatorSearchApiClient.getDiscountBucketCode({
+          discountId,
+        });
 
-      return withValidatedOrInternalError(validated, response =>
+      return withValidatedOrInternalError(validated, (response) =>
         this.mapResponse<DiscountBucketCode>(response)
       );
     });
