@@ -14,14 +14,14 @@ overrides:
     - api-app.io.pagopa.it
   endpoints:
     /info:
-      response_time_threshold: 3
+      response_time_threshold: 8
       availability_threshold: 0.70
     /test-login:
-      response_time_threshold: 3
+      response_time_threshold: 8
       availability_threshold: 0.70
     /login:
-      response_time_threshold: 3
+      response_time_threshold: 8
       availability_threshold: 0.70
     /assertionConsumerService:
-      response_time_threshold: 3
+      response_time_threshold: 9
       availability_threshold: 0.70
