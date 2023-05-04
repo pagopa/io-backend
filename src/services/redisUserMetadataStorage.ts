@@ -21,8 +21,10 @@ export const invalidVersionNumberError = new Error("Invalid version number");
  * Service that manages user metadata stored into Redis database.
  */
 
-export default class RedisUserMetadataStorage extends RedisStorageUtils
-  implements IUserMetadataStorage {
+export default class RedisUserMetadataStorage
+  extends RedisStorageUtils
+  implements IUserMetadataStorage
+{
   constructor(
     private readonly redisClient: redis.RedisClientType | redis.RedisClusterType
   ) {
@@ -112,7 +114,7 @@ export default class RedisUserMetadataStorage extends RedisStorageUtils
             flow(
               UserMetadata.decode,
               TE.fromEither,
-              TE.mapLeft(err => {
+              TE.mapLeft((err) => {
                 log.error(
                   "Unable to decode the user metadata: %s",
                   errorsToReadableMessages(err).join("|")

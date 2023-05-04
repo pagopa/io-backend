@@ -27,7 +27,7 @@ export default class RedisStorageUtils {
   ) {
     return pipe(
       command,
-      TE.map(reply => reply === "OK")
+      TE.map((reply) => reply === "OK")
     );
   }
 
@@ -57,7 +57,7 @@ export default class RedisStorageUtils {
     ): TE.TaskEither<Error, boolean> =>
       pipe(
         command,
-        TE.chain(reply => {
+        TE.chain((reply) => {
           if (expectedReply !== undefined && expectedReply !== reply) {
             return TE.right(false);
           }
@@ -90,7 +90,7 @@ export default class RedisStorageUtils {
     ): TE.TaskEither<Error, true> =>
       pipe(
         response,
-        TE.chain(_ => (_ ? TE.right(_) : TE.left(error)))
+        TE.chain((_) => (_ ? TE.right(_) : TE.left(error)))
       );
   }
 }

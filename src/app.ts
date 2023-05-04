@@ -12,7 +12,7 @@ import { Express } from "express";
 import expressEnforcesSsl = require("express-enforces-ssl");
 import {
   NodeEnvironment,
-  NodeEnvironmentEnum
+  NodeEnvironmentEnum,
 } from "@pagopa/ts-commons/lib/environment";
 import { CIDR, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { QueueClient } from "@azure/storage-queue";
@@ -81,7 +81,7 @@ import {
   LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING,
   LOLLIPOP_REVOKE_QUEUE_NAME,
   IO_SIGN_SERVICE_ID,
-  FIRST_LOLLIPOP_CONSUMER_CLIENT
+  FIRST_LOLLIPOP_CONSUMER_CLIENT,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -101,12 +101,12 @@ import CgnController from "./controllers/cgnController";
 import SessionLockController from "./controllers/sessionLockController";
 import {
   getPNActivationController,
-  upsertPNActivationController
+  upsertPNActivationController,
 } from "./controllers/pnController";
 import {
   getUserForBPD,
   getUserForFIMS,
-  getUserForMyPortal
+  getUserForMyPortal,
 } from "./controllers/ssoController";
 import SupportController from "./controllers/supportController";
 import ZendeskController from "./controllers/zendeskController";
@@ -133,22 +133,22 @@ import { User } from "./types/user";
 import {
   attachTrackingData,
   StartupEventName,
-  trackStartupTime
+  trackStartupTime,
 } from "./utils/appinsights";
 import { getRequiredENVVar } from "./utils/container";
 import {
   constantExpressHandler,
   toExpressHandler,
-  toExpressMiddleware
+  toExpressMiddleware,
 } from "./utils/express";
 import { expressErrorMiddleware } from "./utils/middleware/express";
 import {
   getCurrentBackendVersion,
-  getObjectFromPackageJson
+  getObjectFromPackageJson,
 } from "./utils/package";
 import {
   createClusterRedisClient,
-  createSimpleRedisClient
+  createSimpleRedisClient,
 } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
@@ -166,7 +166,7 @@ import IoSignService from "./services/ioSignService";
 import IoSignController from "./controllers/ioSignController";
 import {
   getNotificationServiceFactory,
-  NotificationServiceFactory
+  NotificationServiceFactory,
 } from "./services/notificationServiceFactory";
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
@@ -178,7 +178,7 @@ import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  newApp
+  newApp,
 };
 
 export interface IAppFactoryParameters {
@@ -227,7 +227,7 @@ export async function newApp({
   CGNOperatorSearchAPIBasePath,
   EUCovidCertBasePath,
   MitVoucherBasePath,
-  ZendeskBasePath
+  ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
   const REDIS_CLIENT =
     ENV === NodeEnvironmentEnum.DEVELOPMENT
@@ -271,29 +271,29 @@ export async function newApp({
   // Creates middlewares for each implemented strategy
   const authMiddlewares = {
     bearerBPD: passport.authenticate("bearer.bpd", {
-      session: false
+      session: false,
     }),
     bearerFIMS: passport.authenticate("bearer.fims", {
-      session: false
+      session: false,
     }),
     bearerMyPortal: passport.authenticate("bearer.myportal", {
-      session: false
+      session: false,
     }),
     bearerSession: passport.authenticate("bearer.session", {
-      session: false
+      session: false,
     }),
     bearerWallet: passport.authenticate("bearer.wallet", {
-      session: false
+      session: false,
     }),
     bearerZendesk: passport.authenticate("bearer.zendesk", {
-      session: false
+      session: false,
     }),
     local: passport.authenticate("local", {
-      session: false
+      session: false,
     }),
     urlToken: passport.authenticate("authtoken", {
-      session: false
-    })
+      session: false,
+    }),
   };
 
   // Create and setup the Express app.
@@ -328,7 +328,7 @@ export async function newApp({
     pipe(
       req.user,
       User.decode,
-      E.map(user => String(user.fiscal_code).slice(0, 6)),
+      E.map((user) => String(user.fiscal_code).slice(0, 6)),
       E.getOrElse(() => "")
     )
   );
@@ -356,7 +356,7 @@ export async function newApp({
       verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
         // eslint-disable-next-line functional/immutable-data
         res.locals.body = buf;
-      }
+      },
     })
   );
 
@@ -419,10 +419,10 @@ export async function newApp({
                 NOTIFICATIONS_STORAGE_CONNECTION_STRING,
                 NOTIFICATIONS_QUEUE_NAME
               ),
-            err =>
+            (err) =>
               new Error(`Error initializing Notification Service: [${err}]`)
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
@@ -435,12 +435,12 @@ export async function newApp({
                 PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING,
                 PUSH_NOTIFICATIONS_QUEUE_NAME
               ),
-            err =>
+            (err) =>
               new Error(
                 `Error initializing Push Notification Service: [${err}]`
               )
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
@@ -461,10 +461,10 @@ export async function newApp({
                 USERS_LOGIN_STORAGE_CONNECTION_STRING,
                 USERS_LOGIN_QUEUE_NAME
               ),
-            err =>
+            (err) =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
@@ -478,30 +478,31 @@ export async function newApp({
                 LOLLIPOP_REVOKE_QUEUE_NAME,
                 appInsightsClient
               ),
-            err =>
+            (err) =>
               new Error(`Error initializing UsersLoginLogService: [${err}]`)
           ),
-          E.getOrElseW(err => {
+          E.getOrElseW((err) => {
             throw err;
           })
         );
 
-        const acsController: AuthenticationController = new AuthenticationController(
-          SESSION_STORAGE,
-          TOKEN_SERVICE,
-          getClientProfileRedirectionUrl,
-          getClientErrorRedirectionUrl,
-          PROFILE_SERVICE,
-          notificationServiceFactory,
-          USERS_LOGIN_LOG_SERVICE,
-          TEST_LOGIN_FISCAL_CODES,
-          FF_USER_AGE_LIMIT_ENABLED,
-          {
-            isLollipopEnabled: FF_LOLLIPOP_ENABLED,
-            lollipopService: LOLLIPOP_SERVICE
-          },
-          appInsightsClient
-        );
+        const acsController: AuthenticationController =
+          new AuthenticationController(
+            SESSION_STORAGE,
+            TOKEN_SERVICE,
+            getClientProfileRedirectionUrl,
+            getClientErrorRedirectionUrl,
+            PROFILE_SERVICE,
+            notificationServiceFactory,
+            USERS_LOGIN_LOG_SERVICE,
+            TEST_LOGIN_FISCAL_CODES,
+            FF_USER_AGE_LIMIT_ENABLED,
+            {
+              isLollipopEnabled: FF_LOLLIPOP_ENABLED,
+              lollipopService: LOLLIPOP_SERVICE,
+            },
+            appInsightsClient
+          );
 
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerPublicRoutes(app);
@@ -688,9 +689,9 @@ export async function newApp({
         );
         return { acsController, app };
       },
-      err => new Error(`Error on app routes setup: [${err}]`)
+      (err) => new Error(`Error on app routes setup: [${err}]`)
     ),
-    TE.chain(_ => {
+    TE.chain((_) => {
       const spidQueueClient = new QueueClient(
         SPID_LOG_STORAGE_CONNECTION_STRING,
         SPID_LOG_QUEUE_NAME
@@ -705,15 +706,15 @@ export async function newApp({
               app: _.app,
               appConfig: {
                 ...appConfig,
-                eventTraker: event => {
+                eventTraker: (event) => {
                   appInsightsClient?.trackEvent({
                     name: event.name,
                     properties: {
                       type: event.type,
-                      ...event.data
-                    }
+                      ...event.data,
+                    },
                   });
-                }
+                },
               },
               doneCb: spidLogCallback,
               logout: _.acsController.slo.bind(_.acsController),
@@ -726,17 +727,17 @@ export async function newApp({
               ),
               redisClient: REDIS_CLIENT,
               samlConfig,
-              serviceProviderConfig
+              serviceProviderConfig,
             })(),
-          err => new Error(`Unexpected error initizing Spid Login: [${err}]`)
+          (err) => new Error(`Unexpected error initizing Spid Login: [${err}]`)
         ),
-        TE.map(withSpidApp => ({
+        TE.map((withSpidApp) => ({
           ...withSpidApp,
-          spidConfigTime: timer.getElapsedMilliseconds()
+          spidConfigTime: timer.getElapsedMilliseconds(),
         }))
       );
     }),
-    TE.map(_ => {
+    TE.map((_) => {
       if (appInsightsClient) {
         trackStartupTime(
           appInsightsClient,
@@ -758,7 +759,7 @@ export async function newApp({
       );
       return _.app;
     }),
-    TE.chain(_ => {
+    TE.chain((_) => {
       const spidStrategyOption = getSpidStrategyOption(_);
       // Process ends in case no IDP is configured
       if (R.isEmpty(spidStrategyOption?.idp || {})) {
@@ -773,14 +774,14 @@ export async function newApp({
       }
       return TE.of(_);
     }),
-    TE.map(_ => {
+    TE.map((_) => {
       // Register the express error handler
       // This middleware must be the last in order to catch all the errors
       // forwarded with express next function.
       _.use(expressErrorMiddleware);
       return _;
     }),
-    TE.getOrElse(err => {
+    TE.getOrElse((err) => {
       app.emit("server:stop");
       throw err;
     })
@@ -890,9 +891,8 @@ function registerEUCovidCertAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const eucovidCertController: EUCovidCertController = new EUCovidCertController(
-    eucovidcertService
-  );
+  const eucovidCertController: EUCovidCertController =
+    new EUCovidCertController(eucovidcertService);
 
   app.post(
     `${basePath}/certificate`,
@@ -958,14 +958,11 @@ function registerAPIRoutes(
     fnAppService
   );
 
-  const notificationController: NotificationController = new NotificationController(
-    notificationServiceFactory,
-    sessionStorage,
-    {
+  const notificationController: NotificationController =
+    new NotificationController(notificationServiceFactory, sessionStorage, {
       notificationDefaultSubject: NOTIFICATION_DEFAULT_SUBJECT,
-      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE
-    }
-  );
+      notificationDefaultTitle: NOTIFICATION_DEFAULT_TITLE,
+    });
 
   const sessionController: SessionController = new SessionController(
     sessionStorage,
@@ -973,17 +970,14 @@ function registerAPIRoutes(
     profileService
   );
 
-  const pagoPAProxyController: PagoPAProxyController = new PagoPAProxyController(
-    pagoPaProxyService
-  );
+  const pagoPAProxyController: PagoPAProxyController =
+    new PagoPAProxyController(pagoPaProxyService);
 
-  const userMetadataController: UserMetadataController = new UserMetadataController(
-    userMetadataStorage
-  );
+  const userMetadataController: UserMetadataController =
+    new UserMetadataController(userMetadataStorage);
 
-  const userDataProcessingController: UserDataProcessingController = new UserDataProcessingController(
-    userDataProcessingService
-  );
+  const userDataProcessingController: UserDataProcessingController =
+    new UserDataProcessingController(userDataProcessingService);
 
   const supportController: SupportController = new SupportController(
     tokenService
@@ -1223,11 +1217,12 @@ function registerSessionAPIRoutes(
   lollipopService: LollipopService
 ): void {
   if (FF_ENABLE_SESSION_ENDPOINTS) {
-    const sessionLockController: SessionLockController = new SessionLockController(
-      sessionStorage,
-      userMetadataStorage,
-      lollipopService
-    );
+    const sessionLockController: SessionLockController =
+      new SessionLockController(
+        sessionStorage,
+        userMetadataStorage,
+        lollipopService
+      );
 
     app.get(
       `${basePath}/sessions/:fiscal_code`,
@@ -1340,7 +1335,7 @@ function registerIoSignAPIRoutes(
     bearerSessionTokenAuth,
     constantExpressHandler(
       ResponseSuccessJson({
-        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString
+        serviceId: IO_SIGN_SERVICE_ID as NonEmptyString,
       })
     )
   );
@@ -1385,10 +1380,8 @@ function registerCgnOperatorSearchAPIRoutes(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bearerSessionTokenAuth: any
 ): void {
-  const cgnOperatorController: CgnOperatorSearchController = new CgnOperatorSearchController(
-    cgnService,
-    cgnOperatorSearchService
-  );
+  const cgnOperatorController: CgnOperatorSearchController =
+    new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
 
   app.get(
     `${basePath}/published-product-categories`,
@@ -1487,7 +1480,7 @@ function registerAuthenticationRoutes(
 ): void {
   pipe(
     TEST_LOGIN_PASSWORD,
-    E.map(testLoginPassword => {
+    E.map((testLoginPassword) => {
       passport.use(
         "local",
         localStrategy(TEST_LOGIN_FISCAL_CODES, testLoginPassword)
@@ -1495,7 +1488,10 @@ function registerAuthenticationRoutes(
       app.post(
         `${authBasePath}/test-login`,
         localAuth,
-        toExpressHandler(req => acsController.acsTest(req.user), acsController)
+        toExpressHandler(
+          (req) => acsController.acsTest(req.user),
+          acsController
+        )
       );
     })
   );
@@ -1552,17 +1548,17 @@ function registerPublicRoutes(app: Express): void {
         minAppVersion,
         O.getOrElse(() => ({
           android: "UNKNOWN",
-          ios: "UNKNOWN"
+          ios: "UNKNOWN",
         }))
       ),
       min_app_version_pagopa: pipe(
         minAppVersionPagoPa,
         O.getOrElse(() => ({
           android: "UNKNOWN",
-          ios: "UNKNOWN"
+          ios: "UNKNOWN",
         }))
       ),
-      version
+      version,
     };
     res.status(200).json(serverInfo);
   });

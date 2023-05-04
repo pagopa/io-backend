@@ -16,7 +16,7 @@ export async function createSimpleRedisClient(
     Record<string, never>,
     Record<string, never>
   >({
-    url: redisUrlOrDefault
+    url: redisUrlOrDefault,
   });
   await redisClient.connect();
   return redisClient;
@@ -25,78 +25,80 @@ export async function createSimpleRedisClient(
 export const obfuscateTokensInfo = (message: string) =>
   pipe(
     keyPrefixes,
-    RA.findFirst(key => message.includes(key)),
-    O.map(key =>
+    RA.findFirst((key) => message.includes(key)),
+    O.map((key) =>
       // eslint-disable-next-line no-useless-escape
       message.replace(new RegExp(`\\"${key}\\w+\\"`), `"${key}redacted"`)
     ),
     O.getOrElse(() => message)
   );
 
-export const createClusterRedisClient = (
-  appInsightsClient?: appInsights.TelemetryClient
-) => async (
-  redisUrl: string,
-  password?: string,
-  port?: string
-): Promise<redis.RedisClusterType> => {
-  const DEFAULT_REDIS_PORT = "6379";
+export const createClusterRedisClient =
+  (appInsightsClient?: appInsights.TelemetryClient) =>
+  async (
+    redisUrl: string,
+    password?: string,
+    port?: string
+  ): Promise<redis.RedisClusterType> => {
+    const DEFAULT_REDIS_PORT = "6379";
 
-  const redisPort: number = parseInt(port || DEFAULT_REDIS_PORT, 10);
-  log.info("Creating CLUSTER redis client", { url: redisUrl });
+    const redisPort: number = parseInt(port || DEFAULT_REDIS_PORT, 10);
+    log.info("Creating CLUSTER redis client", { url: redisUrl });
 
-  const redisClient = redis.createCluster<
-    redis.RedisDefaultModules,
-    Record<string, never>,
-    Record<string, never>
-  >({
-    defaults: {
-      legacyMode: true,
-      password
-    },
-    rootNodes: [
-      {
-        url: `${redisUrl}:${redisPort}`
-      }
-    ],
-    useReplicas: true
-  });
-  redisClient.on("error", err => {
-    log.error("[REDIS Error] an error occurs on redis client: %s", err);
-    appInsightsClient?.trackEvent({
-      name: "io-backend.redis.error",
-      properties: {
-        error: String(err),
-        message:
-          err instanceof Object ? obfuscateTokensInfo(JSON.stringify(err)) : ""
+    const redisClient = redis.createCluster<
+      redis.RedisDefaultModules,
+      Record<string, never>,
+      Record<string, never>
+    >({
+      defaults: {
+        legacyMode: true,
+        password,
       },
-      tagOverrides: { samplingEnabled: "false" }
-    });
-  });
-  redisClient.on(
-    "reconnecting",
-    ({
-      delay,
-      attempt
-    }: {
-      readonly delay: number;
-      readonly attempt: number;
-    }) => {
-      log.warn(
-        "[REDIS reconnecting] a reconnection events occurs [delay %s] [attempt %s]",
-        delay,
-        attempt
-      );
-      appInsightsClient?.trackEvent({
-        name: "io-backend.redis.reconnecting",
-        properties: {
-          attempt,
-          delay
+      rootNodes: [
+        {
+          url: `${redisUrl}:${redisPort}`,
         },
-        tagOverrides: { samplingEnabled: "false" }
+      ],
+      useReplicas: true,
+    });
+    redisClient.on("error", (err) => {
+      log.error("[REDIS Error] an error occurs on redis client: %s", err);
+      appInsightsClient?.trackEvent({
+        name: "io-backend.redis.error",
+        properties: {
+          error: String(err),
+          message:
+            err instanceof Object
+              ? obfuscateTokensInfo(JSON.stringify(err))
+              : "",
+        },
+        tagOverrides: { samplingEnabled: "false" },
       });
-    }
-  );
-  await redisClient.connect();
-  return redisClient;
-};
+    });
+    redisClient.on(
+      "reconnecting",
+      ({
+        delay,
+        attempt,
+      }: {
+        readonly delay: number;
+        readonly attempt: number;
+      }) => {
+        log.warn(
+          "[REDIS reconnecting] a reconnection events occurs [delay %s] [attempt %s]",
+          delay,
+          attempt
+        );
+        appInsightsClient?.trackEvent({
+          name: "io-backend.redis.reconnecting",
+          properties: {
+            attempt,
+            delay,
+          },
+          tagOverrides: { samplingEnabled: "false" },
+        });
+      }
+    );
+    await redisClient.connect();
+    return redisClient;
+  };
