@@ -94,20 +94,15 @@ paths:
     get:
       tags:
       - AppIO-PN-Notification
-      produces:
-        - application/json
       parameters:
-      - $ref: '#/parameters/FiscalCode'
-      - $ref: '#/parameters/ThirdPartyMessageId'
-      summary: gets the precondition to accept to access the message content and its attachments
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/ThirdPartyMessageId'
       operationId: getThirdPartyMessagePrecontition
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/PreconditionContent"
+          schema:
+            $ref: "#/definitions/PreconditionContent"
         '400':
           description: Bad Request
           schema:
