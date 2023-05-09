@@ -203,6 +203,7 @@ const mockParameters: GetMessagesParameters = {
 const mockGetMessages = jest.fn();
 const mockGetMessage = jest.fn();
 const mockUpsertMessageStatus = jest.fn();
+const mockGetTPMessagePrecondition = jest.fn();
 
 const mockGetTPMessageFromExternalService = jest.fn();
 mockGetTPMessageFromExternalService.mockImplementation(async _messageId =>
@@ -219,7 +220,8 @@ const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
     (_fiscalCode: FiscalCode) => {
       return {
         getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
-        getThirdPartyMessageAttachment: mockGetTPAttachment
+        getThirdPartyMessageAttachment: mockGetTPAttachment,
+        getThirdPartyMessagePrecontition: mockGetTPMessagePrecondition
       };
     }
   )
