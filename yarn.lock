@@ -971,10 +971,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^12.0.0":
-  version "12.0.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-12.0.0.tgz#984194d7b5ca80ff83f00194e986c183fc190c04"
-  integrity sha512-xF0tmXzlDI3cem/GcXaInGR28StiB1JpuDaw5nlJPkI/WpOwAKT9GWt9VUTJAfttw7u/YoH7AfFGc0AuE96xwg==
+"@pagopa/io-spid-commons@^12.0.1":
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-12.0.1.tgz#a4bc0e555377df60a39eb17ef3c2d7d44fa5ad54"
+  integrity sha512-oMWr+NVVN6/SW1hcxj02fY32oFJdf1lgIj/7GREG5+lPaGrKDjBOLsRtJs+He82h9dVuyXeElkpgjL5ZYf07Lg==
   dependencies:
     "@pagopa/ts-commons" "^12.0.0"
     "@types/redis" "^2.8.32"
