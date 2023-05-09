@@ -523,7 +523,7 @@ export default class NewMessagesService {
   // Retrieve a ThirdParty message precondition for a specific message, if exists
   // return an error otherwise
   private readonly getThirdPartyMessagePreconditionFromThirdPartyService = (
-    _: MessageWithThirdPartyData
+    message: MessageWithThirdPartyData
   ): TE.TaskEither<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -533,12 +533,69 @@ export default class NewMessagesService {
     | IResponseSuccessNoContent,
     ThirdPartyMessagePrecondition
   > =>
-    // TODO remove dummy implementation with the real one that calls the api of pn to get the third party content
-    TE.of({
-      markdown:
-        "Se continui, la notifica risulterà legalmente recapitata a te. Aprire il messaggio su IO equivale infatti a firmare la ricevuta di ritorno di una raccomandata tradizionale.\n**Mittente**: Comune di Xxxxxxx  \n**Oggetto**: Infrazione al codice della strada  \n**Data e ora**: 12 Luglio 2022 - 12.36  \n**Codice IUN**: YYYYMM-1-ABCD-EFGH-X",
-      title: "Questo messaggio contiene una comunicazione a valore legale",
-    });
+    pipe(
+      this.thirdPartyClientFactory(message.sender_service_id),
+      TE.fromEither,
+      TE.mapLeft((error) => {
+        log.error(
+          "newMessagesService|getThirdPartyMessagePreconditionFromThirdPartyService|%s",
+          error.message
+        );
+        return ResponseErrorInternal(error.message);
+      }),
+      TE.map((getClientByFiscalCode) =>
+        getClientByFiscalCode(message.fiscal_code)
+      ),
+      TE.chain((client) =>
+        TE.tryCatch(
+          () => client.getThirdPartyMessagePrecontition({ id: message.id }),
+          (e) => ResponseErrorInternal(E.toError(e).message)
+        )
+      ),
+      TE.chainW(wrapValidationWithInternalError),
+      TE.chainW(
+        flow(
+          (response) =>
+            response.status === 200 ? E.of(response.value) : E.left(response),
+          TE.fromEither,
+          TE.mapLeft((response) => {
+            log.error(
+              `newMessagesService|getThirdPartyMessagePrecontitionFromThirdPartyService|invocation returned an error:${
+                response.status
+              } [title: ${response.value?.title ?? "No title"}, detail: ${
+                response.value?.detail ?? "No details"
+              }, type: ${response.value?.type ?? "No type"}]`
+            );
+            return response;
+          }),
+          TE.mapLeft(
+            flow((response) => {
+              switch (response.status) {
+                case 400:
+                  return ResponseErrorValidation("Bad Request", "");
+                case 401:
+                  return ResponseErrorUnexpectedAuthProblem();
+                case 403:
+                  return ResponseErrorForbiddenNotAuthorized;
+                case 404:
+                  return ResponseErrorNotFound(
+                    "Not found",
+                    "Message from Third Party service not found"
+                  );
+                case 429:
+                  return ResponseErrorTooManyRequests();
+                case 500:
+                  return ResponseErrorInternal(
+                    "Third Party Service failed with code 500"
+                  );
+                default:
+                  return ResponseErrorStatusNotDefinedInSpec(response);
+              }
+            })
+          )
+        )
+      )
+    );
 
   // Retrieve a ThirdParty message detail from related service, if exists
   // return an error otherwise
