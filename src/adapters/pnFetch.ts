@@ -73,7 +73,10 @@ const retrievePrecondition = (
 ) =>
   pipe(
     () =>
-      PnAPIClient(pnUrl, withAccept_iojson(origFetch)).getReceivedNotification({
+      PnAPIClient(
+        pnUrl,
+        withAccept_iojson(origFetch)
+      ).getReceivedNotificationPrecondition({
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode,
@@ -82,7 +85,7 @@ const retrievePrecondition = (
     TE.chain(
       TE.fromPredicate(
         (r) => r.status === 200,
-        (r) => Error(`Failed to fetch PN ReceivedNotification: ${r.status}`)
+        (r) => Error(`Failed to fetch PN ReceivedPrecondition: ${r.status}`)
       )
     ),
     TE.map((response) => response.value)
@@ -138,7 +141,7 @@ export const errorResponse = (error: Error): Response =>
       }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
-export const redirectPrecondition = 
+export const redirectPrecondition =
   (
     origFetch: typeof fetch,
     pnUrl: string,
@@ -170,6 +173,7 @@ export const redirectPrecondition =
         )
       ),
       TE.map(
+        // eslint-disable-next-line sonarjs/no-identical-functions
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,
@@ -212,6 +216,7 @@ export const redirectMessages =
         )
       ),
       TE.map(
+        // eslint-disable-next-line sonarjs/no-identical-functions
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,

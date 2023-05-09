@@ -64,6 +64,9 @@ import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
+const ERROR_MESSAGE_500 = "Third Party Service failed with code 500";
+const ERROR_MESSAGE_400 = "Bad Request";
+
 const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
   t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) }),
@@ -563,6 +566,7 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyMessagePrecontitionFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}]`
             );
@@ -572,7 +576,7 @@ export default class NewMessagesService {
             flow((response) => {
               switch (response.status) {
                 case 400:
-                  return ResponseErrorValidation("Bad Request", "");
+                  return ResponseErrorValidation(ERROR_MESSAGE_400, "");
                 case 401:
                   return ResponseErrorUnexpectedAuthProblem();
                 case 403:
@@ -585,9 +589,7 @@ export default class NewMessagesService {
                 case 429:
                   return ResponseErrorTooManyRequests();
                 case 500:
-                  return ResponseErrorInternal(
-                    "Third Party Service failed with code 500"
-                  );
+                  return ResponseErrorInternal(ERROR_MESSAGE_500);
                 default:
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
@@ -642,16 +644,18 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyMessageFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}]`
             );
             return response;
           }),
           TE.mapLeft(
+            // eslint-disable-next-line sonarjs/no-identical-functions
             flow((response) => {
               switch (response.status) {
                 case 400:
-                  return ResponseErrorValidation("Bad Request", "");
+                  return ResponseErrorValidation(ERROR_MESSAGE_400, "");
                 case 401:
                   return ResponseErrorUnexpectedAuthProblem();
                 case 403:
@@ -664,9 +668,7 @@ export default class NewMessagesService {
                 case 429:
                   return ResponseErrorTooManyRequests();
                 case 500:
-                  return ResponseErrorInternal(
-                    "Third Party Service failed with code 500"
-                  );
+                  return ResponseErrorInternal(ERROR_MESSAGE_500);
                 default:
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
@@ -723,6 +725,7 @@ export default class NewMessagesService {
               `newMessagesService|getThirdPartyAttachmentFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 response.value?.detail ?? "No details"
               }, type: ${response.value?.type ?? "No type"}])`
             );
@@ -732,7 +735,7 @@ export default class NewMessagesService {
             flow((response) => {
               switch (response.status) {
                 case 400:
-                  return ResponseErrorValidation("Bad Request", "");
+                  return ResponseErrorValidation(ERROR_MESSAGE_400, "");
                 case 401:
                   return ResponseErrorUnexpectedAuthProblem();
                 case 403:
@@ -745,9 +748,7 @@ export default class NewMessagesService {
                 case 429:
                   return ResponseErrorTooManyRequests();
                 case 500:
-                  return ResponseErrorInternal(
-                    "Third Party Service failed with code 500"
-                  );
+                  return ResponseErrorInternal(ERROR_MESSAGE_500);
                 default:
                   return ResponseErrorStatusNotDefinedInSpec(response);
               }
