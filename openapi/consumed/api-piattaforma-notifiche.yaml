@@ -178,8 +178,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-
-  delivery/notifications/received/{iun}/precondition:
+  /ext-registry-private/io/v1/notification-disclaimer/{iun}:
     get:
       tags:
       - AppIO-PN-Notification
@@ -220,7 +219,12 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
-
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
 components:
   schemas:
     PreconditionContent:
