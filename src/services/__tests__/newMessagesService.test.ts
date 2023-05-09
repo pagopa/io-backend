@@ -26,6 +26,7 @@ import { ThirdPartyServiceClient } from "../../clients/third-party-service-clien
 import { CreatedMessageWithContent } from "../../../generated/io-messages-api/CreatedMessageWithContent";
 import { base64File } from "../../__mocks__/pn";
 import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
+import { PreconditionContent } from "../../../generated/piattaforma-notifiche/PreconditionContent";
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
@@ -34,6 +35,8 @@ const aPublicMessageParam = true;
 const getMessageParamOnlyWithMessageId = {
   id: aValidMessageId
 };
+
+const aValidPreconditionContent: PreconditionContent = {title: "A valid title", markdown: "A valid md"}
 
 const getMessageParam = {
   ...getMessageParamOnlyWithMessageId,
@@ -213,6 +216,15 @@ mockGetTPMessageFromExternalService.mockImplementation(async _messageId =>
     value: aThirdPartyMessageDetail
   })
 );
+
+mockGetTPMessagePrecondition.mockImplementation(async _message =>
+  t.success({
+    status: 200,
+    headers: {},
+    value: aValidPreconditionContent 
+  })
+);
+
 const mockGetTPAttachment = jest.fn();
 
 const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
@@ -1236,6 +1248,139 @@ describe("MessageService#getThirdPartyMessage", () => {
       kind: "IResponseErrorNotFound"
     });
   });
+});
+
+describe("MessageService#getThirdPartyMessagePrecondition", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return a valid PreconditionContent", async () => {
+    mockGetMessage.mockImplementationOnce(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    // @ts-ignore
+    const res = await service.getThirdPartyMessagePrecondition(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    );
+
+    // we call getMessage to ensure that the message exists
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
+      id: validApiMessageResponse.value.message.id
+    });
+    expect(res).toMatchObject({
+      kind: "IResponseSuccessJson",
+      value: aValidPreconditionContent
+    });
+  });
+
+  it("should return Not found without calling the third party service if the getMessage return a 404", async () => {
+
+    mockGetMessage.mockImplementationOnce(async () =>
+      t.success(emptyApiMessagesResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    // @ts-ignore
+    const res = await service.getThirdPartyMessagePrecondition(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    // we should not call the third party service to get the PreconditionContent if no message is returned for the messageId
+    expect(mockGetTPMessagePrecondition).not.toHaveBeenCalled();
+    expect(res).toMatchObject({
+      kind: "IResponseErrorNotFound",
+      detail: 'Not found: Message not found'
+    });
+  });
+
+  it("should return Internal server error without calling the third party service if the getMessage return a 500", async () => {
+
+    mockGetMessage.mockImplementationOnce(async () =>
+      t.success(invalidApiMessageResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    // @ts-ignore
+    const res = await service.getThirdPartyMessagePrecondition(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    // we should not call the third party service to get the PreconditionContent if no message is returned for the messageId
+    expect(mockGetTPMessagePrecondition).not.toHaveBeenCalled();
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+      detail: 'Internal server error: unhandled API response status [500]'
+    });
+
+  });
+
+   it("should return 500 error if the third party service return a 500", async () => {
+
+    mockGetMessage.mockImplementationOnce(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+    mockGetTPMessagePrecondition.mockImplementationOnce(async () => t.success({
+      status: 500,
+      headers: {},
+      value: {}
+    }))
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    // @ts-ignore
+    const res = await service.getThirdPartyMessagePrecondition(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    // we should not call the third party service to get the PreconditionContent if no message is returned for the messageId
+    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiMessageResponse.value.message.id });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorInternal",
+      detail: "Internal server error: Third Party Service failed with code 500"
+    });
+  }); 
 });
 
 describe("MessageService#getThirdPartyAttachment", () => {
