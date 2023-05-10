@@ -4,6 +4,7 @@
 
 import { isArray } from "util";
 import * as A from "fp-ts/lib/Array";
+import * as ROA from "fp-ts/lib/ReadonlyArray";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as R from "fp-ts/lib/Record";
@@ -363,7 +364,12 @@ export default class RedisSessionStorage
     )(this.getUserTokens(user));
 
     const deleteTokensPromiseV2 = await pipe(
-      TE.tryCatch(() => this.redisClient.del([...tokens]), E.toError),
+      tokens,
+      ROA.map((singleToken) =>
+        TE.tryCatch(() => this.redisClient.del(singleToken), E.toError)
+      ),
+      ROA.sequence(TE.ApplicativePar),
+      TE.map(ROA.reduce(0, (current, next) => current + next)),
       this.integerReplyAsync(tokens.length),
       this.falsyResponseToErrorAsync(
         new Error("Unexpected response from redis client deleting user tokens.")
@@ -1013,7 +1019,11 @@ export default class RedisSessionStorage
       // Retrieve all user data related to session tokens.
       // All the tokens are stored inside user payload.
       const errorOrSerializedUserV2 = await pipe(
-        TE.tryCatch(() => this.redisClient.mGet(oldSessionInfoKeys), E.toError),
+        oldSessionInfoKeys,
+        ROA.map((key) =>
+          TE.tryCatch(() => this.redisClient.get(key), E.toError)
+        ),
+        ROA.sequence(TE.ApplicativePar),
         // TODO: Some value can be null
         this.arrayStringReplyAsync
       );
@@ -1075,7 +1085,11 @@ export default class RedisSessionStorage
         TE.fold(
           (keys) =>
             pipe(
-              TE.tryCatch(() => this.redisClient.del(keys), E.toError),
+              keys,
+              ROA.map((singleKey) =>
+                TE.tryCatch(() => this.redisClient.del(singleKey), E.toError)
+              ),
+              ROA.sequence(TE.ApplicativePar),
               this.integerReplyAsync()
             ),
           (_) => TE.right(true)

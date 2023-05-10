@@ -51,8 +51,12 @@ export const createClusterRedisClient =
       Record<string, never>
     >({
       defaults: {
-        legacyMode: true,
+        legacyMode: false,
         password,
+        socket: {
+          tls: true,
+          keepAlive: 2000,
+        },
       },
       rootNodes: [
         {
