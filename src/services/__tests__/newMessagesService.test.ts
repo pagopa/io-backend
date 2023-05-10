@@ -1255,7 +1255,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
     jest.clearAllMocks();
   });
 
-  it("should return a valid PreconditionContent", async () => {
+  it("should return a valid PreconditionContent when third party service return 200", async () => {
     mockGetMessage.mockImplementationOnce(async () =>
       t.success(validApiThirdPartyMessageResponse)
     );
@@ -1374,13 +1374,47 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageIdWithThirdPartyData
     });
-    // we should not call the third party service to get the PreconditionContent if no message is returned for the messageId
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiMessageResponse.value.message.id });
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
       detail: "Internal server error: Third Party Service failed with code 500"
     });
   }); 
+  
+  it("should return Bad request if the third party service return a 400", async () => {
+
+    mockGetMessage.mockImplementationOnce(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+    mockGetTPMessagePrecondition.mockImplementationOnce(async () => t.success({
+      status: 400,
+      headers: {},
+      value: {}
+    }))
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    // @ts-ignore
+    const res = await service.getThirdPartyMessagePrecondition(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    );
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData
+    });
+    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiMessageResponse.value.message.id });
+    expect(res).toMatchObject({
+      kind: "IResponseErrorValidation",
+      detail: "Bad request: Third party service returned 400"
+    });
+  });
+
 });
 
 describe("MessageService#getThirdPartyAttachment", () => {

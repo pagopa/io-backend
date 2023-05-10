@@ -65,7 +65,7 @@ import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
 const ERROR_MESSAGE_500 = "Third Party Service failed with code 500";
-const ERROR_MESSAGE_400 = "Bad Request";
+const ERROR_MESSAGE_400 = "Bad request";
 
 const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
@@ -576,7 +576,7 @@ export default class NewMessagesService {
             flow((response) => {
               switch (response.status) {
                 case 400:
-                  return ResponseErrorValidation(ERROR_MESSAGE_400, "");
+                  return ResponseErrorValidation(ERROR_MESSAGE_400, "Third party service returned 400");
                 case 401:
                   return ResponseErrorUnexpectedAuthProblem();
                 case 403:
