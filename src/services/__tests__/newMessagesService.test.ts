@@ -233,7 +233,7 @@ const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
       return {
         getThirdPartyMessageDetails: mockGetTPMessageFromExternalService,
         getThirdPartyMessageAttachment: mockGetTPAttachment,
-        getThirdPartyMessagePrecontition: mockGetTPMessagePrecondition
+        getThirdPartyMessagePrecondition: mockGetTPMessagePrecondition
       };
     }
   )

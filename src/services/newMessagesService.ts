@@ -551,7 +551,7 @@ export default class NewMessagesService {
       ),
       TE.chain((client) =>
         TE.tryCatch(
-          () => client.getThirdPartyMessagePrecontition({ id: message.id }),
+          () => client.getThirdPartyMessagePrecondition({ id: message.id }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
       ),
@@ -563,7 +563,7 @@ export default class NewMessagesService {
           TE.fromEither,
           TE.mapLeft((response) => {
             log.error(
-              `newMessagesService|getThirdPartyMessagePrecontitionFromThirdPartyService|invocation returned an error:${
+              `newMessagesService|getThirdPartyMessagePreconditionFromThirdPartyService|invocation returned an error:${
                 response.status
               } [title: ${response.value?.title ?? "No title"}, detail: ${
                 // eslint-disable-next-line sonarjs/no-duplicate-string
@@ -576,7 +576,10 @@ export default class NewMessagesService {
             flow((response) => {
               switch (response.status) {
                 case 400:
-                  return ResponseErrorValidation(ERROR_MESSAGE_400, "Third party service returned 400");
+                  return ResponseErrorValidation(
+                    ERROR_MESSAGE_400,
+                    "Third party service returned 400"
+                  );
                 case 401:
                   return ResponseErrorUnexpectedAuthProblem();
                 case 403:

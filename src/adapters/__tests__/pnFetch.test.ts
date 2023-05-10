@@ -358,7 +358,7 @@ describe("getThirdPartyMessagePrecondition", () => {
       baseUrl: "https://localhost",
       fetchApi: aFetch
     });
-    const result = await client.getThirdPartyMessagePrecontition({
+    const result = await client.getThirdPartyMessagePrecondition({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId
     });
@@ -397,7 +397,7 @@ describe("getThirdPartyMessagePrecondition", () => {
       baseUrl: "https://localhost",
       fetchApi: aFetch
     });
-    const result = await client.getThirdPartyMessagePrecontition({
+    const result = await client.getThirdPartyMessagePrecondition({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId
     });

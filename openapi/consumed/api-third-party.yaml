@@ -97,7 +97,7 @@ paths:
       parameters:
         - $ref: '#/parameters/FiscalCode'
         - $ref: '#/parameters/ThirdPartyMessageId'
-      operationId: getThirdPartyMessagePrecontition
+      operationId: getThirdPartyMessagePrecondition
       responses:
         '200':
           description: OK
