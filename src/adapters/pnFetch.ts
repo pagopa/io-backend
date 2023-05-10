@@ -35,7 +35,7 @@ export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
 
 export const ThirdPartyPreconditionUrl = pathParamsFromUrl(
   RegExp("^[/]+messages[/]+([^/]+)/(.+)$"),
-  ([id]) => `/messages/${id}/precondition`
+  ([id]) => `/ext-registry-private/io/v1/notification-disclaimer/${id}`
 );
 
 const basePnDocument =
