@@ -368,7 +368,7 @@ export default class RedisSessionStorage
       ROA.map((singleToken) =>
         TE.tryCatch(() => this.redisClient.del(singleToken), E.toError)
       ),
-      ROA.sequence(TE.ApplicativePar),
+      ROA.sequence(TE.ApplicativeSeq),
       TE.map(ROA.reduce(0, (current, next) => current + next)),
       this.integerReplyAsync(tokens.length),
       this.falsyResponseToErrorAsync(
@@ -1030,7 +1030,7 @@ export default class RedisSessionStorage
         ROA.map((key) =>
           TE.tryCatch(() => this.redisClient.get(key), E.toError)
         ),
-        ROA.sequence(TE.ApplicativePar),
+        ROA.sequence(TE.ApplicativeSeq),
         // TODO: Some value can be null
         this.arrayStringReplyAsync
       );
@@ -1096,7 +1096,7 @@ export default class RedisSessionStorage
               ROA.map((singleKey) =>
                 TE.tryCatch(() => this.redisClient.del(singleKey), E.toError)
               ),
-              ROA.sequence(TE.ApplicativePar),
+              ROA.sequence(TE.ApplicativeSeq),
               this.integerReplyAsync()
             ),
           (_) => TE.right(true)
