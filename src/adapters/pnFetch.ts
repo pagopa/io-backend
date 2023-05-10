@@ -34,8 +34,8 @@ export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
 );
 
 export const ThirdPartyPreconditionUrl = pathParamsFromUrl(
-  RegExp("^[/]+messages[/]+([^/]+)/(.+)$"),
-  ([id]) => `/ext-registry-private/io/v1/notification-disclaimer/${id}`
+  RegExp("^[/]+messages[/]+([^/]+)/precondition$"),
+  ([id]) => `/messages/${id}/precondition`
 );
 
 const basePnDocument =
@@ -340,12 +340,12 @@ export const pnFetch =
             (url) => redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
           )
           .when(
-            (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
-            (url) => redirectAttachment(origFetch, pnUrl, pnApiKey, url, init)
-          )
-          .when(
             (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
             (url) => redirectPrecondition(origFetch, pnUrl, pnApiKey, url, init)
+          )
+          .when(
+            (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
+            (url) => redirectAttachment(origFetch, pnUrl, pnApiKey, url, init)
           )
           .otherwise((url) =>
             pipe(

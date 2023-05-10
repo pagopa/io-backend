@@ -17,6 +17,7 @@ import {
   aPnNotificationId,
   aPNServiceId,
   aPNThirdPartyNotification,
+  aPNThirdPartyPrecondition,
   aPnUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody
@@ -28,6 +29,7 @@ import {
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
+const dummyGetReceivedNotificationPrecondition = jest.fn();
 dummyGetReceivedNotification.mockImplementation(() =>
   TE.of({
     status: 200,
@@ -42,11 +44,19 @@ dummyGetSentNotificationDocument.mockImplementation(() =>
     headers: {}
   })()
 );
+dummyGetReceivedNotificationPrecondition.mockImplementation(() =>
+  TE.of({
+    status: 200,
+    value: aPNThirdPartyPrecondition,
+    headers: {}
+  })()
+);
 const dummyPnAPIClient = jest.spyOn(pnclient, "PnAPIClient");
 dummyPnAPIClient.mockImplementation(
   () =>
     (({
       getReceivedNotification: dummyGetReceivedNotification,
+      getReceivedNotificationPrecondition: dummyGetReceivedNotificationPrecondition,
       getSentNotificationDocument: dummyGetSentNotificationDocument
     } as unknown) as PnClient)
 );
@@ -331,5 +341,79 @@ describe("getThirdPartyAttachments", () => {
       );
     }
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe("getThirdPartyMessagePrecondition", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a working PN endpoint WHEN a Third-Party get precondition is called THEN the get is properly orchestrated on PN endpoints", async () => {
+    const aFetch = pnFetch(
+      (nodeFetch as any) as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey
+    );
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch
+    });
+    const result = await client.getThirdPartyMessagePrecontition({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId
+    });
+
+    console.log(result);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      console.log(JSON.stringify(result.right));
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          status: 200,
+          value: aPNThirdPartyPrecondition
+        })
+      );
+    }
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(1);
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledWith({
+      ApiKeyAuth: aPnKey,
+      iun: aPnNotificationId,
+      "x-pagopa-cx-taxid": aFiscalCode
+    });
+  });
+
+  it("GIVEN a not working PN get message precondition endpoint WHEN a Third-Party get message precondition is called THEN the get is properly orchestrated on PN endpoints returning an error", async () => {
+    dummyGetReceivedNotificationPrecondition.mockImplementationOnce(() =>
+      TE.of({ status: 400, value: {} })()
+    );
+
+    const aFetch = pnFetch(
+      (nodeFetch as any) as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey
+    );
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch
+    });
+    const result = await client.getThirdPartyMessagePrecontition({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId
+    });
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          status: 500
+        })
+      );
+    }
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(1);
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledWith({
+      ApiKeyAuth: aPnKey,
+      iun: aPnNotificationId,
+      "x-pagopa-cx-taxid": aFiscalCode
+    });
   });
 });
