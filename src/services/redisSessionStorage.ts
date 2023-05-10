@@ -768,11 +768,18 @@ export default class RedisSessionStorage
     )();
   }
 
+  // This mGet fires a bunch of GET operation to prevent CROSS-SLOT errors on the cluster
   // eslint-disable-next-line functional/prefer-readonly-type
   private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
-    return TE.tryCatch(
-      () => this.redisClient.mGet.bind(this.redisClient)(keys),
-      E.toError
+    return pipe(
+      keys,
+      A.map((singleKey) =>
+        TE.tryCatch(
+          () => this.redisClient.get.bind(this.redisClient)(singleKey),
+          E.toError
+        )
+      ),
+      A.sequence(TE.ApplicativePar)
     );
   }
 
