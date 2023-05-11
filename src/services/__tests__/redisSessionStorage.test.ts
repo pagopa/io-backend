@@ -1097,7 +1097,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
       createdAt: new Date(),
       sessionToken: aValidUser.session_token,
     };
-    mockMget.mockImplementation((_) =>
+    mockGet.mockImplementation((_) =>
       Promise.resolve([JSON.stringify(expectedSessionInfo)])
     );
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -1139,16 +1139,16 @@ describe("RedisSessionStorage#listUserSessions", () => {
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
     );
 
-    mockMget.mockImplementation((_) =>
+    mockGet.mockImplementation((_) =>
       Promise.resolve([JSON.stringify({ test: "Invalid SessionInfo" })])
     );
 
     const response = await sessionStorage.listUserSessions(aValidUser);
 
-    expect(mockMget).toHaveBeenCalledTimes(1);
-    expect(mockMget).toHaveBeenCalledWith([
-      `SESSIONINFO-${aValidUser.session_token}`,
-    ]);
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).toHaveBeenCalledWith(
+      `SESSIONINFO-${aValidUser.session_token}`
+    );
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
   });
@@ -1164,14 +1164,14 @@ describe("RedisSessionStorage#listUserSessions", () => {
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
     );
 
-    mockMget.mockImplementation((_) => Promise.resolve(["Invalid JSON value"]));
+    mockGet.mockImplementation((_) => Promise.resolve(["Invalid JSON value"]));
 
     const response = await sessionStorage.listUserSessions(aValidUser);
 
-    expect(mockMget).toHaveBeenCalledTimes(1);
-    expect(mockMget).toHaveBeenCalledWith([
-      `SESSIONINFO-${aValidUser.session_token}`,
-    ]);
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).toHaveBeenCalledWith(
+      `SESSIONINFO-${aValidUser.session_token}`
+    );
     const expectedSessionsList = SessionsList.decode({ sessions: [] });
     expect(response).toEqual(expectedSessionsList);
   });
@@ -1200,16 +1200,16 @@ describe("RedisSessionStorage#listUserSessions", () => {
     });
     expect(E.isRight(expectedSessionInfo)).toBeTruthy();
     if (E.isRight(expectedSessionInfo)) {
-      mockMget.mockImplementationOnce((_) =>
+      mockGet.mockImplementationOnce((_) =>
         Promise.resolve([JSON.stringify(expectedSessionInfo.right)])
       );
 
       const response = await sessionStorage.listUserSessions(aValidUser);
 
-      expect(mockMget).toHaveBeenCalledTimes(1);
-      expect(mockMget).toHaveBeenCalledWith([
-        `SESSIONINFO-${aValidUser.session_token}`,
-      ]);
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet).toHaveBeenCalledWith(
+        `SESSIONINFO-${aValidUser.session_token}`
+      );
       const expectedSessionsList = SessionsList.decode({
         sessions: [expectedSessionInfo.right],
       });
