@@ -1000,7 +1000,7 @@ describe("RedisSessionStorage#del", () => {
   const expectedRedisDelError = new Error("del error");
 
   it.each([
-    [undefined, 7, E.right(true), "should delete al user tokens"],
+    [undefined, 1, E.right(true), "should delete all user tokens"],
     [
       expectedRedisDelError,
       undefined,
@@ -1013,7 +1013,8 @@ describe("RedisSessionStorage#del", () => {
     ],
     [
       undefined,
-      4,
+      //here we are making integerReplyAsync function fail, even if the DEL operations went fine
+      0,
       E.left(
         new Error(
           `value [${
@@ -1033,22 +1034,42 @@ describe("RedisSessionStorage#del", () => {
     };
     const expectedSessionInfoKey = `SESSIONINFO-${aValidUserWithExternalTokens.session_token}`;
 
-    redisMethodImplFromError(mockDel, tokenDelResponse, tokenDelErr);
+    for (let i = 0; i < (tokenDelErr == undefined ? 7 : 1); i++)
+      redisMethodImplFromError(mockDel, tokenDelResponse, tokenDelErr);
     mockSrem.mockImplementationOnce((_, __) => Promise.resolve(1));
 
     const response = await sessionStorage.del(aValidUserWithExternalTokens);
 
-    expect(mockDel).toHaveBeenCalledTimes(1);
-    expect(mockDel).toHaveBeenCalledWith([
-      `BPD-${aValidUserWithExternalTokens.bpd_token}`,
-      `FIMS-${aValidUserWithExternalTokens.fims_token}`,
+    expect(mockDel).toHaveBeenCalledTimes(tokenDelErr == undefined ? 7 : 1);
+    if (tokenDelErr == undefined) {
+      expect(mockDel).toHaveBeenNthCalledWith(
+        1,
+        `BPD-${aValidUserWithExternalTokens.bpd_token}`
+      );
+      expect(mockDel).toHaveBeenNthCalledWith(
+        2,
+        `FIMS-${aValidUserWithExternalTokens.fims_token}`
+      );
 
-      `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`,
-      expectedSessionInfoKey,
-      `SESSION-${aValidUserWithExternalTokens.session_token}`,
-      `WALLET-${aValidUserWithExternalTokens.wallet_token}`,
-      `ZENDESK-${aValidUserWithExternalTokens.zendesk_token}`,
-    ]);
+      expect(mockDel).toHaveBeenNthCalledWith(
+        3,
+        `MYPORTAL-${aValidUserWithExternalTokens.myportal_token}`
+      );
+      expect(mockDel).toHaveBeenNthCalledWith(4, expectedSessionInfoKey);
+      expect(mockDel).toHaveBeenNthCalledWith(
+        5,
+        `SESSION-${aValidUserWithExternalTokens.session_token}`
+      );
+      expect(mockDel).toHaveBeenNthCalledWith(
+        6,
+        `WALLET-${aValidUserWithExternalTokens.wallet_token}`
+      );
+      expect(mockDel).toHaveBeenNthCalledWith(
+        7,
+        `ZENDESK-${aValidUserWithExternalTokens.zendesk_token}`
+      );
+    }
+
     if (E.isRight(expected)) {
       expect(mockSrem).toHaveBeenCalledTimes(1);
       expect(mockSrem).toHaveBeenCalledWith(
