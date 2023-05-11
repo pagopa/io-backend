@@ -11,7 +11,7 @@ import {
   mockBPDToken,
   mockZendeskToken,
   mockFIMSToken,
-  mockedInitializedProfile
+  mockedInitializedProfile,
 } from "../../__mocks__/user_mock";
 import SessionController from "../sessionController";
 import * as E from "fp-ts/lib/Either";
@@ -34,10 +34,10 @@ const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
 const mockExists = jest.fn();
-const mockRedisClient = ({
+const mockRedisClient = {
   get: mockGet,
   mGet: mockMget,
-  sMembers: mockSmembers.mockImplementation(_ =>
+  sMembers: mockSmembers.mockImplementation((_) =>
     Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
   ),
   sIsMember: mockSismember,
@@ -45,15 +45,15 @@ const mockRedisClient = ({
   set: mockSet,
   sRem: mockSrem,
   setEx: mockSet,
-  exists: mockExists
-} as unknown) as RedisClientType;
+  exists: mockExists,
+} as unknown as RedisClientType;
 
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getProfile: mockGetProfile
-    }))
+      getProfile: mockGetProfile,
+    })),
   };
 });
 
@@ -93,9 +93,9 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
-    mockGet.mockImplementationOnce(_ => Promise.resolve(anAssertionRef));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(anAssertionRef));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -110,7 +110,7 @@ describe("SessionController#getSessionState", () => {
       walletToken: mockedUser.wallet_token,
       zendeskToken:
         mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
-      lollipopAssertionRef: anAssertionRef
+      lollipopAssertionRef: anAssertionRef,
     });
   });
 
@@ -120,9 +120,9 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
-    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -135,7 +135,8 @@ describe("SessionController#getSessionState", () => {
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token,
-      zendeskToken: mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile
+      zendeskToken:
+        mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
     });
   });
 
@@ -145,10 +146,10 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
     const expectedError = new Error("Error retrieving the assertion ref");
-    mockGet.mockImplementationOnce(_ => Promise.reject(expectedError));
+    mockGet.mockImplementationOnce((_) => Promise.reject(expectedError));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -159,7 +160,7 @@ describe("SessionController#getSessionState", () => {
       expect.objectContaining({
         detail: expect.stringContaining(expectedError.message),
         status: 500,
-        title: "Internal server error"
+        title: "Internal server error",
       })
     );
   });
@@ -170,23 +171,23 @@ describe("SessionController#getSessionState", () => {
       bpd_token: undefined,
       fims_token: undefined,
       myportal_token: undefined,
-      zendesk_token: undefined
+      zendesk_token: undefined,
     } as User;
-    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
 
     mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
     mockGetNewToken.mockImplementationOnce(() => mockFIMSToken);
     mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
     mockGetNewToken.mockImplementationOnce(() => mockZendeskToken);
 
-    mockTtl.mockImplementationOnce(_ => Promise.resolve(2000));
+    mockTtl.mockImplementationOnce((_) => Promise.resolve(2000));
     mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
     mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
-    mockSmembers.mockImplementationOnce(_ => Promise.resolve([]));
+    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -200,7 +201,8 @@ describe("SessionController#getSessionState", () => {
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockWalletToken,
-      zendeskToken: mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile
+      zendeskToken:
+        mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
     });
   });
 
@@ -214,9 +216,9 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
-    mockGet.mockImplementationOnce(_ => Promise.resolve(null));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -229,7 +231,7 @@ describe("SessionController#getSessionState", () => {
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token,
-      zendeskToken: expect.stringContaining(mockZendeskToken)
+      zendeskToken: expect.stringContaining(mockZendeskToken),
     });
   });
 });
@@ -237,20 +239,20 @@ describe("SessionController#getSessionState", () => {
 describe("SessionController#listSessions", () => {
   const expectedSessionInfo: SessionInfo = {
     createdAt: new Date(),
-    sessionToken: mockedUser.session_token
+    sessionToken: mockedUser.session_token,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockMget.mockImplementationOnce(_ =>
-      Promise.resolve([JSON.stringify(expectedSessionInfo)])
-    );
   });
 
   it("returns list of sessions for an authenticated user", async () => {
     req.user = mockedUser;
+    mockGet.mockImplementationOnce((_) =>
+      Promise.resolve(JSON.stringify(expectedSessionInfo))
+    );
     mockSrem.mockImplementationOnce((_, __) => Promise.resolve(true));
-    mockExists.mockImplementationOnce(_ => Promise.reject());
+    mockExists.mockImplementationOnce((_) => Promise.reject());
 
     const response = await controller.listSessions(req);
     response.apply(res);
@@ -264,7 +266,7 @@ describe("SessionController#listSessions", () => {
       `SESSIONINFO-${mockedUser.session_token}`
     );
     const expectedResponse = SessionsList.decode({
-      sessions: [expectedSessionInfo]
+      sessions: [expectedSessionInfo],
     });
     expect(E.isRight(expectedResponse)).toBeTruthy();
     if (E.isRight(expectedResponse)) {
