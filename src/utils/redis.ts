@@ -34,16 +34,18 @@ export const obfuscateTokensInfo = (message: string) =>
   );
 
 export const createClusterRedisClient =
-  (appInsightsClient?: appInsights.TelemetryClient) =>
+  (enableTls: boolean, appInsightsClient?: appInsights.TelemetryClient) =>
   async (
     redisUrl: string,
     password?: string,
     port?: string
   ): Promise<redis.RedisClusterType> => {
-    const DEFAULT_REDIS_PORT = "6379";
+    const DEFAULT_REDIS_PORT = enableTls ? "6380" : "6379";
+    const prefixUrl = enableTls ? "rediss://" : "redis://";
+    const completeRedisUrl = `${prefixUrl}${redisUrl}`;
 
     const redisPort: number = parseInt(port || DEFAULT_REDIS_PORT, 10);
-    log.info("Creating CLUSTER redis client", { url: redisUrl });
+    log.info("Creating CLUSTER redis client", { url: completeRedisUrl });
 
     const redisClient = redis.createCluster<
       redis.RedisDefaultModules,
@@ -55,12 +57,12 @@ export const createClusterRedisClient =
         password,
         socket: {
           keepAlive: 2000,
-          tls: true,
+          tls: enableTls,
         },
       },
       rootNodes: [
         {
-          url: `${redisUrl}:${redisPort}`,
+          url: `${completeRedisUrl}:${redisPort}`,
         },
       ],
       useReplicas: true,

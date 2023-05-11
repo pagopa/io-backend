@@ -146,10 +146,7 @@ import {
   getCurrentBackendVersion,
   getObjectFromPackageJson,
 } from "./utils/package";
-import {
-  createClusterRedisClient,
-  createSimpleRedisClient,
-} from "./utils/redis";
+import { createClusterRedisClient } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
@@ -229,14 +226,15 @@ export async function newApp({
   MitVoucherBasePath,
   ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
-  const REDIS_CLIENT =
-    ENV === NodeEnvironmentEnum.DEVELOPMENT
-      ? await createSimpleRedisClient(process.env.REDIS_URL)
-      : await createClusterRedisClient(appInsightsClient)(
-          getRequiredENVVar("REDIS_URL"),
-          process.env.REDIS_PASSWORD,
-          process.env.REDIS_PORT
-        );
+  const isDevEnvirnment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
+  const REDIS_CLIENT = await createClusterRedisClient(
+    !isDevEnvirnment,
+    appInsightsClient
+  )(
+    getRequiredENVVar("REDIS_URL"),
+    process.env.REDIS_PASSWORD,
+    process.env.REDIS_PORT
+  );
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
     REDIS_CLIENT,
