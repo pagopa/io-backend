@@ -83,15 +83,15 @@ jest.mock("../../services/tokenService", () => {
 });
 
 const mockSet = jest.fn();
-const mockSetEx = jest.fn();
+const mockSetEx = jest.fn().mockImplementation((_,__,___)=>Promise.resolve("OK"));
 const mockGet = jest
   .fn()
   .mockImplementation((_) => Promise.resolve(JSON.stringify(aValidUser)));
 const mockMget = jest.fn();
-const mockDel = jest.fn().mockImplementation((_) => Promise.resolve(7));
+const mockDel = jest.fn().mockImplementation((_) =>{console.log("sono io"); return Promise.resolve(1)});
 
-const mockSadd = jest.fn();
-const mockSrem = jest.fn();
+const mockSadd = jest.fn().mockImplementation((_,__)=>Promise.resolve(1));
+const mockSrem = jest.fn().mockImplementation((_,__)=>Promise.resolve(1));
 const mockSmembers = jest
   .fn()
   .mockImplementation((_) => Promise.resolve([mockSessionToken]));
@@ -1036,7 +1036,6 @@ describe("RedisSessionStorage#del", () => {
 
     for (let i = 0; i < (tokenDelErr == undefined ? 7 : 1); i++)
       redisMethodImplFromError(mockDel, tokenDelResponse, tokenDelErr);
-    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(1));
 
     const response = await sessionStorage.del(aValidUserWithExternalTokens);
 
@@ -1089,16 +1088,12 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
 
-    mockSetEx.mockImplementation((_, __, ___) => Promise.resolve("OK"));
-
-    mockSadd.mockImplementation((_, __) => Promise.resolve(1));
-
     const expectedSessionInfo: SessionInfo = {
       createdAt: new Date(),
       sessionToken: aValidUser.session_token,
     };
-    mockGet.mockImplementation((_) =>
-      Promise.resolve([JSON.stringify(expectedSessionInfo)])
+    mockGet.mockImplementationOnce((_) =>
+      Promise.resolve(JSON.stringify(expectedSessionInfo))
     );
     const response = await sessionStorage.listUserSessions(aValidUser);
     const expectedSessionInfoKey = `SESSIONINFO-${aValidUser.session_token}`;
@@ -1120,7 +1115,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
 
     mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
 
-    mockSetEx.mockImplementation((_, __, ___) =>
+    mockSetEx.mockImplementationOnce((_, __, ___) =>
       Promise.reject(new Error("REDIS ERROR"))
     );
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -1139,8 +1134,8 @@ describe("RedisSessionStorage#listUserSessions", () => {
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
     );
 
-    mockGet.mockImplementation((_) =>
-      Promise.resolve([JSON.stringify({ test: "Invalid SessionInfo" })])
+    mockGet.mockImplementationOnce((_) =>
+      Promise.resolve(JSON.stringify({ test: "Invalid SessionInfo" }))
     );
 
     const response = await sessionStorage.listUserSessions(aValidUser);
@@ -1164,7 +1159,7 @@ describe("RedisSessionStorage#listUserSessions", () => {
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
     );
 
-    mockGet.mockImplementation((_) => Promise.resolve(["Invalid JSON value"]));
+    mockGet.mockImplementationOnce((_) => Promise.resolve("Invalid JSON value"));
 
     const response = await sessionStorage.listUserSessions(aValidUser);
 
@@ -1187,8 +1182,6 @@ describe("RedisSessionStorage#listUserSessions", () => {
     mockExists.mockImplementationOnce((_) => Promise.resolve(1));
 
     mockExists.mockImplementationOnce((_) => Promise.resolve(0));
-
-    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(1));
 
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
@@ -1240,8 +1233,6 @@ describe("RedisSessionStorage#clearExpiredSetValues", () => {
     mockExists.mockImplementationOnce((_) => Promise.resolve(1));
 
     mockExists.mockImplementationOnce((_) => Promise.resolve(0));
-
-    mockSrem.mockImplementation((_, __) => Promise.resolve(1));
 
     // tslint:disable-next-line: no-string-literal
     const clearResults = await sessionStorage["clearExpiredSetValues"](
@@ -1431,9 +1422,6 @@ describe("RedisSessionStorage#setBlockedUser", () => {
 
 describe("RedisSessionStorage#unsetBlockedUser", () => {
   it("should return E.right(true) if the user is correctly unlocked", async () => {
-    const sremSuccess = 1;
-    mockSrem.mockImplementation((_, __) => Promise.resolve(sremSuccess));
-
     const result = await sessionStorage.unsetBlockedUser(aFiscalCode);
 
     expect(E.isRight(result)).toBeTruthy();
@@ -1513,8 +1501,6 @@ describe("RedisSessionStorage#delUserAllSessions", () => {
   });
 
   it("should succeed if everything is fine", async () => {
-    mockSrem.mockImplementationOnce((_) => Promise.resolve(1));
-
     const result = await sessionStorage.delUserAllSessions(aFiscalCode);
 
     expect(E.isRight(result)).toBeTruthy();
