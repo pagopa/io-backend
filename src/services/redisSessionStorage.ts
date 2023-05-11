@@ -526,6 +526,8 @@ export default class RedisSessionStorage
 
     return pipe(
       this.mGet(errorOrSessionTokens.right),
+      // Skipping null values from the array
+      TE.map(A.filter((key): key is string => key !== null)),
       TE.map((_) => _.length > 0)
     )();
   }

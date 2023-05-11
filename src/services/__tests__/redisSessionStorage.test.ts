@@ -1275,20 +1275,24 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
         `SESSIONINFO-expired_session_token`,
       ])
     );
-    mockMget.mockImplementationOnce((_, __) =>
-      Promise.resolve([
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
           sessionToken: aValidUser.session_token,
-        }),
+        })
+      )
+    );
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
           sessionToken: "expired_session_token",
-        }),
-      ])
+        })
+      )
     );
-    mockMget.mockImplementationOnce((_, __) =>
-      Promise.resolve([JSON.stringify(aValidUser)])
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(JSON.stringify(aValidUser))
     );
     const userHasActiveSessionsResult =
       await sessionStorage.userHasActiveSessions(aValidUser.fiscal_code);
@@ -1306,20 +1310,25 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
       ])
     );
 
-    mockMget.mockImplementationOnce((_, __) =>
-      Promise.resolve([
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
           sessionToken: aValidUser.session_token,
-        }),
+        })
+      )
+    );
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
         JSON.stringify({
           createdAt: new Date(),
           sessionToken: "expired_session_token",
-        }),
-      ])
+        })
+      )
     );
 
-    mockMget.mockImplementationOnce((_, __) => Promise.resolve([]));
+    mockGet.mockImplementationOnce((_, __) => Promise.resolve(null));
+    mockGet.mockImplementationOnce((_, __) => Promise.resolve(null));
 
     const userHasActiveSessionsResult =
       await sessionStorage.userHasActiveSessions(aValidUser.fiscal_code);
@@ -1348,7 +1357,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
       ])
     );
 
-    mockMget.mockImplementationOnce((_, __) => Promise.resolve([]));
+    mockGet.mockImplementationOnce((_, __) => Promise.resolve(null));
 
     const userHasActiveSessionsResult =
       await sessionStorage.userHasActiveSessions(aValidUser.fiscal_code);
@@ -1367,7 +1376,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     );
 
     const expectedRedisError = new Error("Generic Redis Error");
-    mockMget.mockImplementationOnce((_, __) =>
+    mockGet.mockImplementationOnce((_, __) =>
       Promise.reject(expectedRedisError)
     );
 
