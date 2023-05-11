@@ -54,8 +54,8 @@ export const createClusterRedisClient =
         legacyMode: false,
         password,
         socket: {
-          tls: true,
           keepAlive: 2000,
+          tls: true,
         },
       },
       rootNodes: [
