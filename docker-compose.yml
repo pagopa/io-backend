@@ -168,3 +168,12 @@ networks:
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1450
+volumes:
+    redis-node-0-data:
+    redis-node-1-data:
+    redis-node-2-data:
+    redis-node-3-data:
+    redis-node-4-data:
+    redis-node-5-data:
+    redis-node-6-data:
+    redis-cluster-data:
