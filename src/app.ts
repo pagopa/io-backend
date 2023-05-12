@@ -226,9 +226,9 @@ export async function newApp({
   MitVoucherBasePath,
   ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
-  const isDevEnvirnment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
+  const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
   const REDIS_CLIENT = await createClusterRedisClient(
-    !isDevEnvirnment,
+    !isDevEnvironment,
     appInsightsClient
   )(
     getRequiredENVVar("REDIS_URL"),

@@ -6,22 +6,6 @@ import * as O from "fp-ts/lib/Option";
 import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
 
-export async function createSimpleRedisClient(
-  redisUrl?: string
-): Promise<redis.RedisClientType> {
-  const redisUrlOrDefault = redisUrl || "redis://redis";
-  log.info("Creating SIMPLE redis client", { url: redisUrlOrDefault });
-  const redisClient = redis.createClient<
-    redis.RedisDefaultModules,
-    Record<string, never>,
-    Record<string, never>
-  >({
-    url: redisUrlOrDefault,
-  });
-  await redisClient.connect();
-  return redisClient;
-}
-
 export const obfuscateTokensInfo = (message: string) =>
   pipe(
     keyPrefixes,
@@ -48,7 +32,7 @@ export const createClusterRedisClient =
     log.info("Creating CLUSTER redis client", { url: completeRedisUrl });
 
     const redisClient = redis.createCluster<
-      redis.RedisDefaultModules,
+      Record<string, never>,
       Record<string, never>,
       Record<string, never>
     >({

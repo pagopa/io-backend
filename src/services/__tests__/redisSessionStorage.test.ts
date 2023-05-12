@@ -83,15 +83,17 @@ jest.mock("../../services/tokenService", () => {
 });
 
 const mockSet = jest.fn();
-const mockSetEx = jest.fn().mockImplementation((_,__,___)=>Promise.resolve("OK"));
+const mockSetEx = jest
+  .fn()
+  .mockImplementation((_, __, ___) => Promise.resolve("OK"));
 const mockGet = jest
   .fn()
   .mockImplementation((_) => Promise.resolve(JSON.stringify(aValidUser)));
 const mockMget = jest.fn();
-const mockDel = jest.fn().mockImplementation((_) =>{console.log("sono io"); return Promise.resolve(1)});
+const mockDel = jest.fn().mockImplementation((_) => Promise.resolve(1));
 
-const mockSadd = jest.fn().mockImplementation((_,__)=>Promise.resolve(1));
-const mockSrem = jest.fn().mockImplementation((_,__)=>Promise.resolve(1));
+const mockSadd = jest.fn().mockImplementation((_, __) => Promise.resolve(1));
+const mockSrem = jest.fn().mockImplementation((_, __) => Promise.resolve(1));
 const mockSmembers = jest
   .fn()
   .mockImplementation((_) => Promise.resolve([mockSessionToken]));
@@ -1159,7 +1161,9 @@ describe("RedisSessionStorage#listUserSessions", () => {
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
     );
 
-    mockGet.mockImplementationOnce((_) => Promise.resolve("Invalid JSON value"));
+    mockGet.mockImplementationOnce((_) =>
+      Promise.resolve("Invalid JSON value")
+    );
 
     const response = await sessionStorage.listUserSessions(aValidUser);
 

@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=dev
-      - REDIS_URL=redis://redis
+      - REDIS_URL=redis-cluster
       - GITHUB_TOKEN
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     expose:
@@ -32,18 +32,123 @@ services:
       - "./testenv2/conf:/app/conf:cached"
     networks:
       - io-be
-
-  redis:
-    container_name: redis
-    image: wodby/redis:3.2-2.1.5
-    ports:
-      - "6379:6379"
-    environment:
-      REDIS_TIMEOUT: 300
-      REDIS_TCP_KEEPALIVE: 60
-      REDIS_MAXMEMORY: 182m
+  #
+  #                   __ __            __             __ 
+  #   .----.-----.--|  |__.-----.----|  .--.--.-----|  |_.-----.----.
+  #  |   _|  -__|  _  |  |__ --|  __|  |  |  |__ --|   _|  -__|   _|
+  # |__| |_____|_____|__|_____|____|__|_____|_____|____|_____|__|
+  #
+  #
+  redis-node-0:
+    image: docker.io/bitnami/redis-cluster:6.2
     networks:
       - io-be
+    ports:
+      - 6380:6379
+    volumes:
+      - redis-node-0-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-node-1:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+      - 6381:6379
+    volumes:
+      - redis-node-1-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-node-2:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+        - 6382:6379
+    volumes:
+      - redis-node-2-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-node-3:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+        - 6383:6379
+    volumes:
+      - redis-node-3-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-node-4:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+        - 6384:6379
+    volumes:
+      - redis-node-4-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-node-5:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+        - 6385:6379
+    volumes:
+      - redis-node-5-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-node-6:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+        - 6386:6379
+    volumes:
+      - redis-node-6-data:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+
+  redis-cluster:
+    image: docker.io/bitnami/redis-cluster:6.2
+    networks:
+      - io-be
+    ports:
+        - 6379:6379
+    volumes:
+      - redis-cluster-data:/bitnami/redis/data
+    depends_on:
+      - redis-node-0
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDISCLI_AUTH=bitnami'
+      - 'REDIS_CLUSTER_REPLICAS=1'
+      - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
+      - 'REDIS_CLUSTER_CREATOR=yes'
+  #
+  #
+  #
+  #
 
   storage:
     image: azurite
