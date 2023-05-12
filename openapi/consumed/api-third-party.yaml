@@ -92,12 +92,14 @@ paths:
 
   /messages/{id}/precondition:
     get:
-      tags:
-      - AppIO-PN-Notification
+      operationId: getThirdPartyMessagePrecondition
+      summary: Retrieve the precondition of a Third Party message
+      description: |-
+        Returns the precondition associated to the Third Party message with the provided message ID.
+        User's fiscal code is required as header parameter.
       parameters:
         - $ref: '#/parameters/FiscalCode'
         - $ref: '#/parameters/ThirdPartyMessageId'
-      operationId: getThirdPartyMessagePrecondition
       responses:
         '200':
           description: OK
