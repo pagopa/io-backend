@@ -9,6 +9,8 @@ services:
     environment:
       - NODE_ENV=dev
       - REDIS_URL=redis-cluster
+      - REDIS_PASSWORD=bitnami
+      - REDIS_PORT=6379
       - GITHUB_TOKEN
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     expose:
@@ -17,7 +19,7 @@ services:
       - "443:443"
       - "5859:5859"
     image: node:18.13.0-alpine
-    command: ["yarn", "hot-reload"]
+    command: ["yarn", "start"]
     volumes:
       - ".:/usr/src/app"
     networks:
@@ -33,7 +35,7 @@ services:
     networks:
       - io-be
   #
-  #                   __ __            __             __ 
+  #                   __ __            __             __
   #   .----.-----.--|  |__.-----.----|  .--.--.-----|  |_.-----.----.
   #  |   _|  -__|  _  |  |__ --|  __|  |  |  |__ --|   _|  -__|   _|
   # |__| |_____|_____|__|_____|____|__|_____|_____|____|_____|__|

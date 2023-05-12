@@ -4,6 +4,7 @@
 **/bin
 **/obj
 **/__tests__/**/*
+!openapi/generated
 .env
 .git/**/*
 .github/**/*
