@@ -40,6 +40,8 @@ export const createClusterRedisClient =
         legacyMode: false,
         password,
         socket: {
+          // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
+          checkServerIdentity: (_hostname, _cert) => undefined,
           keepAlive: 2000,
           tls: enableTls,
         },
