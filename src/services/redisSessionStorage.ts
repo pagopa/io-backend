@@ -439,7 +439,6 @@ export default class RedisSessionStorage
         ),
       ]),
       TE.map((keys) =>
-        // TODO: Check if is safe remove null values returned by mGet
         this.parseUserSessionList(
           keys.filter((key) => key !== null) as ReadonlyArray<string>
         )
@@ -512,7 +511,6 @@ export default class RedisSessionStorage
       this.mGet([...sessionKeys.right]),
       TE.map((keys) =>
         this.parseUserSessionList(
-          // TODO: Check if is safe skip null values from mGet
           keys.filter<string>((key): key is string => key !== null)
         ).sessions.map((session) => session.sessionToken)
       )
@@ -733,7 +731,6 @@ export default class RedisSessionStorage
         () => this.redisClient.del(`${noticeEmailPrefix}${user.session_token}`),
         E.toError
       ),
-      // TODO: Check if the method return 0 on missing delete
       TE.map<number, true>((_) => true)
     )();
   }
@@ -906,7 +903,6 @@ export default class RedisSessionStorage
         );
         return this.redisClient.del(`${userSessionsSetKeyPrefix}${fiscalCode}`);
       }, E.toError),
-      // TODO: Check if the method return 0 on missing delete
       TE.map<number, true>((_) => true)
     )();
   }
@@ -1006,7 +1002,6 @@ export default class RedisSessionStorage
   /**
    * Remove other user sessions and wallet tokens
    */
-  // TODO: refactor this to return taskeither
   private async removeOtherUserSessions(
     user: UserV5
   ): Promise<Either<Error, boolean>> {
@@ -1033,7 +1028,7 @@ export default class RedisSessionStorage
           TE.tryCatch(() => this.redisClient.get(key), E.toError)
         ),
         ROA.sequence(TE.ApplicativeSeq),
-        // TODO: Some value can be null
+        // It's intended that some value can be null here
         this.arrayStringReplyAsync
       );
 
