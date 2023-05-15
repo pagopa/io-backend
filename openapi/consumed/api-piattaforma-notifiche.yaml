@@ -182,6 +182,8 @@ paths:
     get:
       tags:
       - AppIO-PN-Notification
+      summary: Returns the AppIo user activation status
+      description: Returns the AppIo user activation status
       parameters:
       - name: iun
         in: path
@@ -198,7 +200,6 @@ paths:
           minLength: 16
           pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
           type: string
-      summary: gets the precondition to accept to access the notification and its attachments
       operationId: getReceivedNotificationPrecondition
       responses:
         "200":
