@@ -38,7 +38,7 @@ describe("UserMetadataController#getMetadata", () => {
     mockGetMetadata.mockReturnValue(Promise.resolve(right(mockMetadata)));
 
     req.user = mockedUser;
-    const redisClient = {} as redis.RedisClient;
+    const redisClient = {} as redis.RedisClientType;
 
     const userMetadataService = new RedisUserMetadataStorage(redisClient);
     const controller = new UserMetadataController(userMetadataService);
@@ -61,7 +61,7 @@ describe("UserMetadataController#getMetadata", () => {
     );
 
     req.user = mockedUser;
-    const redisClient = {} as redis.RedisClient;
+    const redisClient = {} as redis.RedisClientType;
 
     const userMetadataService = new RedisUserMetadataStorage(redisClient);
     const controller = new UserMetadataController(userMetadataService);
@@ -83,7 +83,7 @@ describe("UserMetadataController#getMetadata", () => {
     mockGetMetadata.mockReturnValue(Promise.resolve(left(redisError)));
 
     req.user = mockedUser;
-    const redisClient = {} as redis.RedisClient;
+    const redisClient = {} as redis.RedisClientType;
 
     const userMetadataService = new RedisUserMetadataStorage(redisClient);
     const controller = new UserMetadataController(userMetadataService);
@@ -112,7 +112,7 @@ describe("UserMetadataController#upsertMetadata", () => {
     req.user = mockedUser;
     req.body = mockMetadata;
 
-    const redisClient = {} as redis.RedisClient;
+    const redisClient = {} as redis.RedisClientType;
 
     const userMetadataService = new RedisUserMetadataStorage(redisClient);
     const controller = new UserMetadataController(userMetadataService);
@@ -136,7 +136,7 @@ describe("UserMetadataController#upsertMetadata", () => {
     req.user = mockedUser;
     req.body = mockMetadata;
 
-    const redisClient = {} as redis.RedisClient;
+    const redisClient = {} as redis.RedisClientType;
 
     const userMetadataService = new RedisUserMetadataStorage(redisClient);
     const controller = new UserMetadataController(userMetadataService);
@@ -161,7 +161,7 @@ describe("UserMetadataController#upsertMetadata", () => {
     req.user = mockedUser;
     req.body = mockMetadata;
 
-    const redisClient = {} as redis.RedisClient;
+    const redisClient = {} as redis.RedisClientType;
 
     const userMetadataService = new RedisUserMetadataStorage(redisClient);
     const controller = new UserMetadataController(userMetadataService);

@@ -11,7 +11,7 @@ import {
   mockBPDToken,
   mockZendeskToken,
   mockFIMSToken,
-  mockedInitializedProfile
+  mockedInitializedProfile,
 } from "../../__mocks__/user_mock";
 import SessionController from "../sessionController";
 import * as E from "fp-ts/lib/Either";
@@ -22,7 +22,7 @@ import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import * as crypto from "crypto";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
-import { RedisClient } from "redis";
+import { RedisClientType } from "redis";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -34,24 +34,26 @@ const mockSismember = jest.fn();
 const mockSrem = jest.fn();
 const mockTtl = jest.fn();
 const mockExists = jest.fn();
-const mockRedisClient = {} as RedisClient;
-mockRedisClient.get = mockGet;
-mockRedisClient.mget = mockMget;
-mockRedisClient.smembers = mockSmembers.mockImplementation((_, callback) => {
-  callback(null, [`SESSIONINFO-${mockedUser.session_token}`]);
-});
-mockRedisClient.sismember = mockSismember;
-mockRedisClient.ttl = mockTtl;
-mockRedisClient.set = mockSet;
-mockRedisClient.srem = mockSrem;
-mockRedisClient.exists = mockExists;
+const mockRedisClient = {
+  get: mockGet,
+  mGet: mockMget,
+  sMembers: mockSmembers.mockImplementation((_) =>
+    Promise.resolve([`SESSIONINFO-${mockedUser.session_token}`])
+  ),
+  sIsMember: mockSismember,
+  ttl: mockTtl,
+  set: mockSet,
+  sRem: mockSrem,
+  setEx: mockSet,
+  exists: mockExists,
+} as unknown as RedisClientType;
 
 const mockGetProfile = jest.fn();
 jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getProfile: mockGetProfile
-    }))
+      getProfile: mockGetProfile,
+    })),
   };
 });
 
@@ -91,19 +93,14 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
-    mockGet.mockImplementationOnce((_, callback) =>
-      callback(null, anAssertionRef)
-    );
+    mockGet.mockImplementationOnce((_) => Promise.resolve(anAssertionRef));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${mockedUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
@@ -113,7 +110,7 @@ describe("SessionController#getSessionState", () => {
       walletToken: mockedUser.wallet_token,
       zendeskToken:
         mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
-      lollipopAssertionRef: anAssertionRef
+      lollipopAssertionRef: anAssertionRef,
     });
   });
 
@@ -123,17 +120,14 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${mockedUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       bpdToken: mockBPDToken,
@@ -141,7 +135,8 @@ describe("SessionController#getSessionState", () => {
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token,
-      zendeskToken: mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile
+      zendeskToken:
+        mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
     });
   });
 
@@ -151,24 +146,21 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
     const expectedError = new Error("Error retrieving the assertion ref");
-    mockGet.mockImplementationOnce((_, callback) => callback(expectedError));
+    mockGet.mockImplementationOnce((_) => Promise.reject(expectedError));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
 
-    expect(mockGet).toBeCalledWith(
-      `KEYS-${mockedUser.fiscal_code}`,
-      expect.any(Function)
-    );
+    expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         detail: expect.stringContaining(expectedError.message),
         status: 500,
-        title: "Internal server error"
+        title: "Internal server error",
       })
     );
   });
@@ -179,37 +171,23 @@ describe("SessionController#getSessionState", () => {
       bpd_token: undefined,
       fims_token: undefined,
       myportal_token: undefined,
-      zendesk_token: undefined
+      zendesk_token: undefined,
     } as User;
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
 
     mockGetNewToken.mockImplementationOnce(() => mockBPDToken);
     mockGetNewToken.mockImplementationOnce(() => mockFIMSToken);
     mockGetNewToken.mockImplementationOnce(() => mockMyPortalToken);
     mockGetNewToken.mockImplementationOnce(() => mockZendeskToken);
 
-    mockTtl.mockImplementationOnce((_, callback) => callback(undefined, 2000));
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSet.mockImplementationOnce((_, __, ___, ____, callback) =>
-      callback(undefined, "OK")
-    );
-    mockSmembers.mockImplementationOnce((_, callback) =>
-      callback(undefined, [])
-    );
+    mockTtl.mockImplementationOnce((_) => Promise.resolve(2000));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSet.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
+    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -223,7 +201,8 @@ describe("SessionController#getSessionState", () => {
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockWalletToken,
-      zendeskToken: mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile
+      zendeskToken:
+        mockZendeskToken + zendeskSuffixForCorrectlyRetrievedProfile,
     });
   });
 
@@ -237,9 +216,9 @@ describe("SessionController#getSessionState", () => {
       bpd_token: mockBPDToken,
       fims_token: mockFIMSToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
-    mockGet.mockImplementationOnce((_, callback) => callback(null, null));
+    mockGet.mockImplementationOnce((_) => Promise.resolve(null));
 
     const response = await controller.getSessionState(req);
     response.apply(res);
@@ -252,7 +231,7 @@ describe("SessionController#getSessionState", () => {
       myPortalToken: mockMyPortalToken,
       spidLevel: "https://www.spid.gov.it/SpidL2",
       walletToken: mockedUser.wallet_token,
-      zendeskToken: expect.stringContaining(mockZendeskToken)
+      zendeskToken: expect.stringContaining(mockZendeskToken),
     });
   });
 });
@@ -260,24 +239,20 @@ describe("SessionController#getSessionState", () => {
 describe("SessionController#listSessions", () => {
   const expectedSessionInfo: SessionInfo = {
     createdAt: new Date(),
-    sessionToken: mockedUser.session_token
+    sessionToken: mockedUser.session_token,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockMget.mockImplementationOnce((_, callback) => {
-      callback(null, [JSON.stringify(expectedSessionInfo)]);
-    });
   });
 
   it("returns list of sessions for an authenticated user", async () => {
     req.user = mockedUser;
-    mockSrem.mockImplementationOnce((_, __, callback) =>
-      callback(undefined, true)
+    mockGet.mockImplementationOnce((_) =>
+      Promise.resolve(JSON.stringify(expectedSessionInfo))
     );
-    mockExists.mockImplementationOnce((_, callback) =>
-      callback(undefined, false)
-    );
+    mockSrem.mockImplementationOnce((_, __) => Promise.resolve(true));
+    mockExists.mockImplementationOnce((_) => Promise.reject());
 
     const response = await controller.listSessions(req);
     response.apply(res);
@@ -286,14 +261,12 @@ describe("SessionController#listSessions", () => {
     expect(mockSrem).toBeCalledTimes(1);
     // smembers is called by clearExpiredSetValues and readSessionInfoKeys
     expect(mockSmembers).toBeCalledTimes(2);
-    expect(mockSrem.mock.calls[0][0]).toEqual(
-      `USERSESSIONS-${mockedUser.fiscal_code}`
-    );
-    expect(mockSrem.mock.calls[0][1]).toEqual(
+    expect(mockSrem).toHaveBeenCalledWith(
+      `USERSESSIONS-${mockedUser.fiscal_code}`,
       `SESSIONINFO-${mockedUser.session_token}`
     );
     const expectedResponse = SessionsList.decode({
-      sessions: [expectedSessionInfo]
+      sessions: [expectedSessionInfo],
     });
     expect(E.isRight(expectedResponse)).toBeTruthy();
     if (E.isRight(expectedResponse)) {

@@ -1,17 +1,10 @@
 import * as redis from "redis";
-import RedisClustr = require("redis-clustr");
 import * as appInsights from "applicationinsights";
 import { pipe } from "fp-ts/lib/function";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as O from "fp-ts/lib/Option";
 import { keyPrefixes } from "../services/redisSessionStorage";
 import { log } from "./logger";
-
-export function createSimpleRedisClient(redisUrl?: string): redis.RedisClient {
-  const redisUrlOrDefault = redisUrl || "redis://redis";
-  log.info("Creating SIMPLE redis client", { url: redisUrlOrDefault });
-  return redis.createClient(redisUrlOrDefault);
-}
 
 export const obfuscateTokensInfo = (message: string) =>
   pipe(
@@ -25,27 +18,41 @@ export const obfuscateTokensInfo = (message: string) =>
   );
 
 export const createClusterRedisClient =
-  (appInsightsClient?: appInsights.TelemetryClient) =>
-  (redisUrl: string, password?: string, port?: string): redis.RedisClient => {
-    const DEFAULT_REDIS_PORT = "6379";
+  (enableTls: boolean, appInsightsClient?: appInsights.TelemetryClient) =>
+  async (
+    redisUrl: string,
+    password?: string,
+    port?: string
+  ): Promise<redis.RedisClusterType> => {
+    const DEFAULT_REDIS_PORT = enableTls ? "6380" : "6379";
+    const prefixUrl = enableTls ? "rediss://" : "redis://";
+    const completeRedisUrl = `${prefixUrl}${redisUrl}`;
 
     const redisPort: number = parseInt(port || DEFAULT_REDIS_PORT, 10);
-    log.info("Creating CLUSTER redis client", { url: redisUrl });
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const redisClient = new RedisClustr({
-      redisOptions: {
-        auth_pass: password,
-        tls: {
-          servername: redisUrl,
+    log.info("Creating CLUSTER redis client", { url: completeRedisUrl });
+
+    const redisClient = redis.createCluster<
+      Record<string, never>,
+      Record<string, never>,
+      Record<string, never>
+    >({
+      defaults: {
+        legacyMode: false,
+        password,
+        socket: {
+          // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
+          checkServerIdentity: (_hostname, _cert) => undefined,
+          keepAlive: 2000,
+          tls: enableTls,
         },
       },
-      servers: [
+      rootNodes: [
         {
-          host: redisUrl,
-          port: redisPort,
+          url: `${completeRedisUrl}:${redisPort}`,
         },
       ],
-    }) as redis.RedisClient; // Casting RedisClustr with missing typings to RedisClient (same usage).
+      useReplicas: true,
+    });
     redisClient.on("error", (err) => {
       log.error("[REDIS Error] an error occurs on redis client: %s", err);
       appInsightsClient?.trackEvent({
@@ -84,5 +91,6 @@ export const createClusterRedisClient =
         });
       }
     );
+    await redisClient.connect();
     return redisClient;
   };

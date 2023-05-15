@@ -1,7 +1,7 @@
 // tslint:disable no-object-mutation
 
 import { left, right } from "fp-ts/lib/Either";
-import { RedisClient } from "redis";
+import { RedisClientType } from "redis";
 import { EmailAddress } from "../../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
 import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
@@ -39,12 +39,22 @@ const validNewVersion = 11;
 
 const mockSet = jest.fn();
 const mockGet = jest.fn();
-const mockRedisClient = {} as RedisClient;
-mockRedisClient.set = mockSet;
-mockRedisClient.get = mockGet;
+const mockRedisClient = ({
+  get: mockGet,
+  set: mockSet
+} as unknown) as RedisClientType;
 
 const userMetadataStorage = new RedisUserMetadataStorage(mockRedisClient);
 const redisClientError = new Error("REDIS CLIENT ERROR");
+
+const redisMethodImplFromError = (
+  mockFunction: jest.Mock<unknown, any>,
+  success?: unknown,
+  error?: Error
+) =>
+  mockFunction.mockImplementationOnce(() =>
+    error ? Promise.reject(error) : Promise.resolve(success)
+  );
 
 describe("RedisUserMetadataStorage#get", () => {
   beforeEach(() => {
@@ -82,12 +92,10 @@ describe("RedisUserMetadataStorage#get", () => {
       "should fail if user metadata don't exists"
     ]
   ])("%s, %s, %s, %s", async (mockGetError, mockGetResponse, expected, _) => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(mockGetError, mockGetResponse);
-    });
+    redisMethodImplFromError(mockGet, mockGetResponse, mockGetError);
 
     const response = await userMetadataStorage.get(aValidUser);
-    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
     expect(response).toEqual(expected);
   });
 });
@@ -98,84 +106,84 @@ describe("RedisUserMetadataStorage#get", () => {
   });
 
   it("should update user metadata", async () => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(undefined, JSON.stringify(aValidUserMetadata));
-    });
-    mockSet.mockImplementation((_, __, callback) => {
-      callback(undefined, "OK");
-    });
+    mockGet.mockImplementation(_ =>
+      Promise.resolve(JSON.stringify(aValidUserMetadata))
+    );
+    mockSet.mockImplementation((_, __) => Promise.resolve("OK"));
+
     const newMetadata: UserMetadata = {
       metadata,
       version: validNewVersion
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
-    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(newMetadata));
+    expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet).toHaveBeenCalledWith(
+      `USERMETA-${aValidUser.fiscal_code}`,
+      JSON.stringify(newMetadata)
+    );
     expect(response).toEqual(right(true));
   });
 
   it("should set user metadata if don't exists", async () => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(undefined, null);
-    });
-    mockSet.mockImplementation((_, __, callback) => {
-      callback(undefined, "OK");
-    });
+    mockGet.mockImplementation(_ => Promise.resolve(null));
+    mockSet.mockImplementation((_, __) => Promise.resolve("OK"));
+
     const newMetadata: UserMetadata = {
       metadata,
       version: 1
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
-    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(newMetadata));
+    expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet).toHaveBeenCalledWith(
+      `USERMETA-${aValidUser.fiscal_code}`,
+      JSON.stringify(newMetadata)
+    );
     expect(response).toEqual(right(true));
   });
 
   it("should fail update user metadata with invalid version number", async () => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(undefined, JSON.stringify(aValidUserMetadata));
-    });
+    mockGet.mockImplementation(_ =>
+      Promise.resolve(JSON.stringify(aValidUserMetadata))
+    );
+
     const newMetadata: UserMetadata = {
       metadata,
       version: aValidUserMetadata.version - 1
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
-    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet).not.toBeCalled();
+    expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet).not.toHaveBeenCalled();
     expect(response).toEqual(left(invalidVersionNumberError));
   });
 
   it("should fail update user metadata if redis client error occours on get", async () => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(redisClientError, undefined);
-    });
+    mockGet.mockImplementation(_ => Promise.reject(redisClientError));
     const newMetadata: UserMetadata = {
       metadata,
       version: 1
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
-    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet).not.toBeCalled();
+    expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet).not.toHaveBeenCalled();
     expect(response).toEqual(left(redisClientError));
   });
 
   it("should fail update user metadata if redis client error occours on set", async () => {
-    mockGet.mockImplementation((_, callback) => {
-      callback(undefined, JSON.stringify(aValidUserMetadata));
-    });
-    mockSet.mockImplementation((_, __, callback) => {
-      callback(redisClientError, undefined);
-    });
+    mockGet.mockImplementation(_ =>
+      Promise.resolve(JSON.stringify(aValidUserMetadata))
+    );
+    mockSet.mockImplementation((_, __) => Promise.reject(redisClientError));
+
     const newMetadata: UserMetadata = {
       metadata,
       version: validNewVersion
     };
     const response = await userMetadataStorage.set(aValidUser, newMetadata);
-    expect(mockGet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][0]).toBe(`USERMETA-${aValidUser.fiscal_code}`);
-    expect(mockSet.mock.calls[0][1]).toBe(JSON.stringify(newMetadata));
+    expect(mockGet).toHaveBeenCalledWith(`USERMETA-${aValidUser.fiscal_code}`);
+    expect(mockSet).toHaveBeenCalledWith(
+      `USERMETA-${aValidUser.fiscal_code}`,
+      JSON.stringify(newMetadata)
+    );
     expect(response).toEqual(left(redisClientError));
   });
 });

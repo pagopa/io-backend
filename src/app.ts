@@ -2,7 +2,6 @@
 /**
  * Main entry point for the Digital Citizenship proxy.
  */
-import * as apicache from "apicache";
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as helmet from "helmet";
@@ -33,7 +32,6 @@ import {
   API_CLIENT,
   appConfig,
   BONUS_API_CLIENT,
-  CACHE_MAX_AGE_SECONDS,
   CGN_API_CLIENT,
   ENABLE_NOTICE_EMAIL_CACHE,
   ENV,
@@ -61,7 +59,6 @@ import {
   USERS_LOGIN_STORAGE_CONNECTION_STRING,
   TEST_CGN_FISCAL_CODES,
   CGN_OPERATOR_SEARCH_API_CLIENT,
-  CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
   EUCOVIDCERT_API_CLIENT,
   FF_MIT_VOUCHER_ENABLED,
   getClientErrorRedirectionUrl,
@@ -149,10 +146,7 @@ import {
   getCurrentBackendVersion,
   getObjectFromPackageJson,
 } from "./utils/package";
-import {
-  createClusterRedisClient,
-  createSimpleRedisClient,
-} from "./utils/redis";
+import { createClusterRedisClient } from "./utils/redis";
 import { ResponseErrorDismissed } from "./utils/responses";
 import { makeSpidLogCallback } from "./utils/spid";
 import { TimeTracer } from "./utils/timer";
@@ -184,18 +178,6 @@ const defaultModule = {
   newApp,
 };
 
-const cacheDuration = `${CACHE_MAX_AGE_SECONDS} seconds`;
-
-const cachingMiddleware = apicache.options({
-  debug:
-    process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
-    process.env.APICACHE_DEBUG === "true",
-  defaultDuration: cacheDuration,
-  statusCodes: {
-    include: [200],
-  },
-}).middleware;
-
 export interface IAppFactoryParameters {
   readonly env: NodeEnvironment;
   readonly appInsightsClient?: appInsights.TelemetryClient;
@@ -221,7 +203,7 @@ export interface IAppFactoryParameters {
 }
 
 // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
-export function newApp({
+export async function newApp({
   env,
   allowNotifyIPSourceRange,
   allowPagoPAIPSourceRange,
@@ -244,14 +226,15 @@ export function newApp({
   MitVoucherBasePath,
   ZendeskBasePath,
 }: IAppFactoryParameters): Promise<Express> {
-  const REDIS_CLIENT =
-    ENV === NodeEnvironmentEnum.DEVELOPMENT
-      ? createSimpleRedisClient(process.env.REDIS_URL)
-      : createClusterRedisClient(appInsightsClient)(
-          getRequiredENVVar("REDIS_URL"),
-          process.env.REDIS_PASSWORD,
-          process.env.REDIS_PORT
-        );
+  const isDevEnvironment = ENV === NodeEnvironmentEnum.DEVELOPMENT;
+  const REDIS_CLIENT = await createClusterRedisClient(
+    !isDevEnvironment,
+    appInsightsClient
+  )(
+    getRequiredENVVar("REDIS_URL"),
+    process.env.REDIS_PASSWORD,
+    process.env.REDIS_PORT
+  );
   // Create the Session Storage service
   const SESSION_STORAGE = new RedisSessionStorage(
     REDIS_CLIENT,
@@ -1130,7 +1113,6 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services/:id`,
     bearerSessionTokenAuth,
-    cachingMiddleware(),
     toExpressHandler(servicesController.getService, servicesController)
   );
 
@@ -1155,7 +1137,6 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/services`,
     bearerSessionTokenAuth,
-    cachingMiddleware(),
     toExpressHandler(servicesController.getVisibleServices, servicesController)
   );
 
@@ -1400,22 +1381,9 @@ function registerCgnOperatorSearchAPIRoutes(
   const cgnOperatorController: CgnOperatorSearchController =
     new CgnOperatorSearchController(cgnService, cgnOperatorSearchService);
 
-  const cgnOperatorSearchCacheDuration = `${CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS} seconds`;
-
-  const cgnOperatorSearchCachingMiddleware = apicache.options({
-    debug:
-      process.env.NODE_ENV === NodeEnvironmentEnum.DEVELOPMENT ||
-      process.env.APICACHE_DEBUG === "true",
-    defaultDuration: cgnOperatorSearchCacheDuration,
-    statusCodes: {
-      include: [200],
-    },
-  }).middleware;
-
   app.get(
     `${basePath}/published-product-categories`,
     bearerSessionTokenAuth,
-    cgnOperatorSearchCachingMiddleware(),
     toExpressHandler(
       cgnOperatorController.getPublishedProductCategories,
       cgnOperatorController
@@ -1425,7 +1393,6 @@ function registerCgnOperatorSearchAPIRoutes(
   app.get(
     `${basePath}/merchants/:merchantId`,
     bearerSessionTokenAuth,
-    cgnOperatorSearchCachingMiddleware(),
     toExpressHandler(cgnOperatorController.getMerchant, cgnOperatorController)
   );
 

@@ -7,7 +7,7 @@ import { CIDR } from "@pagopa/ts-commons/lib/strings";
 import * as request from "supertest";
 import { ServerInfo } from "../../generated/public/ServerInfo";
 import * as redisUtils from "../utils/redis";
-import { RedisClient } from "redis";
+import * as redis from "redis";
 
 jest.mock("@azure/storage-queue");
 
@@ -16,7 +16,7 @@ jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
-  .mockImplementation(() => () => ({} as RedisClient));
+  .mockImplementation(_ => async () => ({} as redis.RedisClusterType));
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {

@@ -197,7 +197,7 @@ const mockTelemetryClient = ({
   trackEvent: jest.fn()
 } as unknown) as appInsights.TelemetryClient;
 
-const redisClient = {} as redis.RedisClient;
+const redisClient = {} as redis.RedisClientType;
 
 const tokenService = new TokenService();
 

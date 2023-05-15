@@ -75,6 +75,7 @@ export const ENV = getNodeEnvironmentFromProcessEnv(process.env);
 const DEFAULT_CACHE_MAX_AGE_SECONDS: string = "300";
 
 // Resolve cache control default max-age value
+// @deprecated this value is not used anymore.
 export const CACHE_MAX_AGE_SECONDS: number = parseInt(
   process.env.CACHE_MAX_AGE_SECONDS || DEFAULT_CACHE_MAX_AGE_SECONDS,
   10
@@ -91,6 +92,7 @@ export const ENABLE_NOTICE_EMAIL_CACHE: boolean = pipe(
 const DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: string = "3600";
 
 // Resolve cache control default max-age value
+// @deprecated this value is not used anymore.
 export const CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS: number = parseInt(
   process.env.CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS ||
     DEFAULT_CGN_OPERATOR_SEARCH_CACHE_MAX_AGE_SECONDS,
