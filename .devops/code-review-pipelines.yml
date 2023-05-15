@@ -46,7 +46,7 @@ stages:
               yarn openapi:bundle
             displayName: 'Bundle OpenAPI'
           - script: |
-              [[ -z $(git status --porcelain) ]] && exit 0 || exit 1
+              [[ -z $(git status --porcelain) ]] && exit 0 || git diff && exit 1
             displayName: 'Check OpenAPI spec is up-to-date'
       - job: validate_api_specification
         steps:
