@@ -9,6 +9,7 @@ import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as AP from "fp-ts/lib/Apply";
+import * as S from "fp-ts/lib/string";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -26,7 +27,10 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import {
+  errorsToReadableMessages,
+  readableReportSimplified,
+} from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
@@ -46,6 +50,10 @@ import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
+  CLIENT_ERROR_REDIRECTION_URL,
+  FF_IOLOGIN,
+  IOLOGIN_CANARY_USERS_SHA_REGEX,
+  IOLOGIN_USERS_LIST,
   tokenDurationSecs,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -67,6 +75,8 @@ import {
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
+import { getIsUserEligibleForNewFeature } from "src/utils/featureFlag";
+import { record } from "fp-ts";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -116,6 +126,20 @@ export default class AuthenticationController {
     // decode the SPID assertion into a SPID user
     //
 
+    const defaultUrlSchemeRegex = new RegExp("^http[s]?:");
+
+    const isUserElegibleForIoLoginUrlScheme =
+      getIsUserEligibleForNewFeature<FiscalCode>(
+        (fiscalCode) => IOLOGIN_USERS_LIST.includes(fiscalCode),
+        (fiscalCode) =>
+          pipe(
+            fiscalCode,
+            sha256,
+            new RegExp(IOLOGIN_CANARY_USERS_SHA_REGEX).test
+          ),
+        FF_IOLOGIN
+      );
+
     const errorOrSpidUser = validateSpidUser(userPayload);
 
     if (E.isLeft(errorOrSpidUser)) {
@@ -151,7 +175,31 @@ export default class AuthenticationController {
           type: "INFO",
         },
       });
-      return ResponsePermanentRedirect(redirectionUrl);
+
+      return pipe(
+        isUserElegibleForIoLoginUrlScheme(spidUser.fiscalNumber),
+        B.fold(
+          () => redirectionUrl,
+          () =>
+            pipe(
+              record
+                .collect(S.Ord)((key, value) => `${key}=${value}`)({
+                  errorCode: AGE_LIMIT_ERROR_CODE,
+                })
+                .join("&"),
+              (errorParams) =>
+                CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
+              S.replace(defaultUrlSchemeRegex, "iologin:"),
+              UrlFromString.decode,
+              E.getOrElseW((err) => {
+                throw new Error(
+                  `Invalid url | ${readableReportSimplified(err)}`
+                );
+              })
+            )
+        ),
+        ResponsePermanentRedirect
+      );
     }
 
     //
@@ -449,7 +497,23 @@ export default class AuthenticationController {
       user.session_token
     );
 
-    return ResponsePermanentRedirect(urlWithToken);
+    return pipe(
+      isUserElegibleForIoLoginUrlScheme(user.fiscal_code),
+      B.fold(
+        () => urlWithToken,
+        () =>
+          pipe(
+            clientProfileRedirectionUrl,
+            S.replace("{token}", user.session_token),
+            S.replace(defaultUrlSchemeRegex, "iologin:"),
+            UrlFromString.decode,
+            E.getOrElseW((err) => {
+              throw new Error(`Invalid url | ${readableReportSimplified(err)}`);
+            })
+          )
+      ),
+      ResponsePermanentRedirect
+    );
   }
 
   /**

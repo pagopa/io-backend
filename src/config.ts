@@ -16,6 +16,7 @@ import {
 import {
   errorsToReadableMessages,
   readableReport,
+  readableReportSimplified,
 } from "@pagopa/ts-commons/lib/reporters";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
@@ -181,8 +182,28 @@ export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
   O.getOrElseW(() => undefined)
 );
 
-export const CLIENT_ERROR_REDIRECTION_URL =
-  process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
+export const CLIENT_ERROR_REDIRECTION_URL = pipe(
+  // this env variable is required and must be an absolute URL
+  process.env.CLIENT_ERROR_REDIRECTION_URL,
+  NonEmptyString.decode,
+  E.mapLeft((err) => {
+    throw new Error(
+      `CLIENT_ERROR_REDIRECTION_URL env variable is required | ${readableReportSimplified(
+        err
+      )}`
+    );
+  }),
+  E.chain(
+    E.fromPredicate(
+      (url) => url.includes("/error.html"),
+      () => undefined
+    )
+  ),
+  E.getOrElseW(() => {
+    log.error("CLIENT_ERROR_REDIRECTION_URL must contain /error.html");
+    return process.exit(1);
+  })
+);
 
 export const CLIENT_REDIRECTION_URL =
   process.env.CLIENT_REDIRECTION_URL || "/login";
@@ -296,12 +317,28 @@ export const samlConfig: SamlConfig = {
 };
 
 // Redirection urls
-export const clientProfileRedirectionUrl =
-  process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
-
-if (!clientProfileRedirectionUrl.includes("{token}")) {
-  log.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
-}
+export const clientProfileRedirectionUrl = pipe(
+  // this env variable is required and must be an absolute URL
+  process.env.CLIENT_PROFILE_REDIRECTION_URL,
+  NonEmptyString.decode,
+  E.mapLeft((err) => {
+    throw new Error(
+      `CLIENT_PROFILE_REDIRECTION_URL env variable is required | ${readableReportSimplified(
+        err
+      )}`
+    );
+  }),
+  E.chain(
+    E.fromPredicate(
+      (url) => url.includes("{token}"),
+      () => undefined
+    )
+  ),
+  E.getOrElseW(() => {
+    log.error("CLIENT_REDIRECTION_URL must contain a {token} placeholder");
+    return process.exit(1);
+  })
+);
 
 // IP(s) or CIDR(s) allowed for notification
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
@@ -740,6 +777,27 @@ export const FF_MIT_VOUCHER_ENABLED =
 
 export const FF_USER_AGE_LIMIT_ENABLED =
   process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
+
+// IOLOGIN FF variable
+export const FF_IOLOGIN = pipe(
+  process.env.FF_LOGIN,
+  FeatureFlag.decode,
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
+);
+
+export const IOLOGIN_USERS_LIST = pipe(
+  process.env.IOLOGIN_TEST_USERS,
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW((err) => {
+    throw new Error(`Invalid IOLOGIN_TEST_USERS value: ${readableReport(err)}`);
+  })
+);
+
+export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
+  process.env.IOLOGIN_CANARY_USERS_REGEX,
+  NonEmptyString.decode,
+  E.getOrElse(() => "XYZ" as NonEmptyString)
+);
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
