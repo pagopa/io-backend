@@ -83,6 +83,7 @@ microservice-chart:
     IDP_METADATA_URL: 'https://api.is.eng.pagopa.it/idp-keys/spid/latest'
     IO_SIGN_API_BASE_PATH: '/api/v1/sign'
     IO_SIGN_API_URL: 'https://io-p-sign-user-func.azurewebsites.net'
+    IO_SIGN_SERVICE_ID: '01GQQZ9HF5GAPRVKJM1VDAVFHM'
     IS_APPBACKENDLI: 'true'
     JWT_MIT_VOUCHER_TOKEN_EXPIRATION: '1200'
     JWT_MIT_VOUCHER_TOKEN_ISSUER: 'app-backend.io.italia.it'
