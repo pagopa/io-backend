@@ -335,7 +335,9 @@ export const clientProfileRedirectionUrl = pipe(
     )
   ),
   E.getOrElseW(() => {
-    log.error("CLIENT_REDIRECTION_URL must contain a {token} placeholder");
+    log.error(
+      "CLIENT_PROFILE_REDIRECTION_URL must contain a {token} placeholder"
+    );
     return process.exit(1);
   })
 );
@@ -780,7 +782,7 @@ export const FF_USER_AGE_LIMIT_ENABLED =
 
 // IOLOGIN FF variable
 export const FF_IOLOGIN = pipe(
-  process.env.FF_LOGIN,
+  process.env.FF_IOLOGIN,
   FeatureFlag.decode,
   E.getOrElseW(() => FeatureFlagEnum.NONE)
 );
