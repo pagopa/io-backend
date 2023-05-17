@@ -22,7 +22,7 @@ import {
   ResponsePermanentRedirect,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { UrlFromString } from "@pagopa/ts-commons/lib/url";
+import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
 
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
@@ -50,7 +50,6 @@ import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
-  CLIENT_ERROR_REDIRECTION_URL,
   FF_IOLOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
@@ -75,8 +74,8 @@ import {
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
-import { getIsUserEligibleForNewFeature } from "src/utils/featureFlag";
-import { record } from "fp-ts";
+import { getIsUserEligibleForNewFeature } from "../utils/featureFlag";
+import { Errors } from "io-ts";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -140,6 +139,17 @@ export default class AuthenticationController {
         FF_IOLOGIN
       );
 
+    const IOLOGIN_URI_SCHEME = "iologin:";
+
+    const errorOrIoLoginURL = (url: ValidUrl): E.Either<Errors, ValidUrl> =>
+      pipe(
+        url,
+        UrlFromString.encode,
+        // replace http: or https: URIschemes with iologin:
+        S.replace(defaultUrlSchemeRegex, IOLOGIN_URI_SCHEME),
+        UrlFromString.decode
+      );
+
     const errorOrSpidUser = validateSpidUser(userPayload);
 
     if (E.isLeft(errorOrSpidUser)) {
@@ -182,15 +192,8 @@ export default class AuthenticationController {
           () => redirectionUrl,
           () =>
             pipe(
-              record
-                .collect(S.Ord)((key, value) => `${key}=${value}`)({
-                  errorCode: AGE_LIMIT_ERROR_CODE,
-                })
-                .join("&"),
-              (errorParams) =>
-                CLIENT_ERROR_REDIRECTION_URL.concat(`?${errorParams}`),
-              S.replace(defaultUrlSchemeRegex, "iologin:"),
-              UrlFromString.decode,
+              redirectionUrl,
+              errorOrIoLoginURL,
               E.getOrElseW((err) => {
                 throw new Error(
                   `Invalid url | ${readableReportSimplified(err)}`
@@ -503,10 +506,8 @@ export default class AuthenticationController {
         () => urlWithToken,
         () =>
           pipe(
-            clientProfileRedirectionUrl,
-            S.replace("{token}", user.session_token),
-            S.replace(defaultUrlSchemeRegex, "iologin:"),
-            UrlFromString.decode,
+            urlWithToken,
+            errorOrIoLoginURL,
             E.getOrElseW((err) => {
               throw new Error(`Invalid url | ${readableReportSimplified(err)}`);
             })
