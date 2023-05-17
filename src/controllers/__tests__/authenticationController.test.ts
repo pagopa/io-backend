@@ -62,6 +62,12 @@ import {
   anAssertionRef,
   anotherAssertionRef,
 } from "../../__mocks__/lollipop";
+import * as ioLoginUtilities from "../../utils/ioLoginUriScheme";
+import {
+  FeatureFlagEnum,
+  getIsUserEligibleForNewFeature,
+} from "../../utils/featureFlag";
+import { pipe } from "fp-ts/lib/function";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -99,6 +105,8 @@ const badRequestErrorResponse = {
   title: expect.any(String),
   type: undefined,
 };
+
+const anotherFiscalCode = "ISPXNB32R82Y766D" as FiscalCode;
 
 const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
@@ -885,6 +893,63 @@ describe("AuthenticationController#acs", () => {
     expect(mockGetProfile).not.toBeCalled();
     expect(mockCreateProfile).not.toBeCalled();
   });
+
+  it.each`
+    inputFc              | FF                        | TEST_USERS     | expectedResult
+    ${aFiscalCode}       | ${FeatureFlagEnum.NONE}   | ${""}          | ${false}
+    ${aFiscalCode}       | ${FeatureFlagEnum.BETA}   | ${aFiscalCode} | ${true}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.BETA}   | ${aFiscalCode} | ${false}
+    ${aFiscalCode}       | ${FeatureFlagEnum.CANARY} | ${""}          | ${false}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.CANARY} | ${""}          | ${true}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.ALL}    | ${""}          | ${true}
+  `(
+    "should succeed and replace URI scheme with iologin WHEN the user is in BETA",
+    async ({ inputFc, FF, TEST_USERS, expectedResult }) => {
+      const aRegexPattern = "^([(0-9)|(a-f)|(A-F)]{63}0)$";
+      jest
+        .spyOn(ioLoginUtilities, "getIsUserElegibleForIoLoginUrlScheme")
+        .mockImplementationOnce((_, __, ___) =>
+          getIsUserEligibleForNewFeature<FiscalCode>(
+            (_) => TEST_USERS.includes(inputFc),
+            (_) => {
+              const regex = new RegExp(aRegexPattern);
+              // below the bind is needed to keep reference to "this" object
+              return pipe(inputFc, sha256, regex.test.bind(regex));
+            },
+            FF
+          )
+        );
+
+      const res = mockRes();
+
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
+
+      mockGetProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+      const response = await controller.acs(validUserPayload);
+      response.apply(res);
+
+      const expectedUriScheme = expectedResult ? "iologin:" : "https:";
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        expectedUriScheme + "//localhost/profile.html?token=" + mockSessionToken
+      );
+      expect(mockSet).toHaveBeenCalledWith(mockedUser);
+      expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
+      expect(mockCreateProfile).not.toBeCalled();
+    }
+  );
 });
 
 describe("AuthenticationController#acsTest", () => {

@@ -49,6 +49,9 @@ import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
+  FF_IOLOGIN,
+  IOLOGIN_CANARY_USERS_SHA_REGEX,
+  IOLOGIN_USERS_LIST,
   tokenDurationSecs,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -72,7 +75,7 @@ import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 import {
   errorOrIoLoginURL,
-  isUserElegibleForIoLoginUrlScheme,
+  getIsUserElegibleForIoLoginUrlScheme,
 } from "../utils/ioLoginUriScheme";
 
 // how many random bytes to generate for each session token
@@ -122,6 +125,12 @@ export default class AuthenticationController {
     //
     // decode the SPID assertion into a SPID user
     //
+    const isUserElegibleForIoLoginUrlScheme =
+      getIsUserElegibleForIoLoginUrlScheme(
+        IOLOGIN_USERS_LIST,
+        IOLOGIN_CANARY_USERS_SHA_REGEX,
+        FF_IOLOGIN
+      );
 
     const errorOrSpidUser = validateSpidUser(userPayload);
 
