@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: 1.0.0
+  version: 12.0.1
   title: Bonus vacanze API
 host: localhost
 basePath: /api/v1
@@ -24,7 +24,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
     get:
       operationId: getBonusEligibilityCheck
       summary: Get eligibility (ISEE) check information for user's bonus
@@ -45,9 +44,7 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
   ## BONUS ACTIVATIONS
-
   "/bonus/vacanze/activations":
     post:
       operationId: startBonusActivationProcedure
@@ -61,7 +58,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
     get:
       operationId: getAllBonusActivations
       summary: |
@@ -80,7 +76,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
   "/bonus/vacanze/activations/{bonus_id}":
     get:
       operationId: getLatestBonusActivationById
@@ -110,7 +105,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
 definitions:
   FiscalCode:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/FiscalCode"
@@ -152,7 +146,6 @@ definitions:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/PaginationResponse"
   PaginatedBonusActivationsCollection:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-bonus/master/openapi/index.yaml#/definitions/PaginatedBonusActivationsCollection"
-
   QrCodeImage:
     type: object
     properties:
@@ -172,7 +165,6 @@ definitions:
           $ref: "#/definitions/QrCodeImage"
     required:
       - qr_code
-
   BonusActivationWithQrCode:
     allOf:
       - $ref: "#/definitions/BonusActivation"

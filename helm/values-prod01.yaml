@@ -1,7 +1,7 @@
 microservice-chart:
   image:
     repository: 'iopcommonacr.azurecr.io/io-backend'
-    tag: '0.1.0'
+    tag: '12.0.1'
     pullPolicy: Always
   namespace: 'messages'
   livenessProbe:

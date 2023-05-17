@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: 1.0.0
+  version: 12.0.1
   title: Public API
   description: Mobile and web proxy API gateway.
 host: localhost
@@ -15,6 +15,7 @@ paths:
       summary: Runtime server info
       description: >
         Returns runtime information about the server.
+
       responses:
         "200":
           description: Runtime server info.

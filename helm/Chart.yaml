@@ -2,8 +2,8 @@ apiVersion: v2
 name: io-backend
 description: io-backend
 type: application
-version: 0.1.0
-appVersion: 0.1.0
+version: 12.0.1
+appVersion: 12.0.1
 dependencies:
   - name: microservice-chart
     version: 2.3.1

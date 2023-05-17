@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: 1.0.0
+  version: 12.0.1
   title: Carta Giovani Nazionale Operator Search API
 host: localhost
 basePath: /api/v1/cgn/operator-search
@@ -25,8 +25,7 @@ paths:
         "500":
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson" 
-
+            $ref: "#/definitions/ProblemJson"
   "/online-merchants":
     post:
       operationId: getOnlineMerchants
@@ -47,8 +46,7 @@ paths:
         "500":
           description: Service unavailable.
           schema:
-            $ref: "#/definitions/ProblemJson" 
-
+            $ref: "#/definitions/ProblemJson"
   "/offline-merchants":
     post:
       operationId: getOfflineMerchants
@@ -70,7 +68,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
   "/merchants/{merchantId}":
     parameters:
       - name: merchantId
@@ -95,7 +92,6 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
   "/discount-bucket-code/{discountId}":
     parameters:
       - name: discountId
@@ -126,14 +122,12 @@ paths:
           description: Service unavailable.
           schema:
             $ref: "#/definitions/ProblemJson"
-
 parameters:
   CountNewDiscounts:
     type: boolean
     name: count_new_discounts
     in: query
     description: Indicates whether categories should be enriched with new discounts count.
-
 definitions:
   ProblemJson:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"

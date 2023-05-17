@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: 0.0.1
+  version: 12.0.1
   title: MIT Voucher service for IO App
 basePath: /api/v1/mitvoucher/auth
 schemes:
@@ -30,7 +30,6 @@ paths:
           description: Generic server error
         '504':
           description: Gateway Timeout
-  
 definitions:
   ProblemJson:
     $ref: "../node_modules/@pagopa/io-functions-commons/openapi/definitions.yaml#/ProblemJson"
@@ -46,7 +45,6 @@ definitions:
         minLength: 1
     required:
       - token
-
 securityDefinitions:
   Bearer:
     type: apiKey
