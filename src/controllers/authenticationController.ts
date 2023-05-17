@@ -39,6 +39,7 @@ import { NotificationServiceFactory } from "src/services/notificationServiceFact
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
+import { Errors } from "io-ts";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
@@ -75,7 +76,6 @@ import {
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 import { getIsUserEligibleForNewFeature } from "../utils/featureFlag";
-import { Errors } from "io-ts";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
