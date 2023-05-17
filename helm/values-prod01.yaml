@@ -124,6 +124,7 @@ microservice-chart:
     USERS_LOGIN_QUEUE_NAME: 'userslogin'
     WEBSITE_SITE_NAME: 'io-p-weuprod01-appbackend'
     ZENDESK_BASE_PATH: '/api/backend/zendesk/v1'
+    LOLLIPOP_API_URL: 'https://io-p-weu-lollipop-fn.azurewebsites.net'
     LOLLIPOP_API_BASE_PATH: '/api/v1'
     LOLLIPOP_ALLOWED_USER_AGENTS: 'IO-App/2.23.0'
     LOLLIPOP_REVOKE_QUEUE_NAME: 'pubkeys-revoke'
