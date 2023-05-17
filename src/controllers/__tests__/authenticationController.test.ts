@@ -10,7 +10,7 @@ import {
   ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponsePermanentRedirect,
-  ResponseSuccessJson
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { UserIdentity } from "../../../generated/auth/UserIdentity";
@@ -32,7 +32,7 @@ import {
   aSpidEmailAddress,
   aSessionTrackingId,
   mockFIMSToken,
-  mockedInitializedProfile
+  mockedInitializedProfile,
 } from "../../__mocks__/user_mock";
 import ApiClientFactory from "../../services/apiClientFactory";
 import NotificationService from "../../services/notificationService";
@@ -43,7 +43,7 @@ import UsersLoginLogService from "../../services/usersLoginLogService";
 import { exactUserIdentityDecode, SpidUser } from "../../types/user";
 import AuthenticationController, {
   AGE_LIMIT,
-  AGE_LIMIT_ERROR_CODE
+  AGE_LIMIT_ERROR_CODE,
 } from "../authenticationController";
 import { addDays, addMonths, format, subYears } from "date-fns";
 import { getClientErrorRedirectionUrl } from "../../config";
@@ -60,7 +60,7 @@ import { JwkPubKey } from "../../../generated/lollipop-api/JwkPubKey";
 import {
   aLollipopAssertion,
   anAssertionRef,
-  anotherAssertionRef
+  anotherAssertionRef,
 } from "../../__mocks__/lollipop";
 
 // validUser has all every field correctly set.
@@ -73,7 +73,7 @@ const validUserPayload = {
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
   getAssertionXml: () => aLollipopAssertion,
-  getSamlResponseXml: () => aLollipopAssertion
+  getSamlResponseXml: () => aLollipopAssertion,
 };
 // invalidUser lacks the required familyName and optional email fields.
 const invalidUserPayload = {
@@ -83,21 +83,21 @@ const invalidUserPayload = {
   getSamlResponseXml: () => "",
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
-  name: aValidName
+  name: aValidName,
 };
 
 const anErrorResponse = {
   detail: undefined,
   status: 500,
   title: "Internal server error",
-  type: undefined
+  type: undefined,
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const mockSet = jest.fn();
@@ -118,8 +118,8 @@ jest.mock("../../services/redisSessionStorage", () => {
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
       isBlockedUser: mockIsBlockedUser,
-      set: mockSet
-    }))
+      set: mockSet,
+    })),
   };
 });
 
@@ -130,8 +130,8 @@ jest.mock("../../services/tokenService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       getNewToken: mockGetNewToken,
-      getNewTokenAsync: () => Promise.resolve(mockGetNewToken())
-    }))
+      getNewTokenAsync: () => Promise.resolve(mockGetNewToken()),
+    })),
   };
 });
 
@@ -142,8 +142,8 @@ jest.mock("../../services/profileService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       createProfile: mockCreateProfile,
-      getProfile: mockGetProfile
-    }))
+      getProfile: mockGetProfile,
+    })),
   };
 });
 
@@ -151,20 +151,20 @@ jest.mock("../../services/notificationService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       deleteInstallation: () =>
-        Promise.resolve(ResponseSuccessJson({ message: "ok" }))
-    }))
+        Promise.resolve(ResponseSuccessJson({ message: "ok" })),
+    })),
   };
 });
 
 jest.mock("../../services/usersLoginLogService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      notifyUserLogin: () => Promise.resolve()
-    }))
+      notifyUserLogin: () => Promise.resolve(),
+    })),
   };
 });
 
-const anActivatedPubKey = ({
+const anActivatedPubKey = {
   status: PubKeyStatusEnum.VALID,
   assertion_file_name: "file",
   assertion_ref: "sha" as AssertionRef,
@@ -173,12 +173,12 @@ const anActivatedPubKey = ({
   pub_key: {} as JwkPubKey,
   ttl: 600,
   version: 1,
-  expires_at: 1000
-} as unknown) as ActivatedPubKey;
+  expires_at: 1000,
+} as unknown as ActivatedPubKey;
 
 const mockRevokePreviousAssertionRef = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve({}));
+  .mockImplementation((_) => Promise.resolve({}));
 
 const mockActivateLolliPoPKey = jest
   .fn()
@@ -188,14 +188,14 @@ jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       revokePreviousAssertionRef: mockRevokePreviousAssertionRef,
-      activateLolliPoPKey: mockActivateLolliPoPKey
-    }))
+      activateLolliPoPKey: mockActivateLolliPoPKey,
+    })),
   };
 });
 
-const mockTelemetryClient = ({
-  trackEvent: jest.fn()
-} as unknown) as appInsights.TelemetryClient;
+const mockTelemetryClient = {
+  trackEvent: jest.fn(),
+} as unknown as appInsights.TelemetryClient;
 
 const redisClient = {} as redis.RedisClientType;
 
@@ -210,9 +210,12 @@ const redisSessionStorage = new RedisSessionStorage(
 );
 
 const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
-  const url = "/profile.html?token={token}".replace("{token}", token);
+  const url = "https://localhost/profile.html?token={token}".replace(
+    "{token}",
+    token
+  );
   return {
-    href: url
+    href: url,
   } as UrlFromString;
 };
 
@@ -240,7 +243,7 @@ const controller = new AuthenticationController(
   true,
   {
     isLollipopEnabled: false,
-    lollipopService: lollipopService
+    lollipopService: lollipopService,
   },
   mockTelemetryClient
 );
@@ -257,7 +260,7 @@ const lollipopActivatedController = new AuthenticationController(
   true,
   {
     isLollipopEnabled: true,
-    lollipopService: lollipopService
+    lollipopService: lollipopService,
   },
   mockTelemetryClient
 );
@@ -279,7 +282,7 @@ describe("AuthenticationController#acs", () => {
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
       is_email_validated: true,
-      is_test_profile: false
+      is_test_profile: false,
     };
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
@@ -304,7 +307,7 @@ describe("AuthenticationController#acs", () => {
 
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      "/profile.html?token=" + mockSessionToken
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -336,7 +339,7 @@ describe("AuthenticationController#acs", () => {
 
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      "/profile.html?token=" + mockSessionToken
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
     expect(mockSet).toHaveBeenCalledWith(mockedUser);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
@@ -348,7 +351,7 @@ describe("AuthenticationController#acs", () => {
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
       is_email_validated: true,
-      is_test_profile: false
+      is_test_profile: false,
     };
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
@@ -381,7 +384,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "IResponseErrorInternal"
+      detail: "IResponseErrorInternal",
     });
   });
 
@@ -412,7 +415,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "IResponseErrorInternal"
+      detail: "IResponseErrorInternal",
     });
   });
 
@@ -439,7 +442,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error creating the user session"
+      detail: "Error creating the user session",
     });
   });
 
@@ -465,7 +468,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error while validating user"
+      detail: "Error while validating user",
     });
   });
 
@@ -480,7 +483,7 @@ describe("AuthenticationController#acs", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error while creating the user session"
+      detail: "Error while creating the user session",
     });
   });
 
@@ -492,7 +495,7 @@ describe("AuthenticationController#acs", () => {
       dateOfBirth: format(
         addDays(subYears(new Date(), AGE_LIMIT), 1),
         "YYYY-MM-DD"
-      )
+      ),
     };
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
@@ -502,14 +505,14 @@ describe("AuthenticationController#acs", () => {
         name: "spid.error.generic",
         properties: {
           message: expect.any(String),
-          type: "INFO"
-        }
+          type: "INFO",
+        },
       })
     );
     expect(mockSet).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      `/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`
+      expect.stringContaining(`/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`)
     );
   });
 
@@ -522,7 +525,7 @@ describe("AuthenticationController#acs", () => {
 
     const aYoungUserPayload: SpidUser = {
       ...validUserPayload,
-      dateOfBirth: format(dateOfBirth, "YYYY-MM-D")
+      dateOfBirth: format(dateOfBirth, "YYYY-MM-D"),
     };
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
@@ -532,14 +535,14 @@ describe("AuthenticationController#acs", () => {
         name: "spid.error.generic",
         properties: {
           message: expect.any(String),
-          type: "INFO"
-        }
+          type: "INFO",
+        },
       })
     );
     expect(mockSet).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      `/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`
+      expect.stringContaining(`/error.html?errorCode=${AGE_LIMIT_ERROR_CODE}`)
     );
   });
 
@@ -548,7 +551,7 @@ describe("AuthenticationController#acs", () => {
     const expectedNewProfile: NewProfile = {
       email: validUserPayload.email,
       is_email_validated: true,
-      is_test_profile: false
+      is_test_profile: false,
     };
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
@@ -570,7 +573,7 @@ describe("AuthenticationController#acs", () => {
     );
     const aYoungUserPayload: SpidUser = {
       ...validUserPayload,
-      dateOfBirth: format(subYears(new Date(), AGE_LIMIT), "YYYY-MM-DD")
+      dateOfBirth: format(subYears(new Date(), AGE_LIMIT), "YYYY-MM-DD"),
     };
     const response = await controller.acs(aYoungUserPayload);
     response.apply(res);
@@ -578,20 +581,20 @@ describe("AuthenticationController#acs", () => {
     expect(mockTelemetryClient.trackEvent).not.toBeCalled();
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      "/profile.html?token=" + mockSessionToken
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
     expect(mockSet).toHaveBeenCalledWith({
       ...mockedUser,
-      date_of_birth: aYoungUserPayload.dateOfBirth
+      date_of_birth: aYoungUserPayload.dateOfBirth,
     });
     expect(mockGetProfile).toHaveBeenCalledWith({
       ...mockedUser,
-      date_of_birth: aYoungUserPayload.dateOfBirth
+      date_of_birth: aYoungUserPayload.dateOfBirth,
     });
     expect(mockCreateProfile).toHaveBeenCalledWith(
       {
         ...mockedUser,
-        date_of_birth: aYoungUserPayload.dateOfBirth
+        date_of_birth: aYoungUserPayload.dateOfBirth,
       },
       expectedNewProfile
     );
@@ -605,7 +608,7 @@ describe("AuthenticationController#acs", () => {
     mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
       TE.of({
         ...anActivatedPubKey,
-        assertion_ref: newAssertionRef
+        assertion_ref: newAssertionRef,
       } as ActivatedPubKey)
     );
     mockSetLollipop.mockImplementationOnce((_, __, ___) =>
@@ -631,7 +634,7 @@ describe("AuthenticationController#acs", () => {
 
     expect(res.redirect).toHaveBeenCalledWith(
       301,
-      "/profile.html?token=" + mockSessionToken
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
 
     expect(mockGetLollipop).toHaveBeenCalledTimes(1);
@@ -646,7 +649,7 @@ describe("AuthenticationController#acs", () => {
     );
     expect(mockSetLollipop).toBeCalledWith(
       expect.objectContaining({
-        fiscal_code: aFiscalCode
+        fiscal_code: aFiscalCode,
       }),
       anotherAssertionRef
     );
@@ -672,7 +675,7 @@ describe("AuthenticationController#acs", () => {
         (newAssertionRef, __, ___) =>
           TE.of({
             ...anActivatedPubKey,
-            assertion_ref: newAssertionRef
+            assertion_ref: newAssertionRef,
           } as ActivatedPubKey)
       );
       mockSetLollipop.mockImplementationOnce(
@@ -697,15 +700,15 @@ describe("AuthenticationController#acs", () => {
         properties: expect.objectContaining({
           assertion_ref: anotherAssertionRef,
           fiscal_code: sha256(aFiscalCode),
-          message: errorMessage
-        })
+          message: errorMessage,
+        }),
       });
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
         apply: expect.any(Function),
         detail: "Internal server error: Error Activation Lollipop Key",
-        kind: "IResponseErrorInternal"
+        kind: "IResponseErrorInternal",
       });
 
       expect(mockGetLollipop).toHaveBeenCalledTimes(1);
@@ -722,7 +725,7 @@ describe("AuthenticationController#acs", () => {
       );
       expect(mockSetLollipop).toBeCalledWith(
         expect.objectContaining({
-          fiscal_code: aFiscalCode
+          fiscal_code: aFiscalCode,
         }),
         anotherAssertionRef
       );
@@ -759,7 +762,7 @@ describe("AuthenticationController#acs", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: "Internal server error: Error Activation Lollipop Key",
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
 
     expect(mockGetLollipop).toHaveBeenCalledTimes(1);
@@ -791,7 +794,7 @@ describe("AuthenticationController#acs", () => {
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
       mockDelLollipop.mockImplementationOnce(
-        _ => delLollipopAssertionRefForUserResponse
+        (_) => delLollipopAssertionRefForUserResponse
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
@@ -811,15 +814,15 @@ describe("AuthenticationController#acs", () => {
         name: "lollipop.error.acs",
         properties: expect.objectContaining({
           fiscal_code: sha256(aFiscalCode),
-          message: `acs: ${errorMessage}`
-        })
+          message: `acs: ${errorMessage}`,
+        }),
       });
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(response).toEqual({
         apply: expect.any(Function),
         detail: `Internal server error: ${errorMessage}`,
-        kind: "IResponseErrorInternal"
+        kind: "IResponseErrorInternal",
       });
 
       expect(mockGetLollipop).toHaveBeenCalledTimes(1);
@@ -859,8 +862,8 @@ describe("AuthenticationController#acs", () => {
       name: "lollipop.error.acs",
       properties: expect.objectContaining({
         fiscal_code: sha256(aFiscalCode),
-        message: "Error retrieving previous lollipop configuration"
-      })
+        message: "Error retrieving previous lollipop configuration",
+      }),
     });
 
     expect(res.status).toHaveBeenCalledWith(500);
@@ -868,7 +871,7 @@ describe("AuthenticationController#acs", () => {
       apply: expect.any(Function),
       detail:
         "Internal server error: Error retrieving previous lollipop configuration",
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
 
     expect(mockGetLollipop).toHaveBeenCalledTimes(1);
@@ -924,7 +927,7 @@ describe("AuthenticationController#acsTest", () => {
   it("should return ResponseErrorInternal if the token is missing", async () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
-        href: "http://invalid-url"
+        href: "http://invalid-url",
       } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);
@@ -956,14 +959,14 @@ describe("AuthenticationController#getUserIdentity", () => {
     response.apply(res);
 
     const expectedValue = exactUserIdentityDecode(
-      (mockedUser as unknown) as UserIdentity
+      mockedUser as unknown as UserIdentity
     );
     expect(E.isRight(expectedValue)).toBeTruthy();
     if (E.isRight(expectedValue)) {
       expect(response).toEqual({
         apply: expect.any(Function),
         kind: "IResponseSuccessJson",
-        value: expectedValue.right
+        value: expectedValue.right,
       });
     }
   });
@@ -986,7 +989,7 @@ describe("AuthenticationController#getUserIdentity", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       detail: "Internal server error: Unexpected User Identity data format.",
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -1030,7 +1033,7 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
@@ -1041,7 +1044,7 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
       ...mockedUser,
       bpd_token: mockBPDToken,
       myportal_token: mockMyPortalToken,
-      zendesk_token: mockZendeskToken
+      zendesk_token: mockZendeskToken,
     };
     req.user = userWithExternalToken;
 
@@ -1058,7 +1061,7 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
@@ -1095,7 +1098,7 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Redis error",
     });
   });
 
@@ -1117,7 +1120,7 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error destroying the user session"
+      detail: "Error destroying the user session",
     });
   });
 
@@ -1139,7 +1142,7 @@ describe("AuthenticationController|>LollipopDisabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Redis error",
     });
   });
 });
@@ -1174,12 +1177,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
   it(`
-  GIVEN a lollipop enabled flow 
+  GIVEN a lollipop enabled flow
   WHEN there is no assertionRef on redis
   THEN it should not send the pub key revokal message and succeed deleting the assertionRef and the session tokens
   `, async () => {
@@ -1201,12 +1204,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
   it(`
-  GIVEN an enabled lollipop flow 
+  GIVEN an enabled lollipop flow
   WHEN the pub key revokal message sending fails
   THEN it should succeed deleting the assertionRef and the session tokens`, async () => {
     const res = mockRes();
@@ -1230,12 +1233,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
   it(`
-  GIVEN an enabled lollipop flow 
+  GIVEN an enabled lollipop flow
   WHEN the user data is invalid
   THEN it should fail and not call internal functions`, async () => {
     const res = mockRes();
@@ -1254,7 +1257,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
   });
 
   it(`
-  GIVEN an enabled lollipop flow 
+  GIVEN an enabled lollipop flow
   WHEN it can't retrieve the assertionRef from redis because of an error
   THEN it should fail not sending the pub key revokal message and not deleting the assertionRef and the session tokens`, async () => {
     const res = mockRes();
@@ -1273,12 +1276,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "error"
+      detail: "error",
     });
   });
 
   it(`
-  GIVEN an enabled lollipop flow 
+  GIVEN an enabled lollipop flow
   WHEN it can't delete the assertionRef from redis because of an error
   THEN it should fail after sending the pub key revokal message but not deleting the session tokens`, async () => {
     const res = mockRes();
@@ -1299,12 +1302,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "error"
+      detail: "error",
     });
   });
 
   it(`
-  GIVEN an enabled lollipop flow 
+  GIVEN an enabled lollipop flow
   WHEN the session can not be destroyed
   THEN it should fail after sending the pub key revokal message and deleting the assertionRef`, async () => {
     const res = mockRes();
@@ -1326,12 +1329,12 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Error destroying the user session"
+      detail: "Error destroying the user session",
     });
   });
 
   it(`
-  GIVEN an enabled lollipop flow 
+  GIVEN an enabled lollipop flow
   WHEN the Redis client returns an error
   THEN it should fail after sending the pub key revokal message and deleting the assertionRef`, async () => {
     const res = mockRes();
@@ -1353,7 +1356,7 @@ describe("AuthenticationController|>LollipopEnabled|>logout", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
-      detail: "Redis error"
+      detail: "Redis error",
     });
   });
 });
