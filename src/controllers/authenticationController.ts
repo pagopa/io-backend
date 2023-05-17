@@ -9,7 +9,6 @@ import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as AP from "fp-ts/lib/Apply";
-import * as S from "fp-ts/lib/string";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -22,7 +21,7 @@ import {
   ResponsePermanentRedirect,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import { UrlFromString, ValidUrl } from "@pagopa/ts-commons/lib/url";
+import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
@@ -39,7 +38,6 @@ import { NotificationServiceFactory } from "src/services/notificationServiceFact
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
-import { Errors } from "io-ts";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
@@ -51,9 +49,6 @@ import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
-  FF_IOLOGIN,
-  IOLOGIN_CANARY_USERS_SHA_REGEX,
-  IOLOGIN_USERS_LIST,
   tokenDurationSecs,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -75,7 +70,10 @@ import {
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
-import { getIsUserEligibleForNewFeature } from "../utils/featureFlag";
+import {
+  errorOrIoLoginURL,
+  isUserElegibleForIoLoginUrlScheme,
+} from "../utils/ioLoginUriScheme";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -124,31 +122,6 @@ export default class AuthenticationController {
     //
     // decode the SPID assertion into a SPID user
     //
-
-    const defaultUrlSchemeRegex = new RegExp("^http[s]?:");
-
-    const isUserElegibleForIoLoginUrlScheme =
-      getIsUserEligibleForNewFeature<FiscalCode>(
-        (fiscalCode) => IOLOGIN_USERS_LIST.includes(fiscalCode),
-        (fiscalCode) =>
-          pipe(
-            fiscalCode,
-            sha256,
-            new RegExp(IOLOGIN_CANARY_USERS_SHA_REGEX).test
-          ),
-        FF_IOLOGIN
-      );
-
-    const IOLOGIN_URI_SCHEME = "iologin:";
-
-    const errorOrIoLoginURL = (url: ValidUrl): E.Either<Errors, ValidUrl> =>
-      pipe(
-        url,
-        UrlFromString.encode,
-        // replace http: or https: URIschemes with iologin:
-        S.replace(defaultUrlSchemeRegex, IOLOGIN_URI_SCHEME),
-        UrlFromString.decode
-      );
 
     const errorOrSpidUser = validateSpidUser(userPayload);
 
