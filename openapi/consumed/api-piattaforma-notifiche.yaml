@@ -178,8 +178,70 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+  /ext-registry-private/io/v1/notification-disclaimer/{iun}:
+    get:
+      tags:
+      - AppIO-PN-Notification
+      summary: Returns the AppIo user activation status
+      description: Returns the AppIo user activation status
+      parameters:
+      - name: iun
+        in: path
+        description: Identificativo Univoco Notifica
+        required: true
+        schema:
+          type: string
+      - name: x-pagopa-cx-taxid
+        in: header
+        description: "Customer taxId, used in B2B AppIO."
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+          type: string
+      operationId: getReceivedNotificationPrecondition
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreconditionContent"
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
 components:
   schemas:
+    PreconditionContent:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title to be rendered in App
+          minlength: 1
+        markdown:
+          type: string
+          description: The markdown content to be rendered in App
+          minlength: 1
+      required:
+        - title
+        - markdown
     LegalFactDownloadMetadataResponse:
       title: Url e metadati per il download di un allegato di una notifica
       required:

@@ -89,6 +89,42 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ProblemJson'
+
+  /messages/{id}/precondition:
+    get:
+      operationId: getThirdPartyMessagePrecondition
+      summary: Retrieve the precondition of a Third Party message
+      description: |-
+        Returns the precondition associated to the Third Party message with the provided message ID.
+        User's fiscal code is required as header parameter.
+      parameters:
+        - $ref: '#/parameters/FiscalCode'
+        - $ref: '#/parameters/ThirdPartyMessageId'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/PreconditionContent"
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: >-
+            No message or precondition found for the provided ID.
+          schema:
+            $ref: '#/definitions/ProblemJson'
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ProblemJson'
+
 parameters:
   FiscalCode:
     name: fiscal_code
@@ -108,6 +144,20 @@ parameters:
     required: true
     description: ID of the Third Party message.
 definitions:
+  PreconditionContent:
+    type: object
+    properties:
+      title:
+        type: string
+        description: The title to be rendered in App
+        minlength: 1
+      markdown:
+        type: string
+        description: The markdown content to be rendered in App
+        minlength: 1
+    required:
+      - title
+      - markdown
   ThirdPartyMessage:
     type: object
     properties:

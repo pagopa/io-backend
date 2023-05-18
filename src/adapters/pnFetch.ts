@@ -33,6 +33,11 @@ export const ThirdPartyAttachmentUrl = pathParamsFromUrl(
   ([id, url]) => `/messages/${id}/${url}`
 );
 
+export const ThirdPartyPreconditionUrl = pathParamsFromUrl(
+  RegExp("^[/]+messages[/]+([^/]+)/precondition$"),
+  ([id]) => `/messages/${id}/precondition`
+);
+
 const basePnDocument =
   "[/]{0,1}delivery[/]+notifications[/]+received[/]+([^/]+)";
 const attachmentPnDocument = "[/]+attachments[/]+documents[/]+([^/]+)$";
@@ -58,6 +63,33 @@ const withAccept_iojson =
 
 const WithFiscalCode = t.interface({ fiscal_code: FiscalCode });
 type WithFiscalCode = t.TypeOf<typeof WithFiscalCode>;
+
+const retrievePrecondition = (
+  origFetch: typeof fetch,
+  pnUrl: string,
+  pnApiKey: string,
+  fiscalCode: FiscalCode,
+  [_, iun]: ReadonlyArray<string>
+) =>
+  pipe(
+    () =>
+      PnAPIClient(
+        pnUrl,
+        withAccept_iojson(origFetch)
+      ).getReceivedNotificationPrecondition({
+        ApiKeyAuth: pnApiKey,
+        iun,
+        "x-pagopa-cx-taxid": fiscalCode,
+      }),
+    TE.mapLeft(errorsToError),
+    TE.chain(
+      TE.fromPredicate(
+        (r) => r.status === 200,
+        (r) => Error(`Failed to fetch PN ReceivedPrecondition: ${r.status}`)
+      )
+    ),
+    TE.map((response) => response.value)
+  );
 
 const retrieveNotificationDetails = (
   origFetch: typeof fetch,
@@ -109,6 +141,49 @@ export const errorResponse = (error: Error): Response =>
       }) as unknown as Response // cast required: the same cast is used in clients code generation
   );
 
+export const redirectPrecondition =
+  (
+    origFetch: typeof fetch,
+    pnUrl: string,
+    pnApiKey: string,
+    url: string,
+    init?: RequestInit
+  ) =>
+  (): Promise<Response> =>
+    pipe(
+      init?.headers,
+      checkHeaders,
+      TE.chain((headers) =>
+        pipe(
+          url,
+          ThirdPartyPreconditionUrl.decode,
+          E.mapLeft(errorsToError),
+          TE.fromEither,
+          TE.chain((params) =>
+            pipe(
+              retrievePrecondition(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                headers.fiscal_code,
+                params
+              )
+            )
+          )
+        )
+      ),
+      TE.map(
+        // eslint-disable-next-line sonarjs/no-identical-functions
+        (body) =>
+          new NodeResponse(JSON.stringify(body), {
+            status: 200,
+            statusText: "OK",
+          }) as unknown as Response // cast required: the same cast is used in clients code generation
+      ),
+      TE.mapLeft(errorResponse),
+      TE.toUnion
+    )();
+
 export const redirectMessages =
   (
     origFetch: typeof fetch,
@@ -141,6 +216,7 @@ export const redirectMessages =
         )
       ),
       TE.map(
+        // eslint-disable-next-line sonarjs/no-identical-functions
         (body) =>
           new NodeResponse(JSON.stringify(body), {
             status: 200,
@@ -262,6 +338,10 @@ export const pnFetch =
           .when(
             (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
             (url) => redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
+          )
+          .when(
+            (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
+            (url) => redirectPrecondition(origFetch, pnUrl, pnApiKey, url, init)
           )
           .when(
             (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
