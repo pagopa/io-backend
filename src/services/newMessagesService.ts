@@ -551,7 +551,10 @@ export default class NewMessagesService {
       ),
       TE.chain((client) =>
         TE.tryCatch(
-          () => client.getThirdPartyMessagePrecondition({ id: message.id }),
+          () =>
+            client.getThirdPartyMessagePrecondition({
+              id: message.content.third_party_data.id,
+            }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
       ),
