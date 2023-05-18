@@ -26,10 +26,7 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import {
-  errorsToReadableMessages,
-  readableReportSimplified,
-} from "@pagopa/ts-commons/lib/reporters";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
@@ -74,7 +71,7 @@ import {
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
 import {
-  errorOrIoLoginURL,
+  internalErrorOrIoLoginRedirect,
   getIsUserElegibleForIoLoginUrlScheme,
 } from "../utils/ioLoginUriScheme";
 
@@ -171,19 +168,10 @@ export default class AuthenticationController {
       return pipe(
         isUserElegibleForIoLoginUrlScheme(spidUser.fiscalNumber),
         B.fold(
-          () => redirectionUrl,
-          () =>
-            pipe(
-              redirectionUrl,
-              errorOrIoLoginURL,
-              E.getOrElseW((err) => {
-                throw new Error(
-                  `Invalid url | ${readableReportSimplified(err)}`
-                );
-              })
-            )
+          () => E.right(ResponsePermanentRedirect(redirectionUrl)),
+          () => internalErrorOrIoLoginRedirect(redirectionUrl)
         ),
-        ResponsePermanentRedirect
+        E.toUnion
       );
     }
 
@@ -485,17 +473,10 @@ export default class AuthenticationController {
     return pipe(
       isUserElegibleForIoLoginUrlScheme(user.fiscal_code),
       B.fold(
-        () => urlWithToken,
-        () =>
-          pipe(
-            urlWithToken,
-            errorOrIoLoginURL,
-            E.getOrElseW((err) => {
-              throw new Error(`Invalid url | ${readableReportSimplified(err)}`);
-            })
-          )
+        () => E.right(ResponsePermanentRedirect(urlWithToken)),
+        () => internalErrorOrIoLoginRedirect(urlWithToken)
       ),
-      ResponsePermanentRedirect
+      E.toUnion
     );
   }
 

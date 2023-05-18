@@ -47,15 +47,15 @@ describe("IOLOGIN utility methods testing", () => {
   );
 
   it.each`
-    input                | FF                        | TEST_USERS     | expectedResult
-    ${aFiscalCode}       | ${FeatureFlagEnum.NONE}   | ${""}          | ${false}
-    ${aFiscalCode}       | ${FeatureFlagEnum.BETA}   | ${aFiscalCode} | ${true}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.BETA}   | ${aFiscalCode} | ${false}
-    ${aFiscalCode}       | ${FeatureFlagEnum.CANARY} | ${""}          | ${false}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.CANARY} | ${""}          | ${true}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.ALL}    | ${""}          | ${true}
+    input                | FF                        | TEST_USERS       | expectedResult
+    ${aFiscalCode}       | ${FeatureFlagEnum.NONE}   | ${[]}            | ${false}
+    ${aFiscalCode}       | ${FeatureFlagEnum.BETA}   | ${[aFiscalCode]} | ${true}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.BETA}   | ${[aFiscalCode]} | ${false}
+    ${aFiscalCode}       | ${FeatureFlagEnum.CANARY} | ${[]}            | ${false}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.CANARY} | ${[]}            | ${true}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.ALL}    | ${[]}            | ${true}
   `(
-    "should give $expectedResult given FF $FF with $TEST_USERS allowed",
+    "should give $expectedResult given FF $FF with $TEST_USERS users allowed",
     ({ input, FF, TEST_USERS, expectedResult }) => {
       const isUserElegibleForIoLoginUrlScheme =
         getIsUserElegibleForIoLoginUrlScheme(TEST_USERS, aRegexPattern, FF);

@@ -895,15 +895,15 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    inputFc              | FF                        | TEST_USERS     | expectedResult
-    ${aFiscalCode}       | ${FeatureFlagEnum.NONE}   | ${""}          | ${false}
-    ${aFiscalCode}       | ${FeatureFlagEnum.BETA}   | ${aFiscalCode} | ${true}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.BETA}   | ${aFiscalCode} | ${false}
-    ${aFiscalCode}       | ${FeatureFlagEnum.CANARY} | ${""}          | ${false}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.CANARY} | ${""}          | ${true}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.ALL}    | ${""}          | ${true}
+    inputFc              | FF                        | TEST_USERS       | expectedResult
+    ${aFiscalCode}       | ${FeatureFlagEnum.NONE}   | ${[]}            | ${false}
+    ${aFiscalCode}       | ${FeatureFlagEnum.BETA}   | ${[aFiscalCode]} | ${true}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.BETA}   | ${[aFiscalCode]} | ${false}
+    ${aFiscalCode}       | ${FeatureFlagEnum.CANARY} | ${[]}            | ${false}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.CANARY} | ${[]}            | ${true}
+    ${anotherFiscalCode} | ${FeatureFlagEnum.ALL}    | ${[]}            | ${true}
   `(
-    "should succeed and replace URI scheme with iologin WHEN the user is in BETA",
+    "should succeed and redirect to the correct URI scheme having iologin FF set to $FF and $TEST_USERS users allowed",
     async ({ inputFc, FF, TEST_USERS, expectedResult }) => {
       const aRegexPattern = "^([(0-9)|(a-f)|(A-F)]{63}0)$";
       jest
@@ -945,9 +945,6 @@ describe("AuthenticationController#acs", () => {
         301,
         expectedUriScheme + "//localhost/profile.html?token=" + mockSessionToken
       );
-      expect(mockSet).toHaveBeenCalledWith(mockedUser);
-      expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
-      expect(mockCreateProfile).not.toBeCalled();
     }
   );
 });

@@ -5,6 +5,13 @@ import { pipe } from "fp-ts/function";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Errors } from "io-ts";
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
+import {
+  IResponseErrorInternal,
+  IResponsePermanentRedirect,
+  ResponseErrorInternal,
+  ResponsePermanentRedirect,
+} from "@pagopa/ts-commons/lib/responses";
+import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { FeatureFlag, getIsUserEligibleForNewFeature } from "./featureFlag";
 
 const IOLOGIN_URI_SCHEME = "iologin:";
@@ -32,4 +39,16 @@ export const errorOrIoLoginURL = (url: ValidUrl): E.Either<Errors, ValidUrl> =>
     // replace http: or https: URIschemes with iologin:
     S.replace(defaultUrlSchemeRegex, IOLOGIN_URI_SCHEME),
     UrlFromString.decode
+  );
+
+export const internalErrorOrIoLoginRedirect = (
+  redirectionUrl: ValidUrl
+): E.Either<IResponseErrorInternal, IResponsePermanentRedirect> =>
+  pipe(
+    redirectionUrl,
+    errorOrIoLoginURL,
+    E.mapLeft((errors) =>
+      ResponseErrorInternal(`Invalid url | ${readableReportSimplified(errors)}`)
+    ),
+    E.map(ResponsePermanentRedirect)
   );
