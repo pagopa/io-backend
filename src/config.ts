@@ -196,11 +196,18 @@ export const CLIENT_ERROR_REDIRECTION_URL = pipe(
   E.chain(
     E.fromPredicate(
       (url) => url.includes("/error.html"),
-      () => undefined
+      () => "url must contain /error.html"
     )
   ),
-  E.getOrElseW(() => {
-    log.error("CLIENT_ERROR_REDIRECTION_URL must contain /error.html");
+  E.chain(
+    // simple check to see if the URL is absolute
+    E.fromPredicate(
+      (url) => /^(https?|iologin):/.test(url),
+      () => "url must be absolute"
+    )
+  ),
+  E.getOrElseW((message) => {
+    log.error(`CLIENT_ERROR_REDIRECTION_URL ${message}`);
     return process.exit(1);
   })
 );
@@ -331,13 +338,18 @@ export const clientProfileRedirectionUrl = pipe(
   E.chain(
     E.fromPredicate(
       (url) => url.includes("{token}"),
-      () => undefined
+      () => "url must contain {token} placeholder"
     )
   ),
-  E.getOrElseW(() => {
-    log.error(
-      "CLIENT_PROFILE_REDIRECTION_URL must contain a {token} placeholder"
-    );
+  E.chain(
+    // simple check to see if the URL is absolute
+    E.fromPredicate(
+      (url) => /^(https?|iologin):/.test(url),
+      () => "url must be absolute"
+    )
+  ),
+  E.getOrElseW((message) => {
+    log.error(`CLIENT_PROFILE_REDIRECTION_URL ${message}`);
     return process.exit(1);
   })
 );
