@@ -182,19 +182,10 @@ export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
   O.getOrElseW(() => undefined)
 );
 
-export const CLIENT_ERROR_REDIRECTION_URL = pipe(
-  // this env variable is required and must be an absolute URL
-  process.env.CLIENT_ERROR_REDIRECTION_URL,
+export const BACKEND_HOST = pipe(
+  process.env.BACKEND_HOST,
   NonEmptyString.decode,
-  E.mapLeft(
-    (err) => `env variable is required | ${readableReportSimplified(err)}`
-  ),
-  E.chain(
-    E.fromPredicate(
-      (url) => url.includes("/error.html"),
-      () => "url must contain /error.html"
-    )
-  ),
+  E.mapLeft(readableReportSimplified),
   E.chain(
     // simple check to see if the URL is absolute
     E.fromPredicate(
@@ -203,10 +194,15 @@ export const CLIENT_ERROR_REDIRECTION_URL = pipe(
     )
   ),
   E.getOrElseW((message) => {
-    log.error(`CLIENT_ERROR_REDIRECTION_URL ${message}`);
+    log.error(`BACKEND_HOST error | ${message}`);
     return process.exit(1);
   })
 );
+
+// Redirection urls
+export const CLIENT_ERROR_REDIRECTION_URL = `${BACKEND_HOST}/error.html`;
+
+export const clientProfileRedirectionUrl = `${BACKEND_HOST}/profile.html?token={token}`;
 
 export const CLIENT_REDIRECTION_URL =
   process.env.CLIENT_REDIRECTION_URL || "/login";
@@ -318,33 +314,6 @@ export const samlConfig: SamlConfig = {
   privateCert: samlKey(),
   requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS,
 };
-
-// Redirection urls
-export const clientProfileRedirectionUrl = pipe(
-  // this env variable is required and must be an absolute URL
-  process.env.CLIENT_PROFILE_REDIRECTION_URL,
-  NonEmptyString.decode,
-  E.mapLeft(
-    (err) => `env variable is required | ${readableReportSimplified(err)}`
-  ),
-  E.chain(
-    E.fromPredicate(
-      (url) => url.includes("{token}"),
-      () => "url must contain {token} placeholder"
-    )
-  ),
-  E.chain(
-    // simple check to see if the URL is absolute
-    E.fromPredicate(
-      (url) => /^(https?|iologin):/.test(url),
-      () => "url must be absolute"
-    )
-  ),
-  E.getOrElseW((message) => {
-    log.error(`CLIENT_PROFILE_REDIRECTION_URL ${message}`);
-    return process.exit(1);
-  })
-);
 
 // IP(s) or CIDR(s) allowed for notification
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
