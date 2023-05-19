@@ -87,6 +87,13 @@ export const AGE_LIMIT_ERROR_CODE = 1001;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
 
+export const isUserElegibleForIoLoginUrlScheme =
+  getIsUserElegibleForIoLoginUrlScheme(
+    IOLOGIN_USERS_LIST,
+    IOLOGIN_CANARY_USERS_SHA_REGEX,
+    FF_IOLOGIN
+  );
+
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
   constructor(
@@ -122,13 +129,6 @@ export default class AuthenticationController {
     //
     // decode the SPID assertion into a SPID user
     //
-    const isUserElegibleForIoLoginUrlScheme =
-      getIsUserElegibleForIoLoginUrlScheme(
-        IOLOGIN_USERS_LIST,
-        IOLOGIN_CANARY_USERS_SHA_REGEX,
-        FF_IOLOGIN
-      );
-
     const errorOrSpidUser = validateSpidUser(userPayload);
 
     if (E.isLeft(errorOrSpidUser)) {

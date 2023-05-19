@@ -186,13 +186,9 @@ export const CLIENT_ERROR_REDIRECTION_URL = pipe(
   // this env variable is required and must be an absolute URL
   process.env.CLIENT_ERROR_REDIRECTION_URL,
   NonEmptyString.decode,
-  E.mapLeft((err) => {
-    throw new Error(
-      `CLIENT_ERROR_REDIRECTION_URL env variable is required | ${readableReportSimplified(
-        err
-      )}`
-    );
-  }),
+  E.mapLeft(
+    (err) => `env variable is required | ${readableReportSimplified(err)}`
+  ),
   E.chain(
     E.fromPredicate(
       (url) => url.includes("/error.html"),
@@ -328,13 +324,9 @@ export const clientProfileRedirectionUrl = pipe(
   // this env variable is required and must be an absolute URL
   process.env.CLIENT_PROFILE_REDIRECTION_URL,
   NonEmptyString.decode,
-  E.mapLeft((err) => {
-    throw new Error(
-      `CLIENT_PROFILE_REDIRECTION_URL env variable is required | ${readableReportSimplified(
-        err
-      )}`
-    );
-  }),
+  E.mapLeft(
+    (err) => `env variable is required | ${readableReportSimplified(err)}`
+  ),
   E.chain(
     E.fromPredicate(
       (url) => url.includes("{token}"),

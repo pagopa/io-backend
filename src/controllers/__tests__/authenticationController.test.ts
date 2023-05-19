@@ -62,12 +62,7 @@ import {
   anAssertionRef,
   anotherAssertionRef,
 } from "../../__mocks__/lollipop";
-import * as ioLoginUtilities from "../../utils/ioLoginUriScheme";
-import {
-  FeatureFlagEnum,
-  getIsUserEligibleForNewFeature,
-} from "../../utils/featureFlag";
-import { pipe } from "fp-ts/lib/function";
+import * as authCtrl from "../authenticationController";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -105,8 +100,6 @@ const badRequestErrorResponse = {
   title: expect.any(String),
   type: undefined,
 };
-
-const anotherFiscalCode = "ISPXNB32R82Y766D" as FiscalCode;
 
 const mockSet = jest.fn();
 const mockGetBySessionToken = jest.fn();
@@ -895,30 +888,15 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    inputFc              | FF                        | TEST_USERS       | expectedResult
-    ${aFiscalCode}       | ${FeatureFlagEnum.NONE}   | ${[]}            | ${false}
-    ${aFiscalCode}       | ${FeatureFlagEnum.BETA}   | ${[aFiscalCode]} | ${true}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.BETA}   | ${[aFiscalCode]} | ${false}
-    ${aFiscalCode}       | ${FeatureFlagEnum.CANARY} | ${[]}            | ${false}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.CANARY} | ${[]}            | ${true}
-    ${anotherFiscalCode} | ${FeatureFlagEnum.ALL}    | ${[]}            | ${true}
+    isUserElegible | expectedUriScheme
+    ${false}       | ${"https:"}
+    ${true}        | ${"iologin:"}
   `(
     "should succeed and redirect to the correct URI scheme having iologin FF set to $FF and $TEST_USERS users allowed",
-    async ({ inputFc, FF, TEST_USERS, expectedResult }) => {
-      const aRegexPattern = "^([(0-9)|(a-f)|(A-F)]{63}0)$";
+    async ({ isUserElegible, expectedUriScheme }) => {
       jest
-        .spyOn(ioLoginUtilities, "getIsUserElegibleForIoLoginUrlScheme")
-        .mockImplementationOnce((_, __, ___) =>
-          getIsUserEligibleForNewFeature<FiscalCode>(
-            (_) => TEST_USERS.includes(inputFc),
-            (_) => {
-              const regex = new RegExp(aRegexPattern);
-              // below the bind is needed to keep reference to "this" object
-              return pipe(inputFc, sha256, regex.test.bind(regex));
-            },
-            FF
-          )
-        );
+        .spyOn(authCtrl, "isUserElegibleForIoLoginUrlScheme")
+        .mockImplementationOnce((_) => isUserElegible);
 
       const res = mockRes();
 
@@ -938,8 +916,6 @@ describe("AuthenticationController#acs", () => {
       );
       const response = await controller.acs(validUserPayload);
       response.apply(res);
-
-      const expectedUriScheme = expectedResult ? "iologin:" : "https:";
 
       expect(res.redirect).toHaveBeenCalledWith(
         301,
