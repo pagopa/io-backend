@@ -142,7 +142,7 @@ Those are all Environment variables needed by the application:
 | API_KEY                                | The key used to authenticate to the io-functions-app API                          | string |
 | API_URL                                | The io-functions-app URL                                                          | string |
 | API_BASE_PATH                          | The root path for the backend api endpoints                                       | string |
-| BACKEND_HOST                           | The FQDN of the backend                                                           | string |
+| BACKEND_HOST                           | The absolute URL of the app service containing the FQDN                           | string |
 | BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
 | BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
 | BONUS_API_BASE_PATH                    | The root path for the backend bonus api endpoints                                 | string |

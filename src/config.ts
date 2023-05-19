@@ -194,7 +194,7 @@ export const BACKEND_HOST = pipe(
     )
   ),
   E.getOrElseW((message) => {
-    log.error(`BACKEND_HOST error | ${message}`);
+    log.error(`BACKEND_HOST env variable error | ${message}`);
     return process.exit(1);
   })
 );
