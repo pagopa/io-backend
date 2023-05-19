@@ -178,7 +178,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /ext-registry-private/io/v1/notification-disclaimer/{iun}:
+  ext-registry-private/io/v1/notification-disclaimer/{iun}:
     get:
       tags:
       - AppIO-PN-Notification
