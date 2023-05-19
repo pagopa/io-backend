@@ -46,7 +46,7 @@ import { getRequiredENVVar, readFile } from "./utils/container";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import ApiClientFactory from "./services/apiClientFactory";
 import { BonusAPIClient } from "./clients/bonus";
-import { STRINGS_RECORD } from "./types/commons";
+import { IoLoginHostUrl, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
@@ -184,17 +184,11 @@ export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
 
 export const BACKEND_HOST = pipe(
   process.env.BACKEND_HOST,
-  NonEmptyString.decode,
-  E.mapLeft(readableReportSimplified),
-  E.chain(
-    // simple check to see if the URL is absolute
-    E.fromPredicate(
-      (url) => /^(https?|iologin):/.test(url),
-      () => "url must be absolute"
-    )
-  ),
-  E.getOrElseW((message) => {
-    log.error(`BACKEND_HOST env variable error | ${message}`);
+  IoLoginHostUrl.decode,
+  E.getOrElseW((errors) => {
+    log.error(
+      `BACKEND_HOST env variable error | ${readableReportSimplified(errors)}`
+    );
     return process.exit(1);
   })
 );
