@@ -1278,7 +1278,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       id: aValidMessageIdWithThirdPartyData
     });
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
-      id: validApiMessageResponse.value.message.id
+      id: validApiThirdPartyMessageResponse.value.message.content.third_party_data.id
     });
     expect(res).toMatchObject({
       kind: "IResponseSuccessJson",
@@ -1374,7 +1374,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageIdWithThirdPartyData
     });
-    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiMessageResponse.value.message.id });
+    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiThirdPartyMessageResponse.value.message.content.third_party_data.id });
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
       detail: "Internal server error: Third Party Service failed with code 500"
@@ -1408,7 +1408,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageIdWithThirdPartyData
     });
-    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiMessageResponse.value.message.id });
+    expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({ id: validApiThirdPartyMessageResponse.value.message.content.third_party_data.id });
     expect(res).toMatchObject({
       kind: "IResponseErrorValidation",
       detail: "Bad request: Third party service returned 400"
