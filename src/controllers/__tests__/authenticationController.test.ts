@@ -892,7 +892,7 @@ describe("AuthenticationController#acs", () => {
     ${false}       | ${"https:"}
     ${true}        | ${"iologin:"}
   `(
-    "should succeed and redirect to the correct URI scheme having iologin FF set to $FF and $TEST_USERS users allowed",
+    "should succeed and redirect to the correct URI scheme($expectedUriScheme) when IOLOGIN feature check for the user returns $isUserElegible",
     async ({ isUserElegible, expectedUriScheme }) => {
       jest
         .spyOn(authCtrl, "isUserElegibleForIoLoginUrlScheme")

@@ -47,6 +47,7 @@ export const internalErrorOrIoLoginRedirect = (
   pipe(
     redirectionUrl,
     errorOrIoLoginURL,
+    // this should never happen, but we manage the either anyway
     E.mapLeft((errors) =>
       ResponseErrorInternal(`Invalid url | ${readableReportSimplified(errors)}`)
     ),

@@ -771,7 +771,8 @@ export const IOLOGIN_USERS_LIST = pipe(
 export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
   process.env.IOLOGIN_CANARY_USERS_REGEX,
   NonEmptyString.decode,
-  E.getOrElse(() => "XYZ" as NonEmptyString)
+  // allow ~6% of users by default
+  E.getOrElse(() => "^([(0-9)|(a-f)|(A-F)]{63}0)$" as NonEmptyString)
 );
 
 // Support Token
