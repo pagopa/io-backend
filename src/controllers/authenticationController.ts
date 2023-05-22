@@ -46,6 +46,9 @@ import { AccessToken } from "../../generated/public/AccessToken";
 import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
+  FF_IOLOGIN,
+  IOLOGIN_CANARY_USERS_SHA_REGEX,
+  IOLOGIN_USERS_LIST,
   tokenDurationSecs,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
@@ -67,6 +70,10 @@ import {
 } from "../types/user";
 import { log } from "../utils/logger";
 import { withCatchAsInternalError } from "../utils/responses";
+import {
+  internalErrorOrIoLoginRedirect,
+  getIsUserElegibleForIoLoginUrlScheme,
+} from "../utils/ioLoginUriScheme";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -79,6 +86,13 @@ export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
 export const AGE_LIMIT_ERROR_CODE = 1001;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
+
+export const isUserElegibleForIoLoginUrlScheme =
+  getIsUserElegibleForIoLoginUrlScheme(
+    IOLOGIN_USERS_LIST,
+    IOLOGIN_CANARY_USERS_SHA_REGEX,
+    FF_IOLOGIN
+  );
 
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
@@ -115,7 +129,6 @@ export default class AuthenticationController {
     //
     // decode the SPID assertion into a SPID user
     //
-
     const errorOrSpidUser = validateSpidUser(userPayload);
 
     if (E.isLeft(errorOrSpidUser)) {
@@ -151,7 +164,15 @@ export default class AuthenticationController {
           type: "INFO",
         },
       });
-      return ResponsePermanentRedirect(redirectionUrl);
+
+      return pipe(
+        isUserElegibleForIoLoginUrlScheme(spidUser.fiscalNumber),
+        B.fold(
+          () => E.right(ResponsePermanentRedirect(redirectionUrl)),
+          () => internalErrorOrIoLoginRedirect(redirectionUrl)
+        ),
+        E.toUnion
+      );
     }
 
     //
@@ -449,7 +470,14 @@ export default class AuthenticationController {
       user.session_token
     );
 
-    return ResponsePermanentRedirect(urlWithToken);
+    return pipe(
+      isUserElegibleForIoLoginUrlScheme(user.fiscal_code),
+      B.fold(
+        () => E.right(ResponsePermanentRedirect(urlWithToken)),
+        () => internalErrorOrIoLoginRedirect(urlWithToken)
+      ),
+      E.toUnion
+    );
   }
 
   /**

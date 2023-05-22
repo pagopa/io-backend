@@ -2,6 +2,7 @@
  * Common response message type.
  */
 
+import { PatternString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 
 export const SuccessResponse = t.interface({
@@ -16,6 +17,8 @@ export type STRINGS_RECORD = t.TypeOf<typeof STRINGS_RECORD>;
 export function assertUnreachable(_: never): never {
   throw new Error("Unexpected type error");
 }
+
+export const IoLoginHostUrl = PatternString("^(https?|iologin):");
 
 /**
  * Create a decoder that parses a list of comma-separated elements into an array of typed items, using the provided decoder

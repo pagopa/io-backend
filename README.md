@@ -142,14 +142,14 @@ Those are all Environment variables needed by the application:
 | API_KEY                                | The key used to authenticate to the io-functions-app API                          | string |
 | API_URL                                | The io-functions-app URL                                                          | string |
 | API_BASE_PATH                          | The root path for the backend api endpoints                                       | string |
+| BACKEND_HOST                           | The absolute URL of the app service containing the FQDN                           | string |
 | BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
 | BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
 | BONUS_API_BASE_PATH                    | The root path for the backend bonus api endpoints                                 | string |
 | CGN_API_KEY                            | The key used to authenticate to the io-functions-cgn API                          | string |
 | CGN_API_URL                            | The io-functions-cgn  URL                                                         | string |
 | CGN_API_BASE_PATH                      | The root path for the backend cgn api endpoints                                   | string |
-| CLIENT_REDIRECTION_URL                 | The path where the user will be redirected after a successful SPID login          | string |
-| CLIENT_ERROR_REDIRECTION_URL           | The path where the user will be redirected when en error occurs during SPID login | string |
+| CLIENT_REDIRECTION_URL                 | (Optional)The path where the user will be redirected after a successful SPID login| string |
 | PORT                                   | The HTTP port the Express server is listening to                                  | int    |
 | REDIS_URL                              | The URL of a Redis instance                                                       | string |
 | TOKEN_DURATION_IN_SECONDS              | The number of seconds a session token is considered valid                         | int    |

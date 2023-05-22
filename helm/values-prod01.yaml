@@ -52,6 +52,7 @@ microservice-chart:
     API_URL: 'https://io-p-app-fn-1.azurewebsites.net/api/v1'
     APP_MESSAGES_API_URL: 'https://io-p-app-messages-fn-1.azurewebsites.net/api/v1'
     AUTHENTICATION_BASE_PATH: ""
+    BACKEND_HOST: "https://api-app.io.pagopa.it"
     BONUS_API_BASE_PATH: '/api/v1'
     BONUS_API_URL: 'http://io-p-func-bonus.azurewebsites.net/api/v1'
     BPD_BASE_PATH: '/bpd/api/v1'
@@ -73,6 +74,7 @@ microservice-chart:
     FF_CGN_ENABLED: '1'
     FF_EUCOVIDCERT_ENABLED: '1'
     FF_IO_SIGN_ENABLED: '1'
+    FF_IOLOGIN: 'NONE'
     FF_MIT_VOUCHER_ENABLED: '1'
     FF_PN_ACTIVATION_ENABLED: '1'
     FF_ROUTING_PUSH_NOTIF: 'ALL'
@@ -81,6 +83,7 @@ microservice-chart:
     FIMS_BASE_PATH: '/fims/api/v1'
     IDP_METADATA_REFRESH_INTERVAL_SECONDS: '864000'
     IDP_METADATA_URL: 'https://api.is.eng.pagopa.it/idp-keys/spid/latest'
+    IOLOGIN_CANARY_USERS_REGEX: '^([(0-9)|(a-f)|(A-F)]{63}0)$'
     IO_SIGN_API_BASE_PATH: '/api/v1/sign'
     IO_SIGN_API_URL: 'https://io-p-sign-user-func.azurewebsites.net'
     IO_SIGN_SERVICE_ID: '01GQQZ9HF5GAPRVKJM1VDAVFHM'
@@ -135,6 +138,7 @@ microservice-chart:
     API_KEY: 'funcapp-KEY-APPBACKEND'
     BONUS_API_KEY: 'funcbonus-KEY-APPBACKEND'
     CGN_API_KEY: 'funccgn-KEY-APPBACKEND'
+    IOLOGIN_TEST_USERS: 'appbackend-IOLOGIN-TEST-USERS'
     IO_SIGN_API_KEY: 'funciosign-KEY-APPBACKEND'
     CGN_OPERATOR_SEARCH_API_KEY: 'funccgnoperatorsearch-KEY-PROD-APPBACKEND'
     EUCOVIDCERT_API_KEY: 'funceucovidcert-KEY-APPBACKEND'

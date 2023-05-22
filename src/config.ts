@@ -16,6 +16,7 @@ import {
 import {
   errorsToReadableMessages,
   readableReport,
+  readableReportSimplified,
 } from "@pagopa/ts-commons/lib/reporters";
 import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 
@@ -45,7 +46,7 @@ import { getRequiredENVVar, readFile } from "./utils/container";
 import PagoPAClientFactory from "./services/pagoPAClientFactory";
 import ApiClientFactory from "./services/apiClientFactory";
 import { BonusAPIClient } from "./clients/bonus";
-import { STRINGS_RECORD } from "./types/commons";
+import { IoLoginHostUrl, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
 import { decodeCIDRs } from "./utils/cidrs";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
@@ -181,8 +182,21 @@ export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
   O.getOrElseW(() => undefined)
 );
 
-export const CLIENT_ERROR_REDIRECTION_URL =
-  process.env.CLIENT_ERROR_REDIRECTION_URL || "/error.html";
+export const BACKEND_HOST = pipe(
+  process.env.BACKEND_HOST,
+  IoLoginHostUrl.decode,
+  E.getOrElseW((errors) => {
+    log.error(
+      `BACKEND_HOST env variable error | ${readableReportSimplified(errors)}`
+    );
+    return process.exit(1);
+  })
+);
+
+// Redirection urls
+export const CLIENT_ERROR_REDIRECTION_URL = `${BACKEND_HOST}/error.html`;
+
+export const clientProfileRedirectionUrl = `${BACKEND_HOST}/profile.html?token={token}`;
 
 export const CLIENT_REDIRECTION_URL =
   process.env.CLIENT_REDIRECTION_URL || "/login";
@@ -294,14 +308,6 @@ export const samlConfig: SamlConfig = {
   privateCert: samlKey(),
   requestIdExpirationPeriodMs: SAML_REQUEST_EXPIRATION_PERIOD_MS,
 };
-
-// Redirection urls
-export const clientProfileRedirectionUrl =
-  process.env.CLIENT_REDIRECTION_URL || "/profile.html?token={token}";
-
-if (!clientProfileRedirectionUrl.includes("{token}")) {
-  log.error("CLIENT_REDIRECTION_URL must contains a {token} placeholder");
-}
 
 // IP(s) or CIDR(s) allowed for notification
 export const ALLOW_NOTIFY_IP_SOURCE_RANGE = pipe(
@@ -740,6 +746,28 @@ export const FF_MIT_VOUCHER_ENABLED =
 
 export const FF_USER_AGE_LIMIT_ENABLED =
   process.env.FF_USER_AGE_LIMIT_ENABLED === "1";
+
+// IOLOGIN FF variable
+export const FF_IOLOGIN = pipe(
+  process.env.FF_IOLOGIN,
+  FeatureFlag.decode,
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
+);
+
+export const IOLOGIN_USERS_LIST = pipe(
+  process.env.IOLOGIN_TEST_USERS,
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW((err) => {
+    throw new Error(`Invalid IOLOGIN_TEST_USERS value: ${readableReport(err)}`);
+  })
+);
+
+export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
+  process.env.IOLOGIN_CANARY_USERS_REGEX,
+  NonEmptyString.decode,
+  // allow ~6% of users by default
+  E.getOrElse(() => "^([(0-9)|(a-f)|(A-F)]{63}0)$" as NonEmptyString)
+);
 
 // Support Token
 export const JWT_SUPPORT_TOKEN_PRIVATE_RSA_KEY = pipe(
