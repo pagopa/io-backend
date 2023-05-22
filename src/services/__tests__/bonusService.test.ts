@@ -9,7 +9,6 @@ import { BonusActivation } from "../../../generated/io-bonus-api/BonusActivation
 import { BonusActivationStatusEnum } from "../../../generated/io-bonus-api/BonusActivationStatus";
 import { BonusCode } from "../../../generated/io-bonus-api/BonusCode";
 import { EligibilityCheck } from "../../../generated/io-bonus-api/EligibilityCheck";
-import { PaginatedBonusActivationsCollection } from "../../../generated/io-bonus-api/PaginatedBonusActivationsCollection";
 import { BonusAPIClient } from "../../clients/bonus";
 import { mockedUser } from "../../__mocks__/user_mock";
 import BonusService from "../bonusService";
@@ -53,15 +52,6 @@ const aBonusActivation: BonusActivation = {
   },
   id: aBonusId,
   status: BonusActivationStatusEnum.ACTIVE
-};
-
-const aPaginatedBonusActivationCollection: PaginatedBonusActivationsCollection = {
-  items: [
-    {
-      id: aBonusId,
-      is_applicant: true
-    }
-  ]
 };
 
 // mock for a not adult User
@@ -242,95 +232,6 @@ describe("BonusService#getLatestBonusActivationById", () => {
       mockedUser,
       aBonusId
     );
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
-    });
-  });
-});
-
-describe("BonusService#getAllBonusActivations", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should make the correct api call", async () => {
-    const service = new BonusService(api);
-
-    await service.getAllBonusActivations(mockedUser);
-
-    expect(mockGetAllBonusActivations).toHaveBeenCalledWith({
-      fiscalcode: mockedUser.fiscal_code
-    });
-  });
-
-  it("should handle a successful request", async () => {
-    mockGetAllBonusActivations.mockImplementation(() =>
-      t.success({
-        status: 200,
-        value: aPaginatedBonusActivationCollection
-      })
-    );
-
-    const service = new BonusService(api);
-
-    const res = await service.getAllBonusActivations(mockedUser);
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson"
-    });
-  });
-
-  it("should handle no found bonus", async () => {
-    mockGetAllBonusActivations.mockImplementation(() =>
-      t.success({ status: 200, value: { items: [], page_size: 0 } })
-    );
-
-    const service = new BonusService(api);
-
-    const res = await service.getAllBonusActivations(mockedUser);
-
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: { items: [], page_size: 0 }
-    });
-  });
-
-  it("should handle an internal error response", async () => {
-    const aGenericProblem = {};
-    mockGetAllBonusActivations.mockImplementation(() =>
-      t.success({ status: 500, value: aGenericProblem })
-    );
-
-    const service = new BonusService(api);
-
-    const res = await service.getAllBonusActivations(mockedUser);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
-    });
-  });
-
-  it("should return an error for unhandled response status code", async () => {
-    mockGetAllBonusActivations.mockImplementation(() =>
-      t.success({ status: 123 })
-    );
-    const service = new BonusService(api);
-
-    const res = await service.getAllBonusActivations(mockedUser);
-
-    expect(res).toMatchObject({
-      kind: "IResponseErrorInternal"
-    });
-  });
-
-  it("should return an error if the api call thows", async () => {
-    mockGetAllBonusActivations.mockImplementation(() => {
-      throw new Error();
-    });
-    const service = new BonusService(api);
-
-    const res = await service.getAllBonusActivations(mockedUser);
 
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal"
