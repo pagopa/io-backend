@@ -73,10 +73,8 @@ const retrievePrecondition = (
 ) =>
   pipe(
     () =>
-      PnAPIClient(
-        pnUrl,
-        withAccept_iojson(origFetch)
-      ).getReceivedNotificationPrecondition({
+      // we use the origFetch because this api is generic and needs only the standard accept header application/json
+      PnAPIClient(pnUrl, origFetch).getReceivedNotificationPrecondition({
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode,
