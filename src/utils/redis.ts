@@ -39,6 +39,9 @@ export const createClusterRedisClient =
       defaults: {
         legacyMode: false,
         password,
+        // 9 minutes PING interval. this solves the `socket closed unexpectedly` event for Azure Cache for Redis
+        // (https://github.com/redis/node-redis/issues/1598)
+        pingInterval: 1000 * 60 * 9,
         socket: {
           // TODO: We can add a whitelist with all the IP addresses of the redis clsuter
           checkServerIdentity: (_hostname, _cert) => undefined,
