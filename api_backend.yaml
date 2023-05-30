@@ -406,28 +406,20 @@ paths:
       parameters:
         - name: x-pagopa-lollipop-original-method
           in: header
-          description: The method of the endpoint called by IO app
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopMethod"
         - name: x-pagopa-lollipop-original-url
           in: header
-          description: The url of the endpoint called by IO app
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopOriginalURL"
         - name: signature-input
           in: header
-          description: The signature input, needed to verify the `signature` header
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopSignatureInput"
         - name: signature
           in: header
-          description: The signature of the HTTP request, signed by the client with its private key.
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopSignature"
         - name: id
           in: path
           type: string
@@ -489,6 +481,22 @@ paths:
       produces:
         - application/octet-stream
       parameters:
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          type: string
+          required: true
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          type: string
+          required: true
+        - name: signature-input
+          in: header
+          type: string
+          required: true
+        - name: signature
+          in: header
+          type: string
+          required: true
         - name: id
           in: path
           type: string
@@ -500,30 +508,6 @@ paths:
           type: string
           minLength: 1
           required: true
-        - name: x-pagopa-lollipop-original-method
-          in: header
-          description: The method of the endpoint called by IO app
-          required: true
-          schema:
-            $ref: "#/definitions/LollipopMethod"
-        - name: x-pagopa-lollipop-original-url
-          in: header
-          description: The url of the endpoint called by IO app
-          required: true
-          schema:
-            $ref: "#/definitions/LollipopOriginalURL"
-        - name: signature-input
-          in: header
-          description: The signature input, needed to verify the `signature` header
-          required: true
-          schema:
-            $ref: "#/definitions/LollipopSignatureInput"
-        - name: signature
-          in: header
-          description: The signature of the HTTP request, signed by the client with its private key.
-          required: true
-          schema:
-            $ref: "#definitions/LollipopSignature"
       responses:
         "200":
           description: Success
@@ -562,28 +546,20 @@ paths:
       parameters:
         - name: x-pagopa-lollipop-original-method
           in: header
-          description: The method of the endpoint called by IO app
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopMethod"
         - name: x-pagopa-lollipop-original-url
           in: header
-          description: The url of the endpoint called by IO app
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopOriginalURL"
         - name: signature-input
           in: header
-          description: The signature input, needed to verify the `signature` header
+          type: string
           required: true
-          schema:
-            $ref: "#/definitions/LollipopSignatureInput"
         - name: signature
           in: header
-          description: The signature of the HTTP request, signed by the client with its private key.
+          type: string
           required: true
-          schema:
-            $ref: "#definitions/LollipopSignature"
         - name: id
           in: path
           type: string
