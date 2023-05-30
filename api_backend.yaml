@@ -265,7 +265,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
   "/messages/{id}/message-status":
-    x-swagger-router-controller: MessagesController          
+    x-swagger-router-controller: MessagesController
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -404,6 +404,30 @@ paths:
       description: |-
         Returns the Third Party message with the provided message ID.
       parameters:
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          description: The method of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopMethod"
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          description: The url of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopOriginalURL"
+        - name: signature-input
+          in: header
+          description: The signature input, needed to verify the `signature` header
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopSignatureInput"
+        - name: signature
+          in: header
+          description: The signature of the HTTP request, signed by the client with its private key.
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopSignature"
         - name: id
           in: path
           type: string
@@ -422,9 +446,9 @@ paths:
                 subject: "my subject ............",
                 third_party_data: [{id: "aThirdPartyMessageId"}]
               },
-              third_party_message: { 
-                attachments: [], 
-                custom_property: "a custom property" 
+              third_party_message: {
+                attachments: [],
+                custom_property: "a custom property"
               },
               created_at: "2018-06-06T12:22:24.523Z",
               fiscal_code: "LSSLCU79B24L219P",
@@ -476,6 +500,30 @@ paths:
           type: string
           minLength: 1
           required: true
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          description: The method of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopMethod"
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          description: The url of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopOriginalURL"
+        - name: signature-input
+          in: header
+          description: The signature input, needed to verify the `signature` header
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopSignatureInput"
+        - name: signature
+          in: header
+          description: The signature of the HTTP request, signed by the client with its private key.
+          required: true
+          schema:
+            $ref: "#definitions/LollipopSignature"
       responses:
         "200":
           description: Success
@@ -512,6 +560,30 @@ paths:
       description: |-
         Returns the Third Party message precondition associated to the provided message ID to receive the third party content.
       parameters:
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          description: The method of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopMethod"
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          description: The url of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopOriginalURL"
+        - name: signature-input
+          in: header
+          description: The signature input, needed to verify the `signature` header
+          required: true
+          schema:
+            $ref: "#/definitions/LollipopSignatureInput"
+        - name: signature
+          in: header
+          description: The signature of the HTTP request, signed by the client with its private key.
+          required: true
+          schema:
+            $ref: "#definitions/LollipopSignature"
         - name: id
           in: path
           type: string
@@ -907,7 +979,7 @@ paths:
           schema:
             $ref: "#/definitions/PaymentProblemJson"
         "504":
-          description: gateway timeout.    
+          description: gateway timeout.
   "/payment-activations":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -950,7 +1022,7 @@ paths:
           schema:
             $ref: "#/definitions/PaymentProblemJson"
         "504":
-          description: gateway timeout.   
+          description: gateway timeout.
   "/payment-activations/{codiceContestoPagamento}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -991,7 +1063,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
         "504":
-          description: gateway timeout.   
+          description: gateway timeout.
   "/user-data-processing":
     x-swagger-router-controller: UserDataProcessingController
     post:
@@ -1029,7 +1101,7 @@ paths:
     x-swagger-router-controller: UserDataProcessingController
     get:
       operationId: getUserDataProcessing
-      summary: Get User's data processing 
+      summary: Get User's data processing
       description: Get the user's request to delete or download his stored data by providing a kind of choice.
       parameters:
         - $ref: "#/parameters/UserDataProcessingChoiceParam"
@@ -1301,6 +1373,23 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
     $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+  LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+  LollipopOriginalURL:
+      type: string
+      pattern: "^https:\/\/"
+  LollipopSignatureInput:
+      type: string
+      pattern: "^(((sig[0-9]+)=[^,]*?)(, ?)?)+$"
+  LollipopSignature:
+      type: string
+      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"
   # AssertionRef possible inputs
   AssertionRefSha256:
     type: string
