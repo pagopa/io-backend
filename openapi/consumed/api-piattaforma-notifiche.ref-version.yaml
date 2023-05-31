@@ -1,0 +1,595 @@
+openapi: 3.0.3
+info:
+  title: "Piattaforma Notifiche: API B2B per backend AppIO"
+  description: |-
+    ## Abstract
+      API utilizzate dal backend di AppIO per recuperare:
+      - i dettagli della notifica
+      - gli url dei documenti allegati alla notifica
+      - gli url degli atti opponibili a terzi
+  termsOfService: https://da-definire/
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: https://da-definire/
+  version: 1.1.0
+  x-api-id: api-external-b2b-appio
+  x-summary: "Piattaforma Notifiche: API B2B per backend AppIO"
+servers:
+- url: https://api-io.pn.pagopa.it
+  description: Ambiente di produzione
+- url: https://api-io.uat.pn.pagopa.it
+  description: Ambiente di test
+- url: https://api-io.dev.pn.pagopa.it
+  description: Ambiente di sviluppo
+security:
+- ApiKeyAuth: []
+tags:
+- name: AppIO-PN-Notification
+  description: Notification details
+- name: AppIO-PN-Documents
+  description: Notification Documents
+- name: AppIO-PN-LegalFacts
+  description: Notification Legal Facts
+paths:
+  delivery/notifications/received/{iun}:
+    get:
+      tags:
+      - AppIO-PN-Notification
+      summary: Accesso notifiche ricevute
+      description: Utilizzato da Persone Fisiche e Persone Giuridiche per accedere
+        ai dettagli delle  notifiche ricevute.
+      operationId: getReceivedNotification
+      parameters:
+      - name: iun
+        in: path
+        description: Identificativo Univoco Notifica
+        required: true
+        schema:
+          type: string
+      - name: x-pagopa-cx-taxid
+        in: header
+        description: "Customer taxId, used in B2B AppIO."
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+          type: string
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopMethodHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopOriginalURLHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureInputHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureHeader"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/io+json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyMessage'
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  delivery/notifications/received/{iun}/attachments/documents/{docIdx}:
+    get:
+      tags:
+      - AppIO-PN-Documents
+      summary: Download documento notificato
+      operationId: getSentNotificationDocument
+      parameters:
+      - name: iun
+        in: path
+        description: Identificativo Univoco Notifica
+        required: true
+        schema:
+          type: string
+      - name: docIdx
+        in: path
+        description: indice del documento nella lista partendo da 0.
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: x-pagopa-cx-taxid
+        in: header
+        description: "Customer taxId, used in B2B AppIO."
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+          type: string
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopMethodHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopOriginalURLHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureInputHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureHeader"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationAttachmentDownloadMetadataResponse'
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  delivery-push/{iun}/legal-facts/{legalFactType}/{legalFactId}:
+    get:
+      tags:
+      - AppIO-PN-LegalFacts
+      summary: Download atto opponibile a terzi
+      description: Permette di scaricare un atto opponibile a terzi
+      operationId: getLegalFact
+      parameters:
+      - name: iun
+        in: path
+        description: Identificativo Univoco Notifica
+        required: true
+        schema:
+          type: string
+      - name: legalFactType
+        in: path
+        description: Categoria dell'atto opponibile a terzi
+        required: true
+        style: simple
+        explode: false
+        schema:
+          title: Tipi di atti opponibili a terzi
+          type: string
+          description: |-
+            Tipi di atti opponibili a terzi che Piattaforam Notiiche mette a disposizione dei suoi utenti.
+              - SENDER_ACK: atto di "presa in carico" di una notifica
+              - DIGITAL_DELIVERY: atto di consegna digitale
+              - ANALOG_DELIVERY: atto di consegna cartacea
+              - RECIPIENT_ACCESS: atto di consegna per avvenuto accesso alla piattaforma
+              - PEC_RECEIPT: ricevuta PEC
+      - name: legalFactId
+        in: path
+        description: Identificativo dell'atto opponibile a terzi
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: x-pagopa-cx-taxid
+        in: header
+        description: "Customer taxId, used in B2B AppIO."
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+          type: string
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopMethodHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopOriginalURLHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureInputHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureHeader"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataResponse'
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  ext-registry-private/io/v1/notification-disclaimer/{iun}:
+    get:
+      tags:
+      - AppIO-PN-Notification
+      summary: Returns the AppIo user activation status
+      description: Returns the AppIo user activation status
+      parameters:
+      - name: iun
+        in: path
+        description: Identificativo Univoco Notifica
+        required: true
+        schema:
+          type: string
+      - name: x-pagopa-cx-taxid
+        in: header
+        description: "Customer taxId, used in B2B AppIO."
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+          type: string
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopMethodHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopOriginalURLHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureInputHeader"
+      - $ref: "../lollipop_definitions.yaml#/components/parameters/LollipopSignatureHeader"
+      operationId: getReceivedNotificationPrecondition
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreconditionContent"
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+components:
+  schemas:
+    PreconditionContent:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title to be rendered in App
+          minlength: 1
+        markdown:
+          type: string
+          description: The markdown content to be rendered in App
+          minlength: 1
+      required:
+        - title
+        - markdown
+    LegalFactDownloadMetadataResponse:
+      title: Url e metadati per il download di un allegato di una notifica
+      required:
+      - contentLength
+      - filename
+      type: object
+      properties:
+        filename:
+          type: string
+        contentLength:
+          type: number
+          description: "dmensione, in byte, del contenuto."
+          example: 54092
+        url:
+          type: string
+          description: URL preautorizzato a cui effettuare una richiesta GET per ottenere
+            il  contenuto del documento. Presente solo se il documento è pronto per
+            il download.
+        retryAfter:
+          type: number
+          description: Stima del numero di secondi da aspettare prima che il contenuto
+            del  documento sia scaricabile.
+      description: |-
+        I due campi più importanti sono __url__ e __retryAfter__. <br/>
+          - __url__ è presente se il file è pronto per essere scaricato ed indica l'url a cui fare GET.
+          - __retryAfter__ indica che il file non è stato archiviato e bisognerà aspettare un numero di
+            secondi non inferiore a quanto indicato dal campo _retryAfter_. <br/>
+    ThirdPartyMessage:
+      type: object
+      properties:
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyAttachment'
+        details:
+          $ref: '#/components/schemas/IOReceivedNotification'
+    Problem:
+      type: object
+      required:
+      - errors
+      - status
+      properties:
+        type:
+          type: string
+          description: URI reference of type definition
+        status:
+          maximum: 600
+          exclusiveMaximum: true
+          minimum: 100
+          type: integer
+          description: The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          format: int32
+          example: 503
+        title:
+          maxLength: 64
+          pattern: "^[ -~]{0,64}$"
+          type: string
+          description: "A short, summary of the problem type. Written in english and\
+            \ readable"
+          example: Service Unavailable
+        detail:
+          maxLength: 4096
+          pattern: "^.{0,4096}$"
+          type: string
+          description: A human readable explanation of the problem.
+          example: Request took too long to complete.
+        traceId:
+          type: string
+          description: Internal support identifier associated to error
+          example: 123e4567-e89b-12d3-a456-426614174000
+        timestamp:
+          type: string
+          description: date and time referred to UTC
+          format: date-time
+          example: 2022-07-27T12:22:33.444Z
+        errors:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ProblemError'
+    NotificationAttachmentDownloadMetadataResponse:
+      title: Url e metadati per il download di un allegato di una notifica
+      required:
+      - contentLength
+      - contentType
+      - filename
+      - sha256
+      type: object
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+          example: application/pdf
+        contentLength:
+          type: integer
+          description: "dmensione, in byte, del contenuto."
+          format: int32
+          example: 54092
+        sha256:
+          type: string
+          description: SHA256 del contenuto del file.
+        url:
+          type: string
+          description: URL preautorizzato a cui effettuare una richiesta GET per ottenere
+            il  contenuto del documento. Presente solo se il documento è pronto per
+            il download.
+        retryAfter:
+          type: integer
+          description: Stima del numero di secondi da aspettare prima che il contenuto
+            del  documento sia disponibile per il download.
+          format: int32
+      description: |-
+        I due campi più importanti sono __url__ e __retryAfter__. <br/>
+          - __url__ è presente se il file è pronto per essere scaricato ed indica l'url a cui fare GET.
+          - __retryAfter__ indica che il file è stato archiviato e bisognerà aspettare un numero di
+            secondi non inferiore a quanto indicato dal campo _retryAfter_. <br/>
+    LegalFactCategory:
+      title: Tipi di atti opponibili a terzi
+      type: string
+      description: |-
+        Tipi di atti opponibili a terzi che Piattaforam Notiiche mette a disposizione dei suoi utenti.
+          - SENDER_ACK: atto di "presa in carico" di una notifica
+          - DIGITAL_DELIVERY: atto di consegna digitale
+          - ANALOG_DELIVERY: atto di consegna cartacea
+          - RECIPIENT_ACCESS: atto di consegna per avvenuto accesso alla piattaforma
+          - PEC_RECEIPT: ricevuta PEC
+    ThirdPartyAttachment:
+      required:
+      - id
+      - url
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+        content_type:
+          minLength: 1
+          type: string
+        name:
+          minLength: 1
+          type: string
+        url:
+          minLength: 1
+          type: string
+    IOReceivedNotification:
+      required:
+      - iun
+      - notificationStatusHistory
+      - recipients
+      - subject
+      type: object
+      properties:
+        subject:
+          type: string
+        iun:
+          type: string
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationRecipient'
+        notificationStatusHistory:
+          $ref: '#/components/schemas/NotificationStatusHistory'
+        abstract:
+          type: string
+        senderDenomination:
+          type: string
+      description: Le informazioni riguardanti una richiesta di notifica accettata
+        e il processo di  inoltro della notifica verso i destinatari (Persone Fisiche
+        o Giuridiche).
+    NotificationRecipient:
+      required:
+      - denomination
+      - recipientType
+      - taxId
+      type: object
+      properties:
+        recipientType:
+          type: string
+          description: |
+            Tipologia di destinatario: Persona Fisica (PF) o Persona Giuridica (PG). * `PF` * `PG`
+        taxId:
+          $ref: '#/components/schemas/TaxId'
+        denomination:
+          $ref: '#/components/schemas/Denomination'
+        payment:
+          $ref: '#/components/schemas/NotificationPaymentInfo'
+      description: Informazioni sui destinatari
+    NotificationPaymentInfo:
+      title: Informazioni per effettuare il pagamento
+      required:
+      - creditorTaxId
+      - noticeCode
+      type: object
+      properties:
+        noticeCode:
+          $ref: '#/components/schemas/noticeCode'
+        creditorTaxId:
+          $ref: '#/components/schemas/paTaxId'
+      description: |-
+        Informazioni utili per effettuare il pagamento di una notifica, sono associate al destinatario perché le spese di notifica possono differire a seconda del canale di notifica utilizzato. <br/>
+          - _noticeCode_: "codice avviso pagoPA" di pagamento del sistema pagoPA, usato per pagamento online.<br/>
+          - _creditorTaxId_: codice fiscale dell'ente a cui fa riferimento il "codice avviso pagoPA". <br/>
+    noticeCode:
+      maxLength: 18
+      minLength: 18
+      pattern: ^\d+$
+      type: string
+      description: Payment notice number  numero avviso
+      example: "302000100000019421"
+    paTaxId:
+      maxLength: 11
+      minLength: 11
+      pattern: ^\d+$
+      type: string
+      description: Payment PA fiscal code
+      example: "77777777777"
+    NotificationStatusHistory:
+      type: array
+      description: elenco degli avanzamenti effettuati dal processo di notifica
+      items:
+        $ref: '#/components/schemas/NotificationStatusHistoryElement'
+    NotificationStatusHistoryElement:
+      required:
+      - activeFrom
+      - relatedTimelineElements
+      - status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/NotificationStatus'
+        activeFrom:
+          type: string
+          description: data e ora di raggiungimento dello stato di avanzamento
+          format: date-time
+        relatedTimelineElements:
+          type: array
+          description: Eventi avvenuti nello stato
+          items:
+            $ref: '#/components/schemas/TimelineElementId'
+      description: elenco degli avanzamenti effettuati dal processo di notifica
+    NotificationStatus:
+      type: string
+      description: "stato di avanzamento del processo di notifica:\n  * `IN_VALIDATION`\
+        \ - notifica depositata in attesa di validazione\n  * `ACCEPTED` - notifica\
+        \ accettata \n  * `REFUSED` - notifica rifiutata\n  * `DELIVERING` - notifica\
+        \ in spedita\n  * `DELIVERED` - notifica ricevuta da tutti i destinatari\n\
+        \  * `VIEWED` - notifica presa visione per almeno un destinatario\n  * `EFFECTIVE_DATE`\
+        \ - notifica perfezionata per un destinatario\n  * `PAID` - notifica pagata\n\
+        \  * `UNREACHABLE` - notifica non recapitabile\n  * `CANCELLED` - notifica\
+        \ annullata dal mittente       \n"
+    TimelineElementId:
+      type: string
+    ProblemError:
+      type: object
+      required:
+      - code
+      properties:
+        code:
+          type: string
+          description: "Internal code of the error, in human-readable format"
+          example: PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY
+            | etc...
+        element:
+          type: string
+          description: Parameter or request body field name for validation error
+          example: "body.order.item[2].quantity"
+        detail:
+          maxLength: 1024
+          type: string
+          description: A human readable explanation specific to this occurrence of
+            the problem.
+          example: Parameter not valid
+    TaxId:
+      maxLength: 16
+      minLength: 11
+      pattern: "^([A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})|([0-9]{11})$"
+      type: string
+      description: C.F. persona fisica o persona giuridica (Partita iva)
+    Denomination:
+      maxLength: 80
+      minLength: 1
+      pattern: "^([\\x20-\\xFF]{1,80})$"
+      type: string
+      description: Denominazione ente o persona fisica / ragione sociale
+  parameters:
+    cxTaxIdAuthFleet:
+      name: x-pagopa-cx-taxid
+      in: header
+      description: "Customer taxId, used in B2B AppIO."
+      required: true
+      schema:
+        maxLength: 16
+        minLength: 16
+        pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
+        type: string
+    pathLegalFactType:
+      name: legalFactType
+      in: path
+      description: Categoria dell'atto opponibile a terzi
+      required: true
+      style: simple
+      explode: false
+      schema:
+        $ref: '#/components/schemas/LegalFactCategory'
+    pathLegalFactId:
+      name: legalFactId
+      in: path
+      description: Identificativo dell'atto opponibile a terzi
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    pathIun:
+      name: iun
+      in: path
+      description: Identificativo Univoco Notifica
+      required: true
+      schema:
+        type: string
+    pathDocumentIdx:
+      name: docIdx
+      in: path
+      description: indice del documento nella lista partendo da 0.
+      required: true
+      schema:
+        type: integer
+        format: int32
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: x-api-key
+      in: header
