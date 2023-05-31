@@ -1291,6 +1291,12 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
     );
     const userHasActiveSessionsResult =
       await sessionStorage.userHasActiveSessions(aValidUser.fiscal_code);
+
+    expect(mockGet).toHaveBeenNthCalledWith(
+      3,
+      `SESSION-${aValidUser.session_token}`
+    );
+
     expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
     if (E.isRight(userHasActiveSessionsResult)) {
       expect(userHasActiveSessionsResult.right).toEqual(true);

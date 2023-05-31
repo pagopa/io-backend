@@ -512,7 +512,9 @@ export default class RedisSessionStorage
       TE.map((keys) =>
         this.parseUserSessionList(
           keys.filter<string>((key): key is string => key !== null)
-        ).sessions.map((session) => session.sessionToken)
+        ).sessions.map(
+          (session) => `${sessionKeyPrefix}${session.sessionToken}`
+        )
       )
     )();
 
