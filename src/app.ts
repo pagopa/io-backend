@@ -83,7 +83,10 @@ import {
   IO_SIGN_SERVICE_ID,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
 } from "./config";
-import AuthenticationController from "./controllers/authenticationController";
+import AuthenticationController, {
+  AdditionalLoginProps,
+  AdditionalLoginPropsT,
+} from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
@@ -700,7 +703,7 @@ export async function newApp({
       return pipe(
         TE.tryCatch(
           () =>
-            withSpid({
+            withSpid<AdditionalLoginPropsT>({
               acs: _.acsController.acs.bind(_.acsController),
               app: _.app,
               appConfig: {
@@ -713,6 +716,13 @@ export async function newApp({
                       ...event.data,
                     },
                   });
+                },
+                extraLoginRequestParamConfig: {
+                  codec: AdditionalLoginProps,
+                  requestMapper: (_req) =>
+                    E.of({
+                      loginType: _req.header("x-pagopa-login-type"),
+                    }),
                 },
               },
               doneCb: spidLogCallback,

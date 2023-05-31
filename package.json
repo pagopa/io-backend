@@ -87,7 +87,7 @@
     "@pagopa/io-functions-cgn-sdk": "x",
     "@pagopa/io-functions-commons": "^28.1.0",
     "@pagopa/io-functions-eucovidcerts-sdk": "x",
-    "@pagopa/io-spid-commons": "^13.0.0",
+    "@pagopa/io-spid-commons": "file:../io-spid-commons",
     "@pagopa/ts-commons": "^12.0.0",
     "@pagopa/winston-ts": "^2.2.0",
     "applicationinsights": "^1.8.10",

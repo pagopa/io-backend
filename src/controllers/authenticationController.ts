@@ -9,6 +9,7 @@ import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as AP from "fp-ts/lib/Apply";
+import * as t from "io-ts";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -94,6 +95,9 @@ export const isUserElegibleForIoLoginUrlScheme =
     FF_IOLOGIN
   );
 
+export type AdditionalLoginPropsT = t.TypeOf<typeof AdditionalLoginProps>;
+export const AdditionalLoginProps = t.partial({ loginType: t.string });
+
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
   constructor(
@@ -119,7 +123,8 @@ export default class AuthenticationController {
    */
   // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
   public async acs(
-    userPayload: unknown
+    userPayload: unknown,
+    additionalProps?: AdditionalLoginPropsT
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -130,6 +135,9 @@ export default class AuthenticationController {
     // decode the SPID assertion into a SPID user
     //
     const errorOrSpidUser = validateSpidUser(userPayload);
+
+    // eslint-disable-next-line no-console
+    console.log("additionalProps", additionalProps);
 
     if (E.isLeft(errorOrSpidUser)) {
       log.error(
@@ -491,7 +499,7 @@ export default class AuthenticationController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<AccessToken>
   > {
-    const acsResponse = await this.acs(userPayload);
+    const acsResponse = await this.acs(userPayload, {});
     // When the login succeeded with a ResponsePermanentRedirect (301)
     // the token was extract from the response and returned into the body
     // of a ResponseSuccessJson (200)
