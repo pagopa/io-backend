@@ -1294,7 +1294,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
 
     expect(mockGet).toHaveBeenNthCalledWith(
       3,
-      "SESSION-" + aValidUser.session_token
+      `SESSION-${aValidUser.session_token}`
     );
 
     expect(E.isRight(userHasActiveSessionsResult)).toBeTruthy();
