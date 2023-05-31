@@ -612,6 +612,7 @@ components:
         - WAIT_FOR_QTSP
         - SIGNED
         - REJECTED
+        - CANCELLED
 
     SignatureRequestListView:
       type: object
