@@ -250,7 +250,7 @@ export default class NewMessagesService {
   public readonly getThirdPartyMessagePrecondition = async (
     fiscalCode: FiscalCode,
     messageId: NonEmptyString,
-    lollipopLocals: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -438,7 +438,7 @@ export default class NewMessagesService {
   // Private Functions
   // ------------------------------------
 
-  private readonly getThirdPartyMessageFnApp = (
+  public readonly getThirdPartyMessageFnApp = (
     fiscalCode: FiscalCode,
     messageId: string
   ): TE.TaskEither<
@@ -535,7 +535,7 @@ export default class NewMessagesService {
   // return an error otherwise
   private readonly getThirdPartyMessagePreconditionFromThirdPartyService = (
     message: MessageWithThirdPartyData,
-    lollipopLocals: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
     | IResponseErrorValidation

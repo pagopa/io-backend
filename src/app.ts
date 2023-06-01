@@ -951,7 +951,9 @@ function registerAPIRoutes(
 
   const messagesController: MessagesController = new MessagesController(
     appMessagesService,
-    tokenService
+    tokenService,
+    lollipopClient,
+    sessionStorage
   );
 
   const servicesController: ServicesController = new ServicesController(
@@ -1088,7 +1090,6 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/third-party-messages/:id/precondition`,
     bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(
       messagesController.getThirdPartyMessagePrecondition,
       messagesController
@@ -1098,7 +1099,6 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/third-party-messages/:id`,
     bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(
       messagesController.getThirdPartyMessage,
       messagesController
@@ -1108,7 +1108,6 @@ function registerAPIRoutes(
   app.get(
     `${basePath}/third-party-messages/:id/attachments/:attachment_url(*)`,
     bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(
       messagesController.getThirdPartyMessageAttachment,
       messagesController

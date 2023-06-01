@@ -11,6 +11,7 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
+  ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
@@ -18,7 +19,8 @@ import {
   IResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+import { identity, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -41,7 +43,15 @@ import {
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
 import { ResLocals } from "src/utils/express";
-import { withLollipopLocals } from "src/types/lollipop";
+import {
+  LollipopRequiredHeaders,
+  withLollipopHeadersFromRequest,
+  withLollipopLocals,
+} from "src/types/lollipop";
+import { LollipopApiClient } from "src/clients/lollipop";
+import { ISessionStorage } from "src/services/ISessionStorage";
+import { extractLollipopLocalsFromLollipopHeaders } from "src/utils/middleware/lollipop";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -72,7 +82,9 @@ export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
     private readonly messageService: NewMessagesService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly lollipopClient: ReturnType<typeof LollipopApiClient>,
+    private readonly sessionStorage: ISessionStorage
   ) {}
 
   /**
@@ -196,11 +208,8 @@ export default class MessagesController {
   /**
    * Returns the precondition for the required third party message.
    */
-  public readonly getThirdPartyMessagePrecondition = async <
-    T extends ResLocals
-  >(
-    req: express.Request,
-    locals?: T
+  public readonly getThirdPartyMessagePrecondition = async (
+    req: express.Request
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -215,17 +224,45 @@ export default class MessagesController {
         NonEmptyString.decode(req.params.id),
         (messageId) =>
           pipe(
-            locals,
-            withLollipopLocals,
-            E.map((lollipopLocals) =>
-              this.messageService.getThirdPartyMessagePrecondition(
-                user.fiscal_code,
-                messageId,
-                lollipopLocals
+            TE.of(true), // this will be a task either that will get the message and the service to check if service has lollipo enabled
+            TE.chainEitherKW((hasLollipopEnabled) =>
+              hasLollipopEnabled
+                ? pipe(
+                    t.exact(LollipopRequiredHeaders).decode(req.headers),
+                    E.map((lollipopHeaders) =>
+                      pipe(
+                        extractLollipopLocalsFromLollipopHeaders(
+                          this.lollipopClient,
+                          this.sessionStorage,
+                          user,
+                          lollipopHeaders
+                        ),
+                        TE.mapLeft((e) => ResponseErrorInternal(""))
+                      )
+                    ),
+                    E.mapLeft((e) =>
+                      ResponseErrorValidation(
+                        "Bad request",
+                        errorsToReadableMessages(e).join(" / ")
+                      )
+                    )
+                  )
+                : E.of(undefined)
+            ),
+            TE.chainW((x) => (x ? x : TE.of(x))),
+            TE.chainW((lollipopLocals) =>
+              TE.tryCatch(
+                () =>
+                  this.messageService.getThirdPartyMessagePrecondition(
+                    user.fiscal_code,
+                    messageId,
+                    lollipopLocals
+                  ),
+                (_) => ResponseErrorInternal("")
               )
             ),
-            E.toUnion
-          )
+            TE.toUnion
+          )()
       )
     );
 
