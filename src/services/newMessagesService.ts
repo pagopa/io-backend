@@ -278,7 +278,7 @@ export default class NewMessagesService {
   public readonly getThirdPartyMessage = async (
     fiscalCode: FiscalCode,
     messageId: NonEmptyString,
-    locals: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -291,7 +291,7 @@ export default class NewMessagesService {
       this.getThirdPartyMessageFnApp(fiscalCode, messageId),
       TE.chain((message) =>
         pipe(
-          this.getThirdPartyMessageFromThirdPartyService(message, locals),
+          this.getThirdPartyMessageFromThirdPartyService(message, lollipopLocals),
           TE.map((thirdPartyMessage) => ({
             ...message,
             third_party_message: thirdPartyMessage,
@@ -309,7 +309,7 @@ export default class NewMessagesService {
     fiscalCode: FiscalCode,
     messageId: NonEmptyString,
     attachmentUrl: NonEmptyString,
-    locals: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -326,7 +326,7 @@ export default class NewMessagesService {
           this.getThirdPartyAttachmentFromThirdPartyService(
             message,
             attachmentUrl,
-            locals
+            lollipopLocals
           )
         )
       ),
@@ -619,7 +619,7 @@ export default class NewMessagesService {
   // return an error otherwise
   private readonly getThirdPartyMessageFromThirdPartyService = (
     message: MessageWithThirdPartyData,
-    locals: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -646,7 +646,7 @@ export default class NewMessagesService {
           () =>
             client.getThirdPartyMessageDetails({
               id: message.content.third_party_data.id,
-              ...locals,
+              ...lollipopLocals,
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )
@@ -701,7 +701,7 @@ export default class NewMessagesService {
   private readonly getThirdPartyAttachmentFromThirdPartyService = (
     message: MessageWithThirdPartyData,
     attachmentUrl: NonEmptyString,
-    locals: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): TE.TaskEither<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -729,7 +729,7 @@ export default class NewMessagesService {
             client.getThirdPartyMessageAttachment({
               attachment_url: attachmentUrl,
               id: message.content.third_party_data.id,
-              ...locals,
+              ...lollipopLocals,
             }),
           (e) => ResponseErrorInternal(E.toError(e).message)
         )

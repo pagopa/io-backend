@@ -10,6 +10,7 @@ import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
 import { base64File } from "../../__mocks__/pn";
+import { mockLollipopApiClient, mockSessionStorage } from "../../__mocks__/lollipop";
 
 const anId: string = "string-id";
 
@@ -111,7 +112,9 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -156,7 +159,9 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -203,7 +208,9 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -231,7 +238,9 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -260,7 +269,9 @@ describe("MessagesController#getMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessage(req);
@@ -288,7 +299,9 @@ describe("MessagesController#getMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessage(req);
@@ -316,7 +329,9 @@ describe("MessagesController#getMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getMessage(req);
@@ -351,7 +366,9 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getThirdPartyMessageAttachment(req);
@@ -384,7 +401,9 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getThirdPartyMessageAttachment(req);
@@ -412,7 +431,9 @@ describe("MessagesController#getLegalMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getLegalMessage(req);
@@ -442,7 +463,9 @@ describe("MessagesController#getLegalMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getLegalMessage(req);
@@ -465,7 +488,9 @@ describe("MessagesController#getLegalMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getLegalMessage(req);
@@ -500,7 +525,9 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getLegalMessageAttachment(req);
@@ -534,7 +561,9 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getLegalMessageAttachment(req);
@@ -557,7 +586,9 @@ describe("MessagesController#getLegalMessageAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.getLegalMessageAttachment(req);
@@ -600,7 +631,9 @@ describe("MessagesController#upsertMessageStatus", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
+      {} as TokenService,
+      mockLollipopApiClient,
+      mockSessionStorage
     );
 
     const response = await controller.upsertMessageStatus(req);
@@ -640,7 +673,9 @@ describe("MessagesController#upsertMessageStatus", () => {
 
       const controller = new MessagesController(
         newMessageService,
-        {} as TokenService
+        {} as TokenService,
+        mockLollipopApiClient,
+        mockSessionStorage,
       );
 
       const response = await controller.upsertMessageStatus(req);
