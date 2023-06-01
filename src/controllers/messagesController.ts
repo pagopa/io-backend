@@ -40,6 +40,8 @@ import {
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
+import { ResLocals } from "src/utils/express";
+import { withLollipopLocals } from "src/types/lollipop";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -194,8 +196,11 @@ export default class MessagesController {
   /**
    * Returns the precondition for the required third party message.
    */
-  public readonly getThirdPartyMessagePrecondition = (
-    req: express.Request
+  public readonly getThirdPartyMessagePrecondition = async <
+    T extends ResLocals
+  >(
+    req: express.Request,
+    locals?: T
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -209,9 +214,17 @@ export default class MessagesController {
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
         (messageId) =>
-          this.messageService.getThirdPartyMessagePrecondition(
-            user.fiscal_code,
-            messageId
+          pipe(
+            locals,
+            withLollipopLocals,
+            E.map((lollipopLocals) =>
+              this.messageService.getThirdPartyMessagePrecondition(
+                user.fiscal_code,
+                messageId,
+                lollipopLocals
+              )
+            ),
+            E.toUnion
           )
       )
     );
@@ -219,8 +232,9 @@ export default class MessagesController {
   /**
    * Returns the Third Party message identified by the message id.
    */
-  public readonly getThirdPartyMessage = (
-    req: express.Request
+  public readonly getThirdPartyMessage = <T extends ResLocals>(
+    req: express.Request,
+    locals?: T
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -233,15 +247,27 @@ export default class MessagesController {
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
         (messageId) =>
-          this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
+          pipe(
+            locals,
+            withLollipopLocals,
+            E.map((lollipopLocals) =>
+              this.messageService.getThirdPartyMessage(
+                user.fiscal_code,
+                messageId,
+                lollipopLocals
+              )
+            ),
+            E.toUnion
+          )
       )
     );
 
   /**
    * Returns the Third Party message attachments identified by the Third Party message id and the attachment relative url.
    */
-  public readonly getThirdPartyMessageAttachment = (
-    req: express.Request
+  public readonly getThirdPartyMessageAttachment = <T extends ResLocals>(
+    req: express.Request,
+    locals?: T
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -253,11 +279,19 @@ export default class MessagesController {
     | IResponseSuccessOctet<Buffer>
   > =>
     withUserFromRequest(req, (user) =>
-      withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
-        this.messageService.getThirdPartyAttachment(
-          user.fiscal_code,
-          messageId,
-          attachmentUrl
+      withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
+        pipe(
+          locals,
+          withLollipopLocals,
+          E.map((lollipopLocals) =>
+            this.messageService.getThirdPartyAttachment(
+              user.fiscal_code,
+              messageId,
+              attachmentUrl,
+              lollipopLocals
+            )
+          ),
+          E.toUnion
         )
       )
     );

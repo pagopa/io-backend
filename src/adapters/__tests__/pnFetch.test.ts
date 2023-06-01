@@ -26,6 +26,7 @@ import {
   notificationDetailResponseExample,
   notificationDetailResponseExampleAsObject
 } from "../../__mocks__/pn-response";
+import { lollipopParams } from "../../__mocks__/lollipop";
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
@@ -91,7 +92,8 @@ describe("getThirdPartyMessageDetails", () => {
     });
     const result = await client.getThirdPartyMessageDetails({
       fiscal_code: aFiscalCode,
-      id: aPnNotificationId
+      id: aPnNotificationId,
+      ...lollipopParams
     });
 
     expect(E.isRight(result)).toBeTruthy();
@@ -134,7 +136,8 @@ describe("getThirdPartyMessageDetails", () => {
     });
     const result = await client.getThirdPartyMessageDetails({
       fiscal_code: aFiscalCode,
-      id: aPnNotificationId
+      id: aPnNotificationId,
+...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -168,7 +171,8 @@ describe("getThirdPartyMessageDetails", () => {
     });
     const result = await client.getThirdPartyMessageDetails({
       fiscal_code: aFiscalCode,
-      id: aPnNotificationId
+      id: aPnNotificationId,
+      ...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -214,7 +218,8 @@ describe("getThirdPartyAttachments", () => {
     const result = await client.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
-      attachment_url: aThirdPartyAttachmentForPnRelativeUrl
+      attachment_url: aThirdPartyAttachmentForPnRelativeUrl,
+      ...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
@@ -253,7 +258,8 @@ describe("getThirdPartyAttachments", () => {
     const result = await client.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
-      attachment_url: aThirdPartyAttachmentForPnRelativeUrl
+      attachment_url: aThirdPartyAttachmentForPnRelativeUrl,
+      ...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -295,7 +301,8 @@ describe("getThirdPartyAttachments", () => {
     const result = await client.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
-      attachment_url: aThirdPartyAttachmentForPnRelativeUrl
+      attachment_url: aThirdPartyAttachmentForPnRelativeUrl,
+      ...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -330,7 +337,9 @@ describe("getThirdPartyAttachments", () => {
     const result = await client.getThirdPartyMessageAttachment({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
-      attachment_url: "/not/pn/url"
+      attachment_url: "/not/pn/url",
+      ...lollipopParams
+
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -360,7 +369,8 @@ describe("getThirdPartyMessagePrecondition", () => {
     });
     const result = await client.getThirdPartyMessagePrecondition({
       fiscal_code: aFiscalCode,
-      id: aPnNotificationId
+      id: aPnNotificationId,
+      ...lollipopParams
     });
 
     console.log(result);
@@ -399,7 +409,8 @@ describe("getThirdPartyMessagePrecondition", () => {
     });
     const result = await client.getThirdPartyMessagePrecondition({
       fiscal_code: aFiscalCode,
-      id: aPnNotificationId
+      id: aPnNotificationId,
+      ...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {

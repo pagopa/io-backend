@@ -27,6 +27,7 @@ import { CreatedMessageWithContent } from "../../../generated/io-messages-api/Cr
 import { base64File } from "../../__mocks__/pn";
 import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
 import { PreconditionContent } from "../../../generated/piattaforma-notifiche/PreconditionContent";
+import { lollipopParams } from "../../__mocks__/lollipop";
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
@@ -221,7 +222,7 @@ mockGetTPMessagePrecondition.mockImplementation(async _message =>
   t.success({
     status: 200,
     headers: {},
-    value: aValidPreconditionContent 
+    value: aValidPreconditionContent
   })
 );
 
@@ -965,7 +966,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -989,7 +991,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -1013,7 +1016,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1039,7 +1043,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1071,7 +1076,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1103,7 +1109,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1137,7 +1144,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1170,7 +1178,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1202,7 +1211,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1234,7 +1244,8 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const res = await service.getThirdPartyMessage(
       mockedUser.fiscal_code,
-      aValidMessageIdWithThirdPartyData
+      aValidMessageIdWithThirdPartyData,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1379,8 +1390,8 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       kind: "IResponseErrorInternal",
       detail: "Internal server error: Third Party Service failed with code 500"
     });
-  }); 
-  
+  });
+
   it("should return Bad request if the third party service return a 400", async () => {
 
     mockGetMessage.mockImplementationOnce(async () =>
@@ -1448,7 +1459,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1477,7 +1489,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -1510,7 +1523,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1540,7 +1554,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
     expect(mockGetMessage).toHaveBeenCalledWith({
       fiscal_code: mockedUser.fiscal_code,
@@ -1565,8 +1580,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1593,7 +1608,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1626,7 +1642,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1659,7 +1676,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1694,7 +1712,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({
@@ -1728,7 +1747,8 @@ describe("MessageService#getThirdPartyAttachment", () => {
     const res = await service.getThirdPartyAttachment(
       mockedUser.fiscal_code,
       aValidMessageIdWithThirdPartyData,
-      anAttachmentUrl
+      anAttachmentUrl,
+      lollipopParams
     );
 
     expect(mockGetMessage).toHaveBeenCalledWith({

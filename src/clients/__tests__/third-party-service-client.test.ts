@@ -15,6 +15,7 @@ import {
   aPNThirdPartyNotification,
   base64File
 } from "../../__mocks__/pn";
+import { lollipopParams } from "../../__mocks__/lollipop";
 
 const aValidDetailAuthentication = {
   type: "API_KEY",
@@ -91,7 +92,8 @@ describe("third-party-service-client", () => {
     )(aFiscalCode);
 
     client.getThirdPartyMessageDetails({
-      id: aThirdPartyId
+      id: aThirdPartyId,
+      ...lollipopParams
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.testEnvironment!;
 
@@ -118,7 +120,8 @@ describe("third-party-service-client", () => {
     )(aProdFiscalCode);
 
     client.getThirdPartyMessageDetails({
-      id: aThirdPartyId
+      id: aThirdPartyId,
+      ...lollipopParams
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
@@ -145,7 +148,8 @@ describe("third-party-service-client", () => {
     )(aProdFiscalCode);
 
     const res = await client.getThirdPartyMessageDetails({
-      id: aThirdPartyId
+      id: aThirdPartyId,
+      ...lollipopParams
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
@@ -195,7 +199,8 @@ describe("third-party-service-client", () => {
 
     const res = await client.getThirdPartyMessageAttachment({
       id: aThirdPartyId,
-      attachment_url: "an/url"
+      attachment_url: "an/url",
+      ...lollipopParams
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
@@ -230,7 +235,8 @@ describe("third-party-service-client", () => {
 
     await client.getThirdPartyMessageAttachment({
       id: aThirdPartyId,
-      attachment_url: `delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`
+      attachment_url: `delivery/notifications/received/${aThirdPartyId}/attachments/documents/0`,
+      ...lollipopParams
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
