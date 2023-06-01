@@ -12,6 +12,11 @@ import { AssertionTypeEnum } from "../../generated/io-sign-api/AssertionType";
 import { LollipopJWTAuthorization } from "../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../generated/io-sign-api/LollipopPublicKey";
 import { aFiscalCode } from "./user_mock";
+import { LollipopApiClient } from "../clients/lollipop";
+import { ISessionStorage } from "../services/ISessionStorage";
+
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 
 export const anAssertionRef =
   "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha256;
@@ -43,6 +48,25 @@ export const aSignatureInput =
 export const aLollipopOriginalMethod = "POST" as LollipopMethod;
 export const aLollipopOriginalUrl =
   "https://api.pagopa.it" as LollipopOriginalURL;
+
+export const mockActivatePubKey = jest.fn();
+
+export const mockLollipopApiClient = {
+  ping: jest.fn(),
+  activatePubKey: mockActivatePubKey,
+  generateLCParams: jest.fn(),
+  reservePubKey: jest.fn()
+} as ReturnType<LollipopApiClient>;
+
+const mockGetlollipopAssertionRefForUser = jest
+  .fn()
+  .mockImplementation(async () => {
+    return E.right(O.some(anAssertionRef));
+  });
+
+export const mockSessionStorage = ({
+  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser
+} as unknown) as ISessionStorage;
 
 export const lollipopParams: LollipopLocalsType = {
   signature: aSignature,
