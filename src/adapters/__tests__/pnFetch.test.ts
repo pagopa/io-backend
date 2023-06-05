@@ -84,7 +84,8 @@ describe("getThirdPartyMessageDetails", () => {
       (nodeFetch as any) as typeof fetch,
       aPNServiceId,
       aPnUrl,
-      aPnKey
+      aPnKey,
+      lollipopParams
     );
     const client = createClient({
       baseUrl: "https://localhost",
@@ -128,7 +129,8 @@ describe("getThirdPartyMessageDetails", () => {
       (nodeFetch as any) as typeof fetch,
       aPNServiceId,
       aPnUrl,
-      aPnKey
+      aPnKey,
+      lollipopParams
     );
     const client = createClient({
       baseUrl: "https://localhost",
@@ -137,7 +139,7 @@ describe("getThirdPartyMessageDetails", () => {
     const result = await client.getThirdPartyMessageDetails({
       fiscal_code: aFiscalCode,
       id: aPnNotificationId,
-...lollipopParams
+      ...lollipopParams
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {

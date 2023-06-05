@@ -68,14 +68,13 @@ describe("getThirdPartyServiceClientFactory", () => {
 
 const mockNodeFetch = jest.fn();
 mockNodeFetch.mockImplementation(
-  async (_input: RequestInfo | URL, _init?: RequestInit) =>
-    ({
+  async (_input: RequestInfo | URL, _init?: RequestInit) => {
+    return {
       ok: true,
       status: 200,
-      json: async () => {
-        return aPnThirdPartyMessage;
-      }
-    } as Response)
+      json: async () => aPnThirdPartyMessage
+    } as Response;
+  }
 );
 
 const aThirdPartyId = "aThirdPartyId";
@@ -88,7 +87,8 @@ describe("third-party-service-client", () => {
   it("should add ApiKey header to Third Party service call with API_KEY configuration when user is a TEST user", async () => {
     const client = getThirdPartyServiceClient(
       aValidTestAndProdThirdPartyConfig,
-      mockNodeFetch
+      mockNodeFetch,
+      lollipopParams
     )(aFiscalCode);
 
     client.getThirdPartyMessageDetails({
@@ -103,7 +103,8 @@ describe("third-party-service-client", () => {
         headers: {
           fiscal_code: aFiscalCode,
           [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key
+            expectedConfig.detailsAuthentication.key,
+          ...lollipopParams
         },
         method: "get",
         redirect: "manual"
@@ -116,7 +117,8 @@ describe("third-party-service-client", () => {
 
     const client = getThirdPartyServiceClient(
       aValidTestAndProdThirdPartyConfig,
-      mockNodeFetch
+      mockNodeFetch,
+      lollipopParams
     )(aProdFiscalCode);
 
     client.getThirdPartyMessageDetails({
@@ -131,7 +133,8 @@ describe("third-party-service-client", () => {
         headers: {
           fiscal_code: aProdFiscalCode,
           [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key
+            expectedConfig.detailsAuthentication.key,
+          ...lollipopParams
         },
         method: "get",
         redirect: "manual"
@@ -144,7 +147,8 @@ describe("third-party-service-client", () => {
 
     const client = getThirdPartyServiceClient(
       { ...aValidTestAndProdThirdPartyConfig, serviceId: aPNServiceId },
-      mockNodeFetch
+      mockNodeFetch,
+      lollipopParams
     )(aProdFiscalCode);
 
     const res = await client.getThirdPartyMessageDetails({
@@ -153,12 +157,8 @@ describe("third-party-service-client", () => {
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
-    expect(res).toMatchObject(
-      E.right({
-        status: 200,
-        value: aPNThirdPartyNotification
-      })
-    );
+    console.log(await mockNodeFetch())
+    console.log(res)
 
     expect(mockNodeFetch).toHaveBeenCalledWith(
       `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}`,
@@ -168,12 +168,22 @@ describe("third-party-service-client", () => {
           "x-pagopa-cx-taxid": aProdFiscalCode,
           "x-api-key": "aKey",
           [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key
+            expectedConfig.detailsAuthentication.key,
+          ...lollipopParams
         },
         method: "get",
         redirect: "manual"
       }
     );
+
+    expect(res).toMatchObject(
+      E.right({
+        status: 200,
+        value: aPNThirdPartyNotification
+      })
+    );
+
+
   });
 
   it("should call custom decoder when getThirdPartyMessageAttachment is called", async () => {
@@ -194,7 +204,8 @@ describe("third-party-service-client", () => {
 
     const client = getThirdPartyServiceClient(
       { ...aValidTestAndProdThirdPartyConfig, serviceId: aServiceId },
-      mockNodeFetch
+      mockNodeFetch,
+      lollipopParams
     )(aProdFiscalCode);
 
     const res = await client.getThirdPartyMessageAttachment({
@@ -217,7 +228,8 @@ describe("third-party-service-client", () => {
         headers: {
           fiscal_code: aProdFiscalCode,
           [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key
+            expectedConfig.detailsAuthentication.key,
+          ...lollipopParams
         },
         method: "get",
         redirect: "manual"
@@ -230,7 +242,8 @@ describe("third-party-service-client", () => {
 
     const client = getThirdPartyServiceClient(
       { ...aValidTestAndProdThirdPartyConfig, serviceId: aPNServiceId },
-      mockNodeFetch
+      mockNodeFetch,
+      lollipopParams
     )(aProdFiscalCode);
 
     await client.getThirdPartyMessageAttachment({
@@ -247,7 +260,8 @@ describe("third-party-service-client", () => {
           "x-pagopa-cx-taxid": aProdFiscalCode,
           "x-api-key": "aKey",
           [expectedConfig.detailsAuthentication.header_key_name]:
-            expectedConfig.detailsAuthentication.key
+            expectedConfig.detailsAuthentication.key,
+          ...lollipopParams
         },
         method: "get",
         redirect: "manual"
