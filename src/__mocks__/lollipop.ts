@@ -55,7 +55,7 @@ export const mockLollipopApiClient = {
   ping: jest.fn(),
   activatePubKey: mockActivatePubKey,
   generateLCParams: jest.fn(),
-  reservePubKey: jest.fn()
+  reservePubKey: jest.fn(),
 } as ReturnType<LollipopApiClient>;
 
 const mockGetlollipopAssertionRefForUser = jest
@@ -64,9 +64,18 @@ const mockGetlollipopAssertionRefForUser = jest
     return E.right(O.some(anAssertionRef));
   });
 
-export const mockSessionStorage = ({
-  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser
-} as unknown) as ISessionStorage;
+export const mockSessionStorage = {
+  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser,
+} as unknown as ISessionStorage;
+
+export const lollipopRequiredHeaders = {
+  signature:
+    "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
+  "signature-input":
+    'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
+  "x-pagopa-lollipop-original-method": "POST",
+  "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
+};
 
 export const lollipopParams: LollipopLocalsType = {
   signature: aSignature,

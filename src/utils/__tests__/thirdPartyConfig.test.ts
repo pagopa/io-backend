@@ -14,6 +14,7 @@ const aValidTestAndProdThirdPartyConfig = {
   serviceId: "aServiceId",
   schemaKind: "PN",
   jsonSchema: "aJsonSchema",
+  isLollipopEnabled: true,
   prodEnvironment: {
     baseUrl: "aBaseUrl",
     detailsAuthentication: aValidDetailAuthentication

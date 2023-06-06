@@ -11,7 +11,6 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
-  ResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
@@ -23,9 +22,10 @@ import * as t from "io-ts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
+import * as B from "fp-ts/boolean";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
-import { withUserFromRequest } from "../types/user";
+import { User, withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
@@ -42,14 +42,12 @@ import {
 } from "../utils/responses";
 import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
-import {
-  LollipopLocalsType,
-  LollipopRequiredHeaders,
-} from "src/types/lollipop";
-import { LollipopApiClient } from "src/clients/lollipop";
-import { ISessionStorage } from "src/services/ISessionStorage";
-import { extractLollipopLocalsFromLollipopHeaders } from "src/utils/middleware/lollipop";
+import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
+import { LollipopApiClient } from "../clients/lollipop";
+import { ISessionStorage } from "../services/ISessionStorage";
+import { extractLollipopLocalsFromLollipopHeaders } from "../utils/lollipop";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { checkIfLollipopIsEnabled } from "../utils/lollipop";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -203,6 +201,63 @@ export default class MessagesController {
       )
     );
 
+  public readonly checkLollipopAndGetLocalsOrDefault = (
+    req: express.Request,
+    user: User,
+    messageId: NonEmptyString
+  ) =>
+    pipe(
+      this.messageService.getThirdPartyMessageFnApp(
+        user.fiscal_code,
+        messageId
+      ),
+      TE.bindTo("message"),
+      TE.bindW("hasLollipopEnabled", ({ message }) =>
+        pipe(
+          checkIfLollipopIsEnabled(user.fiscal_code, message.sender_service_id),
+          TE.mapLeft((e) =>
+            ResponseErrorInternal(
+              `Cannot define if Lollipop is enabled or not: ${e.name} | ${e.message}`
+            )
+          )
+        )
+      ),
+      TE.bindW("lollipopLocals", ({ hasLollipopEnabled }) =>
+        pipe(
+          hasLollipopEnabled,
+          B.matchW(
+            () => TE.of(undefined),
+            () =>
+              pipe(
+                t.exact(LollipopRequiredHeaders).decode(req.headers),
+                E.foldW(
+                  (e) =>
+                    TE.left(
+                      ResponseErrorInternal(
+                        `Bad request ${errorsToReadableMessages(e).join(" / ")}`
+                      )
+                    ),
+                  (lollipopHeaders) =>
+                    pipe(
+                      extractLollipopLocalsFromLollipopHeaders(
+                        this.lollipopClient,
+                        this.sessionStorage,
+                        user.fiscal_code,
+                        lollipopHeaders
+                      ),
+                      TE.mapLeft((_) =>
+                        ResponseErrorInternal(
+                          "Error extracting lollipop locals"
+                        )
+                      )
+                    )
+                )
+              )
+          )
+        )
+      )
+    );
+
   /**
    * Returns the precondition for the required third party message.
    */
@@ -222,41 +277,18 @@ export default class MessagesController {
         NonEmptyString.decode(req.params.id),
         (messageId) =>
           pipe(
-            TE.of(true), // this will be a task either that will get the message and the service to check if service has lollipo enabled
-            TE.chainEitherKW((hasLollipopEnabled) =>
-              hasLollipopEnabled
-                ? pipe(
-                    t.exact(LollipopRequiredHeaders).decode(req.headers),
-                    E.map((lollipopHeaders) =>
-                      pipe(
-                        extractLollipopLocalsFromLollipopHeaders(
-                          this.lollipopClient,
-                          this.sessionStorage,
-                          user,
-                          lollipopHeaders
-                        ),
-                        TE.mapLeft((_) => ResponseErrorInternal(""))
-                      )
-                    ),
-                    E.mapLeft((e) =>
-                      ResponseErrorValidation(
-                        "Bad request",
-                        errorsToReadableMessages(e).join(" / ")
-                      )
-                    )
-                  )
-                : E.of(undefined)
-            ),
-            TE.chainW((x) => (x ? x : TE.of(x))),
-            TE.chainW((lollipopLocals) =>
+            this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+            TE.chainW(({ message, lollipopLocals }) =>
               TE.tryCatch(
                 () =>
                   this.messageService.getThirdPartyMessagePrecondition(
-                    user.fiscal_code,
-                    messageId,
+                    message,
                     lollipopLocals as LollipopLocalsType
                   ),
-                (_) => ResponseErrorInternal("")
+                (_) =>
+                  ResponseErrorInternal(
+                    "Error getting preconditions from third party service"
+                  )
               )
             ),
             TE.toUnion
@@ -282,41 +314,18 @@ export default class MessagesController {
         NonEmptyString.decode(req.params.id),
         (messageId) =>
           pipe(
-            TE.of(true), // this will be a task either that will get the message and the service to check if service has lollipo enabled
-            TE.chainEitherKW((hasLollipopEnabled) =>
-              hasLollipopEnabled
-                ? pipe(
-                    t.exact(LollipopRequiredHeaders).decode(req.headers),
-                    E.map((lollipopHeaders) =>
-                      pipe(
-                        extractLollipopLocalsFromLollipopHeaders(
-                          this.lollipopClient,
-                          this.sessionStorage,
-                          user,
-                          lollipopHeaders
-                        ),
-                        TE.mapLeft((_) => ResponseErrorInternal(""))
-                      )
-                    ),
-                    E.mapLeft((e) =>
-                      ResponseErrorValidation(
-                        "Bad request",
-                        errorsToReadableMessages(e).join(" / ")
-                      )
-                    )
-                  )
-                : E.of(undefined)
-            ),
-            TE.chainW((x) => (x ? x : TE.of(x))),
-            TE.chainW((lollipopLocals) =>
+            this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+            TE.chainW(({ message, lollipopLocals }) =>
               TE.tryCatch(
                 () =>
                   this.messageService.getThirdPartyMessage(
-                    user.fiscal_code,
-                    messageId,
+                    message,
                     lollipopLocals as LollipopLocalsType
                   ),
-                (_) => ResponseErrorInternal("")
+                (_) =>
+                  ResponseErrorInternal(
+                    "Error getting message from third party service"
+                  )
               )
             ),
             TE.toUnion
@@ -342,42 +351,19 @@ export default class MessagesController {
     withUserFromRequest(req, (user) =>
       withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
         pipe(
-          TE.of(true), // this will be a task either that will get the message and the service to check if service has lollipo enabled
-          TE.chainEitherKW((hasLollipopEnabled) =>
-            hasLollipopEnabled
-              ? pipe(
-                  t.exact(LollipopRequiredHeaders).decode(req.headers),
-                  E.map((lollipopHeaders) =>
-                    pipe(
-                      extractLollipopLocalsFromLollipopHeaders(
-                        this.lollipopClient,
-                        this.sessionStorage,
-                        user,
-                        lollipopHeaders
-                      ),
-                      TE.mapLeft((_) => ResponseErrorInternal(""))
-                    )
-                  ),
-                  E.mapLeft((e) =>
-                    ResponseErrorValidation(
-                      "Bad request",
-                      errorsToReadableMessages(e).join(" / ")
-                    )
-                  )
-                )
-              : E.of(undefined)
-          ),
-          TE.chainW((x) => (x ? x : TE.of(x))),
-          TE.chainW((lollipopLocals) =>
+          this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+          TE.chainW(({ message, lollipopLocals }) =>
             TE.tryCatch(
               () =>
                 this.messageService.getThirdPartyAttachment(
-                  user.fiscal_code,
-                  messageId,
+                  message,
                   attachmentUrl,
                   lollipopLocals as LollipopLocalsType
                 ),
-              (_) => ResponseErrorInternal("")
+              (_) =>
+                ResponseErrorInternal(
+                  "Error getting attachment from third party service"
+                )
             )
           ),
           TE.toUnion

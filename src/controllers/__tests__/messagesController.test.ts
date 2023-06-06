@@ -10,7 +10,27 @@ import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
 import { base64File } from "../../__mocks__/pn";
-import { mockLollipopApiClient, mockSessionStorage } from "../../__mocks__/lollipop";
+import {
+  lollipopParams,
+  lollipopRequiredHeaders,
+  mockLollipopApiClient,
+  mockSessionStorage,
+} from "../../__mocks__/lollipop";
+import * as TE from "fp-ts/TaskEither";
+import * as lollipopUtils from "../../utils/lollipop";
+
+const dummyExtractLollipopLocalsFromLollipopHeaders = jest.spyOn(
+  lollipopUtils,
+  "extractLollipopLocalsFromLollipopHeaders"
+);
+dummyExtractLollipopLocalsFromLollipopHeaders.mockReturnValue(
+  TE.of(lollipopParams)
+);
+const dummyCheckIfLollipopIsEnabled = jest.spyOn(
+  lollipopUtils,
+  "checkIfLollipopIsEnabled"
+);
+dummyCheckIfLollipopIsEnabled.mockReturnValue(TE.of(false));
 
 const anId: string = "string-id";
 
@@ -18,24 +38,24 @@ const proxyMessagesResponse = {
   items: [
     {
       id: "01C3GDA0GB7GAFX6CCZ3FK3Z5Q",
-      sender_service_id: "5a563817fcc896087002ea46c49a"
+      sender_service_id: "5a563817fcc896087002ea46c49a",
     },
     {
       id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-      sender_service_id: "5a563817fcc896087002ea46c49a"
-    }
+      sender_service_id: "5a563817fcc896087002ea46c49a",
+    },
   ],
-  page_size: 2
+  page_size: 2,
 };
 const proxyMessageResponse = {
   content: {
     markdown:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget fringilla neque, laoreet volutpat elit. Nunc leo nisi, dignissim eget lobortis non, faucibus in augue.",
-    subject: "Lorem ipsum"
+    subject: "Lorem ipsum",
   },
   created_at: new Date(),
   id: "01C3XE80E6X8PHY0NM8S8SDS1E",
-  sender_service_id: "5a563817fcc896087002ea46c49a"
+  sender_service_id: "5a563817fcc896087002ea46c49a",
 };
 
 const proxyLegalMessageResponse = {
@@ -45,9 +65,9 @@ const proxyLegalMessageResponse = {
     legal_data: {
       sender_mail_from: "test@legal.it",
       has_attachment: false,
-      message_unique_id: "A_MSG_UNIQUE_ID"
-    }
-  }
+      message_unique_id: "A_MSG_UNIQUE_ID",
+    },
+  },
 };
 
 const proxyLegalAttachmentResponse = Buffer.from("ALegalAttachment");
@@ -56,21 +76,21 @@ const mockedDefaultParameters = {
   pageSize: undefined,
   enrichResultData: undefined,
   maximumId: undefined,
-  minimumId: undefined
+  minimumId: undefined,
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const internalErrorResponse = {
   detail: expect.any(String),
   status: 500,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 const mockFnAppGetMessage = jest.fn();
@@ -80,20 +100,22 @@ const mockGetThirdPartyMessage = jest.fn();
 const mockGetThirdPartyAttachment = jest.fn();
 const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
+const mocktGetThirdPartyMessageFnApp = jest.fn();
 
-const newMessageService = ({
+const newMessageService = {
   getMessage: mockFnAppGetMessage,
   getMessagesByUser: mockFnAppGetMessagesByUser,
   upsertMessageStatus: mockFnAppUpsertMessageStatus,
   getThirdPartyMessage: mockGetThirdPartyMessage,
   getThirdPartyAttachment: mockGetThirdPartyAttachment,
   getLegalMessage: mockGetLegalMessage,
-  getLegalMessageAttachment: mockGetLegalMessageAttachment
-} as any) as NewMessagesService;
+  getLegalMessageAttachment: mockGetLegalMessageAttachment,
+  getThirdPartyMessageFnApp: mocktGetThirdPartyMessageFnApp,
+} as any as NewMessagesService;
 
 const mockGetPecServerTokenHandler = jest.fn();
 const tokenServiceMock = {
-  getPecServerTokenHandler: jest.fn(() => mockGetPecServerTokenHandler)
+  getPecServerTokenHandler: jest.fn(() => mockGetPecServerTokenHandler),
 };
 
 describe("MessagesController#getMessagesByUser", () => {
@@ -126,7 +148,7 @@ describe("MessagesController#getMessagesByUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyMessagesResponse
+      value: proxyMessagesResponse,
     });
   });
 
@@ -147,14 +169,14 @@ describe("MessagesController#getMessagesByUser", () => {
     // query params should be strings
     req.query = {
       page_size: `${pageSize}`,
-      enrich_result_data: `${enrichResultData}`
+      enrich_result_data: `${enrichResultData}`,
     };
 
     const mockedParameters = {
       pageSize: pageSize,
       enrichResultData: enrichResultData,
       maximumId: maximumId,
-      minimumId: minimumId
+      minimumId: minimumId,
     };
 
     const controller = new MessagesController(
@@ -173,7 +195,7 @@ describe("MessagesController#getMessagesByUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyMessagesResponse
+      value: proxyMessagesResponse,
     });
   });
 
@@ -196,14 +218,14 @@ describe("MessagesController#getMessagesByUser", () => {
       page_size: `${pageSize}`,
       enrich_result_data: `${enrichResultData}`,
       maximum_id: maximumId,
-      minimum_id: minimumId
+      minimum_id: minimumId,
     };
 
     const mockedParameters = {
       pageSize: pageSize,
       enrichResultData: enrichResultData,
       maximumId: maximumId,
-      minimumId: minimumId
+      minimumId: minimumId,
     };
 
     const controller = new MessagesController(
@@ -222,7 +244,7 @@ describe("MessagesController#getMessagesByUser", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyMessagesResponse
+      value: proxyMessagesResponse,
     });
   });
 
@@ -278,12 +300,12 @@ describe("MessagesController#getMessage", () => {
 
     expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
       id: anId,
-      public_message: true
+      public_message: true,
     });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
+      value: proxyMessageResponse,
     });
   });
 
@@ -307,12 +329,12 @@ describe("MessagesController#getMessage", () => {
     const response = await controller.getMessage(req);
 
     expect(mockFnAppGetMessage).toHaveBeenCalledWith(mockedUser, {
-      id: anId
+      id: anId,
     });
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyMessageResponse
+      value: proxyMessageResponse,
     });
   });
 
@@ -354,6 +376,13 @@ describe("MessagesController#getThirdPartyAttachment", () => {
   it("should call the getThirdPartyAttachment on the messagesController with valid values", async () => {
     const req = mockReq();
 
+    // TODO: Define a const with aMessageWithThirdPartyData with values
+    // and extend these tests with lollipop enabled case mocking a TE.of(true) above
+
+    mocktGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of({})
+    );
+
     mockGetThirdPartyAttachment.mockReturnValue(
       Promise.resolve(ResponseSuccessOctet(buffer))
     );
@@ -361,9 +390,9 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     req.user = mockedUser;
     req.params = {
       id: anId,
-      attachment_url: anAttachmentUrl
+      attachment_url: anAttachmentUrl,
     };
-
+    
     const controller = new MessagesController(
       newMessageService,
       tokenServiceMock as any,
@@ -371,17 +400,20 @@ describe("MessagesController#getThirdPartyAttachment", () => {
       mockSessionStorage
     );
 
+   console.log(lollipopRequiredHeaders);
+
     const response = await controller.getThirdPartyMessageAttachment(req);
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
-      mockedUser.fiscal_code,
-      req.params.id,
-      req.params.attachment_url
+      {},
+      req.params.attachment_url,
+      undefined
     );
+
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessOctet",
-      value: buffer
+      value: buffer,
     });
   });
 
@@ -396,7 +428,7 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     req.user = "";
     req.params = {
       id: anId,
-      attachment_url: anAttachmentUrl
+      attachment_url: anAttachmentUrl,
     };
 
     const controller = new MessagesController(
@@ -446,7 +478,7 @@ describe("MessagesController#getLegalMessage", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyLegalMessageResponse
+      value: proxyLegalMessageResponse,
     });
   });
 
@@ -520,7 +552,7 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     req.user = mockedUser;
     req.params = {
       id: anId,
-      attachment_id: "anAttachemntId"
+      attachment_id: "anAttachemntId",
     };
 
     const controller = new MessagesController(
@@ -541,7 +573,7 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessOctet",
-      value: proxyLegalAttachmentResponse
+      value: proxyLegalAttachmentResponse,
     });
   });
 
@@ -556,7 +588,7 @@ describe("MessagesController#getLegalMessageAttachment", () => {
     req.user = "";
     req.params = {
       id: anId,
-      attachment_id: "anAttachemntId"
+      attachment_id: "anAttachemntId",
     };
 
     const controller = new MessagesController(
@@ -610,12 +642,12 @@ describe("MessagesController#upsertMessageStatus", () => {
 
   const proxyUpsertMessageStatusResponse = {
     is_read: true,
-    is_archived: false
+    is_archived: false,
   };
 
   const aMessageStatusChange: MessageStatusChange = {
     change_type: Reading_Change_typeEnum.reading,
-    is_read: true
+    is_read: true,
   };
 
   it("calls the upsertMessage on the messagesService with valid values", async () => {
@@ -648,7 +680,7 @@ describe("MessagesController#upsertMessageStatus", () => {
     expect(response).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: proxyUpsertMessageStatusResponse
+      value: proxyUpsertMessageStatusResponse,
     });
   });
 
@@ -675,7 +707,7 @@ describe("MessagesController#upsertMessageStatus", () => {
         newMessageService,
         {} as TokenService,
         mockLollipopApiClient,
-        mockSessionStorage,
+        mockSessionStorage
       );
 
       const response = await controller.upsertMessageStatus(req);

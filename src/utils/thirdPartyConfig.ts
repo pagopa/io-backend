@@ -46,6 +46,7 @@ export const ThirdPartyConfigBase = t.interface({
   serviceId: NonEmptyString,
   schemaKind: NonEmptyString,
   jsonSchema: NonEmptyString,
+  isLollipopEnabled: t.boolean,
 });
 
 /**

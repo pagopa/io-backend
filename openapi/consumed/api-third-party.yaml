@@ -338,8 +338,10 @@ components:
           items:
             $ref: '#/components/schemas/ThirdPartyAttachment'
         details:
+          # DO NOT CHANGE OR REMOVE
+          # PN requires this property to be free form because its response will be decoded by a ThirdParty client
           type: object
-          properties: {}
+          additionalProperties: true
     ThirdPartyAttachment:
       required:
       - id

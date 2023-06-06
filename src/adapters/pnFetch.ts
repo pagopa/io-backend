@@ -16,6 +16,8 @@ import { pathParamsFromUrl } from "../types/pathParams";
 import { ServiceId } from "../../generated/backend/ServiceId";
 import { PN_SERVICE_ID } from "../config";
 import { LollipopLocalsType } from "src/types/lollipop";
+import { Fetch } from "src/clients/third-party-service-client";
+import nodeFetch from "node-fetch";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
@@ -338,55 +340,73 @@ export const redirectAttachment =
 
 export const pnFetch =
   (
-    origFetch: typeof fetch = fetch,
+    origFetch: Fetch = nodeFetch as unknown as Fetch,
     serviceId: ServiceId,
     pnUrl: string,
     pnApiKey: string,
     maybeLollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
-  (input, init) => {
-    const lollipopLocals = O.fromNullable(maybeLollipopLocals);
-    if (O.isNone(lollipopLocals))
-      return Promise.resolve(
-        errorResponse(
-          new Error("Piattaforma Notifiche requires lollipopLocals")
-        )
-      );
-    const locals = lollipopLocals.value;
-    return serviceId === PN_SERVICE_ID
-      ? match(getPath(input))
-          .when(
-            (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
-            (url) =>
-              redirectMessages(origFetch, pnUrl, pnApiKey, url, locals, init)
-          )
-          .when(
-            (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
-            (url) =>
-              redirectPrecondition(
-                origFetch,
-                pnUrl,
-                pnApiKey,
-                url,
-                locals,
-                init
-              )
-          )
-          .when(
-            (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
-            (url) =>
-              redirectAttachment(origFetch, pnUrl, pnApiKey, url, locals, init)
-          )
-          .otherwise((url) =>
-            pipe(
-              TE.left(
-                new Error(
-                  `Can not find a Piattaforma Notifiche implementation for ${url}`
-                )
-              ),
-              TE.mapLeft(errorResponse),
-              TE.toUnion
+  (input, init) =>
+    pipe(
+      maybeLollipopLocals,
+      O.fromNullable,
+      O.fold(
+        () =>
+          Promise.resolve(
+            errorResponse(
+              new Error("Piattaforma Notifiche requires lollipopLocals")
             )
-          )()
-      : origFetch(input, init);
-  };
+          ),
+        (lollipopLocals) =>
+          serviceId === PN_SERVICE_ID
+            ? match(getPath(input))
+                .when(
+                  (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
+                  (url) =>
+                    redirectMessages(
+                      origFetch,
+                      pnUrl,
+                      pnApiKey,
+                      url,
+                      lollipopLocals,
+                      init
+                    )
+                )
+                .when(
+                  (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
+                  (url) =>
+                    redirectPrecondition(
+                      origFetch,
+                      pnUrl,
+                      pnApiKey,
+                      url,
+                      lollipopLocals,
+                      init
+                    )
+                )
+                .when(
+                  (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
+                  (url) =>
+                    redirectAttachment(
+                      origFetch,
+                      pnUrl,
+                      pnApiKey,
+                      url,
+                      lollipopLocals,
+                      init
+                    )
+                )
+                .otherwise((url) =>
+                  pipe(
+                    TE.left(
+                      new Error(
+                        `Can not find a Piattaforma Notifiche implementation for ${url}`
+                      )
+                    ),
+                    TE.mapLeft(errorResponse),
+                    TE.toUnion
+                  )
+                )()
+            : origFetch(input, init)
+      )
+    );

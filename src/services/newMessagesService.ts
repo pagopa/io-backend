@@ -248,8 +248,7 @@ export default class NewMessagesService {
    * Retrieves the precondition of a specific Third-Party message.
    */
   public readonly getThirdPartyMessagePrecondition = async (
-    fiscalCode: FiscalCode,
-    messageId: NonEmptyString,
+    message: MessageWithThirdPartyData,
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
@@ -261,12 +260,9 @@ export default class NewMessagesService {
     | IResponseSuccessJson<ThirdPartyMessagePrecondition>
   > =>
     pipe(
-      this.getThirdPartyMessageFnApp(fiscalCode, messageId),
-      TE.chain((message) =>
-        this.getThirdPartyMessagePreconditionFromThirdPartyService(
-          message,
-          lollipopLocals
-        )
+      this.getThirdPartyMessagePreconditionFromThirdPartyService(
+        message,
+        lollipopLocals
       ),
       TE.map(ResponseSuccessJson),
       TE.toUnion
@@ -276,8 +272,7 @@ export default class NewMessagesService {
    * Retrieves a specific Third-Party message.
    */
   public readonly getThirdPartyMessage = async (
-    fiscalCode: FiscalCode,
-    messageId: NonEmptyString,
+    message: MessageWithThirdPartyData,
     lollipopLocals?: LollipopLocalsType
   ): Promise<
     | IResponseErrorInternal
@@ -288,15 +283,12 @@ export default class NewMessagesService {
     | IResponseSuccessJson<ThirdPartyMessageWithContent>
   > =>
     pipe(
-      this.getThirdPartyMessageFnApp(fiscalCode, messageId),
-      TE.chain((message) =>
-        pipe(
-          this.getThirdPartyMessageFromThirdPartyService(message, lollipopLocals),
-          TE.map((thirdPartyMessage) => ({
-            ...message,
-            third_party_message: thirdPartyMessage,
-          }))
-        )
+      pipe(
+        this.getThirdPartyMessageFromThirdPartyService(message, lollipopLocals),
+        TE.map((thirdPartyMessage) => ({
+          ...message,
+          third_party_message: thirdPartyMessage,
+        }))
       ),
       TE.map(ResponseSuccessJson),
       TE.toUnion
@@ -306,8 +298,7 @@ export default class NewMessagesService {
    * Retrieves an attachment related to a message
    */
   public readonly getThirdPartyAttachment = async (
-    fiscalCode: FiscalCode,
-    messageId: NonEmptyString,
+    message: MessageWithThirdPartyData,
     attachmentUrl: NonEmptyString,
     lollipopLocals?: LollipopLocalsType
   ): Promise<
@@ -320,14 +311,11 @@ export default class NewMessagesService {
     | IResponseSuccessOctet<Buffer>
   > =>
     pipe(
-      this.getThirdPartyMessageFnApp(fiscalCode, messageId),
-      TE.chain((message) =>
-        pipe(
-          this.getThirdPartyAttachmentFromThirdPartyService(
-            message,
-            attachmentUrl,
-            lollipopLocals
-          )
+      pipe(
+        this.getThirdPartyAttachmentFromThirdPartyService(
+          message,
+          attachmentUrl,
+          lollipopLocals
         )
       ),
       TE.filterOrElseW(getIsFileTypeForTypes(ALLOWED_TYPES), () =>
@@ -434,10 +422,6 @@ export default class NewMessagesService {
       TE.toUnion
     )();
 
-  // ------------------------------------
-  // Private Functions
-  // ------------------------------------
-
   public readonly getThirdPartyMessageFnApp = (
     fiscalCode: FiscalCode,
     messageId: string
@@ -501,6 +485,10 @@ export default class NewMessagesService {
         )
       )
     );
+
+  // ------------------------------------
+  // Private Functions
+  // ------------------------------------
 
   private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
     pipe(
