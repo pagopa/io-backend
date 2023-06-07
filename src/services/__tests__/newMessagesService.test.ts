@@ -46,6 +46,7 @@ dummyCheckIfLollipopIsEnabled.mockReturnValue(TE.of(false));
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
+const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
 const aPublicMessageParam = true;
 const getMessageParamOnlyWithMessageId = {
   id: aValidMessageId,
@@ -192,6 +193,9 @@ const validApiMessageResponseWithPrescriptionMetadata = {
   },
 };
 
+const authProblemMessagesResponse = {
+  status: 401,
+};
 const emptyApiMessagesResponse = {
   status: 404,
 };
@@ -945,6 +949,111 @@ describe("MessageService#upsertMessageStatus", () => {
       });
     }
   );
+});
+
+describe("MessageService#getThirdPartyMessageFnApp", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return a third party message from the API", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(validApiThirdPartyMessageResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyMessageFnApp(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    )();
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData,
+    });
+    expect(res).toMatchObject(E.of(aValidMessageWithThirdPartyData));
+  });
+
+  it("should return an error if the message is not found", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(emptyApiMessagesResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyMessageFnApp(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    )();
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData,
+    });
+    expect(res).toMatchObject(E.left({
+      kind: "IResponseErrorNotFound",
+      detail: "Not found: Message not found",
+    }));
+  });
+
+  it("should return an error if the response is 429 too many request", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(tooManyReqApiMessagesResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyMessageFnApp(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    )();
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData,
+    });
+    expect(res).toMatchObject(E.left({
+      kind: "IResponseErrorTooManyRequests"
+    }));
+  });
+
+  it("should return an error if the response is 401", async () => {
+    mockGetMessage.mockImplementation(async () =>
+      t.success(authProblemMessagesResponse)
+    );
+
+    const service = new NewMessageService(
+      api,
+      mockGetThirdPartyMessageClientFactory,
+      pecServerClientFactoryMock
+    );
+
+    const res = await service.getThirdPartyMessageFnApp(
+      mockedUser.fiscal_code,
+      aValidMessageIdWithThirdPartyData
+    )();
+
+    expect(mockGetMessage).toHaveBeenCalledWith({
+      fiscal_code: mockedUser.fiscal_code,
+      id: aValidMessageIdWithThirdPartyData,
+    });
+    expect(res).toMatchObject(E.left({
+      kind: "IResponseErrorInternal"
+    }));
+  });
 });
 
 describe("MessageService#getThirdPartyMessage", () => {

@@ -60,7 +60,7 @@ export const aPNThirdPartyNotification = {
   details: aPnNotificationDetails
 };
 
-export const aPNThirdPartyPrecondition = {
+export const aThirdPartyPrecondition = {
   title: "A title",
   markdown: "A markdown"
 };

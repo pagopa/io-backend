@@ -9,7 +9,7 @@ import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
-import { base64File } from "../../__mocks__/pn";
+import { aThirdPartyPrecondition, base64File } from "../../__mocks__/pn";
 import {
   lollipopParams,
   lollipopRequiredHeaders,
@@ -58,6 +58,16 @@ const proxyMessageResponse = {
   sender_service_id: "5a563817fcc896087002ea46c49a",
 };
 
+const aThirdPartyMessageDetail = { details: { aDetail: "detail" } };
+
+const proxyThirdPartyMessageResponse = {
+  ...proxyMessageResponse,
+  content: {
+    ...proxyMessageResponse.content,
+    third_party_data: aThirdPartyMessageDetail
+  }
+}
+
 const proxyLegalMessageResponse = {
   ...proxyMessageResponse,
   content: {
@@ -98,9 +108,10 @@ const mockFnAppGetMessagesByUser = jest.fn();
 const mockFnAppUpsertMessageStatus = jest.fn();
 const mockGetThirdPartyMessage = jest.fn();
 const mockGetThirdPartyAttachment = jest.fn();
+const mockGetThirdPartyPrecondition = jest.fn();
 const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
-const mocktGetThirdPartyMessageFnApp = jest.fn();
+const mockGetThirdPartyMessageFnApp = jest.fn();
 
 const newMessageService = {
   getMessage: mockFnAppGetMessage,
@@ -108,9 +119,10 @@ const newMessageService = {
   upsertMessageStatus: mockFnAppUpsertMessageStatus,
   getThirdPartyMessage: mockGetThirdPartyMessage,
   getThirdPartyAttachment: mockGetThirdPartyAttachment,
+  getThirdPartyMessagePrecondition: mockGetThirdPartyPrecondition,
   getLegalMessage: mockGetLegalMessage,
   getLegalMessageAttachment: mockGetLegalMessageAttachment,
-  getThirdPartyMessageFnApp: mocktGetThirdPartyMessageFnApp,
+  getThirdPartyMessageFnApp: mockGetThirdPartyMessageFnApp,
 } as any as NewMessagesService;
 
 const mockGetPecServerTokenHandler = jest.fn();
@@ -379,7 +391,7 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     // TODO: Define a const with aMessageWithThirdPartyData with values
     // and extend these tests with lollipop enabled case mocking a TE.of(true) above
 
-    mocktGetThirdPartyMessageFnApp.mockReturnValue(
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
       TE.of({})
     );
 
@@ -443,6 +455,100 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
+  });
+});
+
+describe("MessagesController#getThirdPartyMessagePrecondition", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should call the getThirdPartyMessagePrecondition on the messagesController with valid values and without lollipopParams", async () => {
+    const req = mockReq();
+
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of(proxyThirdPartyMessageResponse)
+    );
+
+    mockGetThirdPartyPrecondition.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aThirdPartyPrecondition))
+    );
+
+    req.user = mockedUser;
+    req.headers = lollipopRequiredHeaders;
+    req.params = {
+      id: anId
+    };
+    
+    const controller = new MessagesController(
+      newMessageService,
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
+    );
+
+    const response = await controller.getThirdPartyMessagePrecondition(req);
+
+    expect(mockGetThirdPartyPrecondition).toHaveBeenCalledWith(
+      proxyThirdPartyMessageResponse,
+      undefined
+    );
+    expect(mockGetThirdPartyMessageFnApp).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      req.params.id
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aThirdPartyPrecondition,
+    });
+  });
+
+  it("should call the getThirdPartyMessagePrecondition on the messagesController with valid values and with lollipopParams", async () => {
+    const req = mockReq();
+
+    dummyCheckIfLollipopIsEnabled.mockReturnValueOnce(
+      TE.of(true)
+    );
+
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of(proxyThirdPartyMessageResponse)
+    );
+
+    mockGetThirdPartyPrecondition.mockReturnValue(
+      Promise.resolve(ResponseSuccessJson(aThirdPartyPrecondition))
+    );
+
+    req.user = mockedUser;
+    req.headers = lollipopRequiredHeaders;
+    req.params = {
+      id: anId
+    };
+    
+    const controller = new MessagesController(
+      newMessageService,
+      tokenServiceMock as any,
+      mockLollipopApiClient,
+      mockSessionStorage
+    );
+
+    const response = await controller.getThirdPartyMessagePrecondition(req);
+
+    expect(mockGetThirdPartyPrecondition).toHaveBeenCalledWith(
+      proxyThirdPartyMessageResponse,
+      lollipopParams
+    );
+    expect(mockGetThirdPartyMessageFnApp).toHaveBeenCalledWith(
+      mockedUser.fiscal_code,
+      req.params.id
+    );
+
+    expect(response).toEqual({
+      apply: expect.any(Function),
+      kind: "IResponseSuccessJson",
+      value: aThirdPartyPrecondition,
+    });
   });
 });
 

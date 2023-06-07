@@ -17,7 +17,7 @@ import {
   aPnNotificationId,
   aPNServiceId,
   aPNThirdPartyNotification,
-  aPNThirdPartyPrecondition,
+  aThirdPartyPrecondition,
   aPnUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody,
@@ -48,7 +48,7 @@ dummyGetSentNotificationDocument.mockImplementation(() =>
 dummyGetReceivedNotificationPrecondition.mockImplementation(() =>
   TE.of({
     status: 200,
-    value: aPNThirdPartyPrecondition,
+    value: aThirdPartyPrecondition,
     headers: {},
   })()
 );
@@ -496,7 +496,7 @@ describe("getThirdPartyMessagePrecondition", () => {
       expect(result.right).toEqual(
         expect.objectContaining({
           status: 200,
-          value: aPNThirdPartyPrecondition,
+          value: aThirdPartyPrecondition,
         })
       );
     }
