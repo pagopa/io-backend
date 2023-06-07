@@ -5,6 +5,7 @@ import nodeFetch from "node-fetch";
 
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
+import { LollipopLocalsType } from "src/types/lollipop";
 import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
@@ -17,7 +18,6 @@ import {
 } from "../../generated/third-party-service/client";
 
 import { pnFetch } from "../adapters/pnFetch";
-import { LollipopLocalsType } from "src/types/lollipop";
 
 // ---
 

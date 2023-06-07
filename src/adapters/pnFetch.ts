@@ -10,14 +10,14 @@ import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
 import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { match } from "ts-pattern";
+import { LollipopLocalsType } from "src/types/lollipop";
+import { Fetch } from "src/clients/third-party-service-client";
+import nodeFetch from "node-fetch";
 import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
 import { ServiceId } from "../../generated/backend/ServiceId";
 import { PN_SERVICE_ID } from "../config";
-import { LollipopLocalsType } from "src/types/lollipop";
-import { Fetch } from "src/clients/third-party-service-client";
-import nodeFetch from "node-fetch";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL

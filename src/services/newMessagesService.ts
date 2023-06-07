@@ -25,6 +25,7 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import { IResponseType } from "@pagopa/ts-commons/lib/requests";
+import { LollipopLocalsType } from "src/types/lollipop";
 import { InternalMessageResponseWithContent } from "../../generated/io-messages-api/InternalMessageResponseWithContent";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
 import { LegalData } from "../../generated/io-messages-api/LegalData";
@@ -61,7 +62,6 @@ import { log } from "../utils/logger";
 import { LegalMessage } from "../../generated/pecserver/LegalMessage";
 import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
-import { LollipopLocalsType } from "src/types/lollipop";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 

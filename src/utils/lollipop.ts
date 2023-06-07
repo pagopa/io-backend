@@ -12,13 +12,13 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { eventLog } from "@pagopa/winston-ts";
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
+import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { LollipopApiClient } from "../clients/lollipop";
 import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
-import { log } from "./logger";
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LcParams } from "../../generated/lollipop-api/LcParams";
-import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
+import { log } from "./logger";
 import { ThirdPartyConfigListFromString } from "./thirdPartyConfig";
 
 export const THIRD_PARTY_CONFIG_LIST = pipe(
