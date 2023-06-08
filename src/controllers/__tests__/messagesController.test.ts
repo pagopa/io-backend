@@ -18,6 +18,7 @@ import {
 } from "../../__mocks__/lollipop";
 import * as TE from "fp-ts/TaskEither";
 import * as lollipopUtils from "../../utils/lollipop";
+import { ThirdPartyConfigList } from "../../utils/thirdPartyConfig";
 
 const dummyExtractLollipopLocalsFromLollipopHeaders = jest.spyOn(
   lollipopUtils,
@@ -64,9 +65,9 @@ const proxyThirdPartyMessageResponse = {
   ...proxyMessageResponse,
   content: {
     ...proxyMessageResponse.content,
-    third_party_data: aThirdPartyMessageDetail
-  }
-}
+    third_party_data: aThirdPartyMessageDetail,
+  },
+};
 
 const proxyLegalMessageResponse = {
   ...proxyMessageResponse,
@@ -148,7 +149,8 @@ describe("MessagesController#getMessagesByUser", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -195,7 +197,8 @@ describe("MessagesController#getMessagesByUser", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -244,7 +247,8 @@ describe("MessagesController#getMessagesByUser", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -274,7 +278,8 @@ describe("MessagesController#getMessagesByUser", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -305,7 +310,8 @@ describe("MessagesController#getMessage", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessage(req);
@@ -335,7 +341,8 @@ describe("MessagesController#getMessage", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessage(req);
@@ -365,7 +372,8 @@ describe("MessagesController#getMessage", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getMessage(req);
@@ -391,9 +399,7 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     // TODO: Define a const with aMessageWithThirdPartyData with values
     // and extend these tests with lollipop enabled case mocking a TE.of(true) above
 
-    mockGetThirdPartyMessageFnApp.mockReturnValue(
-      TE.of({})
-    );
+    mockGetThirdPartyMessageFnApp.mockReturnValue(TE.of({}));
 
     mockGetThirdPartyAttachment.mockReturnValue(
       Promise.resolve(ResponseSuccessOctet(buffer))
@@ -404,15 +410,16 @@ describe("MessagesController#getThirdPartyAttachment", () => {
       id: anId,
       attachment_url: anAttachmentUrl,
     };
-    
+
     const controller = new MessagesController(
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
-   console.log(lollipopRequiredHeaders);
+    console.log(lollipopRequiredHeaders);
 
     const response = await controller.getThirdPartyMessageAttachment(req);
 
@@ -447,7 +454,8 @@ describe("MessagesController#getThirdPartyAttachment", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getThirdPartyMessageAttachment(req);
@@ -477,14 +485,15 @@ describe("MessagesController#getThirdPartyMessagePrecondition", () => {
     req.user = mockedUser;
     req.headers = lollipopRequiredHeaders;
     req.params = {
-      id: anId
+      id: anId,
     };
-    
+
     const controller = new MessagesController(
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getThirdPartyMessagePrecondition(req);
@@ -508,9 +517,7 @@ describe("MessagesController#getThirdPartyMessagePrecondition", () => {
   it("should call the getThirdPartyMessagePrecondition on the messagesController with valid values and with lollipopParams", async () => {
     const req = mockReq();
 
-    dummyCheckIfLollipopIsEnabled.mockReturnValueOnce(
-      TE.of(true)
-    );
+    dummyCheckIfLollipopIsEnabled.mockReturnValueOnce(TE.of(true));
 
     mockGetThirdPartyMessageFnApp.mockReturnValue(
       TE.of(proxyThirdPartyMessageResponse)
@@ -523,14 +530,15 @@ describe("MessagesController#getThirdPartyMessagePrecondition", () => {
     req.user = mockedUser;
     req.headers = lollipopRequiredHeaders;
     req.params = {
-      id: anId
+      id: anId,
     };
-    
+
     const controller = new MessagesController(
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getThirdPartyMessagePrecondition(req);
@@ -571,7 +579,8 @@ describe("MessagesController#getLegalMessage", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getLegalMessage(req);
@@ -603,7 +612,8 @@ describe("MessagesController#getLegalMessage", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getLegalMessage(req);
@@ -628,7 +638,8 @@ describe("MessagesController#getLegalMessage", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getLegalMessage(req);
@@ -665,7 +676,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getLegalMessageAttachment(req);
@@ -701,7 +713,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getLegalMessageAttachment(req);
@@ -726,7 +739,8 @@ describe("MessagesController#getLegalMessageAttachment", () => {
       newMessageService,
       tokenServiceMock as any,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.getLegalMessageAttachment(req);
@@ -771,7 +785,8 @@ describe("MessagesController#upsertMessageStatus", () => {
       newMessageService,
       {} as TokenService,
       mockLollipopApiClient,
-      mockSessionStorage
+      mockSessionStorage,
+      [] as ThirdPartyConfigList
     );
 
     const response = await controller.upsertMessageStatus(req);
@@ -813,7 +828,8 @@ describe("MessagesController#upsertMessageStatus", () => {
         newMessageService,
         {} as TokenService,
         mockLollipopApiClient,
-        mockSessionStorage
+        mockSessionStorage,
+        [] as ThirdPartyConfigList
       );
 
       const response = await controller.upsertMessageStatus(req);

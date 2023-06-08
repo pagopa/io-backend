@@ -48,6 +48,7 @@ import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { extractLollipopLocalsFromLollipopHeaders } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
+import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
 
 type IGetLegalMessageResponse =
   | IResponseErrorInternal
@@ -80,7 +81,8 @@ export default class MessagesController {
     private readonly messageService: NewMessagesService,
     private readonly tokenService: TokenService,
     private readonly lollipopClient: ReturnType<typeof LollipopApiClient>,
-    private readonly sessionStorage: ISessionStorage
+    private readonly sessionStorage: ISessionStorage,
+    private readonly thirdPartyConfigList: ThirdPartyConfigList
   ) {}
 
   /**
@@ -214,7 +216,11 @@ export default class MessagesController {
       TE.bindTo("message"),
       TE.bindW("hasLollipopEnabled", ({ message }) =>
         pipe(
-          checkIfLollipopIsEnabled(user.fiscal_code, message.sender_service_id),
+          checkIfLollipopIsEnabled(
+            this.thirdPartyConfigList,
+            user.fiscal_code,
+            message.sender_service_id
+          ),
           TE.mapLeft((e) =>
             ResponseErrorInternal(
               `Cannot define if Lollipop is enabled or not: ${e.name} | ${e.message}`

@@ -30,7 +30,8 @@ const aValidTestAndProdThirdPartyConfig = pipe(
     serviceId: aServiceId,
     schemaKind: "PN",
     jsonSchema: "aJsonSchema",
-    isLollipopEnabled: false,
+    isLollipopEnabled: "false",
+    disableLollipopFor: [],
     prodEnvironment: {
       baseUrl: "http://aBaseUrl",
       detailsAuthentication: aValidDetailAuthentication

@@ -19,13 +19,7 @@ import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LcParams } from "../../generated/lollipop-api/LcParams";
 import { log } from "./logger";
-import { ThirdPartyConfigListFromString } from "./thirdPartyConfig";
-
-export const THIRD_PARTY_CONFIG_LIST = pipe(
-  process.env.THIRD_PARTY_CONFIG_LIST ?? "",
-  ThirdPartyConfigListFromString.decode,
-  E.getOrElse(() => [] as ThirdPartyConfigListFromString)
-);
+import { ThirdPartyConfigList } from "./thirdPartyConfig";
 
 type ErrorsResponses =
   | IResponseErrorInternal
@@ -47,18 +41,19 @@ const getNonceOrUlid = (
 };
 
 export const checkIfLollipopIsEnabled = (
+  thirdPartyConfigList: ThirdPartyConfigList,
   fiscalCode: FiscalCode,
   serviceId: ServiceId
 ) =>
   pipe(
-    THIRD_PARTY_CONFIG_LIST.find((c) => c.serviceId === serviceId),
+    thirdPartyConfigList.find((c) => c.serviceId === serviceId),
     TE.fromNullable(
       Error(`Cannot find configuration for service ${serviceId}`)
     ),
     TE.map(
       (config) =>
         config.isLollipopEnabled &&
-        !config.testEnvironment?.testUsers.includes(fiscalCode)
+        !config.disableLollipopFor.includes(fiscalCode)
     )
   );
 

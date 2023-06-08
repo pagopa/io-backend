@@ -953,7 +953,8 @@ function registerAPIRoutes(
     appMessagesService,
     tokenService,
     lollipopClient,
-    sessionStorage
+    sessionStorage,
+    THIRD_PARTY_CONFIG_LIST
   );
 
   const servicesController: ServicesController = new ServicesController(
