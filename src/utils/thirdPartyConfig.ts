@@ -47,7 +47,7 @@ export const ThirdPartyConfigBase = t.interface({
   schemaKind: NonEmptyString,
   jsonSchema: NonEmptyString,
   isLollipopEnabled: BooleanFromString,
-  disableLollipopFor: t.readonlyArray(FiscalCode)
+  disableLollipopFor: t.readonlyArray(FiscalCode),
 });
 
 /**
