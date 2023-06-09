@@ -159,9 +159,6 @@ describe("third-party-service-client", () => {
     });
     const expectedConfig = aValidTestAndProdThirdPartyConfig.prodEnvironment!;
 
-    console.log(await mockNodeFetch())
-    console.log(res)
-
     expect(mockNodeFetch).toHaveBeenCalledWith(
       `${expectedConfig.baseUrl}/delivery/notifications/received/${aThirdPartyId}`,
       {
