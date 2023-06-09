@@ -17,7 +17,6 @@ import {
   aPnNotificationId,
   aPNServiceId,
   aPNThirdPartyNotification,
-  aThirdPartyPrecondition,
   aPnUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody,
@@ -27,6 +26,7 @@ import {
   notificationDetailResponseExampleAsObject,
 } from "../../__mocks__/pn-response";
 import { lollipopParams } from "../../__mocks__/lollipop";
+import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
 
 const dummyGetReceivedNotification = jest.fn();
 const dummyGetSentNotificationDocument = jest.fn();
@@ -514,7 +514,7 @@ describe("getThirdPartyMessagePrecondition", () => {
       aPnKey,
       lollipopParams
     );
-    
+
     const client = createClient({
       baseUrl: "https://localhost",
       fetchApi: aFetch,
@@ -525,7 +525,7 @@ describe("getThirdPartyMessagePrecondition", () => {
       id: aPnNotificationId,
       ...lollipopParams,
     });
-    
+
     expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(1);
     expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledWith({
       ApiKeyAuth: aPnKey,

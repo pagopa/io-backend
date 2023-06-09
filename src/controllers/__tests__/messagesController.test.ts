@@ -9,7 +9,7 @@ import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
-import { aThirdPartyPrecondition, base64File } from "../../__mocks__/pn";
+import { base64File } from "../../__mocks__/pn";
 import {
   lollipopParams,
   lollipopRequiredHeaders,
@@ -19,6 +19,7 @@ import {
 import * as TE from "fp-ts/TaskEither";
 import * as lollipopUtils from "../../utils/lollipop";
 import { ThirdPartyConfigList } from "../../utils/thirdPartyConfig";
+import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
 
 const dummyExtractLollipopLocalsFromLollipopHeaders = jest.spyOn(
   lollipopUtils,
