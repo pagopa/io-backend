@@ -60,7 +60,7 @@
     "generate:proxy:piattaforma-notifiche-courtesy": "rimraf generated/piattaforma-notifiche-courtesy && gen-api-models --api-spec https://raw.githubusercontent.com/pagopa/pn-user-attributes/13b91a353f6a219c60d5cdadc023cc18c4157554/docs/openapi/pn-address-book-b2b-external-io-v1.yaml --out-dir generated/piattaforma-notifiche-courtesy --request-types --response-decoders --client",
     "generate:test-certs": "./scripts/generate-test-certs.sh certs",
     "generate:proxy:api-session": "rimraf generated/session && gen-api-models --api-spec api_session.yaml --out-dir generated/session",
-    "generate:lollipop-definitions": "rimraf generated/lollipop && gen-api-models --api-spec openapi/lollipop_definitions.yaml --out-dir generated/lollipop",
+    "generate:lollipop-definitions": "rimraf generated/lollipop && gen-api-models --api-spec openapi/generated/lollipop_definitions.yaml --out-dir generated/lollipop",
     "generate:lollipop-first-sign": "rimraf generated/lollipop-first-consumer && gen-api-models --api-spec openapi/consumed/lollipop_first_consumer.yaml --out-dir generated/lollipop-first-consumer --request-types --response-decoders --client",
     "postversion": "git push && git push --tags",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
