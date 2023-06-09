@@ -37,18 +37,6 @@ const proxyMessageResponse = {
   sender_service_id: "5a563817fcc896087002ea46c49a"
 };
 
-const proxyLegalMessageResponse = {
-  ...proxyMessageResponse,
-  content: {
-    ...proxyMessageResponse.content,
-    legal_data: {
-      sender_mail_from: "test@legal.it",
-      has_attachment: false,
-      message_unique_id: "A_MSG_UNIQUE_ID"
-    }
-  }
-};
-
 const proxyLegalAttachmentResponse = Buffer.from("ALegalAttachment");
 
 const mockedDefaultParameters = {
@@ -392,91 +380,6 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-});
-
-describe("MessagesController#getLegalMessage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("calls the getLegalMessage on the messagesController with valid values", async () => {
-    const req = mockReq();
-
-    mockGetLegalMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyLegalMessageResponse))
-    );
-
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    const controller = new MessagesController(
-      newMessageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessage(req);
-
-    expect(mockGetLegalMessage).toHaveBeenCalledWith(
-      mockedUser,
-      anId,
-      expect.any(Function)
-    );
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessJson",
-      value: proxyLegalMessageResponse
-    });
-  });
-
-  it("calls the getLegalMessage on the messagesController with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetLegalMessage.mockReturnValue(
-      Promise.resolve(ResponseSuccessJson(proxyMessageResponse))
-    );
-
-    req.user = "";
-    req.params = { id: anId };
-
-    const controller = new MessagesController(
-      newMessageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessage(req);
-    response.apply(res);
-
-    expect(mockGetLegalMessage).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-
-  it("should fail Internal Error if GetLegalMessage fails", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetLegalMessage.mockReturnValue(
-      Promise.reject(new Error("Cannot call GetLegalMessage"))
-    );
-
-    req.user = mockedUser;
-    req.params = { id: anId };
-
-    const controller = new MessagesController(
-      newMessageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessage(req);
-    response.apply(res);
-
-    expect(mockGetLegalMessage).toHaveBeenCalledWith(
-      mockedUser,
-      anId,
-      expect.any(Function)
-    );
-    expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });
 });
 

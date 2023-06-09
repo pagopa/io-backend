@@ -38,15 +38,7 @@ import {
   IResponseErrorNotImplemented,
   IResponseErrorUnsupportedMediaType,
 } from "../utils/responses";
-import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import TokenService from "../services/tokenService";
-
-type IGetLegalMessageResponse =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseErrorNotFound
-  | IResponseErrorTooManyRequests
-  | IResponseSuccessJson<LegalMessageWithContent>;
 
 type IGetLegalMessageAttachmentResponse =
   | IResponseErrorInternal
@@ -120,27 +112,6 @@ export default class MessagesController {
         }),
         (params) => this.messageService.getMessage(user, params)
       )
-    );
-
-  /**
-   * Returns the legal message identified by the message id.
-   */
-  public readonly getLegalMessage = (
-    req: express.Request
-  ): Promise<IGetLegalMessageResponse> =>
-    withUserFromRequest(req, (user) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            this.messageService.getLegalMessage(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code)
-            ),
-          (e) => ResponseErrorInternal(E.toError(e).message)
-        ),
-        TE.toUnion
-      )()
     );
 
   /**

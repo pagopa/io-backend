@@ -28,7 +28,6 @@ import { IResponseType } from "@pagopa/ts-commons/lib/requests";
 import { InternalMessageResponseWithContent } from "../../generated/io-messages-api/InternalMessageResponseWithContent";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
 import { LegalData } from "../../generated/io-messages-api/LegalData";
-import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
@@ -36,8 +35,6 @@ import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdParty
 import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
-import { StrictUTCISODateFromString } from "../utils/date";
-import { errorsToError } from "../utils/errorsFormatter";
 import { PecBearerGeneratorT } from "../types/token";
 import { User } from "../types/user";
 import {
@@ -58,7 +55,6 @@ import { ThirdPartyMessage } from "../../generated/third-party-service/ThirdPart
 import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
 import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
-import { LegalMessage } from "../../generated/pecserver/LegalMessage";
 import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
 import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
@@ -82,10 +78,6 @@ const isGetMessageSuccess = (
   res: IResponseType<number, unknown, never>
 ): res is IResponseType<200, InternalMessageResponseWithContent, never> =>
   res.status === 200;
-
-const isPecServerGetMessageSuccess = (
-  res: IResponseType<number, unknown, never>
-): res is IResponseType<200, LegalMessage, never> => res.status === 200;
 
 const MessageWithLegalData = t.intersection([
   CreatedMessageWithContent,
@@ -334,58 +326,6 @@ export default class NewMessagesService {
   // ------------------------------------
   // Legal Messages
   // ------------------------------------
-
-  /**
-   * Retrieves a specific legal message.
-   */
-  public readonly getLegalMessage = (
-    user: User,
-    messageId: string,
-    bearerGenerator: PecBearerGeneratorT
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessJson<LegalMessageWithContent>
-  > =>
-    pipe(
-      this.getLegalMessageFromFnApp(user, messageId),
-      TE.chain((message) =>
-        pipe(
-          this.getLegalMessageFromPecServer(message, bearerGenerator),
-          TE.chain((legalMessageMetadata) =>
-            // Decode the timestamp with timezone from string (UTCISODateFromString currently support only Z time)
-            pipe(
-              TE.fromEither(
-                pipe(
-                  StrictUTCISODateFromString.decode(
-                    legalMessageMetadata.cert_data.data.timestamp
-                  ),
-                  E.map((timestamp) => ({
-                    ...legalMessageMetadata,
-                    cert_data: {
-                      ...legalMessageMetadata.cert_data,
-                      data: {
-                        ...legalMessageMetadata.cert_data.data,
-                        timestamp,
-                      },
-                    },
-                  }))
-                )
-              ),
-              TE.mapLeft(errorsToError),
-              TE.mapLeft((es) => ResponseErrorInternal(es.message))
-            )
-          ),
-          TE.map((legalMessageResponse) => ({
-            ...message,
-            legal_message: legalMessageResponse,
-          }))
-        )
-      ),
-      TE.map(ResponseSuccessJson),
-      TE.toUnion
-    )();
 
   /**
    * Retrieves a specific legal message attachment.
@@ -762,36 +702,5 @@ export default class NewMessagesService {
           )
         )
       )
-    );
-
-  private readonly getLegalMessageFromPecServer = (
-    message: MessageWithLegalData,
-    bearerGenerator: PecBearerGeneratorT
-  ): TE.TaskEither<IResponseErrorInternal, LegalMessage> =>
-    pipe(
-      this.pecClient.getClient(
-        bearerGenerator,
-        message.content.legal_data.pec_server_service_id
-      ),
-      TE.mapLeft((e) => ResponseErrorInternal(e.message)),
-      TE.chain((client) =>
-        TE.tryCatch(
-          () =>
-            client.getMessage({
-              id: message.content.legal_data.message_unique_id,
-            }),
-          (e) => ResponseErrorInternal(E.toError(e).message)
-        )
-      ),
-
-      TE.chain(wrapValidationWithInternalError),
-      TE.chain(
-        TE.fromPredicate(isPecServerGetMessageSuccess, (e) =>
-          ResponseErrorInternal(
-            `Error getting the message from pecServer getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
-          )
-        )
-      ),
-      TE.map((successResponse) => successResponse.value)
     );
 }

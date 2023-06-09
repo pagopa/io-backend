@@ -1,4 +1,4 @@
-/* tslint:disable:no-identical-functions */
+/* tslint:disable:oientical-functions */
 
 import * as e from "express";
 import * as t from "io-ts";
@@ -221,7 +221,7 @@ mockGetTPMessagePrecondition.mockImplementation(async _message =>
   t.success({
     status: 200,
     headers: {},
-    value: aValidPreconditionContent 
+    value: aValidPreconditionContent
   })
 );
 
@@ -271,43 +271,6 @@ const validApiMessageResponseWithLegalData = {
     status: "PROCESSED"
   }
 };
-
-const validApiLegalMessageResponse = {
-  status: 200,
-  value: {
-    cert_data: {
-      data: {
-        envelope_id: "anEnvelopeId",
-        msg_id: "<msgId@pec.it>",
-        receipt_type: "completa",
-        sender_provider: "aProvider",
-        timestamp: new Date()
-      },
-      header: {
-        object: "anObject",
-        recipients: "aRecipient@pec.it",
-        replies: "sender@pec.it",
-        sender: "sender@pec.it"
-      }
-    },
-    eml: {
-      attachments: [
-        {
-          content_type: "application/pdf",
-          id: "0",
-          name: "attachment_name",
-          url: "/messages/message_unique_id/attachments/0"
-        }
-      ],
-      html_content: "",
-      plain_text_content: "aPlainTextContent",
-      subject: "A Legal Subject"
-    }
-  }
-};
-
-const proxyLegalMessageResponse =
-  validApiMessageResponseWithLegalData.value.message;
 
 const mockGetLegalMessage = jest.fn();
 const mockGetLegalMessageAttachment = jest.fn();
@@ -565,154 +528,6 @@ describe("MessageService#getMessage", () => {
     );
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
-  });
-});
-
-describe("MessageService#getLegalMessage", () => {
-  it("returns a legal message from the API", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponseWithLegalData)
-    );
-    mockGetLegalMessage.mockImplementation(async () =>
-      t.success(validApiLegalMessageResponse)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: proxyLegalMessageResponse
-    });
-  });
-  it("returns an error if the getMessage API returns an error", async () => {
-    mockGetMessage.mockImplementation(async () => t.success(problemJson));
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns unknown response if the response from the getMessage API returns something wrong", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(invalidApiMessageResponse)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error response if the response from the getMessage API returns a message without legal data", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponse)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error response if bearer generator fails to generate a valid jwt", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponse)
-    );
-
-    aBearerGenerator.mockImplementation(() =>
-      TE.left(new Error("Cannot generate jwt"))
-    );
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error response if the response from the getLegalMessage API returns an error", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiLegalMessageResponse)
-    );
-
-    mockGetLegalMessage.mockImplementation(async () => t.success(problemJson));
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
@@ -1379,8 +1194,8 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       kind: "IResponseErrorInternal",
       detail: "Internal server error: Third Party Service failed with code 500"
     });
-  }); 
-  
+  });
+
   it("should return Bad request if the third party service return a 400", async () => {
 
     mockGetMessage.mockImplementationOnce(async () =>

@@ -1069,12 +1069,6 @@ function registerAPIRoutes(
   );
 
   app.get(
-    `${basePath}/legal-messages/:id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(messagesController.getLegalMessage, messagesController)
-  );
-
-  app.get(
     `${basePath}/legal-messages/:id/attachments/:attachment_id`,
     bearerSessionTokenAuth,
     toExpressHandler(
