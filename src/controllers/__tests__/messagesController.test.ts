@@ -397,9 +397,6 @@ describe("MessagesController#getThirdPartyAttachment", () => {
   it("should call the getThirdPartyAttachment on the messagesController with valid values", async () => {
     const req = mockReq();
 
-    // TODO: Define a const with aMessageWithThirdPartyData with values
-    // and extend these tests with lollipop enabled case mocking a TE.of(true) above
-
     mockGetThirdPartyMessageFnApp.mockReturnValue(TE.of({}));
 
     mockGetThirdPartyAttachment.mockReturnValue(
