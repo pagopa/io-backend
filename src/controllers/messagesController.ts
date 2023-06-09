@@ -14,9 +14,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import {
-  IResponseErrorForbiddenNotAuthorized,
-} from "@pagopa/ts-commons/lib/responses";
+import { IResponseErrorForbiddenNotAuthorized } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { withUserFromRequest } from "../types/user";
@@ -48,9 +46,7 @@ export const withGetThirdPartyAttachmentParams = async <T>(
 
 export default class MessagesController {
   // eslint-disable-next-line max-params
-  constructor(
-    private readonly messageService: NewMessagesService,
-  ) {}
+  constructor(private readonly messageService: NewMessagesService) {}
 
   /**
    * Returns the messages for the user identified by the provided fiscal code.

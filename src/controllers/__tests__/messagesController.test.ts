@@ -55,8 +55,6 @@ const mockFnAppGetMessagesByUser = jest.fn();
 const mockFnAppUpsertMessageStatus = jest.fn();
 const mockGetThirdPartyMessage = jest.fn();
 const mockGetThirdPartyAttachment = jest.fn();
-const mockGetLegalMessage = jest.fn();
-const mockGetLegalMessageAttachment = jest.fn();
 
 const newMessageService = ({
   getMessage: mockFnAppGetMessage,
@@ -64,8 +62,6 @@ const newMessageService = ({
   upsertMessageStatus: mockFnAppUpsertMessageStatus,
   getThirdPartyMessage: mockGetThirdPartyMessage,
   getThirdPartyAttachment: mockGetThirdPartyAttachment,
-  getLegalMessage: mockGetLegalMessage,
-  getLegalMessageAttachment: mockGetLegalMessageAttachment
 } as any) as NewMessagesService;
 
 describe("MessagesController#getMessagesByUser", () => {

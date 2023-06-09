@@ -72,7 +72,7 @@ const isMessageWithThirdPartyData = (
 export default class NewMessagesService {
   constructor(
     private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>,
-    private readonly thirdPartyClientFactory: ThirdPartyServiceClientFactory,
+    private readonly thirdPartyClientFactory: ThirdPartyServiceClientFactory
   ) {}
 
   /**

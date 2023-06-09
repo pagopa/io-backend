@@ -531,7 +531,7 @@ export async function newApp({
         // Create the new messages service.
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT,
-          thirdPartyClientFactory,
+          thirdPartyClientFactory
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
@@ -945,7 +945,7 @@ function registerAPIRoutes(
   );
 
   const messagesController: MessagesController = new MessagesController(
-    appMessagesService,
+    appMessagesService
   );
 
   const servicesController: ServicesController = new ServicesController(
