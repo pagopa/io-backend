@@ -44,14 +44,10 @@ const aValidThirdPartyConfig = {
   ...aValidTestEnvironmentConfig,
 };
 
-const aThirdPartyConfigList = [
-  aValidThirdPartyConfig,
-] as unknown as ThirdPartyConfigList;
-
 describe("checkIfLollipopIsEnabled", () => {
-  it("Should return true when lollipop is enabled and no users are in the blacklist", async () => {
+  it("Should return true when lollipop is enabled and the user is not in the blacklist", async () => {
     const res = await checkIfLollipopIsEnabled(
-      aThirdPartyConfigList,
+      [aValidThirdPartyConfig] as unknown as ThirdPartyConfigList,
       aLollipopEnabledFiscalCode,
       aServiceId
     )();
@@ -62,5 +58,46 @@ describe("checkIfLollipopIsEnabled", () => {
     }
   });
 
-  //it("", () => {});
+  it("Should return false when lollipop is enabled and the user is in the blacklist", async () => {
+    const res = await checkIfLollipopIsEnabled(
+      [aValidThirdPartyConfig] as unknown as ThirdPartyConfigList,
+      aLollipopDisabledFiscalCode,
+      aServiceId
+    )();
+
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toBe(false);
+    }
+  });
+
+  it("Should return false when lollipop is disabled and the user is not in the blacklist", async () => {
+    const res = await checkIfLollipopIsEnabled(
+      [
+        { ...aValidThirdPartyConfig, isLollipopEnabled: false },
+      ] as unknown as ThirdPartyConfigList,
+      aLollipopEnabledFiscalCode,
+      aServiceId
+    )();
+
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toBe(false);
+    }
+  });
+
+  it("Should return false when lollipop is disabled and the user is in the blacklist", async () => {
+    const res = await checkIfLollipopIsEnabled(
+      [
+        { ...aValidThirdPartyConfig, isLollipopEnabled: false },
+      ] as unknown as ThirdPartyConfigList,
+      aLollipopDisabledFiscalCode,
+      aServiceId
+    )();
+
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toBe(false);
+    }
+  });
 });
