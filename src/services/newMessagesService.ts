@@ -68,11 +68,11 @@ const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 const ERROR_MESSAGE_500 = "Third Party Service failed with code 500";
 const ERROR_MESSAGE_400 = "Bad request";
 
-const MessageWithThirdPartyData = t.intersection([
+export const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
   t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) }),
 ]);
-type MessageWithThirdPartyData = t.TypeOf<typeof MessageWithThirdPartyData>;
+export type MessageWithThirdPartyData = t.TypeOf<typeof MessageWithThirdPartyData>;
 
 const isMessageWithThirdPartyData = (
   value: CreatedMessageWithContent

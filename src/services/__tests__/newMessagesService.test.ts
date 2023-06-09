@@ -8,6 +8,7 @@ import * as TE from "fp-ts/TaskEither";
 
 import { mockedUser } from "../../__mocks__/user_mock";
 import NewMessageService from "../newMessagesService";
+import { MessageWithThirdPartyData } from "../newMessagesService";
 import mockRes from "../../__mocks__/response";
 import { GetMessagesParameters } from "../../../generated/parameters/GetMessagesParameters";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
@@ -23,11 +24,9 @@ import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
 import { IPecServerClient } from "../../clients/pecserver";
 
 import { ThirdPartyServiceClient } from "../../clients/third-party-service-client";
-import { CreatedMessageWithContent } from "../../../generated/io-messages-api/CreatedMessageWithContent";
 import { base64File } from "../../__mocks__/pn";
 import { NON_VALID_PDF } from "../../utils/__mocks__/pdf_files";
 import { PreconditionContent } from "../../../generated/piattaforma-notifiche/PreconditionContent";
-import { ThirdPartyData } from "../../../generated/io-messages-api/ThirdPartyData";
 import * as lollipopUtils from "../../utils/lollipop";
 import { lollipopParams } from "../../__mocks__/lollipop";
 
@@ -123,12 +122,6 @@ const validApiThirdPartyMessageResponse = {
     },
   },
 };
-
-const MessageWithThirdPartyData = t.intersection([
-  CreatedMessageWithContent,
-  t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) }),
-]);
-type MessageWithThirdPartyData = t.TypeOf<typeof MessageWithThirdPartyData>;
 
 const aValidMessageWithThirdPartyData = validApiThirdPartyMessageResponse.value
   .message as unknown as MessageWithThirdPartyData;
@@ -1120,7 +1113,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
@@ -1146,7 +1139,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
@@ -1171,7 +1164,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
@@ -1195,7 +1188,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
@@ -1205,7 +1198,7 @@ describe("MessageService#getThirdPartyMessage", () => {
   });
 
   it("should return Not Found if ThirParty service client returns an 404", async () => {
-   
+
     mockGetTPMessageFromExternalService.mockImplementationOnce(async () =>
       t.success({ status: 404 })
     );
@@ -1220,7 +1213,7 @@ describe("MessageService#getThirdPartyMessage", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
     });
@@ -1248,7 +1241,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
     );
 
     // we call getMessage to ensure that the message exists
-    
+
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
       id: validApiThirdPartyMessageResponse.value.message.content
         .third_party_data.id,
@@ -1282,7 +1275,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
       id: validApiThirdPartyMessageResponse.value.message.content
         .third_party_data.id,
@@ -1316,7 +1309,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
       aValidMessageWithThirdPartyData
     );
 
-    
+
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
       id: validApiThirdPartyMessageResponse.value.message.content
         .third_party_data.id,
@@ -1346,7 +1339,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an attachment from the API", async () => {
-   
+
     const service = new NewMessageService(
       api,
       mockGetThirdPartyMessageClientFactory,
@@ -1358,7 +1351,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       anAttachmentUrl
     );
 
-    
+
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,
@@ -1378,7 +1371,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       });
     });
 
-   
+
     const service = new NewMessageService(
       api,
       mockGetThirdPartyMessageClientFactory,
@@ -1390,7 +1383,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       anAttachmentUrl
     );
 
-    
+
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,
@@ -1415,7 +1408,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       aValidMessageWithThirdPartyData,
       anAttachmentUrl
     );
-    
+
     expect(mockGetTPAttachment).not.toHaveBeenCalled();
     expect(res).toMatchObject({
       kind: "IResponseErrorInternal",
@@ -1424,7 +1417,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an error if ThirParty service client throws an error", async () => {
-   
+
     const anError = "Error calling Third Party client";
     mockGetTPAttachment.mockImplementationOnce(async () => {
       throw Error(anError);
@@ -1441,7 +1434,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       anAttachmentUrl
     );
 
-    
+
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,
@@ -1453,7 +1446,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an error if ThirParty service client returns a problemJson response", async () => {
-   
+
     mockGetTPAttachment.mockImplementationOnce(async () =>
       t.success(problemJson)
     );
@@ -1469,7 +1462,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       anAttachmentUrl
     );
 
-    
+
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,
@@ -1480,7 +1473,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return Not Found if ThirParty service client returns an 404", async () => {
-   
+
     mockGetTPAttachment.mockImplementationOnce(async () =>
       t.success({ status: 404 })
     );
@@ -1496,7 +1489,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
       anAttachmentUrl
     );
 
-    
+
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
       attachment_url: anAttachmentUrl,
