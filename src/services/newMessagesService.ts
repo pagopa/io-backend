@@ -72,7 +72,9 @@ export const MessageWithThirdPartyData = t.intersection([
   CreatedMessageWithContent,
   t.interface({ content: t.interface({ third_party_data: ThirdPartyData }) }),
 ]);
-export type MessageWithThirdPartyData = t.TypeOf<typeof MessageWithThirdPartyData>;
+export type MessageWithThirdPartyData = t.TypeOf<
+  typeof MessageWithThirdPartyData
+>;
 
 const isMessageWithThirdPartyData = (
   value: CreatedMessageWithContent
