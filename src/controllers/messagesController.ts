@@ -16,11 +16,7 @@ import {
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
 import {
   IResponseErrorForbiddenNotAuthorized,
-  ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
 import { withUserFromRequest } from "../types/user";
@@ -38,14 +34,6 @@ import {
   IResponseErrorNotImplemented,
   IResponseErrorUnsupportedMediaType,
 } from "../utils/responses";
-import TokenService from "../services/tokenService";
-
-type IGetLegalMessageAttachmentResponse =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseErrorNotFound
-  | IResponseErrorTooManyRequests
-  | IResponseSuccessOctet<Buffer>;
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
@@ -62,7 +50,6 @@ export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
     private readonly messageService: NewMessagesService,
-    private readonly tokenService: TokenService
   ) {}
 
   /**
@@ -112,28 +99,6 @@ export default class MessagesController {
         }),
         (params) => this.messageService.getMessage(user, params)
       )
-    );
-
-  /**
-   * Returns the legal message attachments identified by the legal message id and the attachment id.
-   */
-  public readonly getLegalMessageAttachment = (
-    req: express.Request
-  ): Promise<IGetLegalMessageAttachmentResponse> =>
-    withUserFromRequest(req, (user) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            this.messageService.getLegalMessageAttachment(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code),
-              req.params.attachment_id
-            ),
-          (e) => ResponseErrorInternal(E.toError(e).message)
-        ),
-        TE.toUnion
-      )()
     );
 
   public readonly upsertMessageStatus = (

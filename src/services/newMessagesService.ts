@@ -24,10 +24,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
-import { IResponseType } from "@pagopa/ts-commons/lib/requests";
-import { InternalMessageResponseWithContent } from "../../generated/io-messages-api/InternalMessageResponseWithContent";
 import { CreatedMessageWithContent } from "../../generated/io-messages-api/CreatedMessageWithContent";
-import { LegalData } from "../../generated/io-messages-api/LegalData";
 import { PaginatedPublicMessagesCollection } from "../../generated/io-messages-api/PaginatedPublicMessagesCollection";
 import { GetMessageParameters } from "../../generated/parameters/GetMessageParameters";
 import { GetMessagesParameters } from "../../generated/parameters/GetMessagesParameters";
@@ -35,7 +32,6 @@ import { ThirdPartyMessageWithContent } from "../../generated/backend/ThirdParty
 import { ThirdPartyMessagePrecondition } from "../../generated/backend/ThirdPartyMessagePrecondition";
 import { CreatedMessageWithContentAndAttachments } from "../../generated/backend/CreatedMessageWithContentAndAttachments";
 import { getPrescriptionAttachments } from "../utils/attachments";
-import { PecBearerGeneratorT } from "../types/token";
 import { User } from "../types/user";
 import {
   IResponseErrorUnsupportedMediaType,
@@ -56,7 +52,6 @@ import { ThirdPartyData } from "../../generated/backend/ThirdPartyData";
 import { ThirdPartyServiceClientFactory } from "../../src/clients/third-party-service-client";
 import { log } from "../utils/logger";
 import { FileType, getIsFileTypeForTypes } from "../utils/file-type";
-import { IPecServerClientFactoryInterface } from "./IPecServerClientFactory";
 
 const ALLOWED_TYPES: ReadonlySet<FileType> = new Set(["pdf"]);
 
@@ -74,22 +69,10 @@ const isMessageWithThirdPartyData = (
 ): value is MessageWithThirdPartyData =>
   E.isRight(MessageWithThirdPartyData.decode(value));
 
-const isGetMessageSuccess = (
-  res: IResponseType<number, unknown, never>
-): res is IResponseType<200, InternalMessageResponseWithContent, never> =>
-  res.status === 200;
-
-const MessageWithLegalData = t.intersection([
-  CreatedMessageWithContent,
-  t.interface({ content: t.interface({ legal_data: LegalData }) }),
-]);
-type MessageWithLegalData = t.TypeOf<typeof MessageWithLegalData>;
-
 export default class NewMessagesService {
   constructor(
     private readonly apiClient: ReturnType<typeof AppMessagesAPIClient>,
     private readonly thirdPartyClientFactory: ThirdPartyServiceClientFactory,
-    private readonly pecClient: IPecServerClientFactoryInterface
   ) {}
 
   /**
@@ -324,49 +307,6 @@ export default class NewMessagesService {
     )();
 
   // ------------------------------------
-  // Legal Messages
-  // ------------------------------------
-
-  /**
-   * Retrieves a specific legal message attachment.
-   */
-  public readonly getLegalMessageAttachment = (
-    user: User,
-    messageId: string,
-    bearerGenerator: PecBearerGeneratorT,
-    attachmentId: string
-  ): Promise<
-    | IResponseErrorInternal
-    | IResponseErrorNotFound
-    | IResponseErrorTooManyRequests
-    | IResponseSuccessOctet<Buffer>
-  > =>
-    pipe(
-      this.getLegalMessageFromFnApp(user, messageId),
-      TE.map((message) => message.content.legal_data),
-      TE.chain((messageLegalData) =>
-        pipe(
-          this.pecClient.getClient(
-            bearerGenerator,
-            messageLegalData.pec_server_service_id
-          ),
-          TE.mapLeft((e) => ResponseErrorInternal(e.message)),
-          TE.chain((client) =>
-            pipe(
-              client.getAttachmentBody(
-                messageLegalData.message_unique_id,
-                attachmentId
-              ),
-              TE.mapLeft((e) => ResponseErrorInternal(e.message))
-            )
-          )
-        )
-      ),
-      TE.map(ResponseSuccessOctet),
-      TE.toUnion
-    )();
-
-  // ------------------------------------
   // Private Functions
   // ------------------------------------
 
@@ -429,35 +369,6 @@ export default class NewMessagesService {
           ResponseErrorValidation(
             "Bad request",
             "The message retrieved is not a valid message with third-party data"
-          )
-        )
-      )
-    );
-
-  private readonly getLegalMessageFromFnApp = (user: User, messageId: string) =>
-    pipe(
-      TE.tryCatch(
-        () =>
-          this.apiClient.getMessage({
-            fiscal_code: user.fiscal_code,
-            id: messageId,
-          }),
-        (e) => ResponseErrorInternal(E.toError(e).message)
-      ),
-      TE.chain(wrapValidationWithInternalError),
-
-      TE.chain(
-        TE.fromPredicate(isGetMessageSuccess, (e) =>
-          ResponseErrorInternal(
-            `Error getting the message from getMessage endpoint (received a ${e.status})` // IMPROVE ME: disjoint the errors for better monitoring
-          )
-        )
-      ),
-      TE.map((successResponse) => successResponse.value.message),
-      TE.chain(
-        TE.fromPredicate(MessageWithLegalData.is, () =>
-          ResponseErrorInternal(
-            "The message retrieved is not a valid message with legal data"
           )
         )
       )

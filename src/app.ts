@@ -63,7 +63,6 @@ import {
   FF_MIT_VOUCHER_ENABLED,
   getClientErrorRedirectionUrl,
   FF_USER_AGE_LIMIT_ENABLED,
-  PECSERVERS,
   APP_MESSAGES_API_CLIENT,
   FF_ENABLE_NOTIFY_ENDPOINT,
   FF_ENABLE_SESSION_ENDPOINTS,
@@ -154,7 +153,6 @@ import CgnOperatorSearchController from "./controllers/cgnOperatorSearchControll
 import EUCovidCertService from "./services/eucovidcertService";
 import EUCovidCertController from "./controllers/eucovidcertController";
 import MitVoucherController from "./controllers/mitVoucherController";
-import PecServerClientFactory from "./services/pecServerClientFactory";
 import NewMessagesService from "./services/newMessagesService";
 import bearerFIMSTokenStrategy from "./strategies/bearerFIMSTokenStrategy";
 import { getThirdPartyServiceClientFactory } from "./clients/third-party-service-client";
@@ -534,7 +532,6 @@ export async function newApp({
         const APP_MESSAGES_SERVICE = new NewMessagesService(
           APP_MESSAGES_API_CLIENT,
           thirdPartyClientFactory,
-          new PecServerClientFactory(PECSERVERS)
         );
 
         const PAGOPA_PROXY_SERVICE = new PagoPAProxyService(PAGOPA_CLIENT);
@@ -949,7 +946,6 @@ function registerAPIRoutes(
 
   const messagesController: MessagesController = new MessagesController(
     appMessagesService,
-    tokenService
   );
 
   const servicesController: ServicesController = new ServicesController(
@@ -1066,15 +1062,6 @@ function registerAPIRoutes(
     `${basePath}/messages/:id/message-status`,
     bearerSessionTokenAuth,
     toExpressHandler(messagesController.upsertMessageStatus, messagesController)
-  );
-
-  app.get(
-    `${basePath}/legal-messages/:id/attachments/:attachment_id`,
-    bearerSessionTokenAuth,
-    toExpressHandler(
-      messagesController.getLegalMessageAttachment,
-      messagesController
-    )
   );
 
   app.get(

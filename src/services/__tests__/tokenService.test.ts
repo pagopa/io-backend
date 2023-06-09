@@ -6,7 +6,6 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import TokenService from "../tokenService";
-import { pipe } from "fp-ts/lib/function";
 
 const aFirstname = "Mario" as NonEmptyString;
 const aLastname = "Rossi" as NonEmptyString;
@@ -31,10 +30,6 @@ const aTokenLengthString = aTokenLengthBytes * 2; // because bytes
 const mitVoucher_privateKey_mock = `-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIPNKa/mrzj3DHOJiNn6pCY4xpn3VC+8yHbWbM7uuTfGuoAoGCCqGSM49\nAwEHoUQDQgAEC1bQKO9dKObwgKAGv97QMLR9w6IOFIlBGZx7PY0yE+z18xYdKZp/\nC547dDoYKjllfxMTIO0bKfHKPj2bxMiXSQ==\n-----END EC PRIVATE KEY-----` as NonEmptyString;
 const mitVoucher_audience_mock = "69b3d5a9c935fac3d60c" as NonEmptyString;
 const mitVoucher_tokenIssuer_mock = "app-backend.io.italia.it" as NonEmptyString;
-
-const aPecServerSecretCode = "dummy-code" as NonEmptyString;
-const aPecServerJwt =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50IjoiQUFBQUFBQUFBQUFBQUFBIn0.--ycAy9bJ9SYmTJs0TEU0fgLNk9PNCzhkucKUcg0gso";
 
 describe("TokenService#getNewToken", () => {
   it("generate a new token", () => {
@@ -143,26 +138,5 @@ describe("TokenService#getZendeskSupportToken", () => {
         aTokenIssuer
       )();
     expect(E.isLeft(errorOrNewJwtToken)).toBeTruthy();
-  });
-});
-
-describe("TokenService#getPecServerTokenHandler", () => {
-  it("should generate a jwt token for Pec Server", async () => {
-    const tokenService = new TokenService();
-    const pecServerJwt = await tokenService
-      .getPecServerTokenHandler(aFiscalCode)({
-        secret: aPecServerSecretCode
-      } as any)();
-
-    expect(E.isRight(pecServerJwt)).toBeTruthy();
-    expect(pipe(pecServerJwt, E.getOrElse(()=>""))).toBe(aPecServerJwt);
-  });
-
-  it("should return an error if an error occurs during token generation", async () => {
-    const tokenService = new TokenService();
-    const pecServerJwt = await tokenService
-      .getPecServerTokenHandler(aFiscalCode)({ secret: "" } as any)();
-
-    expect(E.isLeft(pecServerJwt)).toBeTruthy();
   });
 });

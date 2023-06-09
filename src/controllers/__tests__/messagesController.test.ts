@@ -5,7 +5,6 @@ import mockRes from "../../__mocks__/response";
 import NewMessagesService from "../../services/newMessagesService";
 import MessagesController from "../messagesController";
 import { mockedUser } from "../../__mocks__/user_mock";
-import TokenService from "../../services/tokenService";
 import { ResponseSuccessOctet } from "../../utils/responses";
 import { MessageStatusChange } from "../../../generated/io-messages-api/MessageStatusChange";
 import { Change_typeEnum as Reading_Change_typeEnum } from "../../../generated/io-messages-api/MessageStatusReadingChange";
@@ -37,8 +36,6 @@ const proxyMessageResponse = {
   sender_service_id: "5a563817fcc896087002ea46c49a"
 };
 
-const proxyLegalAttachmentResponse = Buffer.from("ALegalAttachment");
-
 const mockedDefaultParameters = {
   pageSize: undefined,
   enrichResultData: undefined,
@@ -49,13 +46,6 @@ const mockedDefaultParameters = {
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
-  title: expect.any(String),
-  type: undefined
-};
-
-const internalErrorResponse = {
-  detail: expect.any(String),
-  status: 500,
   title: expect.any(String),
   type: undefined
 };
@@ -78,11 +68,6 @@ const newMessageService = ({
   getLegalMessageAttachment: mockGetLegalMessageAttachment
 } as any) as NewMessagesService;
 
-const mockGetPecServerTokenHandler = jest.fn();
-const tokenServiceMock = {
-  getPecServerTokenHandler: jest.fn(() => mockGetPecServerTokenHandler)
-};
-
 describe("MessagesController#getMessagesByUser", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,7 +84,6 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -144,7 +128,6 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -191,7 +174,6 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -219,7 +201,6 @@ describe("MessagesController#getMessagesByUser", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessagesByUser(req);
@@ -248,7 +229,6 @@ describe("MessagesController#getMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessage(req);
@@ -276,7 +256,6 @@ describe("MessagesController#getMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessage(req);
@@ -304,7 +283,6 @@ describe("MessagesController#getMessage", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.getMessage(req);
@@ -339,7 +317,6 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
     );
 
     const response = await controller.getThirdPartyMessageAttachment(req);
@@ -372,7 +349,6 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      tokenServiceMock as any
     );
 
     const response = await controller.getThirdPartyMessageAttachment(req);
@@ -380,98 +356,6 @@ describe("MessagesController#getThirdPartyAttachment", () => {
 
     expect(mockGetThirdPartyAttachment).not.toBeCalled();
     expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-});
-
-describe("MessagesController#getLegalMessageAttachment", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("calls the getLegalMessageAttachment on the messagesController with valid values", async () => {
-    const req = mockReq();
-
-    mockGetLegalMessageAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(proxyLegalAttachmentResponse))
-    );
-
-    req.user = mockedUser;
-    req.params = {
-      id: anId,
-      attachment_id: "anAttachemntId"
-    };
-
-    const controller = new MessagesController(
-      newMessageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessageAttachment(req);
-
-    expect(mockGetLegalMessageAttachment).toHaveBeenCalledWith(
-      mockedUser,
-      req.params.id,
-      expect.any(Function),
-      req.params.attachment_id
-    );
-    expect(response).toEqual({
-      apply: expect.any(Function),
-      kind: "IResponseSuccessOctet",
-      value: proxyLegalAttachmentResponse
-    });
-  });
-
-  it("calls the getLegalMessageAttachment on the messagesController with empty user", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetLegalMessageAttachment.mockReturnValue(
-      Promise.resolve(ResponseSuccessOctet(proxyLegalAttachmentResponse))
-    );
-
-    req.user = "";
-    req.params = {
-      id: anId,
-      attachment_id: "anAttachemntId"
-    };
-
-    const controller = new MessagesController(
-      newMessageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessageAttachment(req);
-    response.apply(res);
-
-    expect(mockGetLegalMessageAttachment).not.toBeCalled();
-    expect(res.json).toHaveBeenCalledWith(badRequestErrorResponse);
-  });
-
-  it("should fail with Internal Error if GetLegalMessageAttachment fails", async () => {
-    const req = mockReq();
-    const res = mockRes();
-
-    mockGetLegalMessageAttachment.mockReturnValue(
-      Promise.reject(new Error("Cannot call GetLegalMessageAttachment"))
-    );
-
-    req.user = mockedUser;
-    req.params = { id: anId, attachment_id: "anAttachemntId" };
-
-    const controller = new MessagesController(
-      newMessageService,
-      tokenServiceMock as any
-    );
-
-    const response = await controller.getLegalMessageAttachment(req);
-    response.apply(res);
-    expect(mockGetLegalMessageAttachment).toHaveBeenCalledWith(
-      mockedUser,
-      req.params.id,
-      expect.any(Function),
-      req.params.attachment_id
-    );
-    expect(res.json).toHaveBeenCalledWith(internalErrorResponse);
   });
 });
 
@@ -503,7 +387,6 @@ describe("MessagesController#upsertMessageStatus", () => {
 
     const controller = new MessagesController(
       newMessageService,
-      {} as TokenService
     );
 
     const response = await controller.upsertMessageStatus(req);
@@ -543,7 +426,6 @@ describe("MessagesController#upsertMessageStatus", () => {
 
       const controller = new MessagesController(
         newMessageService,
-        {} as TokenService
       );
 
       const response = await controller.upsertMessageStatus(req);
