@@ -40,7 +40,7 @@ import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
-import { exactUserIdentityDecode, SpidUser } from "../../types/user";
+import { SpidUser, exactUserIdentityDecode } from "../../types/user";
 import AuthenticationController, {
   AGE_LIMIT,
   AGE_LIMIT_ERROR_CODE,
@@ -63,6 +63,7 @@ import {
   anotherAssertionRef,
 } from "../../__mocks__/lollipop";
 import * as authCtrl from "../authenticationController";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -202,7 +203,9 @@ const redisClient = {} as redis.RedisClientType;
 
 const tokenService = new TokenService();
 
-const tokenDurationSecs = 0;
+const tokenDurationSecs = 3600 * 24 * 30;
+const lvTokenDurationSecs = 60 * 1;
+
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
@@ -246,6 +249,8 @@ const controller = new AuthenticationController(
     isLollipopEnabled: false,
     lollipopService: lollipopService,
   },
+  tokenDurationSecs as Second,
+  lvTokenDurationSecs as Second,
   mockTelemetryClient
 );
 
@@ -263,6 +268,8 @@ const lollipopActivatedController = new AuthenticationController(
     isLollipopEnabled: true,
     lollipopService: lollipopService,
   },
+  tokenDurationSecs as Second,
+  lvTokenDurationSecs as Second,
   mockTelemetryClient
 );
 
@@ -310,7 +317,7 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).toHaveBeenCalledWith(
       mockedUser,
@@ -342,7 +349,7 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
   });
@@ -375,7 +382,7 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).toHaveBeenCalledWith(
@@ -409,7 +416,7 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toHaveBeenCalled();
@@ -584,10 +591,13 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith({
-      ...mockedUser,
-      date_of_birth: aYoungUserPayload.dateOfBirth,
-    });
+    expect(mockSet).toHaveBeenCalledWith(
+      {
+        ...mockedUser,
+        date_of_birth: aYoungUserPayload.dateOfBirth,
+      },
+      tokenDurationSecs
+    );
     expect(mockGetProfile).toHaveBeenCalledWith({
       ...mockedUser,
       date_of_birth: aYoungUserPayload.dateOfBirth,
@@ -652,10 +662,11 @@ describe("AuthenticationController#acs", () => {
       expect.objectContaining({
         fiscal_code: aFiscalCode,
       }),
-      anotherAssertionRef
+      anotherAssertionRef,
+      tokenDurationSecs
     );
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
   });
@@ -728,7 +739,8 @@ describe("AuthenticationController#acs", () => {
         expect.objectContaining({
           fiscal_code: aFiscalCode,
         }),
-        anotherAssertionRef
+        anotherAssertionRef,
+        tokenDurationSecs
       );
 
       expect(mockSet).not.toBeCalled();
@@ -920,6 +932,141 @@ describe("AuthenticationController#acs", () => {
       expect(res.redirect).toHaveBeenCalledWith(
         301,
         expectedUriScheme + "//localhost/profile.html?token=" + mockSessionToken
+      );
+    }
+  );
+});
+
+describe("AuthenticationController|>LV|>acs", () => {
+  it.each`
+    loginType                          | expectedTtlDuration
+    ${authCtrl.LoginTypeEnum.LV}       | ${lvTokenDurationSecs}
+    ${authCtrl.LoginTypeEnum.STANDARD} | ${tokenDurationSecs}
+    ${undefined}                       | ${tokenDurationSecs}
+  `(
+    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled and login is of type $loginType",
+    async ({ loginType, expectedTtlDuration }) => {
+      const res = mockRes();
+
+      mockGetLollipop.mockResolvedValueOnce(
+        E.right(O.some(anotherAssertionRef))
+      );
+      mockDelLollipop.mockResolvedValueOnce(E.right(true));
+      mockActivateLolliPoPKey.mockImplementationOnce(
+        (newAssertionRef, __, ___) =>
+          TE.of({
+            ...anActivatedPubKey,
+            assertion_ref: newAssertionRef,
+          } as ActivatedPubKey)
+      );
+      mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+        Promise.resolve(E.right(true))
+      );
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
+
+      mockGetProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+      const response = await lollipopActivatedController.acs(
+        validUserPayload,
+        withoutUndefinedValues({
+          loginType,
+        })
+      );
+      response.apply(res);
+
+      expect(mockSet).toHaveBeenCalledWith(mockedUser, expectedTtlDuration);
+      expect(mockSetLollipop).toHaveBeenCalledWith(
+        mockedUser,
+        anotherAssertionRef,
+        expectedTtlDuration
+      );
+      expect(mockActivateLolliPoPKey).toHaveBeenCalledWith(
+        anotherAssertionRef,
+        mockedUser.fiscal_code,
+        aLollipopAssertion,
+        expect.any(Function)
+      );
+
+      const ttlToExpirationDate = mockActivateLolliPoPKey.mock.calls[0][3];
+
+      const now = new Date();
+      const exp = ttlToExpirationDate() as Date;
+      const diff = (exp.getTime() - now.getTime()) / 1000;
+
+      expect(diff).toEqual(expectedTtlDuration);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        expect.stringContaining("/profile.html?token=" + mockSessionToken)
+      );
+    }
+  );
+
+  it.each`
+    loginType                          | expectedTtlDuration
+    ${authCtrl.LoginTypeEnum.LV}       | ${tokenDurationSecs}
+    ${authCtrl.LoginTypeEnum.STANDARD} | ${tokenDurationSecs}
+    ${undefined}                       | ${tokenDurationSecs}
+  `(
+    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is disabled and login is of type $loginType",
+    async ({ loginType, expectedTtlDuration }) => {
+      const res = mockRes();
+
+      mockGetLollipop.mockResolvedValueOnce(
+        E.right(O.some(anotherAssertionRef))
+      );
+      mockDelLollipop.mockResolvedValueOnce(E.right(true));
+      mockActivateLolliPoPKey.mockImplementationOnce(
+        (newAssertionRef, __, ___) =>
+          TE.of({
+            ...anActivatedPubKey,
+            assertion_ref: newAssertionRef,
+          } as ActivatedPubKey)
+      );
+      mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+        Promise.resolve(E.right(true))
+      );
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
+
+      mockGetProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+      const response = await controller.acs(
+        validUserPayload,
+        withoutUndefinedValues({
+          loginType,
+        })
+      );
+      response.apply(res);
+
+      expect(mockSet).toHaveBeenCalledWith(mockedUser, expectedTtlDuration);
+      expect(mockSetLollipop).not.toHaveBeenCalled();
+      expect(mockActivateLolliPoPKey).not.toHaveBeenCalled();
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        expect.stringContaining("/profile.html?token=" + mockSessionToken)
       );
     }
   );

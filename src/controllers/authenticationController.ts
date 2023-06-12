@@ -36,6 +36,8 @@ import { NotificationServiceFactory } from "src/services/notificationServiceFact
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
+import { enumType } from "@pagopa/ts-commons/lib/types";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
@@ -50,7 +52,6 @@ import {
   FF_IOLOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
-  tokenDurationSecs,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -95,8 +96,22 @@ export const isUserElegibleForIoLoginUrlScheme =
     FF_IOLOGIN
   );
 
+export enum LoginTypeEnum {
+  "LV" = "LV",
+  "STANDARD" = "STANDARD",
+}
+export type LoginTypeT = t.TypeOf<typeof LoginType>;
+export const LoginType = enumType<LoginTypeEnum>(LoginTypeEnum, "LoginType");
+
 export type AdditionalLoginPropsT = t.TypeOf<typeof AdditionalLoginProps>;
-export const AdditionalLoginProps = t.partial({ loginType: t.string });
+export const AdditionalLoginProps = t.partial({ loginType: LoginType });
+
+export const acsRequestMapper = (
+  _req: express.Request
+): t.Validation<AdditionalLoginPropsT> =>
+  AdditionalLoginProps.decode({
+    loginType: _req.header("x-pagopa-login-type"),
+  });
 
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
@@ -115,13 +130,15 @@ export default class AuthenticationController {
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
     private readonly lollipopParams: LollipopParams,
+    private readonly standardTokenDurationSecs: Second,
+    private readonly lvTokenDurationSecs: Second,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
    * The Assertion consumer service.
    */
-  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
+  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity, complexity
   public async acs(
     userPayload: unknown,
     additionalProps?: AdditionalLoginPropsT
@@ -136,8 +153,11 @@ export default class AuthenticationController {
     //
     const errorOrSpidUser = validateSpidUser(userPayload);
 
-    // eslint-disable-next-line no-console
-    console.log("additionalProps", additionalProps);
+    const sessionTTL =
+      this.lollipopParams.isLollipopEnabled &&
+      additionalProps?.loginType === LoginTypeEnum.LV
+        ? this.lvTokenDurationSecs
+        : this.standardTokenDurationSecs;
 
     if (E.isLeft(errorOrSpidUser)) {
       log.error(
@@ -339,14 +359,15 @@ export default class AuthenticationController {
               assertionRef,
               user.fiscal_code,
               spidUser.getSamlResponseXml(),
-              () => addSeconds(new Date(), tokenDurationSecs)
+              () => addSeconds(new Date(), sessionTTL)
             ),
             pipe(
               TE.tryCatch(
                 () =>
                   this.sessionStorage.setLollipopAssertionRefForUser(
                     user,
-                    assertionRef
+                    assertionRef,
+                    sessionTTL
                   ),
                 E.toError
               ),
@@ -386,7 +407,7 @@ export default class AuthenticationController {
     // Attempt to create a new session object while we fetch an existing profile
     // for the user
     const [errorOrIsSessionCreated, getProfileResponse] = await Promise.all([
-      this.sessionStorage.set(user),
+      this.sessionStorage.set(user, sessionTTL),
       this.profileService.getProfile(user),
     ]);
 

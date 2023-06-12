@@ -591,6 +591,14 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
+// Set default LV session duration
+const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 1;
+export const lvTokenDurationSecs: number = process.env
+  .LV_TOKEN_DURATION_IN_SECONDS
+  ? parseInt(process.env.LV_TOKEN_DURATION_IN_SECONDS, 10)
+  : DEFAULT_LV_TOKEN_DURATION_IN_SECONDS;
+log.info("LV Session token duration set to %s seconds", lvTokenDurationSecs);
+
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
 const simpleHttpsApiFetch = agent.getHttpsFetch(process.env);
@@ -767,6 +775,21 @@ export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
   NonEmptyString.decode,
   // allow ~6% of users by default
   E.getOrElse(() => "^([(0-9)|(a-f)|(A-F)]{63}0)$" as NonEmptyString)
+);
+
+// LV FF variable
+export const FF_LOGIN_VELOCE = pipe(
+  process.env.FF_LOGIN_VELOCE,
+  FeatureFlag.decode,
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
+);
+
+export const LV_TEST_USERS = pipe(
+  process.env.LV_TEST_USERS,
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW((err) => {
+    throw new Error(`Invalid LV_TEST_USERS value: ${readableReport(err)}`);
+  })
 );
 
 // Support Token

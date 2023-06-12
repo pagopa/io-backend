@@ -25,6 +25,7 @@ import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -82,10 +83,11 @@ import {
   LOLLIPOP_REVOKE_QUEUE_NAME,
   IO_SIGN_SERVICE_ID,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
+  lvTokenDurationSecs,
 } from "./config";
 import AuthenticationController, {
   AdditionalLoginProps,
-  AdditionalLoginPropsT,
+  acsRequestMapper,
 } from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
@@ -502,6 +504,8 @@ export async function newApp({
               isLollipopEnabled: FF_LOLLIPOP_ENABLED,
               lollipopService: LOLLIPOP_SERVICE,
             },
+            tokenDurationSecs as Second,
+            lvTokenDurationSecs as Second,
             appInsightsClient
           );
 
@@ -703,7 +707,7 @@ export async function newApp({
       return pipe(
         TE.tryCatch(
           () =>
-            withSpid<AdditionalLoginPropsT>({
+            withSpid({
               acs: _.acsController.acs.bind(_.acsController),
               app: _.app,
               appConfig: {
@@ -719,10 +723,7 @@ export async function newApp({
                 },
                 extraLoginRequestParamConfig: {
                   codec: AdditionalLoginProps,
-                  requestMapper: (_req) =>
-                    E.of({
-                      loginType: _req.header("x-pagopa-login-type"),
-                    }),
+                  requestMapper: acsRequestMapper,
                 },
               },
               doneCb: spidLogCallback,
