@@ -64,6 +64,7 @@ import {
 } from "../../__mocks__/lollipop";
 import * as authCtrl from "../authenticationController";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { LoginTypeEnum } from "../../utils/fastLogin";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -939,14 +940,21 @@ describe("AuthenticationController#acs", () => {
 
 describe("AuthenticationController|>LV|>acs", () => {
   it.each`
-    loginType                          | expectedTtlDuration
-    ${authCtrl.LoginTypeEnum.LV}       | ${lvTokenDurationSecs}
-    ${authCtrl.LoginTypeEnum.STANDARD} | ${tokenDurationSecs}
-    ${undefined}                       | ${tokenDurationSecs}
+    loginType                 | isUserElegible | expectedTtlDuration
+    ${LoginTypeEnum.LV}       | ${true}        | ${lvTokenDurationSecs}
+    ${LoginTypeEnum.LV}       | ${false}       | ${tokenDurationSecs}
+    ${LoginTypeEnum.STANDARD} | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.STANDARD} | ${false}       | ${tokenDurationSecs}
+    ${undefined}              | ${true}        | ${tokenDurationSecs}
+    ${undefined}              | ${false}       | ${tokenDurationSecs}
   `(
-    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled and login is of type $loginType",
-    async ({ loginType, expectedTtlDuration }) => {
+    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled, ff is $isUserElegible and login is of type $loginType",
+    async ({ loginType, expectedTtlDuration, isUserElegible }) => {
       const res = mockRes();
+
+      jest
+        .spyOn(authCtrl, "isUserElegibleForFastLogin")
+        .mockImplementationOnce((_) => isUserElegible);
 
       mockGetLollipop.mockResolvedValueOnce(
         E.right(O.some(anotherAssertionRef))
@@ -1014,14 +1022,21 @@ describe("AuthenticationController|>LV|>acs", () => {
   );
 
   it.each`
-    loginType                          | expectedTtlDuration
-    ${authCtrl.LoginTypeEnum.LV}       | ${tokenDurationSecs}
-    ${authCtrl.LoginTypeEnum.STANDARD} | ${tokenDurationSecs}
-    ${undefined}                       | ${tokenDurationSecs}
+    loginType                 | isUserEligible | expectedTtlDuration
+    ${LoginTypeEnum.LV}       | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}       | ${false}       | ${tokenDurationSecs}
+    ${LoginTypeEnum.STANDARD} | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.STANDARD} | ${false}       | ${tokenDurationSecs}
+    ${undefined}              | ${true}        | ${tokenDurationSecs}
+    ${undefined}              | ${false}       | ${tokenDurationSecs}
   `(
-    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is disabled and login is of type $loginType",
-    async ({ loginType, expectedTtlDuration }) => {
+    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is disabled, ff is $isUserElegible and login is of type $loginType",
+    async ({ loginType, expectedTtlDuration, isUserElegible }) => {
       const res = mockRes();
+
+      jest
+        .spyOn(authCtrl, "isUserElegibleForFastLogin")
+        .mockImplementationOnce((_) => isUserElegible);
 
       mockGetLollipop.mockResolvedValueOnce(
         E.right(O.some(anotherAssertionRef))

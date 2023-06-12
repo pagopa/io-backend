@@ -9,7 +9,6 @@ import * as B from "fp-ts/lib/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as AP from "fp-ts/lib/Apply";
-import * as t from "io-ts";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -32,17 +31,21 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
-import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
-import { enumType } from "@pagopa/ts-commons/lib/types";
 import { Second } from "@pagopa/ts-commons/lib/units";
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
+import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
-import UsersLoginLogService from "../services/usersLoginLogService";
+import {
+  AdditionalLoginPropsT,
+  LoginTypeEnum,
+  getIsUserElegibleForfastLogin,
+} from "../utils/fastLogin";
 import { isOlderThan } from "../utils/date";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -50,6 +53,7 @@ import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
   FF_IOLOGIN,
+  FF_FAST_LOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
 } from "../config";
@@ -96,22 +100,10 @@ export const isUserElegibleForIoLoginUrlScheme =
     FF_IOLOGIN
   );
 
-export enum LoginTypeEnum {
-  "LV" = "LV",
-  "STANDARD" = "STANDARD",
-}
-export type LoginTypeT = t.TypeOf<typeof LoginType>;
-export const LoginType = enumType<LoginTypeEnum>(LoginTypeEnum, "LoginType");
-
-export type AdditionalLoginPropsT = t.TypeOf<typeof AdditionalLoginProps>;
-export const AdditionalLoginProps = t.partial({ loginType: LoginType });
-
-export const acsRequestMapper = (
-  _req: express.Request
-): t.Validation<AdditionalLoginPropsT> =>
-  AdditionalLoginProps.decode({
-    loginType: _req.header("x-pagopa-login-type"),
-  });
+export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
+  IOLOGIN_USERS_LIST,
+  FF_FAST_LOGIN
+);
 
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
@@ -152,12 +144,6 @@ export default class AuthenticationController {
     // decode the SPID assertion into a SPID user
     //
     const errorOrSpidUser = validateSpidUser(userPayload);
-
-    const sessionTTL =
-      this.lollipopParams.isLollipopEnabled &&
-      additionalProps?.loginType === LoginTypeEnum.LV
-        ? this.lvTokenDurationSecs
-        : this.standardTokenDurationSecs;
 
     if (E.isLeft(errorOrSpidUser)) {
       log.error(
@@ -202,6 +188,13 @@ export default class AuthenticationController {
         E.toUnion
       );
     }
+
+    const sessionTTL =
+      this.lollipopParams.isLollipopEnabled &&
+      isUserElegibleForFastLogin(spidUser.fiscalNumber) &&
+      additionalProps?.loginType === LoginTypeEnum.LV
+        ? this.lvTokenDurationSecs
+        : this.standardTokenDurationSecs;
 
     //
     // create a new user object

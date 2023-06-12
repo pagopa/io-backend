@@ -85,10 +85,7 @@ import {
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   lvTokenDurationSecs,
 } from "./config";
-import AuthenticationController, {
-  AdditionalLoginProps,
-  acsRequestMapper,
-} from "./controllers/authenticationController";
+import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
 import NotificationController from "./controllers/notificationController";
 import PagoPAController from "./controllers/pagoPAController";
@@ -177,6 +174,7 @@ import { expressLollipopMiddleware } from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define

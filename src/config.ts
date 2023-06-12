@@ -778,8 +778,8 @@ export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
 );
 
 // LV FF variable
-export const FF_LOGIN_VELOCE = pipe(
-  process.env.FF_LOGIN_VELOCE,
+export const FF_FAST_LOGIN = pipe(
+  process.env.FF_FAST_LOGIN,
   FeatureFlag.decode,
   E.getOrElseW(() => FeatureFlagEnum.NONE)
 );
