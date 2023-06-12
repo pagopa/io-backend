@@ -80,6 +80,45 @@ describe("errorResponse", () => {
 describe("getThirdPartyMessageDetails", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it("GIVEN a working PN endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints without lollipopParams", async () => {
+    const aFetch = pnFetch(
+      nodeFetch as any as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey
+    );
+
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch,
+    });
+
+    const result = await client.getThirdPartyMessageDetails({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId,
+    });
+
+    expect(dummyGetReceivedNotification).toHaveBeenCalledTimes(1);
+    expect(dummyGetReceivedNotification).toHaveBeenCalledWith({
+      ApiKeyAuth: aPnKey,
+      iun: aPnNotificationId,
+      "x-pagopa-cx-taxid": aFiscalCode,
+    });
+
+    expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(0);
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          status: 200,
+          value: aPNThirdPartyNotification,
+        })
+      );
+    }
+  });
+
   it("GIVEN a working PN endpoint WHEN a Third-Party get message is called THEN the get is properly orchestrated on PN endpoints", async () => {
     const aFetch = pnFetch(
       nodeFetch as any as typeof fetch,
@@ -234,6 +273,47 @@ describe("getThirdPartyMessageDetails", () => {
 
 describe("getThirdPartyAttachments", () => {
   beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint without lollipopParams", async () => {
+    const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
+      T.of(
+        new NodeResponse(documentBody, {
+          status: 200,
+          statusText: "OK",
+        }) as unknown as Response
+      )()
+    );
+
+    const aFetch = pnFetch(
+      dummyFetch as any as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey
+    );
+
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch,
+    });
+
+    const result = await client.getThirdPartyMessageAttachment({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId,
+      attachment_url: aThirdPartyAttachmentForPnRelativeUrl,
+    });
+
+    expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
+    expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({
+      ApiKeyAuth: aPnKey,
+      iun: aPnNotificationId,
+      "x-pagopa-cx-taxid": aFiscalCode,
+      docIdx: Number(aDocIdx),
+    });
+    expect(dummyFetch).toHaveBeenCalledTimes(1);
+    expect(dummyFetch).toHaveBeenCalledWith(aPnAttachmentUrl);
+
+    expect(E.isRight(result)).toBeTruthy();
+  });
 
   it("GIVEN a working PN endpoint WHEN a Third-Party get attachments is called THEN the get is properly forwarded to PN endpoint", async () => {
     const dummyFetch = jest.fn((_input: RequestInfo, _init?: RequestInit) =>
@@ -452,6 +532,41 @@ describe("getThirdPartyAttachments", () => {
 
 describe("getThirdPartyMessagePrecondition", () => {
   beforeEach(() => jest.clearAllMocks());
+
+  it("GIVEN a working PN endpoint WHEN a Third-Party get precondition is called THEN the get is properly orchestrated on PN endpoints without lollipopParams", async () => {
+    const aFetch = pnFetch(
+      nodeFetch as any as typeof fetch,
+      aPNServiceId,
+      aPnUrl,
+      aPnKey
+    );
+    const client = createClient({
+      baseUrl: "https://localhost",
+      fetchApi: aFetch,
+    });
+
+    const result = await client.getThirdPartyMessagePrecondition({
+      fiscal_code: aFiscalCode,
+      id: aPnNotificationId,
+    });
+
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(1);
+    expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledWith({
+      ApiKeyAuth: aPnKey,
+      iun: aPnNotificationId,
+      "x-pagopa-cx-taxid": aFiscalCode,
+    });
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          status: 200,
+          value: aThirdPartyPrecondition,
+        })
+      );
+    }
+  });
 
   it("GIVEN a working PN endpoint WHEN a Third-Party get precondition is called THEN the get is properly orchestrated on PN endpoints", async () => {
     const aFetch = pnFetch(

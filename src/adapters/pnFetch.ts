@@ -73,7 +73,7 @@ const retrievePrecondition = (
   pnApiKey: string,
   fiscalCode: FiscalCode,
   [_, iun]: ReadonlyArray<string>,
-  lollipopLocals: LollipopLocalsType
+  lollipopLocals?: LollipopLocalsType
 ) =>
   pipe(
     () =>
@@ -100,7 +100,7 @@ const retrieveNotificationDetails = (
   pnApiKey: string,
   fiscalCode: FiscalCode,
   [_, iun]: ReadonlyArray<string>,
-  lollipopLocals: LollipopLocalsType
+  lollipopLocals?: LollipopLocalsType
 ) =>
   pipe(
     () =>
@@ -152,7 +152,7 @@ export const redirectPrecondition =
     pnUrl: string,
     pnApiKey: string,
     url: string,
-    lollipopLocals: LollipopLocalsType,
+    lollipopLocals?: LollipopLocalsType,
     init?: RequestInit
   ) =>
   (): Promise<Response> =>
@@ -197,7 +197,7 @@ export const redirectMessages =
     pnUrl: string,
     pnApiKey: string,
     url: string,
-    lollipopLocals: LollipopLocalsType,
+    lollipopLocals?: LollipopLocalsType,
     init?: RequestInit
   ) =>
   (): Promise<Response> =>
@@ -242,7 +242,7 @@ const getPnDocumentUrl = (
   pnApiKey: string,
   url: string,
   fiscalCode: FiscalCode,
-  lollipopLocals: LollipopLocalsType
+  lollipopLocals?: LollipopLocalsType
 ): TE.TaskEither<Error, NonEmptyString> =>
   pipe(
     url,
@@ -287,7 +287,7 @@ export const redirectAttachment =
     pnUrl: string,
     pnApiKey: string,
     url: string,
-    lollipopLocals: LollipopLocalsType,
+    lollipopLocals?: LollipopLocalsType,
     init?: RequestInit
   ) =>
   (): Promise<Response> =>
@@ -344,69 +344,56 @@ export const pnFetch =
     serviceId: ServiceId,
     pnUrl: string,
     pnApiKey: string,
-    maybeLollipopLocals?: LollipopLocalsType
+    lollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
   (input, init) =>
-    pipe(
-      maybeLollipopLocals,
-      O.fromNullable,
-      O.fold(
-        () =>
-          Promise.resolve(
-            errorResponse(
-              new Error("Piattaforma Notifiche requires lollipopLocals")
+    serviceId === PN_SERVICE_ID
+      ? match(getPath(input))
+          .when(
+            (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
+            (url) =>
+              redirectMessages(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                url,
+                lollipopLocals,
+                init
+              )
+          )
+          .when(
+            (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
+            (url) =>
+              redirectPrecondition(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                url,
+                lollipopLocals,
+                init
+              )
+          )
+          .when(
+            (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
+            (url) =>
+              redirectAttachment(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                url,
+                lollipopLocals,
+                init
+              )
+          )
+          .otherwise((url) =>
+            pipe(
+              TE.left(
+                new Error(
+                  `Can not find a Piattaforma Notifiche implementation for ${url}`
+                )
+              ),
+              TE.mapLeft(errorResponse),
+              TE.toUnion
             )
-          ),
-        (lollipopLocals) =>
-          serviceId === PN_SERVICE_ID
-            ? match(getPath(input))
-                .when(
-                  (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
-                  (url) =>
-                    redirectMessages(
-                      origFetch,
-                      pnUrl,
-                      pnApiKey,
-                      url,
-                      lollipopLocals,
-                      init
-                    )
-                )
-                .when(
-                  (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
-                  (url) =>
-                    redirectPrecondition(
-                      origFetch,
-                      pnUrl,
-                      pnApiKey,
-                      url,
-                      lollipopLocals,
-                      init
-                    )
-                )
-                .when(
-                  (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
-                  (url) =>
-                    redirectAttachment(
-                      origFetch,
-                      pnUrl,
-                      pnApiKey,
-                      url,
-                      lollipopLocals,
-                      init
-                    )
-                )
-                .otherwise((url) =>
-                  pipe(
-                    TE.left(
-                      new Error(
-                        `Can not find a Piattaforma Notifiche implementation for ${url}`
-                      )
-                    ),
-                    TE.mapLeft(errorResponse),
-                    TE.toUnion
-                  )
-                )()
-            : origFetch(input, init)
-      )
-    );
+          )()
+      : origFetch(input, init);
