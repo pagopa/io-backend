@@ -417,8 +417,6 @@ describe("MessagesController#getThirdPartyAttachment", () => {
       [] as ThirdPartyConfigList
     );
 
-    console.log(lollipopRequiredHeaders);
-
     const response = await controller.getThirdPartyMessageAttachment(req);
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
