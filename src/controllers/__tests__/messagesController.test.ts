@@ -397,7 +397,9 @@ describe("MessagesController#getThirdPartyAttachment", () => {
   it("should call the getThirdPartyAttachment on the messagesController with valid values", async () => {
     const req = mockReq();
 
-    mockGetThirdPartyMessageFnApp.mockReturnValue(TE.of({}));
+    mockGetThirdPartyMessageFnApp.mockReturnValue(
+      TE.of(proxyThirdPartyMessageResponse)
+    );
 
     mockGetThirdPartyAttachment.mockReturnValue(
       Promise.resolve(ResponseSuccessOctet(buffer))
@@ -420,7 +422,7 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     const response = await controller.getThirdPartyMessageAttachment(req);
 
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
-      {},
+      proxyThirdPartyMessageResponse,
       req.params.attachment_url,
       undefined
     );
