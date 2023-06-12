@@ -424,7 +424,7 @@ describe("MessagesController#getThirdPartyAttachment", () => {
     expect(mockGetThirdPartyAttachment).toHaveBeenCalledWith(
       proxyThirdPartyMessageResponse,
       req.params.attachment_url,
-      undefined
+      undefined // we expect lollipopLocals to be undefined because lollipop is disabled here
     );
 
     expect(response).toEqual({
