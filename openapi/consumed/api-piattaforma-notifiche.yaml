@@ -57,6 +57,48 @@ paths:
           minLength: 16
           pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
           type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
       responses:
         "200":
           description: OK
@@ -99,6 +141,47 @@ paths:
           minLength: 16
           pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
           type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
       responses:
         "200":
           description: OK
@@ -165,6 +248,48 @@ paths:
           minLength: 16
           pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
           type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
       responses:
         "200":
           description: OK
@@ -200,6 +325,48 @@ paths:
           minLength: 16
           pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1}"
           type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
       operationId: getReceivedNotificationPrecondition
       responses:
         "200":
@@ -528,6 +695,58 @@ components:
       pattern: "^([\\x20-\\xFF]{1,80})$"
       type: string
       description: Denominazione ente o persona fisica / ragione sociale
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: "^https:\/\/"
+    LollipopSignatureInput:
+      type: string
+      pattern: "^(((sig[0-9]+)=[^,]*?)(, ?)?)+$"
+    LollipopSignature:
+      type: string
+      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"
+    LollipopAssertionRef:
+      oneOf:
+        - $ref: "#/components/schemas/AssertionRefSha256"
+        - $ref: "#/components/schemas/AssertionRefSha384"
+        - $ref: "#/components/schemas/AssertionRefSha512"
+    LollipopUserId:
+      type: string
+      maxLength: 16
+      minLength: 16
+      description: The user's fiscal code, all upper case.
+      pattern: >-
+        ^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$
+    LollipopPublicKey:
+      type: string
+      minLength: 1
+      description: represents a Base64url encode of a JWK Public Key
+    LollipopJWTAuthorization:
+      type: string
+      minLength: 1
+    AssertionType:
+      type: string
+      enum:
+        - SAML
+        - OIDC
+    # AssertionRef possible inputs
+    AssertionRefSha256:
+      type: string
+      pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+    AssertionRefSha384:
+      type: string
+      pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+    AssertionRefSha512:
+      type: string
+      pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
+
   parameters:
     cxTaxIdAuthFleet:
       name: x-pagopa-cx-taxid

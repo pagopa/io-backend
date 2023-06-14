@@ -557,7 +557,8 @@ export async function newApp({
           USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           TOKEN_SERVICE,
-          authMiddlewares.bearerSession
+          authMiddlewares.bearerSession,
+          LOLLIPOP_API_CLIENT
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerSessionAPIRoutes(
@@ -940,7 +941,8 @@ function registerAPIRoutes(
   userDataProcessingService: UserDataProcessingService,
   tokenService: TokenService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: any,
+  lollipopClient: ReturnType<typeof LollipopApiClient>
 ): void {
   const profileController: ProfileController = new ProfileController(
     profileService,
@@ -949,7 +951,10 @@ function registerAPIRoutes(
 
   const messagesController: MessagesController = new MessagesController(
     appMessagesService,
-    tokenService
+    tokenService,
+    lollipopClient,
+    sessionStorage,
+    THIRD_PARTY_CONFIG_LIST
   );
 
   const servicesController: ServicesController = new ServicesController(

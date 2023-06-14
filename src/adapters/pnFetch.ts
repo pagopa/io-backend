@@ -10,6 +10,9 @@ import { ProblemJson } from "@pagopa/ts-commons/lib/responses";
 import { Response as NodeResponse } from "node-fetch";
 import { NotificationAttachmentDownloadMetadataResponse } from "generated/piattaforma-notifiche/NotificationAttachmentDownloadMetadataResponse";
 import { match } from "ts-pattern";
+import { LollipopLocalsType } from "src/types/lollipop";
+import { Fetch } from "src/clients/third-party-service-client";
+import nodeFetch from "node-fetch";
 import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
@@ -69,7 +72,8 @@ const retrievePrecondition = (
   pnUrl: string,
   pnApiKey: string,
   fiscalCode: FiscalCode,
-  [_, iun]: ReadonlyArray<string>
+  [_, iun]: ReadonlyArray<string>,
+  lollipopLocals?: LollipopLocalsType
 ) =>
   pipe(
     () =>
@@ -78,6 +82,7 @@ const retrievePrecondition = (
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode,
+        ...lollipopLocals,
       }),
     TE.mapLeft(errorsToError),
     TE.chain(
@@ -94,7 +99,8 @@ const retrieveNotificationDetails = (
   pnUrl: string,
   pnApiKey: string,
   fiscalCode: FiscalCode,
-  [_, iun]: ReadonlyArray<string>
+  [_, iun]: ReadonlyArray<string>,
+  lollipopLocals?: LollipopLocalsType
 ) =>
   pipe(
     () =>
@@ -102,6 +108,7 @@ const retrieveNotificationDetails = (
         ApiKeyAuth: pnApiKey,
         iun,
         "x-pagopa-cx-taxid": fiscalCode,
+        ...lollipopLocals,
       }),
     TE.mapLeft(errorsToError),
     TE.chain(
@@ -145,6 +152,7 @@ export const redirectPrecondition =
     pnUrl: string,
     pnApiKey: string,
     url: string,
+    lollipopLocals?: LollipopLocalsType,
     init?: RequestInit
   ) =>
   (): Promise<Response> =>
@@ -164,7 +172,8 @@ export const redirectPrecondition =
                 pnUrl,
                 pnApiKey,
                 headers.fiscal_code,
-                params
+                params,
+                lollipopLocals
               )
             )
           )
@@ -188,6 +197,7 @@ export const redirectMessages =
     pnUrl: string,
     pnApiKey: string,
     url: string,
+    lollipopLocals?: LollipopLocalsType,
     init?: RequestInit
   ) =>
   (): Promise<Response> =>
@@ -207,7 +217,8 @@ export const redirectMessages =
                 pnUrl,
                 pnApiKey,
                 headers.fiscal_code,
-                params
+                params,
+                lollipopLocals
               )
             )
           )
@@ -230,7 +241,8 @@ const getPnDocumentUrl = (
   pnUrl: string,
   pnApiKey: string,
   url: string,
-  fiscalCode: FiscalCode
+  fiscalCode: FiscalCode,
+  lollipopLocals?: LollipopLocalsType
 ): TE.TaskEither<Error, NonEmptyString> =>
   pipe(
     url,
@@ -246,6 +258,7 @@ const getPnDocumentUrl = (
               docIdx: Number(docIdx),
               iun,
               "x-pagopa-cx-taxid": fiscalCode,
+              ...lollipopLocals,
             }),
           E.toError
         ),
@@ -274,6 +287,7 @@ export const redirectAttachment =
     pnUrl: string,
     pnApiKey: string,
     url: string,
+    lollipopLocals?: LollipopLocalsType,
     init?: RequestInit
   ) =>
   (): Promise<Response> =>
@@ -296,7 +310,8 @@ export const redirectAttachment =
                     pnUrl,
                     pnApiKey,
                     au,
-                    headers.fiscal_code
+                    headers.fiscal_code,
+                    lollipopLocals
                   )
               )
               .otherwise((au) =>
@@ -325,25 +340,50 @@ export const redirectAttachment =
 
 export const pnFetch =
   (
-    origFetch: typeof fetch = fetch,
+    origFetch: Fetch = nodeFetch as unknown as Fetch,
     serviceId: ServiceId,
     pnUrl: string,
-    pnApiKey: string
+    pnApiKey: string,
+    lollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
   (input, init) =>
     serviceId === PN_SERVICE_ID
       ? match(getPath(input))
           .when(
             (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
-            (url) => redirectMessages(origFetch, pnUrl, pnApiKey, url, init)
+            (url) =>
+              redirectMessages(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                url,
+                lollipopLocals,
+                init
+              )
           )
           .when(
             (url) => E.isRight(ThirdPartyPreconditionUrl.decode(url)),
-            (url) => redirectPrecondition(origFetch, pnUrl, pnApiKey, url, init)
+            (url) =>
+              redirectPrecondition(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                url,
+                lollipopLocals,
+                init
+              )
           )
           .when(
             (url) => E.isRight(ThirdPartyAttachmentUrl.decode(url)),
-            (url) => redirectAttachment(origFetch, pnUrl, pnApiKey, url, init)
+            (url) =>
+              redirectAttachment(
+                origFetch,
+                pnUrl,
+                pnApiKey,
+                url,
+                lollipopLocals,
+                init
+              )
           )
           .otherwise((url) =>
             pipe(

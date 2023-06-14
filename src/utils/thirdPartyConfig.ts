@@ -4,7 +4,7 @@ import * as t from "io-ts";
 
 import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { JsonFromString, withFallback } from "io-ts-types";
+import { BooleanFromString, JsonFromString, withFallback } from "io-ts-types";
 
 export const ClientCert = t.interface({
   client_cert: NonEmptyString,
@@ -46,6 +46,8 @@ export const ThirdPartyConfigBase = t.interface({
   serviceId: NonEmptyString,
   schemaKind: NonEmptyString,
   jsonSchema: NonEmptyString,
+  isLollipopEnabled: BooleanFromString,
+  disableLollipopFor: t.readonlyArray(FiscalCode),
 });
 
 /**

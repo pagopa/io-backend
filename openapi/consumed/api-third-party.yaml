@@ -1,232 +1,474 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: Third Party Messages - Server implementation
   version: 9.7.0
-basePath: /
-schemes:
-  - https
+servers:
+- url: /
 paths:
   /messages/{id}:
     get:
-      operationId: getThirdPartyMessageDetails
       summary: Retrieve a Third Party message
       description: |-
         Returns the Third Party message with the provided message ID.
         User's fiscal code is required as header parameter.
-      produces:
-        - application/json
+      operationId: getThirdPartyMessageDetails
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/ThirdPartyMessageId'
+      - name: fiscal_code
+        in: header
+        description: The fiscal code of the user, all upper case.
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+          type: string
+      - name: id
+        in: path
+        description: ID of the Third Party message.
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
+
+
       responses:
-        '200':
+        200:
           description: Found
-          schema:
-            $ref: '#/definitions/ThirdPartyMessage'
-          examples:
-            text/json: |
-              attachments: [], 
-              custom_property: "a custom property" 
-              custom_property_2: 42 
-        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThirdPartyMessage'
+            text/json:
+              example: "attachments: [], \ncustom_property: \"a custom property\"\
+                \ \ncustom_property_2: 42 \n"
+        400:
           description: Bad Request
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        401:
           description: Unauthorized
-        '403':
+          content: {}
+        403:
           description: Forbidden
-        '404':
+          content: {}
+        404:
           description: No message found for the provided ID.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        429:
           description: Too Many Requests
-        '500':
+          content: {}
+        500:
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /messages/{id}/{attachment_url}:
     get:
-      operationId: getThirdPartyMessageAttachment
       summary: Retrieve an attachment of a Third Party message
       description: |-
         Returns the Third Party message with the provided message ID.
         User's fiscal code is required as header parameter.
-      produces:
-        - application/octet-stream
+      operationId: getThirdPartyMessageAttachment
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/ThirdPartyMessageId'
-        - name: attachment_url
-          in: path
+      - name: fiscal_code
+        in: header
+        description: The fiscal code of the user, all upper case.
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
           type: string
+      - name: id
+        in: path
+        description: ID of the Third Party message.
+        required: true
+        schema:
           minLength: 1
-          required: true
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: string
-            format: binary
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: >-
-            No message found for the provided ID or no attachment found at the
-            provided url.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
-          description: Too Many Requests
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+          type: string
+      - name: attachment_url
+        in: path
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
 
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: No message found for the provided ID or no attachment found
+            at the provided url.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        429:
+          description: Too Many Requests
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /messages/{id}/precondition:
     get:
-      operationId: getThirdPartyMessagePrecondition
       summary: Retrieve the precondition of a Third Party message
       description: |-
         Returns the precondition associated to the Third Party message with the provided message ID.
         User's fiscal code is required as header parameter.
+      operationId: getThirdPartyMessagePrecondition
       parameters:
-        - $ref: '#/parameters/FiscalCode'
-        - $ref: '#/parameters/ThirdPartyMessageId'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: "#/definitions/PreconditionContent"
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: >-
-            No message or precondition found for the provided ID.
-          schema:
-            $ref: '#/definitions/ProblemJson'
-        '429':
-          description: Too Many Requests
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ProblemJson'
+      - name: fiscal_code
+        in: header
+        description: The fiscal code of the user, all upper case.
+        required: true
+        schema:
+          maxLength: 16
+          minLength: 16
+          pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
+          type: string
+      - name: id
+        in: path
+        description: ID of the Third Party message.
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: x-pagopa-lollipop-original-method
+        in: header
+        description: The method of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopMethod"
+      - name: x-pagopa-lollipop-original-url
+        in: header
+        description: The url of the endpoint called by IO app
+        schema:
+          $ref: "#/components/schemas/LollipopOriginalURL"
+      - name: signature-input
+        in: header
+        description: The signature input, needed to verify the `signature` header
+        schema:
+          $ref: "#/components/schemas/LollipopSignatureInput"
+      - name: signature
+        in: header
+        description: The signature of the HTTP request, signed by the client with its private key.
+        schema:
+          $ref: "#/components/schemas/LollipopSignature"
+      - name: x-pagopa-lollipop-assertion-ref
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopAssertionRef"
+      - name: x-pagopa-lollipop-assertion-type
+        in: header
+        schema:
+          $ref: "#/components/schemas/AssertionType"
+      - name: x-pagopa-lollipop-auth-jwt
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopJWTAuthorization"
+      - name: x-pagopa-lollipop-public-key
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopPublicKey"
+      - name: x-pagopa-lollipop-user-id
+        in: header
+        schema:
+          $ref: "#/components/schemas/LollipopUserId"
 
-parameters:
-  FiscalCode:
-    name: fiscal_code
-    in: header
-    type: string
-    maxLength: 16
-    minLength: 16
-    required: true
-    description: The fiscal code of the user, all upper case.
-    pattern: >-
-      [A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]
-  ThirdPartyMessageId:
-    name: id
-    in: path
-    type: string
-    minLength: 1
-    required: true
-    description: ID of the Third Party message.
-definitions:
-  PreconditionContent:
-    type: object
-    properties:
-      title:
-        type: string
-        description: The title to be rendered in App
-        minlength: 1
-      markdown:
-        type: string
-        description: The markdown content to be rendered in App
-        minlength: 1
-    required:
-      - title
+
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PreconditionContent'
+        400:
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: No message or precondition found for the provided ID.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        429:
+          description: Too Many Requests
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    PreconditionContent:
+      required:
       - markdown
-  ThirdPartyMessage:
-    type: object
-    properties:
-      attachments:
-        type: array
-        items:
-          $ref: '#/definitions/ThirdPartyAttachment'
-      details:
-        type: object
-        additionalProperties: true
-  ThirdPartyAttachment:
-    type: object
-    properties:
-      id:
-        type: string
-        minLength: 1
-      content_type:
-        type: string
-        minLength: 1
-      name:
-        type: string
-        minLength: 1
-      url:
-        type: string
-        minLength: 1
-    required:
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title to be rendered in App
+        markdown:
+          type: string
+          description: The markdown content to be rendered in App
+    ThirdPartyMessage:
+      type: object
+      properties:
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyAttachment'
+        details:
+          # DO NOT CHANGE OR REMOVE
+          # PN requires this property to be free form because its response will be decoded by a ThirdParty client
+          type: object
+          additionalProperties: true
+    ThirdPartyAttachment:
+      required:
       - id
       - url
-  ProblemJson:
-    type: object
-    properties:
-      type:
-        type: string
-        format: uri
-        description: |-
-          An absolute URI that identifies the problem type. When dereferenced,
-          it SHOULD provide human-readable documentation for the problem type
-          (e.g., using HTML).
-        default: about:blank
-        example: https://example.com/problem/constraint-violation
-      title:
-        type: string
-        description: |-
-          A short, summary of the problem type. Written in english and readable
-          for engineers (usually not suited for non technical stakeholders and
-          not localized); example: Service Unavailable
-      status:
-        type: integer
-        format: int32
-        description: >-
-          The HTTP status code generated by the origin server for this
-          occurrence
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+        content_type:
+          minLength: 1
+          type: string
+        name:
+          minLength: 1
+          type: string
+        url:
+          minLength: 1
+          type: string
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          format: uri
+          example: https://example.com/problem/constraint-violation
+          default: about:blank
+        title:
+          type: string
+          description: |-
+            A short, summary of the problem type. Written in english and readable
+            for engineers (usually not suited for non technical stakeholders and
+            not localized); example: Service Unavailable
+        status:
+          maximum: 6E+2
+          exclusiveMaximum: true
+          minimum: 1E+2
+          type: integer
+          description: |-
+            The HTTP status code generated by the origin server for this occurrence
+            of the problem.
+          format: int32
+          example: 200
+        detail:
+          type: string
+          description: |-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          description: |-
+            An absolute URI that identifies the specific occurrence of the problem.
+            It may or may not yield further information if dereferenced.
+          format: uri
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: "^https:\/\/"
+    LollipopSignatureInput:
+      type: string
+      pattern: "^(((sig[0-9]+)=[^,]*?)(, ?)?)+$"
+    LollipopSignature:
+      type: string
+      pattern: "^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$"
+    LollipopAssertionRef:
+      oneOf:
+        - $ref: "#/components/schemas/AssertionRefSha256"
+        - $ref: "#/components/schemas/AssertionRefSha384"
+        - $ref: "#/components/schemas/AssertionRefSha512"
+    LollipopUserId:
+      type: string
+      maxLength: 16
+      minLength: 16
+      description: The user's fiscal code, all upper case.
+      pattern: >-
+        ^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$
+    LollipopPublicKey:
+      type: string
+      minLength: 1
+      description: represents a Base64url encode of a JWK Public Key
+    LollipopJWTAuthorization:
+      type: string
+      minLength: 1
+    AssertionType:
+      type: string
+      enum:
+        - SAML
+        - OIDC
+    # AssertionRef possible inputs
+    AssertionRefSha256:
+      type: string
+      pattern: ^(sha256-[A-Za-z0-9-_=]{1,44})$
+    AssertionRefSha384:
+      type: string
+      pattern: ^(sha384-[A-Za-z0-9-_=]{1,66})$
+    AssertionRefSha512:
+      type: string
+      pattern: ^(sha512-[A-Za-z0-9-_=]{1,88})$
 
-          of the problem.
-        minimum: 100
-        maximum: 600
-        exclusiveMaximum: true
-        example: 200
-      detail:
+  parameters:
+    FiscalCode:
+      name: fiscal_code
+      in: header
+      description: The fiscal code of the user, all upper case.
+      required: true
+      schema:
+        maxLength: 16
+        minLength: 16
+        pattern: '[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]'
         type: string
-        description: |-
-          A human readable explanation specific to this occurrence of the
-          problem.
-        example: There was an error processing the request
-      instance:
+    ThirdPartyMessageId:
+      name: id
+      in: path
+      description: ID of the Third Party message.
+      required: true
+      schema:
+        minLength: 1
         type: string
-        format: uri
-        description: >-
-          An absolute URI that identifies the specific occurrence of the
-          problem.
 
-          It may or may not yield further information if dereferenced.

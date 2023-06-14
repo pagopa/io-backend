@@ -60,11 +60,6 @@ export const aPNThirdPartyNotification = {
   details: aPnNotificationDetails
 };
 
-export const aPNThirdPartyPrecondition = {
-  title: "A title",
-  markdown: "A markdown"
-};
-
 export const aPnThirdPartyMessage: PNThirdParthyMessage = pipe(
   aPNThirdPartyNotification,
   PNThirdParthyMessage.decode,

@@ -5,6 +5,7 @@ import nodeFetch from "node-fetch";
 
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
+import { LollipopLocalsType } from "src/types/lollipop";
 import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
@@ -20,7 +21,7 @@ import { pnFetch } from "../adapters/pnFetch";
 
 // ---
 
-type Fetch = (
+export type Fetch = (
   input: RequestInfo | URL,
   init?: RequestInit | undefined
 ) => Promise<Response>;
@@ -63,13 +64,18 @@ const withoutRedirect =
  * @returns a fetch that redirects calls in case TP is PN service
  */
 const withPNFetch =
-  (serviceId: ServiceId, environment: EnvironmentConfig) =>
+  (
+    serviceId: ServiceId,
+    environment: EnvironmentConfig,
+    lollipopLocals?: LollipopLocalsType
+  ) =>
   (fetchApi: Fetch): Fetch =>
     pnFetch(
       fetchApi,
       serviceId,
       environment.baseUrl,
-      environment.detailsAuthentication.key
+      environment.detailsAuthentication.key,
+      lollipopLocals
     ) as Fetch;
 
 // ------------------
@@ -82,7 +88,11 @@ const withPNFetch =
  * @returns
  */
 export const getThirdPartyServiceClient =
-  (thirdPartyConfig: ThirdPartyConfig, fetchApi: Fetch) =>
+  (
+    thirdPartyConfig: ThirdPartyConfig,
+    fetchApi: Fetch,
+    maybeLollipopLocals?: LollipopLocalsType
+  ) =>
   (fiscalCode: FiscalCode): Client<"fiscal_code"> => {
     const environment = thirdPartyConfig.testEnvironment?.testUsers.includes(
       fiscalCode
@@ -96,7 +106,7 @@ export const getThirdPartyServiceClient =
       fetchApi,
       withoutRedirect,
       withApiKey(environment.detailsAuthentication),
-      withPNFetch(thirdPartyConfig.serviceId, environment)
+      withPNFetch(thirdPartyConfig.serviceId, environment, maybeLollipopLocals)
     );
 
     return createClient<"fiscal_code">({
@@ -127,13 +137,16 @@ export const getThirdPartyServiceClientFactory =
     thirdPartyConfigList: ThirdPartyConfigListFromString,
     fetchApi: Fetch = nodeFetch as unknown as Fetch
   ): ((
-    serviceId: ServiceId
+    serviceId: ServiceId,
+    lollipopLocals?: LollipopLocalsType
   ) => E.Either<Error, ReturnType<ThirdPartyServiceClient>>) =>
-  (serviceId) =>
+  (serviceId, lollipopLocals?) =>
     pipe(
       thirdPartyConfigList.find((c) => c.serviceId === serviceId),
       E.fromNullable(
         Error(`Cannot find configuration for service ${serviceId}`)
       ),
-      E.map((config) => getThirdPartyServiceClient(config, fetchApi))
+      E.map((config) =>
+        getThirdPartyServiceClient(config, fetchApi, lollipopLocals)
+      )
     );
