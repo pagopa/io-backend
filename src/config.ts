@@ -592,7 +592,7 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
 // Set default LV session duration
-const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 1;
+const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 15;
 export const lvTokenDurationSecs: number = process.env
   .LV_TOKEN_DURATION_IN_SECONDS
   ? parseInt(process.env.LV_TOKEN_DURATION_IN_SECONDS, 10)

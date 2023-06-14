@@ -56,6 +56,7 @@ import {
   FF_FAST_LOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
+  LV_TEST_USERS,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -101,7 +102,7 @@ export const isUserElegibleForIoLoginUrlScheme =
   );
 
 export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
-  IOLOGIN_USERS_LIST,
+  LV_TEST_USERS,
   FF_FAST_LOGIN
 );
 
