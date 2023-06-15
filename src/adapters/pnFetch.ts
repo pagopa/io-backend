@@ -166,6 +166,15 @@ export const redirectPrecondition =
           ThirdPartyPreconditionUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
+          eventLog.taskEither.info((_) => [
+            `pn.precondition.call`,
+            {
+              name: "pn.precondition.call",
+              locals: lollipopLocals
+                ? Object.keys(lollipopLocals)
+                : "No lollipop locals",
+            },
+          ]),
           TE.chain((params) =>
             pipe(
               retrievePrecondition(
@@ -215,6 +224,15 @@ export const redirectMessages =
           ThirdPartyMessagesUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
+          eventLog.taskEither.info((_) => [
+            `pn.notification.call`,
+            {
+              name: "pn.notification.call",
+              locals: lollipopLocals
+                ? Object.keys(lollipopLocals)
+                : "No lollipop locals",
+            },
+          ]),
           TE.chain((params) =>
             pipe(
               retrieveNotificationDetails(
@@ -313,15 +331,19 @@ export const redirectAttachment =
             match(getAttachmentUrl)
               .when(
                 (au) => E.isRight(PnDocumentUrl.decode(au)),
-                (au) =>
-                  getPnDocumentUrl(
+                (au) => {
+                  eventLog.peek.info(
+                    `Calling PN with lollipopLocals: ${lollipopLocals}`
+                  );
+                  return getPnDocumentUrl(
                     origFetch,
                     pnUrl,
                     pnApiKey,
                     au,
                     headers.fiscal_code,
                     lollipopLocals
-                  )
+                  );
+                }
               )
               .otherwise((au) =>
                 TE.left(
