@@ -32,7 +32,10 @@ import {
   setFetchTimeout,
   toFetch,
 } from "@pagopa/ts-commons/lib/fetch";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IntegerFromString,
+  NonNegativeIntegerFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
@@ -593,10 +596,11 @@ log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
 // Set default LV session duration
 const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 15;
-export const lvTokenDurationSecs: number = process.env
-  .LV_TOKEN_DURATION_IN_SECONDS
-  ? parseInt(process.env.LV_TOKEN_DURATION_IN_SECONDS, 10)
-  : DEFAULT_LV_TOKEN_DURATION_IN_SECONDS;
+export const lvTokenDurationSecs: number = pipe(
+  process.env.LV_TOKEN_DURATION_IN_SECONDS,
+  NonNegativeIntegerFromString.decode,
+  E.getOrElse(() => DEFAULT_LV_TOKEN_DURATION_IN_SECONDS)
+);
 log.info("LV Session token duration set to %s seconds", lvTokenDurationSecs);
 
 // HTTPs-only fetch with optional keepalive agent

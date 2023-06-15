@@ -1022,16 +1022,16 @@ describe("AuthenticationController|>LV|>acs", () => {
   );
 
   it.each`
-    loginType                 | isUserEligible | expectedTtlDuration
-    ${LoginTypeEnum.LV}       | ${true}        | ${tokenDurationSecs}
-    ${LoginTypeEnum.LV}       | ${false}       | ${tokenDurationSecs}
-    ${LoginTypeEnum.STANDARD} | ${true}        | ${tokenDurationSecs}
-    ${LoginTypeEnum.STANDARD} | ${false}       | ${tokenDurationSecs}
-    ${undefined}              | ${true}        | ${tokenDurationSecs}
-    ${undefined}              | ${false}       | ${tokenDurationSecs}
+    loginType                 | isUserEligible
+    ${LoginTypeEnum.LV}       | ${true}
+    ${LoginTypeEnum.LV}       | ${false}
+    ${LoginTypeEnum.STANDARD} | ${true}
+    ${LoginTypeEnum.STANDARD} | ${false}
+    ${undefined}              | ${true}
+    ${undefined}              | ${false}
   `(
-    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is disabled, ff is $isUserElegible and login is of type $loginType",
-    async ({ loginType, expectedTtlDuration, isUserElegible }) => {
+    "should succeed and return a new token with standard duration, if lollipop is disabled, ff is $isUserElegible and login is of type $loginType",
+    async ({ loginType, isUserElegible }) => {
       const res = mockRes();
 
       jest
@@ -1075,7 +1075,7 @@ describe("AuthenticationController|>LV|>acs", () => {
       );
       response.apply(res);
 
-      expect(mockSet).toHaveBeenCalledWith(mockedUser, expectedTtlDuration);
+      expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
       expect(mockSetLollipop).not.toHaveBeenCalled();
       expect(mockActivateLolliPoPKey).not.toHaveBeenCalled();
 

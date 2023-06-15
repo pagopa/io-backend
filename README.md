@@ -137,93 +137,93 @@ IDP is reachable at [https://spid-testenv2:8088]() \
 
 Those are all Environment variables needed by the application:
 
-| Variable name                          | Description                                                                       | type   |
-|----------------------------------------|-----------------------------------------------------------------------------------|--------|
-| API_KEY                                | The key used to authenticate to the io-functions-app API                          | string |
-| API_URL                                | The io-functions-app URL                                                          | string |
-| API_BASE_PATH                          | The root path for the backend api endpoints                                       | string |
-| BACKEND_HOST                           | The absolute URL of the app service containing the FQDN                           | string |
-| BONUS_API_KEY                          | The key used to authenticate to the io-functions-bonus API                        | string |
-| BONUS_API_URL                          | The io-functions-bonus  URL                                                       | string |
-| BONUS_API_BASE_PATH                    | The root path for the backend bonus api endpoints                                 | string |
-| CGN_API_KEY                            | The key used to authenticate to the io-functions-cgn API                          | string |
-| CGN_API_URL                            | The io-functions-cgn  URL                                                         | string |
-| CGN_API_BASE_PATH                      | The root path for the backend cgn api endpoints                                   | string |
-| CLIENT_REDIRECTION_URL                 | (Optional)The path where the user will be redirected after a successful SPID login| string |
-| PORT                                   | The HTTP port the Express server is listening to                                  | int    |
-| REDIS_URL                              | The URL of a Redis instance                                                       | string |
-| TOKEN_DURATION_IN_SECONDS              | The number of seconds a session token is considered valid                         | int    |
-| LV_TOKEN_DURATION_IN_SECONDS           | The number of seconds a session token is considered valid if LV is enabled        | int    |
-| SAML_CALLBACK_URL                      | The absolute URL of the assertion consumer service endpoint                       | string |
-| SAML_ISSUER                            | The issuer id for this Service Provider                                           | string |
-| SAML_ACCEPTED_CLOCK_SKEW_MS            | Maximum skew between SAML Client and Server (empty or -1 disable datetime checks) | int    |
-| SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX | The index in the attribute consumer list                                          | int    |
-| SAML_KEY                               | Private Key used by SAML protocol                                                 | string |
-| SAML_CERT                              | Certificate used by SAML protocol                                                 | string |
-| SAML_REQUEST_EXPIRATION_PERIOD_MS      | (Optional) The TTL in milliseconds that the SAML Request was stored in cache (defaults to `600.000`) | number |
-| PRE_SHARED_KEY                         | The key shared with the API backend to authenticate the webhook notifications     | string |
-| ALLOW_NOTIFY_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the webhook notifications               | string |
-| NOTIFICATIONS_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for notification hub messages           | string |
-| NOTIFICATIONS_QUEUE_NAME                | Queue name of Azure queue storage for notification hub messages                  | string |
-| USERS_LOGIN_STORAGE_CONNECTION_STRING  | Connection string to Azure queue storage for usersLogin messages                  | string |
-| USERS_LOGIN_QUEUE_NAME                 | Queue name of Azure queue storage for usersLogin messages                         | string |
-| ALLOW_PAGOPA_IP_SOURCE_RANGE           | The range in CIDR form of allowed IPs for the PagoPA API                          | string |
-| ALLOW_MYPORTAL_IP_SOURCE_RANGE         | The range in CIDR form of allowed IPs for the MyPortal API                        | string |
-| ALLOW_BPD_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the BPD API                             | string |
-| ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE  | The range in CIDR form of IPs of service allowed to handle user sessions          | string |
-| AUTHENTICATION_BASE_PATH               | The root path for the authentication endpoints                                    | string |
-| PAGOPA_API_URL_PROD                    | The url for the PagoPA api endpoints in prod mode                                 | string |
-| PAGOPA_API_KEY_PROD                    | The api-key needed to call the pagopa proxy API                                   | string |
-| PAGOPA_API_URL_TEST                    | The url for the PagoPA api endpoints in test mode                                 | string |
-| PAGOPA_API_KEY_UAT                     | The api-key needed to call the pagopa proxy API for UAT instance                  | string |
-| PAGOPA_BASE_PATH                       | The root path for the PagoPA endpoints                                            | string |
-| MYPORTAL_BASE_PATH                     | The root path for the MyPortal endpoints                                          | string |
-| BPD_BASE_PATH                          | The root path for the BPD endpoints                                               | string |
-| FIMS_BASE_PATH                         | The root path for the FIMS endpoints                                              | string |
-| STARTUP_IDPS_METADATA                  | Stringified JSON containing idps metadata `Record<string, string>`                | string |
-| CIE_METADATA_URL                       | Url to download CIE metadata from                                                 | string |
-| IDP_METADATA_URL                       | Url to download SPID IDPs metadata from                                           | string |
-| SPID_TESTENV_URL                       | Url to SPID Testenv 2                                                             | string |
-| SPID_VALIDATOR_URL                     | Url to SPID Validator                                                             | string |
-| IDP_METADATA_REFRESH_INTERVAL_SECONDS  | The number of seconds when the IDPs Metadata are refreshed                        | int    |
-| CACHE_MAX_AGE_SECONDS                  | The value in seconds for duration of in-memory api cache                          | int    |
-| APICACHE_DEBUG                         | When is `true` enable the apicache debug mode                                     | boolean |
-| GITHUB_TOKEN                           | The value of your Github Api Key, used in build phase                             | string |
-| FETCH_KEEPALIVE_ENABLED                | When is `true` enables `keepalive` agent in the API client (defaults to `false`)  | boolean |
-| ENABLE_NOTICE_EMAIL_CACHE              | (Optional) Enable `notice_email` cache in PagoPA getUser (defaults to `false`)    | boolean |
-| SPID_LEVEL_WHITELIST                   | (Optional) Spid Level whitelist csv (defaults L2 and L3 for prod, all for dev)    | string |
-| TEST_LOGIN_FISCAL_CODES                | (Optional) Enabled username for password based login (coma separated Fiscal Code) | string |
-| TEST_LOGIN_PASSWORD                    | (Optional) Password for password based login                                      | string |
-| FETCH_KEEPALIVE_MAX_SOCKETS            | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-| FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT_MS | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-| FETCH_KEEPALIVE_KEEPALIVE_MSECS        | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-| FETCH_KEEPALIVE_MAX_FREE_SOCKETS       | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-| FETCH_KEEPALIVE_TIMEOUT                | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-| FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL      | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)  | |
-| FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
-| FF_CGN_ENABLED                         | When is `true` (namely `1`) enables CGN API to be registered into backend app     | boolean |
-| APP_MESSAGES_API_KEY                   | The key used to authenticate to the io-functions-app-messages API                 | string |
-| APP_MESSAGES_API_URL                   | The io-functions-app-messages URL                                                 | string |
-| THIRD_PARTY_CONFIG_LIST                | (Optional, default empty) A list of ThirdParty Configuration                      | stringified JSON |
-| IS_APPBACKENDLI                        | (Optional, default false) Enables notify and session lock endpoints working only on appbackendli | boolean |
-| FF_PN_ACTIVATION_ENABLED               | (Optional) Enable the integration with PN for Service Activation (1 enabled)      | int     |
-| PN_ACTIVATION_BASE_PATH                | (Required if FF_PN_ACTIVATION_ENABLED = 1) base path for activation endpoint      | string  |
-| PN_API_KEY                             | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for production environment  | string  |
-| PN_API_KEY_UAT                         | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for UAT environment         | string  |
-| PN_API_URL                             | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for production         | string  |
-| PN_API_URL_UAT                         | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for UAT environment    | string  |
-| FF_IO_SIGN_ENABLED                     | When is `true` (namely `1`) enables IO SIGN API to be registered into backend app | boolean |
-| IO_SIGN_API_BASE_PATH                  | The root path for the backend io-sign api endpoints                               | string  |
-| IO_SIGN_API_KEY                        | The key used to authenticate to the io-func-sign-user API                         | string  |
-| IO_SIGN_API_URL                        | The io-func-sign-user  URL                                                        | string  |
-| LOLLIPOP_API_KEY                       | The key used to authenticate to the io-function-lollipop API                      | string  |
-| LOLLIPOP_API_URL                       | The io-function-lollipop URL                                                      | string  |
-| LOLLIPOP_API_BASE_PATH                 | The io-function-lollipop api base path                                            | string  |
-| FF_LOLLIPOP_ENABLED                    | (Optional) Enable Lollipop flows default false                                    | boolean |
-| LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for revoke Users lollipop PubKeys     | string  |
-| LOLLIPOP_REVOKE_QUEUE_NAME             | Queue name of Azure queue storage for revoke Users lollipop PubKeys               | string  |
-| FF_FAST_LOGIN                          | (Optional) Enable Fast Login flow. Default: NONE                                  | string (enum) |
-| LV_TEST_USERS                          | (Optional) Comma separated list of LV beta testers. Default: empty array          | srting |
+| Variable name                             | Description                                                                                          | type   |
+|----------------------------------------   |-----------------------------------------------------------------------------------                   |--------|
+| API_KEY                                   | The key used to authenticate to the io-functions-app API                                             | string |
+| API_URL                                   | The io-functions-app URL                                                                             | string |
+| API_BASE_PATH                             | The root path for the backend api endpoints                                                          | string |
+| BACKEND_HOST                              | The absolute URL of the app service containing the FQDN                                              | string |
+| BONUS_API_KEY                             | The key used to authenticate to the io-functions-bonus API                                           | string |
+| BONUS_API_URL                             | The io-functions-bonus  URL                                                                          | string |
+| BONUS_API_BASE_PATH                       | The root path for the backend bonus api endpoints                                                    | string |
+| CGN_API_KEY                               | The key used to authenticate to the io-functions-cgn API                                             | string |
+| CGN_API_URL                               | The io-functions-cgn  URL                                                                            | string |
+| CGN_API_BASE_PATH                         | The root path for the backend cgn api endpoints                                                      | string |
+| CLIENT_REDIRECTION_URL                    | (Optional)The path where the user will be redirected after a successful SPID login                   | string |
+| PORT                                      | The HTTP port the Express server is listening to                                                     | int    |
+| REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
+| TOKEN_DURATION_IN_SECONDS                 | The number of seconds a session token is considered valid                                            | int    |
+| LV_TOKEN_DURATION_IN_SECONDS              | (Optional) The number of seconds a session token is considered valid if LV is enabled                | int    |
+| SAML_CALLBACK_URL                         | The absolute URL of the assertion consumer service endpoint                                          | string |
+| SAML_ISSUER                               | The issuer id for this Service Provider                                                              | string |
+| SAML_ACCEPTED_CLOCK_SKEW_MS               | Maximum skew between SAML Client and Server (empty or -1 disable datetime checks)                    | int    |
+| SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX    | The index in the attribute consumer list                                                             | int    |
+| SAML_KEY                                  | Private Key used by SAML protocol                                                                    | string |
+| SAML_CERT                                 | Certificate used by SAML protocol                                                                    | string |
+| SAML_REQUEST_EXPIRATION_PERIOD_MS         | (Optional) The TTL in milliseconds that the SAML Request was stored in cache (defaults to `600.000`) | number |
+| PRE_SHARED_KEY                            | The key shared with the API backend to authenticate the webhook notifications                        | string |
+| ALLOW_NOTIFY_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the webhook notifications                                  | string |
+| NOTIFICATIONS_STORAGE_CONNECTION_STRING   | Connection string to Azure queue storage for notification hub messages                               | string |
+| NOTIFICATIONS_QUEUE_NAME                  | Queue name of Azure queue storage for notification hub messages                                      | string |
+| USERS_LOGIN_STORAGE_CONNECTION_STRING     | Connection string to Azure queue storage for usersLogin messages                                     | string |
+| USERS_LOGIN_QUEUE_NAME                    | Queue name of Azure queue storage for usersLogin messages                                            | string |
+| ALLOW_PAGOPA_IP_SOURCE_RANGE              | The range in CIDR form of allowed IPs for the PagoPA API                                             | string |
+| ALLOW_MYPORTAL_IP_SOURCE_RANGE            | The range in CIDR form of allowed IPs for the MyPortal API                                           | string |
+| ALLOW_BPD_IP_SOURCE_RANGE                 | The range in CIDR form of allowed IPs for the BPD API                                                | string |
+| ALLOW_SESSION_HANDLER_IP_SOURCE_RANGE     | The range in CIDR form of IPs of service allowed to handle user sessions                             | string |
+| AUTHENTICATION_BASE_PATH                  | The root path for the authentication endpoints                                                       | string |
+| PAGOPA_API_URL_PROD                       | The url for the PagoPA api endpoints in prod mode                                                    | string |
+| PAGOPA_API_KEY_PROD                       | The api-key needed to call the pagopa proxy API                                                      | string |
+| PAGOPA_API_URL_TEST                       | The url for the PagoPA api endpoints in test mode                                                    | string |
+| PAGOPA_API_KEY_UAT                        | The api-key needed to call the pagopa proxy API for UAT instance                                     | string |
+| PAGOPA_BASE_PATH                          | The root path for the PagoPA endpoints                                                               | string |
+| MYPORTAL_BASE_PATH                        | The root path for the MyPortal endpoints                                                             | string |
+| BPD_BASE_PATH                             | The root path for the BPD endpoints                                                                  | string |
+| FIMS_BASE_PATH                            | The root path for the FIMS endpoints                                                                 | string |
+| STARTUP_IDPS_METADATA                     | Stringified JSON containing idps metadata `Record<string, string>`                                   | string |
+| CIE_METADATA_URL                          | Url to download CIE metadata from                                                                    | string |
+| IDP_METADATA_URL                          | Url to download SPID IDPs metadata from                                                              | string |
+| SPID_TESTENV_URL                          | Url to SPID Testenv 2                                                                                | string |
+| SPID_VALIDATOR_URL                        | Url to SPID Validator                                                                                | string |
+| IDP_METADATA_REFRESH_INTERVAL_SECONDS     | The number of seconds when the IDPs Metadata are refreshed                                           | int    |
+| CACHE_MAX_AGE_SECONDS                     | The value in seconds for duration of in-memory api cache                                             | int    |
+| APICACHE_DEBUG                            | When is `true` enable the apicache debug mode                                                        | boolean |
+| GITHUB_TOKEN                              | The value of your Github Api Key, used in build phase                                                | string |
+| FETCH_KEEPALIVE_ENABLED                   | When is `true` enables `keepalive` agent in the API client (defaults to `false`)                     | boolean |
+| ENABLE_NOTICE_EMAIL_CACHE                 | (Optional) Enable `notice_email` cache in PagoPA getUser (defaults to `false`)                       | boolean |
+| SPID_LEVEL_WHITELIST                      | (Optional) Spid Level whitelist csv (defaults L2 and L3 for prod, all for dev)                       | string |
+| TEST_LOGIN_FISCAL_CODES                   | (Optional) Enabled username for password based login (coma separated Fiscal Code)                    | string |
+| TEST_LOGIN_PASSWORD                       | (Optional) Password for password based login                                                         | string |
+| FETCH_KEEPALIVE_MAX_SOCKETS               | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
+| FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT_MS    | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
+| FETCH_KEEPALIVE_KEEPALIVE_MSECS           | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
+| FETCH_KEEPALIVE_MAX_FREE_SOCKETS          | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
+| FETCH_KEEPALIVE_TIMEOUT                   | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
+| FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL         | (Optional) See [agentkeepalive](https://github.com/node-modules/agentkeepalive#readme)               | |
+| FF_CGN_ENABLED                            | When is `true` (namely `1`) enables CGN API to be registered into backend app                        | boolean |
+| FF_CGN_ENABLED                            | When is `true` (namely `1`) enables CGN API to be registered into backend app                        | boolean |
+| APP_MESSAGES_API_KEY                      | The key used to authenticate to the io-functions-app-messages API                                    | string |
+| APP_MESSAGES_API_URL                      | The io-functions-app-messages URL                                                                    | string |
+| THIRD_PARTY_CONFIG_LIST                   | (Optional, default empty) A list of ThirdParty Configuration                                         | stringified JSON |
+| IS_APPBACKENDLI                           | (Optional, default false) Enables notify and session lock endpoints working only on appbackendli     | boolean |
+| FF_PN_ACTIVATION_ENABLED                  | (Optional) Enable the integration with PN for Service Activation (1 enabled)                         | int     |
+| PN_ACTIVATION_BASE_PATH                   | (Required if FF_PN_ACTIVATION_ENABLED = 1) base path for activation endpoint                         | string  |
+| PN_API_KEY                                | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for production environment                     | string  |
+| PN_API_KEY_UAT                            | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API key for UAT environment                            | string  |
+| PN_API_URL                                | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for production                            | string  |
+| PN_API_URL_UAT                            | (Required if FF_PN_ACTIVATION_ENABLED = 1) PN API base url for UAT environment                       | string  |
+| FF_IO_SIGN_ENABLED                        | When is `true` (namely `1`) enables IO SIGN API to be registered into backend app                    | boolean |
+| IO_SIGN_API_BASE_PATH                     | The root path for the backend io-sign api endpoints                                                  | string  |
+| IO_SIGN_API_KEY                           | The key used to authenticate to the io-func-sign-user API                                            | string  |
+| IO_SIGN_API_URL                           | The io-func-sign-user  URL                                                                           | string  |
+| LOLLIPOP_API_KEY                          | The key used to authenticate to the io-function-lollipop API                                         | string  |
+| LOLLIPOP_API_URL                          | The io-function-lollipop URL                                                                         | string  |
+| LOLLIPOP_API_BASE_PATH                    | The io-function-lollipop api base path                                                               | string  |
+| FF_LOLLIPOP_ENABLED                       | (Optional) Enable Lollipop flows default false                                                       | boolean |
+| LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for revoke Users lollipop PubKeys                           | string  |
+| LOLLIPOP_REVOKE_QUEUE_NAME                | Queue name of Azure queue storage for revoke Users lollipop PubKeys                                  | string  |
+| FF_FAST_LOGIN                             | (Optional) Enable Fast Login flow. Default: NONE                                                     | string (enum) |
+| LV_TEST_USERS                             | (Optional) Comma separated list of LV beta testers. Default: empty array                             | srting |
 
 Notes:
 

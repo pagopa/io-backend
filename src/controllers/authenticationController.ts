@@ -190,6 +190,10 @@ export default class AuthenticationController {
       );
     }
 
+    // LV functionality is enable only if Lollipop is enabled.
+    // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
+    // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
+    // Otherwise LV is disabled.
     const sessionTTL =
       this.lollipopParams.isLollipopEnabled &&
       isUserElegibleForFastLogin(spidUser.fiscalNumber) &&

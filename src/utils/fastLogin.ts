@@ -15,10 +15,10 @@ export type AdditionalLoginPropsT = t.TypeOf<typeof AdditionalLoginProps>;
 export const AdditionalLoginProps = t.partial({ loginType: LoginType });
 
 export const acsRequestMapper = (
-  _req: express.Request
+  req: express.Request
 ): t.Validation<AdditionalLoginPropsT> =>
   AdditionalLoginProps.decode({
-    loginType: _req.header("x-pagopa-login-type"),
+    loginType: req.header("x-pagopa-login-type"),
   });
 
 // ----------------------------
