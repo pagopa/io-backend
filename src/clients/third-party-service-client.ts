@@ -6,6 +6,7 @@ import nodeFetch from "node-fetch";
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
 import { LollipopLocalsType } from "src/types/lollipop";
+import { eventLog } from "@pagopa/winston-ts";
 import {
   ThirdPartyConfig,
   ThirdPartyConfigListFromString,
@@ -101,6 +102,19 @@ export const getThirdPartyServiceClient =
       : // We defined thirdPartyConfig to contains at least one configuration
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         thirdPartyConfig.prodEnvironment ?? thirdPartyConfig.testEnvironment!;
+
+    eventLog.peek.info(
+      `Pointing to test environment? ${
+        thirdPartyConfig.testEnvironment?.testUsers.includes(fiscalCode)
+          ? "yes"
+          : "no"
+      }`
+    );
+    eventLog.peek.info(
+      `Is fiscal code included in testUsers: ${thirdPartyConfig.testEnvironment?.testUsers.includes(
+        fiscalCode
+      )}`
+    );
 
     const fetchApiWithRedirectAndAuthentication = pipe(
       fetchApi,

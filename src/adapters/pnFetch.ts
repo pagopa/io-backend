@@ -13,6 +13,7 @@ import { match } from "ts-pattern";
 import { LollipopLocalsType } from "src/types/lollipop";
 import { Fetch } from "src/clients/third-party-service-client";
 import nodeFetch from "node-fetch";
+import { eventLog } from "@pagopa/winston-ts";
 import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
@@ -165,6 +166,15 @@ export const redirectPrecondition =
           ThirdPartyPreconditionUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
+          eventLog.taskEither.info((_) => [
+            `pn.precondition.call`,
+            {
+              locals: lollipopLocals
+                ? Object.keys(lollipopLocals)
+                : "No lollipop locals",
+              name: "pn.precondition.call",
+            },
+          ]),
           TE.chain((params) =>
             pipe(
               retrievePrecondition(
@@ -187,6 +197,10 @@ export const redirectPrecondition =
             statusText: "OK",
           }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
+      eventLog.taskEither.errorLeft(({ message }) => [
+        `Something went wrong trying to call retrievePrecondition`,
+        { message, name: "pn.precondition.error" },
+      ]),
       TE.mapLeft(errorResponse),
       TE.toUnion
     )();
@@ -210,6 +224,15 @@ export const redirectMessages =
           ThirdPartyMessagesUrl.decode,
           E.mapLeft(errorsToError),
           TE.fromEither,
+          eventLog.taskEither.info((_) => [
+            `pn.notification.call`,
+            {
+              locals: lollipopLocals
+                ? Object.keys(lollipopLocals)
+                : "No lollipop locals",
+              name: "pn.notification.call",
+            },
+          ]),
           TE.chain((params) =>
             pipe(
               retrieveNotificationDetails(
@@ -232,6 +255,10 @@ export const redirectMessages =
             statusText: "OK",
           }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
+      eventLog.taskEither.errorLeft(({ message }) => [
+        `Something went wrong trying to call retrieveNotificationDetails`,
+        { message, name: "pn.notification.error" },
+      ]),
       TE.mapLeft(errorResponse),
       TE.toUnion
     )();
@@ -304,15 +331,19 @@ export const redirectAttachment =
             match(getAttachmentUrl)
               .when(
                 (au) => E.isRight(PnDocumentUrl.decode(au)),
-                (au) =>
-                  getPnDocumentUrl(
+                (au) => {
+                  eventLog.peek.info(
+                    `Calling PN with lollipopLocals: ${lollipopLocals}`
+                  );
+                  return getPnDocumentUrl(
                     origFetch,
                     pnUrl,
                     pnApiKey,
                     au,
                     headers.fiscal_code,
                     lollipopLocals
-                  )
+                  );
+                }
               )
               .otherwise((au) =>
                 TE.left(
@@ -334,6 +365,11 @@ export const redirectAttachment =
           )
         )
       ),
+      eventLog.taskEither.errorLeft(({ message }) => [
+        `Something went wrong trying to call getPnDocumentUrl`,
+        { message, name: "pn.attachment.error" },
+      ]),
+
       TE.mapLeft(errorResponse),
       TE.toUnion
     )();
@@ -346,8 +382,11 @@ export const pnFetch =
     pnApiKey: string,
     lollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
-  (input, init) =>
-    serviceId === PN_SERVICE_ID
+  (input, init) => {
+    eventLog.peek.info(
+      serviceId === PN_SERVICE_ID ? `Calling PN api` : "Calling third party api"
+    );
+    return serviceId === PN_SERVICE_ID
       ? match(getPath(input))
           .when(
             (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
@@ -397,3 +436,4 @@ export const pnFetch =
             )
           )()
       : origFetch(input, init);
+  };
