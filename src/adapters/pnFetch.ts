@@ -18,6 +18,7 @@ import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
 import { ServiceId } from "../../generated/backend/ServiceId";
 import { PN_SERVICE_ID } from "../config";
+import { eventLog } from "@pagopa/winston-ts";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
@@ -187,6 +188,10 @@ export const redirectPrecondition =
             statusText: "OK",
           }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
+      eventLog.taskEither.errorLeft(({ message }) => [
+        `Something went wrong trying to call retrievePrecondition`,
+        { message, name: "pn.precondition.error" },
+      ]),
       TE.mapLeft(errorResponse),
       TE.toUnion
     )();
@@ -232,6 +237,10 @@ export const redirectMessages =
             statusText: "OK",
           }) as unknown as Response // cast required: the same cast is used in clients code generation
       ),
+      eventLog.taskEither.errorLeft(({ message }) => [
+        `Something went wrong trying to call retrieveNotificationDetails`,
+        { message, name: "pn.notification.error" },
+      ]),
       TE.mapLeft(errorResponse),
       TE.toUnion
     )();
@@ -334,6 +343,11 @@ export const redirectAttachment =
           )
         )
       ),
+      eventLog.taskEither.errorLeft(({ message }) => [
+        `Something went wrong trying to call getPnDocumentUrl`,
+        { message, name: "pn.attachment.error" },
+      ]),
+
       TE.mapLeft(errorResponse),
       TE.toUnion
     )();
@@ -346,8 +360,11 @@ export const pnFetch =
     pnApiKey: string,
     lollipopLocals?: LollipopLocalsType
   ): typeof fetch =>
-  (input, init) =>
-    serviceId === PN_SERVICE_ID
+  (input, init) => {
+    eventLog.peek.info(
+      serviceId === PN_SERVICE_ID ? `Calling PN api` : "Calling third party api"
+    );
+    return serviceId === PN_SERVICE_ID
       ? match(getPath(input))
           .when(
             (url) => E.isRight(ThirdPartyMessagesUrl.decode(url)),
@@ -397,3 +414,4 @@ export const pnFetch =
             )
           )()
       : origFetch(input, init);
+  };
