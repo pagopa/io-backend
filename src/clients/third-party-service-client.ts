@@ -103,8 +103,14 @@ export const getThirdPartyServiceClient =
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         thirdPartyConfig.prodEnvironment ?? thirdPartyConfig.testEnvironment!;
 
-    eventLog.task.info(`Third party client base url: ${environment.baseUrl}`);
-    eventLog.task.info(
+    eventLog.peek.info(
+      `Pointing to test environment? ${
+        thirdPartyConfig.testEnvironment?.testUsers.includes(fiscalCode)
+          ? "yes"
+          : "no"
+      }`
+    );
+    eventLog.peek.info(
       `Is fiscal code included in testUsers: ${thirdPartyConfig.testEnvironment?.testUsers.includes(
         fiscalCode
       )}`

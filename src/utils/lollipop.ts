@@ -51,9 +51,9 @@ export const checkIfLollipopIsEnabled = (
       Error(`Cannot find configuration for service ${serviceId}`)
     ),
     eventLog.taskEither.info((config) => [
-      `Check if lollipop is enabled`,
+      `lollipop.status.info`,
       {
-        isLollipopDisabledFor: !config.disableLollipopFor.includes(fiscalCode),
+        isLollipopDisabledFor: config.disableLollipopFor.includes(fiscalCode),
         isLollipopEnabled: config.isLollipopEnabled,
       },
     ]),
@@ -188,7 +188,7 @@ export const extractLollipopLocalsFromLollipopHeaders = (
         } as LollipopLocalsType)
     ),
     eventLog.taskEither.info((lcLocals) => [
-      "Lollipop locals",
+      "lollipop.locals.info",
       Object.keys(lcLocals),
     ])
   );
