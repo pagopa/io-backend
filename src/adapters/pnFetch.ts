@@ -13,12 +13,12 @@ import { match } from "ts-pattern";
 import { LollipopLocalsType } from "src/types/lollipop";
 import { Fetch } from "src/clients/third-party-service-client";
 import nodeFetch from "node-fetch";
+import { eventLog } from "@pagopa/winston-ts";
 import { PnAPIClient } from "../clients/pn-clients";
 import { errorsToError } from "../utils/errorsFormatter";
 import { pathParamsFromUrl } from "../types/pathParams";
 import { ServiceId } from "../../generated/backend/ServiceId";
 import { PN_SERVICE_ID } from "../config";
-import { eventLog } from "@pagopa/winston-ts";
 
 const getPath = (input: RequestInfo | URL): string =>
   input instanceof URL
@@ -169,10 +169,10 @@ export const redirectPrecondition =
           eventLog.taskEither.info((_) => [
             `pn.precondition.call`,
             {
-              name: "pn.precondition.call",
               locals: lollipopLocals
                 ? Object.keys(lollipopLocals)
                 : "No lollipop locals",
+              name: "pn.precondition.call",
             },
           ]),
           TE.chain((params) =>
@@ -227,10 +227,10 @@ export const redirectMessages =
           eventLog.taskEither.info((_) => [
             `pn.notification.call`,
             {
-              name: "pn.notification.call",
               locals: lollipopLocals
                 ? Object.keys(lollipopLocals)
                 : "No lollipop locals",
+              name: "pn.notification.call",
             },
           ]),
           TE.chain((params) =>
