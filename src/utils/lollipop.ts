@@ -50,6 +50,13 @@ export const checkIfLollipopIsEnabled = (
     TE.fromNullable(
       Error(`Cannot find configuration for service ${serviceId}`)
     ),
+    eventLog.taskEither.info((config) => [
+      `Check if lollipop is enabled`,
+      {
+        isLollipopDisabledFor: !config.disableLollipopFor.includes(fiscalCode),
+        isLollipopEnabled: config.isLollipopEnabled,
+      },
+    ]),
     TE.map(
       (config) =>
         config.isLollipopEnabled &&
@@ -179,5 +186,9 @@ export const extractLollipopLocalsFromLollipopHeaders = (
           ["x-pagopa-lollipop-user-id"]: fiscalCode,
           ...lollipopHeaders,
         } as LollipopLocalsType)
-    )
+    ),
+    eventLog.taskEither.info((lcLocals) => [
+      "Lollipop locals",
+      Object.keys(lcLocals),
+    ])
   );
