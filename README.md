@@ -228,6 +228,20 @@ Notes:
  * `FETCH_KEEPALIVE_MAX_SOCKETS` depends on the number of `node` processes running on the VM, see [this article](https://docs.microsoft.com/en-us/azure/app-service/app-service-web-nodejs-best-practices-and-troubleshoot-guide#my-node-application-is-making-excessive-outbound-calls) and [this issue](https://github.com/MicrosoftDocs/azure-docs/issues/8013)
  * `FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL` should be set at around 100 seconds when deploying on Azure, see [this comment](https://github.com/MicrosoftDocs/azure-docs/issues/29600#issuecomment-490354812)
 
+If you are trying to run the docker images on your local environment (through the docker-compose) you must set a new env variable as follow:
+  * STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:20003/devstoreaccount1;QueueEndpoint=http://127.0.0.1:20004/devstoreaccount1;TableEndpoint=http://127.0.0.1:20005/devstoreaccount1;
+
+And the following variables with this value:
+* SPID_LOG_STORAGE_CONNECTION_STRING=${STORAGE_CONNECTION_STRING}
+* NOTIFICATIONS_STORAGE_CONNECTION_STRING=${STORAGE_CONNECTION_STRING}
+* PUSH_NOTIFICATIONS_STORAGE_CONNECTION_STRING=${STORAGE_CONNECTION_STRING}
+* USERS_LOGIN_STORAGE_CONNECTION_STRING=${STORAGE_CONNECTION_STRING}
+* LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING=${STORAGE_CONNECTION_STRING}
+
+The STORAGE_CONNECTION_STRING value is a default connection string needed to connect to Azurite, a local emulator used to provide a free local environment for testing an Azure Blob, Queue Storage, and Table Storage application.
+As for docker-compose instructions, the Azurite docker image runs the Blob service on port 20003, the Queue service on port 20004 and the Table service on port 20005.
+If Azurite is executed on different address or ports, the connection string must be changed according to the service.
+
 ### Logs
 
 Application logs are saved into the logs folder.

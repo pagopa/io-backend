@@ -147,23 +147,19 @@ services:
       - 'REDIS_CLUSTER_REPLICAS=1'
       - 'REDIS_NODES=redis-cluster redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
       - 'REDIS_CLUSTER_CREATOR=yes'
-  #
-  #
-  #
-  #
 
   storage:
-    image: azurite
-    build:
-      context: ./
-      dockerfile: docker/images/azurite/Dockerfile
-    command: ["sh", "-c", "node bin/azurite -l /opt/azurite/folder --blobPort 20003 --queuePort 20004 --tablePort 20005"]
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: storage
+    hostname: azurite
+    restart: always
+    command: "azurite --blobHost 127.0.0.1 --blobPort 20003 --queueHost 127.0.0.1 --queuePort 20004 --tableHost 127.0.0.1 --tablePort 20005"
     ports:
       - "20003:20003"
       - "20004:20004"
       - "20005:20005"
     networks:
-      - io-be
+       - io-be
 
 networks:
   io-be:
