@@ -536,7 +536,7 @@ export default class NewMessagesService {
     ThirdPartyMessagePrecondition
   > =>
     pipe(
-      this.thirdPartyClientFactory(message.sender_service_id),
+      this.thirdPartyClientFactory(message.sender_service_id, lollipopLocals),
       TE.fromEither,
       TE.mapLeft((error) => {
         log.error(
@@ -619,7 +619,7 @@ export default class NewMessagesService {
     ThirdPartyMessage
   > =>
     pipe(
-      this.thirdPartyClientFactory(message.sender_service_id),
+      this.thirdPartyClientFactory(message.sender_service_id, lollipopLocals),
       TE.fromEither,
       TE.mapLeft((error) => {
         log.error(
@@ -701,7 +701,7 @@ export default class NewMessagesService {
     Buffer
   > =>
     pipe(
-      this.thirdPartyClientFactory(message.sender_service_id),
+      this.thirdPartyClientFactory(message.sender_service_id, lollipopLocals),
       TE.fromEither,
       TE.mapLeft((error) => {
         log.error(
