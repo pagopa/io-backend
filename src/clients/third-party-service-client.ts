@@ -104,16 +104,26 @@ export const getThirdPartyServiceClient =
         thirdPartyConfig.prodEnvironment ?? thirdPartyConfig.testEnvironment!;
 
     eventLog.peek.info(
-      `Pointing to test environment? ${
-        thirdPartyConfig.testEnvironment?.testUsers.includes(fiscalCode)
-          ? "yes"
-          : "no"
-      }`
+      thirdPartyConfig.testEnvironment?.testUsers.includes(fiscalCode)
+        ? [
+            "Third party client pointing to test environment",
+            { name: "lollipop.third-party.test" },
+          ]
+        : [
+            "Third party client pointing to prod environment",
+            { name: "lollipop.third-party.prod" },
+          ]
     );
     eventLog.peek.info(
-      `Is fiscal code included in testUsers: ${thirdPartyConfig.testEnvironment?.testUsers.includes(
-        fiscalCode
-      )}`
+      thirdPartyConfig.testEnvironment?.testUsers.includes(fiscalCode)
+        ? [
+            "Fiscal code included in testUsers",
+            { name: "lollipop.testUsers.fiscal-code" },
+          ]
+        : [
+            "Fiscal code not included in testUsers",
+            { name: "lollipop.testUsers.fiscal-code" },
+          ]
     );
 
     const fetchApiWithRedirectAndAuthentication = pipe(
