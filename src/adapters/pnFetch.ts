@@ -332,9 +332,10 @@ export const redirectAttachment =
               .when(
                 (au) => E.isRight(PnDocumentUrl.decode(au)),
                 (au) => {
-                  eventLog.peek.info(
-                    `Calling PN with lollipopLocals: ${lollipopLocals}`
-                  );
+                  eventLog.peek.info([
+                    `Calling PN with lollipopLocals: ${lollipopLocals}`,
+                    { name: "lollipo.pn.api.attachment" },
+                  ]);
                   return getPnDocumentUrl(
                     origFetch,
                     pnUrl,
@@ -384,7 +385,9 @@ export const pnFetch =
   ): typeof fetch =>
   (input, init) => {
     eventLog.peek.info(
-      serviceId === PN_SERVICE_ID ? `Calling PN api` : "Calling third party api"
+      serviceId === PN_SERVICE_ID
+        ? [`Calling PN api`, { name: "lollipop.pn.api" }]
+        : ["Calling third party api", { name: "lollipop.third-party.api" }]
     );
     return serviceId === PN_SERVICE_ID
       ? match(getPath(input))
