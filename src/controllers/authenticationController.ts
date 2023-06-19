@@ -31,15 +31,21 @@ import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
-import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
+import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
-import UsersLoginLogService from "../services/usersLoginLogService";
+import {
+  AdditionalLoginPropsT,
+  LoginTypeEnum,
+  getIsUserElegibleForfastLogin,
+} from "../utils/fastLogin";
 import { isOlderThan } from "../utils/date";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -47,9 +53,10 @@ import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
   FF_IOLOGIN,
+  FF_FAST_LOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
-  tokenDurationSecs,
+  LV_TEST_USERS,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -94,6 +101,11 @@ export const isUserElegibleForIoLoginUrlScheme =
     FF_IOLOGIN
   );
 
+export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
+  LV_TEST_USERS,
+  FF_FAST_LOGIN
+);
+
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
   constructor(
@@ -111,15 +123,18 @@ export default class AuthenticationController {
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
     private readonly lollipopParams: LollipopParams,
+    private readonly standardTokenDurationSecs: Second,
+    private readonly lvTokenDurationSecs: Second,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
    * The Assertion consumer service.
    */
-  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
+  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity, complexity
   public async acs(
-    userPayload: unknown
+    userPayload: unknown,
+    additionalProps?: AdditionalLoginPropsT
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -174,6 +189,17 @@ export default class AuthenticationController {
         E.toUnion
       );
     }
+
+    // LV functionality is enable only if Lollipop is enabled.
+    // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
+    // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
+    // Otherwise LV is disabled.
+    const sessionTTL =
+      this.lollipopParams.isLollipopEnabled &&
+      isUserElegibleForFastLogin(spidUser.fiscalNumber) &&
+      additionalProps?.loginType === LoginTypeEnum.LV
+        ? this.lvTokenDurationSecs
+        : this.standardTokenDurationSecs;
 
     //
     // create a new user object
@@ -331,14 +357,15 @@ export default class AuthenticationController {
               assertionRef,
               user.fiscal_code,
               spidUser.getSamlResponseXml(),
-              () => addSeconds(new Date(), tokenDurationSecs)
+              () => addSeconds(new Date(), sessionTTL)
             ),
             pipe(
               TE.tryCatch(
                 () =>
                   this.sessionStorage.setLollipopAssertionRefForUser(
                     user,
-                    assertionRef
+                    assertionRef,
+                    sessionTTL
                   ),
                 E.toError
               ),
@@ -378,7 +405,7 @@ export default class AuthenticationController {
     // Attempt to create a new session object while we fetch an existing profile
     // for the user
     const [errorOrIsSessionCreated, getProfileResponse] = await Promise.all([
-      this.sessionStorage.set(user),
+      this.sessionStorage.set(user, sessionTTL),
       this.profileService.getProfile(user),
     ]);
 
@@ -491,7 +518,7 @@ export default class AuthenticationController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<AccessToken>
   > {
-    const acsResponse = await this.acs(userPayload);
+    const acsResponse = await this.acs(userPayload, {});
     // When the login succeeded with a ResponsePermanentRedirect (301)
     // the token was extract from the response and returned into the body
     // of a ResponseSuccessJson (200)

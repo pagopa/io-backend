@@ -40,7 +40,7 @@ import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
-import { exactUserIdentityDecode, SpidUser } from "../../types/user";
+import { SpidUser, exactUserIdentityDecode } from "../../types/user";
 import AuthenticationController, {
   AGE_LIMIT,
   AGE_LIMIT_ERROR_CODE,
@@ -63,6 +63,8 @@ import {
   anotherAssertionRef,
 } from "../../__mocks__/lollipop";
 import * as authCtrl from "../authenticationController";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { LoginTypeEnum } from "../../utils/fastLogin";
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -202,7 +204,9 @@ const redisClient = {} as redis.RedisClientType;
 
 const tokenService = new TokenService();
 
-const tokenDurationSecs = 0;
+const tokenDurationSecs = 3600 * 24 * 30;
+const lvTokenDurationSecs = 60 * 1;
+
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
@@ -246,6 +250,8 @@ const controller = new AuthenticationController(
     isLollipopEnabled: false,
     lollipopService: lollipopService,
   },
+  tokenDurationSecs as Second,
+  lvTokenDurationSecs as Second,
   mockTelemetryClient
 );
 
@@ -263,6 +269,8 @@ const lollipopActivatedController = new AuthenticationController(
     isLollipopEnabled: true,
     lollipopService: lollipopService,
   },
+  tokenDurationSecs as Second,
+  lvTokenDurationSecs as Second,
   mockTelemetryClient
 );
 
@@ -277,6 +285,17 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+const setupMocks = () => {
+  mockGetNewToken
+    .mockReturnValueOnce(mockSessionToken)
+    .mockReturnValueOnce(mockWalletToken)
+    .mockReturnValueOnce(mockMyPortalToken)
+    .mockReturnValueOnce(mockBPDToken)
+    .mockReturnValueOnce(mockZendeskToken)
+    .mockReturnValueOnce(mockFIMSToken)
+    .mockReturnValueOnce(aSessionTrackingId);
+};
+
 describe("AuthenticationController#acs", () => {
   it("redirects to the correct url if userPayload is a valid User and a profile not exists", async () => {
     const res = mockRes();
@@ -288,14 +307,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -310,7 +322,7 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).toHaveBeenCalledWith(
       mockedUser,
@@ -323,14 +335,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -342,7 +347,7 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
   });
@@ -357,14 +362,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -375,7 +373,7 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).toHaveBeenCalledWith(
@@ -394,14 +392,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorInternal("Error reading the user profile")
@@ -409,7 +400,7 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toHaveBeenCalled();
@@ -557,14 +548,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -584,10 +568,13 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith({
-      ...mockedUser,
-      date_of_birth: aYoungUserPayload.dateOfBirth,
-    });
+    expect(mockSet).toHaveBeenCalledWith(
+      {
+        ...mockedUser,
+        date_of_birth: aYoungUserPayload.dateOfBirth,
+      },
+      tokenDurationSecs
+    );
     expect(mockGetProfile).toHaveBeenCalledWith({
       ...mockedUser,
       date_of_birth: aYoungUserPayload.dateOfBirth,
@@ -617,14 +604,7 @@ describe("AuthenticationController#acs", () => {
     );
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -652,10 +632,11 @@ describe("AuthenticationController#acs", () => {
       expect.objectContaining({
         fiscal_code: aFiscalCode,
       }),
-      anotherAssertionRef
+      anotherAssertionRef,
+      tokenDurationSecs
     );
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
   });
@@ -684,14 +665,7 @@ describe("AuthenticationController#acs", () => {
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      mockGetNewToken
-        .mockReturnValueOnce(mockSessionToken)
-        .mockReturnValueOnce(mockWalletToken)
-        .mockReturnValueOnce(mockMyPortalToken)
-        .mockReturnValueOnce(mockBPDToken)
-        .mockReturnValueOnce(mockZendeskToken)
-        .mockReturnValueOnce(mockFIMSToken)
-        .mockReturnValueOnce(aSessionTrackingId);
+      setupMocks();
 
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
@@ -728,7 +702,8 @@ describe("AuthenticationController#acs", () => {
         expect.objectContaining({
           fiscal_code: aFiscalCode,
         }),
-        anotherAssertionRef
+        anotherAssertionRef,
+        tokenDurationSecs
       );
 
       expect(mockSet).not.toBeCalled();
@@ -747,14 +722,7 @@ describe("AuthenticationController#acs", () => {
     );
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
@@ -799,14 +767,7 @@ describe("AuthenticationController#acs", () => {
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      mockGetNewToken
-        .mockReturnValueOnce(mockSessionToken)
-        .mockReturnValueOnce(mockWalletToken)
-        .mockReturnValueOnce(mockMyPortalToken)
-        .mockReturnValueOnce(mockBPDToken)
-        .mockReturnValueOnce(mockZendeskToken)
-        .mockReturnValueOnce(mockFIMSToken)
-        .mockReturnValueOnce(aSessionTrackingId);
+      setupMocks();
 
       const response = await lollipopActivatedController.acs(validUserPayload);
       response.apply(res);
@@ -847,14 +808,7 @@ describe("AuthenticationController#acs", () => {
     mockGetLollipop.mockResolvedValueOnce(E.left(new Error("Error")));
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
@@ -902,14 +856,7 @@ describe("AuthenticationController#acs", () => {
 
       mockSet.mockReturnValue(Promise.resolve(E.right(true)));
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      mockGetNewToken
-        .mockReturnValueOnce(mockSessionToken)
-        .mockReturnValueOnce(mockWalletToken)
-        .mockReturnValueOnce(mockMyPortalToken)
-        .mockReturnValueOnce(mockBPDToken)
-        .mockReturnValueOnce(mockZendeskToken)
-        .mockReturnValueOnce(mockFIMSToken)
-        .mockReturnValueOnce(aSessionTrackingId);
+      setupMocks();
 
       mockGetProfile.mockReturnValue(
         ResponseSuccessJson(mockedInitializedProfile)
@@ -920,6 +867,105 @@ describe("AuthenticationController#acs", () => {
       expect(res.redirect).toHaveBeenCalledWith(
         301,
         expectedUriScheme + "//localhost/profile.html?token=" + mockSessionToken
+      );
+    }
+  );
+});
+
+describe("AuthenticationController|>LV|>acs", () => {
+  it.each`
+    loginType               | isLollipopEnabled | isUserElegible | expectedTtlDuration
+    ${LoginTypeEnum.LV}     | ${true}           | ${true}        | ${lvTokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${true}           | ${false}       | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}           | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}           | ${false}       | ${tokenDurationSecs}
+    ${undefined}            | ${true}           | ${true}        | ${tokenDurationSecs}
+    ${undefined}            | ${true}           | ${false}       | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}          | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}          | ${false}       | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}          | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}          | ${false}       | ${tokenDurationSecs}
+    ${undefined}            | ${false}          | ${true}        | ${tokenDurationSecs}
+    ${undefined}            | ${false}          | ${false}       | ${tokenDurationSecs}
+  `(
+    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled, ff is $isUserElegible and login is of type $loginType",
+    async ({
+      loginType,
+      isLollipopEnabled,
+      expectedTtlDuration,
+      isUserElegible,
+    }) => {
+      const res = mockRes();
+
+      jest
+        .spyOn(authCtrl, "isUserElegibleForFastLogin")
+        .mockImplementationOnce((_) => isUserElegible);
+
+      mockGetLollipop.mockResolvedValueOnce(
+        E.right(O.some(anotherAssertionRef))
+      );
+      mockDelLollipop.mockResolvedValueOnce(E.right(true));
+      mockActivateLolliPoPKey.mockImplementationOnce(
+        (newAssertionRef, __, ___) =>
+          TE.of({
+            ...anActivatedPubKey,
+            assertion_ref: newAssertionRef,
+          } as ActivatedPubKey)
+      );
+      mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+        Promise.resolve(E.right(true))
+      );
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+      setupMocks();
+
+      mockGetProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+
+      const controllerToUse = isLollipopEnabled
+        ? lollipopActivatedController
+        : controller;
+
+      const response = await controllerToUse.acs(
+        validUserPayload,
+        withoutUndefinedValues({
+          loginType,
+        })
+      );
+      response.apply(res);
+
+      expect(mockSet).toHaveBeenCalledWith(mockedUser, expectedTtlDuration);
+
+      if (isLollipopEnabled) {
+        expect(mockSetLollipop).toHaveBeenCalledWith(
+          mockedUser,
+          anotherAssertionRef,
+          expectedTtlDuration
+        );
+        expect(mockActivateLolliPoPKey).toHaveBeenCalledWith(
+          anotherAssertionRef,
+          mockedUser.fiscal_code,
+          aLollipopAssertion,
+          expect.any(Function)
+        );
+
+        const ttlToExpirationDate = mockActivateLolliPoPKey.mock.calls[0][3];
+
+        const now = new Date();
+        const exp = ttlToExpirationDate() as Date;
+        const diff = (exp.getTime() - now.getTime()) / 1000;
+
+        expect(diff).toEqual(expectedTtlDuration);
+      } else {
+        expect(mockSetLollipop).not.toHaveBeenCalled();
+        expect(mockActivateLolliPoPKey).not.toHaveBeenCalled();
+      }
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        expect.stringContaining("/profile.html?token=" + mockSessionToken)
       );
     }
   );
@@ -965,7 +1011,7 @@ describe("AuthenticationController#acsTest", () => {
   it("should return ResponseErrorInternal if the token is missing", async () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
-        href: "http://invalid-url",
+        href: "https://invalid-url",
       } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);

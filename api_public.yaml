@@ -62,6 +62,7 @@ paths:
         - $ref: "#/parameters/AuthLevel"
         - $ref: "#/parameters/JwkPubKeyToken"
         - $ref: "#/parameters/JwkPubKeyHashAlgorithm"
+        - $ref: "#/parameters/LoginType"
       responses:
         "302":
           description: Redirect to IDP
@@ -164,6 +165,13 @@ parameters:
     description: SPID AuthLevel
     required: true
     x-example: SpidL2
+  LoginType:
+    name: loginType
+    in: header
+    type: string
+    enum: [LV, LEGACY]
+    required: false
+    x-example: LEGACY
   JwkPubKeyToken:
     $ref: "./api_lollipop.yaml#/parameters/JwkPubKeyToken"
   JwkPubKeyHashAlgorithm:
