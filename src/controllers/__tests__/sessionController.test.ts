@@ -57,6 +57,11 @@ jest.mock("../../services/profileService", () => {
   };
 });
 
+const mockSetRedisSessionStorage = jest.spyOn(
+  RedisSessionStorage.prototype,
+  "set"
+);
+
 mockGetProfile.mockReturnValue(
   Promise.resolve(ResponseSuccessJson(mockedInitializedProfile))
 );
@@ -154,6 +159,8 @@ describe("SessionController#getSessionState", () => {
     const response = await controller.getSessionState(req);
     response.apply(res);
 
+    expect(mockSetRedisSessionStorage).not.toHaveBeenCalled();
+
     expect(mockGet).toBeCalledWith(`KEYS-${mockedUser.fiscal_code}`);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(
@@ -191,6 +198,12 @@ describe("SessionController#getSessionState", () => {
 
     const response = await controller.getSessionState(req);
     response.apply(res);
+
+    expect(mockSetRedisSessionStorage).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Number),
+      true
+    );
 
     expect(controller).toBeTruthy();
     expect(mockGetNewToken).toBeCalledTimes(4);

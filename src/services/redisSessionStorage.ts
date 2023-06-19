@@ -91,7 +91,8 @@ export default class RedisSessionStorage
   // eslint-disable-next-line max-lines-per-function
   public async set(
     user: UserV5,
-    expireSec: number = this.tokenDurationSecs
+    expireSec: number = this.tokenDurationSecs,
+    isUserSessionUpdate: boolean = false
   ): Promise<Either<Error, boolean>> {
     const setSessionTokenV2 = pipe(
       TE.tryCatch(
@@ -182,7 +183,7 @@ export default class RedisSessionStorage
     // If is a session update, the session info key doesn't must be updated.
     // eslint-disable-next-line functional/no-let
     let saveSessionInfoPromise: TE.TaskEither<Error, boolean> = TE.right(true);
-    if (expireSec === this.tokenDurationSecs) {
+    if (!isUserSessionUpdate) {
       const sessionInfo: SessionInfo = {
         createdAt: new Date(),
         sessionToken: user.session_token,
@@ -677,7 +678,11 @@ export default class RedisSessionStorage
     }
 
     // We here update all the token but we can optimize it updating only missing tokens
-    const errorOrIsSessionUpdated = await this.set(updatedUser, sessionTtl);
+    const errorOrIsSessionUpdated = await this.set(
+      updatedUser,
+      sessionTtl,
+      true
+    );
     if (E.isLeft(errorOrIsSessionUpdated)) {
       return E.left(
         new Error(
