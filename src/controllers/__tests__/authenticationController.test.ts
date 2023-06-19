@@ -285,6 +285,17 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+const setupMocks = () => {
+  mockGetNewToken
+    .mockReturnValueOnce(mockSessionToken)
+    .mockReturnValueOnce(mockWalletToken)
+    .mockReturnValueOnce(mockMyPortalToken)
+    .mockReturnValueOnce(mockBPDToken)
+    .mockReturnValueOnce(mockZendeskToken)
+    .mockReturnValueOnce(mockFIMSToken)
+    .mockReturnValueOnce(aSessionTrackingId);
+};
+
 describe("AuthenticationController#acs", () => {
   it("redirects to the correct url if userPayload is a valid User and a profile not exists", async () => {
     const res = mockRes();
@@ -296,14 +307,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -331,14 +335,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -365,14 +362,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -402,14 +392,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorInternal("Error reading the user profile")
@@ -565,14 +548,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -628,14 +604,7 @@ describe("AuthenticationController#acs", () => {
     );
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -760,14 +729,7 @@ describe("AuthenticationController#acs", () => {
     );
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
@@ -860,14 +822,7 @@ describe("AuthenticationController#acs", () => {
     mockGetLollipop.mockResolvedValueOnce(E.left(new Error("Error")));
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupMocks();
 
     const response = await lollipopActivatedController.acs(validUserPayload);
     response.apply(res);
