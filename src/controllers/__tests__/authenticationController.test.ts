@@ -1127,7 +1127,7 @@ describe("AuthenticationController#acsTest", () => {
   it("should return ResponseErrorInternal if the token is missing", async () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
-        href: "http://invalid-url",
+        href: "https://invalid-url",
       } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);
