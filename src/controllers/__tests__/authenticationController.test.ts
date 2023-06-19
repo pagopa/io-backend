@@ -940,13 +940,13 @@ describe("AuthenticationController#acs", () => {
 
 describe("AuthenticationController|>LV|>acs", () => {
   it.each`
-    loginType                 | isUserElegible | expectedTtlDuration
-    ${LoginTypeEnum.LV}       | ${true}        | ${lvTokenDurationSecs}
-    ${LoginTypeEnum.LV}       | ${false}       | ${tokenDurationSecs}
-    ${LoginTypeEnum.STANDARD} | ${true}        | ${tokenDurationSecs}
-    ${LoginTypeEnum.STANDARD} | ${false}       | ${tokenDurationSecs}
-    ${undefined}              | ${true}        | ${tokenDurationSecs}
-    ${undefined}              | ${false}       | ${tokenDurationSecs}
+    loginType               | isUserElegible | expectedTtlDuration
+    ${LoginTypeEnum.LV}     | ${true}        | ${lvTokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}       | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}        | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}       | ${tokenDurationSecs}
+    ${undefined}            | ${true}        | ${tokenDurationSecs}
+    ${undefined}            | ${false}       | ${tokenDurationSecs}
   `(
     "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled, ff is $isUserElegible and login is of type $loginType",
     async ({ loginType, expectedTtlDuration, isUserElegible }) => {
@@ -1022,13 +1022,13 @@ describe("AuthenticationController|>LV|>acs", () => {
   );
 
   it.each`
-    loginType                 | isUserEligible
-    ${LoginTypeEnum.LV}       | ${true}
-    ${LoginTypeEnum.LV}       | ${false}
-    ${LoginTypeEnum.STANDARD} | ${true}
-    ${LoginTypeEnum.STANDARD} | ${false}
-    ${undefined}              | ${true}
-    ${undefined}              | ${false}
+    loginType               | isUserEligible
+    ${LoginTypeEnum.LV}     | ${true}
+    ${LoginTypeEnum.LV}     | ${false}
+    ${LoginTypeEnum.LEGACY} | ${true}
+    ${LoginTypeEnum.LEGACY} | ${false}
+    ${undefined}            | ${true}
+    ${undefined}            | ${false}
   `(
     "should succeed and return a new token with standard duration, if lollipop is disabled, ff is $isUserElegible and login is of type $loginType",
     async ({ loginType, isUserElegible }) => {

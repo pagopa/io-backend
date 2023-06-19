@@ -6,7 +6,7 @@ import { FeatureFlag, getIsUserEligibleForNewFeature } from "./featureFlag";
 
 export enum LoginTypeEnum {
   "LV" = "LV",
-  "STANDARD" = "STANDARD",
+  "LEGACY" = "LEGACY",
 }
 export type LoginTypeT = t.TypeOf<typeof LoginType>;
 export const LoginType = enumType<LoginTypeEnum>(LoginTypeEnum, "LoginType");
