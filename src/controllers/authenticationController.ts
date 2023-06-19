@@ -125,6 +125,7 @@ export default class AuthenticationController {
     private readonly lollipopParams: LollipopParams,
     private readonly standardTokenDurationSecs: Second,
     private readonly lvTokenDurationSecs: Second,
+    private readonly lvLongSessionDurationSecs: Second,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
@@ -194,12 +195,12 @@ export default class AuthenticationController {
     // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
     // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
     // Otherwise LV is disabled.
-    const sessionTTL =
+    const [sessionTTL, lollipopKeyTTL] =
       this.lollipopParams.isLollipopEnabled &&
       isUserElegibleForFastLogin(spidUser.fiscalNumber) &&
       additionalProps?.loginType === LoginTypeEnum.LV
-        ? this.lvTokenDurationSecs
-        : this.standardTokenDurationSecs;
+        ? [this.lvTokenDurationSecs, this.lvLongSessionDurationSecs]
+        : [this.standardTokenDurationSecs, this.standardTokenDurationSecs];
 
     //
     // create a new user object
@@ -357,7 +358,7 @@ export default class AuthenticationController {
               assertionRef,
               user.fiscal_code,
               spidUser.getSamlResponseXml(),
-              () => addSeconds(new Date(), sessionTTL)
+              () => addSeconds(new Date(), lollipopKeyTTL)
             ),
             pipe(
               TE.tryCatch(
@@ -365,7 +366,7 @@ export default class AuthenticationController {
                   this.sessionStorage.setLollipopAssertionRefForUser(
                     user,
                     assertionRef,
-                    sessionTTL
+                    lollipopKeyTTL
                   ),
                 E.toError
               ),

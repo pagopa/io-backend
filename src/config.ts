@@ -594,7 +594,7 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
 
-// Set default LV session duration
+// Set default LV token duration
 const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 15;
 export const lvTokenDurationSecs: number = pipe(
   process.env.LV_TOKEN_DURATION_IN_SECONDS,
@@ -602,6 +602,18 @@ export const lvTokenDurationSecs: number = pipe(
   E.getOrElse(() => DEFAULT_LV_TOKEN_DURATION_IN_SECONDS)
 );
 log.info("LV Session token duration set to %s seconds", lvTokenDurationSecs);
+
+// Set default LV session duration
+const DEFAULT_LV_LONG_SESSION_DURATION_IN_SECONDS = 3600 * 24 * 365;
+export const lvLongSessionDurationSecs: number = pipe(
+  process.env.LV_LONG_SESSION_DURATION_IN_SECONDS,
+  NonNegativeIntegerFromString.decode,
+  E.getOrElse(() => DEFAULT_LV_LONG_SESSION_DURATION_IN_SECONDS)
+);
+log.info(
+  "LV Long Session duration set to %s seconds",
+  lvLongSessionDurationSecs
+);
 
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10

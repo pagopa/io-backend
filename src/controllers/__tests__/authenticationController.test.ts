@@ -206,6 +206,7 @@ const tokenService = new TokenService();
 
 const tokenDurationSecs = 3600 * 24 * 30;
 const lvTokenDurationSecs = 60 * 1;
+const lvLongSessionDurationSecs = 3600 * 24 * 365;
 
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
@@ -252,6 +253,7 @@ const controller = new AuthenticationController(
   },
   tokenDurationSecs as Second,
   lvTokenDurationSecs as Second,
+  lvLongSessionDurationSecs as Second,
   mockTelemetryClient
 );
 
@@ -271,6 +273,7 @@ const lollipopActivatedController = new AuthenticationController(
   },
   tokenDurationSecs as Second,
   lvTokenDurationSecs as Second,
+  lvLongSessionDurationSecs as Second,
   mockTelemetryClient
 );
 
@@ -874,25 +877,26 @@ describe("AuthenticationController#acs", () => {
 
 describe("AuthenticationController|>LV|>acs", () => {
   it.each`
-    loginType               | isLollipopEnabled | isUserElegible | expectedTtlDuration
-    ${LoginTypeEnum.LV}     | ${true}           | ${true}        | ${lvTokenDurationSecs}
-    ${LoginTypeEnum.LV}     | ${true}           | ${false}       | ${tokenDurationSecs}
-    ${LoginTypeEnum.LEGACY} | ${true}           | ${true}        | ${tokenDurationSecs}
-    ${LoginTypeEnum.LEGACY} | ${true}           | ${false}       | ${tokenDurationSecs}
-    ${undefined}            | ${true}           | ${true}        | ${tokenDurationSecs}
-    ${undefined}            | ${true}           | ${false}       | ${tokenDurationSecs}
-    ${LoginTypeEnum.LV}     | ${false}          | ${true}        | ${tokenDurationSecs}
-    ${LoginTypeEnum.LV}     | ${false}          | ${false}       | ${tokenDurationSecs}
-    ${LoginTypeEnum.LEGACY} | ${false}          | ${true}        | ${tokenDurationSecs}
-    ${LoginTypeEnum.LEGACY} | ${false}          | ${false}       | ${tokenDurationSecs}
-    ${undefined}            | ${false}          | ${true}        | ${tokenDurationSecs}
-    ${undefined}            | ${false}          | ${false}       | ${tokenDurationSecs}
+    loginType               | isLollipopEnabled | isUserElegible | expectedTtlDuration    | expectedLongSessionDuration
+    ${LoginTypeEnum.LV}     | ${true}           | ${true}        | ${lvTokenDurationSecs} | ${lvLongSessionDurationSecs}
+    ${LoginTypeEnum.LV}     | ${true}           | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}           | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}           | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${true}           | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${true}           | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}          | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}          | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}          | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}          | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${false}          | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${false}          | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
   `(
     "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled, ff is $isUserElegible and login is of type $loginType",
     async ({
       loginType,
       isLollipopEnabled,
       expectedTtlDuration,
+      expectedLongSessionDuration,
       isUserElegible,
     }) => {
       const res = mockRes();
@@ -942,7 +946,7 @@ describe("AuthenticationController|>LV|>acs", () => {
         expect(mockSetLollipop).toHaveBeenCalledWith(
           mockedUser,
           anotherAssertionRef,
-          expectedTtlDuration
+          expectedLongSessionDuration
         );
         expect(mockActivateLolliPoPKey).toHaveBeenCalledWith(
           anotherAssertionRef,
@@ -957,7 +961,7 @@ describe("AuthenticationController|>LV|>acs", () => {
         const exp = ttlToExpirationDate() as Date;
         const diff = (exp.getTime() - now.getTime()) / 1000;
 
-        expect(diff).toEqual(expectedTtlDuration);
+        expect(diff).toEqual(expectedLongSessionDuration);
       } else {
         expect(mockSetLollipop).not.toHaveBeenCalled();
         expect(mockActivateLolliPoPKey).not.toHaveBeenCalled();
