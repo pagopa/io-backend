@@ -84,6 +84,7 @@ import {
   IO_SIGN_SERVICE_ID,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   lvTokenDurationSecs,
+  lvLongSessionDurationSecs,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -504,6 +505,7 @@ export async function newApp({
             },
             tokenDurationSecs as Second,
             lvTokenDurationSecs as Second,
+            lvLongSessionDurationSecs as Second,
             appInsightsClient
           );
 
