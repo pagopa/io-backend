@@ -397,9 +397,29 @@ describe("RedisSessionStorage#set", () => {
       expect(JSON.parse(mockSetEx.mock.calls[6][2])).toHaveProperty(
         "createdAt"
       );
+
+      expect(mockSadd).toHaveBeenCalled();
+
       expect(response).toEqual(expected);
     }
   );
+
+  it("should not call sAdd if is an update", async () => {
+    redisMethodImplFromError(mockSetEx, "OK");
+    redisMethodImplFromError(mockSetEx, "OK");
+    redisMethodImplFromError(mockSetEx, "OK");
+    redisMethodImplFromError(mockSetEx, "OK");
+    redisMethodImplFromError(mockSetEx, "OK");
+    // FIMS Token
+    redisMethodImplFromError(mockSetEx, "OK");
+    redisMethodImplFromError(mockSetEx, "OK");
+    redisMethodImplFromError(mockSadd, 1);
+    redisMethodImplFromError(mockSmembers, []);
+
+    await sessionStorage.set(aValidUser, 100, true);
+
+    expect(mockSadd).not.toHaveBeenCalled();
+  });
 });
 
 describe("RedisSessionStorage#removeOtherUserSessions", () => {

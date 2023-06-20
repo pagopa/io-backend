@@ -20,11 +20,17 @@ import { User, UserV5 } from "../types/user";
 
 export interface ISessionStorage {
   /**
-   * Stores a value to the cache.
+   * Stores or updated a value to the cache.
+   *
+   * @param user the user to store or update
+   * @param expireSec the ttl of all the session-related tokens
+   * @param isUserSessionUpdate a boolean that defines if we are updating an existing session or creating a new one
+   * @returns a promise of either an error or boolena
    */
   readonly set: (
     user: UserV5,
-    expireSec?: number
+    expireSec?: number,
+    isUserSessionUpdate?: boolean
   ) => Promise<Either<Error, boolean>>;
 
   /**
