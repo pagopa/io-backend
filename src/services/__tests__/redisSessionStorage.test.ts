@@ -426,9 +426,6 @@ describe("RedisSessionStorage#set", () => {
     redisMethodImplFromError(mockSetEx, "OK");
     // FIMS Token
     redisMethodImplFromError(mockSetEx, "OK");
-    // redisMethodImplFromError(mockSetEx, "OK");
-    // redisMethodImplFromError(mockSadd, 1);
-    // redisMethodImplFromError(mockSmembers, []);
 
     await sessionStorage.set(aValidUser, 100, true);
 
