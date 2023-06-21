@@ -1,0 +1,50 @@
+openapi: 3.0.1
+servers:
+  - url: https://api-app.io.pagopa.it/api/v1
+info:
+  title: Fast login API
+  version: 1.0.0
+
+paths:
+  /fast-login:
+    post:
+      operationId: Signed Lollipop request to perform a refresh flow
+      summary: POST a session refresh request with Lollipop
+      parameters:
+        - $ref: "./lollipop_definitions.yaml#/components/parameters/LollipopMethodHeader"
+        - $ref: "./lollipop_definitions.yaml#/components/parameters/LollipopOriginalURLHeader"
+        - $ref: "./lollipop_definitions.yaml#/components/parameters/LollipopSignatureInputHeader"
+        - $ref: "./lollipop_definitions.yaml#/components/parameters/LollipopSignatureHeader"
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FastLoginResponse"
+        "401":
+          description: Unauthorized(invalid signature or nonce)
+        "403":
+          description: |
+            Forbidden access.
+            Fast login won't work. A FULL login flow is REQUIRED
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+components:
+  schemas:
+    FastLoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: 48 bytes token (hex encoded)
+          example: c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b
+      required:
+        - token
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/ProblemJson"
