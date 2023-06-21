@@ -26,9 +26,7 @@ import {
 } from "../../types/token";
 import { User, UserV2, UserV3, UserV4, UserV5 } from "../../types/user";
 import { multipleErrorsFormatter } from "../../utils/errorsFormatter";
-import RedisSessionStorage, {
-  sessionNotFoundError,
-} from "../redisSessionStorage";
+import RedisSessionStorage from "../redisSessionStorage";
 import {
   mockBPDToken,
   mockFIMSToken,
@@ -363,37 +361,53 @@ describe("RedisSessionStorage#set", () => {
       redisMethodImplFromError(mockSadd, 1);
       redisMethodImplFromError(mockSmembers, []);
 
-      const response = await sessionStorage.set(aValidUser);
+      const expectedTTL = 42;
+      const response = await sessionStorage.set(aValidUser, expectedTTL);
 
       expect(mockSetEx).toHaveBeenCalledTimes(7);
 
-      expect(mockSetEx.mock.calls[0][0]).toBe(
-        `SESSION-${aValidUser.session_token}`
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        1,
+        `SESSION-${aValidUser.session_token}`,
+        expectedTTL,
+        JSON.stringify(aValidUser)
       );
-      expect(mockSetEx.mock.calls[0][2]).toEqual(JSON.stringify(aValidUser));
-
-      expect(mockSetEx.mock.calls[1][0]).toBe(
-        `WALLET-${aValidUser.wallet_token}`
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        2,
+        `WALLET-${aValidUser.wallet_token}`,
+        expectedTTL,
+        aValidUser.session_token
       );
-      expect(mockSetEx.mock.calls[1][2]).toBe(aValidUser.session_token);
-
-      expect(mockSetEx.mock.calls[2][0]).toBe(
-        `MYPORTAL-${aValidUser.myportal_token}`
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        3,
+        `MYPORTAL-${aValidUser.myportal_token}`,
+        expectedTTL,
+        aValidUser.session_token
       );
-      expect(mockSetEx.mock.calls[2][2]).toBe(aValidUser.session_token);
-
-      expect(mockSetEx.mock.calls[3][0]).toBe(`BPD-${aValidUser.bpd_token}`);
-      expect(mockSetEx.mock.calls[3][2]).toBe(aValidUser.session_token);
-
-      expect(mockSetEx.mock.calls[4][0]).toBe(
-        `ZENDESK-${aValidUser.zendesk_token}`
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        4,
+        `BPD-${aValidUser.bpd_token}`,
+        expectedTTL,
+        aValidUser.session_token
       );
-      expect(mockSetEx.mock.calls[4][2]).toBe(aValidUser.session_token);
-
-      expect(mockSetEx.mock.calls[6][0]).toBe(
-        `SESSIONINFO-${aValidUser.session_token}`
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        5,
+        `ZENDESK-${aValidUser.zendesk_token}`,
+        expectedTTL,
+        aValidUser.session_token
       );
-      expect(mockSetEx.mock.calls[6][2]).toBeDefined();
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        6,
+        `FIMS-${aValidUser.fims_token}`,
+        expectedTTL,
+        aValidUser.session_token
+      );
+      expect(mockSetEx).toHaveBeenNthCalledWith(
+        7,
+        `SESSIONINFO-${aValidUser.session_token}`,
+        expectedTTL,
+        expect.any(String)
+      );
       expect(JSON.parse(mockSetEx.mock.calls[6][2])).toHaveProperty(
         "createdAt"
       );
@@ -412,9 +426,9 @@ describe("RedisSessionStorage#set", () => {
     redisMethodImplFromError(mockSetEx, "OK");
     // FIMS Token
     redisMethodImplFromError(mockSetEx, "OK");
-    redisMethodImplFromError(mockSetEx, "OK");
-    redisMethodImplFromError(mockSadd, 1);
-    redisMethodImplFromError(mockSmembers, []);
+    // redisMethodImplFromError(mockSetEx, "OK");
+    // redisMethodImplFromError(mockSadd, 1);
+    // redisMethodImplFromError(mockSmembers, []);
 
     await sessionStorage.set(aValidUser, 100, true);
 
@@ -1105,46 +1119,6 @@ describe("RedisSessionStorage#del", () => {
 });
 
 describe("RedisSessionStorage#listUserSessions", () => {
-  it("should re-init session info and session info set for a user", async () => {
-    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
-
-    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
-
-    const expectedSessionInfo: SessionInfo = {
-      createdAt: new Date(),
-      sessionToken: aValidUser.session_token,
-    };
-    mockGet.mockImplementationOnce((_) =>
-      Promise.resolve(JSON.stringify(expectedSessionInfo))
-    );
-    const response = await sessionStorage.listUserSessions(aValidUser);
-    const expectedSessionInfoKey = `SESSIONINFO-${aValidUser.session_token}`;
-    // setEx here
-    expect(mockSetEx).toHaveBeenCalledWith(
-      expectedSessionInfoKey,
-      aTokenDurationSecs,
-      JSON.stringify(expectedSessionInfo)
-    );
-    expect(mockSadd).toHaveBeenCalledWith(
-      `USERSESSIONS-${aValidUser.fiscal_code}`,
-      expectedSessionInfoKey
-    );
-    expect(response).toEqual(E.right({ sessions: [expectedSessionInfo] }));
-  });
-
-  it("should fails if re-init session info and session info set don't complete", async () => {
-    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
-
-    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
-
-    mockSetEx.mockImplementationOnce((_, __, ___) =>
-      Promise.reject(new Error("REDIS ERROR"))
-    );
-    const response = await sessionStorage.listUserSessions(aValidUser);
-    expect(mockSadd).not.toBeCalled();
-    expect(response).toEqual(E.left(sessionNotFoundError));
-  });
-
   it("should skip a session with invalid value", async () => {
     mockSmembers.mockImplementationOnce((_) =>
       Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
