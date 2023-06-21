@@ -8,7 +8,7 @@ info:
 paths:
   /fast-login:
     post:
-      operationId: Signed Lollipop request to perform a refresh flow
+      operationId: fastLogin
       summary: POST a session refresh request with Lollipop
       parameters:
         - $ref: "./lollipop_definitions.yaml#/components/parameters/LollipopMethodHeader"
