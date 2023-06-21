@@ -190,7 +190,8 @@ export default class RedisSessionStorage
       };
       saveSessionInfoPromise = this.saveSessionInfo(
         sessionInfo,
-        user.fiscal_code
+        user.fiscal_code,
+        expireSec
       );
     }
 
@@ -411,34 +412,13 @@ export default class RedisSessionStorage
     await this.clearExpiredSetValues(user.fiscal_code);
 
     const sessionKeys = await this.readSessionInfoKeys(user.fiscal_code);
-    // eslint-disable-next-line functional/prefer-readonly-type
-    const initializedSessionKeys: string[] = [];
-    if (E.isLeft(sessionKeys) && sessionKeys.left !== sessionNotFoundError) {
+
+    if (E.isLeft(sessionKeys)) {
       return E.left(sessionKeys.left);
-    } else if (E.isLeft(sessionKeys)) {
-      const sessionInfo: SessionInfo = {
-        createdAt: new Date(),
-        sessionToken: user.session_token,
-      };
-      const refreshUserSessionInfo = await this.saveSessionInfo(
-        sessionInfo,
-        user.fiscal_code
-      )();
-      if (E.isLeft(refreshUserSessionInfo)) {
-        return E.left(sessionNotFoundError);
-      }
-      // eslint-disable-next-line functional/immutable-data
-      initializedSessionKeys.push(
-        `${sessionInfoKeyPrefix}${user.session_token}`
-      );
     }
+
     return pipe(
-      this.mGet([
-        ...pipe(
-          sessionKeys,
-          E.getOrElseW(() => initializedSessionKeys)
-        ),
-      ]),
+      this.mGet([...sessionKeys.right]),
       TE.map((keys) =>
         this.parseUserSessionList(
           keys.filter((key) => key !== null) as ReadonlyArray<string>
@@ -921,7 +901,8 @@ export default class RedisSessionStorage
    */
   private saveSessionInfo(
     sessionInfo: SessionInfo,
-    fiscalCode: FiscalCode
+    fiscalCode: FiscalCode,
+    expireSec: number
   ): TE.TaskEither<Error, boolean> {
     const sessionInfoKey = `${sessionInfoKeyPrefix}${sessionInfo.sessionToken}`;
     return pipe(
@@ -929,7 +910,7 @@ export default class RedisSessionStorage
         () =>
           this.redisClient.setEx(
             sessionInfoKey,
-            this.tokenDurationSecs,
+            expireSec,
             JSON.stringify(sessionInfo)
           ),
         E.toError
