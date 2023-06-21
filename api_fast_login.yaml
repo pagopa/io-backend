@@ -9,7 +9,7 @@ paths:
   /fast-login:
     post:
       operationId: Signed Lollipop request to perform a refresh flow
-      summary: POST a signed request with Lollipop
+      summary: POST a session refresh request with Lollipop
       parameters:
         - name: x-pagopa-lollipop-original-method
           in: header
