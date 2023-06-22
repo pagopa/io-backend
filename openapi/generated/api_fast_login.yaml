@@ -64,6 +64,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+        '502':
+          description: Bad gateway.
+        '504':
+          description: Gateway timeout.
 components:
   schemas:
     FastLoginResponse:
