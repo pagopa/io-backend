@@ -1613,9 +1613,24 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
 
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
-    expect(E.isRight(response)).toBeTruthy();
-    if (E.isRight(response) && O.isSome(response.right))
-      expect(response.right.value).toEqual(anAssertionRef);
+
+    expect(response).toEqual(E.right(O.some(anAssertionRef)));
+  });
+
+  it("should success and return an assertionRef, if data is stored as V2", async () => {
+    mockGet.mockImplementationOnce((_) =>
+      Promise.resolve(
+        JSON.stringify({ version: 2, assertionRef: anAssertionRef })
+      )
+    );
+    const response = await sessionStorage.getLollipopAssertionRefForUser(
+      aValidUser.fiscal_code
+    );
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockGet).toBeCalledWith(`KEYS-${aValidUser.fiscal_code}`);
+
+    expect(response).toEqual(E.right(O.some(anAssertionRef)));
   });
 
   it("should success and return none if assertionRef is missing", async () => {
