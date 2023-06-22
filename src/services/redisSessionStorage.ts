@@ -19,7 +19,10 @@ import { Option } from "fp-ts/lib/Option";
 import { flow, pipe, identity } from "fp-ts/lib/function";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
-import * as t from "io-ts";
+import {
+  NullableBackendAssertionRefFromString,
+  StoredAssertionRefV2,
+} from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
@@ -37,13 +40,6 @@ import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
-
-const NullableBackendAssertionRef = t.union([
-  t.null,
-  t.undefined,
-  BackendAssertionRef,
-]);
-type NullableBackendAssertionRef = t.TypeOf<typeof NullableBackendAssertionRef>;
 
 const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
@@ -791,8 +787,16 @@ export default class RedisSessionStorage
       ),
       TE.chain(
         flow(
-          NullableBackendAssertionRef.decode,
+          NullableBackendAssertionRefFromString.decode,
           E.map(O.fromNullable),
+          E.map(
+            O.map((storedValue) =>
+              StoredAssertionRefV2.is(storedValue)
+                ? // Remap V2 to plain assertionRef
+                  storedValue.assertionRef
+                : storedValue
+            )
+          ),
           E.mapLeft(
             (validationErrors) =>
               new Error(errorsToReadableMessages(validationErrors).join("/"))
