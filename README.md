@@ -238,8 +238,7 @@ With this **connection string** as value:
   * DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:20003/devstoreaccount1;QueueEndpoint=http://127.0.0.1:20004/devstoreaccount1;TableEndpoint=http://127.0.0.1:20005/devstoreaccount1;
 
 The **connection string** has a default value needed to connect to Azurite, a local emulator used to provide a free local environment for testing an Azure Blob, Queue Storage, and Table Storage application.
-As for docker-compose instructions, the Azurite docker image runs the Blob service on port 20003, the Queue service on port 20004 and the Table service on port 20005.
-If Azurite is executed on different address or ports, the **connection string** must be changed according to the service.
+As for docker-compose instructions, the Azurite docker image runs the Blob service on port 20003, the Queue service on port 20004 and the Table service on port 20005. If Azurite is executed on different address or ports, the **connection string** must be changed according to the service.
 
 You must also set the following variables:
  * REDIS_URL
