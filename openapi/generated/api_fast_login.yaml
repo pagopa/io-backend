@@ -15,27 +15,19 @@ paths:
           description: The method of the endpoint called by IO app
           required: true
           schema:
-            type: string
-            enum:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
+            $ref: '#/components/schemas/LollipopMethod'
         - name: x-pagopa-lollipop-original-url
           in: header
           description: The url of the endpoint called by IO app
           required: true
           schema:
-            type: string
-            pattern: ^https://
+            $ref: '#/components/schemas/LollipopOriginalURL'
         - name: signature-input
           in: header
           description: The signature input, needed to verify the `signature` header
           required: true
           schema:
-            type: string
-            pattern: ^(((sig[0-9]+)=[^,]*?)(, ?)?)+$
+            $ref: '#/components/schemas/LollipopSignatureInput'
         - name: signature
           in: header
           description: >-
@@ -43,8 +35,7 @@ paths:
             private key.
           required: true
           schema:
-            type: string
-            pattern: ^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$
+            $ref: '#/components/schemas/LollipopSignature'
       responses:
         '200':
           description: Success response
@@ -70,6 +61,23 @@ paths:
           description: Gateway timeout.
 components:
   schemas:
+    LollipopMethod:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+    LollipopOriginalURL:
+      type: string
+      pattern: ^https://
+    LollipopSignatureInput:
+      type: string
+      pattern: ^(((sig[0-9]+)=[^,]*?)(, ?)?)+$
+    LollipopSignature:
+      type: string
+      pattern: ^((sig[0-9]+)=:[A-Za-z0-9+/=]*:(, ?)?)+$
     FastLoginResponse:
       type: object
       properties:
