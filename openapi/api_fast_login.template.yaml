@@ -1,0 +1,74 @@
+openapi: 3.0.1
+servers:
+  - url: https://api-app.io.pagopa.it/api/v1
+info:
+  title: Fast login API
+  version: 1.0.0
+
+paths:
+  /fast-login:
+    post:
+      operationId: fastLogin
+      summary: POST a session refresh request with Lollipop
+      parameters:
+        - name: x-pagopa-lollipop-original-method
+          in: header
+          description: The method of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopMethod"
+        - name: x-pagopa-lollipop-original-url
+          in: header
+          description: The url of the endpoint called by IO app
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopOriginalURL"
+        - name: signature-input
+          in: header
+          description: The signature input, needed to verify the `signature` header
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopSignatureInput"
+        - name: signature
+          in: header
+          description: The signature of the HTTP request, signed by the client with its private key.
+          required: true
+          schema:
+            $ref: "#/components/schemas/LollipopSignature"
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FastLoginResponse"
+        "401":
+          description: Unauthorized(invalid signature or nonce)
+        "403":
+          description: |
+            Forbidden access.
+            Fast login won't work. A FULL login flow is REQUIRED
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemJson"
+        "502":
+          description: Bad gateway.
+        "504":
+          description: Gateway timeout.
+components:
+  schemas:
+    LollipopMethod:
+      $ref: "./lollipop_definitions.yaml#/components/schemas/LollipopMethod"
+    LollipopOriginalURL:
+      $ref: "./lollipop_definitions.yaml#/components/schemas/LollipopOriginalURL"
+    LollipopSignatureInput:
+      $ref: "./lollipop_definitions.yaml#/components/schemas/LollipopSignatureInput"
+    LollipopSignature:
+      $ref: "./lollipop_definitions.yaml#/components/schemas/LollipopSignature"
+    FastLoginResponse:
+      $ref: "./generated/api_public.yaml#/definitions/AccessToken"
+    ProblemJson:
+      $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/ProblemJson"

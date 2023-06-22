@@ -100,6 +100,8 @@ definitions:
       token:
         type: string
         minLength: 1
+        description: 48 bytes token (hex encoded)
+        example: c77de47586c841adbd1a1caeb90dce25dcecebed620488a4f932a6280b10ee99a77b6c494a8a6e6884ccbeb6d3fe736b
     required:
       - token
 consumes:
