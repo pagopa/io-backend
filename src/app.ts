@@ -85,6 +85,8 @@ import {
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
   lvTokenDurationSecs,
   lvLongSessionDurationSecs,
+  FF_FAST_LOGIN,
+  FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -176,6 +178,8 @@ import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
+import { fastLoginEndpoint } from "./controllers/fastLoginController";
+import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -530,6 +534,17 @@ export async function newApp({
           authMiddlewares.bearerSession,
           authMiddlewares.local
         );
+
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        if (FF_FAST_LOGIN) {
+          registerFastLoginRoutes(
+            app,
+            APIBasePath,
+            LOLLIPOP_API_CLIENT,
+            SESSION_STORAGE,
+            FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT
+          );
+        }
 
         const thirdPartyClientFactory = getThirdPartyServiceClientFactory(
           THIRD_PARTY_CONFIG_LIST
@@ -1598,6 +1613,20 @@ function registerFirstLollipopConsumer(
     bearerSessionTokenAuth,
     expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
+  );
+}
+
+function registerFastLoginRoutes(
+  app: Express,
+  basePath: string,
+  lollipopClient: ReturnType<typeof LollipopApiClient>,
+  sessionStorage: ISessionStorage,
+  fastLoginLollipopConsumerClient: ReturnType<getFastLoginLollipopConsumerClient>
+): void {
+  app.post(
+    `${basePath}/fast-login`,
+    expressLollipopMiddleware(lollipopClient, sessionStorage),
+    toExpressHandler(fastLoginEndpoint(fastLoginLollipopConsumerClient))
   );
 }
 

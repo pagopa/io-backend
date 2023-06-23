@@ -63,6 +63,7 @@ import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -497,6 +498,12 @@ export const FIRST_LOLLIPOP_CONSUMER_CLIENT = FirstLollipopConsumerClient(
   LOLLIPOP_API_KEY,
   LOLLIPOP_API_URL
 );
+
+export const FAST_LOGIN_API_KEY = getRequiredENVVar("FAST_LOGIN_API_KEY");
+export const FAST_LOGIN_API_URL = getRequiredENVVar("FAST_LOGIN_API_URL");
+
+export const FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT =
+  getFastLoginLollipopConsumerClient(FAST_LOGIN_API_KEY, FAST_LOGIN_API_URL);
 
 export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
   "CGN_OPERATOR_SEARCH_API_KEY"
