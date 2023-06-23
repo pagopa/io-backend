@@ -517,6 +517,7 @@ export default class RedisSessionStorage
 
   /**
    * Check if user id logged in, by checking the presence of LollipopData
+   *
    * @param fiscalCode
    * @returns true if login type is LV or a LEGACY session exists, false otherwise
    */
