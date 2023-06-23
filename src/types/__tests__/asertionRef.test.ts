@@ -14,6 +14,11 @@ const lvStoredLollipopData = {
   t: LoginTypeEnum.LV,
 };
 
+const lvExtendedLollipopData = {
+  assertionRef: lvStoredLollipopData.a,
+  loginType: lvStoredLollipopData.t,
+};
+
 describe("NullableBackendAssertionRef|>decode", () => {
   it("should decode null value", async () => {
     const res = NullableBackendAssertionRefFromString.decode(null);
@@ -40,7 +45,7 @@ describe("NullableBackendAssertionRef|>decode", () => {
       JSON.stringify(expectedResult)
     );
 
-    expect(res).toEqual(E.right(expectedResult));
+    expect(res).toEqual(E.right(lvExtendedLollipopData));
   });
 
   it.each`
