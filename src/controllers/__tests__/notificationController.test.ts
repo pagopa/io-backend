@@ -17,7 +17,7 @@ import * as E from "fp-ts/lib/Either";
 import {
   mockedUser,
   mockSessionToken,
-  mockWalletToken
+  mockWalletToken,
 } from "../../__mocks__/user_mock";
 import { MessageSubject } from "../../../generated/notifications/MessageSubject";
 import * as redis from "redis";
@@ -28,7 +28,8 @@ const aFiscalNumber = "GRBGPP87L04L741X" as FiscalCode;
 const anInvalidFiscalNumber = "xxx" as FiscalCode;
 const anEmailAddress = "garibaldi@example.com" as EmailAddress;
 const aValidSpidLevel = SpidLevelEnum["https://www.spid.gov.it/SpidL2"];
-const aValidInstallationID = "550e8400e29b41d4a716446655440000" as InstallationID;
+const aValidInstallationID =
+  "550e8400e29b41d4a716446655440000" as InstallationID;
 const anInvalidInstallationID = "" as InstallationID;
 
 const mockedInvalidUser: User = {
@@ -40,7 +41,7 @@ const mockedInvalidUser: User = {
   session_token: mockSessionToken,
   spid_email: anEmailAddress,
   spid_level: aValidSpidLevel,
-  wallet_token: mockWalletToken
+  wallet_token: mockWalletToken,
 };
 
 const aNotificationSubject = "this is a notification subject" as MessageSubject;
@@ -50,13 +51,13 @@ const aValidNotificationWithoutContent = {
     created_at: new Date(),
     fiscal_code: aFiscalNumber,
     id: "01CCKCY7QQ7WCHWTH8NB504386",
-    sender_service_id: "234567"
+    sender_service_id: "234567",
   },
   sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
-    service_name: "test service"
-  }
+    service_name: "test service",
+  },
 };
 
 const aValidNotification = {
@@ -65,43 +66,43 @@ const aValidNotification = {
     ...aValidNotificationWithoutContent.message,
     content: {
       markdown: "test".repeat(80),
-      subject: aNotificationSubject
-    }
-  }
+      subject: aNotificationSubject,
+    },
+  },
 };
 
 const anInvalidNotification = {
   message: {
     content: {
       markdown: "invalid",
-      subject: aNotificationSubject
+      subject: aNotificationSubject,
     },
     created_at: new Date(),
     fiscal_code: anInvalidFiscalNumber,
-    sender_service_id: "234567"
+    sender_service_id: "234567",
   },
   sender_metadata: {
     department_name: "test department",
     organization_name: "test organization",
-    service_name: "test service"
-  }
+    service_name: "test service",
+  },
 };
 
 const aPushChannel =
   "fLKP3EATnBI:APA91bEy4go681jeSEpLkNqhtIrdPnEKu6Dfi-STtUiEnQn8RwMfBiPGYaqdWrmzJyXIh5Yms4017MYRS9O1LGPZwA4sOLCNIoKl4Fwg7cSeOkliAAtlQ0rVg71Kr5QmQiLlDJyxcq3p";
 const anAppleDevice = {
   platform: PlatformEnum.apns,
-  pushChannel: aPushChannel
+  pushChannel: aPushChannel,
 };
 const anInvalidDevice = {
-  platform: "invalid"
+  platform: "invalid",
 };
 
 const badRequestErrorResponse = {
   detail: expect.any(String),
   status: 400,
   title: expect.any(String),
-  type: undefined
+  type: undefined,
 };
 
 jest.mock("../../services/notificationService");
@@ -117,13 +118,15 @@ const redisSessionStorage = new RedisSessionStorage(
   aDefaultLollipopAssertionRefDurationSec
 );
 
-const mockUserHasActiveSessions = (redisSessionStorage.userHasActiveSessions = jest.fn());
+const mockIsUserLogged = (redisSessionStorage.isUserLogged = jest.fn());
 
 const notificationService = new NotificationService("", "");
 const notificationServiceFactory = (_fc: FiscalCode) => notificationService;
 
 // tslint:disable-next-line: no-any
-const mockCreateOrUpdateInstallation = ((notificationService as any).createOrUpdateInstallation = jest.fn());
+const mockCreateOrUpdateInstallation = ((
+  notificationService as any
+).createOrUpdateInstallation = jest.fn());
 // tslint:disable-next-line: no-any
 const mockNotify = ((notificationService as any).notify = jest.fn());
 
@@ -136,7 +139,7 @@ const controller = new NotificationController(
   redisSessionStorage,
   {
     notificationDefaultSubject: "default subject",
-    notificationDefaultTitle: "default title"
+    notificationDefaultTitle: "default title",
   }
 );
 
@@ -148,7 +151,7 @@ describe("NotificationController#notify", () => {
   it("should return success if data is correct", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -161,14 +164,14 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
   it("should send generic notification if user has not active sessions", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(false)));
+    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(false)));
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -190,14 +193,14 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
   it("should send generic notification if message content is not defined", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -221,7 +224,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
@@ -244,7 +247,7 @@ describe("NotificationController#notify", () => {
   it("should return an error in case an exception is thrown getting user session", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockImplementation(() => {
+    mockIsUserLogged.mockImplementation(() => {
       throw new Error("error");
     });
 
@@ -256,14 +259,14 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.stringContaining("Exception"),
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
   it("should return an error in case an exception is thrown notifying the user", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockImplementation(() => {
       throw new Error("error");
@@ -277,14 +280,14 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.stringContaining("Exception"),
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 
   it("should return an error in case notify call fails", async () => {
     const req = mockReq();
 
-    mockUserHasActiveSessions.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
 
     mockNotify.mockReturnValue(Promise.reject());
 
@@ -296,7 +299,7 @@ describe("NotificationController#notify", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       detail: expect.stringContaining("Exception"),
-      kind: "IResponseErrorInternal"
+      kind: "IResponseErrorInternal",
     });
   });
 });
@@ -322,7 +325,7 @@ describe("NotificationController#createOrUpdateInstallation", () => {
     expect(res).toEqual({
       apply: expect.any(Function),
       kind: "IResponseSuccessJson",
-      value: { message: "ok" }
+      value: { message: "ok" },
     });
   });
 
