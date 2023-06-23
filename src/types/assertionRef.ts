@@ -42,7 +42,7 @@ const LollipopDataFromCompact = new t.Type<
 // ---------------------
 
 // LollipopDataFromString
-const LollipopDataFromString = t.string
+export const LollipopDataFromString = t.string
   .pipe(JsonFromString)
   .pipe(CompactLollipopData)
   .pipe(LollipopDataFromCompact);

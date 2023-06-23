@@ -4,6 +4,8 @@ import { LoginTypeEnum } from "../../utils/fastLogin";
 
 import {
   LollipopData,
+  LollipopDataFromString,
+  LollipopDataT,
   NullableBackendAssertionRefFromString,
 } from "../assertionRef";
 
@@ -14,7 +16,7 @@ const lvStoredLollipopData = {
   t: LoginTypeEnum.LV,
 };
 
-const lvExtendedLollipopData = {
+const lvExtendedLollipopData: LollipopDataT = {
   assertionRef: lvStoredLollipopData.a,
   loginType: lvStoredLollipopData.t,
 };
@@ -56,6 +58,14 @@ describe("NullableBackendAssertionRef|>decode", () => {
     const res = NullableBackendAssertionRefFromString.decode(value);
 
     expect(res).toEqual(E.left(expect.any(Object)));
+  });
+});
+
+describe("LollipopDataFromString|>encode", () => {
+  it("should encode a valid LollipopData", async () => {
+    const res = LollipopDataFromString.encode(lvExtendedLollipopData);
+
+    expect(res).toEqual(JSON.stringify(lvStoredLollipopData));
   });
 });
 
