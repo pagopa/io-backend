@@ -7,6 +7,7 @@ import * as A from "fp-ts/lib/Array";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as B from "fp-ts/lib/boolean";
 import * as R from "fp-ts/lib/Record";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -508,6 +509,39 @@ export default class RedisSessionStorage
       // Skipping null values from the array
       TE.map(A.filter((key): key is string => key !== null)),
       TE.map((_) => _.length > 0)
+    )();
+  }
+
+  public async isUserLogged(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return await pipe(
+      await this.getLollipopDataForUser(fiscalCode),
+      TE.fromEither,
+      TE.chain(
+        flow(
+          O.map((data) =>
+            pipe(
+              data.loginType === LoginTypeEnum.LV,
+              B.fold(
+                // if login type is not LV, check for active user sessions
+                () =>
+                  pipe(
+                    TE.tryCatch(
+                      () => this.userHasActiveSessions(fiscalCode),
+                      E.toError
+                    ),
+                    TE.chainEitherK(identity)
+                  ),
+                // if login type is LV, return true
+                () => TE.of<Error, boolean>(true)
+              )
+            )
+          ),
+          // ff no LollipopData was found, return false
+          O.getOrElseW(() => TE.of<Error, boolean>(false))
+        )
+      )
     )();
   }
 
