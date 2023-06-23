@@ -34,7 +34,7 @@ const mockSetBlockedUser = jest
 const mockUnsetBlockedUser = jest
   .fn()
   .mockImplementation(async () => E.right(true));
-const mockUserHasActiveSessions = jest
+const mockIsUserLogged = jest
   .fn()
   .mockImplementation(async () => E.right(true));
 const mockDelLollipop = jest.fn().mockResolvedValue(E.right(true));
@@ -42,22 +42,22 @@ const mockGetLollipop = jest
   .fn()
   .mockResolvedValue(E.right(O.some(anAssertionRef)));
 const mockSetLollipop = jest.fn().mockResolvedValue(E.right(true));
-const mockRedisSessionStorage = ({
+const mockRedisSessionStorage = {
   delUserAllSessions: mockDelUserAllSessions,
   setBlockedUser: mockSetBlockedUser,
   unsetBlockedUser: mockUnsetBlockedUser,
-  userHasActiveSessions: mockUserHasActiveSessions,
+  isUserLogged: mockIsUserLogged,
   getLollipopAssertionRefForUser: mockGetLollipop,
   delLollipopAssertionRefForUser: mockDelLollipop,
-  setLollipopAssertionRefForUser: mockSetLollipop
-} as unknown) as RedisSessionStorage;
+  setLollipopAssertionRefForUser: mockSetLollipop,
+} as unknown as RedisSessionStorage;
 
 const mockDel = jest.fn().mockImplementation(async () => E.right(true));
-const mockRedisUserMetadataStorage = ({
-  del: mockDel
-} as unknown) as RedisUserMetadataStorage;
+const mockRedisUserMetadataStorage = {
+  del: mockDel,
+} as unknown as RedisUserMetadataStorage;
 
-const anActivatedPubKey = ({
+const anActivatedPubKey = {
   status: PubKeyStatusEnum.VALID,
   assertion_file_name: "file",
   assertion_ref: "sha" as AssertionRef,
@@ -66,12 +66,12 @@ const anActivatedPubKey = ({
   pub_key: {} as JwkPubKey,
   ttl: 600,
   version: 1,
-  expires_at: 1000
-} as unknown) as ActivatedPubKey;
+  expires_at: 1000,
+} as unknown as ActivatedPubKey;
 
 const mockRevokePreviousAssertionRef = jest
   .fn()
-  .mockImplementation(_ => Promise.resolve({}));
+  .mockImplementation((_) => Promise.resolve({}));
 
 const mockActivateLolliPoPKey = jest
   .fn()
@@ -81,8 +81,8 @@ jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       revokePreviousAssertionRef: mockRevokePreviousAssertionRef,
-      activateLolliPoPKey: mockActivateLolliPoPKey
-    }))
+      activateLolliPoPKey: mockActivateLolliPoPKey,
+    })),
   };
 });
 
@@ -109,11 +109,11 @@ describe("SessionLockController#getUserSession", () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it("should fail if userHasActiveSessions returns an error", async () => {
+  it("should fail if isUserLogged returns an error", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockUserHasActiveSessions.mockImplementationOnce(async () =>
+    mockIsUserLogged.mockImplementationOnce(async () =>
       E.left(new Error("any error"))
     );
 
@@ -144,7 +144,7 @@ describe("SessionLockController#getUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      active: true
+      active: true,
     });
   });
 });
@@ -201,7 +201,7 @@ describe("SessionLockController#lockUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: "ok"
+      message: "ok",
     });
   });
 
@@ -394,7 +394,7 @@ describe("SessionLockController#unlockUserSession", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: "ok"
+      message: "ok",
     });
   });
 

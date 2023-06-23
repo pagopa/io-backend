@@ -478,6 +478,9 @@ export default class RedisSessionStorage
     );
   }
 
+  /**
+   * @deprecated use `isUserLogged` instead
+   */
   public async userHasActiveSessions(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
@@ -512,6 +515,12 @@ export default class RedisSessionStorage
     )();
   }
 
+  /**
+   * Check if user id logged in, by checking the presence of LollipopData
+   *
+   * @param fiscalCode
+   * @returns true if login type is LV or a LEGACY session exists, false otherwise
+   */
   public async isUserLogged(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
