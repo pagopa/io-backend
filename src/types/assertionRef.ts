@@ -1,52 +1,51 @@
 import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/function";
 import { JsonFromString } from "io-ts-types";
+
+import { LoginType } from "../utils/fastLogin";
 
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 
-// StoredAssertionRefV1
-export type StoredAssertionRefV1T = t.TypeOf<typeof StoredAssertionRefV1>;
-export const StoredAssertionRefV1 = t.type({
+// LollipopData
+export type LollipopDataT = t.TypeOf<typeof LollipopData>;
+export const LollipopData = t.type({
   assertionRef: AssertionRef,
-  version: t.literal(1),
+  loginType: LoginType,
 });
 
-// StoredAssertionRefV2
-export type StoredAssertionRefV2T = t.TypeOf<typeof StoredAssertionRefV2>;
-export const StoredAssertionRefV2 = t.type({
-  assertionRef: AssertionRef,
-  version: t.literal(2),
+// CompactLollipopData
+type CompactLollipopDataT = t.TypeOf<typeof CompactLollipopData>;
+const CompactLollipopData = t.type({
+  a: AssertionRef,
+  t: LoginType,
 });
 
-// StoredAssertionRef
-export type StoredAssertionRefT = t.TypeOf<typeof StoredAssertionRef>;
-export const StoredAssertionRef = t.union([
-  StoredAssertionRefV1,
-  StoredAssertionRefV2,
-]);
+// LollipopDataFromCompact
+const LollipopDataFromCompact = new t.Type<
+  LollipopDataT,
+  CompactLollipopDataT,
+  CompactLollipopDataT
+>(
+  "LollipopDataFromCompact",
+  LollipopData.is,
+  (val, _context) =>
+    pipe(
+      val,
+      (data) => ({ assertionRef: data.a, loginType: data.t }),
+      LollipopData.decode
+    ),
+  (val) => ({ a: val.assertionRef, t: val.loginType })
+);
 
 // ---------------------
 // From string decoders
 // ---------------------
 
-// StoredAssertionRefV2FromString
-export type StoredAssertionRefV2FromStringT = t.TypeOf<
-  typeof StoredAssertionRefV2FromString
->;
-export const StoredAssertionRefV2FromString = t.string.pipe(
-  JsonFromString.pipe(StoredAssertionRefV2)
-);
-
-/**
- * StoredAssertionRefFromString can be either a plain string
- * or an object of type ´StoredAssertionRefV2FromString´
- */
-export type StoredAssertionRefFromStringT = t.TypeOf<
-  typeof StoredAssertionRefFromString
->;
-export const StoredAssertionRefFromString = t.union([
-  AssertionRef,
-  StoredAssertionRefV2FromString,
-]);
+// LollipopDataFromString
+const LollipopDataFromString = t.string
+  .pipe(JsonFromString)
+  .pipe(CompactLollipopData)
+  .pipe(LollipopDataFromCompact);
 
 // NullableBackendAssertionRefFromString
 export type NullableBackendAssertionRefFromStringT = t.TypeOf<
@@ -55,5 +54,6 @@ export type NullableBackendAssertionRefFromStringT = t.TypeOf<
 export const NullableBackendAssertionRefFromString = t.union([
   t.null,
   t.undefined,
-  StoredAssertionRefFromString,
+  AssertionRef,
+  LollipopDataFromString,
 ]);

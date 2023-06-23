@@ -17,6 +17,7 @@ import {
   ZendeskToken,
 } from "../types/token";
 import { User, UserV5 } from "../types/user";
+import { LollipopDataT } from "../types/assertionRef";
 
 export interface ISessionStorage {
   /**
@@ -78,11 +79,21 @@ export interface ISessionStorage {
   /**
    * Retrieve the LolliPoP assertionRef related to an user
    *
+   * @deprecated
    * @param fiscalCode The fiscalCode value used to get the related assertionRef
    */
   readonly getLollipopAssertionRefForUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, O.Option<BackendAssertionRef>>>;
+
+  /**
+   * Retrieve all the LolliPoP-related data for an user
+   *
+   * @param fiscalCode The fiscalCode value used to get the related assertionRef
+   */
+  readonly getLollipopDataForUser: (
+    fiscalCode: FiscalCode
+  ) => Promise<Either<Error, O.Option<LollipopDataT>>>;
 
   /**
    * Upsert the LolliPoP assertionRef related to an user

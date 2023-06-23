@@ -21,7 +21,8 @@ import { Second } from "@pagopa/ts-commons/lib/units";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
-  StoredAssertionRefV2,
+  LollipopData,
+  LollipopDataT,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -38,6 +39,7 @@ import {
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
+import { LoginTypeEnum } from "../utils/fastLogin";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
 
@@ -781,6 +783,19 @@ export default class RedisSessionStorage
     fiscalCode: FiscalCode
   ): Promise<Either<Error, O.Option<BackendAssertionRef>>> {
     return pipe(
+      await this.getLollipopDataForUser(fiscalCode),
+      E.map(O.map((data) => data.assertionRef))
+    );
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public async getLollipopDataForUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, O.Option<LollipopDataT>>> {
+    return pipe(
       TE.tryCatch(
         () => this.redisClient.get(`${lollipopFingerprintPrefix}${fiscalCode}`),
         E.toError
@@ -791,10 +806,10 @@ export default class RedisSessionStorage
           E.map(O.fromNullable),
           E.map(
             O.map((storedValue) =>
-              StoredAssertionRefV2.is(storedValue)
-                ? // Remap V2 to plain assertionRef
-                  storedValue.assertionRef
-                : storedValue
+              LollipopData.is(storedValue)
+                ? storedValue
+                : // Remap plain string to LollipopData
+                  { assertionRef: storedValue, loginType: LoginTypeEnum.LEGACY }
             )
           ),
           E.mapLeft(
