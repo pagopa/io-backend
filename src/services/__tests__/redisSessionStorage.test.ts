@@ -38,6 +38,7 @@ import {
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import { RedisClientType } from "redis";
+import { LoginTypeEnum } from "../../utils/fastLogin";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -1617,10 +1618,10 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
     expect(response).toEqual(E.right(O.some(anAssertionRef)));
   });
 
-  it("should success and return an assertionRef, if data is stored as V2", async () => {
+  it("should success and return an assertionRef, if data is stored in new format", async () => {
     mockGet.mockImplementationOnce((_) =>
       Promise.resolve(
-        JSON.stringify({ version: 2, assertionRef: anAssertionRef })
+        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
       )
     );
     const response = await sessionStorage.getLollipopAssertionRefForUser(

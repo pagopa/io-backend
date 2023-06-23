@@ -1,57 +1,18 @@
 import * as E from "fp-ts/Either";
 
+import { LoginTypeEnum } from "../../utils/fastLogin";
+
 import {
+  LollipopData,
   NullableBackendAssertionRefFromString,
-  StoredAssertionRefFromString,
-  StoredAssertionRefV2FromString,
 } from "../assertionRef";
 
 import { anAssertionRef } from "../../__mocks__/lollipop";
 
-const v2StoredAssertionRef = {
-  version: 2,
-  assertionRef: anAssertionRef,
+const lvStoredLollipopData = {
+  a: anAssertionRef,
+  t: LoginTypeEnum.LV,
 };
-
-describe("StoredAssertion|>decode", () => {
-  it("should decode a plain assertion Ref", async () => {
-    const res = StoredAssertionRefFromString.decode(anAssertionRef);
-
-    expect(res).toEqual(E.right(anAssertionRef));
-  });
-
-  it("should decode an assertion ref stored as V2", async () => {
-    const res = StoredAssertionRefFromString.decode(
-      JSON.stringify(v2StoredAssertionRef)
-    );
-
-    expect(res).toEqual(E.right(v2StoredAssertionRef));
-  });
-});
-
-describe("StoredAssertionRefV2|>is", () => {
-  it("should check a StoredAssertionRefV2 from a StoredAssertionRefFromString", async () => {
-    const res = StoredAssertionRefFromString.decode(
-      JSON.stringify(v2StoredAssertionRef)
-    );
-
-    if (E.isRight(res)) {
-      expect(StoredAssertionRefV2FromString.is(res.right)).toEqual(true);
-    } else {
-      fail();
-    }
-  });
-
-  it("should faill checking a StoredAssertionRefFromString if is not a V2", async () => {
-    const res = StoredAssertionRefFromString.decode(anAssertionRef);
-
-    if (E.isRight(res)) {
-      expect(StoredAssertionRefV2FromString.is(res.right)).toEqual(false);
-    } else {
-      fail();
-    }
-  });
-});
 
 describe("NullableBackendAssertionRef|>decode", () => {
   it("should decode null value", async () => {
@@ -72,8 +33,8 @@ describe("NullableBackendAssertionRef|>decode", () => {
     expect(res).toEqual(E.right(anAssertionRef));
   });
 
-  it("should decode an assertion ref stored as V2", async () => {
-    const expectedResult = v2StoredAssertionRef;
+  it("should decode an assertion ref stored in new format", async () => {
+    const expectedResult = lvStoredLollipopData;
 
     const res = NullableBackendAssertionRefFromString.decode(
       JSON.stringify(expectedResult)
@@ -87,8 +48,32 @@ describe("NullableBackendAssertionRef|>decode", () => {
     ${"error string"}
     ${JSON.stringify({ version: 1, assertionRef: anAssertionRef })}
   `("should fail decoding $value", async (value) => {
-    const res = StoredAssertionRefFromString.decode(value);
+    const res = NullableBackendAssertionRefFromString.decode(value);
 
     expect(res).toEqual(E.left(expect.any(Object)));
+  });
+});
+
+describe("LollipopData|>is", () => {
+  it("should check a LollipopData from a LollipopDataFromString", async () => {
+    const res = NullableBackendAssertionRefFromString.decode(
+      JSON.stringify(lvStoredLollipopData)
+    );
+
+    if (E.isRight(res)) {
+      expect(LollipopData.is(res.right)).toEqual(true);
+    } else {
+      fail();
+    }
+  });
+
+  it("should faill checking a LollipopDataFromString if it's not in new format", async () => {
+    const res = NullableBackendAssertionRefFromString.decode(anAssertionRef);
+
+    if (E.isRight(res)) {
+      expect(LollipopData.is(res.right)).toEqual(false);
+    } else {
+      fail();
+    }
   });
 });

@@ -21,7 +21,7 @@ import { Second } from "@pagopa/ts-commons/lib/units";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
-  StoredAssertionRefV2,
+  LollipopData,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -791,9 +791,9 @@ export default class RedisSessionStorage
           E.map(O.fromNullable),
           E.map(
             O.map((storedValue) =>
-              StoredAssertionRefV2.is(storedValue)
+              LollipopData.is(storedValue)
                 ? // Remap V2 to plain assertionRef
-                  storedValue.assertionRef
+                  storedValue.a
                 : storedValue
             )
           ),
