@@ -1397,6 +1397,89 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   });
 });
 
+describe("RedisSessionStorage#isUserLogged", () => {
+  it("should return true if login type is LV", async () => {
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
+        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LV })
+      )
+    );
+
+    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    expect(result).toEqual(E.right(true));
+  });
+
+  it("should return true if login type is LEGACY and user has an active session", async () => {
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
+        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
+      )
+    );
+    mockSmembers.mockImplementationOnce((_) =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
+        JSON.stringify({
+          createdAt: new Date(),
+          sessionToken: aValidUser.session_token,
+        })
+      )
+    );
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(JSON.stringify(aValidUser))
+    );
+
+    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    expect(result).toEqual(E.right(true));
+  });
+
+  it("should return false if no LollipopData was found", async () => {
+    mockGet.mockImplementationOnce((_, __) => Promise.resolve(null));
+
+    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    expect(result).toEqual(E.right(false));
+  });
+
+  it("should return false if login type is LEGACY and user has no active sessions", async () => {
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
+        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
+      )
+    );
+    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
+
+    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    expect(result).toEqual(E.right(false));
+  });
+
+  it("should return a left value if a redis call fail in getLollipopDataForUser", async () => {
+    const expectedRedisError = new Error("Generic Redis Error");
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.reject(expectedRedisError)
+    );
+
+    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    expect(result).toEqual(E.left(expectedRedisError));
+  });
+
+  it("should return a left value if a redis call fail in userHasActiveSessions", async () => {
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
+        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
+      )
+    );
+
+    const expectedRedisError = new Error("Generic Redis Error");
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.reject(expectedRedisError)
+    );
+
+    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    expect(result).toEqual(E.left(expectedRedisError));
+  });
+});
+
 describe("RedisSessionStorage#setBlockedUser", () => {
   it("should return E.right(true) if the user is correctly locked", async () => {
     mockSadd.mockImplementationOnce((_, __) => Promise.resolve());
