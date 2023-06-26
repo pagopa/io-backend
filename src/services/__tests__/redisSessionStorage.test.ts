@@ -39,6 +39,7 @@ import { Second } from "@pagopa/ts-commons/lib/units";
 import { anAssertionRef } from "../../__mocks__/lollipop";
 import { RedisClientType } from "redis";
 import { LoginTypeEnum } from "../../utils/fastLogin";
+import { NullableBackendAssertionRefFromString } from "../../types/assertionRef";
 
 const aTokenDurationSecs = 3600;
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
@@ -1753,20 +1754,32 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
   });
 });
 
-describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
+describe("RedisSessionStorage#setLollipopDataForUser", () => {
+  const lollipopData = {
+    assertionRef: anAssertionRef,
+    loginType: LoginTypeEnum.LEGACY,
+  };
+  const compactLollipopData = {
+    a: lollipopData.assertionRef,
+    t: lollipopData.loginType,
+  };
+
   it("should success if the response from redis is OK on set command with default ttl", async () => {
     mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
-    const response = await sessionStorage.setLollipopAssertionRefForUser(
+    const response = await sessionStorage.setLollipopDataForUser(
       aValidUser,
-      anAssertionRef
+      lollipopData
     );
 
     expect(mockSetEx).toHaveBeenCalledTimes(1);
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       aDefaultLollipopAssertionRefDurationSec,
-      anAssertionRef
+      JSON.stringify(compactLollipopData)
     );
+    expect(
+      NullableBackendAssertionRefFromString.decode(mockSetEx.mock.calls[0][2])
+    ).toEqual(E.right(lollipopData));
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
@@ -1774,9 +1787,9 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
   it("should success if the response from redis is OK on set command with custom ttl", async () => {
     const expectedAssertionRefTtl = 100 as Second;
     mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
-    const response = await sessionStorage.setLollipopAssertionRefForUser(
+    const response = await sessionStorage.setLollipopDataForUser(
       aValidUser,
-      anAssertionRef,
+      lollipopData,
       expectedAssertionRefTtl
     );
 
@@ -1784,7 +1797,7 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       expectedAssertionRefTtl,
-      anAssertionRef
+      JSON.stringify(compactLollipopData)
     );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
@@ -1795,16 +1808,16 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     mockSetEx.mockImplementationOnce((_, __, ___) =>
       Promise.reject(expectedError)
     );
-    const response = await sessionStorage.setLollipopAssertionRefForUser(
+    const response = await sessionStorage.setLollipopDataForUser(
       aValidUser,
-      anAssertionRef
+      lollipopData
     );
 
     expect(mockSetEx).toHaveBeenCalledTimes(1);
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       aDefaultLollipopAssertionRefDurationSec,
-      anAssertionRef
+      JSON.stringify(compactLollipopData)
     );
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
@@ -1814,16 +1827,16 @@ describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
     mockSetEx.mockImplementationOnce((_, __, ___) =>
       Promise.resolve(undefined)
     );
-    const response = await sessionStorage.setLollipopAssertionRefForUser(
+    const response = await sessionStorage.setLollipopDataForUser(
       aValidUser,
-      anAssertionRef
+      lollipopData
     );
 
     expect(mockSetEx).toHaveBeenCalledTimes(1);
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       aDefaultLollipopAssertionRefDurationSec,
-      anAssertionRef
+      JSON.stringify(compactLollipopData)
     );
     expect(E.isLeft(response)).toBeTruthy();
   });

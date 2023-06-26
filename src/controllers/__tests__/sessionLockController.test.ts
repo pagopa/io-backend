@@ -49,7 +49,7 @@ const mockRedisSessionStorage = {
   isUserLogged: mockIsUserLogged,
   getLollipopAssertionRefForUser: mockGetLollipop,
   delLollipopAssertionRefForUser: mockDelLollipop,
-  setLollipopAssertionRefForUser: mockSetLollipop,
+  setLollipopDataForUser: mockSetLollipop,
 } as unknown as RedisSessionStorage;
 
 const mockDel = jest.fn().mockImplementation(async () => E.right(true));
