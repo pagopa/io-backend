@@ -117,7 +117,7 @@ jest.mock("../../services/redisSessionStorage", () => {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
       getLollipopAssertionRefForUser: mockGetLollipop,
-      delLollipopAssertionRefForUser: mockDelLollipop,
+      delLollipopDataForUser: mockDelLollipop,
       setLollipopDataForUser: mockSetLollipop,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
@@ -756,18 +756,18 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    scenario                      | delLollipopAssertionRefForUserResponse                 | errorMessage
+    scenario                      | delLollipopDataForUserResponse                         | errorMessage
     ${"with false response"}      | ${Promise.resolve(E.right(false))}                     | ${"Error on LolliPoP initialization"}
     ${"with left response"}       | ${Promise.resolve(E.left(new Error("Error on left")))} | ${"Error on left"}
     ${"with a promise rejection"} | ${Promise.reject(new Error("Error on reject"))}        | ${"Error on reject"}
   `(
     "should fail if an error occours deleting the previous CF-assertionRef link on redis $scenario",
-    async ({ delLollipopAssertionRefForUserResponse, errorMessage }) => {
+    async ({ delLollipopDataForUserResponse, errorMessage }) => {
       const res = mockRes();
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
       mockDelLollipop.mockImplementationOnce(
-        (_) => delLollipopAssertionRefForUserResponse
+        (_) => delLollipopDataForUserResponse
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));

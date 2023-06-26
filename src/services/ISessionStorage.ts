@@ -113,7 +113,7 @@ export interface ISessionStorage {
    *
    * @param fiscalCode A user fiscal code
    */
-  readonly delLollipopAssertionRefForUser: (
+  readonly delLollipopDataForUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 

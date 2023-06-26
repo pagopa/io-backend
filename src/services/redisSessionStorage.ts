@@ -894,7 +894,7 @@ export default class RedisSessionStorage
    * {@inheritDoc}
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  public async delLollipopAssertionRefForUser(fiscalCode: FiscalCode) {
+  public async delLollipopDataForUser(fiscalCode: FiscalCode) {
     return pipe(
       TE.tryCatch(
         () => this.redisClient.del(`${lollipopFingerprintPrefix}${fiscalCode}`),

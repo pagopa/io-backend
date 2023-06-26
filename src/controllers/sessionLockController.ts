@@ -133,10 +133,7 @@ export default class SessionLockController {
             // delete the assertionRef for the user
             pipe(
               TE.tryCatch(
-                () =>
-                  this.sessionStorage.delLollipopAssertionRefForUser(
-                    fiscalCode
-                  ),
+                () => this.sessionStorage.delLollipopDataForUser(fiscalCode),
                 E.toError
               ),
               TE.chain(TE.fromEither)
