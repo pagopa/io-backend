@@ -48,7 +48,7 @@ const mockRedisSessionStorage = {
   unsetBlockedUser: mockUnsetBlockedUser,
   isUserLogged: mockIsUserLogged,
   getLollipopAssertionRefForUser: mockGetLollipop,
-  delLollipopAssertionRefForUser: mockDelLollipop,
+  delLollipopDataForUser: mockDelLollipop,
   setLollipopDataForUser: mockSetLollipop,
 } as unknown as RedisSessionStorage;
 

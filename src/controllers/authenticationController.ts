@@ -320,10 +320,7 @@ export default class AuthenticationController {
       // This operation must be performed even if the lollipop FF is disabled
       // to avoid inconsistency on CF-key relation if the FF will be re-enabled.
       TE.tryCatch(
-        () =>
-          this.sessionStorage.delLollipopAssertionRefForUser(
-            spidUser.fiscalNumber
-          ),
+        () => this.sessionStorage.delLollipopDataForUser(spidUser.fiscalNumber),
         E.toError
       ),
       TE.chainEitherK(identity),
@@ -625,9 +622,7 @@ export default class AuthenticationController {
               // delete the assertionRef for the user
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.delLollipopAssertionRefForUser(
-                    user.fiscal_code
-                  ),
+                  this.sessionStorage.delLollipopDataForUser(user.fiscal_code),
                 E.toError
               ),
               TE.chainEitherK(identity)

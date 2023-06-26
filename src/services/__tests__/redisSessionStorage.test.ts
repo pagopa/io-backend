@@ -1842,10 +1842,10 @@ describe("RedisSessionStorage#setLollipopDataForUser", () => {
   });
 });
 
-describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
+describe("RedisSessionStorage#delLollipopDataForUser", () => {
   it("should return a right either with true value on success", async () => {
     mockDel.mockImplementationOnce((_) => Promise.resolve(1));
-    const response = await sessionStorage.delLollipopAssertionRefForUser(
+    const response = await sessionStorage.delLollipopDataForUser(
       aValidUser.fiscal_code
     );
 
@@ -1858,7 +1858,7 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
   it("should fail with a left response if an error occurs on redis", async () => {
     const expectedError = new Error("redis Error");
     mockDel.mockImplementationOnce((_) => Promise.reject(expectedError));
-    const response = await sessionStorage.delLollipopAssertionRefForUser(
+    const response = await sessionStorage.delLollipopDataForUser(
       aValidUser.fiscal_code
     );
 
@@ -1870,7 +1870,7 @@ describe("RedisSessionStorage#delLollipopAssertionRefForUser", () => {
 
   it("should success if no element are removed from redis", async () => {
     mockDel.mockImplementationOnce((_) => Promise.resolve(0));
-    const response = await sessionStorage.delLollipopAssertionRefForUser(
+    const response = await sessionStorage.delLollipopDataForUser(
       aValidUser.fiscal_code
     );
 
