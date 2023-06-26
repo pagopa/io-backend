@@ -195,12 +195,20 @@ export default class AuthenticationController {
     // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
     // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
     // Otherwise LV is disabled.
-    const [sessionTTL, lollipopKeyTTL] =
+    const [sessionTTL, lollipopKeyTTL, loginType] =
       this.lollipopParams.isLollipopEnabled &&
       isUserElegibleForFastLogin(spidUser.fiscalNumber) &&
       additionalProps?.loginType === LoginTypeEnum.LV
-        ? [this.lvTokenDurationSecs, this.lvLongSessionDurationSecs]
-        : [this.standardTokenDurationSecs, this.standardTokenDurationSecs];
+        ? [
+            this.lvTokenDurationSecs,
+            this.lvLongSessionDurationSecs,
+            LoginTypeEnum.LV,
+          ]
+        : [
+            this.standardTokenDurationSecs,
+            this.standardTokenDurationSecs,
+            LoginTypeEnum.LEGACY,
+          ];
 
     //
     // create a new user object
@@ -363,17 +371,20 @@ export default class AuthenticationController {
             pipe(
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.setLollipopAssertionRefForUser(
+                  this.sessionStorage.setLollipopDataForUser(
                     user,
-                    assertionRef,
+                    {
+                      assertionRef,
+                      loginType,
+                    },
                     lollipopKeyTTL
                   ),
                 E.toError
               ),
               TE.chainEitherK(identity),
               TE.filterOrElse(
-                (setLollipopAssertionRefForUserRes) =>
-                  setLollipopAssertionRefForUserRes === true,
+                (setLollipopDataForUserRes) =>
+                  setLollipopDataForUserRes === true,
                 () =>
                   new Error("Error creating CF thumbprint relation in redis")
               ),

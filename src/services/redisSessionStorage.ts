@@ -24,6 +24,7 @@ import {
   NullableBackendAssertionRefFromString,
   LollipopData,
   LollipopDataT,
+  LollipopDataFromString,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -869,9 +870,9 @@ export default class RedisSessionStorage
    * {@inheritDoc}
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  public async setLollipopAssertionRefForUser(
+  public async setLollipopDataForUser(
     user: UserV5,
-    assertionRef: BackendAssertionRef,
+    data: LollipopDataT,
     expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
   ) {
     return pipe(
@@ -880,7 +881,7 @@ export default class RedisSessionStorage
           this.redisClient.setEx(
             `${lollipopFingerprintPrefix}${user.fiscal_code}`,
             expireAssertionRefSec,
-            assertionRef
+            LollipopDataFromString.encode(data)
           ),
         E.toError
       ),
