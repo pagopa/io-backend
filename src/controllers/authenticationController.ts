@@ -197,8 +197,8 @@ export default class AuthenticationController {
     // Otherwise LV is disabled.
     const [sessionTTL, lollipopKeyTTL, loginType] =
       this.lollipopParams.isLollipopEnabled &&
-      isUserElegibleForFastLogin(spidUser.fiscalNumber) &&
-      additionalProps?.loginType === LoginTypeEnum.LV
+      additionalProps?.loginType === LoginTypeEnum.LV &&
+      isUserElegibleForFastLogin(spidUser.fiscalNumber)
         ? [
             this.lvTokenDurationSecs,
             this.lvLongSessionDurationSecs,
