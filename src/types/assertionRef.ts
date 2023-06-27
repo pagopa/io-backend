@@ -32,7 +32,7 @@ const LollipopDataFromCompact = new t.Type<
     pipe(
       val,
       (data) => ({ assertionRef: data.a, loginType: data.t }),
-      LollipopData.decode
+      (data) => LollipopData.validate(data, _context)
     ),
   (val) => ({ a: val.assertionRef, t: val.loginType })
 );
