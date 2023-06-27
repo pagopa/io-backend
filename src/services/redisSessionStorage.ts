@@ -847,13 +847,18 @@ export default class RedisSessionStorage
       TE.chain(
         flow(
           NullableBackendAssertionRefFromString.decode,
-          E.map(O.fromNullable),
           E.map(
-            O.map((storedValue) =>
-              LollipopData.is(storedValue)
-                ? storedValue
-                : // Remap plain string to LollipopData
-                  { assertionRef: storedValue, loginType: LoginTypeEnum.LEGACY }
+            flow(
+              O.fromNullable,
+              O.map((storedValue) =>
+                LollipopData.is(storedValue)
+                  ? storedValue
+                  : // Remap plain string to LollipopData
+                    {
+                      assertionRef: storedValue,
+                      loginType: LoginTypeEnum.LEGACY,
+                    }
+              )
             )
           ),
           E.mapLeft(
