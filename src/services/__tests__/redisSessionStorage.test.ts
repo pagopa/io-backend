@@ -1410,6 +1410,13 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       aValidUser.fiscal_code
     );
     expect(result).toEqual(E.right(true));
+
+    expect(mockGet).toHaveBeenNthCalledWith(
+      1,
+      `KEYS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSmembers).not.toHaveBeenCalled();
+    expect(mockGet).toHaveBeenCalledTimes(1);
   });
 
   it("should return true if login type is LEGACY and user has an active session", async () => {
@@ -1437,6 +1444,18 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       aValidUser.fiscal_code
     );
     expect(result).toEqual(E.right(true));
+
+    expect(mockGet).toHaveBeenNthCalledWith(
+      1,
+      `KEYS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSmembers).toHaveBeenCalledWith(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockGet).toHaveBeenNthCalledWith(
+      2,
+      `SESSIONINFO-${aValidUser.session_token}`
+    );
   });
 
   it("should return false if no LollipopData was found", async () => {
@@ -1446,6 +1465,43 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       aValidUser.fiscal_code
     );
     expect(result).toEqual(E.right(false));
+
+    expect(mockGet).toHaveBeenNthCalledWith(
+      1,
+      `KEYS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSmembers).not.toHaveBeenCalled();
+    expect(mockGet).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return false if login type is LEGACY, USERSESSION is defined but user has no active sessions", async () => {
+    mockGet.mockImplementationOnce((_, __) =>
+      Promise.resolve(
+        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
+      )
+    );
+    mockSmembers.mockImplementationOnce((_) =>
+      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    );
+
+    mockGet.mockImplementationOnce(() => Promise.resolve(null));
+
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
+    expect(result).toEqual(E.right(false));
+
+    expect(mockGet).toHaveBeenNthCalledWith(
+      1,
+      `KEYS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSmembers).toHaveBeenCalledWith(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockGet).toHaveBeenNthCalledWith(
+      2,
+      `SESSIONINFO-${aValidUser.session_token}`
+    );
   });
 
   it("should return false if login type is LEGACY and user has no active sessions", async () => {
@@ -1460,6 +1516,15 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
       aValidUser.fiscal_code
     );
     expect(result).toEqual(E.right(false));
+
+    expect(mockGet).toHaveBeenNthCalledWith(
+      1,
+      `KEYS-${aValidUser.fiscal_code}`
+    );
+    expect(mockSmembers).toHaveBeenCalledWith(
+      `USERSESSIONS-${aValidUser.fiscal_code}`
+    );
+    expect(mockGet).toHaveBeenCalledTimes(1);
   });
 
   it("should return a left value if a redis call fail in getLollipopDataForUser", async () => {
