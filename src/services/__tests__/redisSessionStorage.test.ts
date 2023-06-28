@@ -1399,11 +1399,14 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
 });
 
 describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
+  const lvLollipopData = { a: anAssertionRef, t: LoginTypeEnum.LV };
+  const legacyLollipopData = { a: anAssertionRef, t: LoginTypeEnum.LEGACY };
+
+  const expectedRedisError = new Error("Generic Redis Error");
+
   it("should return true if login type is LV", async () => {
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(
-        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LV })
-      )
+    mockGet.mockImplementationOnce(async (_, __) =>
+      JSON.stringify(lvLollipopData)
     );
 
     const result = await sessionStorage.userHasActiveSessionsOrLV(
@@ -1420,25 +1423,19 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   });
 
   it("should return true if login type is LEGACY and user has an active session", async () => {
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(
-        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
-      )
+    mockGet.mockImplementationOnce(async (_, __) =>
+      JSON.stringify(legacyLollipopData)
     );
-    mockSmembers.mockImplementationOnce((_) =>
-      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
+    mockSmembers.mockImplementationOnce(async (_) => [
+      `SESSIONINFO-${aValidUser.session_token}`,
+    ]);
+    mockGet.mockImplementationOnce(async (_, __) =>
+      JSON.stringify({
+        createdAt: new Date(),
+        sessionToken: aValidUser.session_token,
+      })
     );
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(
-        JSON.stringify({
-          createdAt: new Date(),
-          sessionToken: aValidUser.session_token,
-        })
-      )
-    );
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(JSON.stringify(aValidUser))
-    );
+    mockGet.mockImplementationOnce(async (_, __) => JSON.stringify(aValidUser));
 
     const result = await sessionStorage.userHasActiveSessionsOrLV(
       aValidUser.fiscal_code
@@ -1459,7 +1456,7 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   });
 
   it("should return false if no LollipopData was found", async () => {
-    mockGet.mockImplementationOnce((_, __) => Promise.resolve(null));
+    mockGet.mockImplementationOnce(async (_, __) => null);
 
     const result = await sessionStorage.userHasActiveSessionsOrLV(
       aValidUser.fiscal_code
@@ -1475,14 +1472,12 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   });
 
   it("should return false if login type is LEGACY, USERSESSION is defined but user has no active sessions", async () => {
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(
-        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
-      )
+    mockGet.mockImplementationOnce(async (_, __) =>
+      JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
     );
-    mockSmembers.mockImplementationOnce((_) =>
-      Promise.resolve([`SESSIONINFO-${aValidUser.session_token}`])
-    );
+    mockSmembers.mockImplementationOnce(async (_) => [
+      `SESSIONINFO-${aValidUser.session_token}`,
+    ]);
 
     mockGet.mockImplementationOnce(() => Promise.resolve(null));
 
@@ -1505,12 +1500,10 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   });
 
   it("should return false if login type is LEGACY and user has no active sessions", async () => {
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(
-        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
-      )
+    mockGet.mockImplementationOnce(async (_, __) =>
+      JSON.stringify(legacyLollipopData)
     );
-    mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
+    mockSmembers.mockImplementationOnce(async (_) => []);
 
     const result = await sessionStorage.userHasActiveSessionsOrLV(
       aValidUser.fiscal_code
@@ -1528,7 +1521,6 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   });
 
   it("should return a left value if a redis call fail in getLollipopDataForUser", async () => {
-    const expectedRedisError = new Error("Generic Redis Error");
     mockGet.mockImplementationOnce((_, __) =>
       Promise.reject(expectedRedisError)
     );
@@ -1540,13 +1532,10 @@ describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   });
 
   it("should return a left value if a redis call fail in userHasActiveSessions", async () => {
-    mockGet.mockImplementationOnce((_, __) =>
-      Promise.resolve(
-        JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
-      )
+    mockGet.mockImplementationOnce(async (_, __) =>
+      JSON.stringify({ a: anAssertionRef, t: LoginTypeEnum.LEGACY })
     );
 
-    const expectedRedisError = new Error("Generic Redis Error");
     mockGet.mockImplementationOnce((_, __) =>
       Promise.reject(expectedRedisError)
     );
