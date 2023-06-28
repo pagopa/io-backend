@@ -7,14 +7,14 @@ import { LoginType } from "../utils/fastLogin";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 
 // LollipopData
-export type LollipopDataT = t.TypeOf<typeof LollipopData>;
+export type LollipopData = t.TypeOf<typeof LollipopData>;
 export const LollipopData = t.type({
   assertionRef: AssertionRef,
   loginType: LoginType,
 });
 
 // CompactLollipopData
-type CompactLollipopDataT = t.TypeOf<typeof CompactLollipopData>;
+type CompactLollipopData = t.TypeOf<typeof CompactLollipopData>;
 const CompactLollipopData = t.type({
   a: AssertionRef,
   t: LoginType,
@@ -22,9 +22,9 @@ const CompactLollipopData = t.type({
 
 // LollipopDataFromCompact
 const LollipopDataFromCompact = new t.Type<
-  LollipopDataT,
-  CompactLollipopDataT,
-  CompactLollipopDataT
+  LollipopData,
+  CompactLollipopData,
+  CompactLollipopData
 >(
   "LollipopDataFromCompact",
   LollipopData.is,
@@ -48,7 +48,7 @@ export const LollipopDataFromString = t.string
   .pipe(LollipopDataFromCompact);
 
 // NullableBackendAssertionRefFromString
-export type NullableBackendAssertionRefFromStringT = t.TypeOf<
+export type NullableBackendAssertionRefFromString = t.TypeOf<
   typeof NullableBackendAssertionRefFromString
 >;
 export const NullableBackendAssertionRefFromString = t.union([

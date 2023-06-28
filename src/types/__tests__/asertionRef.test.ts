@@ -5,7 +5,6 @@ import { LoginTypeEnum } from "../../utils/fastLogin";
 import {
   LollipopData,
   LollipopDataFromString,
-  LollipopDataT,
   NullableBackendAssertionRefFromString,
 } from "../assertionRef";
 
@@ -16,7 +15,7 @@ const lvStoredLollipopData = {
   t: LoginTypeEnum.LV,
 };
 
-const lvExtendedLollipopData: LollipopDataT = {
+const lvExtendedLollipopData: LollipopData = {
   assertionRef: lvStoredLollipopData.a,
   loginType: lvStoredLollipopData.t,
 };

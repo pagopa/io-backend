@@ -23,7 +23,6 @@ import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
   LollipopData,
-  LollipopDataT,
   LollipopDataFromString,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
@@ -55,7 +54,7 @@ const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
-const lollipopFingerprintPrefix = "KEYS-";
+const lollipopDataPrefix = "KEYS-";
 export const keyPrefixes = [
   sessionKeyPrefix,
   walletKeyPrefix,
@@ -67,7 +66,7 @@ export const keyPrefixes = [
   sessionInfoKeyPrefix,
   noticeEmailPrefix,
   blockedUserSetKey,
-  lollipopFingerprintPrefix,
+  lollipopDataPrefix,
 ];
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -797,33 +796,9 @@ export default class RedisSessionStorage
     )();
   }
 
-  // This mGet fires a bunch of GET operation to prevent CROSS-SLOT errors on the cluster
-  // eslint-disable-next-line functional/prefer-readonly-type
-  private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
-    return pipe(
-      keys,
-      A.map((singleKey) =>
-        TE.tryCatch(
-          () => this.redisClient.get.bind(this.redisClient)(singleKey),
-          E.toError
-        )
-      ),
-      A.sequence(TE.ApplicativePar)
-    );
-  }
-
-  private sIsMember(key: string, member: string) {
-    return this.redisClient.sIsMember.bind(this.redisClient)(key, member);
-  }
-
-  private ttl(key: string) {
-    return this.redisClient.ttl.bind(this.redisClient)(key);
-  }
-
   /**
    * {@inheritDoc}
    */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   public async getLollipopAssertionRefForUser(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, O.Option<BackendAssertionRef>>> {
@@ -836,13 +811,12 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   public async getLollipopDataForUser(
     fiscalCode: FiscalCode
-  ): Promise<Either<Error, O.Option<LollipopDataT>>> {
+  ): Promise<Either<Error, O.Option<LollipopData>>> {
     return pipe(
       TE.tryCatch(
-        () => this.redisClient.get(`${lollipopFingerprintPrefix}${fiscalCode}`),
+        () => this.redisClient.get(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
       TE.chain(
@@ -875,17 +849,16 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   public async setLollipopDataForUser(
     user: UserV5,
-    data: LollipopDataT,
+    data: LollipopData,
     expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
   ) {
     return pipe(
       TE.tryCatch(
         () =>
           this.redisClient.setEx(
-            `${lollipopFingerprintPrefix}${user.fiscal_code}`,
+            `${lollipopDataPrefix}${user.fiscal_code}`,
             expireAssertionRefSec,
             LollipopDataFromString.encode(data)
           ),
@@ -899,15 +872,41 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   public async delLollipopDataForUser(fiscalCode: FiscalCode) {
     return pipe(
       TE.tryCatch(
-        () => this.redisClient.del(`${lollipopFingerprintPrefix}${fiscalCode}`),
+        () => this.redisClient.del(`${lollipopDataPrefix}${fiscalCode}`),
         E.toError
       ),
       this.integerReplyAsync()
     )();
+  }
+
+  // ----------------------------------------------
+  // Private methods
+  // ----------------------------------------------
+
+  // This mGet fires a bunch of GET operation to prevent CROSS-SLOT errors on the cluster
+  // eslint-disable-next-line functional/prefer-readonly-type
+  private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
+    return pipe(
+      keys,
+      A.map((singleKey) =>
+        TE.tryCatch(
+          () => this.redisClient.get.bind(this.redisClient)(singleKey),
+          E.toError
+        )
+      ),
+      A.sequence(TE.ApplicativePar)
+    );
+  }
+
+  private sIsMember(key: string, member: string) {
+    return this.redisClient.sIsMember.bind(this.redisClient)(key, member);
+  }
+
+  private ttl(key: string) {
+    return this.redisClient.ttl.bind(this.redisClient)(key);
   }
 
   /**
