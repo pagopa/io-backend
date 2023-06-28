@@ -34,7 +34,7 @@ const mockSetBlockedUser = jest
 const mockUnsetBlockedUser = jest
   .fn()
   .mockImplementation(async () => E.right(true));
-const mockIsUserLogged = jest
+const mockUserHasActiveSessionsOrLV = jest
   .fn()
   .mockImplementation(async () => E.right(true));
 const mockDelLollipop = jest.fn().mockResolvedValue(E.right(true));
@@ -46,7 +46,7 @@ const mockRedisSessionStorage = {
   delUserAllSessions: mockDelUserAllSessions,
   setBlockedUser: mockSetBlockedUser,
   unsetBlockedUser: mockUnsetBlockedUser,
-  isUserLogged: mockIsUserLogged,
+  userHasActiveSessionsOrLV: mockUserHasActiveSessionsOrLV,
   getLollipopAssertionRefForUser: mockGetLollipop,
   delLollipopDataForUser: mockDelLollipop,
   setLollipopDataForUser: mockSetLollipop,
@@ -109,11 +109,11 @@ describe("SessionLockController#getUserSession", () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it("should fail if isUserLogged returns an error", async () => {
+  it("should fail if userHasActiveSessionsOrLV returns an error", async () => {
     const req = mockReq({ params: { fiscal_code: aFiscalCode } });
     const res = mockRes();
 
-    mockIsUserLogged.mockImplementationOnce(async () =>
+    mockUserHasActiveSessionsOrLV.mockImplementationOnce(async () =>
       E.left(new Error("any error"))
     );
 

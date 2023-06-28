@@ -1398,7 +1398,7 @@ describe("RedisSessionStorage#userHasActiveSessions", () => {
   });
 });
 
-describe("RedisSessionStorage#isUserLogged", () => {
+describe("RedisSessionStorage#userHasActiveSessionsOrLV", () => {
   it("should return true if login type is LV", async () => {
     mockGet.mockImplementationOnce((_, __) =>
       Promise.resolve(
@@ -1406,7 +1406,9 @@ describe("RedisSessionStorage#isUserLogged", () => {
       )
     );
 
-    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
     expect(result).toEqual(E.right(true));
   });
 
@@ -1431,14 +1433,18 @@ describe("RedisSessionStorage#isUserLogged", () => {
       Promise.resolve(JSON.stringify(aValidUser))
     );
 
-    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
     expect(result).toEqual(E.right(true));
   });
 
   it("should return false if no LollipopData was found", async () => {
     mockGet.mockImplementationOnce((_, __) => Promise.resolve(null));
 
-    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
     expect(result).toEqual(E.right(false));
   });
 
@@ -1450,7 +1456,9 @@ describe("RedisSessionStorage#isUserLogged", () => {
     );
     mockSmembers.mockImplementationOnce((_) => Promise.resolve([]));
 
-    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
     expect(result).toEqual(E.right(false));
   });
 
@@ -1460,7 +1468,9 @@ describe("RedisSessionStorage#isUserLogged", () => {
       Promise.reject(expectedRedisError)
     );
 
-    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
     expect(result).toEqual(E.left(expectedRedisError));
   });
 
@@ -1476,7 +1486,9 @@ describe("RedisSessionStorage#isUserLogged", () => {
       Promise.reject(expectedRedisError)
     );
 
-    const result = await sessionStorage.isUserLogged(aValidUser.fiscal_code);
+    const result = await sessionStorage.userHasActiveSessionsOrLV(
+      aValidUser.fiscal_code
+    );
     expect(result).toEqual(E.left(expectedRedisError));
   });
 });

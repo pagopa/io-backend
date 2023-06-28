@@ -118,7 +118,8 @@ const redisSessionStorage = new RedisSessionStorage(
   aDefaultLollipopAssertionRefDurationSec
 );
 
-const mockIsUserLogged = (redisSessionStorage.isUserLogged = jest.fn());
+const mockUserHasActiveSessionsOrLV =
+  (redisSessionStorage.userHasActiveSessionsOrLV = jest.fn());
 
 const notificationService = new NotificationService("", "");
 const notificationServiceFactory = (_fc: FiscalCode) => notificationService;
@@ -151,7 +152,9 @@ describe("NotificationController#notify", () => {
   it("should return success if data is correct", async () => {
     const req = mockReq();
 
-    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
+    mockUserHasActiveSessionsOrLV.mockReturnValue(
+      Promise.resolve(E.right(true))
+    );
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -171,7 +174,9 @@ describe("NotificationController#notify", () => {
   it("should send generic notification if user has not active sessions", async () => {
     const req = mockReq();
 
-    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(false)));
+    mockUserHasActiveSessionsOrLV.mockReturnValue(
+      Promise.resolve(E.right(false))
+    );
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -200,7 +205,9 @@ describe("NotificationController#notify", () => {
   it("should send generic notification if message content is not defined", async () => {
     const req = mockReq();
 
-    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
+    mockUserHasActiveSessionsOrLV.mockReturnValue(
+      Promise.resolve(E.right(true))
+    );
 
     mockNotify.mockReturnValue(
       Promise.resolve(ResponseSuccessJson({ message: "ok" }))
@@ -247,7 +254,7 @@ describe("NotificationController#notify", () => {
   it("should return an error in case an exception is thrown getting user session", async () => {
     const req = mockReq();
 
-    mockIsUserLogged.mockImplementation(() => {
+    mockUserHasActiveSessionsOrLV.mockImplementation(() => {
       throw new Error("error");
     });
 
@@ -266,7 +273,9 @@ describe("NotificationController#notify", () => {
   it("should return an error in case an exception is thrown notifying the user", async () => {
     const req = mockReq();
 
-    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
+    mockUserHasActiveSessionsOrLV.mockReturnValue(
+      Promise.resolve(E.right(true))
+    );
 
     mockNotify.mockImplementation(() => {
       throw new Error("error");
@@ -287,7 +296,9 @@ describe("NotificationController#notify", () => {
   it("should return an error in case notify call fails", async () => {
     const req = mockReq();
 
-    mockIsUserLogged.mockReturnValue(Promise.resolve(E.right(true)));
+    mockUserHasActiveSessionsOrLV.mockReturnValue(
+      Promise.resolve(E.right(true))
+    );
 
     mockNotify.mockReturnValue(Promise.reject());
 
