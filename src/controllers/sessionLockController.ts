@@ -55,7 +55,7 @@ export default class SessionLockController {
       TE.chainW((fiscalCode) =>
         pipe(
           TE.tryCatch(
-            () => this.sessionStorage.isUserLogged(fiscalCode),
+            () => this.sessionStorage.userHasActiveSessionsOrLV(fiscalCode),
             E.toError
           ),
           TE.chain(TE.fromEither),

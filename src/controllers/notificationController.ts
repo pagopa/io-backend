@@ -56,7 +56,10 @@ export default class NotificationController {
         (data: Notification) =>
           pipe(
             TE.tryCatch(
-              () => this.sessionStorage.isUserLogged(data.message.fiscal_code),
+              () =>
+                this.sessionStorage.userHasActiveSessionsOrLV(
+                  data.message.fiscal_code
+                ),
               E.toError
             ),
             TE.chain(TE.fromEither),
