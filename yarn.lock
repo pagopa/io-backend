@@ -994,10 +994,10 @@
     xml2js "^0.4.23"
     yargs "^15.3.0"
 
-"@pagopa/openapi-codegen-ts@^13.0.1":
-  version "13.0.1"
-  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-13.0.1.tgz#c39591b88be4bfebb0ebf03f7082c95b5b1c6b41"
-  integrity sha512-kJ/EWR4XkwRxz/yk5cPra6JTCnKx75YvlkJxKbw61XvrfJwrKykJzyr5lgMQFLc5te/gXLyl2cMh7BI3ncaT8Q==
+"@pagopa/openapi-codegen-ts@^13.1.0":
+  version "13.1.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/openapi-codegen-ts/-/openapi-codegen-ts-13.1.0.tgz#b5dca49eec448474f2639516d05f42e78eab0a1c"
+  integrity sha512-VKXkZtIGzklWgRK/GzsmefnHW9Mc9j0tukDxgRz4T3BfKXX0xoy5t0Es6AygRmg2WhF998wSVoQZF/9yhSgEZA==
   dependencies:
     "@pagopa/ts-commons" "^10.15.0"
     fs-extra "^6.0.0"
