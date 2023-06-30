@@ -535,14 +535,15 @@ export async function newApp({
           authMiddlewares.local
         );
 
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         if (FF_FAST_LOGIN) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerFastLoginRoutes(
             app,
             APIBasePath,
             LOLLIPOP_API_CLIENT,
             SESSION_STORAGE,
-            FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT
+            FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
+            TOKEN_SERVICE
           );
         }
 
@@ -1616,17 +1617,26 @@ function registerFirstLollipopConsumer(
   );
 }
 
+// eslint-disable-next-line max-params
 function registerFastLoginRoutes(
   app: Express,
   basePath: string,
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage,
-  fastLoginLollipopConsumerClient: ReturnType<getFastLoginLollipopConsumerClient>
+  fastLoginLollipopConsumerClient: ReturnType<getFastLoginLollipopConsumerClient>,
+  tokenService: TokenService
 ): void {
   app.post(
     `${basePath}/fast-login`,
     expressLollipopMiddleware(lollipopClient, sessionStorage),
-    toExpressHandler(fastLoginEndpoint(fastLoginLollipopConsumerClient))
+    toExpressHandler(
+      fastLoginEndpoint(
+        fastLoginLollipopConsumerClient,
+        sessionStorage,
+        tokenService,
+        lvTokenDurationSecs
+      )
+    )
   );
 }
 

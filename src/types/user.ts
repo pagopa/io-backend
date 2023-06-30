@@ -57,6 +57,8 @@ export const UserWithoutTokens = t.intersection([
     spid_idp: t.string,
   }),
 ]);
+export type UserWithoutTokens = t.TypeOf<typeof UserWithoutTokens>;
+
 const RequiredUserTokensV1 = t.interface({
   session_token: SessionToken,
   wallet_token: WalletToken,

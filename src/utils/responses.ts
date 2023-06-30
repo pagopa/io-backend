@@ -119,6 +119,32 @@ export function ResponseErrorUnauthorizedForLegalReasons(
   };
 }
 
+/**
+ * Interface for 401 unauthorized
+ */
+export interface IResponseErrorUnauthorized
+  extends IResponse<"IResponseErrorUnauthorized"> {
+  readonly detail: string;
+}
+/**
+ * Returns an unauthorized error response with status code 401.
+ */
+export function ResponseErrorUnauthorized(
+  detail: string
+): IResponseErrorUnauthorized {
+  return {
+    ...ResponseErrorGeneric(
+      HttpStatusCodeEnum.HTTP_STATUS_401,
+      "Unauthorized",
+      detail
+    ),
+    ...{
+      detail: `Unauthorized: ${detail}`,
+      kind: "IResponseErrorUnauthorized",
+    },
+  };
+}
+
 export const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
   // This case should not happen, so response is of type never.
   // However, the underlying api may not follow the specs so we might trace the unhandled status
