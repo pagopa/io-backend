@@ -180,6 +180,7 @@ import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
 import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
 import { fastLoginEndpoint } from "./controllers/fastLoginController";
 import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
+import { FeatureFlagEnum } from "./utils/featureFlag";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -535,7 +536,7 @@ export async function newApp({
           authMiddlewares.local
         );
 
-        if (FF_FAST_LOGIN) {
+        if (FF_FAST_LOGIN != FeatureFlagEnum.NONE) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerFastLoginRoutes(
             app,
