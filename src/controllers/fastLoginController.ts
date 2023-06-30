@@ -115,8 +115,8 @@ const generateSessionTokens = (
     TE.mapLeft(() => ResponseErrorInternal(`Error while validating user`)),
     TE.chainW((isUserBlocked) =>
       isUserBlocked
-        ? TE.right(true)
-        : TE.left(ResponseErrorUnauthorized("User is blocked"))
+        ? TE.left(ResponseErrorUnauthorized("User is blocked"))
+        : TE.right(true)
     ),
     TE.chainW(() => pipe(tokenTasks, AP.sequenceS(T.ApplyPar), TE.fromTask))
   );
