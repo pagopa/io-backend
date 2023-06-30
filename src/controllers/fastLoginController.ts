@@ -1,4 +1,3 @@
-import { getFastLoginLollipopConsumerClient } from "../clients/fastLoginLollipopConsumerClient";
 import type * as express from "express";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -11,24 +10,20 @@ import {
 import * as t from "io-ts";
 import * as O from "fp-ts/lib/Option";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { ResLocals } from "../utils/express";
-import { withLollipopLocals } from "../types/lollipop";
 import { flow, identity, pipe } from "fp-ts/function";
 import * as E from "fp-ts/lib/Either";
 import * as AP from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import * as T from "fp-ts/lib/Task";
 import { safeXMLParseFromString } from "@pagopa/io-spid-commons/dist/utils/samlUtils";
+import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
+import { withLollipopLocals } from "../types/lollipop";
+import { ResLocals } from "../utils/express";
+import { getFastLoginLollipopConsumerClient } from "../clients/fastLoginLollipopConsumerClient";
 import TokenService from "../services/tokenService";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { FastLoginResponse as LCFastLoginResponse } from "../../generated/fast-login-api/FastLoginResponse";
-import {
-  isUserElegibleForFastLogin,
-  SESSION_ID_LENGTH_BYTES,
-  SESSION_TOKEN_LENGTH_BYTES,
-} from "./authenticationController";
 import { makeProxyUserFromSAMLResponse } from "../utils/spid";
 import { UserV5 } from "../types/user";
 import {
@@ -43,6 +38,11 @@ import {
   IResponseErrorUnauthorized,
   ResponseErrorUnauthorized,
 } from "../utils/responses";
+import {
+  isUserElegibleForFastLogin,
+  SESSION_ID_LENGTH_BYTES,
+  SESSION_TOKEN_LENGTH_BYTES,
+} from "./authenticationController";
 
 const FastLoginResponse = t.type({
   token: NonEmptyString,
@@ -50,15 +50,15 @@ const FastLoginResponse = t.type({
 
 type FastLoginResponse = t.TypeOf<typeof FastLoginResponse>;
 
-type UserTokens = {
-  session_token: SessionToken;
-  wallet_token: WalletToken;
-  myportal_token: MyPortalToken;
-  bpd_token: BPDToken;
-  zendesk_token: ZendeskToken;
-  fims_token: FIMSToken;
-  session_tracking_id: string;
-};
+interface UserTokens {
+  readonly session_token: SessionToken;
+  readonly wallet_token: WalletToken;
+  readonly myportal_token: MyPortalToken;
+  readonly bpd_token: BPDToken;
+  readonly zendesk_token: ZendeskToken;
+  readonly fims_token: FIMSToken;
+  readonly session_tracking_id: string;
+}
 
 const generateSessionTokens = (
   userFiscalCode: FiscalCode,
@@ -71,39 +71,39 @@ const generateSessionTokens = (
   // note: since we have a bunch of async operations that don't depend on
   //       each other, we can run them in parallel
   const tokenTasks = {
-    // authentication token for app backend
-    session_token: () =>
-      tokenService.getNewTokenAsync(
-        SESSION_TOKEN_LENGTH_BYTES
-      ) as Promise<SessionToken>,
-    // authentication token for pagoPA
-    wallet_token: () =>
-      tokenService.getNewTokenAsync(
-        SESSION_TOKEN_LENGTH_BYTES
-      ) as Promise<WalletToken>,
-    // authentication token for MyPortal
-    myportal_token: () =>
-      tokenService.getNewTokenAsync(
-        SESSION_TOKEN_LENGTH_BYTES
-      ) as Promise<MyPortalToken>,
     // authentication token for BPD
     bpd_token: () =>
       tokenService.getNewTokenAsync(
         SESSION_TOKEN_LENGTH_BYTES
       ) as Promise<BPDToken>,
-    // authentication token for Zendesk
-    zendesk_token: () =>
-      tokenService.getNewTokenAsync(
-        SESSION_TOKEN_LENGTH_BYTES
-      ) as Promise<ZendeskToken>,
     // authentication token for FIMS
     fims_token: () =>
       tokenService.getNewTokenAsync(
         SESSION_TOKEN_LENGTH_BYTES
       ) as Promise<FIMSToken>,
+    // authentication token for MyPortal
+    myportal_token: () =>
+      tokenService.getNewTokenAsync(
+        SESSION_TOKEN_LENGTH_BYTES
+      ) as Promise<MyPortalToken>,
+    // authentication token for app backend
+    session_token: () =>
+      tokenService.getNewTokenAsync(
+        SESSION_TOKEN_LENGTH_BYTES
+      ) as Promise<SessionToken>,
     // unique ID for tracking the user session
     session_tracking_id: () =>
       tokenService.getNewTokenAsync(SESSION_ID_LENGTH_BYTES),
+    // authentication token for pagoPA
+    wallet_token: () =>
+      tokenService.getNewTokenAsync(
+        SESSION_TOKEN_LENGTH_BYTES
+      ) as Promise<WalletToken>,
+    // authentication token for Zendesk
+    zendesk_token: () =>
+      tokenService.getNewTokenAsync(
+        SESSION_TOKEN_LENGTH_BYTES
+      ) as Promise<ZendeskToken>,
   };
 
   // ask the session storage whether this user is blocked
@@ -165,29 +165,29 @@ export const fastLoginEndpoint =
     | IResponseErrorForbiddenNotAuthorized
     | IResponseErrorInternal
     | IResponseSuccessJson<FastLoginResponse>
-  > => {
-    return pipe(
+  > =>
+    pipe(
       locals,
       withLollipopLocals,
-      E.mapLeft((_) => ResponseErrorInternal("Could not initialize Lollipop")),
+      E.mapLeft((__) => ResponseErrorInternal("Could not initialize Lollipop")),
       TE.fromEither,
+      TE.bindTo("lollipopLocals"),
+      TE.bind("userFiscalCode", ({ lollipopLocals }) =>
+        TE.of(lollipopLocals["x-pagopa-lollipop-user-id"])
+      ),
       // TODO: remove this block of code when the FF_FAST_LOGIN will be set to ALL
       // ---------------
       TE.chainFirstW(
         TE.fromPredicate(
-          (locals) =>
-            isUserElegibleForFastLogin(locals["x-pagopa-lollipop-user-id"]),
+          ({ userFiscalCode }) => isUserElegibleForFastLogin(userFiscalCode),
           () => ResponseErrorForbiddenNotAuthorized
         )
       ),
       // ---------------
-      TE.chainFirst((locals) =>
+      TE.chainFirst(({ lollipopLocals, userFiscalCode }) =>
         pipe(
           TE.tryCatch(
-            () =>
-              sessionStorage.getLollipopAssertionRefForUser(
-                locals["x-pagopa-lollipop-user-id"]
-              ),
+            () => sessionStorage.getLollipopAssertionRefForUser(userFiscalCode),
             () =>
               ResponseErrorInternal(
                 `Error while trying to get Lollipop initialization`
@@ -205,13 +205,12 @@ export const fastLoginEndpoint =
               (maybeAssertionRef) =>
                 O.isSome(maybeAssertionRef) &&
                 maybeAssertionRef.value ===
-                  locals["x-pagopa-lollipop-assertion-ref"],
+                  lollipopLocals["x-pagopa-lollipop-assertion-ref"],
               () => ResponseErrorForbiddenNotAuthorized
             )
           )
         )
       ),
-      TE.bindTo("lollipopLocals"),
       TE.bindW("client_response", ({ lollipopLocals }) =>
         pipe(
           TE.tryCatch(
@@ -219,7 +218,7 @@ export const fastLoginEndpoint =
               client.fastLogin({
                 ...lollipopLocals,
               }),
-            (_) =>
+            (__) =>
               ResponseErrorInternal("Error while calling the Lollipop Consumer")
           ),
           TE.chainEitherKW(
@@ -309,4 +308,3 @@ export const fastLoginEndpoint =
       ),
       TE.toUnion
     )();
-  };

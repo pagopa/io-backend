@@ -15,11 +15,11 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
 import { flow, pipe } from "fp-ts/lib/function";
-import { log } from "./logger";
-import { base64EncodeObject } from "./messages";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
 import { UserWithoutTokens } from "../types/user";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
+import { base64EncodeObject } from "./messages";
+import { log } from "./logger";
 import { formatDate } from "./date";
 
 const SAML_NAMESPACE = {
@@ -95,9 +95,10 @@ export const makeProxyUserFromSAMLResponse = (
   doc: Document
 ): O.Option<UserWithoutTokens> => {
   const proxyUserProperties = {
-    fiscal_code: getFiscalNumberFromPayload(doc),
+    created_at: O.some(new Date().getTime()),
     date_of_birth: pipe(getDateOfBirthFromAssertion(doc), O.map(formatDate)),
     family_name: getFamilyNameFromAssertion(doc),
+    fiscal_code: getFiscalNumberFromPayload(doc),
     name: getNameFromAssertion(doc),
     spid_email: getSpidEmailFromAssertion(doc),
     spid_idp: getIssuerFromSAMLResponse(doc),
@@ -108,7 +109,6 @@ export const makeProxyUserFromSAMLResponse = (
         (spidLevel) => O.some(spidLevel)
       )
     ),
-    created_at: O.some(new Date().getTime()),
   };
   return pipe(proxyUserProperties, AP.sequenceS(O.Apply));
 };
