@@ -536,7 +536,7 @@ export async function newApp({
           authMiddlewares.local
         );
 
-        if (FF_FAST_LOGIN != FeatureFlagEnum.NONE) {
+        if (FF_FAST_LOGIN !== FeatureFlagEnum.NONE) {
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           registerFastLoginRoutes(
             app,
