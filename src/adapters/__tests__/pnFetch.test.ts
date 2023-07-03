@@ -25,7 +25,11 @@ import {
   notificationDetailResponseExample,
   notificationDetailResponseExampleAsObject,
 } from "../../__mocks__/pn-response";
-import { lollipopParams } from "../../__mocks__/lollipop";
+import {
+  anAssertionRef,
+  aSignatureInput,
+  lollipopParams,
+} from "../../__mocks__/lollipop";
 import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
 
 const dummyGetReceivedNotification = jest.fn();
@@ -146,10 +150,8 @@ describe("getThirdPartyMessageDetails", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",
@@ -246,10 +248,8 @@ describe("getThirdPartyMessageDetails", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",
@@ -352,10 +352,8 @@ describe("getThirdPartyAttachments", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",
@@ -411,10 +409,8 @@ describe("getThirdPartyAttachments", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",
@@ -472,10 +468,8 @@ describe("getThirdPartyAttachments", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",
@@ -594,10 +588,8 @@ describe("getThirdPartyMessagePrecondition", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",
@@ -648,10 +640,8 @@ describe("getThirdPartyMessagePrecondition", () => {
       "x-pagopa-cx-taxid": aFiscalCode,
       signature:
         "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input":
-        'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
-      "x-pagopa-lollipop-assertion-ref":
-        "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=",
+      "signature-input": aSignatureInput,
+      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
       "x-pagopa-lollipop-assertion-type": "SAML",
       "x-pagopa-lollipop-auth-jwt": "a bearer token",
       "x-pagopa-lollipop-original-method": "POST",

@@ -288,6 +288,15 @@ export const withUserFromRequest = async <T>(
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(User.decode(req.user), f);
 
+export const withOptionalUserFromRequest = async <T>(
+  req: express.Request,
+  f: (user: O.Option<User>) => Promise<T>
+): Promise<IResponseErrorValidation | T> =>
+  withValidatedOrValidationError(
+    req.user ? pipe(User.decode(req.user), E.map(O.some)) : E.right(O.none),
+    f
+  );
+
 /**
  * Extracts a user from a json string.
  */

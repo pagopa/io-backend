@@ -44,10 +44,13 @@ export const aLollipopAssertion =
 export const aSignature =
   `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:` as LollipopSignature;
 export const aSignatureInput =
-  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"` as LollipopSignatureInput;
+  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="${anAssertionRef}"` as LollipopSignatureInput;
 export const aLollipopOriginalMethod = "POST" as LollipopMethod;
 export const aLollipopOriginalUrl =
   "https://api.pagopa.it" as LollipopOriginalURL;
+
+export const anInvalidSignatureInput =
+  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="an-invalid-assertion-ref"` as LollipopSignatureInput;
 
 export const mockActivatePubKey = jest.fn();
 

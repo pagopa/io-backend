@@ -1,5 +1,5 @@
 import * as TE from "fp-ts/TaskEither";
-import { identity, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -13,6 +13,10 @@ import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { eventLog } from "@pagopa/winston-ts";
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
 import { ServiceId } from "@pagopa/io-functions-app-sdk/ServiceId";
+import { Errors } from "io-ts";
+import * as O from "fp-ts/Option";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { LollipopApiClient } from "../clients/lollipop";
 import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
@@ -27,6 +31,8 @@ type ErrorsResponses =
 
 const LOLLIPOP_SIGN_ERROR_EVENT_NAME = "lollipop.error.sign";
 const NONCE_REGEX = new RegExp(';?nonce="([^"]+)";?');
+// Take the first occurrence of the field keyid into the signature-params
+const ASSERTION_REF_REGEX = new RegExp(';?keyid="([^"]+)";?');
 
 const getNonceOrUlid = (
   lollipopSignatureInput: LollipopSignatureInput
@@ -38,6 +44,16 @@ const getNonceOrUlid = (
     ulid(),
   ];
   return nonce as NonEmptyString;
+};
+
+export const getAssertionRefFromSignature = (
+  lollipopSignatureInput: LollipopSignatureInput
+): E.Either<Errors, AssertionRef> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, assertionRef, ...__] = ASSERTION_REF_REGEX.exec(
+    lollipopSignatureInput
+  ) ?? [null, null];
+  return AssertionRef.decode(assertionRef);
 };
 
 export const checkIfLollipopIsEnabled = (
@@ -64,42 +80,79 @@ export const checkIfLollipopIsEnabled = (
         !config.disableLollipopFor.includes(fiscalCode)
     )
   );
+const validateAssertionRefForUser = (
+  sessionStorage: ISessionStorage,
+  fiscalCode: FiscalCode,
+  operationId: NonEmptyString,
+  requestAssertionRef: AssertionRef
+) =>
+  pipe(
+    TE.tryCatch(
+      () => sessionStorage.getLollipopAssertionRefForUser(fiscalCode),
+      E.toError
+    ),
+    TE.chainEitherK(identity),
+    eventLog.taskEither.errorLeft((err) => [
+      `An error occurs retrieving the assertion ref from Redis | ${err.message}`,
+      {
+        fiscal_code: sha256(fiscalCode),
+        name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
+        operation_id: operationId,
+      },
+    ]),
+    TE.mapLeft((err) => {
+      log.error(
+        "lollipopMiddleware|error reading the assertionRef from redis [%s]",
+        err.message
+      );
+      return ResponseErrorInternal("Error retrieving the assertionRef");
+    }),
+    TE.chainW(TE.fromOption(() => ResponseErrorForbiddenNotAuthorized)),
+    TE.chainW(
+      TE.fromPredicate(
+        (_) => _ === requestAssertionRef,
+        () => ResponseErrorForbiddenNotAuthorized
+      )
+    ),
+    TE.map(() => true)
+  );
 
 export const extractLollipopLocalsFromLollipopHeaders = (
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage,
-  fiscalCode: FiscalCode,
-  lollipopHeaders: LollipopRequiredHeaders
-) =>
+  lollipopHeaders: LollipopRequiredHeaders,
+  fiscalCode?: FiscalCode
+): TE.TaskEither<
+  IResponseErrorInternal | IResponseErrorForbiddenNotAuthorized,
+  LollipopLocalsType
+> =>
   pipe(
     TE.of(getNonceOrUlid(lollipopHeaders["signature-input"])),
     TE.bindTo("operationId"),
-    TE.bind("assertionRef", ({ operationId }) =>
+    TE.bind("assertionRef", () =>
       pipe(
-        TE.tryCatch(
-          () => sessionStorage.getLollipopAssertionRefForUser(fiscalCode),
-          E.toError
+        getAssertionRefFromSignature(lollipopHeaders["signature-input"]),
+        E.mapLeft(() =>
+          ResponseErrorInternal("Invalid assertionRef in signature params")
         ),
-        TE.chainEitherK(identity),
-        eventLog.taskEither.errorLeft((err) => [
-          `An error occurs retrieving the assertion ref from Redis | ${err.message}`,
-          {
-            fiscal_code: sha256(fiscalCode),
-            name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
-            operation_id: operationId,
-          },
-        ]),
-        TE.mapLeft((err) => {
-          log.error(
-            "lollipopMiddleware|error reading the assertionRef from redis [%s]",
-            err.message
-          );
-          return ResponseErrorInternal("Error retrieving the assertionRef");
-        }),
-        TE.chainW(TE.fromOption(() => ResponseErrorForbiddenNotAuthorized))
+        TE.fromEither
       )
     ),
-    TE.bindW("generateLCParamsResponse", ({ assertionRef, operationId }) =>
+    TE.chainFirst(({ assertionRef, operationId }) =>
+      pipe(
+        O.fromNullable(fiscalCode),
+        O.map((fc) =>
+          validateAssertionRefForUser(
+            sessionStorage,
+            fc,
+            operationId,
+            assertionRef
+          )
+        ),
+        O.getOrElse(() => TE.of(true))
+      )
+    ),
+    TE.bindW("lcParams", ({ assertionRef, operationId }) =>
       pipe(
         TE.tryCatch(
           () =>
@@ -113,12 +166,12 @@ export const extractLollipopLocalsFromLollipopHeaders = (
         ),
         eventLog.taskEither.errorLeft((error) => [
           `Error trying to call the Lollipop function service | ${error.message}`,
-          {
+          withoutUndefinedValues({
             assertion_ref: assertionRef,
-            fiscal_code: sha256(fiscalCode),
+            fiscal_code: fiscalCode ? sha256(fiscalCode) : undefined,
             name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
             operation_id: operationId,
-          },
+          }),
         ]),
         TE.mapLeft((err) => {
           log.error(
@@ -128,33 +181,32 @@ export const extractLollipopLocalsFromLollipopHeaders = (
           return ResponseErrorInternal(
             "Error calling the Lollipop function service"
           );
-        })
-      )
-    ),
-    TE.chain(({ generateLCParamsResponse, assertionRef, operationId }) =>
-      pipe(
-        generateLCParamsResponse,
-        TE.fromEither,
-        eventLog.taskEither.errorLeft((err) => [
-          `Unexpected response from the lollipop function service | ${readableReportSimplified(
-            err
-          )}`,
-          {
-            assertion_ref: assertionRef,
-            fiscal_code: sha256(fiscalCode),
-            name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
-            operation_id: operationId,
-          },
-        ]),
-        TE.mapLeft((err) => {
-          log.error(
-            "lollipopMiddleware|error calling the Lollipop function service [%s]",
-            readableReportSimplified(err)
-          );
-          return ResponseErrorInternal(
-            "Unexpected response from lollipop service"
-          );
         }),
+        TE.chain(
+          flow(
+            TE.fromEither,
+            eventLog.taskEither.errorLeft((err) => [
+              `Unexpected response from the lollipop function service | ${readableReportSimplified(
+                err
+              )}`,
+              withoutUndefinedValues({
+                assertion_ref: assertionRef,
+                fiscal_code: fiscalCode ? sha256(fiscalCode) : undefined,
+                name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
+                operation_id: operationId,
+              }),
+            ]),
+            TE.mapLeft((err) => {
+              log.error(
+                "lollipopMiddleware|error calling the Lollipop function service [%s]",
+                readableReportSimplified(err)
+              );
+              return ResponseErrorInternal(
+                "Unexpected response from lollipop service"
+              );
+            })
+          )
+        ),
         TE.chainW((lollipopRes) =>
           pipe(
             lollipopRes.status === 200
@@ -166,25 +218,41 @@ export const extractLollipopLocalsFromLollipopHeaders = (
                 ),
             eventLog.taskEither.errorLeft((errorResponse) => [
               `The lollipop function service returns an error | ${errorResponse.kind}`,
-              {
+              withoutUndefinedValues({
                 assertion_ref: assertionRef,
-                fiscal_code: sha256(fiscalCode),
+                fiscal_code: fiscalCode ? sha256(fiscalCode) : undefined,
                 name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
                 operation_id: operationId,
-              },
+              }),
             ])
           )
         )
       )
     ),
+    TE.chainFirst(({ assertionRef, operationId, lcParams }) =>
+      pipe(
+        O.fromNullable(fiscalCode),
+        O.map(() => TE.of(true)),
+        O.getOrElse(() =>
+          validateAssertionRefForUser(
+            sessionStorage,
+            lcParams.fiscal_code,
+            operationId,
+            assertionRef
+          )
+        )
+      )
+    ),
     TE.map(
-      (lcParams) =>
+      ({ lcParams }) =>
         ({
           ["x-pagopa-lollipop-assertion-ref"]: lcParams.assertion_ref,
           ["x-pagopa-lollipop-assertion-type"]: lcParams.assertion_type,
           ["x-pagopa-lollipop-auth-jwt"]: lcParams.lc_authentication_bearer,
           ["x-pagopa-lollipop-public-key"]: lcParams.pub_key,
-          ["x-pagopa-lollipop-user-id"]: fiscalCode,
+          // It's possible to improve security by verify that the fiscal code from
+          // the authorization is the same of the value given from the lollipop function
+          ["x-pagopa-lollipop-user-id"]: fiscalCode || lcParams.fiscal_code,
           ...lollipopHeaders,
         } as LollipopLocalsType)
     ),
