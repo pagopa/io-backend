@@ -4,7 +4,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RNEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as redis from "redis";
-import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import TokenService from "../../services/tokenService";
 import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey";
@@ -67,35 +66,6 @@ jest.mock("../../services/tokenService", () => {
     default: jest.fn().mockImplementation(() => ({
       getNewToken: mockGetNewToken,
       getNewTokenAsync: () => Promise.resolve(mockGetNewToken()),
-    })),
-  };
-});
-
-const mockGetProfile = jest.fn();
-const mockCreateProfile = jest.fn();
-
-jest.mock("../../services/profileService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      createProfile: mockCreateProfile,
-      getProfile: mockGetProfile,
-    })),
-  };
-});
-
-jest.mock("../../services/notificationService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      deleteInstallation: () =>
-        Promise.resolve(ResponseSuccessJson({ message: "ok" })),
-    })),
-  };
-});
-
-jest.mock("../../services/usersLoginLogService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      notifyUserLogin: () => Promise.resolve(),
     })),
   };
 });
