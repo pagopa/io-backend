@@ -1,16 +1,11 @@
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as RNEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as redis from "redis";
 import { aFiscalCode } from "../../__mocks__/user_mock";
 import TokenService from "../../services/tokenService";
-import { ActivatedPubKey } from "../../../generated/lollipop-api/ActivatedPubKey";
-import { PubKeyStatusEnum } from "../../../generated/lollipop-api/PubKeyStatus";
-import { AssertionRef } from "../../../generated/lollipop-api/AssertionRef";
 import { AssertionTypeEnum } from "../../../generated/lollipop-api/AssertionType";
-import { JwkPubKey } from "../../../generated/lollipop-api/JwkPubKey";
 import { fastLoginEndpoint } from "../fastLoginController";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { getFastLoginLollipopConsumerClient } from "../../clients/fastLoginLollipopConsumerClient";
@@ -35,12 +30,9 @@ import * as spidUtils from "../../utils/spid";
 import { pipe } from "fp-ts/lib/function";
 
 const mockSet = jest.fn();
-const mockGetBySessionToken = jest.fn();
-const mockGetByWalletToken = jest.fn();
 const mockDel = jest.fn();
 const mockDelLollipop = jest.fn();
 const mockGetLollipop = jest.fn();
-const mockSetLollipop = jest.fn();
 const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
@@ -48,9 +40,6 @@ jest.mock("../../services/redisSessionStorage", () => {
       del: mockDel,
       getLollipopAssertionRefForUser: mockGetLollipop,
       delLollipopAssertionRefForUser: mockDelLollipop,
-      setLollipopAssertionRefForUser: mockSetLollipop,
-      getBySessionToken: mockGetBySessionToken,
-      getByWalletToken: mockGetByWalletToken,
       isBlockedUser: mockIsBlockedUser,
       set: mockSet,
     })),
@@ -64,40 +53,11 @@ const mockGetNewToken = jest.fn().mockResolvedValue(aRandomToken);
 jest.mock("../../services/tokenService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      getNewToken: mockGetNewToken,
       getNewTokenAsync: () => Promise.resolve(mockGetNewToken()),
     })),
   };
 });
 
-const anActivatedPubKey = {
-  status: PubKeyStatusEnum.VALID,
-  assertion_file_name: "file",
-  assertion_ref: "sha" as AssertionRef,
-  assertion_type: AssertionTypeEnum.SAML,
-  fiscal_code: aFiscalCode,
-  pub_key: {} as JwkPubKey,
-  ttl: 600,
-  version: 1,
-  expires_at: 1000,
-} as unknown as ActivatedPubKey;
-
-const mockRevokePreviousAssertionRef = jest
-  .fn()
-  .mockImplementation((_) => Promise.resolve({}));
-
-const mockActivateLolliPoPKey = jest
-  .fn()
-  .mockImplementation((_, __, ___) => TE.of(anActivatedPubKey));
-
-jest.mock("../../services/lollipopService", () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
-      revokePreviousAssertionRef: mockRevokePreviousAssertionRef,
-      activateLolliPoPKey: mockActivateLolliPoPKey,
-    })),
-  };
-});
 const redisClient = {} as redis.RedisClientType;
 
 const tokenService = new TokenService();
