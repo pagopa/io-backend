@@ -12,7 +12,6 @@ import { getFastLoginLollipopConsumerClient } from "../../clients/fastLoginLolli
 import {
   aLollipopOriginalUrl,
   anAssertionRef,
-  anotherAssertionRef,
   aSignature,
   aSignatureInput,
 } from "../../__mocks__/lollipop";
@@ -31,24 +30,16 @@ import { pipe } from "fp-ts/lib/function";
 
 const mockSet = jest.fn();
 const mockDel = jest.fn();
-const mockDelLollipop = jest.fn();
-const mockGetLollipop = jest
-  .fn()
-  .mockResolvedValue(E.right(O.some(anAssertionRef)));
 const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
-      getLollipopAssertionRefForUser: mockGetLollipop,
-      delLollipopAssertionRefForUser: mockDelLollipop,
       isBlockedUser: mockIsBlockedUser,
       set: mockSet,
     })),
   };
 });
-
-mockDelLollipop.mockImplementation(() => Promise.resolve(E.right(true)));
 
 const aRandomToken = "RANDOMTOKEN";
 const mockGetNewToken = jest.fn().mockResolvedValue(aRandomToken);
@@ -144,8 +135,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(mockGetLollipop).toHaveBeenCalledWith(aFiscalCode);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledWith(fastLoginLollipopLocals);
 
@@ -178,66 +167,12 @@ describe("fastLoginController", () => {
     );
   });
 
-  it("should fail when the sessionStorage had a connection error", async () => {
-    mockGetLollipop.mockRejectedValueOnce(null);
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
-    const res = mockRes();
-    response.apply(res);
-
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Internal server error",
-        detail: "Error while trying to get Lollipop initialization",
-      })
-    );
-  });
-
-  it("should fail when the sessionStorage can't find an assertionRef related to the user", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.left(new Error("error")));
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
-    const res = mockRes();
-    response.apply(res);
-
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Internal server error",
-        detail: "Error while validating Lollipop initialization: error",
-      })
-    );
-  });
-
-  it.each`
-    scenario                                                            | storageResult
-    ${"the assertionRef was not found"}                                 | ${O.none}
-    ${"the assertionRef is not the same as the one in lollipop locals"} | ${O.some(anotherAssertionRef)}
-  `("should return 403 when $title", async ({ storageResult }) => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(storageResult));
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
-    const res = mockRes();
-    response.apply(res);
-
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "You are not allowed here",
-        detail:
-          "You do not have enough permission to complete the operation you requested",
-      })
-    );
-  });
-
   it("should fail when the lollipop consumer can't be contacted", async () => {
     mockLCFastLogin.mockRejectedValueOnce(null);
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(
@@ -254,7 +189,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(
@@ -273,7 +207,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith(
@@ -298,7 +231,6 @@ describe("fastLoginController", () => {
       const res = mockRes();
       response.apply(res);
 
-      expect(mockGetLollipop).toHaveBeenCalledTimes(1);
       expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith(
@@ -318,7 +250,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(
@@ -335,7 +266,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(mockIsBlockedUser).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(401);
@@ -353,7 +283,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(mockIsBlockedUser).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(500);
@@ -378,7 +307,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(mockIsBlockedUser).toHaveBeenCalledTimes(1);
     expect(makeProxyUser).toHaveBeenCalledTimes(1);
@@ -399,7 +327,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(mockIsBlockedUser).toHaveBeenCalledTimes(1);
     expect(mockSet).toHaveBeenCalledTimes(1);
@@ -424,7 +351,6 @@ describe("fastLoginController", () => {
     const res = mockRes();
     response.apply(res);
 
-    expect(mockGetLollipop).toHaveBeenCalledTimes(1);
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
     expect(mockIsBlockedUser).toHaveBeenCalledTimes(1);
     expect(mockSet).toHaveBeenCalledTimes(1);

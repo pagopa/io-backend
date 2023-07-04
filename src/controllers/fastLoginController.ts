@@ -8,7 +8,6 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import * as t from "io-ts";
-import * as O from "fp-ts/lib/Option";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/function";
 import * as E from "fp-ts/lib/Either";
@@ -184,33 +183,6 @@ export const fastLoginEndpoint =
         )
       ),
       // ---------------
-      TE.chainFirst(({ lollipopLocals, userFiscalCode }) =>
-        pipe(
-          TE.tryCatch(
-            () => sessionStorage.getLollipopAssertionRefForUser(userFiscalCode),
-            () =>
-              ResponseErrorInternal(
-                `Error while trying to get Lollipop initialization`
-              )
-          ),
-          TE.chainEitherKW(
-            E.mapLeft((error) =>
-              ResponseErrorInternal(
-                `Error while validating Lollipop initialization: ${error.message}`
-              )
-            )
-          ),
-          TE.chainW(
-            TE.fromPredicate(
-              (maybeAssertionRef) =>
-                O.isSome(maybeAssertionRef) &&
-                maybeAssertionRef.value ===
-                  lollipopLocals["x-pagopa-lollipop-assertion-ref"],
-              () => ResponseErrorForbiddenNotAuthorized
-            )
-          )
-        )
-      ),
       TE.bindW("client_response", ({ lollipopLocals }) =>
         pipe(
           TE.tryCatch(
