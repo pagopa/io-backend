@@ -250,8 +250,8 @@ export const extractLollipopLocalsFromLollipopHeaders = (
           ["x-pagopa-lollipop-assertion-type"]: lcParams.assertion_type,
           ["x-pagopa-lollipop-auth-jwt"]: lcParams.lc_authentication_bearer,
           ["x-pagopa-lollipop-public-key"]: lcParams.pub_key,
-          // It's possible to improve security by verify that the fiscal code from
-          // the authorization is the same of the value given from the lollipop function
+          // It's possible to improve security by verifying that the fiscal code from
+          // the authorization is equal to the one from the lollipop function
           ["x-pagopa-lollipop-user-id"]: fiscalCode || lcParams.fiscal_code,
           ...lollipopHeaders,
         } as LollipopLocalsType)
