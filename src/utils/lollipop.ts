@@ -110,7 +110,7 @@ const validateAssertionRefForUser = (
     TE.chainW(TE.fromOption(() => ResponseErrorForbiddenNotAuthorized)),
     TE.chainW(
       TE.fromPredicate(
-        (_) => _ === requestAssertionRef,
+        (storageAssertionRef) => storageAssertionRef === requestAssertionRef,
         () => ResponseErrorForbiddenNotAuthorized
       )
     ),
