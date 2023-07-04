@@ -20,16 +20,13 @@ import {
   aPnUrl,
   aThirdPartyAttachmentForPnRelativeUrl,
   documentBody,
+  lollipopPNHeaders,
 } from "../../__mocks__/pn";
 import {
   notificationDetailResponseExample,
   notificationDetailResponseExampleAsObject,
 } from "../../__mocks__/pn-response";
-import {
-  anAssertionRef,
-  aSignatureInput,
-  lollipopParams,
-} from "../../__mocks__/lollipop";
+import { lollipopParams } from "../../__mocks__/lollipop";
 import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
 
 const dummyGetReceivedNotification = jest.fn();
@@ -145,19 +142,7 @@ describe("getThirdPartyMessageDetails", () => {
 
     expect(dummyGetReceivedNotification).toHaveBeenCalledTimes(1);
     expect(dummyGetReceivedNotification).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
     });
 
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
@@ -243,19 +228,7 @@ describe("getThirdPartyMessageDetails", () => {
 
     expect(dummyGetReceivedNotification).toHaveBeenCalledTimes(1);
     expect(dummyGetReceivedNotification).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
     });
 
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(0);
@@ -347,19 +320,7 @@ describe("getThirdPartyAttachments", () => {
 
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
       docIdx: Number(aDocIdx),
     });
     expect(dummyFetch).toHaveBeenCalledTimes(1);
@@ -404,19 +365,7 @@ describe("getThirdPartyAttachments", () => {
 
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
       docIdx: Number(aDocIdx),
     });
     expect(dummyFetch).toHaveBeenCalledTimes(0);
@@ -463,19 +412,7 @@ describe("getThirdPartyAttachments", () => {
 
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledTimes(1);
     expect(dummyGetSentNotificationDocument).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
       docIdx: Number(aDocIdx),
     });
     expect(dummyFetch).toHaveBeenCalledTimes(1);
@@ -583,19 +520,7 @@ describe("getThirdPartyMessagePrecondition", () => {
 
     expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(1);
     expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
     });
 
     expect(E.isRight(result)).toBeTruthy();
@@ -635,19 +560,7 @@ describe("getThirdPartyMessagePrecondition", () => {
 
     expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledTimes(1);
     expect(dummyGetReceivedNotificationPrecondition).toHaveBeenCalledWith({
-      ApiKeyAuth: aPnKey,
-      iun: aPnNotificationId,
-      "x-pagopa-cx-taxid": aFiscalCode,
-      signature:
-        "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-      "signature-input": aSignatureInput,
-      "x-pagopa-lollipop-assertion-ref": anAssertionRef,
-      "x-pagopa-lollipop-assertion-type": "SAML",
-      "x-pagopa-lollipop-auth-jwt": "a bearer token",
-      "x-pagopa-lollipop-original-method": "POST",
-      "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
-      "x-pagopa-lollipop-public-key": "a pub key",
-      "x-pagopa-lollipop-user-id": "GRBGPP87L04L741X",
+      ...lollipopPNHeaders,
     });
 
     expect(E.isRight(result)).toBeTruthy();
