@@ -248,8 +248,8 @@ export default class MessagesController {
                       extractLollipopLocalsFromLollipopHeaders(
                         this.lollipopClient,
                         this.sessionStorage,
-                        user.fiscal_code,
-                        lollipopHeaders
+                        lollipopHeaders,
+                        user.fiscal_code
                       ),
                       TE.mapLeft((_) =>
                         ResponseErrorInternal(
