@@ -86,7 +86,7 @@ import {
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
 
 // how many random bytes to generate for each session ID
-const SESSION_ID_LENGTH_BYTES = 32;
+export const SESSION_ID_LENGTH_BYTES = 32;
 
 export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
 // Custom error code handled by the client to show a specific error page

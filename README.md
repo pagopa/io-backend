@@ -154,6 +154,7 @@ Those are all Environment variables needed by the application:
 | REDIS_URL                                 | The URL of a Redis instance                                                                          | string |
 | TOKEN_DURATION_IN_SECONDS                 | The number of seconds a session token is considered valid                                            | int    |
 | LV_TOKEN_DURATION_IN_SECONDS              | (Optional) The number of seconds a session token is considered valid if LV is enabled                | int    |
+| LV_LONG_SESSION_DURATION_IN_SECONDS       | (Optional) The number of seconds a lollipop key is considered valid if LV is enabled                 | int    |
 | SAML_CALLBACK_URL                         | The absolute URL of the assertion consumer service endpoint                                          | string |
 | SAML_ISSUER                               | The issuer id for this Service Provider                                                              | string |
 | SAML_ACCEPTED_CLOCK_SKEW_MS               | Maximum skew between SAML Client and Server (empty or -1 disable datetime checks)                    | int    |
@@ -223,7 +224,9 @@ Those are all Environment variables needed by the application:
 | LOLLIPOP_REVOKE_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for revoke Users lollipop PubKeys                           | string  |
 | LOLLIPOP_REVOKE_QUEUE_NAME                | Queue name of Azure queue storage for revoke Users lollipop PubKeys                                  | string  |
 | FF_FAST_LOGIN                             | (Optional) Enable Fast Login flow. Default: NONE                                                     | string (enum) |
-| LV_TEST_USERS                             | (Optional) Comma separated list of LV beta testers. Default: empty array                             | srting |
+| LV_TEST_USERS                             | (Optional) Comma separated list of LV beta testers. Default: empty array                             | string |
+| FAST_LOGIN_API_KEY                        | The key used to authenticate to the io-functions-fast-login API                                      | string  |
+| FAST_LOGIN_API_URL                        | The io-functions-fast-login API production URL                                                       | string  |
 
 Notes:
 

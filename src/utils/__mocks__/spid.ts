@@ -127,6 +127,11 @@ export const aSAMLResponse = `<samlp:Response Destination="https://app-backend.d
                 Via Listz 21 00144 Roma
             </saml:AttributeValue>
         </saml:Attribute>
+        <saml:Attribute Name="dateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:date">
+                1970-01-01
+            </saml:AttributeValue>
+        </saml:Attribute>
     </saml:AttributeStatement>
 </saml:Assertion>
 </samlp:Response>`;
