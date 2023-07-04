@@ -32,7 +32,9 @@ import { pipe } from "fp-ts/lib/function";
 const mockSet = jest.fn();
 const mockDel = jest.fn();
 const mockDelLollipop = jest.fn();
-const mockGetLollipop = jest.fn();
+const mockGetLollipop = jest
+  .fn()
+  .mockResolvedValue(E.right(O.some(anAssertionRef)));
 const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
@@ -71,7 +73,16 @@ const redisSessionStorage = new RedisSessionStorage(
   aDefaultLollipopAssertionRefDurationSec
 );
 
-const mockLCFastLogin = jest.fn();
+const validFastLoginControllerResponse = {
+  token: aRandomToken as SessionToken,
+};
+const validFastLoginLCResponse = {
+  saml_response: aSAMLResponse,
+} as LCFastLoginResponse;
+
+const mockLCFastLogin = jest
+  .fn()
+  .mockResolvedValue(E.right({ status: 200, value: validFastLoginLCResponse }));
 const fastLoginLCClient = {
   fastLogin: mockLCFastLogin,
 } as unknown as ReturnType<getFastLoginLollipopConsumerClient>;
@@ -95,13 +106,6 @@ const fastLoginLollipopLocals: LollipopLocalsType = {
   // this fiscalcode is in the LV_TEST_USERS array inside .env.example
   ["x-pagopa-lollipop-user-id"]: aFiscalCode,
 };
-
-const validFastLoginControllerResponse = {
-  token: aRandomToken as SessionToken,
-};
-const validFastLoginLCResponse = {
-  saml_response: aSAMLResponse,
-} as LCFastLoginResponse;
 
 const controller = fastLoginEndpoint(
   fastLoginLCClient,
@@ -133,10 +137,6 @@ describe("fastLoginController", () => {
       spid_idp: "http://localhost:8080",
       spid_level: "https://www.spid.gov.it/SpidL2",
     };
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockLCFastLogin.mockResolvedValueOnce(
-      E.right({ status: 200, value: validFastLoginLCResponse })
-    );
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     mockSet.mockResolvedValueOnce(E.right(true));
 
@@ -232,7 +232,6 @@ describe("fastLoginController", () => {
   });
 
   it("should fail when the lollipop consumer can't be contacted", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockLCFastLogin.mockRejectedValueOnce(null);
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
@@ -250,7 +249,6 @@ describe("fastLoginController", () => {
   });
 
   it("should fail when the lollipop consumer gives a decoding error", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockLCFastLogin.mockResolvedValueOnce(BadRequest.decode({}));
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
@@ -270,7 +268,6 @@ describe("fastLoginController", () => {
   });
 
   it("should return 401 when the lollipop consumer gives a 401 Unauthorized", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockLCFastLogin.mockResolvedValueOnce(E.right({ status: 401 }));
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
@@ -294,7 +291,6 @@ describe("fastLoginController", () => {
   `(
     "should return 500 when the lollipop consumer gives $title",
     async ({ status }) => {
-      mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
       mockLCFastLogin.mockResolvedValueOnce(
         E.right({ status: status, value: { detail: "error", title: "error" } })
       );
@@ -315,7 +311,6 @@ describe("fastLoginController", () => {
   );
 
   it("should return 500 when the lollipop consumer gives an invalid saml_response", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
     mockLCFastLogin.mockResolvedValueOnce(
       E.right({ status: 200, value: { saml_response: "" } })
     );
@@ -335,10 +330,6 @@ describe("fastLoginController", () => {
   });
 
   it("should return 403 when the user is blocked", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockLCFastLogin.mockResolvedValueOnce(
-      E.right({ status: 200, value: validFastLoginLCResponse })
-    );
     mockIsBlockedUser.mockResolvedValueOnce(E.right(true));
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
@@ -357,10 +348,6 @@ describe("fastLoginController", () => {
   });
 
   it("should return 500 when the session storage could not determine if the user is blocked", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockLCFastLogin.mockResolvedValueOnce(
-      E.right({ status: 200, value: validFastLoginLCResponse })
-    );
     mockIsBlockedUser.mockResolvedValueOnce(E.left(new Error("error")));
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
@@ -384,10 +371,6 @@ describe("fastLoginController", () => {
       "makeProxyUserFromSAMLResponse"
     );
 
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockLCFastLogin.mockResolvedValueOnce(
-      E.right({ status: 200, value: validFastLoginLCResponse })
-    );
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     makeProxyUser.mockReturnValueOnce(O.none);
 
@@ -409,10 +392,6 @@ describe("fastLoginController", () => {
   });
 
   it("should return 500 when the session storage could not create the session for the user", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockLCFastLogin.mockResolvedValueOnce(
-      E.right({ status: 200, value: validFastLoginLCResponse })
-    );
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     mockSet.mockReturnValueOnce(E.left(new Error("error")));
 
@@ -434,10 +413,6 @@ describe("fastLoginController", () => {
   });
 
   it("should return 500 when the session token created is of the wrong type", async () => {
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-    mockLCFastLogin.mockResolvedValueOnce(
-      E.right({ status: 200, value: validFastLoginLCResponse })
-    );
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     mockSet.mockReturnValueOnce(E.right(true));
     pipe(
