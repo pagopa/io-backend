@@ -127,6 +127,7 @@ const validateAssertionRefForUser = (
     TE.map(() => true)
   );
 
+/* eslint-disable sonarjs/no-identical-functions */
 /**
  * @deprecated
  */
@@ -147,7 +148,6 @@ export const extractLollipopLocalsFromLollipopHeadersLegacy = (
           E.toError
         ),
         TE.chainEitherK(identity),
-        // eslint-disable-next-line sonarjs/no-identical-functions
         eventLog.taskEither.errorLeft((err) => [
           `An error occurs retrieving the assertion ref from Redis | ${err.message}`,
           {
@@ -156,7 +156,6 @@ export const extractLollipopLocalsFromLollipopHeadersLegacy = (
             operation_id: operationId,
           },
         ]),
-        // eslint-disable-next-line sonarjs/no-identical-functions
         TE.mapLeft((err) => {
           log.error(
             "lollipopMiddleware|error reading the assertionRef from redis [%s]",
@@ -308,7 +307,6 @@ export const extractLollipopLocalsFromLollipopHeaders = (
     TE.bindW("lcParams", ({ assertionRef, operationId }) =>
       pipe(
         TE.tryCatch(
-          // eslint-disable-next-line sonarjs/no-identical-functions
           () =>
             lollipopClient.generateLCParams({
               assertion_ref: assertionRef,
@@ -327,7 +325,6 @@ export const extractLollipopLocalsFromLollipopHeaders = (
             operation_id: operationId,
           }),
         ]),
-        // eslint-disable-next-line sonarjs/no-identical-functions
         TE.mapLeft((err) => {
           log.error(
             "lollipopMiddleware|error trying to call the Lollipop function service [%s]",
@@ -351,7 +348,6 @@ export const extractLollipopLocalsFromLollipopHeaders = (
                 operation_id: operationId,
               }),
             ]),
-            // eslint-disable-next-line sonarjs/no-identical-functions
             TE.mapLeft((err) => {
               log.error(
                 "lollipopMiddleware|error calling the Lollipop function service [%s]",
@@ -412,9 +408,9 @@ export const extractLollipopLocalsFromLollipopHeaders = (
           ...lollipopHeaders,
         } as LollipopLocalsType)
     ),
-    // eslint-disable-next-line sonarjs/no-identical-functions
     eventLog.taskEither.info((lcLocals) => [
       "Lollipop locals to be sent to third party api",
       { ...Object.keys(lcLocals), name: "lollipop.locals.info" },
     ])
   );
+/* eslint-enable sonarjs/no-identical-functions */

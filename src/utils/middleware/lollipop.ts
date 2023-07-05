@@ -63,6 +63,7 @@ export const expressLollipopMiddlewareLegacy: (
       TE.toUnion
     )();
 
+/* eslint-disable sonarjs/no-identical-functions */
 export const expressLollipopMiddleware: (
   lollipopClient: ReturnType<typeof LollipopApiClient>,
   sessionStorage: ISessionStorage
@@ -88,7 +89,6 @@ export const expressLollipopMiddleware: (
               )()
             )
           ),
-        // eslint-disable-next-line sonarjs/no-identical-functions
         (err) => {
           log.error(
             "lollipopMiddleware|error executing the middleware [%s]",
@@ -97,7 +97,6 @@ export const expressLollipopMiddleware: (
           return ResponseErrorInternal("Error executing middleware");
         }
       ),
-      // eslint-disable-next-line sonarjs/no-identical-functions
       TE.chain((maybeErrorResponse) =>
         maybeErrorResponse === undefined
           ? TE.of(void 0)
@@ -107,3 +106,4 @@ export const expressLollipopMiddleware: (
       TE.map(() => next()),
       TE.toUnion
     )();
+/* eslint-enable sonarjs/no-identical-functions */
