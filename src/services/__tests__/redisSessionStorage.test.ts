@@ -1811,32 +1811,27 @@ describe("RedisSessionStorage#getLollipopAssertionRefForUser", () => {
   });
 });
 
-describe("RedisSessionStorage#setLollipopDataForUser", () => {
+describe("RedisSessionStorage#setLollipopAssertionRefForUser", () => {
   const lollipopData = {
     assertionRef: anAssertionRef,
     loginType: LoginTypeEnum.LEGACY,
   };
-  const compactLollipopData = {
-    a: lollipopData.assertionRef,
-    t: lollipopData.loginType,
-  };
-
   it("should success if the response from redis is OK on set command with default ttl", async () => {
     mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
-    const response = await sessionStorage.setLollipopDataForUser(
+    const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
-      lollipopData
+      lollipopData.assertionRef
     );
 
     expect(mockSetEx).toHaveBeenCalledTimes(1);
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       aDefaultLollipopAssertionRefDurationSec,
-      JSON.stringify(compactLollipopData)
+      lollipopData.assertionRef
     );
     expect(
       NullableBackendAssertionRefFromString.decode(mockSetEx.mock.calls[0][2])
-    ).toEqual(E.right(lollipopData));
+    ).toEqual(E.right(lollipopData.assertionRef));
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
   });
@@ -1844,9 +1839,9 @@ describe("RedisSessionStorage#setLollipopDataForUser", () => {
   it("should success if the response from redis is OK on set command with custom ttl", async () => {
     const expectedAssertionRefTtl = 100 as Second;
     mockSetEx.mockImplementationOnce((_, __, ___) => Promise.resolve("OK"));
-    const response = await sessionStorage.setLollipopDataForUser(
+    const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
-      lollipopData,
+      lollipopData.assertionRef,
       expectedAssertionRefTtl
     );
 
@@ -1854,7 +1849,7 @@ describe("RedisSessionStorage#setLollipopDataForUser", () => {
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       expectedAssertionRefTtl,
-      JSON.stringify(compactLollipopData)
+      lollipopData.assertionRef
     );
     expect(E.isRight(response)).toBeTruthy();
     if (E.isRight(response)) expect(response.right).toEqual(true);
@@ -1865,16 +1860,16 @@ describe("RedisSessionStorage#setLollipopDataForUser", () => {
     mockSetEx.mockImplementationOnce((_, __, ___) =>
       Promise.reject(expectedError)
     );
-    const response = await sessionStorage.setLollipopDataForUser(
+    const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
-      lollipopData
+      lollipopData.assertionRef
     );
 
     expect(mockSetEx).toHaveBeenCalledTimes(1);
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       aDefaultLollipopAssertionRefDurationSec,
-      JSON.stringify(compactLollipopData)
+      lollipopData.assertionRef
     );
     expect(E.isLeft(response)).toBeTruthy();
     if (E.isLeft(response)) expect(response.left).toEqual(expectedError);
@@ -1884,16 +1879,16 @@ describe("RedisSessionStorage#setLollipopDataForUser", () => {
     mockSetEx.mockImplementationOnce((_, __, ___) =>
       Promise.resolve(undefined)
     );
-    const response = await sessionStorage.setLollipopDataForUser(
+    const response = await sessionStorage.setLollipopAssertionRefForUser(
       aValidUser,
-      lollipopData
+      lollipopData.assertionRef
     );
 
     expect(mockSetEx).toHaveBeenCalledTimes(1);
     expect(mockSetEx).toBeCalledWith(
       `KEYS-${aValidUser.fiscal_code}`,
       aDefaultLollipopAssertionRefDurationSec,
-      JSON.stringify(compactLollipopData)
+      lollipopData.assertionRef
     );
     expect(E.isLeft(response)).toBeTruthy();
   });

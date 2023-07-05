@@ -118,7 +118,7 @@ jest.mock("../../services/redisSessionStorage", () => {
       del: mockDel,
       getLollipopAssertionRefForUser: mockGetLollipop,
       delLollipopDataForUser: mockDelLollipop,
-      setLollipopDataForUser: mockSetLollipop,
+      setLollipopAssertionRefForUser: mockSetLollipop,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
       isBlockedUser: mockIsBlockedUser,
@@ -636,7 +636,7 @@ describe("AuthenticationController#acs", () => {
       expect.objectContaining({
         fiscal_code: aFiscalCode,
       }),
-      lollipopData,
+      lollipopData.assertionRef,
       tokenDurationSecs
     );
 
@@ -646,13 +646,13 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    scenario                      | setLollipopDataForUserResponse        | errorMessage
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}    | ${"Error creating CF thumbprint relation in redis"}
-    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}   | ${undefined}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))} | ${"Error"}
+    scenario                      | setLollipopAssertionRefForUserResponse | errorMessage
+    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF thumbprint relation in redis"}
+    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}    | ${undefined}
+    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}  | ${"Error"}
   `(
     "should fail if an error occours saving assertionRef for user in redis $scenario",
-    async ({ setLollipopDataForUserResponse, errorMessage }) => {
+    async ({ setLollipopAssertionRefForUserResponse, errorMessage }) => {
       const res = mockRes();
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
@@ -665,7 +665,7 @@ describe("AuthenticationController#acs", () => {
           } as ActivatedPubKey)
       );
       mockSetLollipop.mockImplementationOnce(
-        (_, __, ___) => setLollipopDataForUserResponse
+        (_, __, ___) => setLollipopAssertionRefForUserResponse
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
@@ -706,7 +706,7 @@ describe("AuthenticationController#acs", () => {
         expect.objectContaining({
           fiscal_code: aFiscalCode,
         }),
-        lollipopData,
+        lollipopData.assertionRef,
         tokenDurationSecs
       );
 
@@ -946,11 +946,7 @@ describe("AuthenticationController|>LV|>acs", () => {
       if (isLollipopEnabled) {
         expect(mockSetLollipop).toHaveBeenCalledWith(
           mockedUser,
-          {
-            ...lollipopData,
-            loginType:
-              isUserElegible && loginType ? loginType : LoginTypeEnum.LEGACY,
-          },
+          lollipopData.assertionRef,
           expectedLongSessionDuration
         );
         expect(mockActivateLolliPoPKey).toHaveBeenCalledWith(

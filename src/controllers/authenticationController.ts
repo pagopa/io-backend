@@ -195,7 +195,8 @@ export default class AuthenticationController {
     // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
     // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
     // Otherwise LV is disabled.
-    const [sessionTTL, lollipopKeyTTL, loginType] =
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [sessionTTL, lollipopKeyTTL, _loginType] =
       this.lollipopParams.isLollipopEnabled &&
       additionalProps?.loginType === LoginTypeEnum.LV &&
       isUserElegibleForFastLogin(spidUser.fiscalNumber)
@@ -368,20 +369,17 @@ export default class AuthenticationController {
             pipe(
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.setLollipopDataForUser(
+                  this.sessionStorage.setLollipopAssertionRefForUser(
                     user,
-                    {
-                      assertionRef,
-                      loginType,
-                    },
+                    assertionRef,
                     lollipopKeyTTL
                   ),
                 E.toError
               ),
               TE.chainEitherK(identity),
               TE.filterOrElse(
-                (setLollipopDataForUserRes) =>
-                  setLollipopDataForUserRes === true,
+                (setLollipopAssertionRefForUserRes) =>
+                  setLollipopAssertionRefForUserRes === true,
                 () =>
                   new Error("Error creating CF thumbprint relation in redis")
               ),

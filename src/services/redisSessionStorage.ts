@@ -23,7 +23,6 @@ import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
   LollipopData,
-  LollipopDataFromString,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -849,9 +848,10 @@ export default class RedisSessionStorage
   /**
    * {@inheritDoc}
    */
-  public async setLollipopDataForUser(
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public async setLollipopAssertionRefForUser(
     user: UserV5,
-    data: LollipopData,
+    assertionRef: BackendAssertionRef,
     expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
   ) {
     return pipe(
@@ -860,7 +860,7 @@ export default class RedisSessionStorage
           this.redisClient.setEx(
             `${lollipopDataPrefix}${user.fiscal_code}`,
             expireAssertionRefSec,
-            LollipopDataFromString.encode(data)
+            assertionRef
           ),
         E.toError
       ),
