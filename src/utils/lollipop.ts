@@ -109,9 +109,19 @@ const validateAssertionRefForUser = (
     }),
     TE.chainW(TE.fromOption(() => ResponseErrorForbiddenNotAuthorized)),
     TE.chainW(
-      TE.fromPredicate(
-        (storageAssertionRef) => storageAssertionRef === requestAssertionRef,
-        () => ResponseErrorForbiddenNotAuthorized
+      flow(
+        TE.fromPredicate(
+          (storageAssertionRef) => storageAssertionRef === requestAssertionRef,
+          () => ResponseErrorForbiddenNotAuthorized
+        ),
+        eventLog.taskEither.errorLeft(() => [
+          `AssertionRef is different from stored one`,
+          {
+            fiscal_code: sha256(fiscalCode),
+            name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
+            operation_id: operationId,
+          },
+        ])
       )
     ),
     TE.map(() => true)
@@ -264,9 +274,17 @@ export const extractLollipopLocalsFromLollipopHeaders = (
   pipe(
     TE.of(getNonceOrUlid(lollipopHeaders["signature-input"])),
     TE.bindTo("operationId"),
-    TE.bind("assertionRef", () =>
+    TE.bind("assertionRef", ({ operationId }) =>
       pipe(
         getAssertionRefFromSignature(lollipopHeaders["signature-input"]),
+        eventLog.either.errorLeft(() => [
+          `AssertionRef is different from stored one`,
+          {
+            fiscal_code: fiscalCode ? sha256(fiscalCode) : undefined,
+            name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
+            operation_id: operationId,
+          },
+        ]),
         E.mapLeft(() =>
           ResponseErrorInternal("Invalid assertionRef in signature params")
         ),
