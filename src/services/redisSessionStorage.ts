@@ -23,6 +23,7 @@ import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
 import {
   NullableBackendAssertionRefFromString,
   LollipopData,
+  LollipopDataFromString,
 } from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
@@ -842,6 +843,29 @@ export default class RedisSessionStorage
           TE.fromEither
         )
       )
+    )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async setLollipopDataForUser(
+    user: UserV5,
+    data: LollipopData,
+    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
+  ) {
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${lollipopDataPrefix}${user.fiscal_code}`,
+            expireAssertionRefSec,
+            LollipopDataFromString.encode(data)
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
     )();
   }
 

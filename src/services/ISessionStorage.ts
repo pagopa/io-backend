@@ -99,6 +99,20 @@ export interface ISessionStorage {
    * Upsert the LolliPoP assertionRef related to an user
    *
    * @param user The AppUser value used to get the related fiscalCode
+   * @param data The LollipopData, containing the identifier for the pubkey and the login type
+   * @param expireAssertionRefSec The ttl for the key, default value is configured in RedisSessionStorage instance
+   */
+  readonly setLollipopDataForUser: (
+    user: UserV5,
+    data: LollipopData,
+    expireAssertionRefSec?: Second
+  ) => Promise<Either<Error, boolean>>;
+
+  /**
+   *  @deprecated
+   *  Upsert the LolliPoP assertionRef related to an user
+   *
+   * @param user The AppUser value used to get the related fiscalCode
    * @param assertionRef The identifier for the pubkey
    * @param expireAssertionRefSec The ttl for the key, default value is configured in RedisSessionStorage instance
    */

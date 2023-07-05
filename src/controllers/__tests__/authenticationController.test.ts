@@ -111,6 +111,9 @@ const mockDel = jest.fn();
 const mockDelLollipop = jest.fn();
 const mockGetLollipop = jest.fn();
 const mockSetLollipop = jest.fn();
+const mockSetLollipopData = jest
+  .fn()
+  .mockImplementation((_, __, ___) => Promise.resolve(E.right(true)));
 const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
@@ -118,6 +121,7 @@ jest.mock("../../services/redisSessionStorage", () => {
       del: mockDel,
       getLollipopAssertionRefForUser: mockGetLollipop,
       delLollipopDataForUser: mockDelLollipop,
+      setLollipopDataForUser: mockSetLollipopData,
       setLollipopAssertionRefForUser: mockSetLollipop,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
@@ -647,7 +651,7 @@ describe("AuthenticationController#acs", () => {
 
   it.each`
     scenario                      | setLollipopAssertionRefForUserResponse | errorMessage
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF thumbprint relation in redis"}
+    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF - assertion ref relation in redis"}
     ${"with left response"}       | ${Promise.resolve(E.left("Error"))}    | ${undefined}
     ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}  | ${"Error"}
   `(
@@ -917,9 +921,12 @@ describe("AuthenticationController|>LV|>acs", () => {
             assertion_ref: newAssertionRef,
           } as ActivatedPubKey)
       );
-      mockSetLollipop.mockImplementationOnce((_, __, ___) =>
-        Promise.resolve(E.right(true))
-      );
+
+      if (!isUserElegible)
+        mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+          Promise.resolve(E.right(true))
+        );
+
       mockSet.mockReturnValue(Promise.resolve(E.right(true)));
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
 
@@ -944,11 +951,22 @@ describe("AuthenticationController|>LV|>acs", () => {
       expect(mockSet).toHaveBeenCalledWith(mockedUser, expectedTtlDuration);
 
       if (isLollipopEnabled) {
-        expect(mockSetLollipop).toHaveBeenCalledWith(
-          mockedUser,
-          lollipopData.assertionRef,
-          expectedLongSessionDuration
-        );
+        if (isUserElegible) {
+          expect(mockSetLollipopData).toHaveBeenCalledWith(
+            mockedUser,
+            {
+              ...lollipopData,
+              loginType: loginType ? loginType : LoginTypeEnum.LEGACY,
+            },
+            expectedLongSessionDuration
+          );
+        } else {
+          expect(mockSetLollipop).toHaveBeenCalledWith(
+            mockedUser,
+            lollipopData.assertionRef,
+            expectedLongSessionDuration
+          );
+        }
         expect(mockActivateLolliPoPKey).toHaveBeenCalledWith(
           anotherAssertionRef,
           mockedUser.fiscal_code,
