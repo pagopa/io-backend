@@ -173,7 +173,10 @@ import {
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
-import { expressLollipopMiddleware } from "./utils/middleware/lollipop";
+import {
+  expressLollipopMiddleware,
+  expressLollipopMiddlewareLegacy,
+} from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
@@ -1386,7 +1389,7 @@ function registerIoSignAPIRoutes(
   app.post(
     `${basePath}/signatures`,
     bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
+    expressLollipopMiddlewareLegacy(lollipopClient, sessionStorage),
     toExpressHandler(ioSignController.createSignature, ioSignController)
   );
 
