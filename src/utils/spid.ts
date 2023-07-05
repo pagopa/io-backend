@@ -30,7 +30,8 @@ const SAML_NAMESPACE = {
 export const getIssuerFromSAMLResponse: (
   doc: Document
 ) => O.Option<NonEmptyString> = flow(
-  (doc) => doc.getElementsByTagName("saml:Issuer").item(0),
+  (doc) =>
+    doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Issuer").item(0),
   O.fromNullable,
   O.chainNullableK((element) => element.textContent?.trim()),
   O.chain((value) => O.fromEither(NonEmptyString.decode(value)))
@@ -39,7 +40,10 @@ export const getIssuerFromSAMLResponse: (
 export const getSpidLevelFromSAMLResponse: (
   doc: Document
 ) => O.Option<SpidLevelEnum> = flow(
-  (doc) => doc.getElementsByTagName("saml:AuthnContext").item(0),
+  (doc) =>
+    doc
+      .getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "AuthnContext")
+      .item(0),
   O.fromNullable,
   O.chainNullableK((element) => element.textContent?.trim()),
   O.chain((value) => O.fromEither(SpidLevel.decode(value)))
