@@ -277,7 +277,7 @@ export const extractLollipopLocalsFromLollipopHeaders = (
       pipe(
         getAssertionRefFromSignature(lollipopHeaders["signature-input"]),
         eventLog.either.errorLeft(() => [
-          `AssertionRef is different from stored one`,
+          `AssertionRef in signature-input is missing or invalid`,
           {
             fiscal_code: fiscalCode ? sha256(fiscalCode) : undefined,
             name: LOLLIPOP_SIGN_ERROR_EVENT_NAME,
