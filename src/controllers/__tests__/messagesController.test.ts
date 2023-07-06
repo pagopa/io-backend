@@ -23,7 +23,7 @@ import { aThirdPartyPrecondition } from "../../__mocks__/third-party";
 
 const dummyExtractLollipopLocalsFromLollipopHeaders = jest.spyOn(
   lollipopUtils,
-  "extractLollipopLocalsFromLollipopHeaders"
+  "extractLollipopLocalsFromLollipopHeadersLegacy"
 );
 dummyExtractLollipopLocalsFromLollipopHeaders.mockReturnValue(
   TE.of(lollipopParams)
