@@ -172,6 +172,10 @@ jest.mock("../../services/usersLoginLogService", () => {
   };
 });
 
+jest
+  .spyOn(authCtrl, "isUserElegibleForFastLogin")
+  .mockImplementation((_) => false);
+
 const anActivatedPubKey = {
   status: PubKeyStatusEnum.VALID,
   assertion_file_name: "file",
