@@ -47,7 +47,7 @@ import TokenService from "../services/tokenService";
 import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
 import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
-import { extractLollipopLocalsFromLollipopHeaders } from "../utils/lollipop";
+import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
 
 type IGetLegalMessageResponse =
@@ -245,11 +245,11 @@ export default class MessagesController {
                     ),
                   (lollipopHeaders) =>
                     pipe(
-                      extractLollipopLocalsFromLollipopHeaders(
+                      extractLollipopLocalsFromLollipopHeadersLegacy(
                         this.lollipopClient,
                         this.sessionStorage,
-                        lollipopHeaders,
-                        user.fiscal_code
+                        user.fiscal_code,
+                        lollipopHeaders
                       ),
                       TE.mapLeft((_) =>
                         ResponseErrorInternal(
