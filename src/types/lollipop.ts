@@ -1,6 +1,6 @@
 import { FiscalCode } from "@pagopa/io-functions-app-sdk/FiscalCode";
 import * as t from "io-ts";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString, PatternString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
 import {
   IResponseErrorValidation,
@@ -8,6 +8,14 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
+import {
+  JwkPubKeyHashAlgorithm,
+  JwkPubKeyHashAlgorithmEnum,
+} from "generated/lollipop-api/JwkPubKeyHashAlgorithm";
+import * as O from "fp-ts/Option";
+import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
+import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
+import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";
 import { withValidatedOrValidationError } from "../utils/responses";
 import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { AssertionType } from "../../generated/lollipop-api/AssertionType";
@@ -123,4 +131,32 @@ export const withLollipopHeadersFromRequest = async <T>(
   withValidatedOrValidationError(
     t.exact(LollipopRequiredHeaders).decode(req.headers),
     f
+  );
+
+const Sha256Thumbprint = PatternString("^([A-Za-z0-9-_=]{1,44})$");
+const Sha384Thumbprint = PatternString("^([A-Za-z0-9-_=]{1,66})$");
+const Sha512Thumbprint = PatternString("^([A-Za-z0-9-_=]{1,88})$");
+
+export const Thumbprint = t.union(
+  [Sha256Thumbprint, Sha384Thumbprint, Sha512Thumbprint],
+  "Thumbprint"
+);
+
+export type Thumbprint = t.TypeOf<typeof Thumbprint>;
+
+export const algoToAssertionRefSet = new Set([
+  { algo: JwkPubKeyHashAlgorithmEnum.sha256, type: AssertionRefSha256 },
+  { algo: JwkPubKeyHashAlgorithmEnum.sha384, type: AssertionRefSha384 },
+  { algo: JwkPubKeyHashAlgorithmEnum.sha512, type: AssertionRefSha512 },
+]);
+
+export const getAlgoFromAssertionRef = (
+  assertionRef: AssertionRef
+): JwkPubKeyHashAlgorithm =>
+  pipe(
+    Array.from(algoToAssertionRefSet),
+    (ar) => ar.find((entry) => entry.type.is(assertionRef)),
+    O.fromNullable,
+    O.map((pubKeyHashAlgo) => pubKeyHashAlgo.algo),
+    O.getOrElseW(() => void 0 as never)
   );
