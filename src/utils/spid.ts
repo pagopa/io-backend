@@ -4,7 +4,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import * as A from "fp-ts/lib/Array";
-import * as AP from "fp-ts/lib/Apply";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
@@ -97,24 +96,25 @@ export const getSpidEmailFromAssertion: (
 
 export const makeProxyUserFromSAMLResponse = (
   doc: Document
-): O.Option<UserWithoutTokens> => {
+): t.Validation<UserWithoutTokens> => {
   const proxyUserProperties = {
-    created_at: O.some(new Date().getTime()),
-    date_of_birth: pipe(getDateOfBirthFromAssertion(doc), O.map(formatDate)),
-    family_name: getFamilyNameFromAssertion(doc),
-    fiscal_code: getFiscalNumberFromPayload(doc),
-    name: getNameFromAssertion(doc),
-    spid_email: getSpidEmailFromAssertion(doc),
-    spid_idp: getIssuerFromSAMLResponse(doc),
+    created_at: new Date().getTime(),
+    date_of_birth: pipe(
+      getDateOfBirthFromAssertion(doc),
+      O.map(formatDate),
+      O.toUndefined
+    ),
+    family_name: pipe(getFamilyNameFromAssertion(doc), O.toUndefined),
+    fiscal_code: pipe(getFiscalNumberFromPayload(doc), O.toUndefined),
+    name: pipe(getNameFromAssertion(doc), O.toUndefined),
+    spid_email: pipe(getSpidEmailFromAssertion(doc), O.toUndefined),
+    spid_idp: pipe(getIssuerFromSAMLResponse(doc), O.toUndefined),
     spid_level: pipe(
       getSpidLevelFromSAMLResponse(doc),
-      O.fold(
-        () => O.some(SpidLevelEnum["https://www.spid.gov.it/SpidL2"]),
-        (spidLevel) => O.some(spidLevel)
-      )
+      O.getOrElse(() => SpidLevelEnum["https://www.spid.gov.it/SpidL2"])
     ),
   };
-  return pipe(proxyUserProperties, AP.sequenceS(O.Apply));
+  return pipe(proxyUserProperties, UserWithoutTokens.decode);
 };
 
 const getRequestIDFromPayload =

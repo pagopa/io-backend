@@ -244,9 +244,8 @@ export const fastLoginEndpoint =
         pipe(
           parsed_saml_response,
           makeProxyUserFromSAMLResponse,
-          TE.fromOption(() =>
-            ResponseErrorInternal("Could not create proxy user")
-          )
+          TE.fromEither,
+          TE.mapLeft(() => ResponseErrorInternal("Could not create proxy user"))
         )
       ),
       TE.chainFirstW(({ userWithoutTokens, tokens }) =>
