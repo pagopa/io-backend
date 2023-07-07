@@ -1,6 +1,5 @@
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import * as RNEA from "fp-ts/lib/ReadonlyNonEmptyArray";
 import * as redis from "redis";
 import { aFiscalCode } from "../../__mocks__/user_mock";
@@ -21,12 +20,21 @@ import mockRes from "../../__mocks__/response";
 import { LollipopLocalsType } from "../../types/lollipop";
 import { LollipopJWTAuthorization } from "../../../generated/fast-login-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../../generated/fast-login-api/LollipopPublicKey";
-import { SessionToken } from "../../types/token";
+import {
+  BPDToken,
+  FIMSToken,
+  MyPortalToken,
+  SessionToken,
+  WalletToken,
+  ZendeskToken,
+} from "../../types/token";
 import { aSAMLResponse } from "../../utils/__mocks__/spid";
 import { FastLoginResponse as LCFastLoginResponse } from "../../../generated/fast-login-api/FastLoginResponse";
 import { BadRequest } from "../../../generated/fast-login-api/BadRequest";
 import * as spidUtils from "../../utils/spid";
 import { pipe } from "fp-ts/lib/function";
+import { UserWithoutTokens } from "../../types/user";
+import { SpidLevelEnum } from "../../../generated/backend/SpidLevel";
 
 const mockSet = jest.fn();
 const mockDel = jest.fn();
@@ -112,12 +120,12 @@ describe("fastLoginController", () => {
 
   it("should create a valid session of 15 minutes given a valid payload", async () => {
     const validUserSetPayload = {
-      session_token: aRandomToken,
-      bpd_token: aRandomToken,
-      fims_token: aRandomToken,
-      wallet_token: aRandomToken,
-      zendesk_token: aRandomToken,
-      myportal_token: aRandomToken,
+      session_token: aRandomToken as SessionToken,
+      bpd_token: aRandomToken as BPDToken,
+      fims_token: aRandomToken as FIMSToken,
+      wallet_token: aRandomToken as WalletToken,
+      zendesk_token: aRandomToken as ZendeskToken,
+      myportal_token: aRandomToken as MyPortalToken,
       created_at: expect.any(Number),
       date_of_birth: "1970-01-01",
       family_name: "AgID",
@@ -126,7 +134,7 @@ describe("fastLoginController", () => {
       session_tracking_id: aRandomToken,
       spid_email: "spid.tech@agid.gov.it",
       spid_idp: "http://localhost:8080",
-      spid_level: "https://www.spid.gov.it/SpidL2",
+      spid_level: SpidLevelEnum["https://www.spid.gov.it/SpidL2"],
     };
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     mockSet.mockResolvedValueOnce(E.right(true));
@@ -301,7 +309,7 @@ describe("fastLoginController", () => {
     );
 
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
-    makeProxyUser.mockReturnValueOnce(O.none);
+    makeProxyUser.mockReturnValueOnce(UserWithoutTokens.decode({}));
 
     const response = await controller(mockReq(), fastLoginLollipopLocals);
     const res = mockRes();
