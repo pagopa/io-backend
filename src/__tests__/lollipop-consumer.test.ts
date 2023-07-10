@@ -9,7 +9,7 @@ import {
   aLollipopOriginalUrl,
   anAssertionRef,
   aSignature,
-  aSignatureInput
+  aSignatureInput,
 } from "../__mocks__/lollipop";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
@@ -29,7 +29,7 @@ const mockClient = {
   generateLCParams: mockGenerateLCParams,
   activatePubKey: jest.fn(),
   ping: jest.fn(),
-  reservePubKey: jest.fn()
+  reservePubKey: jest.fn(),
 } as ReturnType<typeof LollipopApiClient>;
 
 const mockGetlollipopAssertionRefForUser = jest
@@ -38,9 +38,9 @@ const mockGetlollipopAssertionRefForUser = jest
     console.log("ho chiamato mockGetlollipopAssertionRefForUser");
     return E.right(O.some(anAssertionRef));
   });
-const mockSessionStorage = ({
-  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser
-} as unknown) as ISessionStorage;
+const mockSessionStorage = {
+  getLollipopAssertionRefForUser: mockGetlollipopAssertionRefForUser,
+} as unknown as ISessionStorage;
 
 const aBearerToken = "aBearerTokenJWT";
 const aPubKey = "aPubKey";
@@ -62,14 +62,14 @@ lollipopConsumerApp.use(
     verify: (_req, res: express.Response, buf, _encoding: BufferEncoding) => {
       // eslint-disable-next-line functional/immutable-data
       res.locals.body = buf;
-    }
+    },
   })
 );
 const mockLCMiddleware = jest
   .fn()
   .mockImplementation((req: express.Request, res) => {
     res.status(200).json({
-      response: req.body["message"]
+      response: req.body["message"],
     });
   });
 const expectedLollipopLCPath = "/api/v1/first-lollipop-consumer/signed-message";
@@ -81,7 +81,7 @@ const server = http.createServer(lollipopConsumerApp);
 
 describe("lollipopSign", () => {
   beforeAll(async () => {
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       server.listen(port, () => {
         resolve(void 0);
       });
@@ -89,7 +89,7 @@ describe("lollipopSign", () => {
   });
   afterAll(async () => {
     jest.clearAllMocks();
-    await new Promise(resolve => server.close(() => resolve(void 0)));
+    await new Promise((resolve) => server.close(() => resolve(void 0)));
   });
   it("should returns a status 200 response on lollipop consumer mocked impl", async () => {
     mockGenerateLCParams.mockResolvedValueOnce(
@@ -99,14 +99,14 @@ describe("lollipopSign", () => {
           fiscal_code: aFiscalCode,
           assertion_file_name: `${aFiscalCode}-${anAssertionRef}`,
           assertion_type: AssertionTypeEnum.SAML,
-          expired_at: Date.now(),
+          expired_at: new Date(),
           lc_authentication_bearer: aBearerToken,
           assertion_ref: anAssertionRef,
           pub_key: aPubKey,
           version: 1,
           status: PubKeyStatusEnum.VALID,
-          ttl: 900
-        }
+          ttl: 900,
+        },
       })
     );
     mockGetlollipopAssertionRefForUser.mockResolvedValue(
@@ -125,7 +125,7 @@ describe("lollipopSign", () => {
         ) => {
           // eslint-disable-next-line functional/immutable-data
           res.locals.body = buf;
-        }
+        },
       })
     );
     // Mock the Api call for signing whithout the auth middleware
@@ -144,7 +144,8 @@ describe("lollipopSign", () => {
       ["signature-input"]: aSignatureInput,
       ["x-pagopa-lollipop-original-method"]: aLollipopOriginalMethod,
       ["x-pagopa-lollipop-original-url"]: aLollipopOriginalUrl,
-      "content-digest": "sha-256=:cpyRqJ1VhoVC+MSs9fq4/4wXs4c46EyEFriskys43Zw=:"
+      "content-digest":
+        "sha-256=:cpyRqJ1VhoVC+MSs9fq4/4wXs4c46EyEFriskys43Zw=:",
     };
 
     const expectedRequestBody = { message: "aMessage" };
@@ -159,7 +160,7 @@ describe("lollipopSign", () => {
     expect(mockFetch).toBeCalledWith(
       `http://localhost:${port}${expectedLollipopLCPath}`,
       expect.objectContaining({
-        body: expect.any(Buffer)
+        body: expect.any(Buffer),
       })
     );
   });
