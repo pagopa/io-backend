@@ -33,6 +33,7 @@ import {
 import {
   EmailString,
   FiscalCode,
+  IPString,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
@@ -168,6 +169,13 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrSpidUser.right;
+
+    const req = spidUser.getAcsOriginalRequest();
+    const errorOrUserIp = IPString.decode(req?.ip);
+
+    if (E.isLeft(errorOrUserIp)) {
+      return ResponseErrorInternal("Error reading user IP");
+    }
 
     if (
       this.hasUserAgeLimitEnabled &&
@@ -553,7 +561,7 @@ export default class AuthenticationController {
           family_name: user.family_name,
           fiscal_code: user.fiscal_code,
           identity_provider: spidUser.issuer ?? "cie",
-          ip_address: "127.0.0.1",
+          ip_address: errorOrUserIp.right,
           name: user.name,
         },
         UserLoginParams.decode,

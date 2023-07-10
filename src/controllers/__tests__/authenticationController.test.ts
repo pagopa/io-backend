@@ -67,6 +67,9 @@ import * as authCtrl from "../authenticationController";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { LoginTypeEnum } from "../../utils/fastLogin";
 
+const req = mockReq();
+req.ip = "127.0.0.2";
+
 // validUser has all every field correctly set.
 const validUserPayload = {
   authnContextClassRef: aValidSpidLevel,
@@ -76,6 +79,7 @@ const validUserPayload = {
   issuer: "xxx",
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
+  getAcsOriginalRequest: () => req,
   getAssertionXml: () => aLollipopAssertion,
   getSamlResponseXml: () => aLollipopAssertion,
 };
@@ -83,6 +87,7 @@ const validUserPayload = {
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   fiscalNumber: aFiscalCode,
+  getAcsOriginalRequest: () => undefined,
   getAssertionXml: () => "",
   getSamlResponseXml: () => "",
   issuer: "xxx",
@@ -203,7 +208,7 @@ const expectedUserLoginData = {
   fiscal_code: mockedInitializedProfile.fiscal_code,
   identity_provider: validUserPayload.issuer ?? "cie",
   // TODO change
-  ip_address: "127.0.0.1",
+  ip_address: "127.0.0.2",
   name: mockedInitializedProfile.name,
 };
 
@@ -641,7 +646,10 @@ describe("AuthenticationController#acs", () => {
       ResponseSuccessJson(mockedInitializedProfile)
     );
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.redirect).toHaveBeenCalledWith(
@@ -701,7 +709,10 @@ describe("AuthenticationController#acs", () => {
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
       setupMocks();
 
-      const response = await lollipopActivatedController.acs(validUserPayload);
+      const response = await lollipopActivatedController.acs(
+        validUserPayload,
+        req
+      );
       response.apply(res);
 
       expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
@@ -759,7 +770,10 @@ describe("AuthenticationController#acs", () => {
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     setupMocks();
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
@@ -803,7 +817,10 @@ describe("AuthenticationController#acs", () => {
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
       setupMocks();
 
-      const response = await lollipopActivatedController.acs(validUserPayload);
+      const response = await lollipopActivatedController.acs(
+        validUserPayload,
+        req
+      );
       response.apply(res);
 
       expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
@@ -845,7 +862,10 @@ describe("AuthenticationController#acs", () => {
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
     setupMocks();
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
@@ -909,6 +929,8 @@ describe("AuthenticationController#acs", () => {
 });
 
 describe("AuthenticationController|>LV|>acs", () => {
+  const req = mockReq();
+  req.ip = "127.0.0.2";
   it.each`
     loginType               | isLollipopEnabled | isUserElegible | expectedTtlDuration    | expectedLongSessionDuration
     ${LoginTypeEnum.LV}     | ${true}           | ${true}        | ${lvTokenDurationSecs} | ${lvLongSessionDurationSecs}
@@ -1056,7 +1078,10 @@ describe("AuthenticationController|>LV|>acs", () => {
     mockCreateProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
     );
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.redirect).toHaveBeenCalledWith(
@@ -1100,7 +1125,10 @@ describe("AuthenticationController|>LV|>acs", () => {
       })
     );
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.redirect).toHaveBeenCalledWith(
@@ -1148,7 +1176,10 @@ describe("AuthenticationController|>LV|>acs", () => {
       })
     );
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
@@ -1205,7 +1236,10 @@ describe("AuthenticationController|>LV|>acs", () => {
       })
     );
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
@@ -1233,6 +1267,8 @@ describe("AuthenticationController#acsTest", () => {
     ReturnType<AuthenticationController["acs"]>,
     jest.ArgsType<AuthenticationController["acs"]>
   >;
+  const req = mockReq();
+  req.ip = "127.0.0.2";
   const res = mockRes();
   beforeEach(() => {
     jest.clearAllMocks();

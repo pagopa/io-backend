@@ -1526,7 +1526,11 @@ function registerAuthenticationRoutes(
         `${authBasePath}/test-login`,
         localAuth,
         toExpressHandler(
-          (req) => acsController.acsTest(req.user),
+          (req) =>
+            acsController.acsTest({
+              ...req.user,
+              getAcsOriginalRequest: () => req,
+            }),
           acsController
         )
       );
