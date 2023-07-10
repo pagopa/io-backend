@@ -26,8 +26,15 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  errorsToReadableMessages,
+  readableReportSimplified,
+} from "@pagopa/ts-commons/lib/reporters";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
@@ -37,6 +44,7 @@ import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
+import { UserLoginParams } from "../types/userLoginData";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
 import {
@@ -94,6 +102,8 @@ export const AGE_LIMIT_ERROR_CODE = 1001;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
 
+export type OnUserLogin = (data: UserLoginParams) => TE.TaskEither<Error, true>;
+
 export const isUserElegibleForIoLoginUrlScheme =
   getIsUserElegibleForIoLoginUrlScheme(
     IOLOGIN_USERS_LIST,
@@ -120,6 +130,7 @@ export default class AuthenticationController {
     private readonly profileService: ProfileService,
     private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
+    private readonly onUserLogin: OnUserLogin,
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
     private readonly lollipopParams: LollipopParams,
@@ -448,6 +459,9 @@ export default class AuthenticationController {
       return ResponseErrorInternal("Error creating the user session");
     }
 
+    // eslint-disable-next-line functional/no-let
+    let userEmail: EmailString | undefined;
+
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
       // a profile for the user does not yet exist, we attempt to create a new
       // one
@@ -477,6 +491,11 @@ export default class AuthenticationController {
         // in io-spid-commons does not support 429 / 409 errors
         return ResponseErrorInternal(createProfileResponse.kind);
       }
+
+      userEmail =
+        newProfile.is_email_validated && newProfile.email
+          ? newProfile.email
+          : user.spid_email;
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
       log.error(
         "Error retrieving user's profile: %s",
@@ -485,6 +504,12 @@ export default class AuthenticationController {
       // we switch to a generic error since the acs definition
       // in io-spid-commons does not support 429 errors
       return ResponseErrorInternal(getProfileResponse.kind);
+    } else {
+      userEmail =
+        getProfileResponse.value.is_email_validated &&
+        getProfileResponse.value.email
+          ? getProfileResponse.value.email
+          : user.spid_email;
     }
 
     // Notify the user login
@@ -516,6 +541,76 @@ export default class AuthenticationController {
           JSON.stringify(err)
         );
       });
+
+    if (
+      userEmail &&
+      this.lollipopParams.isLollipopEnabled &&
+      isUserElegibleForFastLoginResult
+    ) {
+      const errorOrNotifyLoginResult = await pipe(
+        {
+          email: userEmail,
+          family_name: user.family_name,
+          fiscal_code: user.fiscal_code,
+          identity_provider: spidUser.issuer ?? "cie",
+          ip_address: "127.0.0.1",
+          name: user.name,
+        },
+        UserLoginParams.decode,
+        TE.fromEither,
+        TE.mapLeft((err) => {
+          {
+            log.error(
+              "Cannot decode UserLoginParams",
+              readableReportSimplified(err)
+            );
+            return readableReportSimplified(err);
+          }
+        }),
+        TE.chainW(
+          flow(
+            (loginData) => this.onUserLogin(loginData),
+            TE.mapLeft((err) => {
+              {
+                log.error(`Unable to notify user login event | ${err.message}`);
+                return err.message;
+              }
+            })
+          )
+        ),
+        TE.mapLeft((err) => {
+          this.appInsightsTelemetryClient?.trackEvent({
+            name: lollipopErrorEventName + ".notify",
+            properties: {
+              error: err,
+              fiscal_code: sha256(user.fiscal_code),
+              message: "acs: Unable to notify user login event",
+            },
+          });
+
+          return ResponseErrorInternal("Unable to notify user login event");
+        })
+      )();
+
+      if (E.isLeft(errorOrNotifyLoginResult)) {
+        const delLollipopResult =
+          await this.sessionStorage.delLollipopDataForUser(user.fiscal_code);
+
+        if (E.isLeft(delLollipopResult)) {
+          this.appInsightsTelemetryClient?.trackEvent({
+            name: lollipopErrorEventName + ".delete",
+            properties: {
+              error: delLollipopResult.left.message,
+              fiscal_code: sha256(user.fiscal_code),
+              message:
+                "acs: error deleting lollipop data while fallbacking from notify login failure",
+            },
+          });
+        }
+
+        return errorOrNotifyLoginResult.left;
+      }
+    }
 
     const urlWithToken = this.getClientProfileRedirectionUrl(
       user.session_token

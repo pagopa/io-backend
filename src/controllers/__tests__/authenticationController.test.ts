@@ -196,6 +196,17 @@ const mockActivateLolliPoPKey = jest
   .fn()
   .mockImplementation((_, __, ___) => TE.of(anActivatedPubKey));
 
+const mockOnUserLogin = jest.fn().mockImplementation(() => TE.of(true));
+const expectedUserLoginData = {
+  email: mockedInitializedProfile.email,
+  family_name: mockedInitializedProfile.family_name,
+  fiscal_code: mockedInitializedProfile.fiscal_code,
+  identity_provider: validUserPayload.issuer ?? "cie",
+  // TODO change
+  ip_address: "127.0.0.1",
+  name: mockedInitializedProfile.name,
+};
+
 jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -254,6 +265,7 @@ const controller = new AuthenticationController(
   profileService,
   notificationServiceFactory,
   usersLoginLogService,
+  mockOnUserLogin,
   [],
   true,
   {
@@ -274,6 +286,7 @@ const lollipopActivatedController = new AuthenticationController(
   profileService,
   notificationServiceFactory,
   usersLoginLogService,
+  mockOnUserLogin,
   [],
   true,
   {
@@ -340,6 +353,7 @@ describe("AuthenticationController#acs", () => {
       mockedUser,
       expectedNewProfile
     );
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it("redirects to the correct url if userPayload is a valid User and a profile exists", async () => {
@@ -362,6 +376,8 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
+
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it("should fail if a profile cannot be created", async () => {
@@ -392,6 +408,7 @@ describe("AuthenticationController#acs", () => {
       mockedUser,
       expectedNewProfile
     );
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -416,6 +433,8 @@ describe("AuthenticationController#acs", () => {
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toHaveBeenCalled();
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
+
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -654,10 +673,13 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    scenario                      | setLollipopAssertionRefForUserResponse | errorMessage
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF - assertion ref relation in redis"}
-    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}    | ${undefined}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}  | ${"Error"}
+    scenario                      | setLollipopAssertionRefForUserResponse      | errorMessage
+    ${"with false response"}      | ${() => Promise.resolve(E.right(false))}    | ${"Error creating CF - assertion ref relation in redis"}
+    ${"with left response"}       | ${() => Promise.resolve(E.left("Error"))}   | ${undefined}
+    ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error"))} | ${"Error"}
+    ${"with false response"}      | ${() => Promise.resolve(E.right(false))}    | ${"Error creating CF thumbprint relation in redis"}
+    ${"with left response"}       | ${() => Promise.resolve(E.left("Error"))}   | ${undefined}
+    ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error"))} | ${"Error"}
   `(
     "should fail if an error occours saving assertionRef for user in redis $scenario",
     async ({ setLollipopAssertionRefForUserResponse, errorMessage }) => {
@@ -672,8 +694,8 @@ describe("AuthenticationController#acs", () => {
             assertion_ref: newAssertionRef,
           } as ActivatedPubKey)
       );
-      mockSetLollipop.mockImplementationOnce(
-        (_, __, ___) => setLollipopAssertionRefForUserResponse
+      mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+        setLollipopAssertionRefForUserResponse()
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
@@ -721,6 +743,7 @@ describe("AuthenticationController#acs", () => {
       expect(mockSet).not.toBeCalled();
       expect(mockGetProfile).not.toBeCalled();
       expect(mockCreateProfile).not.toBeCalled();
+      expect(mockOnUserLogin).not.toHaveBeenCalled();
     }
   );
 
@@ -761,22 +784,21 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).not.toBeCalled();
     expect(mockGetProfile).not.toBeCalled();
     expect(mockCreateProfile).not.toBeCalled();
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it.each`
-    scenario                      | delLollipopDataForUserResponse                         | errorMessage
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}                     | ${"Error on LolliPoP initialization"}
-    ${"with left response"}       | ${Promise.resolve(E.left(new Error("Error on left")))} | ${"Error on left"}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error on reject"))}        | ${"Error on reject"}
+    scenario                      | delLollipopDataForUserResponse                               | errorMessage
+    ${"with false response"}      | ${() => Promise.resolve(E.right(false))}                     | ${"Error on LolliPoP initialization"}
+    ${"with left response"}       | ${() => Promise.resolve(E.left(new Error("Error on left")))} | ${"Error on left"}
+    ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error on reject"))}        | ${"Error on reject"}
   `(
     "should fail if an error occours deleting the previous CF-assertionRef link on redis $scenario",
     async ({ delLollipopDataForUserResponse, errorMessage }) => {
       const res = mockRes();
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-      mockDelLollipop.mockImplementationOnce(
-        (_) => delLollipopDataForUserResponse
-      );
+      mockDelLollipop.mockImplementationOnce(delLollipopDataForUserResponse);
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
       setupMocks();
@@ -811,6 +833,7 @@ describe("AuthenticationController#acs", () => {
       expect(mockSet).not.toBeCalled();
       expect(mockGetProfile).not.toBeCalled();
       expect(mockCreateProfile).not.toBeCalled();
+      expect(mockOnUserLogin).not.toHaveBeenCalled();
     }
   );
 
@@ -851,6 +874,7 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).not.toBeCalled();
     expect(mockGetProfile).not.toBeCalled();
     expect(mockCreateProfile).not.toBeCalled();
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -978,6 +1002,12 @@ describe("AuthenticationController|>LV|>acs", () => {
           expect.any(Function)
         );
 
+        if (isUserElegible) {
+          expect(mockOnUserLogin).toHaveBeenCalledWith(expectedUserLoginData);
+        } else {
+          expect(mockOnUserLogin).not.toHaveBeenCalled();
+        }
+
         const ttlToExpirationDate = mockActivateLolliPoPKey.mock.calls[0][3];
 
         const now = new Date();
@@ -988,6 +1018,7 @@ describe("AuthenticationController|>LV|>acs", () => {
       } else {
         expect(mockSetLollipop).not.toHaveBeenCalled();
         expect(mockActivateLolliPoPKey).not.toHaveBeenCalled();
+        expect(mockOnUserLogin).not.toHaveBeenCalled();
       }
 
       expect(res.redirect).toHaveBeenCalledWith(
@@ -996,6 +1027,205 @@ describe("AuthenticationController|>LV|>acs", () => {
       );
     }
   );
+
+  it("should notify new login with profile email if profile does not exists and user is eligible", async () => {
+    const res = mockRes();
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => true);
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+      Promise.resolve(E.right(true))
+    );
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+    setupMocks();
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(mockedInitializedProfile)
+    );
+    const response = await lollipopActivatedController.acs(validUserPayload);
+    response.apply(res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
+    );
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
+
+    expect(mockOnUserLogin).toHaveBeenCalledWith({
+      ...expectedUserLoginData,
+      email: validUserPayload.email,
+    });
+  });
+
+  it("should notify new login with spid email if profile exists, email is not validated and user is eligible", async () => {
+    const res = mockRes();
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => true);
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+      Promise.resolve(E.right(true))
+    );
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+    setupMocks();
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson({
+        ...mockedInitializedProfile,
+        is_email_validated: undefined,
+      })
+    );
+
+    const response = await lollipopActivatedController.acs(validUserPayload);
+    response.apply(res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
+    );
+
+    expect(mockOnUserLogin).toHaveBeenCalledWith({
+      ...expectedUserLoginData,
+      email: validUserPayload.email,
+    });
+  });
+
+  it("should delete Lollipop data when onUserLogin call fails", async () => {
+    const res = mockRes();
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => true);
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+      Promise.resolve(E.right(true))
+    );
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+    mockOnUserLogin.mockImplementationOnce(() =>
+      TE.left(new Error("Error calling notify endpoint"))
+    );
+
+    setupMocks();
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson({
+        ...mockedInitializedProfile,
+        is_email_validated: undefined,
+      })
+    );
+
+    const response = await lollipopActivatedController.acs(validUserPayload);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+
+    expect(mockOnUserLogin).toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledTimes(2);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        name: "lollipop.error.acs.notify",
+        properties: {
+          error: "Error calling notify endpoint",
+          fiscal_code: sha256(validUserPayload.fiscalNumber),
+          message: "acs: Unable to notify user login event",
+        },
+      })
+    );
+  });
+
+  it("should track an event if delete Lollipop data fails when onUserLogin call fails", async () => {
+    const res = mockRes();
+
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockImplementationOnce((_) => true);
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockDelLollipop.mockResolvedValueOnce(
+      E.left(new Error("Error deleting Lollipop Data"))
+    );
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+      Promise.resolve(E.right(true))
+    );
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+    mockOnUserLogin.mockImplementationOnce(() =>
+      TE.left(new Error("Error calling notify endpoint"))
+    );
+
+    setupMocks();
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson({
+        ...mockedInitializedProfile,
+        is_email_validated: undefined,
+      })
+    );
+
+    const response = await lollipopActivatedController.acs(validUserPayload);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+
+    expect(mockOnUserLogin).toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledTimes(2);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        name: "lollipop.error.acs.delete",
+        properties: {
+          error: "Error deleting Lollipop Data",
+          fiscal_code: sha256(validUserPayload.fiscalNumber),
+          message:
+            "acs: error deleting lollipop data while fallbacking from notify login failure",
+        },
+      })
+    );
+  });
 });
 
 describe("AuthenticationController#acsTest", () => {
