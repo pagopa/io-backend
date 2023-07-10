@@ -8,11 +8,11 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
 import {
   JwkPubKeyHashAlgorithm,
   JwkPubKeyHashAlgorithmEnum,
-} from "generated/lollipop-api/JwkPubKeyHashAlgorithm";
-import * as O from "fp-ts/Option";
+} from "../../generated/lollipop-api/JwkPubKeyHashAlgorithm";
 import { AssertionRefSha256 } from "../../generated/backend/AssertionRefSha256";
 import { AssertionRefSha384 } from "../../generated/backend/AssertionRefSha384";
 import { AssertionRefSha512 } from "../../generated/backend/AssertionRefSha512";

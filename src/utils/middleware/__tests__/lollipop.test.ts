@@ -28,7 +28,7 @@ const mockGenerateLCParams = jest.fn().mockResolvedValue(
       fiscal_code: aFiscalCode,
       assertion_file_name: `${aFiscalCode}-${anAssertionRef}`,
       assertion_type: AssertionTypeEnum.SAML,
-      expired_at: Date.now(),
+      expired_at: new Date(),
       lc_authentication_bearer: aBearerToken,
       assertion_ref: anAssertionRef,
       pub_key: aPubKey,
@@ -204,11 +204,11 @@ describe("lollipopMiddleware", () => {
   });
 
   it.each`
-    title                                                                              | lollipopAssertionRefForUser                                          | expectedResponseStatus
-    ${"the lollipopAssertionRefForUser returns a different assertionRef from request"} | ${Promise.resolve(E.right(O.some(anotherAssertionRef)))}             | ${403}
-    ${"the lollipopAssertionRefForUser rejects"}                                       | ${Promise.reject(new Error("promise reject"))}                       | ${500}
-    ${"the lollipopAssertionRefForUser returns an error"}                              | ${Promise.resolve(E.left(new Error("Error executing the request")))} | ${500}
-    ${"the lollipopAssertionRefForUser not found the value"}                           | ${Promise.resolve(E.right(O.none))}                                  | ${403}
+    title                                                                              | lollipopAssertionRefForUser                                                | expectedResponseStatus
+    ${"the lollipopAssertionRefForUser returns a different assertionRef from request"} | ${() => Promise.resolve(E.right(O.some(anotherAssertionRef)))}             | ${403}
+    ${"the lollipopAssertionRefForUser rejects"}                                       | ${() => Promise.reject(new Error("promise reject"))}                       | ${500}
+    ${"the lollipopAssertionRefForUser returns an error"}                              | ${() => Promise.resolve(E.left(new Error("Error executing the request")))} | ${500}
+    ${"the lollipopAssertionRefForUser not found the value"}                           | ${() => Promise.resolve(E.right(O.none))}                                  | ${403}
   `(
     `
   GIVEN a valid user and Lollipop Headers
@@ -222,7 +222,7 @@ describe("lollipopMiddleware", () => {
       });
       const res = mockRes();
       mockGetlollipopAssertionRefForUser.mockImplementationOnce(
-        () => lollipopAssertionRefForUser
+        lollipopAssertionRefForUser
       );
       const middleware = expressLollipopMiddleware(
         mockClient,
@@ -236,13 +236,13 @@ describe("lollipopMiddleware", () => {
   );
 
   it.each`
-    title                                            | generateLCParams                               | expectedResponseStatus
-    ${"the generateLCParams rejects"}                | ${Promise.reject(new Error("promise reject"))} | ${500}
-    ${"the generateLCParams returns an error"}       | ${Promise.resolve(NonEmptyString.decode(""))}  | ${500}
-    ${"the generateLCParams returns bad request"}    | ${Promise.resolve(E.right({ status: 400 }))}   | ${500}
-    ${"the generateLCParams returns forbidden"}      | ${Promise.resolve(E.right({ status: 403 }))}   | ${403}
-    ${"the generateLCParams returns not found"}      | ${Promise.resolve(E.right({ status: 404 }))}   | ${500}
-    ${"the generateLCParams returns error internal"} | ${Promise.resolve(E.right({ status: 500 }))}   | ${500}
+    title                                            | generateLCParams                                     | expectedResponseStatus
+    ${"the generateLCParams rejects"}                | ${() => Promise.reject(new Error("promise reject"))} | ${500}
+    ${"the generateLCParams returns an error"}       | ${() => Promise.resolve(NonEmptyString.decode(""))}  | ${500}
+    ${"the generateLCParams returns bad request"}    | ${() => Promise.resolve(E.right({ status: 400 }))}   | ${500}
+    ${"the generateLCParams returns forbidden"}      | ${() => Promise.resolve(E.right({ status: 403 }))}   | ${403}
+    ${"the generateLCParams returns not found"}      | ${() => Promise.resolve(E.right({ status: 404 }))}   | ${500}
+    ${"the generateLCParams returns error internal"} | ${() => Promise.resolve(E.right({ status: 500 }))}   | ${500}
   `(
     `
   GIVEN a valid user and Lollipop Headers
@@ -255,7 +255,7 @@ describe("lollipopMiddleware", () => {
         user: mockedUser,
       });
       const res = mockRes();
-      mockGenerateLCParams.mockImplementationOnce(() => generateLCParams);
+      mockGenerateLCParams.mockImplementationOnce(generateLCParams);
       const middleware = expressLollipopMiddleware(
         mockClient,
         mockSessionStorage

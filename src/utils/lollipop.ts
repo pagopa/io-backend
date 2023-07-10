@@ -123,7 +123,7 @@ const getAndValidateAssertionRefForUser = (
         TE.fromPredicate(
           (assertionRef) =>
             assertionRef ===
-            `${getAlgoFromAssertionRef(assertionRef)}${keyThumbprint}`,
+            `${getAlgoFromAssertionRef(assertionRef)}-${keyThumbprint}`,
           () => ResponseErrorForbiddenNotAuthorized
         ),
         eventLog.taskEither.errorLeft(() => [
@@ -430,7 +430,17 @@ export const extractLollipopLocalsFromLollipopHeaders = (
           )
         ),
         TE.fold(
-          (_) => (LcParams.is(_) ? TE.right(_) : TE.left(_)),
+          (_) =>
+            LcParams.is(_)
+              ? TE.right(_)
+              : _.kind === "IResponseErrorInternal" ||
+                _.kind === "IResponseErrorForbiddenNotAuthorized"
+              ? TE.left(_)
+              : TE.left(
+                  ResponseErrorInternal(
+                    "Unexpected result given from retrieveLCParams"
+                  )
+                ),
           () =>
             TE.left<
               IResponseErrorForbiddenNotAuthorized | IResponseErrorInternal
