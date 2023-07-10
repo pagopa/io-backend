@@ -23,7 +23,7 @@ export const anAssertionRef =
 export const aThumbprint =
   "6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as Thumbprint;
 export const anotherAssertionRef =
-  "sha512-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha512;
+  "sha512-Dj51I0q8aPQ3ioaz9LMqGYujAYRbDNblAQbodDRXAMxmY6hsHqEl3F6SvhfJj5oPhcqdX1ldsgEvfMNXGUXBIw==" as AssertionRefSha512;
 
 export const aJwkPubKey: JwkPublicKey = {
   kty: "EC",
@@ -52,7 +52,7 @@ export const aLollipopOriginalUrl =
   "https://api.pagopa.it" as LollipopOriginalURL;
 
 export const anInvalidSignatureInput =
-  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="an-invalid-assertion-ref"` as LollipopSignatureInput;
+  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="#an-invalid-thumbprint#"` as LollipopSignatureInput;
 
 export const mockActivatePubKey = jest.fn();
 
