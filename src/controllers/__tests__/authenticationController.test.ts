@@ -315,7 +315,7 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
-const setupMocks = () => {
+const setupGetNewTokensMocks = () => {
   mockGetNewToken
     .mockReturnValueOnce(mockSessionToken)
     .mockReturnValueOnce(mockWalletToken)
@@ -337,7 +337,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -366,7 +366,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -395,7 +395,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -426,7 +426,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorInternal("Error reading the user profile")
@@ -584,7 +584,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -640,7 +640,7 @@ describe("AuthenticationController#acs", () => {
     );
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -704,7 +704,7 @@ describe("AuthenticationController#acs", () => {
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      setupMocks();
+      setupGetNewTokensMocks();
 
       const response = await lollipopActivatedController.acs(
         validUserPayload,
@@ -765,7 +765,7 @@ describe("AuthenticationController#acs", () => {
     );
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     const response = await lollipopActivatedController.acs(
       validUserPayload,
@@ -812,7 +812,7 @@ describe("AuthenticationController#acs", () => {
       mockDelLollipop.mockImplementationOnce(delLollipopDataForUserResponse);
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      setupMocks();
+      setupGetNewTokensMocks();
 
       const response = await lollipopActivatedController.acs(
         validUserPayload,
@@ -857,7 +857,7 @@ describe("AuthenticationController#acs", () => {
     mockGetLollipop.mockResolvedValueOnce(E.left(new Error("Error")));
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    setupMocks();
+    setupGetNewTokensMocks();
 
     const response = await lollipopActivatedController.acs(
       validUserPayload,
@@ -909,7 +909,7 @@ describe("AuthenticationController#acs", () => {
 
       mockSet.mockReturnValue(Promise.resolve(E.right(true)));
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      setupMocks();
+      setupGetNewTokensMocks();
 
       mockGetProfile.mockReturnValue(
         ResponseSuccessJson(mockedInitializedProfile)
@@ -926,8 +926,6 @@ describe("AuthenticationController#acs", () => {
 });
 
 describe("AuthenticationController|>LV|>acs", () => {
-  const req = mockReq();
-  req.ip = "127.0.0.2";
   it.each`
     loginType               | isLollipopEnabled | isUserElegible | expectedTtlDuration    | expectedLongSessionDuration
     ${LoginTypeEnum.LV}     | ${true}           | ${true}        | ${lvTokenDurationSecs} | ${lvLongSessionDurationSecs}
@@ -977,7 +975,7 @@ describe("AuthenticationController|>LV|>acs", () => {
       mockSet.mockReturnValue(Promise.resolve(E.right(true)));
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
 
-      setupMocks();
+      setupGetNewTokensMocks();
 
       mockGetProfile.mockReturnValue(
         ResponseSuccessJson(mockedInitializedProfile)
@@ -1046,10 +1044,10 @@ describe("AuthenticationController|>LV|>acs", () => {
       );
     }
   );
+});
 
-  it("should notify new login with profile email if profile does not exists and user is eligible", async () => {
-    const res = mockRes();
-
+describe("AuthenticationController|>LV|>acs|>notify user login", () => {
+  const setupLollipopScenario = () => {
     jest
       .spyOn(authCtrl, "isUserElegibleForFastLogin")
       .mockImplementationOnce((_) => true);
@@ -1067,8 +1065,13 @@ describe("AuthenticationController|>LV|>acs", () => {
     );
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+  };
 
-    setupMocks();
+  it("should notify new login with profile email if profile does not exists and user is eligible", async () => {
+    const res = mockRes();
+
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
     );
@@ -1096,25 +1099,8 @@ describe("AuthenticationController|>LV|>acs", () => {
   it("should notify new login with spid email if profile exists, email is not validated and user is eligible", async () => {
     const res = mockRes();
 
-    jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
-      .mockImplementationOnce((_) => true);
-
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
-    mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
-      TE.of({
-        ...anActivatedPubKey,
-        assertion_ref: newAssertionRef,
-      } as ActivatedPubKey)
-    );
-    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
-      Promise.resolve(E.right(true))
-    );
-    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-
-    setupMocks();
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson({
         ...mockedInitializedProfile,
@@ -1142,30 +1128,15 @@ describe("AuthenticationController|>LV|>acs", () => {
   it("should delete Lollipop data when onUserLogin call fails", async () => {
     const res = mockRes();
 
-    jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
-      .mockImplementationOnce((_) => true);
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
 
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
     mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockDelLollipop.mockResolvedValueOnce(E.right(true));
-    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
-      TE.of({
-        ...anActivatedPubKey,
-        assertion_ref: newAssertionRef,
-      } as ActivatedPubKey)
-    );
-    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
-      Promise.resolve(E.right(true))
-    );
-    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
 
     mockOnUserLogin.mockImplementationOnce(() =>
       TE.left(new Error("Error calling notify endpoint"))
     );
 
-    setupMocks();
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson({
         ...mockedInitializedProfile,
@@ -1200,32 +1171,17 @@ describe("AuthenticationController|>LV|>acs", () => {
   it("should track an event if delete Lollipop data fails when onUserLogin call fails", async () => {
     const res = mockRes();
 
-    jest
-      .spyOn(authCtrl, "isUserElegibleForFastLogin")
-      .mockImplementationOnce((_) => true);
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
 
-    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
-    mockDelLollipop.mockResolvedValueOnce(E.right(true));
     mockDelLollipop.mockResolvedValueOnce(
       E.left(new Error("Error deleting Lollipop Data"))
     );
-    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
-      TE.of({
-        ...anActivatedPubKey,
-        assertion_ref: newAssertionRef,
-      } as ActivatedPubKey)
-    );
-    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
-      Promise.resolve(E.right(true))
-    );
-    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
-    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
 
     mockOnUserLogin.mockImplementationOnce(() =>
       TE.left(new Error("Error calling notify endpoint"))
     );
 
-    setupMocks();
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson({
         ...mockedInitializedProfile,
@@ -1264,8 +1220,6 @@ describe("AuthenticationController#acsTest", () => {
     ReturnType<AuthenticationController["acs"]>,
     jest.ArgsType<AuthenticationController["acs"]>
   >;
-  const req = mockReq();
-  req.ip = "127.0.0.2";
   const res = mockRes();
   beforeEach(() => {
     jest.clearAllMocks();
