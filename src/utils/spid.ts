@@ -3,6 +3,7 @@ import { format as dateFnsFormat } from "date-fns";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
+import * as S from "fp-ts/lib/string";
 import * as A from "fp-ts/lib/Array";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -67,6 +68,7 @@ export const getFiscalNumberFromPayload: (
   doc: Document
 ) => O.Option<FiscalCode> = flow(
   getUserAttributeFromAssertion("fiscalNumber"),
+  O.map(S.toUpperCase),
   O.map((fiscalCode) =>
     // Remove the international prefix from fiscal code.
     fiscalCode.replace("TINIT-", "")
