@@ -43,9 +43,9 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
+import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
-import { UserLoginParams } from "../types/userLoginData";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
 import {
