@@ -52,7 +52,7 @@ describe("UsersLoginLogService#notifyUserLogin", () => {
 });
 
 describe("onUserLogin", () => {
-  const mockStartNotifyLoginProcess = jest.fn(async () =>
+  const mockStartNotifyLoginProcess = jest.fn().mockResolvedValue(
     E.right({
       status: 202,
     })
