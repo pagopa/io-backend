@@ -7,7 +7,7 @@ import { LollipopSignature } from "../../generated/lollipop/LollipopSignature";
 import { LollipopSignatureInput } from "../../generated/lollipop/LollipopSignatureInput";
 import { LollipopMethod } from "../../generated/lollipop/LollipopMethod";
 import { LollipopOriginalURL } from "../../generated/lollipop/LollipopOriginalURL";
-import { LollipopLocalsType } from "../types/lollipop";
+import { LollipopLocalsType, Thumbprint } from "../types/lollipop";
 import { AssertionTypeEnum } from "../../generated/io-sign-api/AssertionType";
 import { LollipopJWTAuthorization } from "../../generated/io-sign-api/LollipopJWTAuthorization";
 import { LollipopPublicKey } from "../../generated/io-sign-api/LollipopPublicKey";
@@ -20,8 +20,10 @@ import * as O from "fp-ts/lib/Option";
 
 export const anAssertionRef =
   "sha256-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha256;
+export const aThumbprint =
+  "6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as Thumbprint;
 export const anotherAssertionRef =
-  "sha512-6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as AssertionRefSha512;
+  "sha512-Dj51I0q8aPQ3ioaz9LMqGYujAYRbDNblAQbodDRXAMxmY6hsHqEl3F6SvhfJj5oPhcqdX1ldsgEvfMNXGUXBIw==" as AssertionRefSha512;
 
 export const aJwkPubKey: JwkPublicKey = {
   kty: "EC",
@@ -44,13 +46,13 @@ export const aLollipopAssertion =
 export const aSignature =
   `sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:` as LollipopSignature;
 export const aSignatureInput =
-  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="${anAssertionRef}"` as LollipopSignatureInput;
+  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="${aThumbprint}"` as LollipopSignatureInput;
 export const aLollipopOriginalMethod = "POST" as LollipopMethod;
 export const aLollipopOriginalUrl =
   "https://api.pagopa.it" as LollipopOriginalURL;
 
 export const anInvalidSignatureInput =
-  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="an-invalid-assertion-ref"` as LollipopSignatureInput;
+  `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="#an-invalid-thumbprint#"` as LollipopSignatureInput;
 
 export const mockActivatePubKey = jest.fn();
 
@@ -74,8 +76,7 @@ export const mockSessionStorage = {
 export const lollipopRequiredHeaders = {
   signature:
     "sig1=:hNojB+wWw4A7SYF3qK1S01Y4UP5i2JZFYa2WOlMB4Np5iWmJSO0bDe2hrYRbcIWqVAFjuuCBRsB7lYQJkzbb6g==:",
-  "signature-input":
-    'sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="test-key-rsa-pss"',
+  "signature-input": `sig1=("x-pagopa-lollipop-original-method" "x-pagopa-lollipop-original-url"); created=1618884475; keyid="${aThumbprint}"`,
   "x-pagopa-lollipop-original-method": "POST",
   "x-pagopa-lollipop-original-url": "https://api.pagopa.it",
 };
