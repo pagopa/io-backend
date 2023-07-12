@@ -191,16 +191,28 @@ export default class AuthenticationController {
       );
     }
 
+    const isUserElegibleForFastLoginResult = isUserElegibleForFastLogin(
+      spidUser.fiscalNumber
+    );
+
     // LV functionality is enable only if Lollipop is enabled.
     // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
     // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
     // Otherwise LV is disabled.
-    const [sessionTTL, lollipopKeyTTL] =
+    const [sessionTTL, lollipopKeyTTL, loginType] =
       this.lollipopParams.isLollipopEnabled &&
-      isUserElegibleForFastLogin(spidUser.fiscalNumber) &&
-      additionalProps?.loginType === LoginTypeEnum.LV
-        ? [this.lvTokenDurationSecs, this.lvLongSessionDurationSecs]
-        : [this.standardTokenDurationSecs, this.standardTokenDurationSecs];
+      additionalProps?.loginType === LoginTypeEnum.LV &&
+      isUserElegibleForFastLoginResult
+        ? [
+            this.lvTokenDurationSecs,
+            this.lvLongSessionDurationSecs,
+            LoginTypeEnum.LV,
+          ]
+        : [
+            this.standardTokenDurationSecs,
+            this.standardTokenDurationSecs,
+            LoginTypeEnum.LEGACY,
+          ];
 
     //
     // create a new user object
@@ -312,10 +324,7 @@ export default class AuthenticationController {
       // This operation must be performed even if the lollipop FF is disabled
       // to avoid inconsistency on CF-key relation if the FF will be re-enabled.
       TE.tryCatch(
-        () =>
-          this.sessionStorage.delLollipopAssertionRefForUser(
-            spidUser.fiscalNumber
-          ),
+        () => this.sessionStorage.delLollipopDataForUser(spidUser.fiscalNumber),
         E.toError
       ),
       TE.chainEitherK(identity),
@@ -363,19 +372,33 @@ export default class AuthenticationController {
             pipe(
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.setLollipopAssertionRefForUser(
-                    user,
-                    assertionRef,
-                    lollipopKeyTTL
+                  pipe(
+                    isUserElegibleForFastLoginResult,
+                    B.fold(
+                      () =>
+                        this.sessionStorage.setLollipopAssertionRefForUser(
+                          user,
+                          assertionRef,
+                          lollipopKeyTTL
+                        ),
+                      () =>
+                        this.sessionStorage.setLollipopDataForUser(
+                          user,
+                          { assertionRef, loginType },
+                          lollipopKeyTTL
+                        )
+                    )
                   ),
                 E.toError
               ),
               TE.chainEitherK(identity),
               TE.filterOrElse(
-                (setLollipopAssertionRefForUserRes) =>
-                  setLollipopAssertionRefForUserRes === true,
+                (setLollipopDataForUserRes) =>
+                  setLollipopDataForUserRes === true,
                 () =>
-                  new Error("Error creating CF thumbprint relation in redis")
+                  new Error(
+                    "Error creating CF - assertion ref relation in redis"
+                  )
               ),
               TE.mapLeft((error) => {
                 this.appInsightsTelemetryClient?.trackEvent({
@@ -614,9 +637,7 @@ export default class AuthenticationController {
               // delete the assertionRef for the user
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.delLollipopAssertionRefForUser(
-                    user.fiscal_code
-                  ),
+                  this.sessionStorage.delLollipopDataForUser(user.fiscal_code),
                 E.toError
               ),
               TE.chainEitherK(identity)

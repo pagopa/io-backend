@@ -14,6 +14,7 @@ import { LollipopPublicKey } from "../../generated/io-sign-api/LollipopPublicKey
 import { aFiscalCode } from "./user_mock";
 import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
+import { LoginTypeEnum } from "../utils/fastLogin";
 
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -24,6 +25,11 @@ export const aThumbprint =
   "6LvipIvFuhyorHpUqK3HjySC5Y6gshXHFBhU9EJ4DoM=" as Thumbprint;
 export const anotherAssertionRef =
   "sha512-Dj51I0q8aPQ3ioaz9LMqGYujAYRbDNblAQbodDRXAMxmY6hsHqEl3F6SvhfJj5oPhcqdX1ldsgEvfMNXGUXBIw==" as AssertionRefSha512;
+
+export const lollipopData = {
+  assertionRef: anotherAssertionRef,
+  loginType: LoginTypeEnum.LEGACY,
+};
 
 export const aJwkPubKey: JwkPublicKey = {
   kty: "EC",

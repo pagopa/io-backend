@@ -7,6 +7,7 @@ import * as A from "fp-ts/lib/Array";
 import * as ROA from "fp-ts/lib/ReadonlyArray";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as B from "fp-ts/lib/boolean";
 import * as R from "fp-ts/lib/Record";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -19,7 +20,11 @@ import { Option } from "fp-ts/lib/Option";
 import { flow, pipe, identity } from "fp-ts/lib/function";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
-import * as t from "io-ts";
+import {
+  NullableBackendAssertionRefFromString,
+  LollipopData,
+  LollipopDataFromString,
+} from "../types/assertionRef";
 import { AssertionRef as BackendAssertionRef } from "../../generated/backend/AssertionRef";
 import { SessionInfo } from "../../generated/backend/SessionInfo";
 import { SessionsList } from "../../generated/backend/SessionsList";
@@ -35,15 +40,9 @@ import {
 import { User, UserV1, UserV2, UserV3, UserV4, UserV5 } from "../types/user";
 import { multipleErrorsFormatter } from "../utils/errorsFormatter";
 import { log } from "../utils/logger";
+import { LoginTypeEnum } from "../utils/fastLogin";
 import { ISessionStorage } from "./ISessionStorage";
 import RedisStorageUtils from "./redisStorageUtils";
-
-const NullableBackendAssertionRef = t.union([
-  t.null,
-  t.undefined,
-  BackendAssertionRef,
-]);
-type NullableBackendAssertionRef = t.TypeOf<typeof NullableBackendAssertionRef>;
 
 const sessionKeyPrefix = "SESSION-";
 const walletKeyPrefix = "WALLET-";
@@ -55,7 +54,7 @@ const userSessionsSetKeyPrefix = "USERSESSIONS-";
 const sessionInfoKeyPrefix = "SESSIONINFO-";
 const noticeEmailPrefix = "NOTICEEMAIL-";
 const blockedUserSetKey = "BLOCKEDUSERS";
-const lollipopFingerprintPrefix = "KEYS-";
+const lollipopDataPrefix = "KEYS-";
 export const keyPrefixes = [
   sessionKeyPrefix,
   walletKeyPrefix,
@@ -67,7 +66,7 @@ export const keyPrefixes = [
   sessionInfoKeyPrefix,
   noticeEmailPrefix,
   blockedUserSetKey,
-  lollipopFingerprintPrefix,
+  lollipopDataPrefix,
 ];
 export const sessionNotFoundError = new Error("Session not found");
 
@@ -479,6 +478,9 @@ export default class RedisSessionStorage
     );
   }
 
+  /**
+   * @deprecated use `userHasActiveSessionsOrLV` instead
+   */
   public async userHasActiveSessions(
     fiscalCode: FiscalCode
   ): Promise<Either<Error, boolean>> {
@@ -510,6 +512,46 @@ export default class RedisSessionStorage
       // Skipping null values from the array
       TE.map(A.filter((key): key is string => key !== null)),
       TE.map((_) => _.length > 0)
+    )();
+  }
+
+  /**
+   * Check if user id logged in, by checking the presence of LollipopData.
+   * It returns true if login type is LV or a LEGACY session exists, false otherwise
+   *
+   * @param fiscalCode
+   * @returns true if login type is LV or a LEGACY session exists, false otherwise
+   */
+  public async userHasActiveSessionsOrLV(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, boolean>> {
+    return await pipe(
+      await this.getLollipopDataForUser(fiscalCode),
+      TE.fromEither,
+      TE.chain(
+        flow(
+          O.map((data) =>
+            pipe(
+              data.loginType === LoginTypeEnum.LV,
+              B.fold(
+                // if login type is not LV, check for active user sessions
+                () =>
+                  pipe(
+                    TE.tryCatch(
+                      () => this.userHasActiveSessions(fiscalCode),
+                      E.toError
+                    ),
+                    TE.chainEitherK(identity)
+                  ),
+                // if login type is LV, return true
+                () => TE.of<Error, boolean>(true)
+              )
+            )
+          ),
+          // ff no LollipopData was found, return false
+          O.getOrElseW(() => TE.of<Error, boolean>(false))
+        )
+      )
     )();
   }
 
@@ -754,6 +796,120 @@ export default class RedisSessionStorage
     )();
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public async getLollipopAssertionRefForUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, O.Option<BackendAssertionRef>>> {
+    return pipe(
+      await this.getLollipopDataForUser(fiscalCode),
+      E.map(O.map((data) => data.assertionRef))
+    );
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async getLollipopDataForUser(
+    fiscalCode: FiscalCode
+  ): Promise<Either<Error, O.Option<LollipopData>>> {
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.get(`${lollipopDataPrefix}${fiscalCode}`),
+        E.toError
+      ),
+      TE.chain(
+        flow(
+          NullableBackendAssertionRefFromString.decode,
+          E.map(
+            flow(
+              O.fromNullable,
+              O.map((storedValue) =>
+                LollipopData.is(storedValue)
+                  ? storedValue
+                  : // Remap plain string to LollipopData
+                    {
+                      assertionRef: storedValue,
+                      loginType: LoginTypeEnum.LEGACY,
+                    }
+              )
+            )
+          ),
+          E.mapLeft(
+            (validationErrors) =>
+              new Error(errorsToReadableMessages(validationErrors).join("/"))
+          ),
+          TE.fromEither
+        )
+      )
+    )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async setLollipopDataForUser(
+    user: UserV5,
+    data: LollipopData,
+    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
+  ) {
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${lollipopDataPrefix}${user.fiscal_code}`,
+            expireAssertionRefSec,
+            LollipopDataFromString.encode(data)
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
+    )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public async setLollipopAssertionRefForUser(
+    user: UserV5,
+    assertionRef: BackendAssertionRef,
+    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
+  ) {
+    return pipe(
+      TE.tryCatch(
+        () =>
+          this.redisClient.setEx(
+            `${lollipopDataPrefix}${user.fiscal_code}`,
+            expireAssertionRefSec,
+            assertionRef
+          ),
+        E.toError
+      ),
+      this.singleStringReplyAsync,
+      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
+    )();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public async delLollipopDataForUser(fiscalCode: FiscalCode) {
+    return pipe(
+      TE.tryCatch(
+        () => this.redisClient.del(`${lollipopDataPrefix}${fiscalCode}`),
+        E.toError
+      ),
+      this.integerReplyAsync()
+    )();
+  }
+
+  // ----------------------------------------------
+  // Private methods
+  // ----------------------------------------------
+
   // This mGet fires a bunch of GET operation to prevent CROSS-SLOT errors on the cluster
   // eslint-disable-next-line functional/prefer-readonly-type
   private mGet(keys: string[]): TaskEither<Error, Array<string | null>> {
@@ -775,70 +931,6 @@ export default class RedisSessionStorage
 
   private ttl(key: string) {
     return this.redisClient.ttl.bind(this.redisClient)(key);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  public async getLollipopAssertionRefForUser(
-    fiscalCode: FiscalCode
-  ): Promise<Either<Error, O.Option<BackendAssertionRef>>> {
-    return pipe(
-      TE.tryCatch(
-        () => this.redisClient.get(`${lollipopFingerprintPrefix}${fiscalCode}`),
-        E.toError
-      ),
-      TE.chain(
-        flow(
-          NullableBackendAssertionRef.decode,
-          E.map(O.fromNullable),
-          E.mapLeft(
-            (validationErrors) =>
-              new Error(errorsToReadableMessages(validationErrors).join("/"))
-          ),
-          TE.fromEither
-        )
-      )
-    )();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  public async setLollipopAssertionRefForUser(
-    user: UserV5,
-    assertionRef: BackendAssertionRef,
-    expireAssertionRefSec: Second = this.defaultDurationAssertionRefSec
-  ) {
-    return pipe(
-      TE.tryCatch(
-        () =>
-          this.redisClient.setEx(
-            `${lollipopFingerprintPrefix}${user.fiscal_code}`,
-            expireAssertionRefSec,
-            assertionRef
-          ),
-        E.toError
-      ),
-      this.singleStringReplyAsync,
-      this.falsyResponseToErrorAsync(new Error("Error setting user key"))
-    )();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  public async delLollipopAssertionRefForUser(fiscalCode: FiscalCode) {
-    return pipe(
-      TE.tryCatch(
-        () => this.redisClient.del(`${lollipopFingerprintPrefix}${fiscalCode}`),
-        E.toError
-      ),
-      this.integerReplyAsync()
-    )();
   }
 
   /**
