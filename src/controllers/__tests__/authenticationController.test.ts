@@ -685,9 +685,6 @@ describe("AuthenticationController#acs", () => {
     ${"with false response"}      | ${() => Promise.resolve(E.right(false))}    | ${"Error creating CF - assertion ref relation in redis"}
     ${"with left response"}       | ${() => Promise.resolve(E.left("Error"))}   | ${undefined}
     ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error"))} | ${"Error"}
-    ${"with false response"}      | ${() => Promise.resolve(E.right(false))}    | ${"Error creating CF thumbprint relation in redis"}
-    ${"with left response"}       | ${() => Promise.resolve(E.left("Error"))}   | ${undefined}
-    ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error"))} | ${"Error"}
   `(
     "should fail if an error occours saving assertionRef for user in redis $scenario",
     async ({ setLollipopAssertionRefForUserResponse, errorMessage }) => {

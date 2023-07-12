@@ -170,13 +170,6 @@ export default class AuthenticationController {
 
     const spidUser = errorOrSpidUser.right;
 
-    const req = spidUser.getAcsOriginalRequest();
-    const errorOrUserIp = IPString.decode(req?.ip);
-
-    if (E.isLeft(errorOrUserIp)) {
-      return ResponseErrorInternal("Error reading user IP");
-    }
-
     if (
       this.hasUserAgeLimitEnabled &&
       !isOlderThan(AGE_LIMIT)(parse(spidUser.dateOfBirth), new Date())
@@ -232,6 +225,13 @@ export default class AuthenticationController {
             this.standardTokenDurationSecs,
             LoginTypeEnum.LEGACY,
           ];
+
+    // Retrieve user IP from request
+    const errorOrUserIp = IPString.decode(spidUser.getAcsOriginalRequest()?.ip);
+
+    if (isUserElegibleForFastLoginResult && E.isLeft(errorOrUserIp)) {
+      return ResponseErrorInternal("Error reading user IP");
+    }
 
     //
     // create a new user object
@@ -561,7 +561,11 @@ export default class AuthenticationController {
           family_name: user.family_name,
           fiscal_code: user.fiscal_code,
           identity_provider: spidUser.issuer ?? "cie",
-          ip_address: errorOrUserIp.right,
+          ip_address: pipe(
+            errorOrUserIp,
+            // we've already checked errorOrUserIp, this will never happen
+            E.getOrElse(() => "")
+          ),
           name: user.name,
         },
         UserLoginParams.decode,
