@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 12.7.4
+  version: 13.0.0
   title: Public API
   description: Mobile and web proxy API gateway.
 host: localhost
