@@ -500,10 +500,7 @@ export default class AuthenticationController {
         return ResponseErrorInternal(createProfileResponse.kind);
       }
 
-      userEmail =
-        newProfile.is_email_validated && newProfile.email
-          ? newProfile.email
-          : user.spid_email;
+      userEmail = user.spid_email;
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
       log.error(
         "Error retrieving user's profile: %s",
