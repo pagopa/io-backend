@@ -502,6 +502,15 @@ export default class AuthenticationController {
 
       userEmail = user.spid_email;
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
+      // errorOrActivatedPubKey is Left when login was not a lollipop login
+      if (E.isRight(errorOrActivatedPubKey)) {
+        await this.deleteAssertionRefAssociation(
+          user.fiscal_code,
+          errorOrActivatedPubKey.right[0].assertion_ref,
+          lollipopErrorEventName,
+          "acs: error deleting lollipop data while fallbacking from getProfile response error"
+        );
+      }
       log.error(
         "Error retrieving user's profile: %s",
         getProfileResponse.detail
@@ -602,19 +611,14 @@ export default class AuthenticationController {
       )();
 
       if (E.isLeft(errorOrNotifyLoginResult)) {
-        const delLollipopResult =
-          await this.sessionStorage.delLollipopDataForUser(user.fiscal_code);
-
-        if (E.isLeft(delLollipopResult)) {
-          this.appInsightsTelemetryClient?.trackEvent({
-            name: lollipopErrorEventName + ".delete",
-            properties: {
-              error: delLollipopResult.left.message,
-              fiscal_code: sha256(user.fiscal_code),
-              message:
-                "acs: error deleting lollipop data while fallbacking from notify login failure",
-            },
-          });
+        // errorOrActivatedPubKey is Left when login was not a lollipop login
+        if (E.isRight(errorOrActivatedPubKey)) {
+          await this.deleteAssertionRefAssociation(
+            user.fiscal_code,
+            errorOrActivatedPubKey.right[0].assertion_ref,
+            lollipopErrorEventName,
+            "acs: error deleting lollipop data while fallbacking from notify login failure"
+          );
         }
 
         return errorOrNotifyLoginResult.left;
@@ -815,4 +819,51 @@ export default class AuthenticationController {
         E.toUnion
       )
     );
+
+  private async deleteAssertionRefAssociation(
+    fiscalCode: FiscalCode,
+    assertionRefToRevoke: AssertionRef,
+    eventName: string,
+    eventMessage: string
+  ) {
+    // Sending a revoke message for assertionRef
+    // This operation is fire and forget
+    this.lollipopParams.lollipopService
+      .revokePreviousAssertionRef(assertionRefToRevoke)
+      .catch((err) => {
+        this.appInsightsTelemetryClient?.trackEvent({
+          name: eventName,
+          properties: {
+            assertion_ref: assertionRefToRevoke,
+            error: err,
+            fiscal_code: sha256(fiscalCode),
+            message:
+              "acs: error sending revoke message for previous assertionRef",
+          },
+        });
+        log.error(
+          "acs: error sending revoke message for previous assertionRef [%s]",
+          err
+        );
+      });
+
+    const delLollipopResult = await pipe(
+      TE.tryCatch(
+        () => this.sessionStorage.delLollipopDataForUser(fiscalCode),
+        E.toError
+      ),
+      TE.chainEitherK(identity)
+    )();
+
+    if (E.isLeft(delLollipopResult)) {
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: eventName + ".delete",
+        properties: {
+          error: delLollipopResult.left.message,
+          fiscal_code: sha256(fiscalCode),
+          message: eventMessage,
+        },
+      });
+    }
+  }
 }

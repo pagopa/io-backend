@@ -1199,7 +1199,8 @@ describe("AuthenticationController|>LV|>acs|>notify user login", () => {
 
     expect(mockOnUserLogin).toHaveBeenCalled();
     expect(mockDelLollipop).toHaveBeenCalledTimes(2);
-
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledTimes(2);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(2);
     expect(mockTelemetryClient.trackEvent).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
