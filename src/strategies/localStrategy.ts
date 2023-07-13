@@ -13,7 +13,7 @@ export const localStrategy = (
   validUsernameList: ReadonlyArray<FiscalCode>,
   validPassword: string
 ): passport.Strategy =>
-  new Strategy((username, password, done) => {
+  new Strategy({ passReqToCallback: true }, (req, username, password, done) => {
     if (
       FiscalCode.is(username) &&
       validUsernameList.includes(username) &&
@@ -25,6 +25,7 @@ export const localStrategy = (
         dateOfBirth: "2000-06-02",
         familyName: "Rossi",
         fiscalNumber: username,
+        getAcsOriginalRequest: () => req,
         getAssertionXml: () => "<xml></xml>",
         getSamlResponseXml: () => "<xml></xml>",
         issuer: "IO",

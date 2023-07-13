@@ -16,26 +16,27 @@ jest.mock("../services/redisUserMetadataStorage");
 jest.mock("../services/apiClientFactory");
 jest
   .spyOn(redisUtils, "createClusterRedisClient")
-  .mockImplementation(_ => async () => ({} as redis.RedisClusterType));
+  .mockImplementation((_) => async () => ({} as redis.RedisClusterType));
 
 const mockNotify = jest.fn();
 jest.mock("../controllers/notificationController", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
-      notify: mockNotify
-    }))
+      notify: mockNotify,
+    })),
   };
 });
 const mockNotificationService = jest.fn().mockImplementation(() => ({}));
 jest.mock("../services/notificationService", () => {
   return {
-    default: mockNotificationService
+    default: mockNotificationService,
   };
 });
 const mockUsersLoginLogService = jest.fn().mockImplementation(() => ({}));
 jest.mock("../services/usersLoginLogService", () => {
   return {
-    default: mockUsersLoginLogService
+    default: mockUsersLoginLogService,
+    onUserLogin: () => () => TE.of(true),
   };
 });
 
@@ -98,7 +99,7 @@ describe("Success app start", () => {
       allowSessionHandleIPSourceRange: [aValidCIDR],
       allowZendeskIPSourceRange: [aValidCIDR],
       authenticationBasePath: "",
-      env: NodeEnvironmentEnum.PRODUCTION
+      env: NodeEnvironmentEnum.PRODUCTION,
     });
   });
 
@@ -109,9 +110,7 @@ describe("Success app start", () => {
   describe("Test redirect to HTTPS", () => {
     // test case: ping. Cannot fail.
     it("should 200 and ok if pinged", () => {
-      return request(app)
-        .get("/ping")
-        .expect(200, "ok");
+      return request(app).get("/ping").expect(200, "ok");
     });
 
     // test case: https forced. Already set: it trust the proxy and accept the header: X-Forwarded-Proto.
@@ -124,10 +123,7 @@ describe("Success app start", () => {
 
     // test case: https forced. If proxy hasn't set X-Forwarded-Proto it should be forwarded to https.
     it("should respond 301 if forwarded from an HTTP connection", () => {
-      return request(app)
-        .get("/")
-        .expect(301)
-        .expect("Location", /https/);
+      return request(app).get("/").expect(301).expect("Location", /https/);
     });
   });
 
@@ -203,7 +199,7 @@ describe("Failure app start", () => {
         allowSessionHandleIPSourceRange: [aValidCIDR],
         allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
       });
     } catch (err) {
       expect(mockFetchIdpsMetadata).toBeCalledTimes(3);
@@ -237,7 +233,7 @@ describe("Failure app start", () => {
         allowSessionHandleIPSourceRange: [aValidCIDR],
         allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(1);
@@ -271,7 +267,7 @@ describe("Failure app start", () => {
         allowSessionHandleIPSourceRange: [aValidCIDR],
         allowZendeskIPSourceRange: [aValidCIDR],
         authenticationBasePath: "",
-        env: NodeEnvironmentEnum.PRODUCTION
+        env: NodeEnvironmentEnum.PRODUCTION,
       });
     } catch (err) {
       expect(mockNotificationService).toBeCalledTimes(2);

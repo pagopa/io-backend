@@ -112,6 +112,7 @@ export const SpidUser = t.intersection([
     dateOfBirth: t.string,
     familyName: t.string,
     fiscalNumber: FiscalCode,
+    getAcsOriginalRequest: t.Function,
     getAssertionXml: t.Function,
     getSamlResponseXml: t.Function,
     issuer: Issuer,
@@ -182,6 +183,7 @@ export function exactUserIdentityDecode(
 const SpidObject = t.intersection([
   t.interface({
     fiscalNumber: t.string,
+    getAcsOriginalRequest: t.Function,
     getAssertionXml: t.Function,
     getSamlResponseXml: t.Function,
   }),

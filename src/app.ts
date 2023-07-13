@@ -127,7 +127,9 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
-import UsersLoginLogService from "./services/usersLoginLogService";
+import UsersLoginLogService, {
+  onUserLogin,
+} from "./services/usersLoginLogService";
 import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
@@ -505,6 +507,7 @@ export async function newApp({
             PROFILE_SERVICE,
             notificationServiceFactory,
             USERS_LOGIN_LOG_SERVICE,
+            onUserLogin(API_CLIENT),
             TEST_LOGIN_FISCAL_CODES,
             FF_USER_AGE_LIMIT_ENABLED,
             {
@@ -1523,7 +1526,11 @@ function registerAuthenticationRoutes(
         `${authBasePath}/test-login`,
         localAuth,
         toExpressHandler(
-          (req) => acsController.acsTest(req.user),
+          (req) =>
+            acsController.acsTest({
+              ...req.user,
+              getAcsOriginalRequest: () => req,
+            }),
           acsController
         )
       );

@@ -918,9 +918,9 @@
     prettier "^2.6.2"
 
 "@pagopa/io-functions-app-sdk@x":
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-4.5.2.tgz#17e30663f012e89dc4203020c3a39d7f47745969"
-  integrity sha512-xrgfW9qCOBnU16Gr1C2FMd/dxciMKhxuu3NvuqzENDUqv7bbJzbRwWTVnrgJ4IPwsrUBjyEDWQxK6p9n+uJfRA==
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-functions-app-sdk/-/io-functions-app-sdk-5.0.0.tgz#e7acac7d3e04474d10fcabcccd1bef67525a81db"
+  integrity sha512-rZBQEiPJBQItFGzyGqeko0tCmka4wD4rfv4xZnesQ7H5B5Xs3Kh0H6AWpicQhv+nbq9mYn9SOlSHlOmS+wp0HQ==
   dependencies:
     "@pagopa/ts-commons" "^10.0.0"
     fp-ts "^2.10.5"
@@ -971,10 +971,10 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^13.1.0":
-  version "13.1.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.1.0.tgz#a470eef4869e318085710528a6f9d080377b9737"
-  integrity sha512-doiXA3pEXWbENCu6jYqgThlAIhGAKgsI9oIsRGBXWSQBY4JgG/vn9OnrtWArNgKBdxzyWY5kA+EqFu0C8AhI5Q==
+"@pagopa/io-spid-commons@^13.2.0":
+  version "13.2.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.2.0.tgz#701632eab25e23e38ca47432b40ed7453ac6adad"
+  integrity sha512-GeWcl5hov9WFHjt4+PWvldfWJ12xJokf0XBIe9XrSUVq3r+teP2K/YgAFvUIAp6x2XyIKndpcIBq34qATo+75A==
   dependencies:
     "@pagopa/ts-commons" "^12.0.0"
     "@xmldom/xmldom" "^0.8.7"
@@ -1009,21 +1009,7 @@
     write-yaml-file "^4.1.3"
     yargs "^15.0.1"
 
-"@pagopa/ts-commons@^10.0.0":
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.2.0.tgz#ac4c65f2d24f8d2c427ab5e7fcb88732976800ef"
-  integrity sha512-Uq+rmMR1+QvDZUUZeka/KaPVJaUeL3UHcPjVmHncSjAFQczL2mcAC9AadtY3cHiI+eQ0Mw2exjj4HOaABC2KAA==
-  dependencies:
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.1.4"
-    applicationinsights "^1.8.10"
-    fp-ts "^2.11.0"
-    io-ts "^2.2.16"
-    json-set-map "^1.1.2"
-    node-fetch "^2.6.0"
-    validator "^10.1.0"
-
-"@pagopa/ts-commons@^10.15.0":
+"@pagopa/ts-commons@^10.0.0", "@pagopa/ts-commons@^10.15.0":
   version "10.15.0"
   resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-10.15.0.tgz#8e3030a2ebc16c3edb5ef99962c6e8d534826957"
   integrity sha512-MTmD0geIN9L9vnEYjPTE7v6Bu+IRTFMre+3K4LWYjy1AaRmYcpSrc9HTZgyCRW8uLCvw1BmDKcKtSiETM817kw==
@@ -1766,12 +1752,12 @@ agent-base@6:
     debug "4"
 
 agentkeepalive@^4.1.4:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.2.1.tgz#a7975cbb9f83b367f06c90cc51ff28fe7d499717"
-  integrity sha512-Zn4cw2NEqd+9fiSVWMscnjyQ1a8Yfoc5oBajLeo5w+YBHgDUcEBY2hS4YpTz6iN5f/2zQiktcuM6tS8x1p9dpA==
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.3.0.tgz#bb999ff07412653c1803b3ced35e50729830a255"
+  integrity sha512-7Epl1Blf4Sy37j4v9f9FjICCh4+KAQOyXgHEwlyBiAQLbhKdq/i2QQU3amQalS/wPhdPzDXPL5DMR5bkn+YeWg==
   dependencies:
     debug "^4.1.0"
-    depd "^1.1.2"
+    depd "^2.0.0"
     humanize-ms "^1.2.1"
 
 ajv@^6.10.0, ajv@^6.12.4, ajv@^6.5.5:
@@ -2732,12 +2718,12 @@ delayed-stream@~1.0.0:
   resolved "https://registry.yarnpkg.com/delayed-stream/-/delayed-stream-1.0.0.tgz#df3ae199acadfb7d440aaae0b29e2272b24ec619"
   integrity sha1-3zrhmayt+31ECqrgsp4icrJOxhk=
 
-depd@2.0.0, depd@~2.0.0:
+depd@2.0.0, depd@^2.0.0, depd@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/depd/-/depd-2.0.0.tgz#b696163cc757560d09cf22cc8fad1571b79e76df"
   integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
 
-depd@^1.1.2, depd@~1.1.2:
+depd@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
   integrity sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==
@@ -3588,9 +3574,9 @@ fp-ts@2.14.0:
   integrity sha512-QLagLSYAgMA00pZzUzeksH/78Sd14y7+Gc2A8Yaja3/IpGOFMdm/gYBuDMxYqLsJ58iT5lz+bJb953RAeFfp1A==
 
 fp-ts@^2.10.5, fp-ts@^2.11.0:
-  version "2.13.1"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.13.1.tgz#1bf2b24136cca154846af16752dc29e8fa506f2a"
-  integrity sha512-0eu5ULPS2c/jsa1lGFneEFFEdTbembJv8e4QKXeVJ3lm/5hyve06dlKZrpxmMwJt6rYen7sxmHHK2CLaXvWuWQ==
+  version "2.16.0"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.16.0.tgz#64e03314dfc1c7ce5e975d3496ac14bc3eb7f92e"
+  integrity sha512-bLq+KgbiXdTEoT1zcARrWEpa5z6A/8b7PcDW7Gef3NSisQ+VS7ll2Xbf1E+xsgik0rWub/8u0qP/iTTjj+PhxQ==
 
 fresh@0.5.2:
   version "0.5.2"
@@ -5475,9 +5461,9 @@ node-fetch@^2.2.0, node-fetch@^2.6.1:
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
 node-fetch@^2.6.0:
-  version "2.6.9"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.9.tgz#7c7f744b5cc6eb5fd404e0c7a9fec630a55657e6"
-  integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
+  version "2.6.12"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.12.tgz#02eb8e22074018e3d5a83016649d04df0e348fba"
+  integrity sha512-C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==
   dependencies:
     whatwg-url "^5.0.0"
 
@@ -7422,7 +7408,7 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-validator@^10.0.0, validator@^10.1.0, validator@^10.8.0:
+validator@^10.0.0, validator@^10.8.0:
   version "10.11.0"
   resolved "https://registry.yarnpkg.com/validator/-/validator-10.11.0.tgz#003108ea6e9a9874d31ccc9e5006856ccd76b228"
   integrity sha512-X/p3UZerAIsbBfN/IwahhYaBbY68EN/UQBWHtsbXGT5bfrH/p4NQzUCG1kF/rtKaNpnJ7jAu6NGTdSNtyNIXMw==
