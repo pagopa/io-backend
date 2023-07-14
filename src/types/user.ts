@@ -15,6 +15,7 @@ import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
 import { flow, pipe } from "fp-ts/lib/function";
+import { Issuer } from "@pagopa/io-spid-commons/dist/config";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
@@ -25,7 +26,6 @@ import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
-import { Issuer } from "./issuer";
 import { isSpidL } from "./spidLevel";
 import {
   BPDToken,

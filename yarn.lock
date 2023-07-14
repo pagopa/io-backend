@@ -971,10 +971,8 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
-"@pagopa/io-spid-commons@^13.2.0":
+"@pagopa/io-spid-commons@../io-spid-commons":
   version "13.2.0"
-  resolved "https://registry.yarnpkg.com/@pagopa/io-spid-commons/-/io-spid-commons-13.2.0.tgz#701632eab25e23e38ca47432b40ed7453ac6adad"
-  integrity sha512-GeWcl5hov9WFHjt4+PWvldfWJ12xJokf0XBIe9XrSUVq3r+teP2K/YgAFvUIAp6x2XyIKndpcIBq34qATo+75A==
   dependencies:
     "@pagopa/ts-commons" "^12.0.0"
     "@xmldom/xmldom" "^0.8.7"

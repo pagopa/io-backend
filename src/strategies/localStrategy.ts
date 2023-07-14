@@ -2,6 +2,10 @@ import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as passport from "passport";
 import { Strategy } from "passport-local";
 import { SpidUser } from "src/types/user";
+import {
+  Issuer,
+  SPID_IDP_IDENTIFIERS,
+} from "@pagopa/io-spid-commons/dist/config";
 import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
 
 /**
@@ -28,7 +32,7 @@ export const localStrategy = (
         getAcsOriginalRequest: () => req,
         getAssertionXml: () => "<xml></xml>",
         getSamlResponseXml: () => "<xml></xml>",
-        issuer: "IO",
+        issuer: Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer,
         name: "Mario",
       };
       return done(null, testUser);
