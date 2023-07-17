@@ -988,7 +988,7 @@ describe("AuthenticationController#acs", () => {
 
       expect(res.redirect).toHaveBeenCalledWith(
         301,
-        "/profile.html?token=" + mockSessionToken
+        "https://localhost/profile.html?token=" + mockSessionToken
       );
     }
   );
@@ -1001,7 +1001,7 @@ describe("AuthenticationController#acs", () => {
     const CIE_IDP_IDENTIFIERS_KEYS = Object.keys(CIE_IDP_IDENTIFIERS);
 
     const prodUrlFilter = CIE_IDP_IDENTIFIERS_KEYS.filter(
-      k =>
+      (k) =>
         k ===
         "https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"
     );
