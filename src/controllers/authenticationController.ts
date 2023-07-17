@@ -45,7 +45,11 @@ import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
-import { IDP_NAMES, Issuer } from "@pagopa/io-spid-commons/dist/config";
+import {
+  IDP_NAMES,
+  Issuer,
+  CIE_IDP_IDENTIFIERS,
+} from "@pagopa/io-spid-commons/dist/config";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
@@ -92,7 +96,6 @@ import {
   internalErrorOrIoLoginRedirect,
   getIsUserElegibleForIoLoginUrlScheme,
 } from "../utils/ioLoginUriScheme";
-import { CIE_IDP_IDENTIFIERS } from "@pagopa/io-spid-commons/dist/config";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
