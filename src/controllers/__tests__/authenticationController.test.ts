@@ -66,9 +66,17 @@ import {
 import * as authCtrl from "../authenticationController";
 import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
 import { LoginTypeEnum } from "../../utils/fastLogin";
+import {
+  IDP_NAMES,
+  Issuer,
+  SPID_IDP_IDENTIFIERS,
+} from "@pagopa/io-spid-commons/dist/config";
 
 const req = mockReq();
 req.ip = "127.0.0.2";
+
+const aValidEntityID = Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer;
+const expectedIdPName = IDP_NAMES[aValidEntityID];
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -76,7 +84,7 @@ const validUserPayload = {
   email: aSpidEmailAddress,
   familyName: aValidFamilyname,
   fiscalNumber: aFiscalCode,
-  issuer: "xxx",
+  issuer: aValidEntityID,
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
   getAcsOriginalRequest: () => req,
@@ -90,7 +98,7 @@ const invalidUserPayload = {
   getAcsOriginalRequest: () => undefined,
   getAssertionXml: () => "",
   getSamlResponseXml: () => "",
-  issuer: "xxx",
+  issuer: aValidEntityID,
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
 };
@@ -206,7 +214,7 @@ const expectedUserLoginData = {
   email: mockedInitializedProfile.email,
   family_name: mockedInitializedProfile.family_name,
   fiscal_code: mockedInitializedProfile.fiscal_code,
-  identity_provider: validUserPayload.issuer ?? "cie",
+  identity_provider: expectedIdPName,
   // TODO change
   ip_address: "127.0.0.2",
   name: mockedInitializedProfile.name,

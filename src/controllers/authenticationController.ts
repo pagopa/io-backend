@@ -44,6 +44,7 @@ import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
+import { IDP_NAMES, Issuer } from "@pagopa/io-spid-commons/dist/config";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
@@ -566,7 +567,12 @@ export default class AuthenticationController {
           email: userEmail,
           family_name: user.family_name,
           fiscal_code: user.fiscal_code,
-          identity_provider: spidUser.issuer ?? "cie",
+          identity_provider: pipe(
+            Issuer.decode(spidUser.issuer),
+            E.map((issuer) => IDP_NAMES[issuer]),
+            E.chainW(E.fromNullable(null)),
+            E.getOrElse(() => "Sconosciuto")
+          ),
           ip_address: pipe(
             errorOrUserIp,
             // we've already checked errorOrUserIp, this will never happen

@@ -258,6 +258,13 @@ const maybeSpidTestenvOption = pipe(
   }))
 );
 
+/**
+ * Boolean value that is `true` if some test issuer was provided in configuration.
+ * When equals to `false` enable strict validation of the Issuer value retrieved from the SpidUser.
+ */
+export const ALLOWED_TEST_ISSUER =
+  O.isSome(maybeSpidValidatorUrlOption) || O.isSome(maybeSpidTestenvOption);
+
 // Set default idp metadata refresh time to 7 days
 export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 7;
 export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env

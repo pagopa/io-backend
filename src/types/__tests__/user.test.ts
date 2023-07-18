@@ -5,7 +5,10 @@
 import * as E from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { Issuer } from "../issuer";
+import {
+  Issuer,
+  SPID_IDP_IDENTIFIERS,
+} from "@pagopa/io-spid-commons/dist/config";
 import {
   extractUserFromJson,
   toAppUser,
@@ -22,7 +25,7 @@ import {
   mockZendeskToken,
 } from "../../__mocks__/user_mock";
 
-const anIssuer = "onelogin_saml" as Issuer;
+const anIssuer = Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
 
