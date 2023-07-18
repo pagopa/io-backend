@@ -15,6 +15,7 @@ import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
 import { flow, pipe } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Issuer } from "@pagopa/io-spid-commons/dist/config";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
@@ -26,6 +27,7 @@ import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
+import { ALLOWED_TEST_ISSUER } from "../config";
 import { isSpidL } from "./spidLevel";
 import {
   BPDToken,
@@ -115,7 +117,9 @@ export const SpidUser = t.intersection([
     getAcsOriginalRequest: t.Function,
     getAssertionXml: t.Function,
     getSamlResponseXml: t.Function,
-    issuer: Issuer,
+    // The allowed issuer must include development Issuer
+    // and Spid SAML Check even in production if provided in config.
+    issuer: ALLOWED_TEST_ISSUER ? NonEmptyString : Issuer,
     name: t.string,
   }),
   t.partial({
