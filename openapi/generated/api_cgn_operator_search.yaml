@@ -180,6 +180,9 @@ definitions:
       - id
       - name
       - discounts
+      - supportType
+      - supportValue
+      - allNationalAddresses
     properties:
       id:
         type: string
@@ -191,6 +194,11 @@ definitions:
         type: string
         minLength: 1
       websiteUrl:
+        type: string
+        minLength: 1
+      supportType:
+        $ref: '#/definitions/SupportType'
+      supportValue:
         type: string
         minLength: 1
       discountCodeType:
@@ -206,6 +214,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Address'
+      allNationalAddresses:
+        type: boolean
+  SupportType:
+    type: string
+    enum:
+      - WEBSITE
+      - PHONENUMBER
+      - EMAILADDRESS
   DiscountCodeType:
     type: string
     enum:
