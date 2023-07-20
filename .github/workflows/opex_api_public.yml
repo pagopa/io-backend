@@ -5,8 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - demo
-      # - master
+      - master
     paths:
       - 'api_public.yaml'
       - '.github/workflows/opex_api_public.yml'
