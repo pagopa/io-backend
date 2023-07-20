@@ -953,9 +953,11 @@ describe("AuthenticationController#acs", () => {
   });
 
   it.each`
-    title                                   | fiscalNumber                     | issuer
-    ${"if a CIE TEST user is in whitelist"} | ${validUserPayload.fiscalNumber} | ${Object.keys(CIE_IDP_IDENTIFIERS)[0]}
-    ${"if a user logs to PROD CIE IDP"}     | ${anotherFiscalCode}             | ${Object.keys(CIE_IDP_IDENTIFIERS)[1]}
+    title                                        | fiscalNumber                     | issuer
+    ${"if a CIE TEST user is in whitelist"}      | ${validUserPayload.fiscalNumber} | ${Object.keys(CIE_IDP_IDENTIFIERS)[0]}
+    ${"if a user logs to PROD CIE IDP"}          | ${anotherFiscalCode}             | ${Object.keys(CIE_IDP_IDENTIFIERS)[1]}
+    ${"if a user logs to another IDP"}           | ${anotherFiscalCode}             | ${"https://id.eht.eu"}
+    ${"if  a CIE TEST user logs to another IDP"} | ${validUserPayload.fiscalNumber} | ${"https://id.eht.eu"}
   `(
     "should redirect to success URL $title",
     async ({ fiscalNumber, issuer }) => {
