@@ -91,13 +91,15 @@ paths:
           schema:
             $ref: "#/definitions/SAMLResponse"
       responses:
-        "200":
-          description: Access token
         "301":
           description: Redirect to home page
           headers:
             Location:
               type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
 
 definitions:
   FiscalCode:
@@ -162,7 +164,7 @@ parameters:
     name: entityID
     in: query
     type: string
-    enum: 
+    enum:
       - lepidaid
       - infocertid
       - sielteid
