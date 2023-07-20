@@ -52,7 +52,7 @@ jobs:
           fetch-depth: 0
 
       # from https://github.com/pagopa/opex-dashboard-azure-action/
-      - uses: pagopa/opex-dashboard-azure-action@v1.1.0
+      - uses: pagopa/opex-dashboard-azure-action@v1.1.2
         with:
           environment: ${{ matrix.environment }}
           api-name: ${{ env.API_NAME }}
@@ -61,4 +61,4 @@ jobs:
           tenant-id: ${{ env.TENANT_ID }}
           subscription-id: ${{ env.SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
-          docker-version: sha256:7e454c1892b2aaf3717782c07a2fa01504db5cc7d07979fae863dfc00a9f0173
+          docker-version: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
