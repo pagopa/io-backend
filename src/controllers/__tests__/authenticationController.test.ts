@@ -70,6 +70,7 @@ import {
   IDP_NAMES,
   Issuer,
   SPID_IDP_IDENTIFIERS,
+  CIE_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
 
 const req = mockReq();
@@ -102,6 +103,8 @@ const invalidUserPayload = {
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
 };
+
+const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
 
 const anErrorResponse = {
   detail: undefined,
@@ -288,6 +291,7 @@ const controller = new AuthenticationController(
   tokenDurationSecs as Second,
   lvTokenDurationSecs as Second,
   lvLongSessionDurationSecs as Second,
+  [validUserPayload.fiscalNumber],
   mockTelemetryClient
 );
 
@@ -309,6 +313,7 @@ const lollipopActivatedController = new AuthenticationController(
   tokenDurationSecs as Second,
   lvTokenDurationSecs as Second,
   lvLongSessionDurationSecs as Second,
+  [validUserPayload.fiscalNumber],
   mockTelemetryClient
 );
 
@@ -931,6 +936,85 @@ describe("AuthenticationController#acs", () => {
       );
     }
   );
+
+  it("should return unauthorized using a CIE test environment with no whitelisted user fiscalcode", async () => {
+    const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
+    const res = mockRes();
+    const anInvalidCieTestUser = {
+      ...validUserPayload,
+      fiscalNumber: anotherFiscalCode,
+      issuer: Object.keys(CIE_IDP_IDENTIFIERS)[0],
+    };
+
+    const response = await controller.acs(anInvalidCieTestUser);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it.each`
+    title                                        | fiscalNumber                     | issuer
+    ${"if a CIE TEST user is in whitelist"}      | ${validUserPayload.fiscalNumber} | ${Object.keys(CIE_IDP_IDENTIFIERS)[0]}
+    ${"if a user logs to PROD CIE IDP"}          | ${anotherFiscalCode}             | ${Object.keys(CIE_IDP_IDENTIFIERS)[1]}
+    ${"if a user logs to another IDP"}           | ${anotherFiscalCode}             | ${"https://id.eht.eu"}
+    ${"if  a CIE TEST user logs to another IDP"} | ${validUserPayload.fiscalNumber} | ${"https://id.eht.eu"}
+  `(
+    "should redirect to success URL $title",
+    async ({ fiscalNumber, issuer }) => {
+      const res = mockRes();
+      const whitelistedCieTestUserPayload = {
+        ...validUserPayload,
+        fiscalNumber,
+        issuer,
+      };
+
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
+
+      mockGetProfile.mockReturnValue(
+        ResponseErrorNotFound("Not Found.", "Profile not found")
+      );
+      mockCreateProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+      const response = await controller.acs(whitelistedCieTestUserPayload);
+      response.apply(res);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        "https://localhost/profile.html?token=" + mockSessionToken
+      );
+    }
+  );
+
+  // this test ensures CIE prod, coll and test URLs are present in the identifiers object.
+  // since in the authenticationcontroller we filter the keys based on the prod URL, we ensure here
+  // that at least coll and test URLs are in the array, to let the logic work in the controller.
+  // instead, if the order of the keys changes, the unit tests above should fail when the library is updated
+  it("should verify that the CIE_IDP_IDENTIFIERS urls are present", () => {
+    const CIE_IDP_IDENTIFIERS_KEYS = Object.keys(CIE_IDP_IDENTIFIERS);
+
+    const prodUrlFilter = CIE_IDP_IDENTIFIERS_KEYS.filter(
+      (k) =>
+        k ===
+        "https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"
+    );
+
+    // expect prod url to be present
+    expect(prodUrlFilter.length).toBe(1);
+    // expect at least test and coll urls to be present
+    expect(
+      CIE_IDP_IDENTIFIERS_KEYS.length - prodUrlFilter.length
+    ).toBeGreaterThanOrEqual(2);
+  });
 });
 
 describe("AuthenticationController|>LV|>acs", () => {

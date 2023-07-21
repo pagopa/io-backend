@@ -164,6 +164,7 @@ const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
+const CIE_TEST_METADATA_URL = process.env.CIE_TEST_METADATA_URL;
 
 export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
   process.env.STARTUP_IDPS_METADATA,
@@ -295,6 +296,7 @@ export const serviceProviderConfig: IServiceProviderConfig = {
     attributes: ["email", "name", "familyName", "fiscalNumber", "dateOfBirth"],
     name: "IO - l'app dei servizi pubblici BETA",
   },
+  spidCieTestUrl: CIE_TEST_METADATA_URL,
   spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,
   spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
@@ -1046,4 +1048,19 @@ export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
   E.getOrElse((_) => "XYZ" as NonEmptyString)
+);
+
+export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
+  process.env.ALLOWED_CIE_TEST_FISCAL_CODES,
+  NonEmptyString.decode,
+  E.chain(CommaSeparatedListOf(FiscalCode).decode),
+  E.getOrElseW((errs) => {
+    log.warn(
+      `Missing or invalid ALLOWED_CIE_TEST_FISCAL_CODES environment variable: ${readableReport(
+        errs
+      )}`
+    );
+
+    return [] as ReadonlyArray<FiscalCode>;
+  })
 );

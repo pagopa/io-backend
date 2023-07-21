@@ -91,6 +91,10 @@ import {
   internalErrorOrIoLoginRedirect,
   getIsUserElegibleForIoLoginUrlScheme,
 } from "../utils/ioLoginUriScheme";
+import {
+  getIsUserElegibleForCIETestEnv,
+  isCIETestEnvLogin,
+} from "../utils/cie";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
@@ -139,6 +143,7 @@ export default class AuthenticationController {
     private readonly standardTokenDurationSecs: Second,
     private readonly lvTokenDurationSecs: Second,
     private readonly lvLongSessionDurationSecs: Second,
+    private readonly allowedCieTestFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
@@ -170,6 +175,21 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrSpidUser.right;
+
+    // if the CIE test user is not in the whitelist we return
+    // with a not authorized
+    if (
+      isCIETestEnvLogin(spidUser.issuer) &&
+      !getIsUserElegibleForCIETestEnv(this.allowedCieTestFiscalCodes)(
+        spidUser.fiscalNumber
+      )
+    ) {
+      log.warn(
+        `unallowed CF tried to login on CIE TEST IDP, issuer: [%s]`,
+        spidUser.issuer
+      );
+      return ResponseErrorForbiddenNotAuthorized;
+    }
 
     if (
       this.hasUserAgeLimitEnabled &&
