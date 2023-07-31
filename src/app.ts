@@ -1625,7 +1625,7 @@ function registerFirstLollipopConsumer(
   app.post(
     `${basePath}/sign`,
     bearerSessionTokenAuth,
-    expressLollipopMiddlewareLegacy(lollipopClient, sessionStorage),
+    expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
   );
 }
