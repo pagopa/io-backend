@@ -15,6 +15,8 @@ import { IResponseErrorValidation } from "@pagopa/ts-commons/lib/responses";
 import { DOMParser } from "xmldom";
 
 import { flow, pipe } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { Issuer } from "@pagopa/io-spid-commons/dist/config";
 import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { FiscalCode } from "../../generated/backend/FiscalCode";
 import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
@@ -25,7 +27,7 @@ import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { formatDate } from "../utils/date";
 import { log } from "../utils/logger";
 import { withValidatedOrValidationError } from "../utils/responses";
-import { Issuer } from "./issuer";
+import { ALLOWED_TEST_ISSUER } from "../config";
 import { isSpidL } from "./spidLevel";
 import {
   BPDToken,
@@ -57,6 +59,8 @@ export const UserWithoutTokens = t.intersection([
     spid_idp: t.string,
   }),
 ]);
+export type UserWithoutTokens = t.TypeOf<typeof UserWithoutTokens>;
+
 const RequiredUserTokensV1 = t.interface({
   session_token: SessionToken,
   wallet_token: WalletToken,
@@ -110,9 +114,12 @@ export const SpidUser = t.intersection([
     dateOfBirth: t.string,
     familyName: t.string,
     fiscalNumber: FiscalCode,
+    getAcsOriginalRequest: t.Function,
     getAssertionXml: t.Function,
     getSamlResponseXml: t.Function,
-    issuer: Issuer,
+    // The allowed issuer must include development Issuer
+    // and Spid SAML Check even in production if provided in config.
+    issuer: ALLOWED_TEST_ISSUER ? NonEmptyString : Issuer,
     name: t.string,
   }),
   t.partial({
@@ -180,6 +187,7 @@ export function exactUserIdentityDecode(
 const SpidObject = t.intersection([
   t.interface({
     fiscalNumber: t.string,
+    getAcsOriginalRequest: t.Function,
     getAssertionXml: t.Function,
     getSamlResponseXml: t.Function,
   }),
@@ -287,6 +295,15 @@ export const withUserFromRequest = async <T>(
   f: (user: User) => Promise<T>
 ): Promise<IResponseErrorValidation | T> =>
   withValidatedOrValidationError(User.decode(req.user), f);
+
+export const withOptionalUserFromRequest = async <T>(
+  req: express.Request,
+  f: (user: O.Option<User>) => Promise<T>
+): Promise<IResponseErrorValidation | T> =>
+  withValidatedOrValidationError(
+    req.user ? pipe(User.decode(req.user), E.map(O.some)) : E.right(O.none),
+    f
+  );
 
 /**
  * Extracts a user from a json string.

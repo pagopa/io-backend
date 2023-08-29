@@ -59,7 +59,9 @@ export default class CgnService {
         );
 
       return withValidatedOrInternalError(validated, (response) =>
-        this.mapResponse<PublishedProductCategoriesResult>(response)
+        this.mapResponse<PublishedProductCategoriesResult>(
+          response as ClientResponses<PublishedProductCategoriesResult>
+        )
       );
     });
 
@@ -75,7 +77,7 @@ export default class CgnService {
       });
 
       return withValidatedOrInternalError(validated, (response) =>
-        this.mapResponse<Merchant>(response)
+        this.mapResponse<Merchant>(response as ClientResponses<Merchant>)
       );
     });
 
@@ -93,7 +95,9 @@ export default class CgnService {
         });
 
       return withValidatedOrInternalError(validated, (response) =>
-        this.mapResponse<OnlineMerchants>(response)
+        this.mapResponse<OnlineMerchants>(
+          response as ClientResponses<OnlineMerchants>
+        )
       );
     });
 
@@ -111,7 +115,9 @@ export default class CgnService {
         });
 
       return withValidatedOrInternalError(validated, (response) =>
-        this.mapResponse<OfflineMerchants>(response)
+        this.mapResponse<OfflineMerchants>(
+          response as ClientResponses<OfflineMerchants>
+        )
       );
     });
 
@@ -128,7 +134,9 @@ export default class CgnService {
         });
 
       return withValidatedOrInternalError(validated, (response) =>
-        this.mapResponse<DiscountBucketCode>(response)
+        this.mapResponse<DiscountBucketCode>(
+          response as ClientResponses<DiscountBucketCode>
+        )
       );
     });
 

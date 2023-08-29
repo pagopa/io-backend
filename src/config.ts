@@ -32,7 +32,10 @@ import {
   setFetchTimeout,
   toFetch,
 } from "@pagopa/ts-commons/lib/fetch";
-import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IntegerFromString,
+  NonNegativeIntegerFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import { Millisecond, Second } from "@pagopa/ts-commons/lib/units";
@@ -60,6 +63,7 @@ import { FeatureFlag, FeatureFlagEnum } from "./utils/featureFlag";
 import { CommaSeparatedListOf } from "./utils/separated-list";
 import { LollipopApiClient } from "./clients/lollipop";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
 
 // Without this, the environment variables loaded by dotenv aren't available in
 // this file.
@@ -160,6 +164,7 @@ const SPID_TESTENV_URL = process.env.SPID_TESTENV_URL;
 // Register the spidStrategy.
 export const IDP_METADATA_URL = getRequiredENVVar("IDP_METADATA_URL");
 const CIE_METADATA_URL = getRequiredENVVar("CIE_METADATA_URL");
+const CIE_TEST_METADATA_URL = process.env.CIE_TEST_METADATA_URL;
 
 export const STARTUP_IDPS_METADATA: Record<string, string> | undefined = pipe(
   process.env.STARTUP_IDPS_METADATA,
@@ -254,6 +259,13 @@ const maybeSpidTestenvOption = pipe(
   }))
 );
 
+/**
+ * Boolean value that is `true` if some test issuer was provided in configuration.
+ * When equals to `false` enable strict validation of the Issuer value retrieved from the SpidUser.
+ */
+export const ALLOWED_TEST_ISSUER =
+  O.isSome(maybeSpidValidatorUrlOption) || O.isSome(maybeSpidTestenvOption);
+
 // Set default idp metadata refresh time to 7 days
 export const DEFAULT_IDP_METADATA_REFRESH_INTERVAL_SECONDS = 3600 * 24 * 7;
 export const IDP_METADATA_REFRESH_INTERVAL_SECONDS: number = process.env
@@ -284,6 +296,7 @@ export const serviceProviderConfig: IServiceProviderConfig = {
     attributes: ["email", "name", "familyName", "fiscalNumber", "dateOfBirth"],
     name: "IO - l'app dei servizi pubblici BETA",
   },
+  spidCieTestUrl: CIE_TEST_METADATA_URL,
   spidCieUrl: CIE_METADATA_URL,
   spidTestEnvUrl: SPID_TESTENV_URL,
   spidValidatorUrl: process.env.SPID_VALIDATOR_URL,
@@ -495,6 +508,12 @@ export const FIRST_LOLLIPOP_CONSUMER_CLIENT = FirstLollipopConsumerClient(
   LOLLIPOP_API_URL
 );
 
+export const FAST_LOGIN_API_KEY = getRequiredENVVar("FAST_LOGIN_API_KEY");
+export const FAST_LOGIN_API_URL = getRequiredENVVar("FAST_LOGIN_API_URL");
+
+export const FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT =
+  getFastLoginLollipopConsumerClient(FAST_LOGIN_API_KEY, FAST_LOGIN_API_URL);
+
 export const CGN_OPERATOR_SEARCH_API_KEY = getRequiredENVVar(
   "CGN_OPERATOR_SEARCH_API_KEY"
 );
@@ -590,6 +609,27 @@ export const tokenDurationSecs: number = process.env.TOKEN_DURATION_IN_SECONDS
   ? parseInt(process.env.TOKEN_DURATION_IN_SECONDS, 10)
   : DEFAULT_TOKEN_DURATION_IN_SECONDS;
 log.info("Session token duration set to %s seconds", tokenDurationSecs);
+
+// Set default LV token duration
+const DEFAULT_LV_TOKEN_DURATION_IN_SECONDS = 60 * 15;
+export const lvTokenDurationSecs: number = pipe(
+  process.env.LV_TOKEN_DURATION_IN_SECONDS,
+  NonNegativeIntegerFromString.decode,
+  E.getOrElse(() => DEFAULT_LV_TOKEN_DURATION_IN_SECONDS)
+);
+log.info("LV Session token duration set to %s seconds", lvTokenDurationSecs);
+
+// Set default LV session duration
+const DEFAULT_LV_LONG_SESSION_DURATION_IN_SECONDS = 3600 * 24 * 365;
+export const lvLongSessionDurationSecs: number = pipe(
+  process.env.LV_LONG_SESSION_DURATION_IN_SECONDS,
+  NonNegativeIntegerFromString.decode,
+  E.getOrElse(() => DEFAULT_LV_LONG_SESSION_DURATION_IN_SECONDS)
+);
+log.info(
+  "LV Long Session duration set to %s seconds",
+  lvLongSessionDurationSecs
+);
 
 // HTTPs-only fetch with optional keepalive agent
 // @see https://github.com/pagopa/io-ts-commons/blob/master/src/agent.ts#L10
@@ -767,6 +807,21 @@ export const IOLOGIN_CANARY_USERS_SHA_REGEX = pipe(
   NonEmptyString.decode,
   // allow ~6% of users by default
   E.getOrElse(() => "^([(0-9)|(a-f)|(A-F)]{63}0)$" as NonEmptyString)
+);
+
+// LV FF variable
+export const FF_FAST_LOGIN = pipe(
+  process.env.FF_FAST_LOGIN,
+  FeatureFlag.decode,
+  E.getOrElseW(() => FeatureFlagEnum.NONE)
+);
+
+export const LV_TEST_USERS = pipe(
+  process.env.LV_TEST_USERS,
+  CommaSeparatedListOf(FiscalCode).decode,
+  E.getOrElseW((err) => {
+    throw new Error(`Invalid LV_TEST_USERS value: ${readableReport(err)}`);
+  })
 );
 
 // Support Token
@@ -993,4 +1048,19 @@ export const FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX = pipe(
   process.env.FF_ROUTING_PUSH_NOTIF_CANARY_SHA_USERS_REGEX,
   NonEmptyString.decode,
   E.getOrElse((_) => "XYZ" as NonEmptyString)
+);
+
+export const ALLOWED_CIE_TEST_FISCAL_CODES = pipe(
+  process.env.ALLOWED_CIE_TEST_FISCAL_CODES,
+  NonEmptyString.decode,
+  E.chain(CommaSeparatedListOf(FiscalCode).decode),
+  E.getOrElseW((errs) => {
+    log.warn(
+      `Missing or invalid ALLOWED_CIE_TEST_FISCAL_CODES environment variable: ${readableReport(
+        errs
+      )}`
+    );
+
+    return [] as ReadonlyArray<FiscalCode>;
+  })
 );

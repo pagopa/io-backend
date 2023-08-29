@@ -3,6 +3,8 @@ import { format as dateFnsFormat } from "date-fns";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
+import * as S from "fp-ts/lib/string";
+import * as A from "fp-ts/lib/Array";
 import { UTCISODateFromString } from "@pagopa/ts-commons/lib/dates";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
@@ -12,30 +14,110 @@ import {
   PatternString,
 } from "@pagopa/ts-commons/lib/strings";
 import { DOMParser } from "xmldom";
-import { pipe } from "fp-ts/lib/function";
-import { log } from "./logger";
+import { flow, pipe } from "fp-ts/lib/function";
+import { SpidLevel, SpidLevelEnum } from "../../generated/backend/SpidLevel";
+import { UserWithoutTokens } from "../types/user";
+import { EmailAddress } from "../../generated/backend/EmailAddress";
 import { base64EncodeObject } from "./messages";
+import { log } from "./logger";
+import { formatDate } from "./date";
 
 const SAML_NAMESPACE = {
   ASSERTION: "urn:oasis:names:tc:SAML:2.0:assertion",
   PROTOCOL: "urn:oasis:names:tc:SAML:2.0:protocol",
 };
 
-export const getFiscalNumberFromPayload = (
+export const getIssuerFromSAMLResponse: (
   doc: Document
-): O.Option<FiscalCode> =>
-  pipe(
-    O.fromNullable(
-      doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Attribute")
+) => O.Option<NonEmptyString> = flow(
+  (doc) =>
+    doc.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Issuer").item(0),
+  O.fromNullable,
+  O.chainNullableK((element) => element.textContent?.trim()),
+  O.chain((value) => O.fromEither(NonEmptyString.decode(value)))
+);
+
+export const getSpidLevelFromSAMLResponse: (
+  doc: Document
+) => O.Option<SpidLevelEnum> = flow(
+  (doc) =>
+    doc
+      .getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "AuthnContext")
+      .item(0),
+  O.fromNullable,
+  O.chainNullableK((element) => element.textContent?.trim()),
+  O.chain((value) => O.fromEither(SpidLevel.decode(value)))
+);
+
+export const getUserAttributeFromAssertion =
+  (attrName: string) =>
+  (SAMLResponse: Document): O.Option<NonEmptyString> =>
+    pipe(
+      Array.from(
+        SAMLResponse.getElementsByTagNameNS(
+          SAML_NAMESPACE.ASSERTION,
+          "Attribute"
+        )
+      ),
+      A.findFirst((element) => element.getAttribute("Name") === attrName),
+      O.chainNullableK((element) => element.textContent?.trim()),
+      O.chain((value) => O.fromEither(NonEmptyString.decode(value)))
+    );
+
+export const getFiscalNumberFromPayload: (
+  doc: Document
+) => O.Option<FiscalCode> = flow(
+  getUserAttributeFromAssertion("fiscalNumber"),
+  O.map(S.toUpperCase),
+  O.map((fiscalCode) =>
+    // Remove the international prefix from fiscal code.
+    fiscalCode.replace("TINIT-", "")
+  ),
+  O.chain((nationalFiscalCode) =>
+    O.fromEither(FiscalCode.decode(nationalFiscalCode))
+  )
+);
+
+export const getDateOfBirthFromAssertion: (
+  doc: Document
+) => O.Option<NonEmptyString> = getUserAttributeFromAssertion("dateOfBirth");
+
+export const getFamilyNameFromAssertion: (
+  doc: Document
+) => O.Option<NonEmptyString> = getUserAttributeFromAssertion("familyName");
+
+export const getNameFromAssertion: (doc: Document) => O.Option<NonEmptyString> =
+  getUserAttributeFromAssertion("name");
+
+export const getSpidEmailFromAssertion: (
+  doc: Document
+) => O.Option<EmailAddress> = flow(
+  getUserAttributeFromAssertion("email"),
+  O.chain((value) => O.fromEither(EmailAddress.decode(value)))
+);
+
+export const makeProxyUserFromSAMLResponse = (
+  doc: Document
+): t.Validation<UserWithoutTokens> => {
+  const proxyUserProperties = {
+    created_at: new Date().getTime(),
+    date_of_birth: pipe(
+      getDateOfBirthFromAssertion(doc),
+      O.map(formatDate),
+      O.toUndefined
     ),
-    O.chainNullableK((collection) =>
-      Array.from(collection).find(
-        (elem) => elem.getAttribute("Name") === "fiscalNumber"
-      )
+    family_name: pipe(getFamilyNameFromAssertion(doc), O.toUndefined),
+    fiscal_code: pipe(getFiscalNumberFromPayload(doc), O.toUndefined),
+    name: pipe(getNameFromAssertion(doc), O.toUndefined),
+    spid_email: pipe(getSpidEmailFromAssertion(doc), O.toUndefined),
+    spid_idp: pipe(getIssuerFromSAMLResponse(doc), O.toUndefined),
+    spid_level: pipe(
+      getSpidLevelFromSAMLResponse(doc),
+      O.getOrElse(() => SpidLevelEnum["https://www.spid.gov.it/SpidL2"])
     ),
-    O.chainNullableK((_) => _.textContent?.trim().replace("TINIT-", "")),
-    O.chain((_) => O.fromEither(FiscalCode.decode(_)))
-  );
+  };
+  return pipe(proxyUserProperties, UserWithoutTokens.decode);
+};
 
 const getRequestIDFromPayload =
   (tagName: string, attrName: string) =>

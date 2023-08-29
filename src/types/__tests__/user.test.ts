@@ -5,12 +5,15 @@
 import * as E from "fp-ts/lib/Either";
 import mockReq from "../../__mocks__/request";
 
-import { Issuer } from "../issuer";
+import {
+  Issuer,
+  SPID_IDP_IDENTIFIERS,
+} from "@pagopa/io-spid-commons/dist/config";
 import {
   extractUserFromJson,
   toAppUser,
   User,
-  validateSpidUser
+  validateSpidUser,
 } from "../user";
 import {
   mockBPDToken,
@@ -19,29 +22,30 @@ import {
   mockMyPortalToken,
   mockSessionToken,
   mockWalletToken,
-  mockZendeskToken
+  mockZendeskToken,
 } from "../../__mocks__/user_mock";
 
-const anIssuer = "onelogin_saml" as Issuer;
+const anIssuer = Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer;
 const SESSION_TOKEN_LENGTH_BYTES = 48;
 const SESSION_TOKEN_LENGTH_STRING = SESSION_TOKEN_LENGTH_BYTES * 2; // token is in hex bytes
 
 // mock for a valid SpidUser
-const mockedSpidUser: any = {
+const mockedSpidUser = {
   authnContextClassRef: mockedUser.spid_level,
   dateOfBirth: "2000-06-02",
   email: mockedUser.spid_email,
   familyName: mockedUser.family_name,
   fiscalNumber: mockedUser.fiscal_code,
+  getAcsOriginalRequest: () => mockReq(),
   getAssertionXml: () => "",
   getSamlResponseXml: () => "",
   issuer: anIssuer,
-  name: mockedUser.name
+  name: mockedUser.name,
 };
 
 // mock for a invalid SpidUser
 const mockedInvalidSpidUser: any = {
-  aKey: "aValue"
+  aKey: "aValue",
 };
 
 const mockSessionTrackingId = "324e25dcecebed6fewf2";

@@ -14,10 +14,20 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 import { CreatedMessageWithContentAndAttachments } from "generated/backend/CreatedMessageWithContentAndAttachments";
-import { IResponseErrorForbiddenNotAuthorized } from "@pagopa/ts-commons/lib/responses";
+import {
+  IResponseErrorForbiddenNotAuthorized,
+  ResponseErrorInternal,
+} from "@pagopa/ts-commons/lib/responses";
+import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/Either";
+import * as B from "fp-ts/boolean";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import NewMessagesService from "src/services/newMessagesService";
-import { withUserFromRequest } from "../types/user";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import { ThirdPartyConfigList } from "src/utils/thirdPartyConfig";
+import { User, withUserFromRequest } from "../types/user";
 
 import { MessageStatusChange } from "../../generated/io-messages-api/MessageStatusChange";
 import { MessageStatusAttributes } from "../../generated/io-messages-api/MessageStatusAttributes";
@@ -32,6 +42,11 @@ import {
   IResponseErrorNotImplemented,
   IResponseErrorUnsupportedMediaType,
 } from "../utils/responses";
+import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
+import { LollipopApiClient } from "../clients/lollipop";
+import { ISessionStorage } from "../services/ISessionStorage";
+import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
+import { checkIfLollipopIsEnabled } from "../utils/lollipop";
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
@@ -46,7 +61,12 @@ export const withGetThirdPartyAttachmentParams = async <T>(
 
 export default class MessagesController {
   // eslint-disable-next-line max-params
-  constructor(private readonly messageService: NewMessagesService) {}
+  constructor(
+    private readonly messageService: NewMessagesService,
+    private readonly lollipopClient: ReturnType<typeof LollipopApiClient>,
+    private readonly sessionStorage: ISessionStorage,
+    private readonly thirdPartyConfigList: ThirdPartyConfigList
+  ) {}
 
   /**
    * Returns the messages for the user identified by the provided fiscal code.
@@ -123,10 +143,71 @@ export default class MessagesController {
       )
     );
 
+  public readonly checkLollipopAndGetLocalsOrDefault = (
+    req: express.Request,
+    user: User,
+    messageId: NonEmptyString
+  ) =>
+    pipe(
+      this.messageService.getThirdPartyMessageFnApp(
+        user.fiscal_code,
+        messageId
+      ),
+      TE.bindTo("message"),
+      TE.bindW("hasLollipopEnabled", ({ message }) =>
+        pipe(
+          checkIfLollipopIsEnabled(
+            this.thirdPartyConfigList,
+            user.fiscal_code,
+            message.sender_service_id
+          ),
+          TE.mapLeft((e) =>
+            ResponseErrorInternal(
+              `Cannot define if Lollipop is enabled or not: ${e.name} | ${e.message}`
+            )
+          )
+        )
+      ),
+      TE.bindW("lollipopLocals", ({ hasLollipopEnabled }) =>
+        pipe(
+          hasLollipopEnabled,
+          B.matchW(
+            () => TE.of(undefined),
+            () =>
+              pipe(
+                t.exact(LollipopRequiredHeaders).decode(req.headers),
+                E.foldW(
+                  (e) =>
+                    TE.left(
+                      ResponseErrorInternal(
+                        `Bad request ${errorsToReadableMessages(e).join(" / ")}`
+                      )
+                    ),
+                  (lollipopHeaders) =>
+                    pipe(
+                      extractLollipopLocalsFromLollipopHeadersLegacy(
+                        this.lollipopClient,
+                        this.sessionStorage,
+                        user.fiscal_code,
+                        lollipopHeaders
+                      ),
+                      TE.mapLeft((_) =>
+                        ResponseErrorInternal(
+                          "Error extracting lollipop locals"
+                        )
+                      )
+                    )
+                )
+              )
+          )
+        )
+      )
+    );
+
   /**
    * Returns the precondition for the required third party message.
    */
-  public readonly getThirdPartyMessagePrecondition = (
+  public readonly getThirdPartyMessagePrecondition = async (
     req: express.Request
   ): Promise<
     | IResponseErrorInternal
@@ -141,10 +222,23 @@ export default class MessagesController {
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
         (messageId) =>
-          this.messageService.getThirdPartyMessagePrecondition(
-            user.fiscal_code,
-            messageId
-          )
+          pipe(
+            this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+            TE.chainW(({ message, lollipopLocals }) =>
+              TE.tryCatch(
+                () =>
+                  this.messageService.getThirdPartyMessagePrecondition(
+                    message,
+                    lollipopLocals as LollipopLocalsType
+                  ),
+                (_) =>
+                  ResponseErrorInternal(
+                    "Error getting preconditions from third party service"
+                  )
+              )
+            ),
+            TE.toUnion
+          )()
       )
     );
 
@@ -165,7 +259,23 @@ export default class MessagesController {
       withValidatedOrValidationError(
         NonEmptyString.decode(req.params.id),
         (messageId) =>
-          this.messageService.getThirdPartyMessage(user.fiscal_code, messageId)
+          pipe(
+            this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+            TE.chainW(({ message, lollipopLocals }) =>
+              TE.tryCatch(
+                () =>
+                  this.messageService.getThirdPartyMessage(
+                    message,
+                    lollipopLocals as LollipopLocalsType
+                  ),
+                (_) =>
+                  ResponseErrorInternal(
+                    "Error getting message from third party service"
+                  )
+              )
+            ),
+            TE.toUnion
+          )()
       )
     );
 
@@ -185,12 +295,25 @@ export default class MessagesController {
     | IResponseSuccessOctet<Buffer>
   > =>
     withUserFromRequest(req, (user) =>
-      withGetThirdPartyAttachmentParams(req, (messageId, attachmentUrl) =>
-        this.messageService.getThirdPartyAttachment(
-          user.fiscal_code,
-          messageId,
-          attachmentUrl
-        )
+      withGetThirdPartyAttachmentParams(req, async (messageId, attachmentUrl) =>
+        pipe(
+          this.checkLollipopAndGetLocalsOrDefault(req, user, messageId),
+          TE.chainW(({ message, lollipopLocals }) =>
+            TE.tryCatch(
+              () =>
+                this.messageService.getThirdPartyAttachment(
+                  message,
+                  attachmentUrl,
+                  lollipopLocals as LollipopLocalsType
+                ),
+              (_) =>
+                ResponseErrorInternal(
+                  "Error getting attachment from third party service"
+                )
+            )
+          ),
+          TE.toUnion
+        )()
       )
     );
 }

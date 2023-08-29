@@ -40,7 +40,7 @@ import ProfileService from "../../services/profileService";
 import RedisSessionStorage from "../../services/redisSessionStorage";
 import TokenService from "../../services/tokenService";
 import UsersLoginLogService from "../../services/usersLoginLogService";
-import { exactUserIdentityDecode, SpidUser } from "../../types/user";
+import { SpidUser, exactUserIdentityDecode } from "../../types/user";
 import AuthenticationController, {
   AGE_LIMIT,
   AGE_LIMIT_ERROR_CODE,
@@ -61,8 +61,23 @@ import {
   aLollipopAssertion,
   anAssertionRef,
   anotherAssertionRef,
+  lollipopData,
 } from "../../__mocks__/lollipop";
 import * as authCtrl from "../authenticationController";
+import { withoutUndefinedValues } from "@pagopa/ts-commons/lib/types";
+import { LoginTypeEnum } from "../../utils/fastLogin";
+import {
+  IDP_NAMES,
+  Issuer,
+  SPID_IDP_IDENTIFIERS,
+  CIE_IDP_IDENTIFIERS,
+} from "@pagopa/io-spid-commons/dist/config";
+
+const req = mockReq();
+req.ip = "127.0.0.2";
+
+const aValidEntityID = Object.keys(SPID_IDP_IDENTIFIERS)[0] as Issuer;
+const expectedIdPName = IDP_NAMES[aValidEntityID];
 
 // validUser has all every field correctly set.
 const validUserPayload = {
@@ -70,9 +85,10 @@ const validUserPayload = {
   email: aSpidEmailAddress,
   familyName: aValidFamilyname,
   fiscalNumber: aFiscalCode,
-  issuer: "xxx",
+  issuer: aValidEntityID,
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
+  getAcsOriginalRequest: () => req,
   getAssertionXml: () => aLollipopAssertion,
   getSamlResponseXml: () => aLollipopAssertion,
 };
@@ -80,12 +96,15 @@ const validUserPayload = {
 const invalidUserPayload = {
   authnContextClassRef: aValidSpidLevel,
   fiscalNumber: aFiscalCode,
+  getAcsOriginalRequest: () => undefined,
   getAssertionXml: () => "",
   getSamlResponseXml: () => "",
-  issuer: "xxx",
+  issuer: aValidEntityID,
   dateOfBirth: aValidDateofBirth,
   name: aValidName,
 };
+
+const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
 
 const anErrorResponse = {
   detail: undefined,
@@ -108,13 +127,17 @@ const mockDel = jest.fn();
 const mockDelLollipop = jest.fn();
 const mockGetLollipop = jest.fn();
 const mockSetLollipop = jest.fn();
+const mockSetLollipopData = jest
+  .fn()
+  .mockImplementation((_, __, ___) => Promise.resolve(E.right(true)));
 const mockIsBlockedUser = jest.fn();
 jest.mock("../../services/redisSessionStorage", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
       del: mockDel,
       getLollipopAssertionRefForUser: mockGetLollipop,
-      delLollipopAssertionRefForUser: mockDelLollipop,
+      delLollipopDataForUser: mockDelLollipop,
+      setLollipopDataForUser: mockSetLollipopData,
       setLollipopAssertionRefForUser: mockSetLollipop,
       getBySessionToken: mockGetBySessionToken,
       getByWalletToken: mockGetByWalletToken,
@@ -165,6 +188,10 @@ jest.mock("../../services/usersLoginLogService", () => {
   };
 });
 
+jest
+  .spyOn(authCtrl, "isUserElegibleForFastLogin")
+  .mockImplementation((_) => false);
+
 const anActivatedPubKey = {
   status: PubKeyStatusEnum.VALID,
   assertion_file_name: "file",
@@ -185,6 +212,17 @@ const mockActivateLolliPoPKey = jest
   .fn()
   .mockImplementation((_, __, ___) => TE.of(anActivatedPubKey));
 
+const mockOnUserLogin = jest.fn().mockImplementation(() => TE.of(true));
+const expectedUserLoginData = {
+  email: mockedInitializedProfile.email,
+  family_name: mockedInitializedProfile.family_name,
+  fiscal_code: mockedInitializedProfile.fiscal_code,
+  identity_provider: expectedIdPName,
+  // TODO change
+  ip_address: "127.0.0.2",
+  name: mockedInitializedProfile.name,
+};
+
 jest.mock("../../services/lollipopService", () => {
   return {
     default: jest.fn().mockImplementation(() => ({
@@ -202,7 +240,10 @@ const redisClient = {} as redis.RedisClientType;
 
 const tokenService = new TokenService();
 
-const tokenDurationSecs = 0;
+const tokenDurationSecs = 3600 * 24 * 30;
+const lvTokenDurationSecs = 60 * 1;
+const lvLongSessionDurationSecs = 3600 * 24 * 365;
+
 const aDefaultLollipopAssertionRefDurationSec = (3600 * 24 * 365 * 2) as Second;
 const redisSessionStorage = new RedisSessionStorage(
   redisClient,
@@ -240,12 +281,17 @@ const controller = new AuthenticationController(
   profileService,
   notificationServiceFactory,
   usersLoginLogService,
+  mockOnUserLogin,
   [],
   true,
   {
     isLollipopEnabled: false,
     lollipopService: lollipopService,
   },
+  tokenDurationSecs as Second,
+  lvTokenDurationSecs as Second,
+  lvLongSessionDurationSecs as Second,
+  [validUserPayload.fiscalNumber],
   mockTelemetryClient
 );
 
@@ -257,12 +303,17 @@ const lollipopActivatedController = new AuthenticationController(
   profileService,
   notificationServiceFactory,
   usersLoginLogService,
+  mockOnUserLogin,
   [],
   true,
   {
     isLollipopEnabled: true,
     lollipopService: lollipopService,
   },
+  tokenDurationSecs as Second,
+  lvTokenDurationSecs as Second,
+  lvLongSessionDurationSecs as Second,
+  [validUserPayload.fiscalNumber],
   mockTelemetryClient
 );
 
@@ -277,6 +328,17 @@ afterEach(() => {
   clock = clock.uninstall();
 });
 
+const setupGetNewTokensMocks = () => {
+  mockGetNewToken
+    .mockReturnValueOnce(mockSessionToken)
+    .mockReturnValueOnce(mockWalletToken)
+    .mockReturnValueOnce(mockMyPortalToken)
+    .mockReturnValueOnce(mockBPDToken)
+    .mockReturnValueOnce(mockZendeskToken)
+    .mockReturnValueOnce(mockFIMSToken)
+    .mockReturnValueOnce(aSessionTrackingId);
+};
+
 describe("AuthenticationController#acs", () => {
   it("redirects to the correct url if userPayload is a valid User and a profile not exists", async () => {
     const res = mockRes();
@@ -288,14 +350,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -310,12 +365,13 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).toHaveBeenCalledWith(
       mockedUser,
       expectedNewProfile
     );
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it("redirects to the correct url if userPayload is a valid User and a profile exists", async () => {
@@ -323,14 +379,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
@@ -342,9 +391,11 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
+
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it("should fail if a profile cannot be created", async () => {
@@ -357,14 +408,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -375,13 +419,14 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).toHaveBeenCalledWith(
       mockedUser,
       expectedNewProfile
     );
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -394,14 +439,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorInternal("Error reading the user profile")
@@ -409,10 +447,12 @@ describe("AuthenticationController#acs", () => {
     const response = await controller.acs(validUserPayload);
     response.apply(res);
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
 
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toHaveBeenCalled();
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
+
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       ...anErrorResponse,
@@ -557,14 +597,7 @@ describe("AuthenticationController#acs", () => {
 
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseErrorNotFound("Not Found.", "Profile not found")
@@ -584,10 +617,13 @@ describe("AuthenticationController#acs", () => {
       301,
       expect.stringContaining("/profile.html?token=" + mockSessionToken)
     );
-    expect(mockSet).toHaveBeenCalledWith({
-      ...mockedUser,
-      date_of_birth: aYoungUserPayload.dateOfBirth,
-    });
+    expect(mockSet).toHaveBeenCalledWith(
+      {
+        ...mockedUser,
+        date_of_birth: aYoungUserPayload.dateOfBirth,
+      },
+      tokenDurationSecs
+    );
     expect(mockGetProfile).toHaveBeenCalledWith({
       ...mockedUser,
       date_of_birth: aYoungUserPayload.dateOfBirth,
@@ -617,20 +653,16 @@ describe("AuthenticationController#acs", () => {
     );
     mockSet.mockReturnValue(Promise.resolve(E.right(true)));
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
     mockGetProfile.mockReturnValue(
       ResponseSuccessJson(mockedInitializedProfile)
     );
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.redirect).toHaveBeenCalledWith(
@@ -652,19 +684,20 @@ describe("AuthenticationController#acs", () => {
       expect.objectContaining({
         fiscal_code: aFiscalCode,
       }),
-      anotherAssertionRef
+      lollipopData.assertionRef,
+      tokenDurationSecs
     );
 
-    expect(mockSet).toHaveBeenCalledWith(mockedUser);
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
     expect(mockGetProfile).toHaveBeenCalledWith(mockedUser);
     expect(mockCreateProfile).not.toBeCalled();
   });
 
   it.each`
-    scenario                      | setLollipopAssertionRefForUserResponse | errorMessage
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}     | ${"Error creating CF thumbprint relation in redis"}
-    ${"with left response"}       | ${Promise.resolve(E.left("Error"))}    | ${undefined}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error"))}  | ${"Error"}
+    scenario                      | setLollipopAssertionRefForUserResponse      | errorMessage
+    ${"with false response"}      | ${() => Promise.resolve(E.right(false))}    | ${"Error creating CF - assertion ref relation in redis"}
+    ${"with left response"}       | ${() => Promise.resolve(E.left("Error"))}   | ${undefined}
+    ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error"))} | ${"Error"}
   `(
     "should fail if an error occours saving assertionRef for user in redis $scenario",
     async ({ setLollipopAssertionRefForUserResponse, errorMessage }) => {
@@ -679,21 +712,17 @@ describe("AuthenticationController#acs", () => {
             assertion_ref: newAssertionRef,
           } as ActivatedPubKey)
       );
-      mockSetLollipop.mockImplementationOnce(
-        (_, __, ___) => setLollipopAssertionRefForUserResponse
+      mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+        setLollipopAssertionRefForUserResponse()
       );
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      mockGetNewToken
-        .mockReturnValueOnce(mockSessionToken)
-        .mockReturnValueOnce(mockWalletToken)
-        .mockReturnValueOnce(mockMyPortalToken)
-        .mockReturnValueOnce(mockBPDToken)
-        .mockReturnValueOnce(mockZendeskToken)
-        .mockReturnValueOnce(mockFIMSToken)
-        .mockReturnValueOnce(aSessionTrackingId);
+      setupGetNewTokensMocks();
 
-      const response = await lollipopActivatedController.acs(validUserPayload);
+      const response = await lollipopActivatedController.acs(
+        validUserPayload,
+        req
+      );
       response.apply(res);
 
       expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
@@ -728,12 +757,14 @@ describe("AuthenticationController#acs", () => {
         expect.objectContaining({
           fiscal_code: aFiscalCode,
         }),
-        anotherAssertionRef
+        lollipopData.assertionRef,
+        tokenDurationSecs
       );
 
       expect(mockSet).not.toBeCalled();
       expect(mockGetProfile).not.toBeCalled();
       expect(mockCreateProfile).not.toBeCalled();
+      expect(mockOnUserLogin).not.toHaveBeenCalled();
     }
   );
 
@@ -747,16 +778,12 @@ describe("AuthenticationController#acs", () => {
     );
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(res.status).toHaveBeenCalledWith(500);
@@ -781,34 +808,29 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).not.toBeCalled();
     expect(mockGetProfile).not.toBeCalled();
     expect(mockCreateProfile).not.toBeCalled();
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it.each`
-    scenario                      | delLollipopAssertionRefForUserResponse                 | errorMessage
-    ${"with false response"}      | ${Promise.resolve(E.right(false))}                     | ${"Error on LolliPoP initialization"}
-    ${"with left response"}       | ${Promise.resolve(E.left(new Error("Error on left")))} | ${"Error on left"}
-    ${"with a promise rejection"} | ${Promise.reject(new Error("Error on reject"))}        | ${"Error on reject"}
+    scenario                      | delLollipopDataForUserResponse                               | errorMessage
+    ${"with false response"}      | ${() => Promise.resolve(E.right(false))}                     | ${"Error on LolliPoP initialization"}
+    ${"with left response"}       | ${() => Promise.resolve(E.left(new Error("Error on left")))} | ${"Error on left"}
+    ${"with a promise rejection"} | ${() => Promise.reject(new Error("Error on reject"))}        | ${"Error on reject"}
   `(
     "should fail if an error occours deleting the previous CF-assertionRef link on redis $scenario",
-    async ({ delLollipopAssertionRefForUserResponse, errorMessage }) => {
+    async ({ delLollipopDataForUserResponse, errorMessage }) => {
       const res = mockRes();
 
       mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anAssertionRef)));
-      mockDelLollipop.mockImplementationOnce(
-        (_) => delLollipopAssertionRefForUserResponse
-      );
+      mockDelLollipop.mockImplementationOnce(delLollipopDataForUserResponse);
 
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      mockGetNewToken
-        .mockReturnValueOnce(mockSessionToken)
-        .mockReturnValueOnce(mockWalletToken)
-        .mockReturnValueOnce(mockMyPortalToken)
-        .mockReturnValueOnce(mockBPDToken)
-        .mockReturnValueOnce(mockZendeskToken)
-        .mockReturnValueOnce(mockFIMSToken)
-        .mockReturnValueOnce(aSessionTrackingId);
+      setupGetNewTokensMocks();
 
-      const response = await lollipopActivatedController.acs(validUserPayload);
+      const response = await lollipopActivatedController.acs(
+        validUserPayload,
+        req
+      );
       response.apply(res);
 
       expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
@@ -838,6 +860,7 @@ describe("AuthenticationController#acs", () => {
       expect(mockSet).not.toBeCalled();
       expect(mockGetProfile).not.toBeCalled();
       expect(mockCreateProfile).not.toBeCalled();
+      expect(mockOnUserLogin).not.toHaveBeenCalled();
     }
   );
 
@@ -847,16 +870,12 @@ describe("AuthenticationController#acs", () => {
     mockGetLollipop.mockResolvedValueOnce(E.left(new Error("Error")));
 
     mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-    mockGetNewToken
-      .mockReturnValueOnce(mockSessionToken)
-      .mockReturnValueOnce(mockWalletToken)
-      .mockReturnValueOnce(mockMyPortalToken)
-      .mockReturnValueOnce(mockBPDToken)
-      .mockReturnValueOnce(mockZendeskToken)
-      .mockReturnValueOnce(mockFIMSToken)
-      .mockReturnValueOnce(aSessionTrackingId);
+    setupGetNewTokensMocks();
 
-    const response = await lollipopActivatedController.acs(validUserPayload);
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
     response.apply(res);
 
     expect(mockTelemetryClient.trackEvent).toHaveBeenCalledWith({
@@ -885,6 +904,7 @@ describe("AuthenticationController#acs", () => {
     expect(mockSet).not.toBeCalled();
     expect(mockGetProfile).not.toBeCalled();
     expect(mockCreateProfile).not.toBeCalled();
+    expect(mockOnUserLogin).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -902,14 +922,7 @@ describe("AuthenticationController#acs", () => {
 
       mockSet.mockReturnValue(Promise.resolve(E.right(true)));
       mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
-      mockGetNewToken
-        .mockReturnValueOnce(mockSessionToken)
-        .mockReturnValueOnce(mockWalletToken)
-        .mockReturnValueOnce(mockMyPortalToken)
-        .mockReturnValueOnce(mockBPDToken)
-        .mockReturnValueOnce(mockZendeskToken)
-        .mockReturnValueOnce(mockFIMSToken)
-        .mockReturnValueOnce(aSessionTrackingId);
+      setupGetNewTokensMocks();
 
       mockGetProfile.mockReturnValue(
         ResponseSuccessJson(mockedInitializedProfile)
@@ -923,6 +936,376 @@ describe("AuthenticationController#acs", () => {
       );
     }
   );
+
+  it("should return unauthorized using a CIE test environment with no whitelisted user fiscalcode", async () => {
+    const anotherFiscalCode = "AAABBB01C02D345Z" as FiscalCode;
+    const res = mockRes();
+    const anInvalidCieTestUser = {
+      ...validUserPayload,
+      fiscalNumber: anotherFiscalCode,
+      issuer: Object.keys(CIE_IDP_IDENTIFIERS)[0],
+    };
+
+    const response = await controller.acs(anInvalidCieTestUser);
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it.each`
+    title                                        | fiscalNumber                     | issuer
+    ${"if a CIE TEST user is in whitelist"}      | ${validUserPayload.fiscalNumber} | ${Object.keys(CIE_IDP_IDENTIFIERS)[0]}
+    ${"if a user logs to PROD CIE IDP"}          | ${anotherFiscalCode}             | ${Object.keys(CIE_IDP_IDENTIFIERS)[1]}
+    ${"if a user logs to another IDP"}           | ${anotherFiscalCode}             | ${"https://id.eht.eu"}
+    ${"if  a CIE TEST user logs to another IDP"} | ${validUserPayload.fiscalNumber} | ${"https://id.eht.eu"}
+  `(
+    "should redirect to success URL $title",
+    async ({ fiscalNumber, issuer }) => {
+      const res = mockRes();
+      const whitelistedCieTestUserPayload = {
+        ...validUserPayload,
+        fiscalNumber,
+        issuer,
+      };
+
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+      mockGetNewToken
+        .mockReturnValueOnce(mockSessionToken)
+        .mockReturnValueOnce(mockWalletToken)
+        .mockReturnValueOnce(mockMyPortalToken)
+        .mockReturnValueOnce(mockBPDToken)
+        .mockReturnValueOnce(mockZendeskToken)
+        .mockReturnValueOnce(mockFIMSToken)
+        .mockReturnValueOnce(aSessionTrackingId);
+
+      mockGetProfile.mockReturnValue(
+        ResponseErrorNotFound("Not Found.", "Profile not found")
+      );
+      mockCreateProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+      const response = await controller.acs(whitelistedCieTestUserPayload);
+      response.apply(res);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        "https://localhost/profile.html?token=" + mockSessionToken
+      );
+    }
+  );
+
+  // this test ensures CIE prod, coll and test URLs are present in the identifiers object.
+  // since in the authenticationcontroller we filter the keys based on the prod URL, we ensure here
+  // that at least coll and test URLs are in the array, to let the logic work in the controller.
+  // instead, if the order of the keys changes, the unit tests above should fail when the library is updated
+  it("should verify that the CIE_IDP_IDENTIFIERS urls are present", () => {
+    const CIE_IDP_IDENTIFIERS_KEYS = Object.keys(CIE_IDP_IDENTIFIERS);
+
+    const prodUrlFilter = CIE_IDP_IDENTIFIERS_KEYS.filter(
+      (k) =>
+        k ===
+        "https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO"
+    );
+
+    // expect prod url to be present
+    expect(prodUrlFilter.length).toBe(1);
+    // expect at least test and coll urls to be present
+    expect(
+      CIE_IDP_IDENTIFIERS_KEYS.length - prodUrlFilter.length
+    ).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("AuthenticationController|>LV|>acs", () => {
+  it.each`
+    loginType               | isLollipopEnabled | isUserElegible | expectedTtlDuration    | expectedLongSessionDuration
+    ${LoginTypeEnum.LV}     | ${true}           | ${true}        | ${lvTokenDurationSecs} | ${lvLongSessionDurationSecs}
+    ${LoginTypeEnum.LV}     | ${true}           | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}           | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${true}           | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${true}           | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${true}           | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}          | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LV}     | ${false}          | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}          | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${LoginTypeEnum.LEGACY} | ${false}          | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${false}          | ${true}        | ${tokenDurationSecs}   | ${tokenDurationSecs}
+    ${undefined}            | ${false}          | ${false}       | ${tokenDurationSecs}   | ${tokenDurationSecs}
+  `(
+    "should succeed and return a new token with duration $expectedTtlDuration, if lollipop is enabled $isLollipopEnabled, ff is $isUserElegible and login is of type $loginType",
+    async ({
+      loginType,
+      isLollipopEnabled,
+      expectedTtlDuration,
+      expectedLongSessionDuration,
+      isUserElegible,
+    }) => {
+      const res = mockRes();
+
+      jest
+        .spyOn(authCtrl, "isUserElegibleForFastLogin")
+        .mockImplementationOnce((_) => isUserElegible);
+
+      mockGetLollipop.mockResolvedValueOnce(
+        E.right(O.some(anotherAssertionRef))
+      );
+      mockDelLollipop.mockResolvedValueOnce(E.right(true));
+      mockActivateLolliPoPKey.mockImplementationOnce(
+        (newAssertionRef, __, ___) =>
+          TE.of({
+            ...anActivatedPubKey,
+            assertion_ref: newAssertionRef,
+          } as ActivatedPubKey)
+      );
+
+      if (!isUserElegible)
+        mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+          Promise.resolve(E.right(true))
+        );
+
+      mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+      mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+
+      setupGetNewTokensMocks();
+
+      mockGetProfile.mockReturnValue(
+        ResponseSuccessJson(mockedInitializedProfile)
+      );
+
+      const controllerToUse = isLollipopEnabled
+        ? lollipopActivatedController
+        : controller;
+
+      const response = await controllerToUse.acs(
+        validUserPayload,
+        withoutUndefinedValues({
+          loginType,
+        })
+      );
+      response.apply(res);
+
+      expect(mockSet).toHaveBeenCalledWith(mockedUser, expectedTtlDuration);
+
+      if (isLollipopEnabled) {
+        if (isUserElegible) {
+          expect(mockSetLollipopData).toHaveBeenCalledWith(
+            mockedUser,
+            {
+              ...lollipopData,
+              loginType: loginType ? loginType : LoginTypeEnum.LEGACY,
+            },
+            expectedLongSessionDuration
+          );
+        } else {
+          expect(mockSetLollipop).toHaveBeenCalledWith(
+            mockedUser,
+            lollipopData.assertionRef,
+            expectedLongSessionDuration
+          );
+        }
+        expect(mockActivateLolliPoPKey).toHaveBeenCalledWith(
+          anotherAssertionRef,
+          mockedUser.fiscal_code,
+          aLollipopAssertion,
+          expect.any(Function)
+        );
+
+        if (isUserElegible) {
+          expect(mockOnUserLogin).toHaveBeenCalledWith(expectedUserLoginData);
+        } else {
+          expect(mockOnUserLogin).not.toHaveBeenCalled();
+        }
+
+        const ttlToExpirationDate = mockActivateLolliPoPKey.mock.calls[0][3];
+
+        const now = new Date();
+        const exp = ttlToExpirationDate() as Date;
+        const diff = (exp.getTime() - now.getTime()) / 1000;
+
+        expect(diff).toEqual(expectedLongSessionDuration);
+      } else {
+        expect(mockSetLollipop).not.toHaveBeenCalled();
+        expect(mockActivateLolliPoPKey).not.toHaveBeenCalled();
+        expect(mockOnUserLogin).not.toHaveBeenCalled();
+      }
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        301,
+        expect.stringContaining("/profile.html?token=" + mockSessionToken)
+      );
+    }
+  );
+});
+
+describe("AuthenticationController|>LV|>acs|>notify user login", () => {
+  const setupLollipopScenario = () => {
+    jest
+      .spyOn(authCtrl, "isUserElegibleForFastLogin")
+      .mockReturnValueOnce(true);
+
+    mockGetLollipop.mockResolvedValueOnce(E.right(O.some(anotherAssertionRef)));
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+    mockActivateLolliPoPKey.mockImplementationOnce((newAssertionRef, __, ___) =>
+      TE.of({
+        ...anActivatedPubKey,
+        assertion_ref: newAssertionRef,
+      } as ActivatedPubKey)
+    );
+    mockSetLollipop.mockImplementationOnce((_, __, ___) =>
+      Promise.resolve(E.right(true))
+    );
+    mockSet.mockReturnValue(Promise.resolve(E.right(true)));
+    mockIsBlockedUser.mockReturnValue(Promise.resolve(E.right(false)));
+  };
+
+  it("should notify new login with profile email if profile does not exists and user is eligible", async () => {
+    const res = mockRes();
+
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
+    mockGetProfile.mockReturnValue(
+      ResponseErrorNotFound("Not Found.", "Profile not found")
+    );
+    mockCreateProfile.mockReturnValue(
+      ResponseSuccessJson(mockedInitializedProfile)
+    );
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
+    response.apply(res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
+    );
+    expect(mockSet).toHaveBeenCalledWith(mockedUser, tokenDurationSecs);
+
+    expect(mockOnUserLogin).toHaveBeenCalledWith({
+      ...expectedUserLoginData,
+      email: validUserPayload.email,
+    });
+  });
+
+  it("should notify new login with spid email if profile exists, email is not validated and user is eligible", async () => {
+    const res = mockRes();
+
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson({
+        ...mockedInitializedProfile,
+        is_email_validated: undefined,
+      })
+    );
+
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
+    response.apply(res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      301,
+      expect.stringContaining("/profile.html?token=" + mockSessionToken)
+    );
+
+    expect(mockOnUserLogin).toHaveBeenCalledWith({
+      ...expectedUserLoginData,
+      email: validUserPayload.email,
+    });
+  });
+
+  it("should delete Lollipop data when onUserLogin call fails", async () => {
+    const res = mockRes();
+
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
+
+    mockDelLollipop.mockResolvedValueOnce(E.right(true));
+
+    mockOnUserLogin.mockImplementationOnce(() =>
+      TE.left(new Error("Error calling notify endpoint"))
+    );
+
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson({
+        ...mockedInitializedProfile,
+        is_email_validated: undefined,
+      })
+    );
+
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+
+    expect(mockOnUserLogin).toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledTimes(2);
+
+    expect(mockTelemetryClient.trackEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        name: "lollipop.error.acs.notify",
+        properties: {
+          error: "Error calling notify endpoint",
+          fiscal_code: sha256(validUserPayload.fiscalNumber),
+          message: "acs: Unable to notify user login event",
+        },
+      })
+    );
+  });
+
+  it("should track an event if delete Lollipop data fails when onUserLogin call fails", async () => {
+    const res = mockRes();
+
+    setupGetNewTokensMocks();
+    setupLollipopScenario();
+
+    mockDelLollipop.mockResolvedValueOnce(
+      E.left(new Error("Error deleting Lollipop Data"))
+    );
+
+    mockOnUserLogin.mockImplementationOnce(() =>
+      TE.left(new Error("Error calling notify endpoint"))
+    );
+
+    mockGetProfile.mockReturnValue(
+      ResponseSuccessJson({
+        ...mockedInitializedProfile,
+        is_email_validated: undefined,
+      })
+    );
+
+    const response = await lollipopActivatedController.acs(
+      validUserPayload,
+      req
+    );
+    response.apply(res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+
+    expect(mockOnUserLogin).toHaveBeenCalled();
+    expect(mockDelLollipop).toHaveBeenCalledTimes(2);
+    expect(mockRevokePreviousAssertionRef).toHaveBeenCalledTimes(2);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenCalledTimes(2);
+    expect(mockTelemetryClient.trackEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        name: "lollipop.error.acs.delete",
+        properties: {
+          error: "Error deleting Lollipop Data",
+          fiscal_code: sha256(validUserPayload.fiscalNumber),
+          message:
+            "acs: error deleting lollipop data while fallbacking from notify login failure",
+        },
+      })
+    );
+  });
 });
 
 describe("AuthenticationController#acsTest", () => {
@@ -965,7 +1348,7 @@ describe("AuthenticationController#acsTest", () => {
   it("should return ResponseErrorInternal if the token is missing", async () => {
     acsSpyOn.mockImplementation(async (_: unknown) => {
       return ResponsePermanentRedirect({
-        href: "http://invalid-url",
+        href: "https://invalid-url",
       } as ValidUrl);
     });
     const response = await controller.acsTest(validUserPayload);

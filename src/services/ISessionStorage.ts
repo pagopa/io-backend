@@ -17,14 +17,21 @@ import {
   ZendeskToken,
 } from "../types/token";
 import { User, UserV5 } from "../types/user";
+import { LollipopData } from "../types/assertionRef";
 
 export interface ISessionStorage {
   /**
-   * Stores a value to the cache.
+   * Stores or updated a value to the cache.
+   *
+   * @param user the user to store or update
+   * @param expireSec the ttl of all the session-related tokens
+   * @param isUserSessionUpdate a boolean that defines if we are updating an existing session or creating a new one
+   * @returns a promise of either an error or boolena
    */
   readonly set: (
     user: UserV5,
-    expireSec?: number
+    expireSec?: number,
+    isUserSessionUpdate?: boolean
   ) => Promise<Either<Error, boolean>>;
 
   /**
@@ -72,6 +79,7 @@ export interface ISessionStorage {
   /**
    * Retrieve the LolliPoP assertionRef related to an user
    *
+   * @deprecated
    * @param fiscalCode The fiscalCode value used to get the related assertionRef
    */
   readonly getLollipopAssertionRefForUser: (
@@ -79,7 +87,30 @@ export interface ISessionStorage {
   ) => Promise<Either<Error, O.Option<BackendAssertionRef>>>;
 
   /**
+   * Retrieve all the LolliPoP-related data for an user
+   *
+   * @param fiscalCode The fiscalCode value used to get the related assertionRef
+   */
+  readonly getLollipopDataForUser: (
+    fiscalCode: FiscalCode
+  ) => Promise<Either<Error, O.Option<LollipopData>>>;
+
+  /**
    * Upsert the LolliPoP assertionRef related to an user
+   *
+   * @param user The AppUser value used to get the related fiscalCode
+   * @param data The LollipopData, containing the identifier for the pubkey and the login type
+   * @param expireAssertionRefSec The ttl for the key, default value is configured in RedisSessionStorage instance
+   */
+  readonly setLollipopDataForUser: (
+    user: UserV5,
+    data: LollipopData,
+    expireAssertionRefSec?: Second
+  ) => Promise<Either<Error, boolean>>;
+
+  /**
+   *  @deprecated
+   *  Upsert the LolliPoP assertionRef related to an user
    *
    * @param user The AppUser value used to get the related fiscalCode
    * @param assertionRef The identifier for the pubkey
@@ -96,7 +127,7 @@ export interface ISessionStorage {
    *
    * @param fiscalCode A user fiscal code
    */
-  readonly delLollipopAssertionRefForUser: (
+  readonly delLollipopDataForUser: (
     fiscalCode: FiscalCode
   ) => Promise<Either<Error, boolean>>;
 

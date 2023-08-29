@@ -26,20 +26,36 @@ import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import { NewProfile } from "@pagopa/io-functions-app-sdk/NewProfile";
 
 import { sha256 } from "@pagopa/io-functions-commons/dist/src/utils/crypto";
-import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
-import { FiscalCode, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  errorsToReadableMessages,
+  readableReportSimplified,
+} from "@pagopa/ts-commons/lib/reporters";
+import {
+  EmailString,
+  FiscalCode,
+  IPString,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import { parse } from "date-fns";
 import * as appInsights from "applicationinsights";
-import { NotificationServiceFactory } from "src/services/notificationServiceFactory";
 import * as TE from "fp-ts/lib/TaskEither";
 import { DOMParser } from "xmldom";
 import { addSeconds } from "date-fns";
-import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
+import { Second } from "@pagopa/ts-commons/lib/units";
+import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
+import { IDP_NAMES, Issuer } from "@pagopa/io-spid-commons/dist/config";
+import { NotificationServiceFactory } from "../services/notificationServiceFactory";
+import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
 import { getRequestIDFromResponse } from "../utils/spid";
-import UsersLoginLogService from "../services/usersLoginLogService";
+import {
+  AdditionalLoginPropsT,
+  LoginTypeEnum,
+  getIsUserElegibleForfastLogin,
+} from "../utils/fastLogin";
 import { isOlderThan } from "../utils/date";
+import { AssertionRef } from "../../generated/lollipop-api/AssertionRef";
 import { SuccessResponse } from "../../generated/auth/SuccessResponse";
 import { UserIdentity } from "../../generated/auth/UserIdentity";
 import { AccessToken } from "../../generated/public/AccessToken";
@@ -47,9 +63,10 @@ import {
   ClientErrorRedirectionUrlParams,
   clientProfileRedirectionUrl,
   FF_IOLOGIN,
+  FF_FAST_LOGIN,
   IOLOGIN_CANARY_USERS_SHA_REGEX,
   IOLOGIN_USERS_LIST,
-  tokenDurationSecs,
+  LV_TEST_USERS,
 } from "../config";
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
@@ -74,12 +91,16 @@ import {
   internalErrorOrIoLoginRedirect,
   getIsUserElegibleForIoLoginUrlScheme,
 } from "../utils/ioLoginUriScheme";
+import {
+  getIsUserElegibleForCIETestEnv,
+  isCIETestEnvLogin,
+} from "../utils/cie";
 
 // how many random bytes to generate for each session token
 export const SESSION_TOKEN_LENGTH_BYTES = 48;
 
 // how many random bytes to generate for each session ID
-const SESSION_ID_LENGTH_BYTES = 32;
+export const SESSION_ID_LENGTH_BYTES = 32;
 
 export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
 // Custom error code handled by the client to show a specific error page
@@ -87,12 +108,19 @@ export const AGE_LIMIT_ERROR_CODE = 1001;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
 
+export type OnUserLogin = (data: UserLoginParams) => TE.TaskEither<Error, true>;
+
 export const isUserElegibleForIoLoginUrlScheme =
   getIsUserElegibleForIoLoginUrlScheme(
     IOLOGIN_USERS_LIST,
     IOLOGIN_CANARY_USERS_SHA_REGEX,
     FF_IOLOGIN
   );
+
+export const isUserElegibleForFastLogin = getIsUserElegibleForfastLogin(
+  LV_TEST_USERS,
+  FF_FAST_LOGIN
+);
 
 export default class AuthenticationController {
   // eslint-disable-next-line max-params
@@ -108,18 +136,24 @@ export default class AuthenticationController {
     private readonly profileService: ProfileService,
     private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
+    private readonly onUserLogin: OnUserLogin,
     private readonly testLoginFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly hasUserAgeLimitEnabled: boolean,
     private readonly lollipopParams: LollipopParams,
+    private readonly standardTokenDurationSecs: Second,
+    private readonly lvTokenDurationSecs: Second,
+    private readonly lvLongSessionDurationSecs: Second,
+    private readonly allowedCieTestFiscalCodes: ReadonlyArray<FiscalCode>,
     private readonly appInsightsTelemetryClient?: appInsights.TelemetryClient
   ) {}
 
   /**
    * The Assertion consumer service.
    */
-  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
+  // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity, complexity
   public async acs(
-    userPayload: unknown
+    userPayload: unknown,
+    additionalProps?: AdditionalLoginPropsT
   ): Promise<
     | IResponseErrorInternal
     | IResponseErrorValidation
@@ -141,6 +175,21 @@ export default class AuthenticationController {
     }
 
     const spidUser = errorOrSpidUser.right;
+
+    // if the CIE test user is not in the whitelist we return
+    // with a not authorized
+    if (
+      isCIETestEnvLogin(spidUser.issuer) &&
+      !getIsUserElegibleForCIETestEnv(this.allowedCieTestFiscalCodes)(
+        spidUser.fiscalNumber
+      )
+    ) {
+      log.warn(
+        `unallowed CF tried to login on CIE TEST IDP, issuer: [%s]`,
+        spidUser.issuer
+      );
+      return ResponseErrorForbiddenNotAuthorized;
+    }
 
     if (
       this.hasUserAgeLimitEnabled &&
@@ -173,6 +222,36 @@ export default class AuthenticationController {
         ),
         E.toUnion
       );
+    }
+
+    const isUserElegibleForFastLoginResult = isUserElegibleForFastLogin(
+      spidUser.fiscalNumber
+    );
+
+    // LV functionality is enable only if Lollipop is enabled.
+    // With FF set to BETA or CANARY, only whitelisted CF can use the LV functionality (the token TTL is reduced if login type is `LV`).
+    // With FF set to ALL all the user can use the LV (the token TTL is reduced if login type is `LV`).
+    // Otherwise LV is disabled.
+    const [sessionTTL, lollipopKeyTTL, loginType] =
+      this.lollipopParams.isLollipopEnabled &&
+      additionalProps?.loginType === LoginTypeEnum.LV &&
+      isUserElegibleForFastLoginResult
+        ? [
+            this.lvTokenDurationSecs,
+            this.lvLongSessionDurationSecs,
+            LoginTypeEnum.LV,
+          ]
+        : [
+            this.standardTokenDurationSecs,
+            this.standardTokenDurationSecs,
+            LoginTypeEnum.LEGACY,
+          ];
+
+    // Retrieve user IP from request
+    const errorOrUserIp = IPString.decode(spidUser.getAcsOriginalRequest()?.ip);
+
+    if (isUserElegibleForFastLoginResult && E.isLeft(errorOrUserIp)) {
+      return ResponseErrorInternal("Error reading user IP");
     }
 
     //
@@ -285,10 +364,7 @@ export default class AuthenticationController {
       // This operation must be performed even if the lollipop FF is disabled
       // to avoid inconsistency on CF-key relation if the FF will be re-enabled.
       TE.tryCatch(
-        () =>
-          this.sessionStorage.delLollipopAssertionRefForUser(
-            spidUser.fiscalNumber
-          ),
+        () => this.sessionStorage.delLollipopDataForUser(spidUser.fiscalNumber),
         E.toError
       ),
       TE.chainEitherK(identity),
@@ -331,23 +407,38 @@ export default class AuthenticationController {
               assertionRef,
               user.fiscal_code,
               spidUser.getSamlResponseXml(),
-              () => addSeconds(new Date(), tokenDurationSecs)
+              () => addSeconds(new Date(), lollipopKeyTTL)
             ),
             pipe(
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.setLollipopAssertionRefForUser(
-                    user,
-                    assertionRef
+                  pipe(
+                    isUserElegibleForFastLoginResult,
+                    B.fold(
+                      () =>
+                        this.sessionStorage.setLollipopAssertionRefForUser(
+                          user,
+                          assertionRef,
+                          lollipopKeyTTL
+                        ),
+                      () =>
+                        this.sessionStorage.setLollipopDataForUser(
+                          user,
+                          { assertionRef, loginType },
+                          lollipopKeyTTL
+                        )
+                    )
                   ),
                 E.toError
               ),
               TE.chainEitherK(identity),
               TE.filterOrElse(
-                (setLollipopAssertionRefForUserRes) =>
-                  setLollipopAssertionRefForUserRes === true,
+                (setLollipopDataForUserRes) =>
+                  setLollipopDataForUserRes === true,
                 () =>
-                  new Error("Error creating CF thumbprint relation in redis")
+                  new Error(
+                    "Error creating CF - assertion ref relation in redis"
+                  )
               ),
               TE.mapLeft((error) => {
                 this.appInsightsTelemetryClient?.trackEvent({
@@ -378,7 +469,7 @@ export default class AuthenticationController {
     // Attempt to create a new session object while we fetch an existing profile
     // for the user
     const [errorOrIsSessionCreated, getProfileResponse] = await Promise.all([
-      this.sessionStorage.set(user),
+      this.sessionStorage.set(user, sessionTTL),
       this.profileService.getProfile(user),
     ]);
 
@@ -396,6 +487,9 @@ export default class AuthenticationController {
       log.error("Error creating the user session");
       return ResponseErrorInternal("Error creating the user session");
     }
+
+    // eslint-disable-next-line functional/no-let
+    let userEmail: EmailString | undefined;
 
     if (getProfileResponse.kind === "IResponseErrorNotFound") {
       // a profile for the user does not yet exist, we attempt to create a new
@@ -426,7 +520,18 @@ export default class AuthenticationController {
         // in io-spid-commons does not support 429 / 409 errors
         return ResponseErrorInternal(createProfileResponse.kind);
       }
+
+      userEmail = user.spid_email;
     } else if (getProfileResponse.kind !== "IResponseSuccessJson") {
+      // errorOrActivatedPubKey is Left when login was not a lollipop login
+      if (E.isRight(errorOrActivatedPubKey)) {
+        await this.deleteAssertionRefAssociation(
+          user.fiscal_code,
+          errorOrActivatedPubKey.right[0].assertion_ref,
+          lollipopErrorEventName,
+          "acs: error deleting lollipop data while fallbacking from getProfile response error"
+        );
+      }
       log.error(
         "Error retrieving user's profile: %s",
         getProfileResponse.detail
@@ -434,6 +539,12 @@ export default class AuthenticationController {
       // we switch to a generic error since the acs definition
       // in io-spid-commons does not support 429 errors
       return ResponseErrorInternal(getProfileResponse.kind);
+    } else {
+      userEmail =
+        getProfileResponse.value.is_email_validated &&
+        getProfileResponse.value.email
+          ? getProfileResponse.value.email
+          : user.spid_email;
     }
 
     // Notify the user login
@@ -466,6 +577,80 @@ export default class AuthenticationController {
         );
       });
 
+    if (
+      userEmail &&
+      this.lollipopParams.isLollipopEnabled &&
+      isUserElegibleForFastLoginResult
+    ) {
+      const errorOrNotifyLoginResult = await pipe(
+        {
+          email: userEmail,
+          family_name: user.family_name,
+          fiscal_code: user.fiscal_code,
+          identity_provider: pipe(
+            Issuer.decode(spidUser.issuer),
+            E.map((issuer) => IDP_NAMES[issuer]),
+            E.chainW(E.fromNullable(null)),
+            E.getOrElse(() => "Sconosciuto")
+          ),
+          ip_address: pipe(
+            errorOrUserIp,
+            // we've already checked errorOrUserIp, this will never happen
+            E.getOrElse(() => "")
+          ),
+          name: user.name,
+        },
+        UserLoginParams.decode,
+        TE.fromEither,
+        TE.mapLeft((err) => {
+          {
+            log.error(
+              "Cannot decode UserLoginParams",
+              readableReportSimplified(err)
+            );
+            return readableReportSimplified(err);
+          }
+        }),
+        TE.chainW(
+          flow(
+            (loginData) => this.onUserLogin(loginData),
+            TE.mapLeft((err) => {
+              {
+                log.error(`Unable to notify user login event | ${err.message}`);
+                return err.message;
+              }
+            })
+          )
+        ),
+        TE.mapLeft((err) => {
+          this.appInsightsTelemetryClient?.trackEvent({
+            name: lollipopErrorEventName + ".notify",
+            properties: {
+              error: err,
+              fiscal_code: sha256(user.fiscal_code),
+              message: "acs: Unable to notify user login event",
+            },
+          });
+
+          return ResponseErrorInternal("Unable to notify user login event");
+        })
+      )();
+
+      if (E.isLeft(errorOrNotifyLoginResult)) {
+        // errorOrActivatedPubKey is Left when login was not a lollipop login
+        if (E.isRight(errorOrActivatedPubKey)) {
+          await this.deleteAssertionRefAssociation(
+            user.fiscal_code,
+            errorOrActivatedPubKey.right[0].assertion_ref,
+            lollipopErrorEventName,
+            "acs: error deleting lollipop data while fallbacking from notify login failure"
+          );
+        }
+
+        return errorOrNotifyLoginResult.left;
+      }
+    }
+
     const urlWithToken = this.getClientProfileRedirectionUrl(
       user.session_token
     );
@@ -491,7 +676,7 @@ export default class AuthenticationController {
     | IResponseErrorForbiddenNotAuthorized
     | IResponseSuccessJson<AccessToken>
   > {
-    const acsResponse = await this.acs(userPayload);
+    const acsResponse = await this.acs(userPayload, {});
     // When the login succeeded with a ResponsePermanentRedirect (301)
     // the token was extract from the response and returned into the body
     // of a ResponseSuccessJson (200)
@@ -586,9 +771,7 @@ export default class AuthenticationController {
               // delete the assertionRef for the user
               TE.tryCatch(
                 () =>
-                  this.sessionStorage.delLollipopAssertionRefForUser(
-                    user.fiscal_code
-                  ),
+                  this.sessionStorage.delLollipopDataForUser(user.fiscal_code),
                 E.toError
               ),
               TE.chainEitherK(identity)
@@ -662,4 +845,51 @@ export default class AuthenticationController {
         E.toUnion
       )
     );
+
+  private async deleteAssertionRefAssociation(
+    fiscalCode: FiscalCode,
+    assertionRefToRevoke: AssertionRef,
+    eventName: string,
+    eventMessage: string
+  ) {
+    // Sending a revoke message for assertionRef
+    // This operation is fire and forget
+    this.lollipopParams.lollipopService
+      .revokePreviousAssertionRef(assertionRefToRevoke)
+      .catch((err) => {
+        this.appInsightsTelemetryClient?.trackEvent({
+          name: eventName,
+          properties: {
+            assertion_ref: assertionRefToRevoke,
+            error: err,
+            fiscal_code: sha256(fiscalCode),
+            message:
+              "acs: error sending revoke message for previous assertionRef",
+          },
+        });
+        log.error(
+          "acs: error sending revoke message for previous assertionRef [%s]",
+          err
+        );
+      });
+
+    const delLollipopResult = await pipe(
+      TE.tryCatch(
+        () => this.sessionStorage.delLollipopDataForUser(fiscalCode),
+        E.toError
+      ),
+      TE.chainEitherK(identity)
+    )();
+
+    if (E.isLeft(delLollipopResult)) {
+      this.appInsightsTelemetryClient?.trackEvent({
+        name: eventName + ".delete",
+        properties: {
+          error: delLollipopResult.left.message,
+          fiscal_code: sha256(fiscalCode),
+          message: eventMessage,
+        },
+      });
+    }
+  }
 }

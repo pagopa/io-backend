@@ -25,6 +25,7 @@ import * as R from "fp-ts/lib/Record";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
+import { Second } from "@pagopa/ts-commons/lib/units";
 import { ServerInfo } from "../generated/public/ServerInfo";
 
 import { VersionPerPlatform } from "../generated/public/VersionPerPlatform";
@@ -81,6 +82,11 @@ import {
   LOLLIPOP_REVOKE_QUEUE_NAME,
   IO_SIGN_SERVICE_ID,
   FIRST_LOLLIPOP_CONSUMER_CLIENT,
+  lvTokenDurationSecs,
+  lvLongSessionDurationSecs,
+  FF_FAST_LOGIN,
+  FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
+  ALLOWED_CIE_TEST_FISCAL_CODES,
 } from "./config";
 import AuthenticationController from "./controllers/authenticationController";
 import MessagesController from "./controllers/messagesController";
@@ -121,7 +127,9 @@ import RedisSessionStorage from "./services/redisSessionStorage";
 import RedisUserMetadataStorage from "./services/redisUserMetadataStorage";
 import TokenService from "./services/tokenService";
 import UserDataProcessingService from "./services/userDataProcessingService";
-import UsersLoginLogService from "./services/usersLoginLogService";
+import UsersLoginLogService, {
+  onUserLogin,
+} from "./services/usersLoginLogService";
 import bearerBPDTokenStrategy from "./strategies/bearerBPDTokenStrategy";
 import bearerMyPortalTokenStrategy from "./strategies/bearerMyPortalTokenStrategy";
 import bearerSessionTokenStrategy from "./strategies/bearerSessionTokenStrategy";
@@ -166,10 +174,17 @@ import {
 import { lollipopLoginHandler } from "./handlers/lollipop";
 import LollipopService from "./services/lollipopService";
 import { firstLollipopSign } from "./controllers/firstLollipopConsumerController";
-import { expressLollipopMiddleware } from "./utils/middleware/lollipop";
+import {
+  expressLollipopMiddleware,
+  expressLollipopMiddlewareLegacy,
+} from "./utils/middleware/lollipop";
 import { LollipopApiClient } from "./clients/lollipop";
 import { ISessionStorage } from "./services/ISessionStorage";
 import { FirstLollipopConsumerClient } from "./clients/firstLollipopConsumer";
+import { AdditionalLoginProps, acsRequestMapper } from "./utils/fastLogin";
+import { fastLoginEndpoint } from "./controllers/fastLoginController";
+import { getFastLoginLollipopConsumerClient } from "./clients/fastLoginLollipopConsumerClient";
+import { FeatureFlagEnum } from "./utils/featureFlag";
 
 const defaultModule = {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -491,12 +506,17 @@ export async function newApp({
             PROFILE_SERVICE,
             notificationServiceFactory,
             USERS_LOGIN_LOG_SERVICE,
+            onUserLogin(API_CLIENT),
             TEST_LOGIN_FISCAL_CODES,
             FF_USER_AGE_LIMIT_ENABLED,
             {
               isLollipopEnabled: FF_LOLLIPOP_ENABLED,
               lollipopService: LOLLIPOP_SERVICE,
             },
+            tokenDurationSecs as Second,
+            lvTokenDurationSecs as Second,
+            lvLongSessionDurationSecs as Second,
+            ALLOWED_CIE_TEST_FISCAL_CODES,
             appInsightsClient
           );
 
@@ -521,6 +541,18 @@ export async function newApp({
           authMiddlewares.bearerSession,
           authMiddlewares.local
         );
+
+        if (FF_FAST_LOGIN !== FeatureFlagEnum.NONE) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          registerFastLoginRoutes(
+            app,
+            APIBasePath,
+            LOLLIPOP_API_CLIENT,
+            SESSION_STORAGE,
+            FAST_LOGIN_LOLLIPOP_CONSUMER_CLIENT,
+            TOKEN_SERVICE
+          );
+        }
 
         const thirdPartyClientFactory = getThirdPartyServiceClientFactory(
           THIRD_PARTY_CONFIG_LIST
@@ -554,7 +586,8 @@ export async function newApp({
           USER_METADATA_STORAGE,
           USER_DATA_PROCESSING_SERVICE,
           TOKEN_SERVICE,
-          authMiddlewares.bearerSession
+          authMiddlewares.bearerSession,
+          LOLLIPOP_API_CLIENT
         );
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         registerSessionAPIRoutes(
@@ -709,6 +742,10 @@ export async function newApp({
                       ...event.data,
                     },
                   });
+                },
+                extraLoginRequestParamConfig: {
+                  codec: AdditionalLoginProps,
+                  requestMapper: acsRequestMapper,
                 },
               },
               doneCb: spidLogCallback,
@@ -937,7 +974,8 @@ function registerAPIRoutes(
   userDataProcessingService: UserDataProcessingService,
   tokenService: TokenService,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bearerSessionTokenAuth: any
+  bearerSessionTokenAuth: any,
+  lollipopClient: ReturnType<typeof LollipopApiClient>
 ): void {
   const profileController: ProfileController = new ProfileController(
     profileService,
@@ -945,7 +983,10 @@ function registerAPIRoutes(
   );
 
   const messagesController: MessagesController = new MessagesController(
-    appMessagesService
+    appMessagesService,
+    lollipopClient,
+    sessionStorage,
+    THIRD_PARTY_CONFIG_LIST
   );
 
   const servicesController: ServicesController = new ServicesController(
@@ -1334,7 +1375,7 @@ function registerIoSignAPIRoutes(
   app.post(
     `${basePath}/signatures`,
     bearerSessionTokenAuth,
-    expressLollipopMiddleware(lollipopClient, sessionStorage),
+    expressLollipopMiddlewareLegacy(lollipopClient, sessionStorage),
     toExpressHandler(ioSignController.createSignature, ioSignController)
   );
 
@@ -1468,7 +1509,11 @@ function registerAuthenticationRoutes(
         `${authBasePath}/test-login`,
         localAuth,
         toExpressHandler(
-          (req) => acsController.acsTest(req.user),
+          (req) =>
+            acsController.acsTest({
+              ...req.user,
+              getAcsOriginalRequest: () => req,
+            }),
           acsController
         )
       );
@@ -1563,6 +1608,29 @@ function registerFirstLollipopConsumer(
     bearerSessionTokenAuth,
     expressLollipopMiddleware(lollipopClient, sessionStorage),
     toExpressHandler(firstLollipopSign(firstLollipopConsumerClient))
+  );
+}
+
+// eslint-disable-next-line max-params
+function registerFastLoginRoutes(
+  app: Express,
+  basePath: string,
+  lollipopClient: ReturnType<typeof LollipopApiClient>,
+  sessionStorage: ISessionStorage,
+  fastLoginLollipopConsumerClient: ReturnType<getFastLoginLollipopConsumerClient>,
+  tokenService: TokenService
+): void {
+  app.post(
+    `${basePath}/fast-login`,
+    expressLollipopMiddleware(lollipopClient, sessionStorage),
+    toExpressHandler(
+      fastLoginEndpoint(
+        fastLoginLollipopConsumerClient,
+        sessionStorage,
+        tokenService,
+        lvTokenDurationSecs
+      )
+    )
   );
 }
 
