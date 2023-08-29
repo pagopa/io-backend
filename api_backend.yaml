@@ -1145,12 +1145,8 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/MessageCategoryBase"
   MessageCategoryPayment:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/MessageCategoryPayment"
-  LegalMessageWithContent:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/LegalMessageWithContent"
   MessageCategoryPN:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/MessageCategoryPN"
-  LegalMessage:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/LegalMessage"
   ThirdPartyData:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/ThirdPartyData"
   ThirdPartyMessageWithContent:
@@ -1161,18 +1157,12 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/ThirdPartyAttachment"
   ThirdPartyMessagePrecondition:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/ThirdPartyMessagePrecondition"
-  LegalMessageEml:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/LegalMessageEml"
-  LegalMessageCertData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/LegalMessageCertData"
   CertData:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/CertData"
   CertDataHeader:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/CertDataHeader"
   Attachment:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/Attachment"
-  LegalData:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/LegalData"
   MessageStatusValue:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/MessageStatusValue"
   RejectedMessageStatusValue:

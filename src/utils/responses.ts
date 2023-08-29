@@ -96,29 +96,6 @@ export const withValidatedOrValidationError = <T, U>(
       )
     : f(response.right);
 
-/**
- * Interface for unauthorized error response.
- */
-export interface IResponseErrorUnauthorizedForLegalReasons
-  extends IResponse<"IResponseErrorUnauthorizedForLegalReasons"> {
-  readonly detail: string;
-}
-/**
- * Returns an unauthorized error response with status code 451.
- */
-export function ResponseErrorUnauthorizedForLegalReasons(
-  title: string,
-  detail: string
-): IResponseErrorUnauthorizedForLegalReasons {
-  return {
-    ...ResponseErrorGeneric(HttpStatusCodeEnum.HTTP_STATUS_451, title, detail),
-    ...{
-      detail: `${title}: ${detail}`,
-      kind: "IResponseErrorUnauthorizedForLegalReasons",
-    },
-  };
-}
-
 export const ResponseErrorStatusNotDefinedInSpec = (response: never) =>
   // This case should not happen, so response is of type never.
   // However, the underlying api may not follow the specs so we might trace the unhandled status
