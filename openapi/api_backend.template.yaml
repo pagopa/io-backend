@@ -315,7 +315,7 @@ paths:
           description: There was an error in upserting message's status attributes.
           schema:
             $ref: "#/definitions/ProblemJson"
-    "/third-party-messages/{id}":
+  "/third-party-messages/{id}":
     x-swagger-router-controller: MessagesController
     get:
       operationId: getThirdPartyMessage
