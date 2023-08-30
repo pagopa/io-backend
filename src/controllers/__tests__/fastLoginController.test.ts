@@ -138,13 +138,20 @@ describe("fastLoginController", () => {
     };
     mockIsBlockedUser.mockResolvedValueOnce(E.right(false));
     mockSet.mockResolvedValueOnce(E.right(true));
+    const expectedClientIp = "10.0.0.2";
 
-    const response = await controller(mockReq(), fastLoginLollipopLocals);
+    const response = await controller(
+      mockReq({ ip: expectedClientIp }),
+      fastLoginLollipopLocals
+    );
     const res = mockRes();
     response.apply(res);
 
     expect(mockLCFastLogin).toHaveBeenCalledTimes(1);
-    expect(mockLCFastLogin).toHaveBeenCalledWith(fastLoginLollipopLocals);
+    expect(mockLCFastLogin).toHaveBeenCalledWith({
+      ...fastLoginLollipopLocals,
+      ["x-pagopa-lv-client-ip"]: expectedClientIp,
+    });
 
     expect(mockIsBlockedUser).toHaveBeenCalledTimes(1);
     expect(mockIsBlockedUser).toHaveBeenCalledWith(aFiscalCode);

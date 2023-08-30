@@ -8,7 +8,8 @@ export default function mockReq({
   headers = {},
   body = {},
   query = {},
-  user = {}
+  user = {},
+  ip = "10.0.0.1",
 } = {}): any {
   const request = {
     accepts: jest.fn(),
@@ -22,12 +23,13 @@ export default function mockReq({
     header: jest.fn(),
     headers,
     is: jest.fn(),
+    ip,
     param: jest.fn(),
     params,
     query,
     range: jest.fn(),
     reset: resetMock,
-    user
+    user,
   };
 
   request.header.mockImplementation(() => request);

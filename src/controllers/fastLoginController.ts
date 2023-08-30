@@ -16,6 +16,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import * as T from "fp-ts/lib/Task";
 import { safeXMLParseFromString } from "@pagopa/io-spid-commons/dist/utils/samlUtils";
+import { decodeIPAddressFromReq } from "../utils/network";
 import { FiscalCode } from "../../generated/io-bonus-api/FiscalCode";
 import { withLollipopLocals } from "../types/lollipop";
 import { ResLocals } from "../utils/express";
@@ -157,7 +158,7 @@ export const fastLoginEndpoint =
     sessionTTL: number
   ) =>
   async <T extends ResLocals>(
-    _: express.Request,
+    req: express.Request,
     locals?: T
   ): Promise<
     | IResponseErrorUnauthorized
@@ -185,13 +186,23 @@ export const fastLoginEndpoint =
       // ---------------
       TE.bindW("client_response", ({ lollipopLocals }) =>
         pipe(
-          TE.tryCatch(
-            () =>
-              client.fastLogin({
-                ...lollipopLocals,
-              }),
-            (__) =>
-              ResponseErrorInternal("Error while calling the Lollipop Consumer")
+          decodeIPAddressFromReq(req),
+          TE.fromEither,
+          TE.mapLeft(() =>
+            ResponseErrorInternal("Unexpected value for client IP")
+          ),
+          TE.chain((clientIp) =>
+            TE.tryCatch(
+              () =>
+                client.fastLogin({
+                  ...lollipopLocals,
+                  "x-pagopa-lv-client-ip": clientIp,
+                }),
+              (__) =>
+                ResponseErrorInternal(
+                  "Error while calling the Lollipop Consumer"
+                )
+            )
           ),
           TE.chainEitherKW(
             E.mapLeft(

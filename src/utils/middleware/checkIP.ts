@@ -9,6 +9,7 @@ import { CIDR, IPString } from "@pagopa/ts-commons/lib/strings";
 import * as rangeCheck from "range_check";
 import { pipe } from "fp-ts/lib/function";
 import { log } from "../logger";
+import { decodeIPAddressFromReq } from "../network";
 
 export default function checkIP(
   range: ReadonlyArray<CIDR>
@@ -22,11 +23,8 @@ export default function checkIP(
     res: express.Response,
     next: express.NextFunction
   ): void => {
-    // when the boolean flag "trust proxy" is enabled
-    // express takes this from the leftmost value
-    // contained in the x-forwarded-for header
     const errorOrIPString = pipe(
-      IPString.decode(req.ip),
+      decodeIPAddressFromReq(req),
       E.alt(() =>
         // use x-client-ip instead of x-forwarded-for
         // for internal calls (same vnet)
