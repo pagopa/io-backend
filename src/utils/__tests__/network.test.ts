@@ -1,6 +1,7 @@
 // tslint:disable: no-duplicate-string
 import { isLeft, right } from "fp-ts/lib/Either";
-import { decodeCIDRs } from "../cidrs";
+import { decodeCIDRs, decodeIPAddressFromReq } from "../network";
+import mockReq from "../../__mocks__/request";
 
 describe("decodeCIDRs", () => {
   it("should exit when input is undefined", () => {
@@ -31,5 +32,22 @@ describe("decodeCIDRs", () => {
     expect(ret).toEqual(
       right(["192.168.1.1/32", "192.168.2.2/32", "192.168.3.3/24"])
     );
+  });
+});
+
+describe("decodeIPAddressFromReq", () => {
+  it("should decode an IP v4 ip from express", () => {
+    const expectedIpAddress = "10.10.10.1";
+    const ret = decodeIPAddressFromReq(mockReq({ ip: expectedIpAddress }));
+    expect(ret).toEqual(right(expectedIpAddress));
+  });
+  it("should decode an IP v6 ip from express", () => {
+    const expectedIpAddress = "eff3:459d:93cb:c2d5:179c:8915:357f:f9a9";
+    const ret = decodeIPAddressFromReq(mockReq({ ip: expectedIpAddress }));
+    expect(ret).toEqual(right(expectedIpAddress));
+  });
+  it("should return an error if the value is not a valid IP", () => {
+    const ret = decodeIPAddressFromReq(mockReq({ ip: "invalidIp" }));
+    expect(isLeft(ret)).toBeTruthy();
   });
 });

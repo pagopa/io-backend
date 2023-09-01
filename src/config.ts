@@ -51,7 +51,7 @@ import ApiClientFactory from "./services/apiClientFactory";
 import { BonusAPIClient } from "./clients/bonus";
 import { IoLoginHostUrl, STRINGS_RECORD } from "./types/commons";
 import { SpidLevelArray } from "./types/spidLevel";
-import { decodeCIDRs } from "./utils/cidrs";
+import { decodeCIDRs } from "./utils/network";
 import { CgnOperatorSearchAPIClient } from "./clients/cgn-operator-search";
 import { EUCovidCertAPIClient } from "./clients/eucovidcert.client";
 import { ognlTypeFor } from "./utils/ognl";
