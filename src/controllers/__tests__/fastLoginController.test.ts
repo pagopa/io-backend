@@ -378,4 +378,22 @@ describe("fastLoginController", () => {
       })
     );
   });
+
+  it("should return 500 when the user IP has an unexpected value", async () => {
+    const response = await controller(
+      mockReq({ ip: "unexpected" }),
+      fastLoginLollipopLocals
+    );
+    const res = mockRes();
+    response.apply(res);
+
+    expect(mockLCFastLogin).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Internal server error",
+        detail: "Unexpected value for client IP",
+      })
+    );
+  });
 });
