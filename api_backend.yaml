@@ -265,7 +265,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
   "/messages/{id}/message-status":
-    x-swagger-router-controller: MessagesController          
+    x-swagger-router-controller: MessagesController
     put:
       operationId: upsertMessageStatusAttributes
       summary: UpsertMessageStatusAttributes
@@ -422,9 +422,9 @@ paths:
                 subject: "my subject ............",
                 third_party_data: [{id: "aThirdPartyMessageId"}]
               },
-              third_party_message: { 
-                attachments: [], 
-                custom_property: "a custom property" 
+              third_party_message: {
+                attachments: [],
+                custom_property: "a custom property"
               },
               created_at: "2018-06-06T12:22:24.523Z",
               fiscal_code: "LSSLCU79B24L219P",
@@ -907,7 +907,7 @@ paths:
           schema:
             $ref: "#/definitions/PaymentProblemJson"
         "504":
-          description: gateway timeout.    
+          description: gateway timeout.
   "/payment-activations":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -950,7 +950,7 @@ paths:
           schema:
             $ref: "#/definitions/PaymentProblemJson"
         "504":
-          description: gateway timeout.   
+          description: gateway timeout.
   "/payment-activations/{codiceContestoPagamento}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -991,7 +991,7 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
         "504":
-          description: gateway timeout.   
+          description: gateway timeout.
   "/user-data-processing":
     x-swagger-router-controller: UserDataProcessingController
     post:
@@ -1029,7 +1029,7 @@ paths:
     x-swagger-router-controller: UserDataProcessingController
     get:
       operationId: getUserDataProcessing
-      summary: Get User's data processing 
+      summary: Get User's data processing
       description: Get the user's request to delete or download his stored data by providing a kind of choice.
       parameters:
         - $ref: "#/parameters/UserDataProcessingChoiceParam"
@@ -1276,31 +1276,31 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v28.2.0/openapi/definitions.yaml#/CreatedMessageWithContentAndEnrichedData"
   # Definitions from pagopa-proxy
   PaymentProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/PaymentProblemJson"
   CodiceContestoPagamento:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/CodiceContestoPagamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/CodiceContestoPagamento"
   EnteBeneficiario:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/EnteBeneficiario"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/EnteBeneficiario"
   Iban:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/Iban"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/Iban"
   ImportoEuroCents:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/ImportoEuroCents"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/ImportoEuroCents"
   PaymentActivationsGetResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentActivationsGetResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/PaymentActivationsGetResponse"
   PaymentActivationsPostRequest:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentActivationsPostRequest"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/PaymentActivationsPostRequest"
   PaymentActivationsPostResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentActivationsPostResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/PaymentActivationsPostResponse"
   PaymentRequestsGetResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/PaymentRequestsGetResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/PaymentRequestsGetResponse"
   RptId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/RptId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/RptId"
   SpezzoneStrutturatoCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/SpezzoneStrutturatoCausaleVersamento"
   SpezzoniCausaleVersamento:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamento"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/SpezzoniCausaleVersamento"
   SpezzoniCausaleVersamentoItem:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v0.20.0/api_pagopa.yaml#/definitions/SpezzoniCausaleVersamentoItem"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-pagopa-proxy/v1.6.0/api-spec/api-pagopa-proxy.yaml#/definitions/SpezzoniCausaleVersamentoItem"
   # AssertionRef possible inputs
   AssertionRefSha256:
     type: string
