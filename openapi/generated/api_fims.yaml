@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 13.4.0
+  version: 13.5.0
   title: FIMS API
   description: Federated Identity Management System API for user authentication.
 host: localhost
