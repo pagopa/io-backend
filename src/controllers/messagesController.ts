@@ -42,27 +42,11 @@ import {
   IResponseErrorNotImplemented,
   IResponseErrorUnsupportedMediaType,
 } from "../utils/responses";
-import { LegalMessageWithContent } from "../../generated/backend/LegalMessageWithContent";
-import TokenService from "../services/tokenService";
 import { LollipopLocalsType, LollipopRequiredHeaders } from "../types/lollipop";
 import { LollipopApiClient } from "../clients/lollipop";
 import { ISessionStorage } from "../services/ISessionStorage";
 import { extractLollipopLocalsFromLollipopHeadersLegacy } from "../utils/lollipop";
 import { checkIfLollipopIsEnabled } from "../utils/lollipop";
-
-type IGetLegalMessageResponse =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseErrorNotFound
-  | IResponseErrorTooManyRequests
-  | IResponseSuccessJson<LegalMessageWithContent>;
-
-type IGetLegalMessageAttachmentResponse =
-  | IResponseErrorInternal
-  | IResponseErrorValidation
-  | IResponseErrorNotFound
-  | IResponseErrorTooManyRequests
-  | IResponseSuccessOctet<Buffer>;
 
 export const withGetThirdPartyAttachmentParams = async <T>(
   req: express.Request,
@@ -79,7 +63,6 @@ export default class MessagesController {
   // eslint-disable-next-line max-params
   constructor(
     private readonly messageService: NewMessagesService,
-    private readonly tokenService: TokenService,
     private readonly lollipopClient: ReturnType<typeof LollipopApiClient>,
     private readonly sessionStorage: ISessionStorage,
     private readonly thirdPartyConfigList: ThirdPartyConfigList
@@ -132,49 +115,6 @@ export default class MessagesController {
         }),
         (params) => this.messageService.getMessage(user, params)
       )
-    );
-
-  /**
-   * Returns the legal message identified by the message id.
-   */
-  public readonly getLegalMessage = (
-    req: express.Request
-  ): Promise<IGetLegalMessageResponse> =>
-    withUserFromRequest(req, (user) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            this.messageService.getLegalMessage(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code)
-            ),
-          (e) => ResponseErrorInternal(E.toError(e).message)
-        ),
-        TE.toUnion
-      )()
-    );
-
-  /**
-   * Returns the legal message attachments identified by the legal message id and the attachment id.
-   */
-  public readonly getLegalMessageAttachment = (
-    req: express.Request
-  ): Promise<IGetLegalMessageAttachmentResponse> =>
-    withUserFromRequest(req, (user) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            this.messageService.getLegalMessageAttachment(
-              user,
-              req.params.id,
-              this.tokenService.getPecServerTokenHandler(user.fiscal_code),
-              req.params.attachment_id
-            ),
-          (e) => ResponseErrorInternal(E.toError(e).message)
-        ),
-        TE.toUnion
-      )()
     );
 
   public readonly upsertMessageStatus = (
