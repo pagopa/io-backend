@@ -5,6 +5,7 @@ import { ThirdPartyMessage as PNThirdParthyMessage } from "../../generated/piatt
 
 export const notificationDetailResponseExampleAsObject = {
   abstract: "Infrazione del codice della strada Art.666",
+  completedPayments: ["302019876543219876"],
   paProtocolNumber: "202207051147",
   subject: "Multa",
   recipients: [
@@ -59,6 +60,7 @@ export const notificationDetailResponseExampleAsObject = {
   senderTaxId: "01199250158",
   group: "",
   senderPaId: "d0d28367-1695-4c50-a260-6fda526e9aab",
+  isCancelled: false,
   iun: "KMZV-LYMY-TDMZ-202207-J-1",
   sentAt: "2022-07-05T08:52:06.389+00:00",
   documentsAvailable: true,

@@ -195,6 +195,7 @@ describe("getThirdPartyMessageDetails", () => {
           value: expect.objectContaining({
             details: expect.objectContaining({
               abstract: notificationDetailResponseExampleAsObject.abstract,
+              isCancelled: notificationDetailResponseExampleAsObject.isCancelled
             }),
           }),
         })
