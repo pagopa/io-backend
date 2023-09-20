@@ -20,8 +20,6 @@ import { MessageStatusWithAttributes } from "../../../generated/io-messages-api/
 import { AppMessagesAPIClient } from "../../clients/app-messages.client";
 import { ServiceId } from "../../../generated/backend/ServiceId";
 import { FiscalCode } from "../../../generated/backend/FiscalCode";
-import { IPecServerClientFactoryInterface } from "../IPecServerClientFactory";
-import { IPecServerClient } from "../../clients/pecserver";
 
 import { ThirdPartyServiceClient } from "../../clients/third-party-service-client";
 import { base64File } from "../../__mocks__/pn";
@@ -45,7 +43,8 @@ dummyCheckIfLollipopIsEnabled.mockReturnValue(TE.of(false));
 
 const aServiceId = "5a563817fcc896087002ea46c49a";
 const aValidMessageId = "01C3GDA0GB7GAFX6CCZ3FK3Z5Q" as NonEmptyString;
-const aValidMessageIdWithThirdPartyData = "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
+const aValidMessageIdWithThirdPartyData =
+  "01C3GDA0GB7GAFX6CCZ3FK3XXX" as NonEmptyString;
 const aPublicMessageParam = true;
 const getMessageParamOnlyWithMessageId = {
   id: aValidMessageId,
@@ -264,97 +263,6 @@ const mockGetThirdPartyMessageClientFactory = jest.fn((_serviceId: ServiceId) =>
   )
 );
 
-// ------------------------
-// Legal message
-// ------------------------
-const aValidPecServerJwtToken = "aValidToken";
-
-const aValidLegalData = {
-  sender_mail_from: "test@legal.it",
-  has_attachment: false,
-  message_unique_id: "A_MSG_UNIQUE_ID",
-};
-
-const validApiMessageResponseWithLegalData = {
-  status: 200,
-  value: {
-    message: {
-      content: {
-        markdown: "a".repeat(81),
-        subject: aValidSubject,
-        legal_data: aValidLegalData,
-      },
-      created_at: new Date(),
-      fiscal_code: "LSSLCU79B24L219P",
-      id: "01CFSP4XYK3Y0VZTKHW9FKS1XM",
-      sender_service_id: "5a563817fcc896087002ea46c49a",
-    },
-    notification: {
-      email: "SENT",
-      webhook: "SENT",
-    },
-    status: "PROCESSED",
-  },
-};
-
-const validApiLegalMessageResponse = {
-  status: 200,
-  value: {
-    cert_data: {
-      data: {
-        envelope_id: "anEnvelopeId",
-        msg_id: "<msgId@pec.it>",
-        receipt_type: "completa",
-        sender_provider: "aProvider",
-        timestamp: new Date(),
-      },
-      header: {
-        object: "anObject",
-        recipients: "aRecipient@pec.it",
-        replies: "sender@pec.it",
-        sender: "sender@pec.it",
-      },
-    },
-    eml: {
-      attachments: [
-        {
-          content_type: "application/pdf",
-          id: "0",
-          name: "attachment_name",
-          url: "/messages/message_unique_id/attachments/0",
-        },
-      ],
-      html_content: "",
-      plain_text_content: "aPlainTextContent",
-      subject: "A Legal Subject",
-    },
-  },
-};
-
-const proxyLegalMessageResponse =
-  validApiMessageResponseWithLegalData.value.message;
-
-const mockGetLegalMessage = jest.fn();
-const mockGetLegalMessageAttachment = jest.fn();
-const mockPecServerApiClient: Partial<ReturnType<IPecServerClient>> = {
-  getMessage: mockGetLegalMessage,
-  getAttachmentBody: mockGetLegalMessageAttachment,
-};
-const pecServerClientFactoryMock = {
-  getClient: jest.fn().mockImplementation(() => TE.of(mockPecServerApiClient)),
-} as IPecServerClientFactoryInterface;
-
-const aValidAttachmentResponse = {
-  status: 200,
-  arrayBuffer: jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(Buffer.from("anAttachment"))),
-};
-
-const aBearerGenerator = jest
-  .fn()
-  .mockImplementation(() => TE.of(aValidPecServerJwtToken));
-
 // ----------------------------
 // Tests
 // ----------------------------
@@ -377,8 +285,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -399,8 +306,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -418,8 +324,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -432,8 +337,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -450,8 +354,7 @@ describe("MessageService#getMessagesByUser", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessagesByUser(mockedUser, mockParameters);
@@ -468,8 +371,7 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessage(
@@ -494,8 +396,7 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessage(mockedUser, getMessageParam);
@@ -518,8 +419,7 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessage(mockedUser, { id: aValidMessageId });
@@ -536,8 +436,7 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessage(
@@ -558,8 +457,7 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessage(
@@ -580,8 +478,7 @@ describe("MessageService#getMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getMessage(
@@ -590,255 +487,6 @@ describe("MessageService#getMessage", () => {
     );
 
     expect(res.kind).toEqual("IResponseErrorTooManyRequests");
-  });
-});
-
-describe("MessageService#getLegalMessage", () => {
-  it("returns a legal message from the API", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponseWithLegalData)
-    );
-    mockGetLegalMessage.mockImplementation(async () =>
-      t.success(validApiLegalMessageResponse)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId,
-    });
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessJson",
-      value: proxyLegalMessageResponse,
-    });
-  });
-  it("returns an error if the getMessage API returns an error", async () => {
-    mockGetMessage.mockImplementation(async () => t.success(problemJson));
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns unknown response if the response from the getMessage API returns something wrong", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(invalidApiMessageResponse)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error response if the response from the getMessage API returns a message without legal data", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponse)
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error response if bearer generator fails to generate a valid jwt", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponse)
-    );
-
-    aBearerGenerator.mockImplementation(() =>
-      TE.left(new Error("Cannot generate jwt"))
-    );
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-
-  it("returns an error response if the response from the getLegalMessage API returns an error", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiLegalMessageResponse)
-    );
-
-    mockGetLegalMessage.mockImplementation(async () => t.success(problemJson));
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessage(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator
-    );
-    expect(mockGetMessage).toHaveBeenCalledWith({
-      fiscal_code: mockedUser.fiscal_code,
-      id: aValidMessageId,
-    });
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-});
-
-describe("MessageService#getLegalMessageAttachment", () => {
-  it("returns a legal message attachment from the API", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponseWithLegalData)
-    );
-    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      TE.of(aValidAttachmentResponse)
-    );
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessageAttachment(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator,
-      aValidMessageId
-    );
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessOctet",
-      value: aValidAttachmentResponse.arrayBuffer(),
-    });
-  });
-
-  it("returns a response error if bearerGenerator fails to generate a valid jwt", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponseWithLegalData)
-    );
-    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      TE.of(aValidAttachmentResponse)
-    );
-
-    aBearerGenerator.mockImplementation(() =>
-      TE.left(new Error("Cannot generate jwt"))
-    );
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessageAttachment(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator,
-      aValidMessageId
-    );
-    expect(res).toMatchObject({
-      kind: "IResponseSuccessOctet",
-      value: aValidAttachmentResponse.arrayBuffer(),
-    });
-  });
-  it("returns an error if there are connectivity error on getLegalMessageAttachment API", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponseWithLegalData)
-    );
-
-    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      TE.left(new Error("Connection timeout"))
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessageAttachment(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator,
-      aValidMessageId
-    );
-    expect(res.kind).toEqual("IResponseErrorInternal");
-  });
-  it("returns an error if the getLegalMessageAttachment API returns an error", async () => {
-    mockGetMessage.mockImplementation(async () =>
-      t.success(validApiMessageResponseWithLegalData)
-    );
-    mockGetLegalMessageAttachment.mockImplementationOnce(() =>
-      TE.left(new Error("Problem"))
-    );
-
-    const service = new NewMessageService(
-      api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
-    );
-
-    const res = await service.getLegalMessageAttachment(
-      mockedUser,
-      aValidMessageId,
-      aBearerGenerator,
-      aValidMessageId
-    );
-    expect(res.kind).toEqual("IResponseErrorInternal");
   });
 });
 
@@ -870,8 +518,7 @@ describe("MessageService#upsertMessageStatus", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
     const res = await service.upsertMessageStatus(
       mockedUser.fiscal_code,
@@ -922,8 +569,7 @@ describe("MessageService#upsertMessageStatus", () => {
 
       const service = new NewMessageService(
         api,
-        mockGetThirdPartyMessageClientFactory,
-        pecServerClientFactoryMock
+        mockGetThirdPartyMessageClientFactory
       );
       const res = await service.upsertMessageStatus(
         mockedUser.fiscal_code,
@@ -956,8 +602,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -979,8 +624,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -992,10 +636,12 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageIdWithThirdPartyData,
     });
-    expect(res).toMatchObject(E.left({
-      kind: "IResponseErrorNotFound",
-      detail: "Not found: Message not found",
-    }));
+    expect(res).toMatchObject(
+      E.left({
+        kind: "IResponseErrorNotFound",
+        detail: "Not found: Message not found",
+      })
+    );
   });
 
   it("should return an error if the response is 429 too many request", async () => {
@@ -1005,8 +651,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -1018,9 +663,11 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageIdWithThirdPartyData,
     });
-    expect(res).toMatchObject(E.left({
-      kind: "IResponseErrorTooManyRequests"
-    }));
+    expect(res).toMatchObject(
+      E.left({
+        kind: "IResponseErrorTooManyRequests",
+      })
+    );
   });
 
   it("should return an error if the response is 401", async () => {
@@ -1030,8 +677,7 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessageFnApp(
@@ -1043,9 +689,11 @@ describe("MessageService#getThirdPartyMessageFnApp", () => {
       fiscal_code: mockedUser.fiscal_code,
       id: aValidMessageIdWithThirdPartyData,
     });
-    expect(res).toMatchObject(E.left({
-      kind: "IResponseErrorInternal"
-    }));
+    expect(res).toMatchObject(
+      E.left({
+        kind: "IResponseErrorInternal",
+      })
+    );
   });
 });
 
@@ -1057,8 +705,7 @@ describe("MessageService#getThirdPartyMessage", () => {
   it("should return a message from the API", async () => {
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     // @ts-ignore
@@ -1082,8 +729,7 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessage(
@@ -1105,14 +751,12 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1131,14 +775,12 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1156,14 +798,12 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1180,14 +820,12 @@ describe("MessageService#getThirdPartyMessage", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1198,21 +836,18 @@ describe("MessageService#getThirdPartyMessage", () => {
   });
 
   it("should return Not Found if ThirParty service client returns an 404", async () => {
-
     mockGetTPMessageFromExternalService.mockImplementationOnce(async () =>
       t.success({ status: 404 })
     );
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyMessage(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessageFromExternalService).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1231,8 +866,7 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
   it("should return a valid PreconditionContent when third party service return 200", async () => {
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     // @ts-ignore
@@ -1266,15 +900,13 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     // @ts-ignore
     const res = await service.getThirdPartyMessagePrecondition(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
       id: validApiThirdPartyMessageResponse.value.message.content
@@ -1300,15 +932,13 @@ describe("MessageService#getThirdPartyMessagePrecondition", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     // @ts-ignore
     const res = await service.getThirdPartyMessagePrecondition(
       aValidMessageWithThirdPartyData
     );
-
 
     expect(mockGetTPMessagePrecondition).toHaveBeenCalledWith({
       id: validApiThirdPartyMessageResponse.value.message.content
@@ -1339,18 +969,15 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an attachment from the API", async () => {
-
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
       anAttachmentUrl
     );
-
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1371,18 +998,15 @@ describe("MessageService#getThirdPartyAttachment", () => {
       });
     });
 
-
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
       anAttachmentUrl
     );
-
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1400,8 +1024,7 @@ describe("MessageService#getThirdPartyAttachment", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyAttachment(
@@ -1417,7 +1040,6 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an error if ThirParty service client throws an error", async () => {
-
     const anError = "Error calling Third Party client";
     mockGetTPAttachment.mockImplementationOnce(async () => {
       throw Error(anError);
@@ -1425,15 +1047,13 @@ describe("MessageService#getThirdPartyAttachment", () => {
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
       anAttachmentUrl
     );
-
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1446,22 +1066,19 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return an error if ThirParty service client returns a problemJson response", async () => {
-
     mockGetTPAttachment.mockImplementationOnce(async () =>
       t.success(problemJson)
     );
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
       anAttachmentUrl
     );
-
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
@@ -1473,22 +1090,19 @@ describe("MessageService#getThirdPartyAttachment", () => {
   });
 
   it("should return Not Found if ThirParty service client returns an 404", async () => {
-
     mockGetTPAttachment.mockImplementationOnce(async () =>
       t.success({ status: 404 })
     );
 
     const service = new NewMessageService(
       api,
-      mockGetThirdPartyMessageClientFactory,
-      pecServerClientFactoryMock
+      mockGetThirdPartyMessageClientFactory
     );
 
     const res = await service.getThirdPartyAttachment(
       aValidMessageWithThirdPartyData,
       anAttachmentUrl
     );
-
 
     expect(mockGetTPAttachment).toHaveBeenCalledWith({
       id: aValidThirdPartyMessageUniqueId,
