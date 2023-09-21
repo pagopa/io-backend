@@ -82,6 +82,7 @@
   },
   "homepage": "https://github.com/pagopa/io-backend#readme",
   "dependencies": {
+    "@azure/data-tables": "^13.2.2",
     "@azure/storage-queue": "^12.0.0",
     "@pagopa/io-functions-app-sdk": "x",
     "@pagopa/io-functions-cgn-sdk": "x",
