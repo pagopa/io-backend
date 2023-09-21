@@ -227,9 +227,10 @@ Those are all Environment variables needed by the application:
 | LV_TEST_USERS                             | (Optional) Comma separated list of LV beta testers. Default: empty array                             | string |
 | FAST_LOGIN_API_KEY                        | The key used to authenticate to the io-functions-fast-login API                                      | string  |
 | FAST_LOGIN_API_URL                        | The io-functions-fast-login API production URL                                                       | string  |
+| LOCKED_PROFILES_STORAGE_CONNECTION_STRING | Connection string to Azure queue storage for locked profiles table                                   | string |
+| LOCKED_PROFILES_TABLE_NAME                | The locked profiles table name                                                                       | string |
 
 Notes:
-
  * `FETCH_KEEPALIVE_ENABLED` should be enabled when deploying on Azure App Service to avoid [SNAT Exhaustion](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections)
  * `FETCH_KEEPALIVE_MAX_SOCKETS` depends on the number of `node` processes running on the VM, see [this article](https://docs.microsoft.com/en-us/azure/app-service/app-service-web-nodejs-best-practices-and-troubleshoot-guide#my-node-application-is-making-excessive-outbound-calls) and [this issue](https://github.com/MicrosoftDocs/azure-docs/issues/8013)
  * `FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL` should be set at around 100 seconds when deploying on Azure, see [this comment](https://github.com/MicrosoftDocs/azure-docs/issues/29600#issuecomment-490354812)
