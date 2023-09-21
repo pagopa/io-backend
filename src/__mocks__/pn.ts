@@ -31,8 +31,10 @@ export const aPnDocument = {
   docIdx: aDocIdx,
 };
 export const aPnNotificationDetails = {
+  completedPayments: ["a-notice-code"],
   subject: "a-subject",
   iun: aPnNotificationId,
+  isCancelled: false,
   recipients: [aPnNotificationRecipient],
   notificationStatusHistory: [
     {

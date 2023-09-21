@@ -577,6 +577,12 @@ components:
           type: string
         senderDenomination:
           type: string
+        isCancelled:
+          type: boolean
+        completedPayments:
+          type: array
+          items:
+            type: string
       description: Le informazioni riguardanti una richiesta di notifica accettata
         e il processo di  inoltro della notifica verso i destinatari (Persone Fisiche
         o Giuridiche).
