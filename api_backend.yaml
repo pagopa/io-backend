@@ -827,6 +827,8 @@ paths:
             $ref: "#/definitions/PaymentProblemJson"
         "504":
           description: gateway timeout.
+          schema:
+            $ref: "#/definitions/PaymentProblemJson"
   "/payment-activations":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -870,6 +872,8 @@ paths:
             $ref: "#/definitions/PaymentProblemJson"
         "504":
           description: gateway timeout.
+          schema:
+            $ref: "#/definitions/PaymentProblemJson"
   "/payment-activations/{codiceContestoPagamento}":
     x-swagger-router-controller: PagoPAProxyController
     parameters:
@@ -909,8 +913,6 @@ paths:
           description: Unavailable service
           schema:
             $ref: "#/definitions/ProblemJson"
-        "504":
-          description: gateway timeout.
   "/user-data-processing":
     x-swagger-router-controller: UserDataProcessingController
     post:
