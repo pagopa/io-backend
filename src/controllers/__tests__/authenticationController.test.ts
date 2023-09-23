@@ -72,6 +72,7 @@ import {
   SPID_IDP_IDENTIFIERS,
   CIE_IDP_IDENTIFIERS,
 } from "@pagopa/io-spid-commons/dist/config";
+import UserProfileLockService from "../../services/UserProfileLockService";
 
 const req = mockReq();
 req.ip = "127.0.0.2";
@@ -263,6 +264,12 @@ const getClientProfileRedirectionUrl = (token: string): UrlFromString => {
 
 const api = new ApiClientFactory("", "");
 const profileService = new ProfileService(api);
+
+const isUserProfileLockedMock = jest.fn(() => TE.of(false));
+const userProfileLockService = {
+  isUserProfileLocked: isUserProfileLockedMock,
+} as any as UserProfileLockService;
+
 const lollipopService = new LollipopService(
   {} as ReturnType<LollipopApiClient>,
   "",
@@ -279,6 +286,7 @@ const controller = new AuthenticationController(
   getClientProfileRedirectionUrl,
   getClientErrorRedirectionUrl,
   profileService,
+  userProfileLockService,
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,
@@ -301,6 +309,7 @@ const lollipopActivatedController = new AuthenticationController(
   getClientProfileRedirectionUrl,
   getClientErrorRedirectionUrl,
   profileService,
+  userProfileLockService,
   notificationServiceFactory,
   usersLoginLogService,
   mockOnUserLogin,

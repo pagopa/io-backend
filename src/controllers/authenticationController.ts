@@ -45,6 +45,7 @@ import { addSeconds } from "date-fns";
 import { Second } from "@pagopa/ts-commons/lib/units";
 import { UserLoginParams } from "@pagopa/io-functions-app-sdk/UserLoginParams";
 import { IDP_NAMES, Issuer } from "@pagopa/io-spid-commons/dist/config";
+import UserProfileLockService from "src/services/userProfileLockService";
 import { NotificationServiceFactory } from "../services/notificationServiceFactory";
 import UsersLoginLogService from "../services/usersLoginLogService";
 import { LollipopParams } from "../types/lollipop";
@@ -71,6 +72,8 @@ import {
 import { ISessionStorage } from "../services/ISessionStorage";
 import ProfileService from "../services/profileService";
 import TokenService from "../services/tokenService";
+import { SpidLevelEnum } from "../../generated/backend/SpidLevel";
+
 import {
   BPDToken,
   FIMSToken,
@@ -103,8 +106,9 @@ export const SESSION_TOKEN_LENGTH_BYTES = 48;
 export const SESSION_ID_LENGTH_BYTES = 32;
 
 export const AGE_LIMIT_ERROR_MESSAGE = "The age of the user is less than 14";
-// Custom error code handled by the client to show a specific error page
+// Custom error codes handled by the client to show a specific error page
 export const AGE_LIMIT_ERROR_CODE = 1001;
+export const USER_PROFILE_LOCKED_ERROR = 1002;
 // Minimum user age allowed to login if the Age limit is enabled
 export const AGE_LIMIT = 14;
 
@@ -134,6 +138,7 @@ export default class AuthenticationController {
       params: ClientErrorRedirectionUrlParams
     ) => UrlFromString,
     private readonly profileService: ProfileService,
+    private readonly userProfileLockService: UserProfileLockService,
     private readonly notificationServiceFactory: NotificationServiceFactory,
     private readonly usersLoginLogService: UsersLoginLogService,
     private readonly onUserLogin: OnUserLogin,
@@ -262,6 +267,7 @@ export default class AuthenticationController {
     //       each other, we can run them in parallel
     const [
       errorOrIsBlockedUser,
+      errorOrIsUserProfileLocked,
       sessionToken,
       walletToken,
       myPortalToken,
@@ -272,6 +278,14 @@ export default class AuthenticationController {
     ] = await Promise.all([
       // ask the session storage whether this user is blocked
       this.sessionStorage.isBlockedUser(spidUser.fiscalNumber),
+      // ask the profile service whether this user profile has been locked from IO-WEB by the user.
+      // NOTE: login with SpidL3 are always allowed
+      spidUser.authnContextClassRef ===
+      SpidLevelEnum["https://www.spid.gov.it/SpidL3"]
+        ? E.of(false)
+        : this.userProfileLockService.isUserProfileLocked(
+            spidUser.fiscalNumber
+          )(),
       // authentication token for app backend
       this.tokenService.getNewTokenAsync(SESSION_TOKEN_LENGTH_BYTES),
       // authentication token for pagoPA
@@ -298,6 +312,33 @@ export default class AuthenticationController {
     const isBlockedUser = errorOrIsBlockedUser.right;
     if (isBlockedUser) {
       return ResponseErrorForbiddenNotAuthorized;
+    }
+
+    if (isUserElegibleForFastLoginResult) {
+      if (E.isLeft(errorOrIsUserProfileLocked)) {
+        const err = errorOrIsUserProfileLocked.left;
+        log.error(`acs: error checking user profile lock [${err.message}]`);
+        return ResponseErrorInternal(
+          "An error occurred during user verification."
+        );
+      }
+      const isUserProfileLocked = errorOrIsUserProfileLocked.right;
+      if (isUserProfileLocked) {
+        const redirectionUrl = this.getClientErrorRedirectionUrl({
+          errorCode: USER_PROFILE_LOCKED_ERROR,
+        });
+        log.error(
+          `acs: ${sha256(spidUser.fiscalNumber)} - The user profile is locked.`
+        );
+        return pipe(
+          isUserElegibleForIoLoginUrlScheme(spidUser.fiscalNumber),
+          B.fold(
+            () => E.right(ResponsePermanentRedirect(redirectionUrl)),
+            () => internalErrorOrIoLoginRedirect(redirectionUrl)
+          ),
+          E.toUnion
+        );
+      }
     }
 
     const user = toAppUser(
