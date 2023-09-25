@@ -1281,6 +1281,15 @@ function registerSessionAPIRoutes(
       )
     );
 
+    app.post(
+      `${basePath}/sessions/:fiscal_code/logout`,
+      urlTokenAuth,
+      toExpressHandler(
+        sessionLockController.deleteUserSession,
+        sessionLockController
+      )
+    );
+
     app.delete(
       `${basePath}/sessions/:fiscal_code/lock`,
       urlTokenAuth,
